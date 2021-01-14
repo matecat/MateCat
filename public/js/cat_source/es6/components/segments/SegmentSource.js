@@ -25,7 +25,7 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, getUpdatedSegmentInfo, getClickedTagInfo} = this;
+        const {onEntityClick, getUpdatedSegmentInfo} = this;
         this.originalSource = this.props.segment.segment;
         this.openConcordance = this.openConcordance.bind(this);
         this.decoratorsStructure = [
@@ -36,10 +36,10 @@ class SegmentSource extends React.Component {
                 props: {
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-                    getClickedTagInfo: getClickedTagInfo,
                     isTarget: false,
                     getSearchParams: this.getSearchParams,
-                    isRTL: config.isSourceRTL
+                    isRTL: config.isSourceRTL,
+                    sid: this.props.segment.sid
                 }
             }];
         //const decorator = new CompoundDecorator(this.decoratorsStructure);
@@ -85,7 +85,8 @@ class SegmentSource extends React.Component {
                 textToReplace: searchParams.source,
                 params: searchParams,
                 occurrences : occurrencesInSearch.occurrences,
-                currentInSearchIndex
+                currentInSearchIndex,
+                isTarget: false
             }
         } else {
             return {
@@ -174,7 +175,8 @@ class SegmentSource extends React.Component {
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
             const lxqDecodedSource = DraftMatecatUtils.prepareTextForLexiqa(editorState);
-            SegmentActions.updateSource(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState), plainText, tagRange, lxqDecodedSource);
+            const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
+            SegmentActions.updateSource(this.props.segment.sid, decodedSegment, plainText, tagRange, lxqDecodedSource);
         }
     };
 
@@ -324,10 +326,8 @@ class SegmentSource extends React.Component {
 
     onChange = (editorState) => {
         const { editorState: prevEditorState } = this.state;
-        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState);
-        if(!entityKey) {
-            this.props.setClickedTagId();
-        }
+        const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState);
+        if(!entityKey) {setTimeout(() =>{ SegmentActions.highlightTags(); });}
         this.setState({
             editorState
         })
@@ -439,7 +439,7 @@ class SegmentSource extends React.Component {
 
     splitSegmentNew = (split) => {
         const {editorState} = this.state;
-        let text = DraftMatecatUtils.decodeSegment(editorState);
+        let {decodedSegment: text} = DraftMatecatUtils.decodeSegment(editorState);
         // Prepare text for backend
         text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
@@ -458,13 +458,12 @@ class SegmentSource extends React.Component {
     }
 
     onBlurEvent = () => {
-        const {setClickedTagId, clickedTagId} = this.props;
-        if (clickedTagId) setClickedTagId();
+        setTimeout(() =>{ SegmentActions.highlightTags(); });
     };
 
     onEntityClick = (start, end, id, text) => {
         const {editorState} = this.state;
-        const {setClickedTagId, segment} = this.props;
+        const {segment} = this.props;
         const {isSplitPoint} = this;
         try{
             // Get latest selection
@@ -498,7 +497,6 @@ class SegmentSource extends React.Component {
                 newEditorState = EditorState.set(newEditorState, {currentContent: contentStateWithoutSplitPoint});
             }
             // update editorState
-            setClickedTagId(id, text, true);
             this.setState({editorState: newEditorState});
         }catch (e) {
             console.log(e)
@@ -515,11 +513,6 @@ class SegmentSource extends React.Component {
         const tagName = entityData ? entityData.name : '';
         return getSplitPointTag().includes(tagName);
     }
-
-    getClickedTagInfo = () => {
-        const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
-        return {clickedTagId, tagClickedInSource, clickedTagText};
-    };
 
     copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
@@ -557,7 +550,7 @@ class SegmentSource extends React.Component {
     }
 
     getUpdatedSegmentInfo= () => {
-        const {segment: { sid, warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
+        const {segment: { sid, warnings, tagMismatch, opened, missingTagsInTarget, openSplit}} = this.props;
         const {tagRange, editorState} = this.state;
         return{
             sid,
@@ -566,7 +559,8 @@ class SegmentSource extends React.Component {
             tagRange,
             segmentOpened: opened,
             missingTagsInTarget,
-            currentSelection: editorState.getSelection()
+            currentSelection: editorState.getSelection(),
+            openSplit
         }
     }
 }

@@ -1149,11 +1149,20 @@ const SegmentActions = {
             plainText
         });
     },
-    focusOnSegment: function (sid, focused = false) {
+    editAreaChanged: function (sid, isTarget) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.SEGMENT_FOCUSED,
-            focused,
-            sid
+            actionType: EditAreaConstants.EDIT_AREA_CHANGED,
+            sid,
+            isTarget
+        });
+    },
+    highlightTags: function (tagId, tagPlaceholder, entityKey, isTarget) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.HIGHLIGHT_TAGS,
+            tagId,
+            tagPlaceholder,
+            entityKey,
+            isTarget
         });
     }
 

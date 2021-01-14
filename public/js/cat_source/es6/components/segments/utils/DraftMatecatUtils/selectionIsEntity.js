@@ -4,11 +4,12 @@ const selectionIsEntity = (editorState) => {
     const anchorKey = currentSelection.getAnchorKey();
     const focusKey = currentSelection.getFocusKey();
     //entity is never on two different block
-    if(focusKey !== anchorKey) return null;
+    if(focusKey !== anchorKey) return {entityKey: null, onEdge: null};
     const anchorOffset =  currentSelection.getAnchorOffset();
     const anchorBlock = contentState.getBlockForKey(anchorKey);
     let anchorEntityKey = anchorBlock.getEntityAt(anchorOffset);
     // if selection is collapsed if selection on edge
+    let onEdge = false;
     if(anchorEntityKey && currentSelection.isCollapsed()){
         anchorBlock.findEntityRanges(
             (character) => {
@@ -17,12 +18,12 @@ const selectionIsEntity = (editorState) => {
             (start, end) => {
                 // if on entity's edge, entity is not selected
                 if(anchorOffset === start || anchorOffset === end){
-                    anchorEntityKey = null;
+                    onEdge = true;
                 }
             }
         );
     }
-    return anchorEntityKey;
+    return {entityKey: anchorEntityKey, onEdge};
 };
 
 export default selectionIsEntity;
