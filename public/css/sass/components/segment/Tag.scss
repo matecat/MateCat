@@ -151,16 +151,16 @@
     &:after{
       border:none;
     }
-    span[data-text="true"]{
-      display: inline-block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 64px;
-      vertical-align: middle;
-    }
   }
 
+  span[data-text="true"]{
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64px;
+    vertical-align: middle;
+  }
   /* Used in TM */
   &.small {
     font-size: 12px;
