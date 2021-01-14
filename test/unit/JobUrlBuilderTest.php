@@ -21,8 +21,13 @@ class JobUrlBuilderTest extends AbstractTest {
 
         $this->assertInstanceOf(\Url\JobUrlStruct::class, $jobUrlStruct);
         $this->assertNotNull($jobUrlStruct->getTranslationUrl());
+        $this->assertEquals($jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl());
         $this->assertNull($jobUrlStruct->getReviseUrl());
         $this->assertNull($jobUrlStruct->getRevise2Url());
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber(1));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber(2));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber("1"));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber("2"));
         $this->assertFalse($jobUrlStruct->hasReview());
         $this->assertFalse($jobUrlStruct->hasSecondPassReview());
     }
@@ -35,8 +40,13 @@ class JobUrlBuilderTest extends AbstractTest {
 
         $this->assertInstanceOf(\Url\JobUrlStruct::class, $jobUrlStruct);
         $this->assertNotNull($jobUrlStruct->getTranslationUrl());
+        $this->assertEquals($jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl());
         $this->assertNull($jobUrlStruct->getReviseUrl());
         $this->assertNull($jobUrlStruct->getRevise2Url());
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber(1));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber(2));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber("1"));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber("2"));
         $this->assertFalse($jobUrlStruct->hasReview());
         $this->assertFalse($jobUrlStruct->hasSecondPassReview());
     }
