@@ -56,9 +56,12 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
     // New contentState without entities
     let plainContentState = ContentState.createFromText(plainText);
     const blocks = plainContentState.getBlockMap();
-
+    const firstBlockKey = plainContentState.getFirstBlock().getKey();
     blocks.forEach(contentBlock => {
-        maxCharsInBlocks += contentBlock.getLength();
+        const loopedBlockKey = contentBlock.getKey();
+        // Add current block length
+        const newLineChar = loopedBlockKey !== firstBlockKey ? 1 : 0;
+        maxCharsInBlocks += contentBlock.getLength() + newLineChar;
 
         offsetWithEntities.forEach( tagEntity =>{
             const {start, tag} = tagEntity;
