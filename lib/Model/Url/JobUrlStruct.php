@@ -72,7 +72,7 @@ class JobUrlStruct {
         $this->target      = $target;
         $this->passwords   = $passwords;
         $this->segmentId   = $segmentId;
-        $this->setUrls($httpHost);
+        $this->setUrls( $httpHost );
     }
 
     /**
@@ -91,7 +91,7 @@ class JobUrlStruct {
      *
      * @param null $httpHost
      */
-    private function setUrls($httpHost = null) {
+    private function setUrls( $httpHost = null ) {
 
         // loop passwords array
         foreach ( $this->passwords as $label => $password ) {
@@ -112,7 +112,7 @@ class JobUrlStruct {
 
                 $sourcePage = ReviewUtils::revisionNumberToSourcePage( $revisionNumber );
 
-                $url = $this->httpHost($httpHost);
+                $url = $this->httpHost( $httpHost );
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->getJobType( $sourcePage );
                 $url .= DIRECTORY_SEPARATOR;
@@ -184,14 +184,14 @@ class JobUrlStruct {
      * @return mixed
      */
     public function getReviseUrl() {
-        return (isset($this->urls[ self::LABEL_R1 ])) ? $this->urls[ self::LABEL_R1 ] : null;
+        return ( isset( $this->urls[ self::LABEL_R1 ] ) ) ? $this->urls[ self::LABEL_R1 ] : null;
     }
 
     /**
      * @return mixed
      */
     public function getRevise2Url() {
-        return (isset($this->urls[ self::LABEL_R2 ])) ? $this->urls[ self::LABEL_R2 ] : null;
+        return ( isset( $this->urls[ self::LABEL_R2 ] ) ) ? $this->urls[ self::LABEL_R2 ] : null;
     }
 
     /**
@@ -199,6 +199,32 @@ class JobUrlStruct {
      */
     public function getUrls() {
         return $this->urls;
+    }
+
+    /**
+     * Get the url from revision number (null|1|2)
+     *
+     * @param null $revisionNumber
+     *
+     * @return string|null
+     */
+    public function getUrlByRevisionNumber( $revisionNumber = null ) {
+
+        if ( !$revisionNumber ) {
+            return $this->getTranslationUrl();
+        }
+
+        $revisionNumber = (int)$revisionNumber;
+
+        if ( $revisionNumber === 1 ) {
+            return $this->getReviseUrl();
+        }
+
+        if ( $revisionNumber === 2 ) {
+            return $this->getRevise2Url();
+        }
+
+        return null;
     }
 
     /**
