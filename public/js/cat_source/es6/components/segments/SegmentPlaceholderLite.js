@@ -193,7 +193,7 @@ class TagEntity extends Component {
                   >
                 {children}
             </span>
-            <div className={'tag-container'}>
+        </div>
     }
 
     selectCorrectStyle = () => {
