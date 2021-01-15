@@ -36,20 +36,23 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
         }
     })
 
-    // Escape html char
-    let positionToSubtract = 0;
-    plainText = plainText.replace(/&lt;/gi, () => {
-        positionToSubtract+= 3;
+    // Escape exceeding brackets
+    let brackets = [];
+    plainText = plainText.replace(/&lt;/gi, (match, offset) => {
+        brackets.push({offset})
         return '<';
-    });
-    plainText = plainText.replace(/&gt;/gi, () => {
-        positionToSubtract+= 3;
+    }).replace(/&gt;/gi, (match, offset) => {
+        brackets.push({offset})
         return '>';
     });
 
-    if(positionToSubtract > 0) {
+    if(brackets.length > 0) {
         offsetWithEntities.map(tag => {
-            tag.start -= positionToSubtract;
+            brackets.forEach( bracket => {
+                if(tag.offset > bracket.offset){
+                    tag.start -= 3; //
+                }
+            })
             return tag;
         })
     }
