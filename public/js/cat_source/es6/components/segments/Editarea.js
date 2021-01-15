@@ -897,8 +897,8 @@ class Editarea extends React.Component {
         // set selection to drop point and check dropping zone
         editorState = EditorState.forceSelection(editorState, selection);
         // Check: Cannot drop anything on entities
-        const {onEdge} = DraftMatecatUtils.selectionIsEntity(editorState);
-        if(onEdge) return 'handled';
+        const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState);
+        if(entityKey) return 'handled';
 
         if(text && !editorSync.draggingFromEditArea) {
             try {
