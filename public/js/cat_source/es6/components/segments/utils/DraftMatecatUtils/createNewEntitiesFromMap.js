@@ -26,13 +26,14 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
 
     // Executre replace with placeholder and adapt offsets
     tagRange.forEach( tagEntity => {
-        const {placeholder, encodedText} = tagEntity.data;
-        const start = tagEntity.offset - slicedLength;
-        const end  = start + encodedText.length;
-        offsetWithEntities.push({start, tag: tagEntity})
-
-        plainText = plainText.slice(0,start) + placeholder + plainText.slice(end);
-        slicedLength +=  (end - start) - placeholder.length;
+        const {name: tagName, placeholder, encodedText} = tagEntity.data;
+        if(!excludedTagsType.includes(tagName)){
+            const start = tagEntity.offset - slicedLength;
+            const end  = start + encodedText.length;
+            offsetWithEntities.push({start, tag: tagEntity})
+            plainText = plainText.slice(0,start) + placeholder + plainText.slice(end);
+            slicedLength +=  (end - start) - placeholder.length;
+        }
     })
 
     // Escape html char
@@ -94,7 +95,6 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
             }
         })
     })
-
     return {contentState: plainContentState, tagRange}
 };
 
