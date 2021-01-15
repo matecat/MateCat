@@ -142,7 +142,8 @@ class TagEntity extends Component {
         const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
         const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;
 
-        return <span ref={(ref) => this.tagRef = ref}
+        return <div className={'tag-container'}>
+            <span ref={(ref) => this.tagRef = ref}
                   className={`tag ${style} ${tagWarningStyle}`}
                 data-offset-key={this.props.offsetkey}
                 unselectable="on"
@@ -160,6 +161,7 @@ class TagEntity extends Component {
                 {searchParams.active && markSearch(decoratedText, searchParams)}
                 {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
             </span>
+        </div>
     }
 
     onClickBound = (entityId, entityPlaceholder) =>{
