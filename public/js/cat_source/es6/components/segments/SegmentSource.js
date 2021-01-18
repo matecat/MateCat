@@ -374,6 +374,8 @@ class SegmentSource extends React.Component {
                 handleKeyCommand={preventEdit}
                 handleDroppedFiles={preventEdit}
                 handlePastedFiles={preventEdit}
+                textAlignment={config.isSourceRTL ? 'right' : 'left'}
+                textDirectionality={config.isSourceRTL ? 'RTL' : 'LTR'}
             />
         </div>;
 
