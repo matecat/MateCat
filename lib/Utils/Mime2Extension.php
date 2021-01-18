@@ -571,6 +571,18 @@ $reference = [
                 [
                         0 => 'mpkg',
                 ],
+        'application/vnd.apple.keynote'                                             =>
+                [
+                        0 => 'key',
+                ],
+        'application/vnd.apple.pages'                                             =>
+                [
+                        0 => 'pages',
+                ],
+        'application/vnd.apple.numbers'                                             =>
+                [
+                        0 => 'numbers',
+                ],
         'application/vnd.apple.mpegurl'                                             =>
                 [
                         0 => 'm3u8',
@@ -2712,6 +2724,7 @@ $reference = [
                         0         => 'jpeg',
                         1         => 'jpg',
                         2         => 'jpe',
+                        3         => 'jfif',
                 ],
         'image/ktx'                                                                 =>
                 [
@@ -2967,6 +2980,10 @@ $reference = [
                         0         => 'html',
                         1         => 'htm',
                 ],
+        'text/markdown'                                                              =>
+                [
+                        0 => 'md',
+                ],
         'text/n3'                                                                   =>
                 [
                         0 => 'n3',
@@ -2981,7 +2998,8 @@ $reference = [
                         4         => 'list',
                         5         => 'log',
                         6         => 'in',
-                        7         => 'srt'
+                        7         => 'srt',
+                        8         => 'sbv',
                 ],
         'text/prs.lines.tag'                                                        =>
                 [
@@ -3081,6 +3099,10 @@ $reference = [
                 [
                         0 => 'wmls',
                 ],
+        'text/vtt'                                                                  =>
+                [
+                        0 => 'vtt',
+                ],
         'text/x-asm'                                                                =>
                 [
                         0 => 's',
@@ -3134,6 +3156,10 @@ $reference = [
         'text/x-po'                                                                 =>
                 [
                         0 => 'po'
+                ],
+        'text/x-python'                                                             =>
+                [
+                        0 => 'md'
                 ],
         'text/x-gettext-translation'                                                =>
                 [

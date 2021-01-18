@@ -1,6 +1,5 @@
 <?php
 
-use Database;
 use Exceptions\ValidationError;
 
 /**
@@ -253,9 +252,9 @@ abstract class DataAccess_AbstractDao {
 
     protected function _logCache( $type, $key, $value, $sqlQuery ) {
         Log::doJsonLog( [
-                "type"       => $type,
-                "key"        => $key,
-                "sql"        => preg_replace( "/[ ]+/", " ", str_replace( "\n", " ", $sqlQuery ) ),
+                "type" => $type,
+                "key"  => $key,
+                "sql"  => preg_replace( "/[ ]+/", " ", str_replace( "\n", " ", $sqlQuery ) ),
             //"result_set" => $value,
         ], "query_cache.log" );
     }
@@ -366,8 +365,8 @@ abstract class DataAccess_AbstractDao {
     /**
      * @param $array_result array
      *
-     * @deprecated Use instead PDO::setFetchMode()
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
+     * @deprecated Use instead PDO::setFetchMode()
      */
     protected function _buildResult( $array_result ) {
     }
@@ -425,9 +424,10 @@ abstract class DataAccess_AbstractDao {
      *
      * WARNING: only AND conditions are supported
      *
+     * @param $attrs array of attributes of the struct
+     *
      * @return string
      *
-     * @param $attrs array of attributes of the struct
      */
 
     protected static function buildPkeyCondition( $attrs ) {
@@ -477,7 +477,7 @@ abstract class DataAccess_AbstractDao {
         return $struct->toArray( $keys );
     }
 
-    public static function updateFields( array $data = [], array $where = [] ){
+    public static function updateFields( array $data = [], array $where = [] ) {
         return Database::obtain()->update( static::TABLE, $data, $where );
     }
 
@@ -517,15 +517,21 @@ abstract class DataAccess_AbstractDao {
                 self::structKeys( $struct )
         );
 
-        \Log::doJsonLog( $sql );
-        \Log::doJsonLog( $data );
+        \Log::doJsonLog( [
+                'table'  => static::TABLE,
+                'sql'    => $sql,
+                'attr'   => $attrs,
+                'fields' => $fields,
+                'struct' => $struct->toArray( $fields ),
+                'data'   => $data
+        ] );
 
         $stmt->execute( $data );
 
-        //WARNING
-        //When updating a Mysql table with identical values, nothing's really affected so rowCount will return 0.
-        //If you need this value use this:
-        //https://www.php.net/manual/en/pdostatement.rowcount.php#example-1096
+        // WARNING
+        // When updating a Mysql table with identical values, nothing's really affected so rowCount will return 0.
+        // If you need this value use this:
+        // https://www.php.net/manual/en/pdostatement.rowcount.php#example-1096
         return $stmt->rowCount();
     }
 

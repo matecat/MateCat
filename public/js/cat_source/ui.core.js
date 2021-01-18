@@ -967,7 +967,7 @@ var UI = {
         try {
             // Attention, to be modified when we will lock tags
             translation = TagUtils.prepareTextToSend( segment.translation );
-            sourceSegment = TagUtils.prepareTextToSend( segment.segment );
+            sourceSegment = TagUtils.prepareTextToSend( segment.updatedSource );
         } catch ( e ) {
             var indexSegment = UI.executingSetTranslation.indexOf(id_segment);
             if (indexSegment > -1) {
@@ -1011,7 +1011,8 @@ var UI = {
             id_after: idAfter,
             by_status: false,
             revision_number: config.revisionNumber,
-            guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+            guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment),
+            current_password: config.currentPassword
         };
         if(isSplitted) {
             SegmentActions.setStatus(segment.original_sid, null, status);

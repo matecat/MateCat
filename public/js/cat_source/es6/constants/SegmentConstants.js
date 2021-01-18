@@ -56,6 +56,7 @@ module.exports = keyMirror({
     TOGGLE_SEGMENT_ON_BULK: null,
     REMOVE_SEGMENTS_ON_BULK: null,
     SET_UNLOCKED_SEGMENT: null,
+    SET_UNLOCKED_SEGMENTS: null,
     SET_BULK_SELECTION_INTERVAL : null,
     SET_BULK_SELECTION_SEGMENTS: null,
     SET_MUTED_SEGMENTS:null,
@@ -98,6 +99,6 @@ module.exports = keyMirror({
     FORCE_UPDATE: null,
     FORCE_UPDATE_SEGMENT: null,
     UPDATE_SEARCH: null,
-    SEGMENT_FOCUSED: null,
-    SET_GUESS_TAGS: null
+    SET_GUESS_TAGS: null,
+    HIGHLIGHT_TAGS: null
 });

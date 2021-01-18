@@ -1159,7 +1159,8 @@
                     job_id: config.job_id,
                     job_pass: config.password,
                     get_public_matches: getPublicMatches,
-                    data: data
+                    data: data,
+                    current_password: config.currentPassword
                 },
                 error: function() {
                     UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');

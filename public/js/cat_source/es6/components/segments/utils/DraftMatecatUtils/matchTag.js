@@ -9,15 +9,12 @@ import {tagSignatures} from "./tagModel"
  */
 const matchTag = (plainContent) => {
 
-    // Escape line feed or it counts as 1 position that disappear when you create the ContentBlock
-    const plainContentLineFeedEscaped = plainContent.replace(/\n/g,'');
-
     // STEP 1 - Find all opening and save offset
     let tagMap;
     let openTags = [];
     for (let tagName in tagSignatures) {
         if(!tagSignatures[tagName].selfClosing && !tagSignatures[tagName].isClosure){
-            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagName);
+            tagMap = findTagWithRegex(plainContent, tagName);
             openTags = [...openTags, ...tagMap]
         }
     }
@@ -26,7 +23,7 @@ const matchTag = (plainContent) => {
     let closingTags = [];
     for (let tagName in tagSignatures) {
         if(tagSignatures[tagName].isClosure){
-            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagName);
+            tagMap = findTagWithRegex(plainContent, tagName);
             closingTags = [...closingTags, ...tagMap]
         }
     }
@@ -35,7 +32,7 @@ const matchTag = (plainContent) => {
     let selfClosingTags = [];
     for (let tagName in tagSignatures) {
         if(tagSignatures[tagName].selfClosing){
-            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagName);
+            tagMap = findTagWithRegex(plainContent, tagName);
             selfClosingTags = [...selfClosingTags, ...tagMap]
         }
     }

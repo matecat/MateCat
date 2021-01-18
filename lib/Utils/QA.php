@@ -1,5 +1,6 @@
 <?php
 
+use BxExG\Mapper;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 
@@ -248,6 +249,8 @@ class QA {
     const ERR_SYMBOL_MISMATCH = 1200;
 
     const ERR_EX_BX_NESTED_IN_G = 1300;
+    const ERR_EX_BX_WRONG_POSITION = 1301;
+    const ERR_EX_BX_COUNT_MISMATCH = 1302;
 
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
     const SMART_COUNT_MISMATCH = 2001;
@@ -350,8 +353,9 @@ class QA {
          */
             1200 => 'Symbol mismatch',
 
-//            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
-            1300 => 'Self-closing tags should be placed outside of regular tags.',
+            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+            1301 => 'Wrong <ex> and/or <bx> placement',
+            1302 => '<ex>, <bx> and/or <g> total count mismatch',
 
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',
@@ -364,7 +368,7 @@ class QA {
          *  2 =>  'bad source xml',
          *  3 =>  'bad target xml',
          */
-            29   => "Critical issue: closing tags must come after opening tags.",
+            29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags."
 
     ];
@@ -427,6 +431,7 @@ class QA {
 
     protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
+    protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
     const ERROR   = 'ERROR';
     const WARNING = 'WARNING';
@@ -490,11 +495,25 @@ class QA {
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
+            case self::ERR_EX_BX_COUNT_MISMATCH:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
+                ] );
+                break;
             case self::ERR_EX_BX_NESTED_IN_G:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
                         'outcome' => self::ERR_EX_BX_NESTED_IN_G,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
+                ] );
+                break;
+            case self::ERR_EX_BX_WRONG_POSITION:
+                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_WRONG_POSITION,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
                 ] );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
@@ -849,34 +868,8 @@ class QA {
          *
          * @see getTrgNormalized
          */
-        preg_match_all( self::$regexpAscii, $source_seg, $matches_src );
-        preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
-
-//        Log::doJsonLog($source_seg);
-//        Log::doJsonLog($target_seg);
-
-        if ( !empty( $matches_src[ 1 ] ) ) {
-            $test_src = $source_seg;
-            foreach ( $matches_src[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
-                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
-            }
-            //Source Content wrong use placeholded one
-            $source_seg = $test_src;
-        }
-
-        if ( !empty( $matches_trg[ 1 ] ) ) {
-            $test_trg = $target_seg;
-            foreach ( $matches_trg[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
-                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg, 1 );
-            }
-            //Target Content wrong use placeholded one
-            $target_seg = $test_trg;
-        }
-
-//        Log::hexDump($source_seg);
-//        Log::hexDump($target_seg);
+        $source_seg = $this->replaceAscii($source_seg);
+        $target_seg = $this->replaceAscii($target_seg);
 
         /**
          * Do it again for entities because
@@ -886,12 +879,69 @@ class QA {
          * does not works for not printable chars
          *
          */
-        preg_match_all( self::$regexpEntity, $source_seg, $matches_src );
-        preg_match_all( self::$regexpEntity, $target_seg, $matches_trg );
+        $source_seg = $this->replaceEntities($source_seg);
+        $target_seg = $this->replaceEntities($target_seg);
 
-        if ( !empty( $matches_src[ 1 ] ) ) {
-            $test_src = $source_seg;
-            foreach ( $matches_src[ 1 ] as $v ) {
+        /**
+         * We insert a default placeholder inside empty html tags to avoid saveXML() function invoked by getTrgNormalized()
+         * to contract them.
+         *
+         * Example:
+         *
+         * <g id="23"></g> would be contracted to <g ="23"/>
+         */
+        $source_seg = $this->fillEmptyHTMLTagsWithPlaceholder($source_seg);
+        $target_seg = $this->fillEmptyHTMLTagsWithPlaceholder($target_seg);
+
+        $this->source_seg = $source_seg;
+        $this->target_seg = $target_seg;
+
+        $this->srcDom = $this->_loadDom( $source_seg, self::ERR_SOURCE );
+        $this->trgDom = $this->_loadDom( $target_seg, self::ERR_TARGET );
+
+        if ( $this->thereAreErrors() ) {
+            $this->_getTagDiff();
+        }
+
+        $this->_resetDOMMaps();
+
+    }
+
+    /**
+     * @param $seg
+     *
+     * @return string|string[]|null
+     */
+    private function replaceAscii($seg){
+
+        preg_match_all( self::$regexpAscii, $seg, $matches );
+
+        if ( !empty( $matches[ 1 ] ) ) {
+            $test_src = $seg;
+            foreach ( $matches[ 1 ] as $v ) {
+                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
+                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
+            }
+
+            // Source Content wrong use placeholded one
+            $seg = $test_src;
+        }
+
+        return $seg;
+    }
+
+    /**
+     * @param $seg
+     *
+     * @return string|string[]|null
+     */
+    private function replaceEntities($seg) {
+
+        preg_match_all( self::$regexpEntity, $seg, $matches );
+
+        if ( !empty( $matches[ 1 ] ) ) {
+            $test_src = $seg;
+            foreach ( $matches[ 1 ] as $v ) {
                 $byte = sprintf( "%02X", hexdec( $v ) );
                 if ( $byte[ 0 ] == '0' ) {
                     $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
@@ -905,49 +955,33 @@ class QA {
                 }
 
             }
+
             //Source Content wrong use placeholded one
-            $source_seg = $test_src;
+            $seg = $test_src;
         }
 
-        if ( !empty( $matches_trg[ 1 ] ) ) {
-            $test_trg = $target_seg;
-            foreach ( $matches_trg[ 1 ] as $v ) {
-                $byte = sprintf( "%02X", hexdec( $v ) );
-                if ( $byte[ 0 ] == '0' ) {
-                    $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
-                } else {
-                    $regexp = '/&#x(' . $byte . ');/u';
-                }
+        return $seg;
+    }
 
-                $key = "" . sprintf( "%02X", hexdec( $v ) ) . "";
-                if ( array_key_exists( $key, self::$asciiPlaceHoldMap ) ) {
-                    $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg );
-                }
+    /**
+     * @param $seg
+     *
+     * @return string|string[]
+     */
+    private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
+        preg_match_all('/<([^ >]+)[^>]*><\/\1>/', $seg, $matches);
+
+        if ( !empty( $matches[ 0 ] ) ) {
+            foreach ($matches[ 0 ]  as $match){
+                $matches = explode("><", $match);
+                $replacedHtmlTag = $matches[0].'>'.self::$emptyHtmlTagsPlaceholder.'<'.$matches[1];
+
+                $seg = str_replace($match, $replacedHtmlTag, $seg);
             }
-            //Target Content wrong use placeholded one
-            $target_seg = $test_trg;
         }
 
-//        Log::doJsonLog($_POST);
-//        Log::doJsonLog($source_seg);
-//        Log::doJsonLog($target_seg);
-//        Log::hexDump($source_seg);
-//        Log::hexDump($target_seg);
-
-        $this->source_seg = $source_seg;
-        $this->target_seg = $target_seg;
-
-        $this->srcDom = $this->_loadDom( $source_seg, self::ERR_SOURCE );
-        $this->trgDom = $this->_loadDom( $target_seg, self::ERR_TARGET );
-
-
-        if ( $this->thereAreErrors() ) {
-            $this->_getTagDiff();
-        }
-
-        $this->_resetDOMMaps();
-
+        return $seg;
     }
 
     /**
@@ -1012,7 +1046,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return $this->target_seg;
+        return str_replace(self::$emptyHtmlTagsPlaceholder, '', $this->target_seg);
     }
 
     public function getDomMaps() {
@@ -1845,29 +1879,17 @@ class QA {
 
     /**
      * Perform a check for <bx> and/or <ex> tag(s) inside a <g> tag
+     *
+     * Please see the corresponding documentation on \BxExG\Validator class
      */
     protected function _checkBxAndExInsideG() {
 
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
+        $bxExGValidator = new \BxExG\Validator($this);
+        $errors = $bxExGValidator->validate();
 
-        @$dom->loadHTML($this->target_seg);
-        $g = $dom->getElementsByTagName ( 'g' );
-
-        for ($i=0;$i<$g->length;$i++){
-            /** @var DOMElement $node */
-            $node = $g->item($i);
-
-            for ($k=0;$k<$node->childNodes->length;$k++){
-                $nodeName = $node->childNodes->item($k)->nodeName;
-
-                if( $nodeName === 'ex' or $nodeName === 'bx' ){
-                    $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
-                }
-            }
+        foreach ($errors as $error){
+            $this->_addError( $error );
         }
-
-        libxml_clear_errors();
     }
 
     /**
@@ -2120,16 +2142,15 @@ class QA {
     public function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
+
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
-//            try {
-//                throw new Exception();
-//            } catch ( Exception $e ){
-//                Log::doJsonLog( "\n" . $this->trgDom->saveXML() );
-//                Log::doJsonLog( $e->getTraceAsString() . "\n\n");
-//            }
+            /**
+             * Remove placeholder from empty HTML tags
+             */
+            $matches[ 1 ] = str_replace(self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ]);
 
             /**
              * Why i do this?? I'm replacing Placeholders of non printable chars
@@ -2240,7 +2261,7 @@ class QA {
     protected function _checkSymbolConsistency() {
 
         $symbols = [
-                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '*'
+                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '\\*'
         ];
 
         $specialSymbols = [ '$', '#' ];
@@ -2285,7 +2306,7 @@ class QA {
                     case self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ]:
                         $this->_addError( self::ERR_TAB_MISMATCH );
                         break;
-                    case '*':
+                    case '\\*':
                         $this->_addError( self::ERR_STARSIGN_MISMATCH );
                         break;
                 }

@@ -7,7 +7,7 @@
 
         startSegmentTagProjection: function (sid) {
             UI.getSegmentTagsProjection(sid).done(function(response) {
-                if (response.errors && !!(response.errors.length || response.errors.code) ) {
+                if (response.errors && (response.errors.length > 0 || !_.isUndefined(response.errors.code)) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     SegmentActions.disableTPOnSegment();
                     // Set as Tagged and restore source with taggedText

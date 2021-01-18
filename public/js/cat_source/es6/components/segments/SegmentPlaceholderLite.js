@@ -186,9 +186,7 @@ class TagEntity extends Component {
         const { children } = this.props;
         const {tagStyle} = this.state;
 
-        return <div className={"tag-container"}
-                    contentEditable="false"
-                    suppressContentEditableWarning={true}>
+        return <div className={'tag-container'}>
             <span className={`tag ${tagStyle} `}
                   unselectable="on"
                   suppressContentEditableWarning={true}

@@ -37,8 +37,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $stmt->execute(
                 [
                         "uid"       => $obj->uid,
-                        "key_value" => $obj->tm_key->key,
-                        "key_name"  => ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
+                        "key_value" => trim($obj->tm_key->key),
+                        "key_name"  => ( $obj->tm_key->name == null ) ? '' : trim($obj->tm_key->name),
                         "key_tm"    => ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
                         "key_glos"  => ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
                 ]

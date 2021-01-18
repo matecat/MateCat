@@ -16,6 +16,7 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use Matecat\XliffParser\XliffParser;
+use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\XliffUtils\XliffVersionDetector;
 use ProjectManager\ProjectManagerModel;
@@ -1911,6 +1912,36 @@ class ProjectManager {
                                 }
                             }
 
+                            // segment original data
+                            // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
+                            $segmentOriginalDataStructMap = (!empty( $dataRefMap )) ? ['map' => $dataRefMap]: [];
+                            $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct($segmentOriginalDataStructMap);
+                            $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
+
+                            //
+                            // -------------------------------------------
+                            // NOTE 2020-12-07
+                            // -------------------------------------------
+                            //
+                            // When there is an 'original-data' map, save segment_hash of REPLACED string
+                            // in order to distinguish it in UI avoiding possible collisions
+                            // (same text, different 'original-data' maps).
+                            // Example:
+                            //
+                            // $mapA = '{"source1":"%@"}';
+                            // $mapB = '{"source1":"%s"}';
+                            //
+                            // $segmentA = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
+                            // $segmentB = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
+                            //
+                            $segmentHash = md5( $seg_source[ 'raw-content' ] );
+                            if(!empty( $dataRefMap )){
+                                $dataRefReplacer = new DataRefReplacer($dataRefMap);
+                                $segmentHash = md5($dataRefReplacer->replace($seg_source[ 'raw-content' ]));
+                            }
+
+
+                            // segment struct
                             $segStruct = new Segments_SegmentStruct( [
                                     'id_file'                 => $fid,
                                     'id_project'              => $this->projectStructure[ 'id_project' ],
@@ -1919,7 +1950,7 @@ class ProjectManager {
                                     'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
                                     'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
                                     'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
-                                    'segment_hash'            => md5( $seg_source[ 'raw-content' ] ),
+                                    'segment_hash'            => $segmentHash,
                                     'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
                                     'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
                                     'raw_word_count'          => $wordCount,
@@ -1928,14 +1959,11 @@ class ProjectManager {
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
 
-                            // segment original data
-                            // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
-                            $segmentOriginalDataStructMap = (!empty( $dataRefMap )) ? ['map' => $dataRefMap]: [];
-                            $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct($segmentOriginalDataStructMap);
-                            $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
-
                             //increment counter for word count
                             $this->files_word_count += $wordCount;
+
+                            //increment the counter for not empty segments
+                            $_fileCounter_Show_In_Cattool += $show_in_cattool;
 
                         } // end foreach seg-source
 
@@ -1979,11 +2007,8 @@ class ProjectManager {
                                     $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
                                             new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
                                     );
-
                                 }
-
                             }
-
                         }
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
@@ -1991,24 +2016,13 @@ class ProjectManager {
                             $this->__addTUnitContextsToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
-                        $segStruct = new Segments_SegmentStruct( [
-                                'id_file'             => $fid,
-                                'id_project'          => $this->projectStructure[ 'id_project' ],
-                                'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),
-                                'segment'             => $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
-                                'segment_hash'        => md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
-                                'xliff_ext_succ_tags' => ( !is_null( $succ_tags ) ? $succ_tags : null ),
-                                'raw_word_count'      => $wordCount,
-                                'show_in_cattool'     => $show_in_cattool
-                        ] );
-
-                        $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+                        $segmentHash = md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
 
                         // segment original data
                         if ( !empty( $segmentOriginalData ) ) {
 
                             $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $segmentOriginalData );
+                            $segmentHash = md5($dataRefReplacer->replace($xliff_trans_unit[ 'source' ][ 'raw-content' ]));
 
                             $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
                                     'data'             => $segmentOriginalData,
@@ -2018,16 +2032,27 @@ class ProjectManager {
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
                         }
 
+                        $segStruct = new Segments_SegmentStruct( [
+                                'id_file'             => $fid,
+                                'id_project'          => $this->projectStructure[ 'id_project' ],
+                                'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),
+                                'segment'             => $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                                'segment_hash'        => $segmentHash,
+                                'xliff_ext_succ_tags' => ( !is_null( $succ_tags ) ? $succ_tags : null ),
+                                'raw_word_count'      => $wordCount,
+                                'show_in_cattool'     => $show_in_cattool
+                        ] );
+
+                        $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+
                         //increment counter for word count
                         $this->files_word_count += $wordCount;
 
+                        //increment the counter for not empty segments
+                        $_fileCounter_Show_In_Cattool += $show_in_cattool;
                     }
-
                 }
-
-                //increment the counter for not empty segments
-                $_fileCounter_Show_In_Cattool += $show_in_cattool;
-
             }
 
             $this->total_segments += count( $xliff_file[ 'trans-units' ] );

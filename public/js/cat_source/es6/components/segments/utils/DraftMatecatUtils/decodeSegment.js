@@ -7,47 +7,39 @@ import {
 /**
  *
  * @param editorState
- * @returns {string}
+ * @returns {}
  */
 const decodeSegment  = (editorState) => {
 
 
     let contentState = editorState.getCurrentContent();
-    // Se non c'è niente da decodare ritorna così
-    if(!contentState.hasText()) return contentState.getPlainText();
+    if(!contentState.hasText()) return {entities: [], decodedSegment: contentState.getPlainText()}
 
-    const inlineStyle = editorState.getCurrentInlineStyle();
-    const entities = getEntities(editorState); //start - end
-    const entityKeys =  entities.map( entity => entity.entityKey);
+    const entities = getEntities(editorState); // already consecutive
+    // Adapt offset from block to absolute
+    const blocks = contentState.getBlockMap();
+    let plainEditorText = contentState.getPlainText();
+    let totalBlocksLength = 0;
+    let slicedLength = 0;
+    blocks.forEach( block => {
+        const blockKey = block.getKey();
+        entities.forEach( tagEntity => {
+            if(tagEntity.blockKey === blockKey){
+                const {encodedText} = tagEntity.entity.data;
+                // add previous block length and previous replace length diff
+                const start = tagEntity.start + totalBlocksLength - slicedLength;
+                const end  = tagEntity.end + totalBlocksLength - slicedLength;
+                plainEditorText = plainEditorText.slice(0,start) + encodedText + plainEditorText.slice(end);
+                slicedLength +=  (end - start) - encodedText.length;
+            }
+        })
+        // Block length plus newline char
+        totalBlocksLength += block.getLength() + 1
+    })
 
-    let editorStateClone = editorState;
+    const decodedSegmentPlain = plainEditorText.replace(/\n/gi, config.lfPlaceholder);
 
-    entityKeys.forEach( key => {
-        // Update entities and blocks cause previous cycle updated offsets
-        // LAZY NOTE: entity.start and entity.end are block-based
-        let entitiesInEditor = getEntities(editorStateClone);
-        // Filter only looped tag and get data
-        // Todo: add check on tag array length
-        const tagEntity = entitiesInEditor.filter( entity => entity.entityKey === key)[0];
-        const {encodedText} = tagEntity.entity.data;
-        // Get block-based selection
-        let selectionState = SelectionState.createEmpty(tagEntity.blockKey)
-        selectionState = selectionState.merge({
-            anchorOffset: tagEntity.start,
-            focusOffset: tagEntity.end
-        });
-        // Replace text of entity with original text and delete entity key
-        contentState = Modifier.replaceText(
-            contentState,
-            selectionState,
-            encodedText,
-            inlineStyle,
-            null
-        );
-        // Update contentState
-        editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
-    });
-    return contentState.getPlainText().replace(/\n/gi, config.lfPlaceholder);
+    return { entitiesRange: entities, decodedSegment: decodedSegmentPlain }
 };
 
 export default decodeSegment;

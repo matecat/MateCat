@@ -148,11 +148,11 @@ const LXQ = {
                                 qadata.color = LXQ.colors[qadata.category];
                                 var category = qadata.category;
                                 if ( qadata.insource ) {
-                                    highlights.source = (highlights.source) ? highlights.source : errorsMap;
+                                    highlights.source = (highlights.source) ? highlights.source : _.cloneDeep(errorsMap);
                                     highlights.source[category].push( qadata );
                                 }
                                 else {
-                                    highlights.target = (highlights.target) ? highlights.target : errorsMap;
+                                    highlights.target = highlights.target ? highlights.target : _.cloneDeep(errorsMap);
                                     highlights.target[category].push( qadata );
                                 }
                             }
@@ -241,11 +241,11 @@ const LXQ = {
                             if ( !qadata.ignored ) {
                                 qadata.color = LXQ.colors[qadata.category];
                                 if ( qadata.insource ) {
-                                    highlights.source = (highlights.source) ? highlights.source : errorsMap;
+                                    highlights.source = (highlights.source) ? highlights.source : _.cloneDeep(errorsMap);
                                     highlights.source[qadata.category].push( qadata );
                                 }
                                 else {
-                                    highlights.target = (highlights.target) ? highlights.target : errorsMap;
+                                    highlights.target = (highlights.target) ? highlights.target : _.cloneDeep(errorsMap);
                                     highlights.target[qadata.category].push( qadata );
                                 }
 

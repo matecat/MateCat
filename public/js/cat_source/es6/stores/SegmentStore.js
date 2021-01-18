@@ -435,7 +435,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
-    setConcordanceMatches: function (sid, matches ,errors) {
+    unlockSegments: function ( segments ) {
+        segments.forEach((sid)=>{
+            let index = this.getSegmentIndex(sid);
+            if (index === -1) return;
+            this._segments = this._segments.setIn([index, 'unlocked'], true);
+        });
+    },
+
+    setConcordanceMatches: function (sid, matches, errors) {
         const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'concordance'], Immutable.fromJS(matches));
@@ -1093,6 +1101,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
+        case SegmentConstants.SET_UNLOCKED_SEGMENTS:
+            SegmentStore.unlockSegments(action.segments);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
         case SegmentConstants.SET_MUTED_SEGMENTS:
             SegmentStore.setMutedSegments(action.segmentsArray);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
@@ -1104,6 +1116,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_SEGMENT_WARNINGS: // LOCAL
             SegmentStore.setSegmentWarnings(action.sid, action.warnings, action.tagMismatch);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_WARNINGS, action.sid);
             break;
         case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
             SegmentStore.updateGlobalWarnings(action.warnings);
@@ -1191,19 +1204,21 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEARCH_RESULTS:
             SegmentStore.addSearchResult(action.occurrencesList, action.searchResultsDictionary, action.currentIndex, action.text);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
-            _.forEach(action.segments, (sid) => {
+            action.occurrencesList.filter((v, i, a) => a.indexOf(v) === i).forEach((sid) => {
                 SegmentStore.emitChange(SegmentConstants.ADD_SEARCH_RESULTS, sid);
             });
             break;
         case SegmentConstants.REMOVE_SEARCH_RESULTS:
             SegmentStore.removeSearchResults();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(SegmentConstants.REMOVE_SEARCH_RESULTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_CURRENT_SEARCH:
             let currentSegment = SegmentStore.addCurrentSearchSegment(action.currentIndex);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             if ( currentSegment ) {
                 SegmentStore.emitChange(SegmentConstants.FORCE_UPDATE_SEGMENT, currentSegment.get('sid'));
+                SegmentStore.emitChange(SegmentConstants.ADD_CURRENT_SEARCH, currentSegment.get('sid'), currentSegment.get('currentInSearchIndex'));
             }
             break;
         case EditAreaConstants.REPLACE_SEARCH_RESULTS:
@@ -1212,14 +1227,17 @@ AppDispatcher.register(function (action) {
         case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
             SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText);
             break;
-        case SegmentConstants.SEGMENT_FOCUSED:
-            SegmentStore.emitChange(SegmentConstants.SEGMENT_FOCUSED, action.sid, action.focused)
-            break;
         case SegmentConstants.SET_GUESS_TAGS:
             SegmentStore.setTagProjectionStatus(action.enabled);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             const current = SegmentStore.getCurrentSegment();
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid);
+            break;
+        case EditAreaConstants.EDIT_AREA_CHANGED:
+            SegmentStore.emitChange(EditAreaConstants.EDIT_AREA_CHANGED, action.sid, action.isTarget);
+            break;
+        case SegmentConstants.HIGHLIGHT_TAGS:
+            SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_TAGS, action.tagId, action.tagPlaceholder, action.entityKey, action.isTarget);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

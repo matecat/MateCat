@@ -1068,6 +1068,17 @@ const SegmentActions = {
         }
     },
 
+    unlockSegments(segments) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_UNLOCKED_SEGMENTS,
+            segments
+        });
+        segments.forEach((segmentSid)=>{
+            CommonUtils.addInStorage('unlocked-' + segmentSid, true);
+        })
+
+    },
+
     setBulkSelectionInterval(from, to, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_BULK_SELECTION_INTERVAL,
@@ -1138,11 +1149,20 @@ const SegmentActions = {
             plainText
         });
     },
-    focusOnSegment: function (sid, focused = false) {
+    editAreaChanged: function (sid, isTarget) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.SEGMENT_FOCUSED,
-            focused,
-            sid
+            actionType: EditAreaConstants.EDIT_AREA_CHANGED,
+            sid,
+            isTarget
+        });
+    },
+    highlightTags: function (tagId, tagPlaceholder, entityKey, isTarget) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.HIGHLIGHT_TAGS,
+            tagId,
+            tagPlaceholder,
+            entityKey,
+            isTarget
         });
     }
 

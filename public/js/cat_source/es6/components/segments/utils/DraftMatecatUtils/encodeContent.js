@@ -38,17 +38,17 @@ const encodeContent = (originalEditorState, plainText = '') => {
     const contentSplitted = splitOnTagPlaceholder(editorState, newLineMap);
     editorState = EditorState.push(editorState, contentSplitted, 'split-block');
     // Link each openTag with its closure using entity key, otherwise tag are linked with openTagId/closeTagId
-    contentState = linkEntities(editorState);
-    editorState = EditorState.push(originalEditorState, contentState, 'change-block-data');
+    //contentState = linkEntities(editorState);
+    //editorState = EditorState.push(originalEditorState, contentState, 'change-block-data');
 
     // Replace each tag text with a placeholder
     // contentState = beautifyEntities(editorState);
-    editorState = beautifyEntities(editorState);
+    //editorState = beautifyEntities(editorState);
     //editorState = EditorState.push(editorState, contentState, 'insert-characters');
 
     // Unescape residual html entities after tag identification
-    editorState = replaceOccurrences(editorState, '&lt;', '<');
-    editorState = replaceOccurrences(editorState, '&gt;', '>');
+    //editorState = replaceOccurrences(editorState, '&lt;', '<');
+    //editorState = replaceOccurrences(editorState, '&gt;', '>');
 
     // Move selection at the end without focusing (for source)
     editorState = EditorState.moveSelectionToEnd(editorState);
