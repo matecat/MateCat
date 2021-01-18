@@ -380,6 +380,8 @@ class Editarea extends React.Component {
                 keyBindingFn={myKeyBindingFn}
                 handleDrop={this.handleDrop}
                 spellCheck={true}
+                textAlignment={config.isTargetRTL ? 'right' : 'left'}
+                textDirectionality={config.isTargetRTL ? 'RTL' : 'LTR'}
             />
             <TagBox
                 displayPopover={displayPopover}
