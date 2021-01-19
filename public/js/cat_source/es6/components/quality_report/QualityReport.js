@@ -229,6 +229,7 @@ if (config.isLoggedIn) {
             }),
             headerMountPoint
         );
+        ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
     });
 } else {
     ReactDOM.render(
@@ -241,7 +242,7 @@ if (config.isLoggedIn) {
         }),
         headerMountPoint
     );
+    ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
 }
 
-ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
 
