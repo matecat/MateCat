@@ -28,7 +28,7 @@ class ActionMenu extends React.Component {
                             <a href={ jobUrls.revise_urls[0].url }>Revise</a>
                         </li>
                         <li className="item" title="Translate" data-value="translate" >
-                            <a href={config.basepath+ "translate/" + config.pname + "/" +  config.source_code + "-" + config.target_code + "/" + config.id_job + "-" + config.password  }>Translate</a>
+                            <a href={ jobUrls.translate_url }>Translate</a>
                         </li>
                     </ul>
                 </div>
