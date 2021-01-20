@@ -486,9 +486,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     changeGlossaryItem: function(sid, matchId, name, comment, target_note, translation) {
         let index = this.getSegmentIndex(sid);
         let glossary = this._segments.get(index).get('glossary').toJS();
-        glossary[name].comment = comment;
-        glossary[name].target_note = comment;
-        glossary[name].translation = translation;
+        glossary[name][0].comment = comment;
+        glossary[name][0].target_note = comment;
+        glossary[name][0].translation = translation;
         this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
     },
     addGlossaryItem: function(sid, match, name) {

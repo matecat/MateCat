@@ -17,7 +17,8 @@ class SegmentFooterTabGlossary extends React.Component {
         this.state = {
             loading: false,
             openComment: false,
-            enableAddButton: false
+            enableAddButton: false,
+            editing: false
         };
         this.matches = {};
         this.stopLoading = this.stopLoading.bind(this);
@@ -85,10 +86,9 @@ class SegmentFooterTabGlossary extends React.Component {
             let matches = $.extend(true, {}, this.props.segment.glossary);
             SegmentActions.updateGlossaryItem( matches[source][0].id, matches[source][0].segment, matches[source][0].translation, target, comment, source, this.props.id_segment );
 
-            $( this.matches[source] ).find( '.sugg-target span, .details .comment' ).removeClass( 'editing' );
-            $( this.matches[source] ).find('.sugg-target span, .details .comment').removeAttr('contenteditable');
             this.setState({
-                openComment: false
+                openComment: false,
+                editing:false
             });
         }
     }
@@ -107,12 +107,8 @@ class SegmentFooterTabGlossary extends React.Component {
 
     editExistingMatch(match, e) {
         e.preventDefault();
-        $(this.matches[match]).find('.sugg-target span, .details .comment').toggleClass('editing');
-        if ( $(this.matches[match]).find('.sugg-target span').attr('contenteditable') ) {
-            $(this.matches[match]).find('.sugg-target span, .details .comment').removeAttr('contenteditable');
-        } else {
-            $(this.matches[match]).find('.sugg-target span, .details .comment').attr('contenteditable', true);
-        }
+        const {editing} = this.state;
+        this.setState({editing: !editing});
     }
 
     onKeyUpSetItem() {
@@ -166,7 +162,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     copyItemInEditArea(glossaryTranslation) {
-        SegmentActions.copyGlossaryItemInEditarea(glossaryTranslation , this.props.segment)
+        !this.state.editing && SegmentActions.copyGlossaryItemInEditarea(glossaryTranslation , this.props.segment)
         // GlossaryUtils.copyGlossaryItemInEditareaDraftJs(glossaryTranslation, this.props.segment);
     }
     onPasteEvent(e) {
@@ -182,8 +178,8 @@ class SegmentFooterTabGlossary extends React.Component {
         if ( _.size( this.props.segment.glossary ) ) {
 
             let self = this;
-            $.each( this.props.segment.glossary, function ( name, value ) {
-                $.each( value, function (index, match) {
+            $.each( this.props.segment.glossary, ( name, value ) => {
+                $.each( value, (index, match) => {
                     // let match = value[0];
                     if ( (match.segment === '') || (match.translation === '') )
                         return;
@@ -229,17 +225,19 @@ class SegmentFooterTabGlossary extends React.Component {
                                       dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple( leftTxt, true ))}/>
                             </li>
                             <li className="b sugg-target" onMouseDown={()=>self.copyItemInEditArea(rightTxt)}>
-                            <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
-                                  data-original={TagUtils.decodePlaceholdersToTextSimple( rightTxt, true )}
-                                  dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple(rightTxt, true))}
-                                  onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
+                                <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className={"translation " + (this.state.editing? "editing": "" )}
+                                      data-original={TagUtils.decodePlaceholdersToTextSimple( rightTxt, true )}
+                                      dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple(rightTxt, true))}
+                                      onKeyPress={self.updateGlossaryItem.bind(self, name)}
+                                      contentEditable={this.state.editing}
+                                />
                             </li>
                             <li className="details">
                                 { ( !match.comment || match.comment === '') ? addCommentHtml :
-                                    <div className="comment"
+                                    <div className={"comment " + (this.state.editing? "editing": "" )}
                                          data-original={TagUtils.decodePlaceholdersToTextSimple( commentOriginal, true )}
                                          dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple(commentOriginal, true ))}
-                                        // onKeyPress={self.updateGlossaryItem.bind(self, name)}
+                                         contentEditable={this.state.editing}
                                     />
                                 }
                                 <ul className="graysmall-details">
@@ -289,6 +287,7 @@ class SegmentFooterTabGlossary extends React.Component {
                 !Immutable.fromJS(this.props.segment.glossary).equals(Immutable.fromJS(nextProps.segment.glossary)) ) )||
                 this.state.loading !== nextState.loading ||
                 this.state.openComment !== nextState.openComment ||
+                this.state.editing !== nextState.editing ||
                 this.props.active_class !== nextProps.active_class ||
                 this.state.enableAddButton !== nextState.enableButton ||
                 this.props.tab_class !== nextProps.tab_class
