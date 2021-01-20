@@ -151,7 +151,7 @@
       border:none;
     }
     span[data-text="true"]{
-      display: inline-block;
+      display: flow-root;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
