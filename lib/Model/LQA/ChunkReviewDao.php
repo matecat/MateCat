@@ -69,7 +69,9 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
                 'source_page' => $source_page,
         ] );
 
-        return $stmt->fetchAll()[0];
+        $results = $stmt->fetchAll();
+
+        return (isset($results[0])) ? $results[0] : null;
     }
 
     /**

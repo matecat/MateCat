@@ -407,10 +407,9 @@ class StatusController extends KleinController {
      * @throws \Exception
      */
     private function getChunkUrls( \Jobs_JobStruct $job ) {
-        return [
-                'translation' => JobUrlBuilder::create( $job->id, $job->password ),
-                'revision1'   => JobUrlBuilder::create( $job->id, $job->password, [ 'revision_number' => 1 ] ),
-                'revision2'   => JobUrlBuilder::create( $job->id, $job->password, [ 'revision_number' => 2 ] ),
-        ];
+
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job);
+
+        return $jobUrlStruct->getUrls();
     }
 }

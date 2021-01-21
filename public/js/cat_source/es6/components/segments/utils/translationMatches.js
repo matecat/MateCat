@@ -167,6 +167,7 @@ let TranslationMatches = {
                 id_after: idAfter,
                 id_client: config.id_client,
                 cross_language: crossLangsArray,
+                current_password: config.currentPassword
             },
             context: $('#segment-' + id),
             error: function () {
@@ -213,6 +214,7 @@ let TranslationMatches = {
                 tra: target,
                 id_translator: config.id_translator,
                 id_match: id,
+                current_password: config.currentPassword
             },
             error: function () {
                 OfflineUtils.failedConnection(0, 'deleteContribution');

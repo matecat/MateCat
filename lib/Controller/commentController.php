@@ -176,12 +176,22 @@ class commentController extends ajaxController {
         return $struct;
     }
 
+    /**
+     * @throws Exception
+     */
     private function sendEmail() {
 
-        $url = JobUrlBuilder::create( $this->job->id, $this->job->password, [
-            'id_segment'      => $this->struct->id_segment,
-            'revision_number' => $this->struct->revision_number
-        ] );
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($this->job, [
+                'id_segment'      => $this->struct->id_segment,
+        ]);
+
+        $url = $jobUrlStruct->getUrlByRevisionNumber($this->struct->revision_number);
+
+        if(!$url){
+            $this->result[ 'errors' ][] = [ "code" => -10, "message" => "No valid url was found for this project." ];
+
+            return;
+        }
 
         Log::doJsonLog( $url );
         $project_data = $this->projectData();
