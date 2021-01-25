@@ -429,7 +429,7 @@ class Editarea extends React.Component {
 
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
-        if((e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
+        if((e.keyCode === 84 || e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({triggerText: null});
             return 'toggle-tag-menu';
         }else if(e.key === '<' && !hasCommandModifier(e)) {

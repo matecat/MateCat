@@ -146,6 +146,7 @@ class TagEntity extends Component {
             <span ref={(ref) => this.tagRef = ref}
                   className={`tag ${style} ${tagWarningStyle}`}
                 data-offset-key={this.props.offsetkey}
+                  contentEditable={false}
                 unselectable="on"
                 suppressContentEditableWarning={true}
                 onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
