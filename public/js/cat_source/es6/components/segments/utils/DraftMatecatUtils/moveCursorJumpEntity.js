@@ -1,4 +1,5 @@
-import {EditorState} from "draft-js";
+import {EditorState, SelectionState} from "draft-js";
+import selectionIsEntity from "./selectionIsEntity";
 
 
 /**
@@ -14,23 +15,35 @@ import {EditorState} from "draft-js";
  * @returns editorState - EditorState with new selection forced
  */
 
-const moveCursorJumpEntity = (editorState, step, shift = false) => {
+const moveCursorJumpEntity = (editorState, step, shift = false, isRTL) => {
 
     const selectionState = editorState.getSelection();
     const contentState = editorState.getCurrentContent();
+
     // ------ previous selection state
     const prevSelectionIsBackward = selectionState.getIsBackward();
     const prevAnchorOffset = selectionState.getAnchorOffset();
     const prevFocusOffset = selectionState.getFocusOffset();
     const anchorKey = selectionState.getAnchorKey();
     const focusKey = selectionState.getFocusKey();
+
     // ------ cursor position after moving
-    const newCursorPosition = selectionState.getFocusOffset() + step;
+    let newCursorPosition = selectionState.getFocusOffset() + step; // +1 / -1
     const currentBlock = contentState.getBlockForKey(focusKey);
     const currentBlockLength = currentBlock.getText().length;
     const nextPos = prevFocusOffset + step;
+
     // ------ new selection to merge
     let nextSelection = null;
+    let newSelection = null;
+
+    const start = selectionState.getStartOffset();
+    const selectedText = step>0 ? currentBlock.getText().slice(start, start +1) : currentBlock.getText().slice(start-1 , start);
+    const checkZeroWidthSpace = String.fromCharCode(parseInt('200B',16)) === selectedText;
+    if(checkZeroWidthSpace){
+        newCursorPosition = step>0 ?  newCursorPosition +1 : newCursorPosition -1;
+    }
+
 
     // find entities in block
     currentBlock.findEntityRanges(
@@ -40,94 +53,45 @@ const moveCursorJumpEntity = (editorState, step, shift = false) => {
             const entityKey = currentBlock.getEntityAt(start);
             const entity = contentState.getEntity(entityKey);
             // jump every immutable entity
+            const goingBack = start <= newCursorPosition && (step < 0) && end > newCursorPosition;
+            const goingForward = start < newCursorPosition && end > newCursorPosition;
+            const jumpingSingleCharEntity = (start < newCursorPosition) && (end >= newCursorPosition) && ((end - start) === 1)
+
             if (entity.getMutability() === 'IMMUTABLE' &&
-                (start < newCursorPosition && end > newCursorPosition)) {
+                // if you cursor inside entity
+                (goingBack || goingForward || jumpingSingleCharEntity)
+                // nothing already jumped
+                && nextSelection === null) {
+
                 nextSelection = {};
-                nextSelection.nextAnchorKey = anchorKey;
-                nextSelection.nextFocusKey = focusKey;
+                nextSelection.nextAnchorKey = anchorKey; // same
+                nextSelection.nextFocusKey = focusKey; // same
+
                 if (step > 0) {
                     // jump on entity end
-                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : end;
-                    nextSelection.nextFocusOffset = end;
+                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : end+1;
+                    nextSelection.nextFocusOffset = end+1;
                 } else {
                     // jump on entity start
-                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : start;
-                    nextSelection.nextFocusOffset = start;
+                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : start-1;
+                    nextSelection.nextFocusOffset = start-1;
                 }
             }
         }
     );
 
-    if (!nextSelection){
-        nextSelection = {};
-        if(step > 0){
-            // go forward
-            const nextBlockKey = contentState.getKeyAfter(focusKey);
-            if(nextBlockKey && nextPos > currentBlockLength){
-                const nextBlock = contentState.getBlockForKey(nextBlockKey);
-                const nextBlockLength = nextBlock.getText().length;
-                // Go on next block
-                nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : 0; // : start of next block
-                nextSelection.nextAnchorKey = shift ? anchorKey : nextBlockKey; // : next block
-                nextSelection.nextFocusOffset = shift && nextBlockLength > 0 ? 1 : 0;
-                nextSelection.nextFocusKey = nextBlockKey;
-                //  console.log('Go on next block');
-            }else if(nextPos > currentBlockLength){
-                // Go on block end
-                nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : currentBlockLength; // : end of block
-                nextSelection.nextAnchorKey = anchorKey;
-                nextSelection.nextFocusOffset = currentBlockLength;
-                nextSelection.nextFocusKey = focusKey;
-                // console.log('Go on block end');
-            }else{
-                // Go forward
-                nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : prevFocusOffset + step; // : go one step forward
-                nextSelection.nextAnchorKey = shift ? anchorKey : focusKey;
-                nextSelection.nextFocusOffset = prevFocusOffset + step;
-                nextSelection.nextFocusKey = focusKey;
-                // console.log('Go forward');
-            }
-        }else{
-            // go back
-            const previousBlockKey = contentState.getKeyBefore(focusKey);
-            if(previousBlockKey && nextPos < 0){
-                const previousBlock = contentState.getBlockForKey(previousBlockKey);
-                const previousBlockLength = previousBlock.getText().length;
-                // Go on previous block
-                nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : previousBlockLength; // : end of previous block
-                nextSelection.nextAnchorKey = shift ? anchorKey : previousBlockKey;
-                nextSelection.nextFocusOffset = shift && previousBlockLength > 0  ? previousBlockLength - 1 : previousBlockLength;
-                nextSelection.nextFocusKey = previousBlockKey;
-                // console.log('Go on previous block');
-            }else if(nextPos < 0){
-                // Go on block start
-                nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : 0; // fine del blocco precedente
-                nextSelection.nextAnchorKey = anchorKey;
-                nextSelection.nextFocusOffset = 0;
-                nextSelection.nextFocusKey = focusKey;
-                // console.log('Go on block start');
-            }else{
-                // Go back
-                nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : prevFocusOffset + step; // : go one step back
-                nextSelection.nextAnchorKey = shift ? anchorKey : focusKey;
-                nextSelection.nextFocusOffset = prevFocusOffset + step;
-                nextSelection.nextFocusKey = focusKey;
-                // console.log('Go back');
-            }
-        }
-    }
-    const newSelection = selectionState.merge({
-        anchorOffset: nextSelection.nextAnchorOffset,
-        anchorKey: nextSelection.nextAnchorKey,
-        focusOffset: nextSelection.nextFocusOffset,
-        focusKey: nextSelection.nextFocusKey,
-        isBackward: checkIsBackward(nextSelection, prevSelectionIsBackward, shift, step > 0 )
-    });
-    // console.log(newSelection.serialize())
-    return EditorState.forceSelection(
+    newSelection = nextSelection ?
+        SelectionState.createEmpty(nextSelection.nextAnchorKey).merge({
+            anchorOffset: nextSelection.nextAnchorOffset,
+            focusOffset: nextSelection.nextFocusOffset,
+            focusKey: nextSelection.nextFocusKey,
+            isBackward: checkIsBackward(nextSelection, prevSelectionIsBackward, shift, step > 0 )
+        }) : null
+
+    return newSelection ? EditorState.forceSelection(
         editorState,
         newSelection
-    );
+    ) : newSelection
 };
 
 
@@ -146,5 +110,6 @@ const checkIsBackward = (nextSelection, prevBackwardState, shift, forward) => {
     const cond3 = nextAnchorKey !== nextFocusKey && nextAnchorOffset >= nextFocusOffset && prevBackwardState;
     return !forward ? (shift && cond1 || cond2 || cond3) : (shift && cond1 || cond2Forward || cond3)
 }
+
 
 export default moveCursorJumpEntity;

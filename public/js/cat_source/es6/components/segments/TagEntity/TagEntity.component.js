@@ -143,25 +143,25 @@ class TagEntity extends Component {
         const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;
 
         return <div className={'tag-container'}>
-            <span ref={(ref) => this.tagRef = ref}
-                  className={`tag ${style} ${tagWarningStyle}`}
-                data-offset-key={this.props.offsetkey}
-                unselectable="on"
-                suppressContentEditableWarning={true}
-                onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
-                onMouseLeave={() => tooltipToggle()}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    this.onClickBound(entityId, entityPlaceholder);
-                    !openSplit && setTimeout(() =>{
-                        SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey);
-                    })
-                }}>
-                {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={style}/>}
-                {searchParams.active && markSearch(decoratedText, searchParams)}
-                {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
-            </span>
-        </div>
+                    <span ref={(ref) => this.tagRef = ref}
+                          className={`tag ${style} ${tagWarningStyle}`}
+                        data-offset-key={this.props.offsetkey}
+                        unselectable="on"
+                        suppressContentEditableWarning={true}
+                        onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
+                        onMouseLeave={() => tooltipToggle()}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            this.onClickBound(entityId, entityPlaceholder);
+                            !openSplit && setTimeout(() =>{
+                                SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey);
+                            })
+                        }}>
+                        {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={style}/>}
+                        {searchParams.active && markSearch(decoratedText, searchParams)}
+                        {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
+                    </span>
+                </div>
     }
 
     onClickBound = (entityId, entityPlaceholder) =>{

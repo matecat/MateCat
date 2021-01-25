@@ -46,6 +46,8 @@
 }
 .tag {
   position: relative;
+  direction: ltr;
+  text-align: left;
   display: inline-block;
   padding: 0 2px;
   background: #002b5c;
@@ -75,6 +77,7 @@
       opacity: 1;
     }
   }
+
   span{
     &::selection{
       color: #fff;
@@ -150,17 +153,19 @@
     &:after{
       border:none;
     }
-    span[data-text="true"]{
-      display: flow-root;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 64px;
-      vertical-align: middle;
-    }
   }
 
-
+  span {
+    all: revert;
+  }
+  span[data-text="true"]{
+    display: flow-root;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64px;
+    vertical-align: middle;
+  }
   /* Used in TM */
   &.small {
     font-size: 12px;

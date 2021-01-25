@@ -472,7 +472,7 @@ class SegmentSource extends React.Component {
             let newSelection = this.editor._latestEditorState.getSelection();
             // force selection on entity
             newSelection = newSelection.merge({
-                anchorOffset: start,
+                anchorOffset: start -1, // -1 is to catch the zero-width space char placed before every entity
                 focusOffset: end,
             });
             let newEditorState = EditorState.forceSelection(

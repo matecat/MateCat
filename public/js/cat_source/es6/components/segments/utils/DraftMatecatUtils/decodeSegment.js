@@ -37,7 +37,8 @@ const decodeSegment  = (editorState) => {
         totalBlocksLength += block.getLength() + 1
     })
 
-    const decodedSegmentPlain = plainEditorText.replace(/\n/gi, config.lfPlaceholder);
+    let decodedSegmentPlain = plainEditorText.replace(/\n/gi, config.lfPlaceholder)
+        .replace(new RegExp(String.fromCharCode(parseInt('200B',16)), 'gi'), '');
 
     return { entitiesRange: entities, decodedSegment: decodedSegmentPlain }
 };
