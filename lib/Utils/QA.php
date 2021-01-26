@@ -1245,9 +1245,13 @@ class QA {
                         $innerHTML = $plainRef[ 'innerHTML' ];
                         $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
                         preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
-                        $html = base64_decode( $html[ 0 ][ 1 ] );
 
-                        @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
+                        if(isset($html[ 0 ][ 1 ])){
+                            $html = base64_decode( $html[ 0 ][ 1 ] );
+                            @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
+                        } else {
+                            @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                        }
                     } else {
                         @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
                     }
