@@ -74,9 +74,6 @@ $.extend(UI, {
                     setTimeout(function () {UI.clickOnTranslatedButton(segment, false)});
                 }
             }
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
-            e.preventDefault();
-            Customizations.toggleTagsMode();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
