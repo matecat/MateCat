@@ -196,7 +196,7 @@ class Editarea extends React.Component {
         const {decodedSegment, entitiesRange} = DraftMatecatUtils.decodeSegment(editorState)
         if ( decodedSegment !== '' ) {
             let contentState = editorState.getCurrentContent();
-            let plainText = contentState.getPlainText();
+            let plainText = contentState.getPlainText().replace(new RegExp(String.fromCharCode(parseInt('200B',16)), 'gi'), '');
             // Match tag without compute tag id
             const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState, entitiesRange);
             // Add missing tag to store for highlight warnings on tags
