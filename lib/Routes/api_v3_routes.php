@@ -6,6 +6,13 @@
  * Time: 18:00
  */
 
+$klein->with( '/api/v3/api-key', function () {
+    route( '/generate/[:user_id]', 'POST', '\API\V3\ApiKeyController', 'generate' );
+    route( '/confirm/[:user_id]', 'PUT', '\API\V3\ApiKeyController', 'confirm' );
+    route( '/show/[:user_id]', 'GET', '\API\V3\ApiKeyController', 'show' );
+    route( '/delete/[:user_id]', 'DELETE', '\API\V3\ApiKeyController', 'delete' );
+} );
+
 $klein->with( '/api/v3/projects', function () {
     route( '/analysis/status/[:id_project]/[:password]', 'GET', '\API\V3\StatusController', 'index' );
 } );
