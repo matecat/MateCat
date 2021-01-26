@@ -100,14 +100,6 @@ const Shortcuts = {
                         "mac": "meta+shift+s",
                     }
                 },
-                "toggleTagDisplayMode": {
-                    "label": "Switch Tag Display Mode",
-                    "equivalent": "",
-                    "keystrokes": {
-                        "standard": "ctrl+shift+t",
-                        "mac": "meta+shift+t",
-                    }
-                },
                 "openComments": {
                     "label": "Open comments in current segment",
                     "equivalent": "",
