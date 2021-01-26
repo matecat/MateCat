@@ -1,5 +1,8 @@
 <?php
 
+use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use SubFiltering\Filter;
+
 class QATest extends AbstractTest {
 
     public function testView2RawXliff() {
@@ -712,6 +715,47 @@ TRG;
 
         $this->assertEquals( $targetNormalized, $translation );
         $this->assertEquals( $check->getTargetSeg(), $translation );
+    }
+
+    /**
+     * In Matecat there are some special characters mapped in data_ref_map (like &#39; for example)
+     * that can be omitted in the target.
+     *
+     * In this case no error should be detected from QA class
+     *
+     * @throws \Exception
+     */
+    public function testCheckThereAreNoErrorsWithDataRefTagsToBeSkipped() {
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $filter = Filter::getInstance( $featureSet );
+
+        $targetLang  = 'pt-PT';
+        $segment     = '<ph id="source1" dataRef="source1"/>When you partner with Uber Eats, you have access to the Restaurant Dashboard to manage your establishment<ph id="source2" dataRef="source2"/>s orders.';
+        $translation = 'Ao fazer parceria com o Uber Eats, você tem acesso ao Painel do Restaurante para gerenciar os pedidos dos seus estabelecimentos.<ph id="source1" dataRef="source1"/> ';
+        $dataRefMap  = [
+                'source3' => '&#39;',
+                'source4' => '&lt;a class=&quot;cmln__link&quot; href=&quot;https://restaurant-dashboard.uber.com/&quot; target=&quot;_blank&quot;&gt;',
+                'source5' => '&lt;/a&gt;',
+                'source1' => '&lt;p class=&quot;cmln__paragraph&quot;&gt;',
+                'source6' => '&lt;/p&gt;',
+                'source2' => '&#39;',
+        ];
+
+        $segment     = $filter->fromLayer0ToLayer1( $segment );
+        $translation = $filter->fromLayer0ToLayer1( $translation );
+
+        $dataRefReplacer     = new DataRefReplacer( $dataRefMap );
+        $replacedSegment     = $dataRefReplacer->replace( $segment );
+        $replacedTranslation = $dataRefReplacer->replace( $translation );
+
+        $check = new QA ( $replacedSegment, $replacedTranslation );
+        $check->setFeatureSet( $featureSet );
+        $check->setTargetSegLang( $targetLang );
+        $check->performTagCheckOnly();
+
+        $this->assertFalse($check->thereAreErrors());
     }
 }
 
