@@ -14,33 +14,42 @@ const splitOnTagPlaceholder = (editorState, newLineMap) => {
     let contentState = editorState.getCurrentContent();
     if(!newLineMap) return contentState;
 
+    newLineMap.sort((a, b) => {return b.selectionState.anchorOffset - a.selectionState.anchorOffset});
+
     while(newLineMap.length > 0){
         let blocks = contentState.getBlockMap();
         // take one of the available tags
         const {blockKey, selectionState} = newLineMap.pop();
-        // start splittinh
+
+        // start splitting
         blocks.forEach((contentBlock) => {
+
             if (blockKey === contentBlock.getKey()){
+
                 contentState = Modifier.splitBlock(
                     contentState,
                     selectionState
                 );
-                const newBlock = contentState.getBlockAfter(contentBlock.getKey())
+                const currentBlock = contentState.getBlockForKey(blockKey);
+                const newBlock = contentState.getBlockAfter(blockKey);
+                const newBlockKey = newBlock.getKey();
+
                 newLineMap.forEach( newline => {
+
                     // if it is a newLinesTag on the same block previously splitted
                     if(newline.blockKey === blockKey && newline.selectionState.anchorOffset > selectionState.anchorOffset){
                         // update selection to match newly created block
                         // residual newLinesTag will be on the new block
-                        const newAnchorOffset = newline.selectionState.anchorOffset - contentBlock.getText().length;
+                        const newAnchorOffset = newline.selectionState.anchorOffset - currentBlock.getText().length;
                         const newFocusOffset = newAnchorOffset + (newline.selectionState.focusOffset - newline.selectionState.anchorOffset)
-                        const newSelectionState = new SelectionState({
-                            anchorKey: newBlock.getKey(),
+
+                        const newSelectionState = SelectionState.createEmpty(newBlockKey).merge({
                             anchorOffset: newAnchorOffset,
-                            focusKey: newBlock.getKey(),
                             focusOffset: newFocusOffset
                         });
+
                         // update residual newLinesTag blockKey and selectionState
-                        newline.blockKey = newBlock.getKey();
+                        newline.blockKey = newBlockKey;
                         newline.selectionState = newSelectionState;
                     }
                 })
