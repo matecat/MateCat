@@ -508,7 +508,7 @@ class SegmentSource extends React.Component {
     isSplitPoint = (contentState, selection) => {
         const anchorKey = selection.getAnchorKey();
         const anchorBlock = contentState.getBlockForKey(anchorKey);
-        const anchorOffset =  selection.getAnchorOffset();
+        const anchorOffset =  selection.getAnchorOffset() + 1;
         const anchorEntityKey = anchorBlock.getEntityAt(anchorOffset);
         const entityInstance = contentState.getEntity(anchorEntityKey);
         const entityData = entityInstance.getData();
