@@ -429,7 +429,7 @@ class Editarea extends React.Component {
 
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
-        if((e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
+        if((e.keyCode === 84 || e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({triggerText: null});
             return 'toggle-tag-menu';
         }else if(e.key === '<' && !hasCommandModifier(e)) {
@@ -459,16 +459,22 @@ class Editarea extends React.Component {
             isOptionKeyCommand(e)){
             return 'insert-nbsp-tag'; // MacOS
         }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
+            console.log('ArrowLeft')
             if (e.shiftKey) {
-                return 'left-nav-shift';
+                const newSel = this.handleCursorMovement(-1, true, config.isTargetRTL);
+                if(newSel) return 'left-nav-shift';
             } else {
-                return 'left-nav';
+                const newSel = this.handleCursorMovement(-1, false, config.isTargetRTL);
+                if(newSel) return 'left-nav';
             }
         } else if (e.key === 'ArrowRight' && !hasCommandModifier(e) && !e.altKey) {
+            console.log('ArrowRight')
             if (e.shiftKey) {
-                return 'right-nav-shift';
+                const newSel = this.handleCursorMovement(1, true, config.isTargetRTL);
+                if(newSel) return 'right-nav-shift';
             } else {
-                return 'right-nav';
+                const newSel = this.handleCursorMovement(1, false, config.isTargetRTL);
+                if(newSel) return 'right-nav';
             }
         }
         return getDefaultKeyBinding(e);
@@ -482,7 +488,7 @@ class Editarea extends React.Component {
             moveDownTagMenuSelection,
             moveUpTagMenuSelection,
             acceptTagMenuSelection,
-            handleCursorMovement
+            insertTagAtSelection
         } = this;
         const {segment: {sourceTagMap, missingTagsInTarget}} = this.props;
 
@@ -509,22 +515,18 @@ class Editarea extends React.Component {
                 acceptTagMenuSelection();
                 return 'handled';
             case 'left-nav':
-                handleCursorMovement(-1, false, config.isTargetRTL);
                 return 'handled';
             case 'left-nav-shift':
-                handleCursorMovement(-1, true, config.isTargetRTL);
                 return 'handled';
             case 'right-nav':
-                handleCursorMovement(1, false, config.isTargetRTL);
                 return 'handled';
             case 'right-nav-shift':
-                handleCursorMovement(1, true, config.isTargetRTL);
                 return 'handled';
             case 'insert-tab-tag':
-                this.insertTagAtSelection('tab');
+                insertTagAtSelection('tab');
                 return 'handled';
             case 'insert-nbsp-tag':
-                this.insertTagAtSelection('nbsp');
+                insertTagAtSelection('nbsp');
                 return 'handled';
             case 'add-issue':
                 return 'handled';
@@ -559,10 +561,12 @@ class Editarea extends React.Component {
     handleCursorMovement = (step, shift = false, isRTL = false) =>{
         const {editorState} = this.state;
         step = isRTL ? step * -1 : step;
-        const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift);
-        this.setState({
-            editorState: newEditorState
-        })
+        const newState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift, isRTL);
+        if(newState) {
+            this.setState({editorState: newState});
+            return true;
+        }
+        return false;
     }
 
     onMouseUpEvent = () => {
@@ -638,6 +642,8 @@ class Editarea extends React.Component {
     }
 
     onChange = (editorState) =>  {
+
+
         //console.log('onChange')
         const {displayPopover, editorState: prevEditorState, activeDecorators} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
@@ -659,7 +665,7 @@ class Editarea extends React.Component {
             if(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]){
                 editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
             }
-            editorState = this.forceSelectionFocus(editorState);
+            editorState = EditorState.acceptSelection(editorState, editorState.getSelection().set('hasFocus', true));
             this.setState(prevState => ({
                 activeDecorators: {
                     ...prevState.activeDecorators,
@@ -975,8 +981,8 @@ class Editarea extends React.Component {
             // Selection
             const selectionState = this.editor._latestEditorState.getSelection();
             let newSelection = selectionState.merge({
-                anchorOffset: start,
-                focusOffset: end,
+                anchorOffset: start -1, // -1 is to catch the zero-width space char placed before every entity
+                focusOffset: end +1, // +1 is to catch the zero-width space char placed after every entity
             });
             const newEditorState = EditorState.forceSelection(
                 editorState,
@@ -1088,6 +1094,7 @@ function getEntityStrategy(mutability, callback) {
         );
     };
 }
+
 
 
 
