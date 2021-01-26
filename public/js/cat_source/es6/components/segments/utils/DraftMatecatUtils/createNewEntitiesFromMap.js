@@ -31,8 +31,8 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
             const start = tagEntity.offset - slicedLength;
             const end  = start + encodedText.length;
             offsetWithEntities.push({start, tag: tagEntity})
-            plainText = plainText.slice(0,start) + placeholder + plainText.slice(end);
-            slicedLength +=  (end - start) - placeholder.length;
+            plainText = plainText.slice(0,start) + '​' +  placeholder + '​' + plainText.slice(end) //String.fromCharCode(parseInt('200B',16))
+            slicedLength +=  (end - start) - (placeholder.length +2);// add 2 ZWSP
         }
     })
 
@@ -70,9 +70,9 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
         offsetWithEntities.forEach( tagEntity =>{
             const {start, tag} = tagEntity;
 
-            if (start < maxCharsInBlocks &&
-                (start + tag.data.placeholder.length) <= maxCharsInBlocks &&
-                start >= (maxCharsInBlocks - contentBlock.getLength()) &&
+            if ((start+1) < maxCharsInBlocks &&
+                ((start+1) + tag.data.placeholder.length) <= maxCharsInBlocks &&
+                (start+1) >= (maxCharsInBlocks - contentBlock.getLength()) &&
                 !excludedTagsType.includes(tag.data.name)
             ){
                 // Clone tag
@@ -81,8 +81,8 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
                 // Each block start with offset = 0 so we have to adapt selection
                 let selectionState = SelectionState.createEmpty(contentBlock.getKey())
                 selectionState = selectionState.merge({
-                    anchorOffset: (start - (maxCharsInBlocks - blockLength)),
-                    focusOffset: ((start + tag.data.placeholder.length) - (maxCharsInBlocks - blockLength))
+                    anchorOffset: (start +1 - (maxCharsInBlocks - blockLength)),
+                    focusOffset: ((start +1 + tag.data.placeholder.length) - (maxCharsInBlocks - blockLength))
                 });
                 // Create entity
                 const {type, mutability, data} = tagEntity;
