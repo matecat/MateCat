@@ -51,10 +51,6 @@ class ApiKeyController extends KleinController {
         return new ApiKeys_ApiKeyStruct( $values );
     }
 
-    public function confirm() {
-        // set enabled to true ????
-    }
-
     public function show() {
 
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
@@ -67,10 +63,10 @@ class ApiKeyController extends KleinController {
                     ]
             ] );
             exit();
-            
-            
-            
         }
+
+        // hide api secret
+        $apiKey->api_secret = '***********';
         
         $this->response->status()->setCode( 200 );
         $this->response->json( $apiKey );
@@ -91,7 +87,7 @@ class ApiKeyController extends KleinController {
         }
 
         try {
-            $apiKeyDao->delete( $apiKeyDao->getByUid( $this->getUser()->uid ) );
+            $apiKeyDao->deleteByUid( $this->getUser()->uid );
 
             $this->response->status()->setCode( 200 );
             $this->response->json( [

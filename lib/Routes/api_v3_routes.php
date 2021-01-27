@@ -7,10 +7,9 @@
  */
 
 $klein->with( '/api/v3/api-key', function () {
-    route( '/generate', 'POST', '\API\V3\ApiKeyController', 'generate' );
-    route( '/confirm', 'PUT', '\API\V3\ApiKeyController', 'confirm' );
+    route( '/generate', 'GET', '\API\V3\ApiKeyController', 'generate' );
     route( '/show', 'GET', '\API\V3\ApiKeyController', 'show' );
-    route( '/delete', 'DELETE', '\API\V3\ApiKeyController', 'delete' );
+    route( '/delete', 'GET', '\API\V3\ApiKeyController', 'delete' );
 } );
 
 $klein->with( '/api/v3/projects', function () {

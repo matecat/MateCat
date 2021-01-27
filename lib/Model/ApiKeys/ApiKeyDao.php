@@ -70,6 +70,13 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
     }
 
     public function deleteByUid($uid) {
-        return $this->delete($this->getByUid($uid));
+
+        $apiKey = $this->getByUid($uid);
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "DELETE FROM api_keys WHERE id = :id " );
+        $stmt->execute( [ 'id' => $apiKey->id ] );
+
+        return $stmt->rowCount();
     }
 }
