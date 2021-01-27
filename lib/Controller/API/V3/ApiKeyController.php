@@ -14,6 +14,11 @@ class ApiKeyController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * generate an api key for a logged user
+     *
+     * @throws \Exception
+     */
     public function generate() {
         
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
@@ -51,6 +56,10 @@ class ApiKeyController extends KleinController {
         return new ApiKeys_ApiKeyStruct( $values );
     }
 
+    /**
+     * show api key
+     * api_secret is hidden
+     */
     public function show() {
 
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
@@ -65,13 +74,16 @@ class ApiKeyController extends KleinController {
             exit();
         }
 
-        // hide api secret
+        // hide api_secret
         $apiKey->api_secret = '***********';
         
         $this->response->status()->setCode( 200 );
         $this->response->json( $apiKey );
     }
 
+    /**
+     * delete an api key
+     */
     public function delete() {
 
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
