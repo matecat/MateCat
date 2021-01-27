@@ -458,7 +458,7 @@ class Editarea extends React.Component {
             e.altKey &&
             isOptionKeyCommand(e)){
             return 'insert-nbsp-tag'; // MacOS
-        }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
+        }else if (e.key === 'ArrowLeft'  && !e.altKey) {
             console.log('ArrowLeft')
             if (e.shiftKey) {
                 const newSel = this.handleCursorMovement(-1, true, config.isTargetRTL);
@@ -467,7 +467,7 @@ class Editarea extends React.Component {
                 const newSel = this.handleCursorMovement(-1, false, config.isTargetRTL);
                 if(newSel) return 'left-nav';
             }
-        } else if (e.key === 'ArrowRight' && !hasCommandModifier(e) && !e.altKey) {
+        } else if (e.key === 'ArrowRight'  && !e.altKey) {
             console.log('ArrowRight')
             if (e.shiftKey) {
                 const newSel = this.handleCursorMovement(1, true, config.isTargetRTL);
