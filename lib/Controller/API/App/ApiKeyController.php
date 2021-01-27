@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V3;
+namespace API\App;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
@@ -10,16 +10,15 @@ use Utils;
 class ApiKeyController extends KleinController {
 
     protected function afterConstruct() {
-        parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**
-     * generate an api key for a logged user
+     * create an api key for a logged user
      *
      * @throws \Exception
      */
-    public function generate() {
+    public function create() {
         
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
 
@@ -46,19 +45,18 @@ class ApiKeyController extends KleinController {
      * @return ApiKeys_ApiKeyStruct
      */
     private function createApiKeyStruct() {
-        $values = [
+
+        return new ApiKeys_ApiKeyStruct( [
                 'uid'        => $this->getUser()->uid,
                 'api_key'    => Utils::randomString( 20, true ),
                 'api_secret' => Utils::randomString( 20, true ),
                 'enabled'    => true
-        ];
-
-        return new ApiKeys_ApiKeyStruct( $values );
+        ] );
     }
 
     /**
-     * show api key
-     * api_secret is hidden
+     * show api key for a logged user
+     * api_secret is always hidden
      */
     public function show() {
 
@@ -82,7 +80,7 @@ class ApiKeyController extends KleinController {
     }
 
     /**
-     * delete an api key
+     * delete an api key for a logged user
      */
     public function delete() {
 
