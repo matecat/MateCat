@@ -374,6 +374,22 @@ class QA {
     ];
 
     /**
+     * This map excludes these characters from consistency check
+     * (only if they are present as xliff 2.0 metadata tag in the source)
+     *
+     * @var array
+     */
+    protected $tagsToBeExcludedFromChecks = [
+            '{s}',
+            '&amp;apos;',
+            '&apos;',
+            '&amp;#39;',
+            '&#39;',
+            '&amp;amp;',
+            '&amp;',
+    ];
+
+    /**
      * <code>
      * $errorMap = [
      *      'code'  => (int),
@@ -1192,51 +1208,57 @@ class QA {
 
                 $elementID = $element->getAttribute( 'id' );
 
-                $plainRef = [
-                        'type'      => 'DOMElement',
-                        'name'      => $element->tagName,
-                        'id'        => $elementID,
-                        'parent_id' => $parentID,
-                        'node_idx'  => $i,
-                        'innerHTML' => $element->ownerDocument->saveXML( $element )
-                ];
+                if($this->_addThisElementToDomMap($element)){
+                    $plainRef = [
+                            'type'       => 'DOMElement',
+                            'name'       => $element->tagName,
+                            'id'         => $elementID,
+                            'parent_id'  => $parentID,
+                            'node_idx'   => $i,
+                            'innerHTML'  => $element->ownerDocument->saveXML( $element ),
+                    ];
 
-                //set depth and increment for next occurrence
-                $srcDomElements[ 'DOMElement' ][] = $plainRef;
+                    //set depth and increment for next occurrence
+                    $srcDomElements[ 'DOMElement' ][] = $plainRef;
 
-                //count occurrences of this tag name when needed, also transport id reference.
-                @$srcDomElements[ $element->tagName ][] = $elementID;
+                    //count occurrences of this tag name when needed, also transport id reference.
+                    @$srcDomElements[ $element->tagName ][] = $elementID;
 
-                // reverse Lookup, from id to tag name
-                //
-                // Note 2020-01-21
-                // -------------------------------------------------
-                //
-                // If the element is a PH, we extract the decoded content and us it as key for refID map.
-                //
-                // In this way, _checkTagMismatch() method is capable to recognize PH content differences.
-                //
-                // Example:
-                //
-                // SOURCE                                                              | TARGET
-                // --------------------------------------------------------------------+------------------------------------------------
-                // Your average weekly price with a (mtc_1)%1$sdiscount is (mtc_2)%2$s | (mtc_1)%{time_left}您的平均每週優惠價為(mtc_2)%2$s
-                //
-                // Source and target PH content does not match, _checkTagMismatch() will throw an error.
-                //
-                if ( $element->tagName === 'ph' ) {
-                    $innerHTML = $plainRef[ 'innerHTML' ];
-                    $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
-                    preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
-                    $html = base64_decode( $html[ 0 ][ 1 ] );
+                    // reverse Lookup, from id to tag name
+                    //
+                    // Note 2020-01-21
+                    // -------------------------------------------------
+                    //
+                    // If the element is a PH, we extract the decoded content and us it as key for refID map.
+                    //
+                    // In this way, _checkTagMismatch() method is capable to recognize PH content differences.
+                    //
+                    // Example:
+                    //
+                    // SOURCE                                                              | TARGET
+                    // --------------------------------------------------------------------+------------------------------------------------
+                    // Your average weekly price with a (mtc_1)%1$sdiscount is (mtc_2)%2$s | (mtc_1)%{time_left}您的平均每週優惠價為(mtc_2)%2$s
+                    //
+                    // Source and target PH content does not match, _checkTagMismatch() will throw an error.
+                    //
+                    if ( $element->tagName === 'ph' ) {
+                        $innerHTML = $plainRef[ 'innerHTML' ];
+                        $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
+                        preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
 
-                    @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
-                } else {
-                    @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
-                }
+                        if(isset($html[ 0 ][ 1 ])){
+                            $html = base64_decode( $html[ 0 ][ 1 ] );
+                            @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
+                        } else {
+                            @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                        }
+                    } else {
+                        @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                    }
 
-                if ( $element->hasChildNodes() ) {
-                    $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
+                    if ( $element->hasChildNodes() ) {
+                        $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
+                    }
                 }
 
             } else {
@@ -1258,7 +1280,39 @@ class QA {
             $srcDomElements[ 'elemCount' ]++;
 
         }
-        //Log::doJsonLog($srcDomElements);
+    }
+
+    /**
+     * This function determines if an element should be added to DOM map used for consistency check.
+     *
+     * It does not add not allowed characters present in source as xliff 2.0 metadata tags.
+     *
+     * For example, consider this tag:
+     *
+     * <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O3AgY2xhc3M9JnF1b3Q7Y21sbl9fcGFyYWdyYXBoJnF1b3Q7Jmd0Ow=="/>
+     *
+     * This function extracts content from equiv-text and checks if it's an allowed value or not.
+     *
+     * @param DOMElement $element
+     *
+     * @return bool
+     */
+    protected function _addThisElementToDomMap( DOMElement $element) {
+
+        $elementHasDataRef = false;
+        $elementValue = null;
+
+        foreach ($element->attributes as $attribute){
+            if ($attribute->name === 'equiv-text'){
+                $elementValue = base64_decode( str_replace('base64:','', $attribute->value) );
+            }
+
+            if($attribute->name === 'dataRef'){
+                $elementHasDataRef = true;
+            }
+        }
+
+        return !(in_array($elementValue, $this->tagsToBeExcludedFromChecks) and $elementHasDataRef);
     }
 
     /**

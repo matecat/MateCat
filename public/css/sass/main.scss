@@ -7,7 +7,6 @@
 @import 'common-main';
 @import 'style';
 @import 'mbc-style';
-@import 'lxq-style';
 @import 'lexiqa';
 @import 'segment-notes';
 @import 'project-completion-feature';
@@ -19,6 +18,10 @@
 @import "components/segment/segmentFooter";
 @import "components/segment/issuesContainer";
 @import "components/segment/tagsMenu";
+@import "components/segment/Tag";
+@import "components/segment/TooltipInfo";
+@import "components/segment/Glossary";
+@import "components/segment/Editor";
 @import "components/bulk-approve-bar/bulk_approve_bar";
 @import "components/header/search";
 @import "components/header/qaComponent";
@@ -27,8 +30,5 @@
 @import 'cattool';
 
 @import 'speech2text';
-
-@import 'qa_check_glossary';
-@import 'qa_check_blacklist';
 
 @import 'commons/tooltip';

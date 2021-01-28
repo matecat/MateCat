@@ -79,6 +79,8 @@
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
                 isCJK: ${isCJK},
+                isTargetRTL: ${isTargetRTL},
+                isSourceRTL: ${isSourceRTL},
                 /**
                  * We proose that lxq_server is in a configuration file
                  * lxq_license: {lxq_license},
@@ -96,7 +98,6 @@
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 support_mail : '${support_mail}',
-                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 speech2text_enabled: ${speech2text_enabled | string:false},
                 tag_projection_enabled: ${tag_projection_enabled | string:false},
                 tag_projection_languages: ${tag_projection_languages},

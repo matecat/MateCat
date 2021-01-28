@@ -36,16 +36,15 @@ if ( ReviewSimple.enabled() ) {
 
             trackChanges: function () {
                 var currentSegmentId = SegmentStore.getCurrentSegment();
+                var segment = SegmentStore.getSegmentByIdToJS(currentSegmentId);
                 var $segment = UI.getSegmentById(currentSegmentId).closest('section');
-                var source = EditAreaUtils.postProcessEditarea($segment, '.original-translation');
-                source = TextUtils.clenaupTextFromPleaceholders( source );
+                var source = segment.original_translation;
                 //Fix for &amp in original-translation
                 source = source.replace(/&amp;/g, "&");
 
-                var target = EditAreaUtils.postProcessEditarea($segment, '.targetarea');
-                target = TextUtils.clenaupTextFromPleaceholders( target );
+                var target = segment.translation;
                 var diffHTML = TextUtils.trackChangesHTML( TextUtils.htmlEncode(source), TextUtils.htmlEncode(target) );
-                diffHTML = TagUtils.transformTextForLockTags(diffHTML);
+                diffHTML = TagUtils.decodeHtmlInTag(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
             setRevision: function ( data ) {
@@ -70,11 +69,11 @@ if ( ReviewSimple.enabled() ) {
             addOriginalTranslation: function ( d, id_segment ) {
                 var segment = SegmentStore.getSegmentByIdToJS(id_segment);
                 var originalTrans = (d.original) ? d.original : segment.translation;
-                if ( originalTrans && originalTrans !== '' ) {
-                    setTimeout( function () {
-                        SegmentActions.addOriginalTranslation( id_segment, null, originalTrans );
-                    } );
-                }
+                // if ( originalTrans && originalTrans !== '' ) {
+                //     setTimeout( function () {
+                //         SegmentActions.addOriginalTranslation( id_segment, null, originalTrans );
+                //     } );
+                // }
                 UI.setReviewErrorData( d.error_data, $( '#segment-' + id_segment ) );
                 setTimeout( function () {
                     UI.trackChanges( xEditarea );

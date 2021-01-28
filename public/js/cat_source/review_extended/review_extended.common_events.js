@@ -4,14 +4,13 @@
 
 if (ReviewExtended.enabled()) {
     $(document).on('files:appended', function () {
-        // SegmentActions.mountTranslationIssues();
         ReviewExtended.getSegmentsIssues();
     });
 
     $( window ).on( 'segmentOpened', function ( e, data ) {
         var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) === 'true';
-        if (config.isReview && !panelClosed) {
-            SegmentActions.openIssuesPanel({sid: data.segmentId}, false)
+        if (config.isReview && !panelClosed ) {
+            setTimeout(()=>SegmentActions.openIssuesPanel({sid: data.segmentId}, false));
         }
         UI.getSegmentVersionsIssuesHandler(data.segmentId);
     } );

@@ -7,14 +7,22 @@
 
         startSegmentTagProjection: function (sid) {
             UI.getSegmentTagsProjection(sid).done(function(response) {
-                if (response.errors && !!(response.errors.length || response.errors.code) ) {
+                if (response.errors && (response.errors.length > 0 || !_.isUndefined(response.errors.code)) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     SegmentActions.disableTPOnSegment();
+                    // Set as Tagged and restore source with taggedText
+                    SegmentActions.setSegmentAsTagged(sid);
+                    // Add missing tag at the end of the string
                     SegmentActions.autoFillTagsInTarget(sid);
                 } else {
+                    // Set as Tagged and restore source with taggedText
                     SegmentActions.setSegmentAsTagged(sid);
-                    SegmentActions.copyTagProjectionInCurrentSegment(sid, response.data.translation);
-                    SegmentActions.autoFillTagsInTarget(sid);
+                    // Unescape HTML
+                    let unescapedTranslation = DraftMatecatUtils.unescapeHTMLLeaveTags(response.data.translation);
+                    // Update target area
+                    SegmentActions.copyTagProjectionInCurrentSegment(sid, unescapedTranslation);
+                    // TODO: Autofill target based on Source Map, rewrite
+                    //SegmentActions.autoFillTagsInTarget(sid);
                 }
 
             }).fail(function () {
@@ -22,7 +30,6 @@
                 SegmentActions.autoFillTagsInTarget(sid);
                 OfflineUtils.startOfflineMode();
             }).always(function () {
-                SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
                 UI.registerQACheck();
             });
         },
@@ -31,19 +38,19 @@
          * @returns translation with the Tag prjection
          */
         getSegmentTagsProjection: function (sid) {
-            var source = UI.currentSegment.find('.source').data('original');
+            var segmentObj = SegmentStore.getSegmentByIdToJS(sid);
+            var source = segmentObj.segment;
             source = TextUtils.htmlDecode(source).replace(/&quot;/g, '\"');
-            source = TextUtils.htmlDecode(source);
+            // source = TextUtils.htmlDecode(source);
             //Retrieve the chosen suggestion if exist
             var suggestion;
-            var currentContribution = SegmentStore.getSegmentChoosenContribution(UI.currentSegmentId);
+            var currentContribution = SegmentStore.getSegmentChoosenContribution(sid);
             // Send the suggestion to Tag Projection only if is > 89% and is not MT
             if (!_.isUndefined(currentContribution) && currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
                 suggestion = currentContribution.translation;
             }
 
-            //Before send process with this.postProcessEditarea
-            var target = EditAreaUtils.postProcessEditarea(UI.currentSegment, ".editarea");
+            var target = segmentObj.translation;
             return APP.doRequest({
                 data: {
                     action: 'getTagProjection',
@@ -72,16 +79,17 @@
             var data = {
                 'tag_projection': true
             };
+            SegmentActions.changeTagProjectionStatus(true);
             $.ajax({
                 url: path,
                 type: 'POST',
                 data : data,
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
-                UI.render({
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
-                });
-                UI.checkWarnings(false);
+                // UI.render({
+                //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                // });
+                // UI.checkWarnings(false);
             });
 
         },
@@ -97,16 +105,17 @@
             var data = {
                 'tag_projection': false
             };
+            SegmentActions.changeTagProjectionStatus(false);
             $.ajax({
                 url: path,
                 type: 'POST',
                 data : data,
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
-                UI.render({
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
-                });
-                UI.checkWarnings(false);
+                // UI.render({
+                //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                // });
+                // UI.checkWarnings(false);
             });
 
         },
@@ -332,4 +341,4 @@
             }
         }
     });
-})(jQuery); 
+})(jQuery);

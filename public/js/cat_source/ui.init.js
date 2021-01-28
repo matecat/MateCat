@@ -91,13 +91,12 @@ $.extend(UI, {
             if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
                 SegmentFilter.openFilter();
             }
-            UI.checkWarnings(true);
+            setTimeout(function () {UI.checkWarnings(true)}, 1000);
         });
 
         $('html').trigger('start');
 
         if (LXQ.enabled()) {
-            $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();
@@ -121,7 +120,6 @@ $.extend(UI, {
 
         Customizations.loadCustomization();
         $('html').trigger('init');
-		rangy.init();
 		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
 		this.warningStopped = false;

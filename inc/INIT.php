@@ -317,6 +317,7 @@ class INIT {
     public static $SPELL_CHECK_ENABLED        = false;
     public static $SUPPORTED_FILE_TYPES       = [
             'Office'              => [
+                    'pages'  => [ '', '', 'extdoc' ],
                     'doc'  => [ '', '', 'extdoc' ],
                     'dot'  => [ '', '', 'extdoc' ],
                     'docx' => [ '', '', 'extdoc' ],
@@ -327,6 +328,7 @@ class INIT {
                     'odt'  => [ '', '', 'extdoc' ],
                     'ott'  => [ '', '', 'extdoc' ],
                     'pdf'  => [ '', '', 'extpdf' ],
+                    'numbers' => [ '', '', 'extxls' ],
                     'txt'  => [ '', '', 'exttxt' ],
                     'xls'  => [ '', '', 'extxls' ],
                     'xlt'  => [ '', '', 'extxls' ],
@@ -338,6 +340,7 @@ class INIT {
                     'ots'  => [ '', '', 'extxls' ],
                 //'csv'  => array( '', '', 'extxls' ),
                     'tsv'  => [ '', '', 'extxls' ],
+                    'key'  => [ '', '', 'extppt' ],
                     'ppt'  => [ '', '', 'extppt' ],
                     'pps'  => [ '', '', 'extppt' ],
                     'pot'  => [ '', '', 'extppt' ],
@@ -371,7 +374,7 @@ class INIT {
                     'gif'  => [ '', '', 'extimg' ],
                     'jpeg' => [ '', '', 'extimg' ],
                     'jpg'  => [ '', '', 'extimg' ],
-                    'jfif'  => [ '', '', 'extimg' ],
+                    'jfif' => [ '', '', 'extimg' ],
                     'tiff' => [ '', '', 'extimg' ]
             ],
             "Interchange Formats" => [
@@ -397,8 +400,8 @@ class INIT {
                     'dita'        => [ '', '', 'extdit' ],
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
-                    'srt'         => [ '', '', 'extsrt' ],
                     'sbv'         => [ '', '', 'extsbv' ],
+                    'srt'         => [ '', '', 'extsrt' ],
                     'vtt'         => [ '', '', 'extvtt' ],
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
