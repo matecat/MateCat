@@ -16,6 +16,7 @@ use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Files\FilesInfoUtility;
 use INIT;
 use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
@@ -78,6 +79,7 @@ class QualityReportController extends KleinController {
         $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
         $options        = [ 'filter' => $filter ];
         $segments_ids   = $qrSegmentModel->getSegmentsIdForQR( $step, $ref_segment, $where, $options );
+
         if ( count( $segments_ids ) > 0 ) {
 
             $segmentTranslationEventDao = new SegmentTranslationEventDao();
@@ -97,6 +99,82 @@ class QualityReportController extends KleinController {
 
     }
 
+    public function segmentsNew() {
+
+        $this->project = $this->chunk->getProject();
+
+        $ref_segment = $this->request->param( 'ref_segment' );
+        $where       = $this->request->param( 'where' );
+        $step        = $this->request->param( 'step' );
+        $filter      = $this->request->param( 'filter' );
+
+        if ( empty( $ref_segment ) ) {
+            $ref_segment = 0;
+        }
+
+        if ( empty( $where ) ) {
+            $where = "after";
+        }
+
+        if ( empty( $step ) ) {
+            $step = 20;
+        }
+
+        $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
+        $options        = [ 'filter' => $filter ];
+        $segments_ids   = $qrSegmentModel->getSegmentsIdForQR( $step, $ref_segment, $where, $options );
+
+        if ( count( $segments_ids ) > 0 ) {
+
+            $segmentTranslationEventDao = new SegmentTranslationEventDao();
+            $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
+            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
+
+            $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+            $filesInfo = $filesInfoUtility->getInfo();
+
+            $segments = $this->_formatSegments( $segments, $ttlArray );
+
+            $this->response->json( [
+                    'files'  => $this->mergeFileInfoWithSegments($filesInfo, $segments),
+                    'first_segment' => $filesInfo['first_segment'],
+                    'last_segment' => $filesInfo['last_segment'],
+                    '_links' => $this->_getPaginationLinks( $segments_ids, $step, $filter )
+            ] );
+
+        } else {
+            $this->response->json( [ 'files' => [] ] );
+        }
+
+    }
+
+    /**
+     * @param $filesInfo
+     * @param $segments
+     *
+     * @return array
+     */
+    private function mergeFileInfoWithSegments($filesInfo, $segments) {
+
+        $merged = [];
+
+        foreach ($filesInfo['files'] as $fileInfo){
+            $merged[] = array_merge(
+                    $fileInfo,
+                    ['segments' => $segments[$fileInfo['id']]['segments']]
+            );
+        }
+
+        return $merged;
+    }
+
+    /**
+     * @param array      $segments_id
+     * @param            $step
+     * @param array|null $filter
+     *
+     * @return array
+     */
     protected function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
 
         $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
@@ -129,6 +207,23 @@ class QualityReportController extends KleinController {
      */
     protected function _formatSegments( $files, array $ttlArray ) {
         $outputArray = [];
+
+//
+//        {
+//            "files": [
+//     {
+//         "id": "5561056",
+//        "first_segment": "1758812487",
+//        "last_segment": "1758812547",
+//        "file_name": "MateCat - migrazioni database con phinx.docx",
+//        "raw_words": "806.00",
+//        "weighted_words": "586.60",
+//        "metadata": []
+//      }
+//    ],
+//    "first_segment": "1758812487",
+//    "last_segment": "1758812547"
+//}
 
         foreach ( $files as $k0 => $file ) {
 

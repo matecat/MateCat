@@ -11,12 +11,9 @@ namespace API\V3;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V3\Json\FilesInfo;
 use Chunks_ChunkStruct;
-use Jobs_JobDao;
+use Files\FilesInfoUtility;
 use Projects_ProjectStruct;
-use Files\MetadataDao as Files_MetadataDao;
-use Files_FileDao;
 
 
 class FileInfoController extends KleinController {
@@ -51,55 +48,36 @@ class FileInfoController extends KleinController {
     }
 
     public function getInfo() {
-
-        /**
-         * get info for every file
-         */
-        $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
-        $metadataDao = new Files_MetadataDao;
-        foreach($fileInfo as &$file){
-            $metadata = [];
-            foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file ) as $metadatum ) {
-                $metadata[ $metadatum->key ] = $metadatum->value;
-            }
-
-            $file->metadata = $metadata;
-        }
-
-        $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );
-
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+        $this->response->json( $filesInfoUtility->getInfo() );
     }
 
+    /**
+     * @throws NotFoundException
+     */
     public function getInstructions() {
-        $id_file = $this->request->param( 'id_file' );
-        if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
-            $metadataDao = new Files_MetadataDao;
-            $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions' );
-            if($instructions){
-                $this->response->json(['instructions' => $instructions->value]);
-            } else {
-                throw new NotFoundException('No instructions for this file');
-            }
-        } else {
-            throw new NotFoundException('File not found on this project');
+
+        $id_file          = $this->request->param( 'id_file' );
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+        $instructions     = $filesInfoUtility->getInstructions( $id_file );
+
+        if ( !$instructions ) {
+            throw new NotFoundException( 'No instructions for this file' );
         }
+
+        $this->response->json( $instructions );
     }
 
     public function setInstructions() {
 
-        $id_file = $this->request->param( 'id_file' );
-        $instructions = $this->request->param( 'instructions' );
-        if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
-            $metadataDao = new Files_MetadataDao;
-            if($metadataDao->get( $this->project->id, $id_file, 'instructions' )){
-                $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
-            } else {
-                $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );
-            }
-            $this->response->json(true);
+        $id_file          = $this->request->param( 'id_file' );
+        $instructions     = $this->request->param( 'instructions' );
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+
+        if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
+            $this->response->json( true );
         } else {
-            throw new NotFoundException('File not found on this project');
+            throw new NotFoundException( 'File not found on this project' );
         }
     }
-
 }
