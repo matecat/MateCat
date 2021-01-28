@@ -215,8 +215,6 @@ class QualityReport extends React.Component {
 
 export default QualityReport;
 
-ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
-
 let headerMountPoint = $('header')[0];
 
 if (config.isLoggedIn) {
@@ -231,6 +229,7 @@ if (config.isLoggedIn) {
             }),
             headerMountPoint
         );
+        ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
     });
 } else {
     ReactDOM.render(
@@ -243,4 +242,7 @@ if (config.isLoggedIn) {
         }),
         headerMountPoint
     );
+    ReactDom.render(React.createElement(QualityReport), document.getElementById('qr-root'));
 }
+
+

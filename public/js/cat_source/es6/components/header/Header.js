@@ -5,9 +5,10 @@ import TeamConstants from "../../constants/TeamConstants";
 import CatToolConstants from "../../constants/CatToolConstants";
 import TeamsStore from "../../stores/TeamsStore";
 import CatToolStore from "../../stores/CatToolStore";
-import IconManage from "../icons/IconManage";
 import IconUserLogout from "../icons/IconUserLogout";
 import ActionMenu from "./ActionMenu";
+import QRStore from "../../stores/QualityReportStore";
+import QRConstants from "../../constants/QualityReportConstants";
 
 class Header extends React.Component {
     constructor(props) {
@@ -16,7 +17,8 @@ class Header extends React.Component {
             teams: [],
             selectedTeamId: null,
             user: this.props.user,
-            loggedUser: this.props.loggedUser
+            loggedUser: this.props.loggedUser,
+			jobUrls: undefined
         };
         this.renderTeams = this.renderTeams.bind(this);
         this.updateTeams = this.updateTeams.bind(this);
@@ -32,6 +34,9 @@ class Header extends React.Component {
 		TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser);
 		CatToolStore.addListener(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP , this.initMyProjectsPopup);
+		if ( this.props.isQualityReport ) {
+			QRStore.addListener(QRConstants.RENDER_REPORT, this.storeJobUrls);
+		}
 		this.initProfileDropdown();
 	}
 
@@ -41,6 +46,9 @@ class Header extends React.Component {
 		TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
 		TeamsStore.removeListener(TeamConstants.UPDATE_USER, this.updateUser);
 		CatToolStore.removeListener(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP , this.initMyProjectsPopup);
+		if ( this.props.isQualityReport ) {
+			QRStore.removeListener(QRConstants.RENDER_REPORT, this.storeJobUrls);
+		}
 	}
 
 	componentDidUpdate() {
@@ -191,10 +199,16 @@ class Header extends React.Component {
         return null;
     }
 
+	storeJobUrls = (jobInfo) => {
+		this.setState({
+			jobUrls: jobInfo.get('urls')
+		})
+	}
+
 	render = () => {
 		const {getHeaderComponentToShow, getUserIcon} = this;
 		const {showLinks, showJobInfo, showFilterProjects, showModals, showTeams, changeTeam, isQualityReport} = this.props;
-		const {teams,selectedTeamId, loggedUser} = this.state;
+		const {teams,selectedTeamId, loggedUser, jobUrls} = this.state;
 
 		const userIcon = getUserIcon();
 		let containerClass = "user-teams four";
@@ -240,13 +254,7 @@ class Header extends React.Component {
 							teams={teams}
 							selectedTeamId={selectedTeamId}
 						/>}
-						{!!isQualityReport && <ActionMenu />}
-						{/*<div className={"separator"}></div>*/}
-						{/*{!!loggedUser && !showFilterProjects && <div title="Manage" id="action-manage">*/}
-						{/*											<a className={"action-submenu"} href={'/manage'}>*/}
-						{/*												<IconManage width={'36'} height={'36'} style={{float:'right'}} />*/}
-						{/*											</a>*/}
-						{/*										</div>}*/}
+						{!!isQualityReport && jobUrls && <ActionMenu jobUrls={this.state.jobUrls.toJS()}/>}
 						{userIcon}
 					</div>
 

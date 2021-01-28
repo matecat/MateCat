@@ -88,6 +88,9 @@ class setTranslationController extends ajaxController {
                 'password'                => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
+                'current_password'                => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
                 'propagate'               => [
                         'filter' => FILTER_VALIDATE_BOOLEAN, 'flags' => FILTER_NULL_ON_FAILURE
                 ],
@@ -116,9 +119,10 @@ class setTranslationController extends ajaxController {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job         = $this->__postInput[ 'id_job' ];
-        $this->password       = $this->__postInput[ 'password' ];
-        $this->revisionNumber = $this->__postInput[ 'revision_number' ];
+        $this->id_job             = $this->__postInput[ 'id_job' ];
+        $this->password           = $this->__postInput[ 'password' ];
+        $this->received_password  = $this->__postInput[ 'current_password' ];
+        $this->revisionNumber     = $this->__postInput[ 'revision_number' ];
 
         /*
          * set by the client, mandatory

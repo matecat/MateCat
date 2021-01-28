@@ -232,9 +232,9 @@ class SubFilteringTest extends AbstractTest {
 
     }
 
-    public function test_3_HandlingNBSP(){
+    public function test_3_HandlingNBSP() {
 
-        $segment = $expectedL1 = '5 tips for creating a great   guide';
+        $segment       = $expectedL1 = '5 tips for creating a great   guide';
         $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . CatUtils::nbspPlaceholder . ' guide';
 
         $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
@@ -368,6 +368,40 @@ class SubFilteringTest extends AbstractTest {
 
         $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
 
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testSPlaceholderWithDataRef() {
+        $data_ref_map = [
+                'source3' => '&lt;/a&gt;',
+                'source4' => '&lt;br&gt;',
+                'source5' => '&lt;br&gt;',
+                'source1' => '&lt;br&gt;',
+                'source2' => '&lt;a href=%s&gt;',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment     = "Hi %s .";
+        $db_translation = "Tere %s .";
+        $expected_l1_segment = "Hi <ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/> .";
+        $expected_l1_translation = "Tere <ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/> .";
+        $expected_l2_segment = "Hi &lt;ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/&gt; .";
+        $expected_l2_translation = "Tere &lt;ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/&gt; .";
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
     }
 
 }

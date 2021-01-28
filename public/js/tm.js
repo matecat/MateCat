@@ -1159,7 +1159,8 @@
                     job_id: config.job_id,
                     job_pass: config.password,
                     get_public_matches: getPublicMatches,
-                    data: data
+                    data: data,
+                    current_password: config.currentPassword
                 },
                 error: function() {
                     UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
@@ -1924,7 +1925,7 @@
                 }
             } else if (type == 'glossary') {
                 label = '<p class="pull-left">Select glossary in XLSX format ' +
-                        '   <a href="http://site.matecat.com/support/managing-language-resources/add-glossary/" target="_blank">(How-to)</a>' +
+                        '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
                         '</p>';
                 format = '.xlsx,.xls';
             }

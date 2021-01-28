@@ -25,10 +25,6 @@ const LXQ = {
                 data : data,
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
-                if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-                    $('#lexiqabox').trigger('click');
-                }
-                $('#lexiqabox').removeAttr('style');
                 if (!LXQ.initialized) {
                     LXQ.init();
                 } else {
@@ -57,10 +53,6 @@ const LXQ = {
                 data : data,
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
-                if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-                    $('#lexiqabox').trigger('click');
-                }
-                $('#lexiqabox').css('display', 'none');
                 UI.render();
                 SegmentActions.qaComponentsetLxqIssues([])
             });
@@ -91,20 +83,21 @@ const LXQ = {
         $div.html(text);
         return $div.text();
     },
-    doLexiQA: function ( segment, id_segment, isSegmentCompleted, callback ) {
+    doLexiQA: function ( segment, isSegmentCompleted, callback ) {
         if ( !LXQ.enabled() ) {
             if ( callback !== undefined && typeof callback === 'function' ) {
                 callback();
             }
             return;
         }
+        let id_segment = segment.sid;
 
-        var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
+        var segObj = segment;
 
         if ( !segObj ) return;
 
-        var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
-        var translation = this.getTargetTextForQa(segment);
+        var sourcetext =  segObj.lxqDecodedSource;
+        var translation = segObj.lxqDecodedTranslation;
 
 
         var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
@@ -124,37 +117,22 @@ const LXQ = {
             function ( err, result ) {
                 if ( !err ) {
                     var noVisibleErrorsFound = false, source_val, target_val;
-                    //myWindow.location =result.qaurl;
-                    var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
-                    source_val = segObj.decoded_source;
                     if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
 
                         //highlight the segments
                         // source_val = $( ".source", segment ).html();
 
-                        var highlights = {
-                            source: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            },
-                            target: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            }
+                        var highlights = {};
+                        var errorsMap =  {
+                            numbers: [],
+                            punctuation: [],
+                            spaces: [],
+                            urls: [],
+                            spelling: [],
+                            specialchardetect: [],
+                            mspolicheck: [],
+                            glossary: [],
+                            blacklist: []
                         };
                         var newWarnings = {};
                         newWarnings[id_segment] = {};
@@ -168,11 +146,14 @@ const LXQ = {
                             newWarnings[id_segment][qadata.errorid] = qadata;
                             if ( !qadata.ignored ) {
                                 qadata.color = LXQ.colors[qadata.category];
+                                var category = qadata.category;
                                 if ( qadata.insource ) {
-                                    highlights.source[qadata.category].push( qadata );
+                                    highlights.source = (highlights.source) ? highlights.source : _.cloneDeep(errorsMap);
+                                    highlights.source[category].push( qadata );
                                 }
                                 else {
-                                    highlights.target[qadata.category].push( qadata );
+                                    highlights.target = highlights.target ? highlights.target : _.cloneDeep(errorsMap);
+                                    highlights.target[category].push( qadata );
                                 }
                             }
                         } );
@@ -188,8 +169,7 @@ const LXQ = {
                         if ( !(LXQ.getVisibleWarningsCountForSegment( id_segment ) > 0) ) {
                             noVisibleErrorsFound = true;
                         }
-                    }
-                    else {
+                    } else {
                         //do something else
                         noVisibleErrorsFound = true;
 
@@ -238,95 +218,53 @@ const LXQ = {
                         }
 
                         //highlight the respective segments here
-                        var highlights = {
-                            source: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            },
-                            target: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            }
+                        var highlights = {};
+                        var errorsMap =  {
+                            numbers: [],
+                            punctuation: [],
+                            spaces: [],
+                            urls: [],
+                            spelling: [],
+                            specialchardetect: [],
+                            mspolicheck: [],
+                            glossary: [],
+                            blacklist: []
                         };
 
-                        let seg = UI.getSegmentById( element.segid );
-                        if ( seg.length === 0) return;
-                        let translation = "";
-                        if (seg.length>0) {
-                            translation = TextUtils.htmlEncode(TagUtils.cleanTextFromPlaceholdersSpan($( UI.targetContainerSelector(), seg ).html()));
-                        }
+                        let seg = SegmentStore.getSegmentByIdToJS( element.segid );
+                        if ( !seg) return;
+
                         LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
-
-
                         results.results[element.segid].forEach( function ( qadata ) {
                             LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;
 
                             if ( !qadata.ignored ) {
                                 qadata.color = LXQ.colors[qadata.category];
-                                if (seg.length>0) {
-                                    if ( qadata.insource ) {
-                                        highlights.source[qadata.category].push( qadata );
-                                    }
-                                    else {
-                                        if ( qadata.end <= translation.length )
-                                            highlights.target[qadata.category].push( qadata );
-
-                                    }
+                                if ( qadata.insource ) {
+                                    highlights.source = (highlights.source) ? highlights.source : _.cloneDeep(errorsMap);
+                                    highlights.source[qadata.category].push( qadata );
                                 }
+                                else {
+                                    highlights.target = (highlights.target) ? highlights.target : _.cloneDeep(errorsMap);
+                                    highlights.target[qadata.category].push( qadata );
+                                }
+
                             }
                         } );
-                        if ( LXQ.getVisibleWarningsCountForSegment( element.segid ) > 0 ) {
-                            errorCnt++;
-                        }
-                        else {
+                        if ( !LXQ.getVisibleWarningsCountForSegment( element.segid ) > 0 ) {
                             LXQ.removeSegmentWarning(element.segid);
                         }
-                        if ( !UI.segmentIsLoaded( element.segid ) )
-                            return; //this segment has not been loaded yet...
-
-                        LXQ.shouldHighlighWarningsForSegment( element.segid, element.show );
-
                         SegmentActions.addLexiqaHighlight(element.segid, highlights);
-
-                        // var source_val = $( ".source", seg ).html();
-                        // source_val = LXQ.highLightText( source_val, highlights.source, true, LXQ.shouldHighlighWarningsForSegment( UI.getSegmentId(seg) ), true, seg );
-                        // var target_val = $(".targetarea", seg).html();
-                        // target_val = LXQ.highLightText( target_val, highlights.target, true, LXQ.shouldHighlighWarningsForSegment( UI.getSegmentId(seg) ), false, seg );
-                        // target_val.indexOf('lxqwarning') > -1 && SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(seg), UI.getSegmentFileId(seg), target_val);
-                        // source_val.indexOf('lxqwarning') > -1 && SegmentActions.replaceSourceText(UI.getSegmentId(seg), UI.getSegmentFileId(seg), source_val);
-                        LXQ.buildPowertipDataForSegment( seg );
                     } );
 
                     LXQ.updateWarningsUI();
 
-                    // if ( LXQ.enabled() ) {
-                    //     LXQ.reloadPowertip();
-                    // }
-
-                }
-                else {
-                    results.qaurl = "#";
                 }
 
                 if ( LXQ.enabled() ) {
                     LXQ.doQAallSegments();
                     //LXQ.refreshElements();
                 }
-                //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);
                 LXQ.lexiqaData.lexiqaFetching = false;
                 if (callback) callback();
             }
@@ -369,10 +307,7 @@ LXQ.init  = function () {
     * Add lexiQA event handlers for warnings events
     */
     $(document).on('getWarning:local:success', function(e, data) {
-        console.log('[LEXIQA] got getWarning:local:success');
-        var segment = data.segment;
-        var id_segment = UI.getSegmentId(segment);
-        LXQ.doLexiQA(segment, id_segment,false, function () {}) ;
+        LXQ.doLexiQA(data.segment, false, function () {}) ;
     });
     /* Invoked when page loads */
     $(document).on('getWarning:global:success', function(e, data) {
@@ -387,21 +322,19 @@ LXQ.init  = function () {
 
     /* invoked when segment is completed (translated clicked)*/
     $(document).on('setTranslation:success', function(e, data) {
-        var segment = UI.getSegmentById(data.segment.sid);
-        LXQ.doLexiQA(segment, data.segment.original_sid,true,null);
+        LXQ.doLexiQA(data.segment, true,null);
     });
 
     /* invoked when more segments are loaded...*/
     $( window ).on( 'segmentsAdded', function ( e , data) {
         globalReceived = false ;
         console.log('[LEXIQA] got segmentsAdded ');
-        $.each(data.resp, function (id,file) {
+        _.each(data.resp, function (file, id) {
           if (file.segments && LXQ.hasOwnProperty('lexiqaData') && LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings')) {
-            $.each(file.segments, function (i,segment) {
+            _.each(file.segments, function (segment, i) {
                   if (LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(segment.sid)) {
-                      console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
+                      // console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
                       //clean up and redo powertip on any glossaries/blacklists
-                      var _segment = UI.getSegmentById(segment.sid)
                       LXQ.redoHighlighting(segment.sid,true);
                       LXQ.redoHighlighting(segment.sid,false);
 
@@ -425,7 +358,7 @@ LXQ.init  = function () {
             glossary: '#EA92B8',
             blacklist: '#EA92B8'
         };
-        var warningMesasges = {
+        var warningMessages = {
             u2: {t:	'email not found in source',
             	 s: 'email missing from target' },
             u1:	{t: 'url not found in source',
@@ -488,20 +421,10 @@ LXQ.init  = function () {
 
         var modulesNoHighlight = ['b1g','g1g','g2g','g3g'];
 
-        // var hidePopUp = function () {
-        //     if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-        //         $('#lexiqa-popup').removeClass('lxq-visible').focus();
-        //         $('#outer').css('margin-top', 20);
-        //     }
-        // };
-
         var isNumeric = function (n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
         };
-        var strInsert = function (string, index, value) {
-            return string.slice(0, index) + value + string.slice(index);
-        };
-        var cleanRanges = function (ranges,isSegmentCompleted) {
+        var cleanRanges = function (ranges) {
             var out = [];
             if ($.isPlainObject(ranges) || isNumeric(ranges[0])) {
                 ranges = [ranges];
@@ -626,49 +549,14 @@ LXQ.init  = function () {
                     }
                 }
             }
-            //console.dir(newout);
-            /*
-            var current = -1;
-            $.each(out, function (i, range) {
-                range.highlightstart = range.start;
-                if (range.start >= range.end) {
-                    $.error('Invalid range end/start');
-                }
-                if (range.start < current) {
-                    //we need to do something here...
-                    range.highlightstart = current;
-
-                    // $.error('Ranges overlap');
-                }
-                current = range.end;
-            });
-            out.reverse();
-            */
-            newout.reverse();
             return {out:out , newout:newout};
         };
-        // var cleanUpHighLighting = function (text) {
-        // //var cleanUpHighLighting = function (segment, isSource) {
-        //     //var regex = /<span id="lexiqahighlight".*?>(.+?)<\/span>/g;
-        //     if (!text) return text;
-        //     var regex = /<lxqwarning id="lexiqahighlight".*?>(.*?)<\/lxqwarning>/g;
-        //     text = text.replace(regex, '$1');
-        //     //clean up spurious highlighting that come when you select all text and delete...
-        //     regex = /<span style="background-color:.*?>(.*)<\/span>/g;
-        //     text =  text.replace(regex, '$1');
-        //     regex = /<font color="#ff0000".*?>(.*)<\/font>/g;
-        //     return text.replace(regex, '$1');
-        // }
 
-        var highLightText = function (text, results,isSegmentCompleted,showHighlighting,isSource,segment) {
+        var getRanges = function (results, text, isSource) {
             //var text = $(area).val();
-            var LTPLACEHOLDER = "##LESSTHAN##";
-            var GTPLACEHOLDER = "##GREATERTHAN##";
+            // var LTPLACEHOLDER = "##LESSTHAN##";
+            // var GTPLACEHOLDER = "##GREATERTHAN##";
             var rangesIn = [
-                // {
-                //     //color: '#EA92B8',
-                //     ranges: results.multiple
-                // },
                 {
                     //color: '#D08053',
                     ranges: results.numbers
@@ -698,543 +586,116 @@ LXQ.init  = function () {
                     ranges: results.blacklist
                 }];
 
-            // if (isSource)
-            //     $.powerTip.destroy($('.tooltipas',segment));
-            // else
-            //     $.powerTip.destroy($('.tooltipa',segment));
-            // text = cleanUpHighLighting(text);
 
-            var ranges = cleanRanges(rangesIn,isSegmentCompleted);
+            var ranges = cleanRanges(rangesIn);
             if (ranges == null) {
                 //do nothing
-                return text;
-            }
-            //console.log('-- text wo highlight: ' + text + '\nlength: ' + text.length);
-            var totalSpaces = 0, nbspLoc = [], skip = false;
-            for (var i = 0; i < text.length; i++) {
-                if (!skip) {
-                    if (text[i] === '<') {
-                        skip = true;
-                        continue;
-                    }
-                    if (text[i] === ' ')
-                        totalSpaces++;
-                    else if (text[i] === '&' ){
-                        if (text.slice(i,i+6)==='&nbsp;') {
-                            totalSpaces++;
-                            nbspLoc.push(totalSpaces);
-                        }
-                    }
-                }
-                else {
-                    if (text[i] === '>')
-                        skip = false;
-                }
-            }
-            text = text.replace(/<br>/g,'<br>\uFFFF')
-            var spcsBeforeRegex = /(( |\&nbsp;)+)<span id="selectionBoundary_/g;
-            var spacesBefore = '';
-            var match;
-            while ((match = spcsBeforeRegex.exec(text))!==null) {
-                if (match[1]!==undefined)
-                    spacesBefore = match[1];
-                break;
-            }
-            //console.log('spacesBefore: **'+spacesBefore+'**');
-            text = text.replace(/\&nbsp;/g, ' ');
-            // text = text.replace(/\&amp;/g, '&');
-
-
-            text = text.replace(/>/g, GTPLACEHOLDER).replace(/</g, LTPLACEHOLDER);
-            text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
-
-            //console.log('--text0: '+ text);
-            //var findTags = /(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)(.*?)(##LESSTHAN##\/\2##GREATERTHAN##)|(##LESSTHAN##[\w]+\s.*?##GREATERTHAN##)/g;
-            //match 1: the tag type
-            //match 2: the <aaaa asdfafd> part
-            //match 3: the part betwen the <> and </>
-            //match 4: the </aaa> part
-            // *** match 5: means its a short of <xxx yyy zzz> tag
-
-            var findTags=/(##LESSTHAN##(\w+)(?:\s(?:(?!##LESSTHAN##|##GREATERTHAN##).)+)?##GREATERTHAN##((?:(?!##LESSTHAN##|##GREATERTHAN##).)+)##LESSTHAN##\/\2?##GREATERTHAN##)|(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)|(##LESSTHAN##\/(\w+)##GREATERTHAN##)|(##LESSTHAN##br\/?##GREATERTHAN##)/g;
-            //findTags = /(<(\w+)(?:\s(?:(?!<|>).)+)?>((?:(?!<|>).)+)<\/\2?>)|(<(\w+)\s.*?>)|(<\/(\w+)>)|(<br\/?>)/gm;
-            var match, tags = [];
-            //match 1: the <span class="blacklisted">blacklistedWord</span>
-            //match 3: the blacklistedWord part
-            //match 3: the <aaaa asdfafd> part
-            //match 4: the aaaa part of match 2
-            //match 5: the </aaaa> part
-            //match 6: the aaa part of match 3
-            //var lastElement;
-            while ((match = findTags.exec(text)) !== null) {
-                if (match[1] !== undefined) {
-                  if (match[3] === '\uFEFF') {
-                    tags.push([match.index, match[1].length,0]);
-                  }
-                  else {
-                    tags.push([match.index, match[1].length,match[3].length]);
-                  }
-                }
-                else if (match[4] !== undefined) {
-                    tags.push([match.index, match[4].length,0]);
-                }
-                else {
-                    // var sub = match[3].length;
-                    // if ((match[3] === '\uFEFF')||(match[3] ===LTPLACEHOLDER+'br'+GTPLACEHOLDER))
-                    //     sub = 0;
-                    if (match[7] === 'span' && text[match.index-1] === '\uFEFF') {
-                            tags.push([match.index-1, match[6].length+1,0]);
-                            // console.log('adding start 2: '+(match.index-1)+' length: '+(match[3].length+1));
-                    }
-                    else {
-                        if (match[6]!==undefined) {
-                        tags.push([match.index, match[6].length,0]);
-                        // console.log('adding start 3: '+match.index+' length: '+match[3].length);
-                        } else {
-                            tags.push([match.index, match[8].length,0]);
-                            // console.log('adding start 5: '+match.index+' length: '+match[5].length);
-                        }
-                    }
-                }
-            }
-            for (var k = 0; k < tags.length-1; k++) {
-                if ((tags[k][0]+tags[k][1] == tags[k+1][0]))
-                { //these tags are adjacent - join them
-                    tags[k][1]+= tags[k+1][1];
-                    tags[k][2]+= tags[k+1][2];
-                    tags.splice(k+1,1);
-                    k--;
-                }
+                return {};
             }
 
-            tags.forEach(function (tag) {
-                ranges.newout.forEach(function (range) {
-                    if (range.end > tag[0]) {
-                        //range.start += tag[1];
-                        range.end += tag[1] - tag[2];
-                        range.start += tag[1] - tag[2];
-                        //if (range.start >= tag[0] && range.start <tag[0]+tag[1]) {
-                        if ((range.start <tag[0]+tag[1]&& range.end >=tag[0]+tag[1])
-                          ||(range.start >=tag[0] && range.end < tag[0]+tag[1])
-                          ||(range.end >= tag[0] && range.end < tag[0]+tag[1])
-                          ||(range.start >= tag[0] && range.start < tag[0]+tag[1])
-                        ) {
-                            //if our markup falls inside the span i.e. _<span>...</span>_ (_ = space)
-                            //completelty ignore it...
-                            range.ignore = true;
-                            //console.log('MALALALA');
-                        }
-                        // else {
-                        //     range.start -= tag[2];
-                        //     range.end -=tag[2];
-                        // }
-                    }
-                });
-            });
-
-            ranges.newout.forEach(function (range) {
-                if (range.start != range.end ) {
+            ranges.newout.map(function (range) {
+                if (text && range.start !== range.end ) {
                     if (range.start < text.length && !range.ignore) {
-                        var data = '', multiple;
+                        var dataErrors = '', multiple;
                         //calculate the color
-                        if (range.errors.length == 1) {
+                        if (range.errors.length === 1) {
                             range.color = ranges.out[range.errors[0]].color;
                             range.myClass = ranges.out[range.errors[0]].module + ' '+ranges.out[range.errors[0]].module[0]+'0'; //.p0 for instance
-                            data = 'data-errors="'+ranges.out[range.errors[0]].errorid+'" ';
+                            dataErrors = ranges.out[range.errors[0]].errorid;
                         }
                         else {
                             range.myClass ='';
-                            data = 'data-errors="';
                             multiple = 0;
                             range.errors.forEach(function (element){
                                 range.myClass += ' '+ ranges.out[element].module + ' '+ranges.out[element].module[0]+'0';
-                                data += ' '+ranges.out[element].errorid;
+                                dataErrors += ' '+ranges.out[element].errorid;
                                 if (modulesNoHighlight.indexOf(ranges.out[element].module)<0)
                                     multiple++;
                             });
-                            data += '" ';
                             range.color = colors.multiple;
                             if (multiple>1)
                                 range.myClass += ' m';
                             range.myClass = range.myClass.trim();
                         }
 
-                        var mark = '##LESSTHAN##lxqwarning id="lexiqahighlight" '
-                        //+' style="background-color:' + range.color + ';"'
-                        + 'class="' +range.myClass;
-                        //if (!showHighlighting) {
                         if (!LXQ.lexiqaData.enableHighlighting) {
-                            mark+= ' lxq-invisible';
-                            mark += '" ';
+                            range.myClass+= ' lxq-invisible';
                         }
                         else {
                             if (isSource)
-                                mark += ' tooltipas';
+                                range.myClass += ' tooltipas';
                             else
-                                mark += ' tooltipa';
-                            mark += '" '+data.trim()
-                        }
-                        mark +='##GREATERTHAN##';
-                        if (range.breakEnd>0) {
-                            text = strInsert(text, range.end, '##LESSTHAN##/lxqwarning##GREATERTHAN##');
-                            text = strInsert(text, range.breakStart, mark);
-                            text = strInsert(text, range.breakEnd, '##LESSTHAN##/lxqwarning##GREATERTHAN##');
-                            text = strInsert(text, range.start, mark);
-                        }
-                        else {
-                            text = strInsert(text, range.end, '##LESSTHAN##/lxqwarning##GREATERTHAN##');
-                            text = strInsert(text, range.start, mark);
+                                range.myClass += ' tooltipa';
                         }
                     }
+                }
+                return range
+            });
+
+            return _.merge(ranges.out, ranges.newout);
+        };
+
+        var buildTooltipMessages = function (range, sid, isSource) {
+            let classList = range.myClass.split(/\s+/);
+            let messages = [];
+            let errorList = range.errorid.split(/\s+/);
+            $.each(classList, function(j,cl) {
+                var txt = getWarningForModule(cl,isSource);
+                if (cl === 'g3g' && LXQ.lexiqaData.lexiqaWarnings[sid]) {
+                    //need to modify message with word.
+                    ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
+                    var word = LXQ.lexiqaData.lexiqaWarnings[sid][errorList[ind]].msg;
+                    txt = txt.replace('#xxx#',word);
+                } else if (cl === 'o1' && LXQ.lexiqaData.lexiqaWarnings[sid]) {
+                    //need to modify message with word.
+                    ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
+                    word = LXQ.lexiqaData.lexiqaWarnings[sid][errorList[ind]].tootipExtraText;
+                    txt = txt.replace('XXXX',word);
+                }
+                if (txt!==null && LXQ.lexiqaData.lexiqaWarnings[sid]) {
+                    messages.push({
+                        msg: txt,
+                        error: errorList[j]
+                    });
                 }
             });
-            //var regex = /(<)(?!\/?span)(.*?)(>)/g;
-            //text = text.replace(regex, '&lt;$2&gt;');
-            //console.log('-- text2: ' + text);
-            // var indexOfmatch = text.indexOf(selectionmatch);
-            // if (indexOfmatch>=0) {
-            //     text  = text.slice(0,indexOfmatch)+ '&nbsp;'+ text.slice(indexOfmatch+1);
-            // }
-            // var lastspace = text.lastIndexOf(' ');
-            // text  = text.slice(0,lastspace)+ '&nbsp;'+ text.slice(lastspace+1);
-            // text =  text.replace(/\*\*\*SPACE\*\*\*/g, ' ');
-
-            // text = text.replace(/\&/g, '&amp;');
-
-            text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
-            //console.log('-- text3: ' + text);
-            text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
-            //console.log('-- text4: ' + text);
-            // var indexOfmatch = text.indexOf('<span id="selectionBoundary_');
-            // if (indexOfmatch>=0) {
-            //     if (text[indexOfmatch-1] === ' ')
-            //         text  = text.slice(0,indexOfmatch-1)+ '&nbsp;'+ text.slice(indexOfmatch);
-            //     else {
-            //         if (text.endsWith('</span>',indexOfmatch)) {
-            //             console.log('span');
-            //             if  (text[indexOfmatch-'</span>'.length-1]==' ') {
-            //                 text = text.slice(0,indexOfmatch-'</span>'.length-1)+'</span>'
-            //                     + '&nbsp;'+text.slice(indexOfmatch);
-            //             }
-            //         }
-            //     }
-            // }
-            skip = false;
-            var spcs2 = 0;
-            for (var i = 0; i < text.length; i++) {
-                if (!skip) {
-                    if (text[i] === '<') {
-                        skip = true;
-                        continue;
-                    }
-                    if (text[i] === ' ')
-                        spcs2++;
-                    if (nbspLoc[0] == spcs2) {
-                        nbspLoc.splice(0,1);
-                        text = text.slice(0,i)+'&nbsp;'+text.slice(i+1);
-                    }
-                    else if (nbspLoc[0] === undefined)
-                        break;
-                }
-                else {
-                    if (text[i] === '>')
-                        skip = false;
-                }
-            }
-            spcsBeforeRegex.lastIndex = 0;
-            text = text.replace(spcsBeforeRegex,spacesBefore+'<span id="selectionBoundary_');
-            text = text.replace(/\uFFFF/g,'');
-            return text;
+            return messages;
         };
-        // var toggleHighlighting = function () {
-        //     var highlights = $('#outer').find('lxqwarning#lexiqahighlight');
-        //     $.each(highlights, function(i, element) {
-        //        $(element).toggleClass('lxq-invisible');
-        //     });
-        //     LXQ.lexiqaData.enableHighlighting = !LXQ.lexiqaData.enableHighlighting;
-        // };
-        // var toogleHighlightInSegment = function(segment) {
-        //     var highlights = $(segment).find('lxqwarning#lexiqahighlight');
-        //     $.each(highlights, function(i, element) {
-        //        $(element).toggleClass('lxq-invisible');
-        //     });
-        //     var show = shouldHighlighWarningsForSegment(segment,!shouldHighlighWarningsForSegment(segment));
+
+        // var replaceWord  = function(word, suggest,target) {
         //
-        //     postShowHighlight(UI.getSegmentId(segment),show);
+        //     //retrieve suggestion code
+        //     // var word = $(this).text();
+        //     // $.ajax({
+        //     //     url: config.lexiqaServer+'/getSuggestions',
+        //     //     data: {
+        //     //         word: word,
+        //     //         lang: config.target_rfc
+        //     //     },
+        //     //     type: 'GET',
+        //     //     success: function(response) {
+        //     //         $.each(response,function(i,suggest) {
+        //     //             //txt+='</br>'+suggest;
+        //     //             var row = $('<div class="tooltip-error-container"> '+
+        //     //                 '<a class="tooltip-error-category"/></div>');
+        //     //             row.find('.tooltip-error-category').text(suggest);
+        //     //             row.find('.tooltip-error-category').on('click', function (e) {
+        //     //                 e.preventDefault();
+        //     //                 LXQ.replaceWord(word, suggest,that);
+        //     //             });
+        //     //             $('#powerTip').append(row);
+        //     //         });
+        //     //     }
+        //     // });
+        //
+        //
         // };
-        var buildPowertipDataForSegment = function (segment) {
-            var sourceHighlihts = $('.source', segment).find('lxqwarning#lexiqahighlight');
-            var targetHighlihts = $(UI.targetContainerSelector(), segment).find('lxqwarning#lexiqahighlight');
-            if ( !LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(UI.getSegmentId(segment)) )
-                return 0;
-            $.each(sourceHighlihts, function(i, element) {
-               var classlist = element.className.split(/\s+/);
-               if ($(element).data('errors')!==undefined) {
-               var errorlist = $(element).data('errors').trim().split(/\s+/);
-               var root = $('<div class="tooltip-error-wrapper"/>');
-               $.each(classlist, function(j,cl) {
-                   var txt = getWarningForModule(cl,true);
-                   if (cl === 'g3g') {
-                       //need to modify message with word.
-                       var ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
-                       var word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
-                       txt = txt.replace('#xxx#',word);
-                   }
-                   if (txt!==null) {
-                       var row = $('<div class="tooltip-error-container"> '+
-                           '<span class="tooltip-error-category"/> '+
-                           '<div class="tooltip-error-ignore">' +
-                               '<span class="icon-cancel-circle"/>' +
-                               '<span class="tooltip-error-ignore-text">Ignore</span> </div> ' +
-                           '</div>');
-                       row.find('.tooltip-error-category').text(txt);
-                       row.find('.tooltip-error-ignore').on('click', function(e) {
-                           e.preventDefault();
-                           LXQ.ignoreError(errorlist[j]);
-                       });
-                       root.append(row);
-                   }
-                    $(element).data('powertipjq', root);
-               });
-               }
-            });
-            $.each(targetHighlihts, function(i, element) {
-               var classlist = element.className.split(/\s+/);
-               if ($(element).data('errors')!==undefined) { //lxq-invisible elements do not have a data part
-               var errorlist = $(element).data('errors').trim().split(/\s+/);
-               var root = $('<div class="tooltip-error-wrapper"/>');
-               var isSpelling = false, spellingRow = null, count = 0, word, ind;
-               $.each(classlist,function(j,cl) {
-                   isSpelling = false;
-                   var txt = getWarningForModule(cl,false);
-                   if (cl === 'g3g' && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
-                       //need to modify message with word.
-                       ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
-                       word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
-                       txt = txt.replace('#xxx#',word);
-                   }
-                   if (cl === 'o1' && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
-                        //need to modify message with word.
-                        ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
-                        word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].tootipExtraText;
-                        txt = txt.replace('XXXX',word);
-                    }
-                   if (txt!==null && LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)]) {
-                        ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
-                        var warningData = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]];
-                        if (!warningData) return;
-                        word = warningData.text;
-                        count++;
-                       var row = $('<div class="tooltip-error-container"> '+
-                           '<span class="tooltip-error-category"/> '+
-                           '<div class="tooltip-error-ignore">' +
-                           '<span class="icon-cancel-circle"/>' +
-                           '<span class="tooltip-error-ignore-text">Ignore</span> </div> ' +
-                           '</div>');
-                        row.find('.tooltip-error-category').text(txt);
-                        row.find('.tooltip-error-ignore').on('click', function(e) {
-                             e.preventDefault();
-                             LXQ.ignoreError(errorlist[j]);
-                        });
-                        if (cl === 'd1g') {//spelling
-                            isSpelling = true;
-                            //element.text has the text
-                            ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
-                            word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
-                            row.find('.tooltip-error-category').addClass('spelling').data('word',word);
-                            spellingRow = row;
-                        }
-                        else
-                            root.append(row);
-                        if (warningData.suggestions && warningData.suggestions.length && Array.isArray(warningData.suggestions) && word && word.length) {
-                          $.each(warningData.suggestions, function (i, suggest) {
-                              var suggestRow = $('<div class="tooltip-error-container lxq-suggestion"> '+
-                                  '<a class="tooltip-error-category"/></div>');
-                              if (cl ==='o1') {
-                                suggestRow.find('.tooltip-error-category').text(suggest);
-                              }
-                              else {
-                                suggestRow.find('.tooltip-error-category').text(suggest).css('cursor','pointer');
-                                suggestRow.data('word',word);
-                              }
-                              root.append(suggestRow);
-                          });
-                        }
-
-                   }
-               });
-               if (spellingRow!==null && count == 1 ) //do not show on multiple errors...
-                    root.append(spellingRow);
-               $(element).data('powertipjq', root);
-               }
-            });
-        };
-        var reloadPowertip = function(segment) {
-            if (segment!==undefined && segment!==null && LXQ.lexiqaData.segments.indexOf(UI.getSegmentId(segment)) > -1) {
-                buildPowertipDataForSegment(segment);
-                $('.tooltipa',segment).powerTip({
-                    placement: 'sw',
-                    mouseOnToPopup: true,
-                    smartPlacement: true,
-                    closeDelay: 500
-                });
-                $('.tooltipas',segment).powerTip({
-                    placement: 'se',
-                    mouseOnToPopup: true,
-                    smartPlacement: true,
-                    closeDelay: 500
-                });
-                $('.tooltipa',segment).on('powerTipRender', function() {
-
-                    //var rows = $('#powerTip').find('tooltip-error-category');
-                    var that = this;
-                    if ($('#powerTip').find('.lxq-suggestion').length) {
-                      $.each($('#powerTip').find('.lxq-suggestion'), function (i, suggestRow) {
-                        var word = $(suggestRow).data('word');
-                        if (word !== undefined) {
-                            var suggestion  = $(suggestRow).text().trim();
-                            $(suggestRow).find('.tooltip-error-category').on('click', function (e) {
-                                e.preventDefault();
-                                LXQ.replaceWord(word, suggestion,that);
-                            });
-                        }
-                      });
-                    }
-                    if ($(this).hasClass('d1g')) {
-                    // make an ajax request
-                        var word = $('#powerTip').find('.spelling').data('word');
-                        that = this;
-                        $.ajax({
-                            url: config.lexiqaServer+'/getSuggestions',
-                            data: {
-                                word: word,
-                                lang: config.target_rfc
-                            },
-                            type: 'GET',
-                            success: function(response) {
-                                $.each(response,function(i,suggest) {
-                                    //txt+='</br>'+suggest;
-                                    var row = $('<div class="tooltip-error-container"> '+
-                                        '<a class="tooltip-error-category"/></div>');
-
-                                    row.find('.tooltip-error-category').text(suggest);
-                                    row.find('.tooltip-error-category').on('click', function (e) {
-                                        e.preventDefault();
-                                        LXQ.replaceWord(word, suggest,that);
-                                    });
-                                    $('#powerTip').append(row);
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-            else {
-                $.powerTip.destroy($('.tooltipas'));
-                $.powerTip.destroy($('.tooltipa'));
-                $('.tooltipa').powerTip({
-                    placement: 'sw',
-                    mouseOnToPopup: true,
-                    smartPlacement: true,
-                    closeDelay: 500
-                });
-                $('.tooltipas').powerTip({
-                    placement: 'se',
-                    mouseOnToPopup: true,
-                    smartPlacement: true,
-                    closeDelay: 500
-                });
-                $('.tooltipa').on('powerTipRender', function() {
-                    //var rows = $('#powerTip').find('tooltip-error-category');
-                    var that = this;
-                    if ($('#powerTip').find('.lxq-suggestion').length) {
-                      $.each($('#powerTip').find('.lxq-suggestion'), function (i, suggestRow) {
-                        var word = $(suggestRow).data('word');
-                        if (word !== undefined) {
-                            var suggestion  = $(suggestRow).text().trim();
-                            $(suggestRow).find('.tooltip-error-category').on('click', function (e) {
-                                e.preventDefault();
-                                LXQ.replaceWord(word, suggestion,that);
-                            });
-                        }
-                      });
-                    }
-                    if ($(this).hasClass('d1g')) {
-                    // make an ajax request
-                        var word = $(this).text();
-                        $.ajax({
-                            url: config.lexiqaServer+'/getSuggestions',
-                            data: {
-                                word: word,
-                                lang: config.target_rfc
-                            },
-                            type: 'GET',
-                            success: function(response) {
-                                $.each(response,function(i,suggest) {
-                                    //txt+='</br>'+suggest;
-                                    var row = $('<div class="tooltip-error-container"> '+
-                                        '<a class="tooltip-error-category"/></div>');
-                                    row.find('.tooltip-error-category').text(suggest);
-                                    row.find('.tooltip-error-category').on('click', function (e) {
-                                        e.preventDefault();
-                                        LXQ.replaceWord(word, suggest,that);
-                                    });
-                                    $('#powerTip').append(row);
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-
-        var replaceWord  = function(word, suggest,target) {
-            if ($(target).closest(UI.targetContainerSelector()).attr('contenteditable')) {
-
-                if ($(target).text() !== word) {
-                    //there is no overlaping errors (like caps after punct...)
-                    //there is an overlap. lets try to find everything manually..
-                    var txt = $(target).text(),$el;
-                    var startInWord = word.indexOf(txt);
-                    var missingCharsStart=word.slice(0,startInWord);
-                    var endInWord = startInWord+txt.length;
-                    var missingCharsEnd = word.slice(endInWord);
-
-                    while(missingCharsStart.length>0) {
-                        $el = $(target).prev('lxqwarning');
-                        txt = $el.text();
-                        startInWord = missingCharsStart.indexOf(txt);
-                        if (startInWord<0)
-                            break;
-                        missingCharsStart = missingCharsStart.slice(0,startInWord);
-                        $el.remove();
-                    }
-                    while(missingCharsEnd.length>0) {
-                        $el = $(target).next('lxqwarning');
-                        txt = $el.text();
-                        startInWord = missingCharsEnd.indexOf(txt);
-                        if (startInWord!==0) {
-                            break;
-                        }
-                        missingCharsEnd = missingCharsEnd.slice(txt.length);
-                        $el.remove();
-                    }
-                }
-                $.powerTip.hide();
-                CursorUtils.saveSelection();
-                $(target).text(suggest);
-                CursorUtils.restoreSelection();
-                $(target).addClass('lxq-invisible');
-                UI.segmentQA(UI.currentSegment);
-            }
-        };
         var ignoreError = function(errorid) {
             var splits = errorid.split(/_/g);
             var targetSeg = splits[1];
             var inSource = splits[splits.length-1] === 's' ? true: false;
             //console.log('ignoring error with id: '+ errorid +' in segment: '+targetSeg);
             LXQ.lexiqaData.lexiqaWarnings[targetSeg][errorid].ignored = true;
-            $.powerTip.hide();
             redoHighlighting(targetSeg,inSource);
             if (getVisibleWarningsCountForSegment(targetSeg)<=0) {
                 //remove the segment from database/reduce the number count
@@ -1297,24 +758,6 @@ LXQ.init  = function () {
             });
         };
 
-
-        var shouldHighlighWarningsForSegment = function (segId,value) {
-            //return true;
-            //var segId = UI.getSegmentId(seg);
-            if (segId!==false){
-            if (!LXQ.lexiqaData.segmentsInfo.hasOwnProperty(segId))
-                LXQ.lexiqaData.segmentsInfo[segId]= {};
-            if (!LXQ.lexiqaData.segmentsInfo[segId].hasOwnProperty('showHighlighting'))
-                LXQ.lexiqaData.segmentsInfo[segId].showHighlighting = true;
-            if (value!==undefined)
-                LXQ.lexiqaData.segmentsInfo[segId].showHighlighting = value;
-
-            return LXQ.lexiqaData.segmentsInfo[segId].showHighlighting ;
-            }
-            else{
-                return false;
-            }
-        };
         var getVisibleWarningsCountForSegment = function(segment) {
             var segId ;
             if (typeof segment ==='string') {
@@ -1332,119 +775,43 @@ LXQ.init  = function () {
             });
             return count;
         };
-        // var getIgnoredWarningsCountForSegment =  function(segment) {
-        //     var segId ;
-        //     if (typeof segment ==='string') {
-        //         segId =segment;
-        //     }
-        //     else
-        //         segId = UI.getSegmentId(segment);
-        //
-        //     if (!LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(segId))
-        //         return 0;
-        //     var count = 0;
-        //     $.each(LXQ.lexiqaData.lexiqaWarnings[segId], function (i,element){
-        //         if (element.ignored === true)
-        //             count++;
-        //     });
-        //     return count;
-        // };
-        var getWarningForModule = function (module,insource) {
-            if (warningMesasges.hasOwnProperty(module))
-                return (insource ? warningMesasges[module].s:warningMesasges[module].t);
+
+        var getWarningForModule = function (module, isSource) {
+            if (warningMessages.hasOwnProperty(module))
+                return (isSource ? warningMessages[module].s:warningMessages[module].t);
             else
                 return null;
 
         };
         var notCheckedSegments; //store the unchecked segments at startup
         var doQAallSegments = function () {
-            var segments = $('#outer').find('section');
+            var segments = SegmentStore.getAllSegments;
             var notChecked = [];
             $.each(segments,function (keys,segment) {
-                var segId = UI.getSegmentId(segment);
+                var segId = segment.sid;
                 if (LXQ.lexiqaData.segments.indexOf(segId) < 0) {
-                    // console.log('segment not in lexiqaDB: '+segId);
-                    notChecked.push(segId);
+                    notChecked.push(segment);
                 }
             });
             notCheckedSegments = notChecked;
             checkNextUncheckedSegment();
         };
 
-        var checkNextUncheckedSegment = function (previousSegment) {
-            if (previousSegment!==undefined && previousSegment!== null )
-                reloadPowertip(previousSegment);
+        var checkNextUncheckedSegment = function () {
             if (!(notCheckedSegments.length >0))
                 return;
             var segment = notCheckedSegments.pop();
             if (!segment)
                 return;
-            var seg =  UI.getSegmentById(segment);
-            var segObj = SegmentStore.getSegmentByIdToJS(seg);
-            if ( segObj.translation ) {
+            if ( segment.translation ) {
                 // console.log('Requesting QA for: '+segment);
-                LXQ.doLexiQA(seg,segment, true, checkNextUncheckedSegment);
+                LXQ.doLexiQA(segment, true, checkNextUncheckedSegment);
             }
             else {
                 checkNextUncheckedSegment();
             }
         };
-        // var getFristSegmentWithWarning = function () {
-        //      if (LXQ.lexiqaData.hasOwnProperty('segments') && LXQ.lexiqaData.segments.length > 0) {
-        //         return LXQ.lexiqaData.segments[0];
-        //     }
-        //     else {
-        //         return UI.currentSegmentId;
-        //     }
-        // };
 
-        // var getNextSegmentWithWarning = function () {
-        //     //if there are no errors..
-        //     if (!LXQ.lexiqaData.hasOwnProperty('segments') || LXQ.lexiqaData.segments.length == 0)
-        //         return UI.currentSegmentId;
-        //     var ind  = -1;
-        //     var segid_int = parseInt(UI.currentSegmentId);
-        //     $.each(LXQ.lexiqaData.segments, function(i,el) {
-        //         if (parseInt(el) > segid_int) {
-        //             ind = i;
-        //             return false; //this is a break for an $.each loop
-        //         }
-        //         if (parseInt(el) == segid_int) {
-        //             if (el>UI.currentSegmentId) {
-        //                 //splitted segments : 111-1 111-2
-        //                 ind = i;
-        //                 return false;
-        //             }
-        //         }
-        //     });
-        //     if (ind == -1) //this is the largest segmentid
-        //         ind = 0;
-        //     return LXQ.lexiqaData.segments[ind];
-        //
-        // };
-        // var getPreviousSegmentWithWarning = function () {
-        //     //if there are no errors..
-        //     if (!LXQ.lexiqaData.hasOwnProperty('segments') || LXQ.lexiqaData.segments.length == 0)
-        //         return UI.currentSegmentId;
-        //     var ind = -1;
-        //     var segid_int = parseInt(UI.currentSegmentId);
-        //     for (var i = LXQ.lexiqaData.segments.length - 1; i >= 0; i--) {
-        //         if (parseInt(LXQ.lexiqaData.segments[i]) < segid_int) {
-        //             ind = i;
-        //             break;
-        //         }
-        //         if (parseInt(LXQ.lexiqaData.segments[i]) == segid_int) {
-        //             if (LXQ.lexiqaData.segments[i]<UI.currentSegmentId) {
-        //                 //splitted segments : 111-1 111-2
-        //                 ind = i;
-        //                 break;
-        //             }
-        //         }
-        //     }
-        //     if (ind == -1) //this is the largest segmentid
-        //         ind = LXQ.lexiqaData.segments.length - 1;
-        //     return LXQ.lexiqaData.segments[ind];
-        // };
 
         var initPopup = function () {
 
@@ -1453,7 +820,7 @@ LXQ.init  = function () {
                     type: "GET",
                     url: config.lexiqaServer+"/tooltipwarnings",
                     success:function(result){
-                        warningMesasges = result;
+                        warningMessages = result;
                         modulesNoHighlight = []
                         $.each(result, function(key,el) {
                             if (key[key.length-1] === 'g')
@@ -1463,34 +830,19 @@ LXQ.init  = function () {
                         // console.err(result);
                     }
             });
-
-            $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
-            $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate'));
-
         };
         // Interfaces
         $.extend(LXQ, {
-            highLightText: highLightText,
-            // cleanUpHighLighting: cleanUpHighLighting,
+            getRanges: getRanges,
             colors: colors,
-            // toogleHighlightInSegment: toogleHighlightInSegment,
-            // toggleHighlighting:toggleHighlighting,
-            shouldHighlighWarningsForSegment: shouldHighlighWarningsForSegment,
+            buildTooltipMessages: buildTooltipMessages,
             getVisibleWarningsCountForSegment:getVisibleWarningsCountForSegment,
-            // getIgnoredWarningsCountForSegment:getIgnoredWarningsCountForSegment,
-            buildPowertipDataForSegment: buildPowertipDataForSegment,
-            reloadPowertip : reloadPowertip,
             ignoreError: ignoreError,
             redoHighlighting:redoHighlighting,
             doQAallSegments: doQAallSegments,
-            // getNextSegmentWithWarning: getNextSegmentWithWarning,
-            // getPreviousSegmentWithWarning:getPreviousSegmentWithWarning,
             initPopup: initPopup,
-            // hidePopUp: hidePopUp,
             partnerid: partnerid,
-            projectid: config.id_job+'-'+config.password,
-            // getWarningForModule: getWarningForModule,
-            replaceWord: replaceWord
+            projectid: config.id_job+'-'+config.password
         });
 
     })(jQuery, config, window, LXQ);

@@ -139,15 +139,11 @@ const CommonUtils = {
 
     setBrowserHistoryBehavior() {
         let updateAppByPopState = () => {
-            var segment = UI.getSegmentById(this.parsedHash.segmentId);
+            var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId);
             var currentSegment = SegmentStore.getCurrentSegment();
-            if (currentSegment.sid === this.parsedHash.segmentId) return;
-            if (segment.length) {
+            if (currentSegment.sid === segment.sid) return;
+            if (segment && !segment.opened) {
                 SegmentActions.openSegment(this.parsedHash.segmentId);
-            } else {
-                if ($('section').length) {
-                    UI.pointBackToSegment(this.parsedHash.segmentId);
-                }
             }
         };
         window.onpopstate = (ev) => {

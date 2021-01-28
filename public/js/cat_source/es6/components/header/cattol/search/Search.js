@@ -1,12 +1,13 @@
-import React from 'react';
-import CattolConstants from '../../../../constants/CatToolConstants';
-import SegmentStore from '../../../../stores/SegmentStore';
-import CatToolStore from '../../../../stores/CatToolStore';
-import SearchUtils from './searchUtils';
-import SegmentConstants from '../../../../constants/SegmentConstants';
-import SegmentActions from '../../../../actions/SegmentActions';
+import React  from 'react';
+import CattolConstants  from '../../../../constants/CatToolConstants';
+import SegmentStore  from '../../../../stores/SegmentStore';
+import CatToolStore  from '../../../../stores/CatToolStore';
+import SearchUtils  from './searchUtils';
+import SegmentConstants from "../../../../constants/SegmentConstants";
+import SegmentActions from "../../../../actions/SegmentActions";
 
 class Search extends React.Component {
+
     constructor(props) {
         super(props);
         this.defaultState = {
@@ -17,10 +18,10 @@ class Search extends React.Component {
                 enableReplace: false,
                 matchCase: false,
                 exactMatch: false,
-                replaceTarget: '',
+                replaceTarget: "",
                 selectStatus: 'all',
-                searchTarget: '',
-                searchSource: '',
+                searchTarget: "",
+                searchSource: ""
             },
             focus: true,
             funcFindButton: true, // true=find / false=next
@@ -29,7 +30,7 @@ class Search extends React.Component {
             searchResults: [],
             occurrencesList: [],
             searchResultsDictionary: {},
-            featuredSearchResult: null,
+            featuredSearchResult: null
         };
         this.state = _.cloneDeep(this.defaultState);
 
@@ -51,7 +52,7 @@ class Search extends React.Component {
             searchResults: [],
             occurrencesList: [],
             searchResultsDictionary: {},
-            featuredSearchResult: null,
+            featuredSearchResult: null
         });
     }
 
@@ -60,8 +61,8 @@ class Search extends React.Component {
             SearchUtils.execFind(this.state.search);
         }
         this.setState({
-            funcFindButton: false,
-        });
+            funcFindButton: false
+        })
     }
 
     setResults(data) {
@@ -71,53 +72,53 @@ class Search extends React.Component {
             occurrencesList: data.occurrencesList,
             searchResultsDictionary: data.searchResultsDictionary,
             featuredSearchResult: data.featuredSearchResult,
-            searchReturn: true,
+            searchReturn: true
         });
-        setTimeout(() => SegmentActions.openSegment(this.state.occurrencesList[data.featuredSearchResult]));
+        setTimeout(()=>{
+            !_.isUndefined(this.state.occurrencesList[data.featuredSearchResult]) && SegmentActions.openSegment(this.state.occurrencesList[data.featuredSearchResult])
+        });
     }
 
     updateSearch() {
-        if (this.props.active) {
+        if ( this.props.active ) {
             setTimeout(() => {
                 const searchObject = SearchUtils.updateSearchObject();
-                this.setState({
+                this.setState( {
                     searchResults: searchObject.searchResults,
                     occurrencesList: searchObject.occurrencesList,
                     searchResultsDictionary: searchObject.searchResultsDictionary,
-                    featuredSearchResult: searchObject.featuredSearchResult,
-                });
-                SegmentStore.addSearchResult(
-                    searchObject.occurrencesList,
-                    searchObject.searchResultsDictionary,
-                    this.state.featuredSearchResult
-                );
+                    featuredSearchResult: searchObject.featuredSearchResult
+                } );
+                setTimeout(()=>SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.searchParams));
             });
         }
     }
 
     updateAfterReplace(sid) {
-        let { searchResults } = this.state;
-        let itemReplaced = _.find(searchResults, (item) => item.id === sid);
+        let {searchResults} = this.state;
+        let itemReplaced = _.find(searchResults, (item)=>item.id === sid);
         let total = this.state.total;
-        if (itemReplaced.occurrences.length === 1) {
-            _.remove(searchResults, (item) => item.id === sid);
-            total--;
+        total--;
+        if ( itemReplaced.occurrences.length === 1 ) {
+            _.remove(searchResults, (item)=>item.id === sid);
         }
-
-        let newResultArray = _.map(searchResults, (item) => item.id);
-
+        let newResultArray = _.map(searchResults, (item)=>item.id);
         const searchObject = SearchUtils.updateSearchObjectAfterReplace(newResultArray);
-        this.setState({
-            total: total,
+        this.setState( {
+            total: total ,
             searchResults: searchObject.searchResults,
             occurrencesList: searchObject.occurrencesList,
             searchResultsDictionary: searchObject.searchResultsDictionary,
+        } );
+        CatToolActions.storeSearchResults({
+            total: total ,
+            searchResults: searchObject.searchResults,
+            occurrencesList: searchObject.occurrencesList,
+            searchResultsDictionary: searchObject.searchResultsDictionary,
+            featuredSearchResult: this.state.featuredSearchResult,
         });
-        SegmentStore.addSearchResult(
-            searchObject.occurrencesList,
-            searchObject.searchResultsDictionary,
-            this.state.featuredSearchResult
-        );
+        SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.searchParams);
+
     }
 
     goToNext() {
@@ -126,6 +127,7 @@ class Search extends React.Component {
 
     goToPrev() {
         this.setFeatured(this.state.featuredSearchResult - 1);
+
     }
 
     setFeatured(value) {
@@ -144,23 +146,23 @@ class Search extends React.Component {
             featuredSearchResult: value,
         });
         SegmentActions.changeCurrentSearchSegment(value);
-    }
+    };
 
     // handling module
-    mod(n, m) {
+    mod (n, m)  {
         return ((n % m) + m) % m;
-    }
+    };
 
     handleCancelClick() {
         this.dropdownInit = false;
         UI.body.removeClass('searchActive');
         this.handleClearClick();
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-            setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId));
+            setTimeout(()=>SegmentActions.scrollToSegment(UI.currentSegmentId));
         } else {
             UI.render({
                 firstLoad: false,
-                segmentToOpen: UI.currentSegmentId,
+                segmentToOpen: UI.currentSegmentId
             });
         }
 
@@ -191,54 +193,54 @@ class Search extends React.Component {
         let self = this;
         let props = {
             modalName: 'confirmReplace',
-            text:
-                'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
-            successText: 'Continue',
+            text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
+            successText: "Continue",
             successCallback: function () {
                 SearchUtils.execReplaceAll(self.state.search);
                 APP.ModalWindow.onCloseModal();
+                CatToolActions.storeSearchResults({
+                    total: 0,
+                    searchResults: [],
+                    occurrencesList: [],
+                    searchResultsDictionary: {},
+                    featuredSearchResult: null,
+                });
             },
-            cancelText: 'Cancel',
+            cancelText: "Cancel",
             cancelCallback: function () {
                 APP.ModalWindow.onCloseModal();
-            },
+            }
+
         };
-        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Confirmation required');
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
     }
 
     handleReplaceClick() {
-        if (this.state.search.searchTarget === this.state.search.replaceTarget) {
-            APP.alert({ msg: 'Attention: you are replacing the same text!' });
+        if(this.state.search.searchTarget === this.state.search.replaceTarget){
+            APP.alert({msg: 'Attention: you are replacing the same text!'});
             return false;
         }
 
-        // todo: redo marksearchresults on the target
-        let mark = $('mark.currSearchItem');
-        mark.text(this.state.search.replaceTarget);
-        let $segment = mark.parents('section');
-        mark.replaceWith(mark.text());
-        let segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
-        SegmentActions.modifiedTranslation(segment.sid, null, true, $segment.find('.targetarea').html());
-        let status = segment.status;
+        SegmentActions.replaceCurrentSearch(this.state.search.replaceTarget);
 
-        this.updateAfterReplace(segment.original_sid);
+        setTimeout(()=> {
+            const segment = SegmentStore.getSegmentByIdToJS( this.state.occurrencesList[this.state.featuredSearchResult] );
+            this.updateAfterReplace(segment.original_sid);
+            // let next = this.state.occurrencesList[this.state.featuredSearchResult];
+            UI.setTranslation( {
+                id_segment: segment.original_sid,
+                status: segment.status,
+                caller: 'replace'
+            } );
+        });
 
-        setTimeout(() =>
-            UI.setTranslation(
-                {
-                    id_segment: segment.original_sid,
-                    status: status,
-                    caller: 'replace',
-                },
-                () => SegmentActions.scrollToSegment(this.state.occurrencesList[this.state.featuredSearchResult])
-            )
-        );
+
     }
 
     handleStatusChange(value) {
-        let search = _.cloneDeep(this.state.search);
+        let search =  _.cloneDeep(this.state.search);
         search['selectStatus'] = value;
-        if (value === 'APPROVED-2') {
+        if ( value === 'APPROVED-2') {
             search.revisionNumber = 2;
             search['selectStatus'] = 'APPROVED';
         } else {
@@ -246,7 +248,7 @@ class Search extends React.Component {
         }
         this.setState({
             search: search,
-            funcFindButton: true,
+            funcFindButton: true
         });
     }
 
@@ -257,7 +259,7 @@ class Search extends React.Component {
         let search = this.state.search;
         search[name] = value;
 
-        if (name !== 'enableReplace') {
+        if ( name !== "enableReplace" ) {
             this.setState({
                 search: search,
                 funcFindButton: true,
@@ -266,11 +268,11 @@ class Search extends React.Component {
                 searchResults: [],
                 occurrencesList: [],
                 searchResultsDictionary: {},
-                featuredSearchResult: null,
+                featuredSearchResult: null
             });
         } else {
             this.setState({
-                search: search,
+                search: search
             });
         }
     }
@@ -279,248 +281,199 @@ class Search extends React.Component {
         let search = this.state.search;
         search.enableReplace = true;
         this.setState({
-            search: search,
-        });
+            search: search
+        })
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.active) {
-            if (!prevProps.active) {
-                window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
-                if (this.sourceEl && this.state.focus) {
+        if(this.props.active){
+            if ( !prevProps.active ) {
+                if(this.sourceEl && this.state.focus){
                     this.sourceEl.focus();
                     this.setState({
-                        focus: false,
+                        focus: false
                     });
                 }
             }
-            $('body').addClass('search-open');
+            $('body').addClass("search-open");
 
             let self = this;
-            if (!this.dropdownInit) {
+            if ( !this.dropdownInit ) {
                 this.dropdownInit = true;
                 $(this.statusDropDown).dropdown({
-                    onChange: function (value, text, $selectedItem) {
-                        value = value === '' ? 'all' : value;
-                        self.handleStatusChange(value);
-                    },
+                    onChange: function(value, text, $selectedItem) {
+                        value = (value === "") ? "all": value;
+                        self.handleStatusChange(value)
+                    }
                 });
             }
-        } else {
-            window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
-            $('body').removeClass('search-open');
-            if (!this.state.focus) {
+        }else{
+            $('body').removeClass("search-open");
+            if(!this.state.focus){
                 this.setState({
-                    focus: true,
+                    focus: true
                 });
             }
             this.dropdownInit = false;
         }
+
+
     }
     getResultsHtml() {
-        var html = '';
-        const { featuredSearchResult, searchReturn, occurrencesList, searchResults } = this.state;
-        const segmentIndex = _.findIndex(searchResults, (item) => item.id === occurrencesList[featuredSearchResult]);
+        var html = "";
+        const {featuredSearchResult, searchReturn, occurrencesList, searchResults} = this.state;
+        const segmentIndex = _.findIndex(searchResults, (item)=>  item.id === occurrencesList[featuredSearchResult]);
         //Waiting for results
         if (!this.state.funcFindButton && !searchReturn) {
-            html = (
-                <div className="search-display">
+            html = <div className="search-display">
                     <p className="searching">Searching ...</p>
-                </div>
-            );
-        } else if (!this.state.funcFindButton && searchReturn) {
+                </div>;
+        } else if (!this.state.funcFindButton && searchReturn){
+
             let query = [];
-            if (this.state.search.exactMatch) query.push(' exactly');
+            if (this.state.search.exactMatch)
+                query.push(' exactly');
             if (this.state.search.searchSource)
-                query.push(
-                    <span key="source" className="query">
-                        <span className="param">{this.state.search.searchSource}</span>in source{' '}
-                    </span>
-                );
+                query.push(<span key="source" className="query"><span className="param">{this.state.search.searchSource}</span>in source </span>);
             if (this.state.search.searchTarget)
-                query.push(
-                    <span key="target" className="query">
-                        <span className="param">{this.state.search.searchTarget}</span>in target{' '}
-                    </span>
-                );
+                query.push(<span key="target" className="query"><span className="param">{this.state.search.searchTarget}</span>in target </span>);
             if (this.state.search.selectStatus !== 'all') {
-                let statusLabel = (
-                    <span key="status">
-                        {' '}
-                        and status <span className="param">{this.state.search.selectStatus}</span>
-                    </span>
-                );
+                let statusLabel = <span key="status"> and status <span className="param">{this.state.search.selectStatus}</span></span>;
                 query.push(statusLabel);
             }
-            let caseLabel = ' (' + (this.state.search.matchCase ? 'case sensitive' : 'case insensitive') + ')';
+            let caseLabel = ' (' + ((this.state.search.matchCase) ? 'case sensitive' : 'case insensitive') + ')';
             query.push(caseLabel);
-            let searchMode =
-                this.state.search.searchSource !== '' && this.state.search.searchTarget !== ''
-                    ? 'source&target'
-                    : 'normal';
-            let numbers = '';
+            let searchMode =(this.state.search.searchSource !== "" && this.state.search.searchTarget !== "") ? 'source&target' : 'normal';
+            let numbers = "";
             let totalResults = this.state.searchResults.length;
             if (searchMode === 'source&target') {
                 let total = this.state.searchResults.length ? this.state.searchResults.length : 0;
-                let label = total === 1 ? 'segment' : 'segments';
-                numbers =
-                    total > 0 ? (
-                        <span key="numbers" className="numbers">
-                            Found <span className="segments">{this.state.searchResults.length}</span> {label}
-                        </span>
-                    ) : (
-                        <span key="numbers" className="numbers">
-                            No segments found
-                        </span>
-                    );
+                let label = (total === 1) ? 'segment' : 'segments';
+                numbers =  total > 0 ? (
+                    <span key="numbers" className="numbers">Found <span className="segments">{this.state.searchResults.length}</span> {label}</span>
+                ) : (
+                    <span key="numbers" className="numbers">No segments found</span>
+                    )
             } else {
                 let total = this.state.total ? parseInt(this.state.total) : 0;
-                let label = total === 1 ? 'result' : 'results';
-                let label2 = total === 1 ? 'segment' : 'segments';
-                numbers =
-                    total > 0 ? (
-                        <span key="numbers" className="numbers">
-                            Found
-                            <span className="results">{' ' + this.state.total}</span> <span>{label}</span> in
-                            <span className="segments">{' ' + this.state.searchResults.length}</span>{' '}
-                            <span>{label2}</span>
-                        </span>
-                    ) : (
-                        <span key="numbers" className="numbers">
-                            No segments found
-                        </span>
-                    );
+                let label = (total === 1) ? 'result' : 'results';
+                let label2 = (total === 1) ? 'segment' : 'segments';
+                numbers =  total > 0  ? (
+                    <span key="numbers" className="numbers">Found
+                        <span className="results">{' '+ this.state.total}</span>{' '}<span>{label}</span>  in
+                        <span className="segments">{' '+ this.state.searchResults.length}</span> {' '}<span>{label2}</span>
+                    </span>
+                ) : (
+                    <span key="numbers" className="numbers">No segments found</span>
+                )
             }
-            html = (
-                <div className="search-display">
-                    <p className="found">
-                        {numbers} having
-                        {query}
-                    </p>
-                    {this.state.searchResults.length > 0 ? (
-                        <div className="search-result-buttons">
-                            <p>{segmentIndex + 1 + ' of ' + totalResults + ' segments'}</p>
+            html = <div className="search-display">
+                        <p className="found">
+                            {numbers}
+                            {' '}
+                            having
+                            {query}
+                        </p>
+                        {this.state.searchResults.length > 0 ? (
+                            <div className="search-result-buttons">
 
-                            <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}>
-                                <i className="icon-chevron-left" />
-                                <span> Find Previous (Shift + F3)</span>
-                            </button>
-                            <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}>
-                                <i className="icon-chevron-right" />
-                                <span> Find Next (F3)</span>
-                            </button>
-                        </div>
-                    ) : null}
-                </div>
-            );
+                                <p>{segmentIndex + 1 + " of " + totalResults + " segments" }</p>
+
+                                <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" />
+                                    <span> Find Previous (Shift + F3)</span>
+                                </button>
+                                <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right"/>
+                                    <span> Find Next (F3)</span>
+                                </button>
+
+                            </div>
+                        ) : (null) }
+
+                    </div>
         }
         return html;
     }
-    handelKeydownFunction(event) {
-        if (this.props.active) {
-            if (event.keyCode === 27) {
+    handelKeydownFunction(event){
+        if ( this.props.active ) {
+            if ( event.keyCode === 27 ) {
                 this.handleCancelClick();
-            } else if (event.keyCode === 13 && $(event.target).closest('.find-container').length > 0) {
-                if (this.state.search.searchTarget !== '' || this.state.search.searchSource !== '') {
+            } else if ( event.keyCode === 13 && $( event.target ).closest( ".find-container" ).length > 0 ) {
+                if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" ) {
                     event.preventDefault();
                     this.handleSubmit();
                 }
-            } else if (event.key === 'F3' && event.shiftKey) {
+            }else if ( event.key === "F3" && event.shiftKey ) {
                 event.preventDefault();
                 this.goToPrev();
-            } else if (event.key === 'F3') {
+            } else if ( event.key === "F3") {
                 event.preventDefault();
                 this.goToNext();
             }
         }
     }
-    componentDidMount() {
-        document.addEventListener('keydown', this.handelKeydownFunction, false);
+    componentDidMount(){
+        document.addEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.addListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults.bind(this));
         CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
         SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch);
+
+
     }
-    componentWillUnmount() {
-        document.removeEventListener('keydown', this.handelKeydownFunction, false);
+    componentWillUnmount(){
+        document.removeEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.removeListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults);
         CatToolStore.removeListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
         SegmentStore.removeListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch);
+
     }
 
     render() {
+
         let options = config.searchable_statuses.map(function (item, index) {
-            return (
-                <React.Fragment key={index}>
-                    <div className="item" key={index} data-value={item.value}>
-                        <div className={'ui ' + item.label.toLowerCase() + '-color empty circular label'} />
-                        {item.label}
-                    </div>
-                    {config.secondRevisionsCount && item.value === 'APPROVED' ? (
-                        <div className="item" key={index + '-2'} data-value={'APPROVED-2'}>
-                            <div className={'ui ' + item.label.toLowerCase() + '-2ndpass-color empty circular label'} />
-                            {item.label}
-                        </div>
-                    ) : null}
-                </React.Fragment>
-            );
+            return (<React.Fragment key={index}>
+                <div className="item" key={index} data-value={item.value}>
+                    <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
+                    {item.label}
+                </div>
+                { config.secondRevisionsCount && item.value === 'APPROVED' ? (
+                <div className="item" key={index+'-2'} data-value={'APPROVED-2'}>
+                    <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
+                    {item.label}
+                </div>
+                ) : null }
+                </React.Fragment>);
         });
         let findIsDisabled = true;
-        if (this.state.search.searchTarget !== '' || this.state.search.searchSource !== '') {
+        if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") {
             findIsDisabled = false;
         }
-        let findButtonClassDisabled = !this.state.funcFindButton || findIsDisabled ? 'disabled' : '';
-        let statusDropdownClass =
-            this.state.search.selectStatus !== '' && this.state.search.selectStatus !== 'all'
-                ? 'filtered'
-                : 'not-filtered';
-        let statusDropdownDisabled =
-            this.state.search.searchTarget !== '' || this.state.search.searchSource !== '' ? '' : 'disabled';
-        let replaceCheckboxClass = this.state.search.searchTarget ? '' : 'disabled';
-        let replaceButtonsClass =
-            this.state.search.enableReplace && this.state.search.searchTarget && !this.state.funcFindButton
-                ? ''
-                : 'disabled';
-        let replaceAllButtonsClass =
-            this.state.search.enableReplace && this.state.search.searchTarget ? '' : 'disabled';
-        let clearVisible =
-            this.state.search.searchTarget !== '' ||
-            this.state.search.searchSource !== '' ||
-            (this.state.search.selectStatus !== '' && this.state.search.selectStatus !== 'all');
-        return this.props.active ? (
-            <div className="ui form">
+        let findButtonClassDisabled = (!this.state.funcFindButton || findIsDisabled) ?  "disabled" : "";
+        let statusDropdownClass = (this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all") ? "filtered" : "not-filtered";
+        let statusDropdownDisabled = (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") ? "" : "disabled";
+        let replaceCheckboxClass = (this.state.search.searchTarget) ? "" : "disabled";
+        let replaceButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget && !this.state.funcFindButton) ? "" : "disabled";
+        let replaceAllButtonsClass = (this.state.search.enableReplace && this.state.search.searchTarget) ? "" : "disabled";
+        let clearVisible = (this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" || this.state.search.selectStatus !== "" && this.state.search.selectStatus !== "all" );
+        return ( this.props.active ? <div className="ui form">
                 <div className="find-wrapper">
                     <div className="find-container">
                         <div className="find-container-inside">
                             <div className="find-list">
                                 <div className="find-element ui input">
                                     <div className="find-in-source">
-                                        <input
-                                            type="text"
-                                            tabIndex={1}
-                                            value={this.state.search.searchSource}
-                                            placeholder="Find in source"
-                                            onChange={this.handleInputChange.bind(this, 'searchSource')}
-                                            ref={(input) => (this.sourceEl = input)}
+                                        <input type="text" tabIndex={1} value={this.state.search.searchSource} placeholder="Find in source"
+                                               onChange={this.handleInputChange.bind(this, "searchSource")}
+                                               ref={(input)=>this.sourceEl=input}
                                         />
                                     </div>
                                     <div className="find-exact-match">
                                         <div className="exact-match">
-                                            <input
-                                                type="checkbox"
-                                                tabIndex={3}
-                                                checked={this.state.search.matchCase}
-                                                onChange={this.handleInputChange.bind(this, 'matchCase')}
-                                                ref={(checkbox) => (this.matchCaseCheck = checkbox)}
-                                            />
+                                            <input type="checkbox" tabIndex={3} checked={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}
+                                                   ref={(checkbox)=>this.matchCaseCheck=checkbox}/>
                                             <label> Match Case</label>
                                         </div>
                                         <div className="exact-match">
-                                            <input
-                                                type="checkbox"
-                                                tabIndex={4}
-                                                checked={this.state.search.exactMatch}
-                                                onChange={this.handleInputChange.bind(this, 'exactMatch')}
-                                            />
+                                            <input type="checkbox" tabIndex={4} checked={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
                                             <label> Whole word</label>
                                         </div>
                                     </div>
@@ -528,119 +481,64 @@ class Search extends React.Component {
                                 <div className="find-element-container">
                                     <div className="find-element ui input">
                                         <div className="find-in-target">
-                                            <input
-                                                type="text"
-                                                tabIndex={2}
-                                                placeholder="Find in target"
-                                                value={this.state.search.searchTarget}
-                                                onChange={this.handleInputChange.bind(this, 'searchTarget')}
-                                                className={
-                                                    !this.state.search.searchTarget && this.state.search.enableReplace
-                                                        ? 'warn'
-                                                        : null
-                                                }
-                                            />
-                                            {this.state.showReplaceOptionsInSearch ? (
-                                                <div className={'enable-replace-check ' + replaceCheckboxClass}>
-                                                    <input
-                                                        type="checkbox"
-                                                        tabIndex={5}
-                                                        checked={this.state.search.enableReplace}
-                                                        onChange={this.handleInputChange.bind(this, 'enableReplace')}
-                                                    />
-                                                    <label> Replace with</label>
-                                                </div>
-                                            ) : null}
+                                            <input type="text" tabIndex={2} placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
+                                                   className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
+                                            {this.state.showReplaceOptionsInSearch ?
+                                            <div className={"enable-replace-check " + replaceCheckboxClass}>
+                                                <input type="checkbox" tabIndex={5} checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
+                                                <label> Replace with</label>
+                                            </div>
+                                            : (null)}
                                         </div>
                                     </div>
-                                    {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ? (
-                                        <div className="find-element ui input">
-                                            <div className="find-in-replace">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Replace in target"
-                                                    value={this.state.search.replaceTarget}
-                                                    onChange={this.handleInputChange.bind(this, 'replaceTarget')}
-                                                />
-                                            </div>
+                                    {this.state.showReplaceOptionsInSearch && this.state.search.enableReplace ?
+                                    <div className="find-element ui input">
+                                        <div className="find-in-replace">
+                                            <input type="text" placeholder="Replace in target" value={this.state.search.replaceTarget} onChange={this.handleInputChange.bind(this, "replaceTarget")}/>
                                         </div>
-                                    ) : null}
+                                    </div>
+                                    : (null)}
                                 </div>
                                 <div className="find-element find-dropdown-status">
-                                    <div
-                                        className={
-                                            'find-dropdown ' + statusDropdownClass + ' ' + statusDropdownDisabled
-                                        }
-                                    >
-                                        <div
-                                            className="ui top left pointing dropdown basic tiny button"
-                                            ref={(dropdown) => (this.statusDropDown = dropdown)}
-                                        >
+                                    <div className={"find-dropdown " + statusDropdownClass + " " + statusDropdownDisabled}>
+                                        <div className="ui top left pointing dropdown basic tiny button" ref={(dropdown)=>this.statusDropDown=dropdown}>
                                             <div className="text">
                                                 <div>Status Segment</div>
                                             </div>
-                                            <div
-                                                className="ui cancel label"
-                                                onClick={this.resetStatusFilter.bind(this)}
-                                            >
-                                                <i className="icon-cancel3" />
+                                            <div className="ui cancel label" onClick={this.resetStatusFilter.bind(this)}><i className="icon-cancel3" /></div>
+                                            <div className="menu">
+                                                {options}
                                             </div>
-                                            <div className="menu">{options}</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="find-element find-clear-all">
-                                    {clearVisible ? (
+                                    { clearVisible ? (
                                         <div className="find-clear">
-                                            <button
-                                                type="button"
-                                                className=""
-                                                onClick={this.handleClearClick.bind(this)}
-                                            >
-                                                Clear
-                                            </button>
+                                            <button type="button" className="" onClick={this.handleClearClick.bind(this)}>Clear</button>
                                         </div>
-                                    ) : null}
+                                    ) : (null)}
                                 </div>
                             </div>
                             {this.state.showReplaceOptionsInSearch ? (
                                 <div className="find-actions">
-                                    <button
-                                        className={'ui basic tiny button ' + findButtonClassDisabled}
-                                        onClick={this.handleSubmit.bind(this)}
-                                    >
-                                        FIND
-                                    </button>
-                                    <button
-                                        className={'ui basic tiny button ' + replaceButtonsClass}
-                                        onClick={this.handleReplaceClick.bind(this)}
-                                    >
-                                        REPLACE
-                                    </button>
-                                    <button
-                                        className={'ui basic tiny button ' + replaceAllButtonsClass}
-                                        onClick={this.handleReplaceAllClick.bind(this)}
-                                    >
-                                        REPLACE ALL
-                                    </button>
+                                    <button className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>FIND</button>
+                                    <button className={"ui basic tiny button " + replaceButtonsClass} onClick={this.handleReplaceClick.bind(this)}>REPLACE</button>
+                                    <button className={"ui basic tiny button " + replaceAllButtonsClass} onClick={this.handleReplaceAllClick.bind(this)}>REPLACE ALL</button>
                                 </div>
-                            ) : (
+                                ) : (
                                 <div className="find-actions">
-                                    <button
-                                        type="button"
-                                        className={'ui basic tiny button ' + findButtonClassDisabled}
-                                        onClick={this.handleSubmit.bind(this)}
-                                    >
-                                        FIND
-                                    </button>
+                                    <button type="button" className={"ui basic tiny button " + findButtonClassDisabled} onClick={this.handleSubmit.bind(this)}>FIND</button>
                                 </div>
-                            )}
+                                )}
                         </div>
                         {this.getResultsHtml()}
                     </div>
                 </div>
-            </div>
-        ) : null;
+
+
+
+        </div> : (null) )
     }
 }
 

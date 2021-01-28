@@ -14,13 +14,26 @@
 abstract class ajaxController extends controller {
 
     /**
+     * ------------------------------------------
+     * Note 2021-01-12
+     * ------------------------------------------
+     *
+     * This field refers to the current job password
+     * which is actually needed by isRevision() function
+     * In near future we should remote it
+     *
+     * @var string|null
+     */
+    protected $received_password;
+
+    /**
      * Carry the result from Executed Controller Action and returned in json format to the Client
      *
      * @var array
      */
     protected $result = [ "errors" => [], "data" => [] ];
-
     protected $id_segment;
+
     protected $split_num = null;
 
     /**
@@ -47,6 +60,16 @@ abstract class ajaxController extends controller {
 
         $this->featureSet = new FeatureSet();
 
+        $filterArgs = array(
+                'current_password' => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+        );
+
+        $__postInput   = (object)filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->received_password = $__postInput->current_password;
     }
 
     /**
@@ -65,13 +88,25 @@ abstract class ajaxController extends controller {
      * @return bool
      */
     public static function isRevision() {
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
-        return $is_revision_url;
+
+        $controller = static::getInstance();
+
+        if (isset($controller->id_job) and isset($controller->received_password)){
+            $jid        = $controller->id_job;
+            $password   = $controller->received_password;
+            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+
+            if ( null === $isRevision ) {
+                $isRevision = CatUtils::getIsRevisionFromReferer();
+            }
+
+            return $isRevision;
+        }
+
+        return CatUtils::getIsRevisionFromReferer();
     }
 
     public function parseIDSegment() {
         @list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
     }
-
 }
