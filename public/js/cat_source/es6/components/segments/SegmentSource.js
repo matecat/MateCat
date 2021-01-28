@@ -520,6 +520,7 @@ class SegmentSource extends React.Component {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
         if (internalClipboard) {
+            e.preventDefault();
             // Get plain text form internalClipboard fragment
             const plainText = internalClipboard.map((block) => block.getText()).join('\n');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
@@ -527,6 +528,7 @@ class SegmentSource extends React.Component {
                 orderedMap: internalClipboard,
                 entitiesMap: entitiesMap
             });
+            e.clipboardData.setData('text/plain', plainText);
             SegmentActions.copyFragmentToClipboard(fragment, plainText);
         }
     };
