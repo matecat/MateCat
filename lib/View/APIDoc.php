@@ -81,6 +81,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 
         $( document ).ready( function () {
 
+            var hash = location.hash;
+
             // Build a system
             window.swaggerUi = SwaggerUIBundle( {
                 url: spec,
@@ -136,7 +138,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                 return false;
 
             } );
-
+            $( '#menuElements li a[href="'+ hash.replace('/', '') +'"]' ).trigger('click');
         } );
 
         /*]]>*/
