@@ -40,7 +40,7 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
         try {
             const matches = _.map(glossaryObj, ( elem ) => (elem[0].raw_segment) ? elem[0].raw_segment: elem[0].segment);
             const escapedMatches = matches.map((match)=>TextUtils.escapeRegExp(match));
-            re = new RegExp( '\b(' + escapedMatches.join('|') + ')\b', "gi" );
+            re = new RegExp( '\\b(' + escapedMatches.join('|') + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {
                 re = new RegExp( '(' + escapedMatches.join('|') + ')', "gi" );
