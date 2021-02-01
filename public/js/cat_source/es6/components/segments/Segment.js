@@ -93,7 +93,7 @@ class Segment extends React.Component {
             $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
 
             //Used by Segment Filter, Comments, Footer, Review extended
-            $(document).trigger('segmentOpened', {segmentId: this.props.segment.original_sid});
+            setTimeout(()=>$(document).trigger('segmentOpened', {segmentId: this.props.segment.original_sid}));
 
             Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section);
             /************/

@@ -1,5 +1,5 @@
 import GlossaryComponent from "../../GlossaryComponents/GlossaryHighlight.component";
-import CompoundDecorator from "../CompoundDecorator";
+import TextUtils from "../../../../utils/textUtils.js";
 import {CompositeDecorator, EditorState} from 'draft-js';
 import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
@@ -39,10 +39,11 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
         let re;
         try {
             const matches = _.map(glossaryObj, ( elem ) => (elem[0].raw_segment) ? elem[0].raw_segment: elem[0].segment);
-            re = new RegExp( '\\b(' + matches.join('|') + ')\\b', "gi" );
+            const text = TextUtils.escapeRegExp(matches.join('|'));
+            re = new RegExp( '\\b(' + text + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {
-                re = new RegExp( '(' + matches.join('|') + ')', "gi" );
+                re = new RegExp( '(' + text + ')', "gi" );
             }
         } catch ( e ) {
             return null;
