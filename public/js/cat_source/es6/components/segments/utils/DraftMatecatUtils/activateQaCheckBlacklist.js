@@ -3,6 +3,7 @@ import {CompositeDecorator, EditorState} from 'draft-js';
 import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import QaCheckBlacklistHighlight from "../../GlossaryComponents/QaCheckBlacklistHighlight.component";
+import TextUtils from "../../../../utils/textUtils";
 
 const activateQaCheckBlacklist = (qaCheckGlossary) => {
 
@@ -31,10 +32,11 @@ const activateQaCheckBlacklist = (qaCheckGlossary) => {
     const createGlossaryRegex = (glossaryArray) => {
         let re;
         try {
-            re = new RegExp( '\\b(' + glossaryArray.join('|') + ')\\b', "gi" );
+            const text = TextUtils.escapeRegExp(glossaryArray.join('|'));
+            re = new RegExp( '\\b(' + text + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {
-                re = new RegExp( '(' + glossaryArray.join('|') + ')', "gi" );
+                re = new RegExp( '(' + text + ')', "gi" );
             }
         } catch ( e ) {
             return null;
