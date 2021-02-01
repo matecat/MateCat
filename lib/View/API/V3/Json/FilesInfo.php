@@ -25,7 +25,6 @@ class FilesInfo {
 
         $result            = [];
         $result[ 'files' ] = [];
-
         $result[ 'first_segment' ] = ($job_first_segment) ? $job_first_segment : reset( $filesStructList )->first_segment;
         $result[ 'last_segment' ]  = ($job_last_segment) ? $job_last_segment : end( $filesStructList )->last_segment;
 
@@ -37,6 +36,7 @@ class FilesInfo {
                     'file_name'      => $fileInfo->file_name,
                     'raw_words'      => $fileInfo->raw_words,
                     'weighted_words' => $fileInfo->weighted_words,
+                    'standard_words' => $fileInfo->standard_words,
                     'metadata'       => $fileInfo->metadata,
             ];
         }
