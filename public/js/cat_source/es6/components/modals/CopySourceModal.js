@@ -57,7 +57,7 @@ class CopySourceModal extends React.Component {
             </div>
             <div className="boxed">
                 <input id="copy_s2t_dont_show" type="checkbox" className="dont_show" ref={(checkbox)=>this.checkbox=checkbox}/>
-                    <label for="copy_s2t_dont_show"> Don't show this dialog again for the current job</label>
+                    <label htmlFor="copy_s2t_dont_show"> Don't show this dialog again for the current job</label>
             </div>
         </div>;
     }
