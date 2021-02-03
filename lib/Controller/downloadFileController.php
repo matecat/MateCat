@@ -437,7 +437,13 @@ class downloadFileController extends downloadController {
         $pathInfo = AbstractFilesStorage::pathinfo_fix( $originalFilename );
         $extension = ($this->isAnIWorkFile($pathInfo[ 'extension' ])) ? $this->overrideExtensionForIWorkFiles($pathInfo[ 'extension' ])  : $pathInfo[ 'extension' ];
 
-        $filename = $pathInfo[ 'filename' ];
+        $filename = '';
+
+        if(isset($pathInfo['dirname']) and $pathInfo['dirname'] != ''){
+            $filename .= $pathInfo['dirname'] . DIRECTORY_SEPARATOR;
+        }
+
+        $filename .= $pathInfo[ 'filename' ];
 
         if($target){
             $filename .= "_" . $target;
