@@ -352,10 +352,10 @@ class downloadFileController extends downloadController {
                     $this->startRemoteFileService( $output_content );
 
                     if ( $this->openOriginalFiles ) {
-                        $this->outputResultForOriginalFiles(); //TODO remove download original from download File // Remove echo
+                        $this->outputResultForOriginalFiles();
                     } else {
                         $this->updateRemoteFiles( $this->getOutputContentsWithZipFiles( $output_content ) );
-                        $this->outputResultForRemoteFiles(); //TODO Remove echo
+                        $this->outputResultForRemoteFiles();
                     }
 
                 } else {
@@ -700,6 +700,7 @@ class downloadFileController extends downloadController {
         foreach ( $output_content as $idFile => $fileInformations ) {
 
             $fileInformations['output_filename'] = $this->generateFilename($fileInformations['output_filename']);
+            $output_content[ $idFile ]['output_filename'] = $fileInformations['output_filename'];
 
             // If this file comes from a ZIP, add it to $zipFiles
             if ( isset( $fileInformations[ 'zipfilename' ] ) ) {
