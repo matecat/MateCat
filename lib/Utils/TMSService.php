@@ -260,7 +260,7 @@ class TMSService {
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
                         "source_lang" => $this->applyFixForChinese($current_tm[ "source_lang" ]),
-                        "target_lang" => $this->applyFixFslacorChinese($current_tm[ "target_lang" ]),
+                        "target_lang" => $this->applyFixForChinese($current_tm[ "target_lang" ]),
                         'completed'   => false
                 );
                 $result[ 'completed' ] = false;
