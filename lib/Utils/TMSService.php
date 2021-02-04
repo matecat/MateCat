@@ -287,7 +287,8 @@ class TMSService {
     }
 
     /**
-     * MyMemory returns "Chinese" for "Chinese Simplified"
+     * MyMemory returns "Chinese" for "Chinese Simplified" and
+     * "Chinese HK" for "Chinese Trad. (Hong Kong)"
      * so we need to fix it
      *
      * @param $lang
@@ -295,7 +296,16 @@ class TMSService {
      * @return string
      */
     private function applyFixForChinese($lang){
-        return ($lang === 'Chinese') ? 'Chinese Simplified' : $lang;
+
+        if($lang === 'Chinese'){
+            return 'Chinese Simplified';
+        }
+
+        if($lang === 'Chinese HK'){
+            return 'Chinese Trad. (Hong Kong)';
+        }
+
+        return $lang;
     }
 
     /**
