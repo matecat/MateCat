@@ -163,7 +163,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     border-radius: 4px;
     background: white;
     width: 100%;
-    min-height: 50px;
+    min-height: 54px;
     margin-bottom: 25px;
     margin-top: 10px;
     -webkit-box-sizing: border-box;
@@ -178,7 +178,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     .user-api-text {
         width: 70%;
         order: 1;
-        textarea {
+        label, textarea {
             resize: none;
             line-height: 20px;
             float: left;
@@ -202,8 +202,25 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         flex: 1 100%;
         line-height: 40px;
         margin-top: 13px;
+        border: 1px solid $greenDefault;
+        background-color: #f7fdf7;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        flex-flow: row;
+        padding: 10px;
+        i {
+            color: $greenDefault;
+            margin-top: 8px;
+            margin-left: 20px;
+        }
+        .user-api-message-content {
+            margin-left: 10px;
+            line-height: 30px;
+        }
     }
-    &.user-api-created textarea {
+    &.user-api-created textarea,
+    &.user-api-created label {
         color: $black;
     }
 

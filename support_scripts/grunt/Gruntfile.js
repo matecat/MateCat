@@ -173,6 +173,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.header.js',
                     basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
                     basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
+                    basePath + 'cat_source/es6/ajax_utils/userAjax.js',
 
                     // basePath + 'cat_source/ui.review.js',
                     //basePath + 'cat_source/sse.js',
