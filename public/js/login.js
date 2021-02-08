@@ -34,7 +34,11 @@ $.extend(APP, {
             if (param) {
                 $.extend(props, param);
             }
-            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile');
+            var style = {
+                width: '700px',
+                maxWidth: '700px'
+            };
+            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile', style);
         });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");

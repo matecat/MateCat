@@ -32,11 +32,11 @@ const activateQaCheckBlacklist = (qaCheckGlossary) => {
     const createGlossaryRegex = (glossaryArray) => {
         let re;
         try {
-            const text = TextUtils.escapeRegExp(glossaryArray.join('|'));
-            re = new RegExp( '\\b(' + text + ')\\b', "gi" );
+            const escapedMatches = glossaryArray.map((match)=>TextUtils.escapeRegExp(match));
+            re = new RegExp( '\\b(' + escapedMatches.join('|') + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {
-                re = new RegExp( '(' + text + ')', "gi" );
+                re = new RegExp( '(' + escapedMatches.join('|') + ')', "gi" );
             }
         } catch ( e ) {
             return null;
