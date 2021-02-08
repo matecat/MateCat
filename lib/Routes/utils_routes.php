@@ -70,3 +70,9 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
+
+$klein->with( '/api/app/api-key', function () {
+    route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );
+    route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
+    route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
+} );
