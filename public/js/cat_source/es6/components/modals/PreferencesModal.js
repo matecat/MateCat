@@ -12,7 +12,16 @@ class PreferencesModal extends React.Component {
 
         this.state = {
             service: this.props.service,
+            credentials: null
         };
+
+        API.USER.getApiKey().done((response)=> {
+            this.setState({
+                credentials: response,
+                credentialsCreated: false,
+                credentialsCopied: false
+            })
+        })
     }
 
     openResetPassword() {
@@ -80,6 +89,67 @@ class PreferencesModal extends React.Component {
                     metadata={this.props.metadata}/>
                 </div>
         }
+    }
+
+    generateKey() {
+        API.USER.createApiKey().done((response)=> {
+            this.setState({
+                credentials: response,
+                credentialsCreated: true
+            })
+        })
+    }
+
+    deleteKey() {
+        API.USER.deleteApiKey().done((response)=> {
+            this.setState({
+                credentials: null,
+                credentialsCreated: false
+            })
+        })
+    }
+
+    copyToClipboard(e) {
+        e.stopPropagation();
+        this.keys.select();
+        this.keys.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        this.setState({
+            credentialsCopied: true
+        })
+    }
+
+
+    getApiKeyHtml() {
+        return <div>
+            <h2>API Key</h2>
+                {this.state.credentials ?
+                    <div className={"user-api " + ((this.state.credentialsCreated ) ? "user-api-created" : "")}>
+                        <div className={"user-api-text"}><textarea  ref={(keys)=>this.keys=keys} rows="1" readOnly={true} value={this.state.credentials.api_key + '-' + this.state.credentials.api_secret}/></div>
+                        {this.state.credentialsCreated ?
+                            <div className={"user-api-buttons"}>
+                                <a onClick={(e)=>this.copyToClipboard(e)} className={'btn-ok copy'}
+                                        data-content="Copied to Clipboard!" data-position="top center">
+                                    <i className="icon-copy icon"/>{this.state.credentialsCopied ? "Copied" :"Copy"}</a>
+                                <a className="btn-ok" onClick={()=>this.deleteKey()}>Delete</a>
+                            </div>:
+                            <div className={"user-api-buttons"}>
+                                <a className="btn-ok" onClick={()=>this.deleteKey()}>Delete</a>
+                            </div>
+                        }
+                        <div className={"user-api-message"}>
+                            <i className="icon-info3 icon"/>Make sure to copy your personal token now. You won’t be able to see it again!
+                        </div>
+                    </div>
+                : (
+                    <div className="user-api">
+                        <label>No API Key associated to your account</label>
+                        <div className='api-key-buttons'>
+                            <a className="btn-ok" onClick={()=>this.generateKey()}>Generate</a>
+                        </div>
+                    </div>
+                )}
+        </div>
     }
 
     render() {
@@ -153,7 +223,7 @@ class PreferencesModal extends React.Component {
                             {gdriveMessage}
 
                         </div>
-
+                        {this.getApiKeyHtml()}
                         {googleDrive}
                         {this.getDqfHtml()}
 

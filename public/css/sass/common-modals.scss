@@ -143,18 +143,70 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .preferences-modal .user-dqf ,
-.preferences-modal .user-gdrive {
+.preferences-modal .user-gdrive
+{
     //border: 1px solid #ccc;
     padding: 10px 0 0 10px;
     border-radius: 4px;
     background: white;
     width: 100%;
-    min-height: 40px;
+    min-height: 50px;
     margin-bottom: 25px;
     margin-top: 10px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+}
+
+.preferences-modal .user-api,
+{
+    border-radius: 4px;
+    background: white;
+    width: 100%;
+    min-height: 50px;
+    margin-bottom: 25px;
+    margin-top: 10px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 10px;
+    flex-flow: row wrap;
+    .user-api-text {
+        width: 70%;
+        order: 1;
+        textarea {
+            resize: none;
+            line-height: 20px;
+            float: left;
+            font-size: 15px;
+            text-align: left;
+            word-wrap: break-word;
+            color: $grey1;
+            white-space: nowrap;
+            width: 100%;
+            border: none;
+            &:focus {
+                outline: none;
+            }
+        }
+    }
+    .user-api-buttons {
+        order: 2;
+    }
+    .user-api-message {
+        order: 3;
+        flex: 1 100%;
+        line-height: 40px;
+        margin-top: 13px;
+    }
+    &.user-api-created textarea {
+        color: $black;
+    }
+
 }
 
 .user-name {
@@ -334,6 +386,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .preferences-modal .user-gdrive > label {
     margin: 4px 10px 10px 95px;
 }
+
 
 .user-menu-flat {
     margin-right: 8px;
