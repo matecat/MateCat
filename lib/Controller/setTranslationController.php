@@ -323,7 +323,10 @@ class setTranslationController extends ajaxController {
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
         $pipeline->addLast( new SprintfToPH() );
 
-        $check = new QA( $pipeline->transform( $this->__postInput[ 'segment' ] ), $pipeline->transform( $this->__postInput[ 'translation' ] ) );
+        $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
+        $trg = CatUtils::removePhTagsFromTargetIfNotPresentInSource($src, $pipeline->transform( $this->__postInput[ 'translation' ] ));
+
+        $check = new QA( $src, $trg );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );

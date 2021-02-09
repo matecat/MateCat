@@ -170,7 +170,7 @@ class getWarningController extends ajaxController {
 
         $Filter                         = Filter::getInstance( $this->featureSet );
         $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
-        $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
+        $this->__postInput->trg_content = CatUtils::removePhTagsFromTargetIfNotPresentInSource($Filter->fromLayer2ToLayer1( $this->__postInput->src_content ), $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content ));
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->setFeatureSet( $this->featureSet );
