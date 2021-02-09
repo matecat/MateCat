@@ -25,7 +25,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-ph',
-        showTooltip: true
+        showTooltip: true,
+        replaceForLexiqa: false
     },
     'ph2': {
         type: 'ph',
@@ -39,7 +40,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-ph',
-        showTooltip: true
+        showTooltip: true,
+        replaceForLexiqa: false
     },
     'ph': {
         type: 'ph',
@@ -53,7 +55,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-ph',
-        showTooltip: true
+        showTooltip: true,
+        replaceForLexiqa: false
     },
     'g': {
         type: 'g',
@@ -68,7 +71,8 @@ const tagSignatures = {
         glossaryAvailable: false,
         style: 'tag-open',
         styleRTL: 'tag-close',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'gCl': {
         type: 'g',
@@ -83,7 +87,8 @@ const tagSignatures = {
         glossaryAvailable: false,
         style: 'tag-close',
         styleRTL: 'tag-open',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'bx': {
         type: 'bx',
@@ -97,7 +102,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'ex': {
         type: 'ex',
@@ -111,7 +117,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'x': {
         type: 'x',
@@ -125,7 +132,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'nbsp':{
         type: 'nbsp',
@@ -140,7 +148,9 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-nbsp',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: true,
+        lexiqaText: " "
     },
     'tab':{
         type: 'tab',
@@ -155,7 +165,8 @@ const tagSignatures = {
         lexiqaAvailable: true,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-tab',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'carriageReturn':{
         type: 'carriageReturn',
@@ -170,7 +181,8 @@ const tagSignatures = {
         lexiqaAvailable: true,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-cr',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     },
     'lineFeed':{
         type: 'lineFeed',
@@ -185,7 +197,8 @@ const tagSignatures = {
         lexiqaAvailable: true,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-lf',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     }
     ,
     'splitPoint':{
@@ -201,7 +214,8 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-split',
-        showTooltip: false
+        showTooltip: false,
+        replaceForLexiqa: false
     }
 };
 
@@ -283,8 +297,17 @@ const getCorrectTag = (tagType, isClosure = false) => {
     }).join()
 }
 
+const isToReplaceForLexiqa = (tagType, isClosure = false) => {
+    return tagSignatures[tagType].isClosure === isClosure && tagSignatures[tagType].type === tagType && tagSignatures[tagType].replaceForLexiqa
+
+}
+
 const getXliffRegExpression = () => {
     return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?&gt;)/gmi;
+}
+
+const getTagSignature = (tagType) => {
+    return tagSignatures[tagType]
 }
 
 export {
@@ -300,5 +323,7 @@ export {
     getCorrectClosureTag,
     getCorrectTag,
     getSplitPointTag,
-    getXliffRegExpression
+    getXliffRegExpression,
+    isToReplaceForLexiqa,
+    getTagSignature
 };
