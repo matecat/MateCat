@@ -152,6 +152,7 @@ class TagEntity extends Component {
                         onMouseLeave={() => tooltipToggle()}
                         onClick={(e) => {
                             e.stopPropagation();
+                            console.log('entityId',entityId)
                             this.onClickBound(entityId, entityPlaceholder);
                             !openSplit && setTimeout(() =>{
                                 SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey);
@@ -246,77 +247,33 @@ class TagEntity extends Component {
 
 
     highlightOnWarnings = () => {
-        //console.log('highlightOnWarnings')
         const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} = this.props;
-        const {warnings, tagMismatch, tagRange, segmentOpened, missingTagsInTarget} = getUpdatedSegmentInfo();
-        const {type: entityType, data: entityData} = contentState.getEntity(entityKey) || {};
-        const {id: entityId, encodedText, openTagId, closeTagId} = entityData || {};
+        const {tagMismatch, segmentOpened} = getUpdatedSegmentInfo();
+        const {data: entityData} = contentState.getEntity(entityKey) || {};
 
         if(!segmentOpened || !tagMismatch) return;
         let tagWarningStyle = '';
         if(tagMismatch.target && tagMismatch.target.length > 0 && isTarget){
-            let tagObject;
             // Todo: Check tag type and tag id instead of string
             tagMismatch.target.forEach(tagString => {
-                // build tag from string
-                //tagObject = DraftMatecatUtils.tagFromString(tagString);
-                /*if(entityType === tagObject.type){
-                    // If tag is closure and openTagId/closeTagId are null, then the tag was added after initial rendering
-                    if(getClosureTag().includes(tagObject.type)){
-                        /!*if(!entityData.openTagId && !entityData.closeTagId){
-                            tagWarningStyle = 'tag-mismatch-error'
-                        }*!/
-                        tagWarningStyle = 'tag-mismatch-error'
-                    }else if(entityData.id === tagObject.data.id){
-                        tagWarningStyle = 'tag-mismatch-error'
-                    }
-                }*/
                 if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-error'
                 }
             });
-        }else if(tagMismatch.source && tagMismatch.source.length > 0 && !isTarget/* && missingTagsInTarget*/){
-            // Find tag and specific Tag ID in missing tags in target array
-            /*const missingTagInError = missingTagsInTarget.filter( tag => {
-                return tag.data.encodedText === encodedText && tag.data.id === entityId
-            });*/
+        }else if(tagMismatch.source && tagMismatch.source.length > 0 && !isTarget){
 
             tagMismatch.source.forEach(tagString => {
-                // build tag from string
-                //tagObject = DraftMatecatUtils.tagFromString(tagString);
-                /*if(entityType === tagObject.type){
-                    // If tag is closure and openTagId/closeTagId are null, then the tag was added after initial rendering
-                    if(getClosureTag().includes(tagObject.type)){
-                        /!*if(!entityData.openTagId && !entityData.closeTagId){
-                            tagWarningStyle = 'tag-mismatch-error'
-                        }*!/
-                        tagWarningStyle = 'tag-mismatch-error'
-                    }else if(entityData.id === tagObject.data.id){
-                        tagWarningStyle = 'tag-mismatch-error'
-                    }
-                }*/
                 if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-error'
                 }
             });
-
-            // Array should contain only one item
-            //if(missingTagInError.length === 1) tagWarningStyle = 'tag-mismatch-error';
-            /*tagMismatch.source.forEach(tagString => {
-                if(entityData.encodedText === tagString){
-                    tagWarningStyle = 'tag-mismatch-error'
-                }
-            });*/
         }else if(tagMismatch.order && isTarget){
             tagMismatch.order.forEach(tagString => {
                 if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-warning'
                 }
             });
-        }/*else if(entityData.id){
-            tagWarningStyle = 'tag-mismatch-error'
-        }*/
-
+        }
         return tagWarningStyle;
 
     };

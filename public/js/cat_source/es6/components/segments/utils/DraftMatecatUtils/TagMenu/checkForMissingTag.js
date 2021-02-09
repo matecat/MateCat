@@ -23,21 +23,22 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
         return tagInSource
     })*/
 
-    // Check which source's tags are missing in target
-    let missingTagInTarget = filteredSourceTagMap.filter( tagInSource => {
-        let found = false;
-        const {data: { id: idSourceTag, name: nameSourceTag, decodedText: decodedTextSourceTag}} = tagInSource;
-        filteredTargetTagMap.forEach( tagInTarget => {
-            const {data: { id: idTargetTag, name: nameTargetTag, decodedText: decodedTextTargetTag}} = tagInTarget;
-            // ph tags doesn't have fixed ID from BE, it will be recomputed on every page refresh
-            if(nameSourceTag === 'ph' &&  nameSourceTag === nameTargetTag && decodedTextTargetTag === decodedTextSourceTag){
-                found = true
-            }else if(nameSourceTag !== 'ph' && idTargetTag === idSourceTag && nameTargetTag === nameSourceTag){
-                found = true;
-            }
+    // Remove target tags from source tags
+    const arraySubtract = (arr1, arr2) => {
+        const arr2Copy = arr2.slice();
+        return arr1.filter(sourceEl => {
+            const {data: { id: idSourceTag, name: nameSourceTag, decodedText: decodedTextSourceTag}} = sourceEl;
+            const idxToRemove = arr2Copy.findIndex(targetEl => {
+                const {data: { id: idTargetTag, name: nameTargetTag, decodedText: decodedTextTargetTag}} = targetEl;
+                return nameTargetTag === 'ph' ?
+                    decodedTextSourceTag === decodedTextTargetTag && nameSourceTag === nameTargetTag
+                    : idTargetTag === idSourceTag && nameSourceTag === nameTargetTag;
+            });
+            if (idxToRemove === -1)  return true;
+            arr2Copy.splice(idxToRemove, 1);
         });
-        return !found;
-    });
+    }
+    let missingTagInTarget = arraySubtract(filteredSourceTagMap, filteredTargetTagMap)
 
     // Sort tag by offset
     missingTagInTarget.sort((a, b) => {return a.offset-b.offset});
