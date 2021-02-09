@@ -128,7 +128,7 @@ class getSegmentsController extends ajaxController {
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
             $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
 
-            $seg[ 'translation' ] = $this->removePhTagsFromTargetIfNotPresentInSource( $seg[ 'segment' ], $seg[ 'translation' ] );
+            $seg[ 'translation' ] = CatUtils::removePhTagsFromTargetIfNotPresentInSource( $seg[ 'segment' ], $seg[ 'translation' ] );
 
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );
@@ -140,38 +140,6 @@ class getSegmentsController extends ajaxController {
         $this->result[ 'data' ][ 'where' ] = $this->where;
 
         $this->result[ 'data' ] = $this->featureSet->filter( 'filterGetSegmentsResult', $this->result[ 'data' ], $this->job );
-    }
-
-    /**
-     * This function removes ph tags from target if they are not present in the source.
-     *
-     * Example:
-     *
-     * SOURCE: MateCat is a free and open source CAT tool (Computer-aided translation), that is a collaborative working platform for translators and project managers.
-     * TARGET: MateCat是一個免費的開源CAT工具（計算機輔助翻譯），它是翻譯人員和項目經理的協作工作平台。&lt;ph id="mtc_1" equiv-text="base64:JS1k"/&gt;
-     *
-     * This function removes &lt;ph id="mtc_1" equiv-text="base64:JS1k"/&gt; from target (because is not present in the source) and restores the original content before sending it to UI
-     *
-     * @param $source
-     * @param $target
-     *
-     * @return mixed
-     */
-    private function removePhTagsFromTargetIfNotPresentInSource( $source, $target ) {
-
-        $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
-        preg_match_all( $regex, $source, $sourcePhMap, PREG_SET_ORDER );
-        preg_match_all( $regex, $target, $targetPhMap, PREG_SET_ORDER );
-
-        foreach ( $targetPhMap as $index => $item ) {
-            if ( !( isset( $sourcePhMap[ $index ] ) and $sourcePhMap[ $index ] === $item ) ) {
-                $html   = htmlentities( "<" ) . $item[ 0 ] . htmlentities( ">" );
-                $value  = base64_decode( $item[ 1 ] );
-                $target = str_replace( $html, $value, $target );
-            }
-        }
-
-        return $target;
     }
 
     private function getOptionalQueryFields() {

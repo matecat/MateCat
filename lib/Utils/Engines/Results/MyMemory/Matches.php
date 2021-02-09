@@ -93,12 +93,12 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'raw_segment' ]     = $match[ 'segment' ];
             $match[ 'segment' ]         = $this->getLayer( $match[ 'segment' ], $layerNum, $dataRefMap );
             $match[ 'raw_translation' ] = $match[ 'translation' ];
-            $match[ 'translation' ]     = $this->getLayer( $match[ 'translation' ], $layerNum, $dataRefMap );
+            $match[ 'translation' ]     = CatUtils::removePhTagsFromTargetIfNotPresentInSource( $match[ 'segment' ], $this->getLayer( $match[ 'translation' ], $layerNum, $dataRefMap ) );
 
         } elseif( count( $this->_args ) >= 5 and !is_array( $this->_args[ 0 ] ) ) {
             $match[ 'segment' ]          = $this->getLayer( $this->_args[ 0 ], $layerNum, $dataRefMap );
             $match[ 'raw_segment' ]      = $this->_args[ 0 ];
-            $match[ 'translation' ]      = $this->getLayer( $this->_args[ 1 ], $layerNum, $dataRefMap );
+            $match[ 'translation' ]      = CatUtils::removePhTagsFromTargetIfNotPresentInSource($match[ 'segment' ], $this->getLayer( $this->_args[ 1 ], $layerNum, $dataRefMap ));
             $match[ 'raw_translation' ]  = $this->_args[ 1 ];
             $match[ 'match' ]            = $this->_args[ 2 ];
             $match[ 'created-by' ]       = $this->_args[ 3 ];

@@ -12,7 +12,6 @@ use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use XliffReplacer\XliffReplacerCallback;
-use XliffReplacer\XliffReplacerFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
