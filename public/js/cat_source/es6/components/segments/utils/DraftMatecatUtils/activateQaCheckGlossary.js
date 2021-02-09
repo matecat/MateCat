@@ -33,11 +33,11 @@ const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
         const matches = _.map(glossaryArray, ( elem ) => (elem.raw_segment) ? elem.raw_segment: elem.segment);
         let re;
         try {
-            const text = TextUtils.escapeRegExp(matches.join('|'));
-            re = new RegExp( '\\b(' + text + ')\\b', "gi" );
+            const escapedMatches = matches.map((match)=>TextUtils.escapeRegExp(match));
+            re = new RegExp( '\\b(' + escapedMatches.join('|') + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {
-                re = new RegExp( '(' + text + ')', "gi" );
+                re = new RegExp( '(' + escapedMatches.join('|') + ')', "gi" );
             }
         } catch ( e ) {
             return null;
