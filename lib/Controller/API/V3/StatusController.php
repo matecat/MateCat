@@ -199,6 +199,9 @@ class StatusController extends KleinController {
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
         foreach ( $this->projectResultSet as $segInfo ) {
 
+            // $this->projectResultSet unique key with jid and password (needed for splitted jobs)
+            $key = $segInfo[ 'jid' ] ."-".$segInfo[ 'jpassword' ];
+
             if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
                 $_total_segments_analyzed += 1;
             }
@@ -222,17 +225,17 @@ class StatusController extends KleinController {
             // save chunks totals data in $this->chunksTotalsCache for getJobTotals() function
             $keyValue = $this->getTotalsArrayKeyName( $segInfo[ 'match_type' ] );
 
-            if ( !isset( $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] ) ) {
-                $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
+            if ( !isset( $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ] ) ) {
+                $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
             }
 
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ $keyValue ]             += $words;
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ $keyValue ]             += $words;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
         }
 
         if ( $_total_wc_standard_analysis == 0 and $this->project->status_analysis == Constants_ProjectStatus::STATUS_FAST_OK ) {
@@ -291,38 +294,47 @@ class StatusController extends KleinController {
         $chunkMetadata->source   = $chunk->source;
         $chunkMetadata->source   = $chunk->source;
         $chunkMetadata->target   = $chunk->target;
-        $chunkMetadata->details  = $this->getChunkDetails( $chunk->id );
+        $chunkMetadata->details  = $this->getChunkDetails( $chunk->id, $chunk->password );
         $chunkMetadata->urls     = $this->getChunkUrls( $chunk );
 
         return $chunkMetadata;
     }
 
     /**
+     * @param $chunkId
+     * @param $chunkPassword
+     *
      * @return \stdClass
      */
-    private function getChunkDetails( $chunkId ) {
+    private function getChunkDetails( $chunkId, $chunkPassword ) {
         $details         = new \stdClass();
-        $details->files  = $this->getProjectFiles( $chunkId );
-        $details->totals = $this->getProjectTotals( $chunkId );
+        $details->files  = $this->getProjectFiles( $chunkId, $chunkPassword );
+        $details->totals = $this->getProjectTotals( $chunkId, $chunkPassword );
 
         return $details;
     }
 
     /**
+     * @param $chunkId
+     * @param $chunkPassword
+     *
      * @return array
      */
-    private function getProjectFiles( $chunkId ) {
-        return array_values( $this->chunksTotalsCache[ $chunkId ] );
+    private function getProjectFiles( $chunkId, $chunkPassword ) {
+        return array_values( $this->chunksTotalsCache[ $chunkId."-".$chunkPassword ] );
     }
 
     /**
+     * @param $chunkId
+     * @param $chunkPassword
+     *
      * @return \stdClass
      */
-    private function getProjectTotals( $chunkId ) {
+    private function getProjectTotals( $chunkId, $chunkPassword ) {
 
         $totals = new \stdClass();
 
-        foreach ( $this->chunksTotalsCache[ $chunkId ] as $id => $chunk ) {
+        foreach ( $this->chunksTotalsCache[ $chunkId."-".$chunkPassword ] as $id => $chunk ) {
             foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
                 $totals->$key += $chunk[ $key ];
             }
