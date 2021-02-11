@@ -1120,19 +1120,19 @@ class ProjectManager {
                     //create an empty var and add the source language too
                     $project_languages = array_merge( (array)$this->projectStructure[ 'target_language' ], (array)$this->projectStructure[ 'source_language' ] );
                     foreach ( $project_languages as $projectTarget ) {
-                        if ( in_array( $this->langService->getLocalizedName( $projectTarget ), $tmTargets ) ) {
+                        if ( in_array( $projectTarget, $tmTargets ) ) {
                             $found = true;
                             break;
                         }
                     }
 
                     //if this TM matches the project lagpair and something has been found
-                    if ( $found and $result[ 'data' ][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+                    if ( $found and $result[ 'data' ][ 'source_lang' ] == $this->projectStructure[ 'source_language' ] ) {
 
                         //the TMX is good to go
                         $this->checkTMX = 0;
 
-                    } elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+                    } elseif ( $found and $result[ 'data' ][ 'target_lang' ] ==  $this->projectStructure[ 'source_language' ] ) {
 
                         /*
                          * This means that the TMX has a srclang as specification in the header. Warn the user.
