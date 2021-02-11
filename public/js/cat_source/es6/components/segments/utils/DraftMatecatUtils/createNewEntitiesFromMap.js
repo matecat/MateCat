@@ -15,6 +15,7 @@ import {
  */
 const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = '') => {
 
+    const excludeReplaceZWSP = ['nbsp'];
     // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
     const tagRange = matchTag(plainText); // absolute offset
     // Apply each entity to the block where it belongs
@@ -31,8 +32,14 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
             const start = tagEntity.offset - slicedLength;
             const end  = start + encodedText.length;
             offsetWithEntities.push({start, tag: tagEntity})
-            plainText = plainText.slice(0,start) + '​' +  placeholder + '​' + plainText.slice(end) //String.fromCharCode(parseInt('200B',16))
-            slicedLength +=  (end - start) - (placeholder.length +2);// add 2 ZWSP
+            if ( !excludeReplaceZWSP.includes(tagName) ) {
+                plainText = plainText.slice( 0, start ) + '​' + placeholder + '​' + plainText.slice( end ) //String.fromCharCode(parseInt('200B',16))
+                slicedLength +=  (end - start) - (placeholder.length +2);// add 2 ZWSP
+            } else  {
+                plainText = plainText.slice( 0, start )  + placeholder + plainText.slice( end ) ;
+                slicedLength +=  (end - start) - (placeholder.length );// add 2 ZWSP
+            }
+
         }
     })
 
@@ -69,10 +76,10 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
 
         offsetWithEntities.forEach( tagEntity =>{
             const {start, tag} = tagEntity;
-
-            if ((start+1) < maxCharsInBlocks &&
-                ((start+1) + tag.data.placeholder.length) <= maxCharsInBlocks &&
-                (start+1) >= (maxCharsInBlocks - contentBlock.getLength()) &&
+            const extraPositionZWSP = excludeReplaceZWSP.includes(tagEntity.tag.data.name) ? 0 : 1;
+            if ((start+extraPositionZWSP) < maxCharsInBlocks &&
+                ((start+extraPositionZWSP) + tag.data.placeholder.length) <= maxCharsInBlocks &&
+                (start+extraPositionZWSP) >= (maxCharsInBlocks - contentBlock.getLength()) &&
                 !excludedTagsType.includes(tag.data.name)
             ){
                 // Clone tag
@@ -81,8 +88,8 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
                 // Each block start with offset = 0 so we have to adapt selection
                 let selectionState = SelectionState.createEmpty(contentBlock.getKey())
                 selectionState = selectionState.merge({
-                    anchorOffset: (start +1 - (maxCharsInBlocks - blockLength)),
-                    focusOffset: ((start +1 + tag.data.placeholder.length) - (maxCharsInBlocks - blockLength))
+                    anchorOffset: (start +extraPositionZWSP - (maxCharsInBlocks - blockLength)),
+                    focusOffset: ((start +extraPositionZWSP + tag.data.placeholder.length) - (maxCharsInBlocks - blockLength))
                 });
                 // Create entity
                 const {type, mutability, data} = tagEntity;

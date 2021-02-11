@@ -41,7 +41,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 64px;
+  max-width: 320px;
   vertical-align: middle;
 }
 .tag {
@@ -163,7 +163,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 64px;
+    max-width: 320px;
     vertical-align: middle;
   }
   /* Used in TM */
@@ -210,7 +210,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 64px;
+      max-width: 320px;
       top: 0;
     }
   }
