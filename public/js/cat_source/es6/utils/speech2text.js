@@ -75,7 +75,7 @@ Speech2Text.init  = function () {
                 var segmentObj = SegmentStore.getSegmentByIdToJS(idSegment) ;
                 if (Speech2Text.recognition) {
 
-                    Speech2Text.targetElement = segmentObj.decodedTranslation;
+                    Speech2Text.targetElement = segmentObj.translation;
                     Speech2Text.sid = segmentObj.sid;
 
                     Speech2Text.microphone.on('click', Speech2Text.clickMicrophone );
@@ -127,7 +127,7 @@ Speech2Text.init  = function () {
                     // Speech2Text.targetElement.html('');
                 } else {
 
-                    Speech2Text.finalTranscript = segment.decodedTranslation + ' ';
+                    Speech2Text.finalTranscript = segment.translation + ' ';
                 }
 
                 Speech2Text.interimTranscript = '';
