@@ -459,7 +459,6 @@ class Editarea extends React.Component {
             isOptionKeyCommand(e)){
             return 'insert-nbsp-tag'; // MacOS
         }else if (e.key === 'ArrowLeft'  && !e.altKey) {
-            console.log('ArrowLeft')
             if (e.shiftKey) {
                 const newSel = this.handleCursorMovement(-1, true, config.isTargetRTL);
                 if(newSel) return 'left-nav-shift';
@@ -468,7 +467,6 @@ class Editarea extends React.Component {
                 if(newSel) return 'left-nav';
             }
         } else if (e.key === 'ArrowRight'  && !e.altKey) {
-            console.log('ArrowRight')
             if (e.shiftKey) {
                 const newSel = this.handleCursorMovement(1, true, config.isTargetRTL);
                 if(newSel) return 'right-nav-shift';
@@ -653,6 +651,7 @@ class Editarea extends React.Component {
 
         // if not on an entity, remove any previous selection highlight
         const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState);
+        let newActiveDecorators = {...activeDecorators};
         // select no tag
         if(!entityKey) setTimeout(() =>{SegmentActions.highlightTags();});
 
@@ -662,15 +661,16 @@ class Editarea extends React.Component {
             // Stop checking decorators while typing...
             editorSync.onComposition = true;
             // ...remove unwanted decorators like lexiqa...
-            if(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]){
+            if(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] && !config.targetIsCJK){
                 editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
+                newActiveDecorators = {
+                    ...newActiveDecorators,
+                    [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+                }
             }
             editorState = EditorState.acceptSelection(editorState, editorState.getSelection().set('hasFocus', true));
             this.setState(prevState => ({
-                activeDecorators: {
-                    ...prevState.activeDecorators,
-                    [DraftMatecatConstants.LEXIQA_DECORATOR]: false
-                },
+                activeDecorators: newActiveDecorators,
                 editorState: editorState
             }), () => {
                 // Reactivate decorators
