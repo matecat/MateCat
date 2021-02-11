@@ -45,7 +45,7 @@ class TMSService {
 
         $this->output_type = 'translation';
 
-        if( $featureSet == null ){
+        if ( $featureSet == null ) {
             $featureSet = new FeatureSet();
         }
         $this->featureSet = $featureSet;
@@ -161,8 +161,7 @@ class TMSService {
 
             return true;
 
-        }
-        else {
+        } else {
             throw new Exception( "Can't find uploaded TMX files", -15 );
         }
 
@@ -210,8 +209,7 @@ class TMSService {
 
             return true;
 
-        }
-        else {
+        } else {
             throw new Exception( "Can't find uploaded Glossary files", -15 );
         }
 
@@ -236,7 +234,7 @@ class TMSService {
         }
 
         $tmx_max_id = 0;
-        $current_tm = array();
+        $current_tm = [];
 
         //scan through memories
         foreach ( $allMemories->responseData[ 'tm' ] as $memory ) {
@@ -249,32 +247,32 @@ class TMSService {
             }
         }
 
-        $result = array();
+        $result = [];
 
         switch ( $current_tm[ 'status' ] ) {
             case "0":
                 //wait for the daemon to process it
                 //LOADING
                 Log::doJsonLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
-                $result[ 'data' ]      = array(
+                $result[ 'data' ]      = [
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
-                        "source_lang" => $this->applyFixForChinese($current_tm[ "source_lang" ]),
-                        "target_lang" => $this->applyFixForChinese($current_tm[ "target_lang" ]),
+                        "source_lang" => $current_tm[ "source_lang" ],
+                        "target_lang" => $current_tm[ "target_lang" ],
                         'completed'   => false
-                );
+                ];
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
                 Log::doJsonLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
-                $result[ 'data' ]      = array(
+                $result[ 'data' ]      = [
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
-                        "source_lang" => $this->applyFixForChinese($current_tm[ "source_lang" ]),
-                        "target_lang" => $this->applyFixForChinese($current_tm[ "target_lang" ]),
+                        "source_lang" => $current_tm[ "source_lang" ],
+                        "target_lang" => $current_tm[ "target_lang" ],
                         'completed'   => true
-                );
+                ];
                 $result[ 'completed' ] = true;
                 break;
             default:
@@ -284,28 +282,6 @@ class TMSService {
 
         return $result;
 
-    }
-
-    /**
-     * MyMemory returns "Chinese" for "Chinese Simplified" and
-     * "Chinese HK" for "Chinese Trad. (Hong Kong)"
-     * so we need to fix it
-     *
-     * @param $lang
-     *
-     * @return string
-     */
-    private function applyFixForChinese($lang){
-
-        if($lang === 'Chinese'){
-            return 'Chinese Simplified';
-        }
-
-        if($lang === 'Chinese HK'){
-            return 'Chinese Trad. (Hong Kong)';
-        }
-
-        return $lang;
     }
 
     /**
@@ -346,7 +322,7 @@ class TMSService {
         return $this;
     }
 
-    public function getTMKey(){
+    public function getTMKey() {
         return $this->tm_key;
     }
 
@@ -392,8 +368,7 @@ class TMSService {
             parse_str( $_download_url[ 'query' ], $secrets );
             list( $_key, $pass ) = array_values( $secrets );
 
-        }
-        else {
+        } else {
 
             throw new Exception( "Critical. Export Creation Failed.", -18 );
 
@@ -415,7 +390,7 @@ class TMSService {
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      */
-    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ){
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ) {
 
         $response = $this->mymemory_engine->emailExport(
                 $this->tm_key,
@@ -433,10 +408,11 @@ class TMSService {
      * @return string
      * @throws Exception
      */
-    public function downloadGlossary(){
+    public function downloadGlossary() {
         $fileName = "/tmp/GLOSS_" . $this->tm_key;
-        $fHandle = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
+        $fHandle  = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
         fclose( $fHandle ); //flush data and close
+
         return $fileName;
     }
 
@@ -456,7 +432,7 @@ class TMSService {
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
-        $Filter = Filter::getInstance( $this->featureSet );
+        $Filter  = Filter::getInstance( $this->featureSet );
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
@@ -482,11 +458,11 @@ class TMSService {
 
             case 'mt' :
                 $hideUnconfirmedRows = false;
-                $result = TMSServiceDao::getMTForTMXExport( $jid, $jPassword );
+                $result              = TMSServiceDao::getMTForTMXExport( $jid, $jPassword );
                 break;
             case 'tm' :
                 $hideUnconfirmedRows = false;
-                $result = TMSServiceDao::getTMForTMXExport( $jid, $jPassword );
+                $result              = TMSServiceDao::getTMForTMXExport( $jid, $jPassword );
                 break;
             case 'translation':
             default:
@@ -497,7 +473,7 @@ class TMSService {
         /**
          * @var $chunks Chunks_ChunkStruct[]
          */
-        $chunks = Chunks_ChunkDao::getByJobID($jid);
+        $chunks = Chunks_ChunkDao::getByJobID( $jid );
 
         foreach ( $result as $k => $row ) {
 
@@ -505,9 +481,9 @@ class TMSService {
              * evaluate the incremental chunk index.
              * If there's more than 1 chunk, add a 'id_chunk' prop to the segment
              */
-            $idChunk = 1;
+            $idChunk         = 1;
             $chunkPropString = '';
-            if(count($chunks) > 1) {
+            if ( count( $chunks ) > 1 ) {
                 foreach ( $chunks as $i => $chunk ) {
                     if ( $row[ 'id_segment' ] >= $chunk->job_first_segment &&
                             $row[ 'id_segment' ] <= $chunk->job_last_segment
@@ -536,20 +512,20 @@ class TMSService {
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . $Filter->fromLayer0ToRawXliff( $row[ 'filename' ] ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
-        '. $chunkPropString . '
-        '. $tmOrigin .'
+        ' . $chunkPropString . '
+        ' . $tmOrigin . '
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'segment' ] ) . '</seg>
         </tuv>';
 
             //if segment is confirmed or we want show all segments
-            if( array_search( $row[ 'status' ],
-                            array(
+            if ( array_search( $row[ 'status' ],
+                            [
                                     Constants_TranslationStatus::STATUS_TRANSLATED,
                                     Constants_TranslationStatus::STATUS_APPROVED,
                                     Constants_TranslationStatus::STATUS_FIXED
-                            )
-                    ) !== false || !$hideUnconfirmedRows ){
+                            ]
+                    ) !== false || !$hideUnconfirmedRows ) {
 
                 $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
@@ -591,9 +567,9 @@ class TMSService {
 
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 15MB */ );
 
-        $csv_fields = array(
+        $csv_fields = [
                 "Source: $sourceLang", "Target: $targetLang"
-        );
+        ];
 
         $tmpFile->fputcsv( $csv_fields );
 
@@ -601,9 +577,9 @@ class TMSService {
 
         foreach ( $result as $k => $row ) {
 
-            $row_array = array(
+            $row_array = [
                     $row[ 'segment' ], $row[ 'translation' ]
-            );
+            ];
 
             $tmpFile->fputcsv( $row_array );
 
