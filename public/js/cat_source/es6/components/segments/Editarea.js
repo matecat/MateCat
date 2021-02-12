@@ -429,6 +429,8 @@ class Editarea extends React.Component {
 
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
+        const {handleCursorMovement} = this;
+
         if((e.keyCode === 84 || e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({triggerText: null});
             return 'toggle-tag-menu';
@@ -460,19 +462,15 @@ class Editarea extends React.Component {
             return 'insert-nbsp-tag'; // MacOS
         }else if (e.key === 'ArrowLeft'  && !e.altKey) {
             if (e.shiftKey) {
-                const newSel = this.handleCursorMovement(-1, true, config.isTargetRTL);
-                if(newSel) return 'left-nav-shift';
+                if(handleCursorMovement(-1, true, config.isTargetRTL)) return 'left-nav-shift';
             } else {
-                const newSel = this.handleCursorMovement(-1, false, config.isTargetRTL);
-                if(newSel) return 'left-nav';
+                if(handleCursorMovement(-1, false, config.isTargetRTL)) return 'left-nav';
             }
         } else if (e.key === 'ArrowRight'  && !e.altKey) {
             if (e.shiftKey) {
-                const newSel = this.handleCursorMovement(1, true, config.isTargetRTL);
-                if(newSel) return 'right-nav-shift';
+                if(handleCursorMovement(1, true, config.isTargetRTL)) return 'right-nav-shift';
             } else {
-                const newSel = this.handleCursorMovement(1, false, config.isTargetRTL);
-                if(newSel) return 'right-nav';
+                if(handleCursorMovement(1, false, config.isTargetRTL)) return 'right-nav';
             }
         }
         return getDefaultKeyBinding(e);
@@ -559,6 +557,9 @@ class Editarea extends React.Component {
     handleCursorMovement = (step, shift = false, isRTL = false) =>{
         const {editorState} = this.state;
         step = isRTL ? step * -1 : step;
+        // When in composition mode avoid setState to let editor commit its "composition state"
+        if(editorState.isInCompositionMode()) return true;
+
         const newState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift, isRTL);
         if(newState) {
             this.setState({editorState: newState});
