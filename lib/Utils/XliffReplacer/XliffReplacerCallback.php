@@ -4,6 +4,7 @@ namespace XliffReplacer;
 
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Ph\PhAnaliser;
 use QA;
 use SubFiltering\Filter;
 use SubFiltering\Filters\DataRefReplace;
@@ -25,6 +26,8 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      */
     private $featureSet;
 
+    private $sourceLang;
+
     /**
      * XliffReplacerCallback constructor.
      *
@@ -33,9 +36,10 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      *
      * @throws \Exception
      */
-    public function __construct( \FeatureSet $featureSet, $targetLang ) {
+    public function __construct( \FeatureSet $featureSet, $sourceLang, $targetLang ) {
         $this->filter     = Filter::getInstance( $featureSet );
         $this->featureSet = $featureSet;
+        $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
     }
 
@@ -44,8 +48,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      */
     public function thereAreErrors( $segment, $translation, array $dataRefMap = [] ) {
 
-        $segment     = $this->filter->fromLayer0ToLayer1( $segment );
-        $translation = \CatUtils::removePhTagsFromTargetIfNotPresentInSource($segment, $this->filter->fromLayer0ToLayer1( $translation ));
+        $phAnaliser = new PhAnaliser(
+                $this->sourceLang,
+                $this->targetLang,
+                $this->filter->fromLayer0ToLayer1( $segment ),
+                $this->filter->fromLayer0ToLayer1( $translation )
+        );
+
+        $segment     = $phAnaliser->getSegment();
+        $translation = $phAnaliser->getTranslation();
 
         //
         // ------------------------------------

@@ -2,6 +2,7 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
+use Ph\PhAnaliser;
 use SubFiltering\Filter;
 use Translations\WarningDao;
 
@@ -168,9 +169,16 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'total' ] = 0;
 
-        $Filter                         = Filter::getInstance( $this->featureSet );
-        $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
-        $this->__postInput->trg_content = CatUtils::removePhTagsFromTargetIfNotPresentInSource($Filter->fromLayer2ToLayer1( $this->__postInput->src_content ), $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content ));
+        $Filter     = Filter::getInstance( $this->featureSet );
+        $phAnaliser = new PhAnaliser(
+                $this->chunk->source,
+                $this->chunk->target,
+                $Filter->fromLayer2ToLayer1( $this->__postInput->src_content ),
+                $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content )
+        );
+
+        $this->__postInput->src_content = $phAnaliser->getSegment();
+        $this->__postInput->trg_content = $phAnaliser->getTranslation();
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->setFeatureSet( $this->featureSet );

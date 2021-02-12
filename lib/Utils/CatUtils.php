@@ -1000,42 +1000,5 @@ class CatUtils {
 
         return $qa->review_password;
     }
-
-    /**
-     * This function removes ph tags from target if they are not present in the source.
-     *
-     * Example:
-     *
-     * SOURCE: MateCat is a free and open source CAT tool (Computer-aided translation), that is a collaborative working platform for translators and project managers.
-     * TARGET: MateCat是一個免費的開源CAT工具（計算機輔助翻譯），它是翻譯人員和項目經理的協作工作平台。&lt;ph id="mtc_1" equiv-text="base64:JS1k"/&gt;
-     *
-     * This function removes &lt;ph id="mtc_1" equiv-text="base64:JS1k"/&gt; from target (because is not present in the source) and restores the original content before sending it to UI
-     *
-     * @param string $source
-     * @param string $target
-     *
-     * @return string
-     */
-    public static function removePhTagsFromTargetIfNotPresentInSource( $source, $target ) {
-
-        $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
-        preg_match_all( $regex, $source, $sourcePhMap, PREG_SET_ORDER );
-        preg_match_all( $regex, $target, $targetPhMap, PREG_SET_ORDER );
-
-        foreach ( $targetPhMap as $index => $item ) {
-            if ( !( isset( $sourcePhMap[ $index ] ) and $sourcePhMap[ $index ] === $item ) ) {
-
-                $html   = [
-                    htmlentities( "<" ) . $item[ 0 ] . htmlentities( ">" ),
-                    "<".$item[ 0 ].">"
-                ];
-
-                $value  = base64_decode( $item[ 1 ] );
-                $target = str_replace( $html, $value, $target );
-            }
-        }
-
-        return $target;
-    }
 }
 

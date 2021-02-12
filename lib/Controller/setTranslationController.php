@@ -6,6 +6,7 @@ use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Ph\PhAnaliser;
 use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -323,8 +324,15 @@ class setTranslationController extends ajaxController {
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
         $pipeline->addLast( new SprintfToPH() );
 
-        $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
-        $trg = CatUtils::removePhTagsFromTargetIfNotPresentInSource($src, $pipeline->transform( $this->__postInput[ 'translation' ] ));
+        $phAnaliser = new PhAnaliser(
+                $this->chunk->source,
+                $this->chunk->target,
+                $pipeline->transform( $this->__postInput[ 'segment' ] ),
+                $pipeline->transform( $this->__postInput[ 'translation' ]
+        ) );
+
+        $src = $phAnaliser->getSegment();
+        $trg = $phAnaliser->getTranslation();
 
         $check = new QA( $src, $trg );
         $check->setFeatureSet( $this->featureSet );

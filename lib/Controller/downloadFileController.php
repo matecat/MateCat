@@ -195,7 +195,7 @@ class downloadFileController extends downloadController {
                 $xsp = new \Matecat\XliffParser\XliffParser();
 
                 // instantiateXliffReplacerCallback
-                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
+                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
 
                 // run xliff replacer
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );

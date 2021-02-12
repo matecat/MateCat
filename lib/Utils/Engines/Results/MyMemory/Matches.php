@@ -1,5 +1,6 @@
 <?php
 
+use Ph\PhAnaliser;
 use SubFiltering\Filter;
 
 class Engines_Results_MyMemory_Matches {
@@ -51,8 +52,8 @@ class Engines_Results_MyMemory_Matches {
 
     }
 
-    public function featureSet( FeatureSet $featureSet = null ){
-       $this->featureSet = $featureSet;
+    public function featureSet( FeatureSet $featureSet = null ) {
+        $this->featureSet = $featureSet;
     }
 
     /**
@@ -63,11 +64,11 @@ class Engines_Results_MyMemory_Matches {
      */
     public function getMatches( $layerNum = 2, $segmentId = null ) {
 
-        $match = [];
+        $match      = [];
         $dataRefMap = [];
 
-        if(null!==$segmentId){
-            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap($segmentId);
+        if ( null !== $segmentId ) {
+            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $segmentId );
         }
 
         if ( count( $this->_args ) == 1 and is_array( $this->_args[ 0 ] ) ) {
@@ -93,12 +94,12 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'raw_segment' ]     = $match[ 'segment' ];
             $match[ 'segment' ]         = $this->getLayer( $match[ 'segment' ], $layerNum, $dataRefMap );
             $match[ 'raw_translation' ] = $match[ 'translation' ];
-            $match[ 'translation' ]     = CatUtils::removePhTagsFromTargetIfNotPresentInSource( $match[ 'segment' ], $this->getLayer( $match[ 'translation' ], $layerNum, $dataRefMap ) );
+            $match[ 'translation' ]     = $this->getLayer( $match[ 'translation' ], $layerNum, $dataRefMap );
 
-        } elseif( count( $this->_args ) >= 5 and !is_array( $this->_args[ 0 ] ) ) {
+        } elseif ( count( $this->_args ) >= 5 and !is_array( $this->_args[ 0 ] ) ) {
             $match[ 'segment' ]          = $this->getLayer( $this->_args[ 0 ], $layerNum, $dataRefMap );
             $match[ 'raw_segment' ]      = $this->_args[ 0 ];
-            $match[ 'translation' ]      = CatUtils::removePhTagsFromTargetIfNotPresentInSource($match[ 'segment' ], $this->getLayer( $this->_args[ 1 ], $layerNum, $dataRefMap ));
+            $match[ 'translation' ]      = $this->getLayer( $this->_args[ 1 ], $layerNum, $dataRefMap );
             $match[ 'raw_translation' ]  = $this->_args[ 1 ];
             $match[ 'match' ]            = $this->_args[ 2 ];
             $match[ 'created-by' ]       = $this->_args[ 3 ];
@@ -106,6 +107,16 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'last-update-date' ] = $this->_args[ 4 ];
             $match[ 'prop' ]             = ( isset( $this->_args[ 5 ] ) ? $this->_args[ 5 ] : [] );
         }
+
+//        $phAnaliser = new PhAnaliser(
+//                $this->sourceLang,
+//                $this->targetLang,
+//                $match[ 'segment' ],
+//                $match[ 'translation' ]
+//        );
+//
+//        $match[ 'segment' ]     = $phAnaliser->getSegment();
+//        $match[ 'translation' ] = $phAnaliser->getTranslation();
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
         $this->create_date      = array_key_exists( 'create-date', $match ) ? $match[ 'create-date' ] : '0000-00-00';
@@ -141,10 +152,10 @@ class Engines_Results_MyMemory_Matches {
      * @return mixed
      * @throws Exception
      */
-    protected function getLayer( $string, $layerNum, array $dataRefMap = [] ){
+    protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
         $filter = Filter::getInstance( $this->featureSet, $dataRefMap );
-        switch( $layerNum ){
+        switch ( $layerNum ) {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string );
                 break;
@@ -168,14 +179,15 @@ class Engines_Results_MyMemory_Matches {
      * @return array
      *
      */
-    protected function toArray(){
+    protected function toArray() {
 
-        $attributes = array();
-        $reflectionClass = new ReflectionObject( $this );
-        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) ;
-        foreach( $publicProperties as $property ) {
+        $attributes       = [];
+        $reflectionClass  = new ReflectionObject( $this );
+        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC );
+        foreach ( $publicProperties as $property ) {
             $attributes[ $property->getName() ] = $property->getValue( $this );
         }
+
         return $attributes;
 
     }
