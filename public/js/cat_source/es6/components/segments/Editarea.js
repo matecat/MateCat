@@ -982,10 +982,21 @@ class Editarea extends React.Component {
         // Use _latestEditorState
         try{
             // Selection
-            const selectionState = this.editor._latestEditorState.getSelection();
+            const latestEditorState = this.editor._latestEditorState;
+            const selectionState = latestEditorState.getSelection();
+            const currentBlockText = latestEditorState
+                .getCurrentContent()
+                .getBlockForKey(selectionState.getFocusKey())
+                .getText();
+            const zwsp = String.fromCharCode(parseInt('200B',16));
+            const selectedTextAfter = currentBlockText.slice(end, end +1);
+            const selectedTextBefore =  currentBlockText.slice(start-1 , start);
+            const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0;
+            const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0;
+
             let newSelection = selectionState.merge({
-                anchorOffset: start -1, // -1 is to catch the zero-width space char placed before every entity
-                focusOffset: end +1, // +1 is to catch the zero-width space char placed after every entity
+                anchorOffset: start - addZwspExtraStepBefore, // -1 is to catch the zero-width space char placed before every entity
+                focusOffset: end + addZwspExtraStepAfter, // +1 is to catch the zero-width space char placed after every entity
             });
             const newEditorState = EditorState.forceSelection(
                 editorState,
