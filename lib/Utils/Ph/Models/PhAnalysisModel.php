@@ -2,7 +2,7 @@
 
 namespace Ph\Models;
 
-use Ph\Helper\PhExtractor;
+use Ph\Helper\PhRegex;
 
 class PhAnalysisModel {
 
@@ -15,7 +15,7 @@ class PhAnalysisModel {
         $this->language = $language;
         $this->before = $before;
         $this->after = $before;
-        $this->tags = PhExtractor::extractToMap($before);
+        $this->tags = PhRegex::extractAll($before);
     }
 
     /**

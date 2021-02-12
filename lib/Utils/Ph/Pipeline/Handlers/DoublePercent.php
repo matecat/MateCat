@@ -3,25 +3,39 @@
 namespace Ph\Pipeline\Handlers;
 
 use Ph\Helper\PhReplacer;
-use Ph\Models\PhAnalysisModel;
-use Ph\Pipeline\Contracts\PipelineHandler;
 
-class DoublePercent implements PipelineHandler {
+class DoublePercent extends AbstractPipelineHandler {
 
     /**
      * @inheritDoc
      */
-    public function handle( PhAnalysisModel $model ) {
+    public function handle( array $models ) {
 
-        foreach ( $model->getTags() as $index => $ph ) {
+        $segment = $models['segment'];
+        $translation = $models['translation'];
 
-            $value  = base64_decode( $ph[ 1 ] );
-
-            if($value === '%%'){
-                $model->setAfter(PhReplacer::replaceOriginalContent($model, $ph));
+        // replace all %% present in segment and in translation
+        foreach ( $segment->getTags() as $index => $ph ) {
+            if($this->isAPhToBeReplaced($ph[ 1 ], '%%', $segment->getLanguage())){
+                $segment->setAfter(PhReplacer::replaceOriginalContent($segment, $ph[0], $ph[1]));
+                $models['segment'] = $segment;
             }
         }
 
-        return $model;
+        foreach ( $translation->getTags() as $index => $ph ) {
+            if($this->isAPhToBeReplaced($ph[ 1 ], '%%', $translation->getLanguage())){
+                $translation->setAfter(PhReplacer::replaceOriginalContent($translation, $ph[0], $ph[1]));
+                $models['translation'] = $translation;
+            }
+        }
+
+        return $models;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function isAllowedLanguage( $language ) {
+        return true; // all language allowed
     }
 }

@@ -3,33 +3,41 @@
 namespace Ph\Pipeline;
 
 use Ph\Models\PhAnalysisModel;
-use Ph\Pipeline\Contracts\PipelineHandler;
+use Ph\Pipeline\Handlers\AbstractPipelineHandler;
 
 class Pipeline {
 
     /**
-     * @var PipelineHandler[]
+     * @var AbstractPipelineHandler[]
      */
     private $handlers = [];
 
     /**
-     * @param PipelineHandler $element
+     * @param AbstractPipelineHandler $element
      */
-    public function add( PipelineHandler $element) {
+    public function add( AbstractPipelineHandler $element ) {
         $this->handlers[] = $element;
     }
 
     /**
-     * @param PhAnalysisModel $model
+     * @param PhAnalysisModel $segment
+     * @param PhAnalysisModel $translation
      *
-     * @return PhAnalysisModel
+     * @return PhAnalysisModel[]
      */
-    public function execute(PhAnalysisModel $model){
+    public function execute( PhAnalysisModel $segment, PhAnalysisModel $translation ) {
 
-        foreach ( $this->handlers as $handler){
-            $model = $handler->handle($model);
+        $models = [
+              'segment' => $segment,
+              'translation' => $translation,
+        ];
+
+        foreach ( $this->handlers as $handler ) {
+            if($handler instanceof AbstractPipelineHandler){
+                $models = $handler->handle( $models );
+            }
         }
 
-        return $model;
+        return $models;
     }
 }

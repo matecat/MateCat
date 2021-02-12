@@ -10,19 +10,18 @@ class PhReplacer {
 
     /**
      * @param PhAnalysisModel $model
-     * @param array           $ph
+     * @param string          $phContent
+     * @param string          $base64Value
      *
      * @return string
      */
-    public static function replaceOriginalContent(PhAnalysisModel $model, array $ph = [])
-    {
-        $value  = base64_decode( $ph[ 1 ] );
-
-        $html   = [
-                htmlentities( "<" ) . $ph[0] . htmlentities( ">" ),
-                "<".$ph[0].">"
+    public static function replaceOriginalContent( PhAnalysisModel $model, $phContent, $base64Value ) {
+        $value = base64_decode( $base64Value );
+        $html  = [
+                htmlentities( "<" ) . $phContent . htmlentities( ">" ),
+                "<" . $phContent . ">"
         ];
 
-        return str_replace( $html, $value,  $model->getAfter());
+        return str_replace( $html, $value, $model->getAfter() );
     }
 }

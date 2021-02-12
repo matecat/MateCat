@@ -5,6 +5,7 @@ namespace Ph;
 use Ph\Models\PhAnalysisModel;
 use Ph\Pipeline\Handlers\DoublePercent;
 use Ph\Pipeline\Handlers\PercentBan;
+use Ph\Pipeline\Handlers\PercentIge;
 
 class PhAnaliser {
 
@@ -31,13 +32,16 @@ class PhAnaliser {
      *
      * PhAnaliser constructor.
      */
-    public function __construct($source, $target, $segment, $translation) {
+    public function __construct( $source, $target, $segment, $translation ) {
         $this->pipeline = $this->createPipeline();
 
-        $a = $this->pipeline->execute(new PhAnalysisModel($source, $segment));
-        $b = $this->pipeline->execute(new PhAnalysisModel($target, $translation));
+        $segmentModel     = new PhAnalysisModel( $source, $segment );
+        $translationModel = new PhAnalysisModel( $target, $translation );
 
-        $this->compare($a, $b);
+        $models = $this->pipeline->execute( $segmentModel, $translationModel );
+
+        $this->segment     = $models[ 'segment' ];
+        $this->translation = $models[ 'translation' ];
     }
 
     /**
@@ -45,20 +49,11 @@ class PhAnaliser {
      */
     private function createPipeline() {
         $pipeline = new Pipeline\Pipeline();
-        $pipeline->add(new DoublePercent());
-        $pipeline->add(new PercentBan());
+        $pipeline->add( new DoublePercent() );
+        $pipeline->add( new PercentBan() );
+        $pipeline->add( new PercentIge() );
 
         return $pipeline;
-    }
-
-    /**
-     * @param PhAnalysisModel $segment
-     * @param PhAnalysisModel $target
-     */
-    private function compare(PhAnalysisModel $segment, PhAnalysisModel $target)
-    {
-        $this->segment = $segment;
-        $this->translation = $target;
     }
 
     /**

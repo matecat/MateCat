@@ -1,42 +1,65 @@
 <?php
 
-
 namespace Ph\Pipeline\Handlers;
 
-
+use Ph\Helper\PhRegex;
 use Ph\Helper\PhReplacer;
-use Ph\Models\PhAnalysisModel;
-use Ph\Pipeline\Contracts\PipelineHandler;
 
-class PercentBan implements PipelineHandler {
+class PercentBan extends AbstractPipelineHandler {
 
     /**
      * @inheritDoc
      */
-    public function handle( PhAnalysisModel $model ) {
+    public function handle( array $models ) {
 
-        foreach ( $model->getTags() as $index => $ph ) {
+        $segment = $models['segment'];
+        $translation = $models['translation'];
 
-            $value  = base64_decode( $ph[ 1 ] );
+        // replace all '%-ban' present in segment
+        foreach ( $segment->getTags() as $index => $ph ) {
+            if($this->isAPhToBeReplaced($ph[ 1 ], '%-ban', $segment->getLanguage())){
+                $segment->setAfter(PhReplacer::replaceOriginalContent($segment, $ph[0], $ph[1]));
+                $models['segment'] = $segment;
 
-            if($value === '%-ban' and in_array($model->getLanguage(), $this->allowedLanguages())){
-                $model->setAfter(PhReplacer::replaceOriginalContent($model, $ph));
+                // loop all ph tags in translation with '%-ban' value
+                foreach (PhRegex::extractByContent($translation->getAfter(), $ph[ 1 ]) as $match){
+                    $translation->setAfter(PhReplacer::replaceOriginalContent($translation, $match[0], $ph[1]));
+                    $models['translation'] = $translation;
+                }
             }
         }
 
-        return $model;
+        // replace all '%-ban'  present in translation
+        foreach ( $translation->getTags() as $index => $ph ) {
+            if($this->isAPhToBeReplaced($ph[ 1 ], '%-ban', $translation->getLanguage())){
+                $translation->setAfter(PhReplacer::replaceOriginalContent($translation, $ph[0], $ph[1]));
+                $models['translation'] = $translation;
+
+                // loop all ph tags in segment with '%-ban' value
+                foreach (PhRegex::extractByContent($segment->getAfter(), $ph[ 1 ]) as $match){
+                    $segment->setAfter(PhReplacer::replaceOriginalContent($segment, $match[0], $ph[1]));
+                    $models['segment'] = $segment;
+                }
+            }
+        }
+
+        return $models;
     }
 
     /**
-     * @return array
+     * @param $language
+     *
+     * @return bool
      */
-    private function allowedLanguages()
+    protected function isAllowedLanguage( $language)
     {
-        return [
+        $allowed = [
                 'az',
                 'az-AZ',
                 'hu',
                 'hu-HU'
         ];
+
+        return in_array($language, $allowed);
     }
 }
