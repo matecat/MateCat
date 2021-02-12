@@ -382,7 +382,7 @@ const SegmentActions = {
         let currentSegment = SegmentStore.getCurrentSegment();
 
         if ( currentSegment ) {
-            let source = currentSegment.segment;
+            let source = currentSegment.updatedSource;
             let sid = currentSegment.sid;
             // Escape html
             source = unescapeHTMLLeaveTags(source);
