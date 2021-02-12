@@ -7,6 +7,13 @@ use Ph\Pipeline\Handlers\DoublePercent;
 use Ph\Pipeline\Handlers\PercentBan;
 use Ph\Pipeline\Handlers\PercentIge;
 
+/**
+ * This class removes unnecessary ph tags from
+ * segment and translations before rendering them
+ *
+ * Class PhAnaliser
+ * @package Ph
+ */
 class PhAnaliser {
 
     /**

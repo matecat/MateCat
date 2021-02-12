@@ -20,6 +20,12 @@ class PhAnaliserTest extends AbstractTest {
 
         $this->assertEquals( 'Lorem ipsum dolor %%', $phAnaliser->getSegment()->getAfter() );
         $this->assertEquals( 'Lorem ipsum dolor facium %% %%', $phAnaliser->getTranslation()->getAfter() );
+
+        $translation = '&lt;ph id="mtc_1" equiv-text="base64:JTEkcw=="/&gt;: For groups of &lt;ph id="mtc_2" equiv-text="base64:JTIkcw=="/&gt; to &lt;ph id="mtc_3" equiv-text="base64:JTMkcw=="/&gt; guests, guests will receive a &lt;ph id="mtc_4" equiv-text="base64:JTQkcw=="/&gt; percent discount &lt;ph id="mtc_5" equiv-text="base64:JSU="/&gt;';
+
+        $phAnaliser = new PhAnaliser( $source, $target, $segment, $translation );
+
+        $this->assertEquals( '&lt;ph id="mtc_1" equiv-text="base64:JTEkcw=="/&gt;: For groups of &lt;ph id="mtc_2" equiv-text="base64:JTIkcw=="/&gt; to &lt;ph id="mtc_3" equiv-text="base64:JTMkcw=="/&gt; guests, guests will receive a &lt;ph id="mtc_4" equiv-text="base64:JTQkcw=="/&gt; percent discount %%', $phAnaliser->getTranslation()->getAfter() );
     }
 
     /**

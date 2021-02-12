@@ -177,8 +177,8 @@ class getWarningController extends ajaxController {
                 $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content )
         );
 
-        $this->__postInput->src_content = $phAnaliser->getSegment();
-        $this->__postInput->trg_content = $phAnaliser->getTranslation();
+        $this->__postInput->src_content = $phAnaliser->getSegment()->getAfter();
+        $this->__postInput->trg_content = $phAnaliser->getTranslation()->getAfter();
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->setFeatureSet( $this->featureSet );

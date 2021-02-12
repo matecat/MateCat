@@ -38,6 +38,8 @@ class PercentIge extends AbstractPipelineHandler {
     protected function isAllowedLanguage( $language ) {
         $allowed = [
                 'de',
+                'de-AT',
+                'de-CH',
                 'de-DE',
         ];
 

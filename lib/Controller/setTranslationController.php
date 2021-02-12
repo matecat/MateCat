@@ -331,8 +331,8 @@ class setTranslationController extends ajaxController {
                 $pipeline->transform( $this->__postInput[ 'translation' ]
         ) );
 
-        $src = $phAnaliser->getSegment();
-        $trg = $phAnaliser->getTranslation();
+        $src = $phAnaliser->getSegment()->getAfter();
+        $trg = $phAnaliser->getTranslation()->getAfter();
 
         $check = new QA( $src, $trg );
         $check->setFeatureSet( $this->featureSet );

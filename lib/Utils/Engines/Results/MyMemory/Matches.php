@@ -62,7 +62,7 @@ class Engines_Results_MyMemory_Matches {
      * @return array
      * @throws Exception
      */
-    public function getMatches( $layerNum = 2, $segmentId = null ) {
+    public function getMatches( $layerNum = 2, $segmentId = null, $source = null, $target = null ) {
 
         $match      = [];
         $dataRefMap = [];
@@ -108,15 +108,17 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'prop' ]             = ( isset( $this->_args[ 5 ] ) ? $this->_args[ 5 ] : [] );
         }
 
-//        $phAnaliser = new PhAnaliser(
-//                $this->sourceLang,
-//                $this->targetLang,
-//                $match[ 'segment' ],
-//                $match[ 'translation' ]
-//        );
-//
-//        $match[ 'segment' ]     = $phAnaliser->getSegment();
-//        $match[ 'translation' ] = $phAnaliser->getTranslation();
+        if($source and $target){
+            $phAnaliser = new PhAnaliser(
+                    $source,
+                    $target,
+                    $match[ 'segment' ],
+                    $match[ 'translation' ]
+            );
+
+            $match[ 'segment' ]     = $phAnaliser->getSegment();
+            $match[ 'translation' ] = $phAnaliser->getTranslation();
+        }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
         $this->create_date      = array_key_exists( 'create-date', $match ) ? $match[ 'create-date' ] : '0000-00-00';

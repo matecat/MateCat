@@ -55,8 +55,8 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
                 $this->filter->fromLayer0ToLayer1( $translation )
         );
 
-        $segment     = $phAnaliser->getSegment();
-        $translation = $phAnaliser->getTranslation();
+        $segment     = $phAnaliser->getSegment()->getAfter();
+        $translation = $phAnaliser->getTranslation()->getAfter();
 
         //
         // ------------------------------------

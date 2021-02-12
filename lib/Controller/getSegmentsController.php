@@ -136,8 +136,8 @@ class getSegmentsController extends ajaxController {
                     $seg[ 'translation' ]
             );
 
-            $seg[ 'segment' ] = $phAnaliser->getSegment();
-            $seg[ 'translation' ] = $phAnaliser->getTranslation();
+            $seg[ 'segment' ] = $phAnaliser->getSegment()->getAfter();
+            $seg[ 'translation' ] = $phAnaliser->getTranslation()->getAfter();
 
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );
