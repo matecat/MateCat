@@ -12,33 +12,33 @@ class PercentBan extends AbstractPipelineHandler {
      */
     public function handle( array $models ) {
 
-        $segment = $models['segment'];
-        $translation = $models['translation'];
+        $segment     = $models[ 'segment' ];
+        $translation = $models[ 'translation' ];
 
         // replace all '%-ban' present in segment
         foreach ( $segment->getTags() as $index => $ph ) {
-            if($this->isAPhToBeReplaced($ph[ 1 ], '%-ban', $segment->getLanguage())){
-                $segment->setAfter(PhReplacer::replaceOriginalContent($segment, $ph[0], $ph[1]));
-                $models['segment'] = $segment;
+            if ( $this->isAPhToBeReplaced( $ph[ 2 ], '%-ban', $segment->getLanguage() ) ) {
+                PhReplacer::replaceOriginalContentFromBase64Decoded( $segment, $ph[ 0 ], $ph[ 2 ] );
+                $models[ 'segment' ] = $segment;
 
                 // loop all ph tags in translation with '%-ban' value
-                foreach (PhRegex::extractByContent($translation->getAfter(), $ph[ 1 ]) as $match){
-                    $translation->setAfter(PhReplacer::replaceOriginalContent($translation, $match[0], $ph[1]));
-                    $models['translation'] = $translation;
+                foreach ( PhRegex::extractByContent( $translation->getAfter(), $ph[ 2 ] ) as $match ) {
+                    PhReplacer::replaceOriginalContentFromBase64Decoded( $translation, $match[ 0 ], $ph[ 2 ] );
+                    $models[ 'translation' ] = $translation;
                 }
             }
         }
 
         // replace all '%-ban'  present in translation
         foreach ( $translation->getTags() as $index => $ph ) {
-            if($this->isAPhToBeReplaced($ph[ 1 ], '%-ban', $translation->getLanguage())){
-                $translation->setAfter(PhReplacer::replaceOriginalContent($translation, $ph[0], $ph[1]));
-                $models['translation'] = $translation;
+            if ( $this->isAPhToBeReplaced( $ph[ 2 ], '%-ban', $translation->getLanguage() ) ) {
+                PhReplacer::replaceOriginalContentFromBase64Decoded( $translation, $ph[ 0 ], $ph[ 2 ] );
+                $models[ 'translation' ] = $translation;
 
                 // loop all ph tags in segment with '%-ban' value
-                foreach (PhRegex::extractByContent($segment->getAfter(), $ph[ 1 ]) as $match){
-                    $segment->setAfter(PhReplacer::replaceOriginalContent($segment, $match[0], $ph[1]));
-                    $models['segment'] = $segment;
+                foreach ( PhRegex::extractByContent( $segment->getAfter(), $ph[ 2 ] ) as $match ) {
+                    PhReplacer::replaceOriginalContentFromBase64Decoded( $segment, $match[ 0 ], $ph[ 2 ] );
+                    $models[ 'segment' ] = $segment;
                 }
             }
         }
@@ -51,8 +51,7 @@ class PercentBan extends AbstractPipelineHandler {
      *
      * @return bool
      */
-    protected function isAllowedLanguage( $language)
-    {
+    protected function isAllowedLanguage( $language ) {
         $allowed = [
                 'az',
                 'az-AZ',
@@ -60,6 +59,6 @@ class PercentBan extends AbstractPipelineHandler {
                 'hu-HU'
         ];
 
-        return in_array($language, $allowed);
+        return in_array( $language, $allowed );
     }
 }

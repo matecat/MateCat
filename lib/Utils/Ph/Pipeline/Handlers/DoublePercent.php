@@ -11,21 +11,21 @@ class DoublePercent extends AbstractPipelineHandler {
      */
     public function handle( array $models ) {
 
-        $segment = $models['segment'];
-        $translation = $models['translation'];
+        $segment     = $models[ 'segment' ];
+        $translation = $models[ 'translation' ];
 
         // replace all %% present in segment and in translation
         foreach ( $segment->getTags() as $index => $ph ) {
-            if($this->isAPhToBeReplaced($ph[ 1 ], '%%', $segment->getLanguage())){
-                $segment->setAfter(PhReplacer::replaceOriginalContent($segment, $ph[0], $ph[1]));
-                $models['segment'] = $segment;
+            if ( $this->isAPhToBeReplaced( $ph[ 2 ], '%%', $segment->getLanguage() ) ) {
+                PhReplacer::replaceOriginalContentFromBase64Decoded( $segment, $ph[ 0 ], $ph[ 2 ] );
+                $models[ 'segment' ] = $segment;
             }
         }
 
         foreach ( $translation->getTags() as $index => $ph ) {
-            if($this->isAPhToBeReplaced($ph[ 1 ], '%%', $translation->getLanguage())){
-                $translation->setAfter(PhReplacer::replaceOriginalContent($translation, $ph[0], $ph[1]));
-                $models['translation'] = $translation;
+            if ( $this->isAPhToBeReplaced( $ph[ 2 ], '%%', $translation->getLanguage() ) ) {
+                PhReplacer::replaceOriginalContentFromBase64Decoded( $translation, $ph[ 0 ], $ph[ 2 ] );
+                $models[ 'translation' ] = $translation;
             }
         }
 

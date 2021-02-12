@@ -18,15 +18,13 @@ class PercentIge extends AbstractPipelineHandler {
         // replace all '%ige' present in segment or in translation
         if($this->isAllowedLanguage($segment->getLanguage()) or $this->isAllowedLanguage($translation->getLanguage())){
             foreach (PhRegex::extractPercentIge($segment->getAfter()) as $ige){
-                $a = str_replace($ige[0], "%ige", $segment->getAfter());
-                $segment->setAfter($a);
+                PhReplacer::replaceOriginalContentFromPlainContent($segment, $ige[0], "%ige");
                 $models['segment'] = $segment;
             }
 
             // replace all '%ige' present in translation
             foreach (PhRegex::extractPercentIge($translation->getAfter()) as $ige){
-                $a = str_replace($ige[0], "%ige", $translation->getAfter());
-                $translation->setAfter($a);
+                PhReplacer::replaceOriginalContentFromPlainContent($translation, $ige[0], "%ige");
                 $models['translation'] = $translation;
             }
         }

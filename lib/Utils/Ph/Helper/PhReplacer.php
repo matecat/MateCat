@@ -13,15 +13,27 @@ class PhReplacer {
      * @param string          $phContent
      * @param string          $base64Value
      *
-     * @return string
+     * @return PhAnalysisModel
      */
-    public static function replaceOriginalContent( PhAnalysisModel $model, $phContent, $base64Value ) {
-        $value = base64_decode( $base64Value );
-        $html  = [
-                htmlentities( "<" ) . $phContent . htmlentities( ">" ),
-                "<" . $phContent . ">"
-        ];
+    public static function replaceOriginalContentFromBase64Decoded( PhAnalysisModel $model, $phContent, $base64Value ) {
+        $value   = base64_decode( $base64Value );
+        $replace = str_replace( $phContent, $value, $model->getAfter() );
+        $model->setAfter( $replace );
 
-        return str_replace( $html, $value, $model->getAfter() );
+        return $model;
+    }
+
+    /**
+     * @param PhAnalysisModel $model
+     * @param string          $phContent
+     * @param string          $value
+     *
+     * @return PhAnalysisModel
+     */
+    public static function replaceOriginalContentFromPlainContent( PhAnalysisModel $model, $phContent, $value ) {
+        $replace = str_replace( $phContent, $value, $model->getAfter() );
+        $model->setAfter( $replace );
+
+        return $model;
     }
 }

@@ -7,6 +7,24 @@ class PhAnaliserTest extends AbstractTest {
     /**
      * @test
      */
+    public function removeDoublePercent() {
+
+        // JSU= === %%
+
+        $source      = "it-IT";
+        $target      = "en-US";
+        $segment     = 'Lorem ipsum dolor <ph id="mtc_1" equiv-text="base64:JSU="/>';
+        $translation = 'Lorem ipsum dolor facium <ph id="mtc_1" equiv-text="base64:JSU="/> <ph id="mtc_1" equiv-text="base64:JSU="/>';
+
+        $phAnaliser = new PhAnaliser( $source, $target, $segment, $translation );
+
+        $this->assertEquals( 'Lorem ipsum dolor %%', $phAnaliser->getSegment()->getAfter() );
+        $this->assertEquals( 'Lorem ipsum dolor facium %% %%', $phAnaliser->getTranslation()->getAfter() );
+    }
+
+    /**
+     * @test
+     */
     public function removePercentIge() {
 
         // JWk= === %i
@@ -35,19 +53,29 @@ class PhAnaliserTest extends AbstractTest {
     /**
      * @test
      */
-    public function removeDoublePercent() {
+    public function doNotRemovePercentIge() {
 
-        // JSU= === %%
+        // JWk= === %i
 
         $source      = "it-IT";
         $target      = "en-US";
-        $segment     = 'Lorem ipsum dolor <ph id="mtc_1" equiv-text="base64:JSU="/>';
-        $translation = 'Lorem ipsum dolor facium <ph id="mtc_1" equiv-text="base64:JSU="/> <ph id="mtc_1" equiv-text="base64:JSU="/>';
+        $segment     = 'Lorem ipsum dolor 100 <ph id="mtc_1" equiv-text="base64:JWk="/>ge';
+        $translation = 'Lorem ipsum dolor facium 100 <ph id="mtc_1" equiv-text="base64:JWk="/>ge';
 
         $phAnaliser = new PhAnaliser( $source, $target, $segment, $translation );
 
-        $this->assertEquals( 'Lorem ipsum dolor %%', $phAnaliser->getSegment()->getAfter() );
-        $this->assertEquals( 'Lorem ipsum dolor facium %% %%', $phAnaliser->getTranslation()->getAfter() );
+        $this->assertEquals( 'Lorem ipsum dolor 100 <ph id="mtc_1" equiv-text="base64:JWk="/>ge', $phAnaliser->getSegment()->getAfter() );
+        $this->assertEquals( 'Lorem ipsum dolor facium 100 <ph id="mtc_1" equiv-text="base64:JWk="/>ge', $phAnaliser->getTranslation()->getAfter() );
+
+        $source      = "de-DE";
+        $target      = "en-US";
+        $segment     = 'Lorem ipsum dolor 100 <ph id="mtc_1" equiv-text="base64:JWk="/> another text.';
+        $translation = 'Lorem ipsum dolor facium 100 <ph id="mtc_1" equiv-text="base64:JWk="/> another text.';
+
+        $phAnaliser = new PhAnaliser( $source, $target, $segment, $translation );
+
+        $this->assertEquals( 'Lorem ipsum dolor 100 <ph id="mtc_1" equiv-text="base64:JWk="/> another text.', $phAnaliser->getSegment()->getAfter() );
+        $this->assertEquals( 'Lorem ipsum dolor facium 100 <ph id="mtc_1" equiv-text="base64:JWk="/> another text.', $phAnaliser->getTranslation()->getAfter() );
     }
 
     /**

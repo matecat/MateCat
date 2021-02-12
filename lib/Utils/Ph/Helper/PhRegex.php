@@ -10,8 +10,7 @@ class PhRegex {
      * @return array
      */
     public static function extractAll( $string ) {
-
-        $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
+        $regex = '/(<|%lt;)ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/(>|%gt;)/';
 
         return self::getResults($regex, $string);
     }
@@ -23,7 +22,7 @@ class PhRegex {
      * @return array
      */
     public static function extractByContent($string, $base64Value) {
-        $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:".$base64Value."[\"']\s*/>";
+        $regex = '/(<|%lt;)ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:'.$base64Value.'["\']\s*\/(>|%gt;)/';
 
         return self::getResults($regex, $string);
     }
