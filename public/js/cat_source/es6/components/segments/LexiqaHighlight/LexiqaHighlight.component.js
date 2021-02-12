@@ -62,7 +62,7 @@ class LexiqaHighlight extends Component {
         const { showTooltip } = this.state;
         const { segmentOpened } = getUpdatedSegmentInfo();
         const warning = this.getWarning();
-        return warning ? <div className="lexiqahighlight"
+        return warning && warning.messages ? <div className="lexiqahighlight"
                  onMouseEnter={() => this.showTooltip(300)}
                  onMouseLeave={() => this.hideTooltip(300)}>
                 {showTooltip && segmentOpened && warning && warning.messages && <LexiqaTooltipInfo messages={warning.messages}/>}
