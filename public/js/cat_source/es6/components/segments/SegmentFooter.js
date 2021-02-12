@@ -64,8 +64,8 @@ class SegmentFooter extends React.Component {
                 label : 'Messages',
                 code : 'notes',
                 tab_class : 'segment-notes',
-                enabled : false,
-                visible : false,
+                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
                 open : false,
                 elements : []
             },
@@ -117,6 +117,10 @@ class SegmentFooter extends React.Component {
             tabs.alternatives.enabled = !!(this.props.segment.alternatives && _.size(this.props.segment.alternatives) > 0);
             tabs.alternatives.open = !!(this.props.segment.alternatives && _.size(this.props.segment.alternatives) > 0);
         }
+        if ( this.props.segment.notes && this.props.segment.notes.length > 0 )  {
+            tabs.alternatives.visible = !!(this.props.segment.notes && this.props.segment.notes.length > 0);
+            tabs.alternatives.enabled = !!(this.props.segment.notes && this.props.segment.notes.length > 0);
+        }
         return allTabs
     }
 
@@ -156,7 +160,6 @@ class SegmentFooter extends React.Component {
                     id_segment = {this.props.sid}
                     segment = {this.props.segment}
                 />;
-                break;
             case 'cc':
                 return <SegmentTabConcordance
                     key={"container_" + tab.code}
@@ -166,7 +169,6 @@ class SegmentFooter extends React.Component {
                     id_segment = {this.props.sid}
                     segment = {this.props.segment}
                 />;
-                break;
             case 'gl':
                 return <SegmentTabGlossary
                     key={"container_" + tab.code}
@@ -175,7 +177,6 @@ class SegmentFooter extends React.Component {
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}
                     segment = {this.props.segment}/>;
-                break;
             case 'al':
                 return <SegmentTabConflicts
                     key={"container_" + tab.code}
@@ -185,7 +186,6 @@ class SegmentFooter extends React.Component {
                     segment = {this.props.segment}
                     id_segment = {this.props.sid}
                 />;
-                break;
             case 'notes':
                 return <SegmentTabMessages
                     key={"container_" + tab.code}
@@ -198,7 +198,6 @@ class SegmentFooter extends React.Component {
                     segmentSource = {this.props.segment.segment}
                     segment = {this.props.segment}
                 />;
-                break;
             case 'cl':
                 return <SegmentFooterMultiMatches
                     key={"container_" + tab.code}
@@ -207,7 +206,6 @@ class SegmentFooter extends React.Component {
                     tab_class = {tab.tab_class}
                     id_segment = {this.props.sid}
                     segment = {this.props.segment}/>;
-                break;
             case 'review':
                 return <SegmentTabRevise
                     key={"container_" + tab.code}
@@ -218,7 +216,6 @@ class SegmentFooter extends React.Component {
                     translation={this.props.segment.translation}
                     segment={this.props.segment}
                     />;
-                break;
             default:
                 return ''
         }
