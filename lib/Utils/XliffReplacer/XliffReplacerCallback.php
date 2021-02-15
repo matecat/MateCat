@@ -45,7 +45,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     public function thereAreErrors( $segment, $translation, array $dataRefMap = [] ) {
 
         $segment     = $this->filter->fromLayer0ToLayer1( $segment );
-        $translation = $this->filter->fromLayer0ToLayer1( $translation );
+        $translation = \CatUtils::removePhTagsFromTargetIfNotPresentInSource($segment, $this->filter->fromLayer0ToLayer1( $translation ));
 
         //
         // ------------------------------------
