@@ -818,10 +818,10 @@ var UI = {
 
         var segment_status = segment.status;
 
-        var src_content = segment.updatedSource.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
-        var trg_content = segment.translation.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        const src_content = TagUtils.prepareTextToSend(segment.updatedSource);
+        const trg_content = TagUtils.prepareTextToSend(segment.translation);
 
-		APP.doRequest({
+        APP.doRequest({
 			data: {
 				action: 'getWarning',
 				id: segment.sid,
