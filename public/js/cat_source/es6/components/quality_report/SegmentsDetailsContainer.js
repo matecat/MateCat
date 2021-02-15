@@ -12,19 +12,18 @@ class SegmentsDetails extends React.Component {
     getFiles() {
         let files = [];
         if (this.props.files) {
-            let keys = this.props.files.keySeq().toJS();
-            keys = keys.sort();
-            keys.forEach((key, index) => {
+
+            this.props.files.forEach((fileObj) => {
                 let file = (
                     <FileDetails
-                        key={key}
-                        file={this.props.files.get(key)}
+                        key={fileObj.get('id')}
+                        file={fileObj}
                         urls={this.props.urls}
                         secondPassReviewEnabled={this.props.secondPassReviewEnabled}
                     />
                 );
                 files.push(file);
-                this.lastSegment = this.props.files.get(key).get('segments').last().get('sid');
+                this.lastSegment = fileObj.get('segments').last().get('sid');
             });
         }
         return files;
@@ -65,8 +64,8 @@ class SegmentsDetails extends React.Component {
         let totalSegments = 0;
 
         this.props.files &&
-            this.props.files.keySeq().forEach((key, index) => {
-                totalSegments = totalSegments + this.props.files.get(key).get('segments').size;
+            this.props.files.forEach((file) => {
+                totalSegments = totalSegments + file.get('segments').size;
             });
         return (
             <div className="qr-segment-details-container shadow-2">
@@ -81,7 +80,7 @@ class SegmentsDetails extends React.Component {
                             updateSegmentToFilter={this.props.updateSegmentToFilter}
                         />
                     </div>
-                    {this.props.files && this.props.files.size === 0 ? (
+                    {this.props.files && this.props.files.length === 0 ? (
                         <div className="no-segments-found">No segments found</div>
                     ) : (
                         this.getFiles()
@@ -89,7 +88,7 @@ class SegmentsDetails extends React.Component {
 
                     {this.props.moreSegments &&
                     this.props.files &&
-                    this.props.files.size !== 0 &&
+                    this.props.files.length !== 0 &&
                     totalSegments >= 20 ? (
                         <div className="ui one column grid">
                             <div className="one column spinner" style={{ height: '100px' }}>

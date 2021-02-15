@@ -86,50 +86,6 @@ class QualityReportController extends KleinController {
             $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
-            $segments = $this->_formatSegments( $segments, $ttlArray );
-
-            $this->response->json( [
-                    'files'  => $segments,
-                    '_links' => $this->_getPaginationLinks( $segments_ids, $step, $filter )
-            ] );
-
-        } else {
-            $this->response->json( [ 'files' => [] ] );
-        }
-
-    }
-
-    public function segmentsNew() {
-
-        $this->project = $this->chunk->getProject();
-
-        $ref_segment = $this->request->param( 'ref_segment' );
-        $where       = $this->request->param( 'where' );
-        $step        = $this->request->param( 'step' );
-        $filter      = $this->request->param( 'filter' );
-
-        if ( empty( $ref_segment ) ) {
-            $ref_segment = 0;
-        }
-
-        if ( empty( $where ) ) {
-            $where = "after";
-        }
-
-        if ( empty( $step ) ) {
-            $step = 20;
-        }
-
-        $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
-        $options        = [ 'filter' => $filter ];
-        $segments_ids   = $qrSegmentModel->getSegmentsIdForQR( $step, $ref_segment, $where, $options );
-
-        if ( count( $segments_ids ) > 0 ) {
-
-            $segmentTranslationEventDao = new SegmentTranslationEventDao();
-            $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
-            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
-
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
             $filesInfo = $filesInfoUtility->getInfo();
 

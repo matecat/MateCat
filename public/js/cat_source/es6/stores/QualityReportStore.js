@@ -20,12 +20,12 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
 
     addSegments: function ( files ) {
         _.forEach(files, (file, key)=>{
-
-            if (this._segmentsFiles.get(key)) {
+            const index = this._segmentsFiles.findIndex((f)=>f.get('id') === file.id);
+            if (index > -1) {
                 let immFiles = Immutable.fromJS(file.segments);
-                this._segmentsFiles = this._segmentsFiles.setIn([key, 'segments'], this._segmentsFiles.get(key).get('segments').push(...immFiles));
+                this._segmentsFiles = this._segmentsFiles.setIn([index, 'segments'], this._segmentsFiles.get(index).get('segments').push(...immFiles));
             } else {
-                this._segmentsFiles = this._segmentsFiles.set(key, Immutable.fromJS(file));
+                this._segmentsFiles = this._segmentsFiles.concat(Immutable.fromJS(file));
             }
         });
 
