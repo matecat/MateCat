@@ -1,4 +1,3 @@
-import TextField  from '../common/TextField';
 import DQFCredentials  from './DQFCredentials';
 
 import * as RuleRunner from '../common/ruleRunner';
@@ -12,7 +11,16 @@ class PreferencesModal extends React.Component {
 
         this.state = {
             service: this.props.service,
+            credentials: null
         };
+
+        API.USER.getApiKey().done((response)=> {
+            this.setState({
+                credentials: response,
+                credentialsCreated: false,
+                credentialsCopied: false
+            })
+        })
     }
 
     openResetPassword() {
@@ -80,6 +88,101 @@ class PreferencesModal extends React.Component {
                     metadata={this.props.metadata}/>
                 </div>
         }
+    }
+
+    generateKey() {
+        API.USER.createApiKey().done((response)=> {
+            this.setState({
+                credentials: response,
+                credentialsCreated: true
+            })
+        })
+    }
+
+    confirmDelete() {
+        this.setState({
+            confirmDelete: true
+        })
+    }
+
+    deleteKey() {
+        API.USER.deleteApiKey().done((response)=> {
+            this.setState({
+                credentials: null,
+                credentialsCreated: false,
+                confirmDelete: false
+            })
+        })
+    }
+
+    undoDelete() {
+        this.setState({
+            confirmDelete: false
+        })
+    }
+
+    copyToClipboard(e) {
+        e.stopPropagation();
+        this.keys.select();
+        this.keys.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        this.setState({
+            credentialsCopied: true
+        })
+    }
+
+
+    getApiKeyHtml() {
+        return <div>
+            <h2>API Key</h2>
+                {this.state.credentials ?
+
+                    this.state.confirmDelete ?
+                        <div className={"user-api user-api-created"}>
+                            <div className={"user-api-text"}>
+                                <label>Are you sure you want to delete the token?</label>
+                                <label>This action cannot be undone.</label>
+                            </div>
+                            <div className={"user-api-buttons"}>
+                                <a className="btn-ok" onClick={() => this.deleteKey()}>Delete</a>
+                                <a onClick={( e ) => this.undoDelete( e )} className={'btn-cancel'}>Cancel</a>
+                            </div>
+                        </div>
+                        :
+                        <div className={"user-api " + ((this.state.credentialsCreated) ? "user-api-created" : "")}>
+
+                            <div className={"user-api-text"}>
+                                <textarea ref={( keys ) => this.keys = keys} rows="1" readOnly={true} value={this.state.credentials.api_key + '-' + this.state.credentials.api_secret}/></div>
+                            {this.state.credentialsCreated ?
+                                <div className={"user-api-buttons"}>
+                                    <a onClick={( e ) => this.copyToClipboard( e )} className={'btn-ok copy'}>
+                                        <i className="icon-copy icon"/>{this.state.credentialsCopied ? "Copied" : "Copy"}</a>
+                                    <a className="btn-ok" onClick={() => this.confirmDelete()}>Delete</a>
+                                </div> :
+                                <div className={"user-api-buttons"}>
+                                    <a className="btn-ok" onClick={() => this.confirmDelete()}>Delete</a>
+                                </div>
+                            }
+                            {this.state.credentialsCreated ?
+                                <div className={"user-api-message"}>
+                                    <i className="icon-info3 icon"/>
+                                    <div className={"user-api-message-content"}>This is the only time that the secret access key can be viewed or copied. You cannot recover it later. However, you
+                                        can delete and create new access keys at any time.
+                                    </div>
+                                </div> : null}
+                        </div>
+
+                : (
+                    <div className="user-api">
+                        <div className={"user-api-text"}>
+                            <label>No API Key associated to your account</label>
+                        </div>
+                        <div className="user-api-buttons">
+                            <a className="btn-ok" onClick={()=>this.generateKey()}>Generate</a>
+                        </div>
+                    </div>
+                )}
+        </div>
     }
 
     render() {
@@ -153,7 +256,7 @@ class PreferencesModal extends React.Component {
                             {gdriveMessage}
 
                         </div>
-
+                        {this.getApiKeyHtml()}
                         {googleDrive}
                         {this.getDqfHtml()}
 
