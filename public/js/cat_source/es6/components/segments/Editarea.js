@@ -429,6 +429,8 @@ class Editarea extends React.Component {
 
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
+        const {handleCursorMovement} = this;
+
         if((e.keyCode === 84 || e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({triggerText: null});
             return 'toggle-tag-menu';
@@ -460,19 +462,15 @@ class Editarea extends React.Component {
             return 'insert-nbsp-tag'; // MacOS
         }else if (e.key === 'ArrowLeft'  && !e.altKey) {
             if (e.shiftKey) {
-                const newSel = this.handleCursorMovement(-1, true, config.isTargetRTL);
-                if(newSel) return 'left-nav-shift';
+                if(handleCursorMovement(-1, true, config.isTargetRTL)) return 'left-nav-shift';
             } else {
-                const newSel = this.handleCursorMovement(-1, false, config.isTargetRTL);
-                if(newSel) return 'left-nav';
+                if(handleCursorMovement(-1, false, config.isTargetRTL)) return 'left-nav';
             }
         } else if (e.key === 'ArrowRight'  && !e.altKey) {
             if (e.shiftKey) {
-                const newSel = this.handleCursorMovement(1, true, config.isTargetRTL);
-                if(newSel) return 'right-nav-shift';
+                if(handleCursorMovement(1, true, config.isTargetRTL)) return 'right-nav-shift';
             } else {
-                const newSel = this.handleCursorMovement(1, false, config.isTargetRTL);
-                if(newSel) return 'right-nav';
+                if(handleCursorMovement(1, false, config.isTargetRTL)) return 'right-nav';
             }
         }
         return getDefaultKeyBinding(e);
@@ -559,6 +557,9 @@ class Editarea extends React.Component {
     handleCursorMovement = (step, shift = false, isRTL = false) =>{
         const {editorState} = this.state;
         step = isRTL ? step * -1 : step;
+        // When in composition mode avoid setState to let editor commit its "composition state"
+        if(editorState.isInCompositionMode()) return true;
+
         const newState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift, isRTL);
         if(newState) {
             this.setState({editorState: newState});
@@ -981,10 +982,21 @@ class Editarea extends React.Component {
         // Use _latestEditorState
         try{
             // Selection
-            const selectionState = this.editor._latestEditorState.getSelection();
+            const latestEditorState = this.editor._latestEditorState;
+            const selectionState = latestEditorState.getSelection();
+            const currentBlockText = latestEditorState
+                .getCurrentContent()
+                .getBlockForKey(selectionState.getFocusKey())
+                .getText();
+            const zwsp = String.fromCharCode(parseInt('200B',16));
+            const selectedTextAfter = currentBlockText.slice(end, end +1);
+            const selectedTextBefore =  currentBlockText.slice(start-1 , start);
+            const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0;
+            const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0;
+
             let newSelection = selectionState.merge({
-                anchorOffset: start -1, // -1 is to catch the zero-width space char placed before every entity
-                focusOffset: end +1, // +1 is to catch the zero-width space char placed after every entity
+                anchorOffset: start - addZwspExtraStepBefore, // -1 is to catch the zero-width space char placed before every entity
+                focusOffset: end + addZwspExtraStepAfter, // +1 is to catch the zero-width space char placed after every entity
             });
             const newEditorState = EditorState.forceSelection(
                 editorState,

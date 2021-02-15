@@ -1,4 +1,5 @@
 import getEntities from "./getEntities";
+import {isToReplaceForLexiqa, getTagSignature} from './tagModel';
 
 const updateLexiqaWarnings = (editorState, warnings) => {
 
@@ -14,15 +15,18 @@ const updateLexiqaWarnings = (editorState, warnings) => {
         const newLineChar = loopedBlockKey !== firstBlockKey ? 1 : 0;
         maxCharsInBlocks += loopedContentBlock.getLength() + newLineChar;
         const entitiesInBlock = entities.filter( ent => ent.blockKey === loopedBlockKey);
-       _.each(warnings, warn => {
+        _.each(warnings, warn => {
             // Todo: warnings between 2 block are now ignored
             const alreadyScannedChars = maxCharsInBlocks - loopedContentBlock.getLength();
             // remove offset added by '<' and '>' that wrap tags preceding current warning
             entitiesInBlock.forEach( ent => {
                 if( (ent.start + alreadyScannedChars) < warn.start && (ent.end + alreadyScannedChars) <= warn.start ) {
-                    warn.start -= 2;
-                    warn.end-= 2;
+                    if (!isToReplaceForLexiqa(ent.entity.getData().name)) {
+                        warn.start -= 2;
+                        warn.end -= 2;
+                    }
                 }
+
             })
             if (warn.start < maxCharsInBlocks &&
                 warn.end <= maxCharsInBlocks &&
