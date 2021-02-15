@@ -118,8 +118,8 @@ class SegmentFooter extends React.Component {
             tabs.alternatives.open = !!(this.props.segment.alternatives && _.size(this.props.segment.alternatives) > 0);
         }
         if ( this.props.segment.notes && this.props.segment.notes.length > 0 )  {
-            tabs.alternatives.visible = !!(this.props.segment.notes && this.props.segment.notes.length > 0);
-            tabs.alternatives.enabled = !!(this.props.segment.notes && this.props.segment.notes.length > 0);
+            tabs.messages.visible = !!(this.props.segment.notes && this.props.segment.notes.length > 0);
+            tabs.messages.enabled = !!(this.props.segment.notes && this.props.segment.notes.length > 0);
         }
         return allTabs
     }
