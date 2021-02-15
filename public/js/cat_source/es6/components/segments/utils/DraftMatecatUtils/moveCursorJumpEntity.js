@@ -30,15 +30,17 @@ const moveCursorJumpEntity = (editorState, step, shift = false, isRTL) => {
     // ------ cursor position after moving
     let newCursorPosition = selectionState.getFocusOffset() + step; // +1 / -1
     const currentBlock = contentState.getBlockForKey(focusKey);
-    const currentBlockLength = currentBlock.getText().length;
-    const nextPos = prevFocusOffset + step;
 
     // ------ new selection to merge
     let nextSelection = null;
     let newSelection = null;
+    const currentBlockText = currentBlock.getText();
 
     const start = selectionState.getStartOffset();
-    const selectedText = step>0 ? currentBlock.getText().slice(start, start +1) : currentBlock.getText().slice(start-1 , start);
+    // content is:   [ZWSP_1]<Tag>[ZWSP_2]
+    // cursor has to add an extra step and skip ZWSP_1 (when step > 0) or ZWSP_2 (when step < 0) to place itself inside the Tag
+    // otherwise it won't be catched in the next check
+    let selectedText = step > 0 ? currentBlockText.slice(start, start +1) : currentBlockText.slice(start-1 , start);
     const checkZeroWidthSpace = String.fromCharCode(parseInt('200B',16)) === selectedText;
     if(checkZeroWidthSpace){
         newCursorPosition = step>0 ?  newCursorPosition +1 : newCursorPosition -1;
@@ -67,14 +69,18 @@ const moveCursorJumpEntity = (editorState, step, shift = false, isRTL) => {
                 nextSelection.nextAnchorKey = anchorKey; // same
                 nextSelection.nextFocusKey = focusKey; // same
 
+                // content is:   [ZWSP_1]<Tag>[ZWSP_2]
+                // cursor will skip <Tag> and will be placed after ZWSP_2 (when step > 0) or before ZWSP_1 (when step < 0)
+                selectedText = step > 0 ? currentBlockText.slice(end , end + 1) : currentBlockText.slice(start - 1 , start);
+                const addZwspExtraStep = String.fromCharCode(parseInt('200B',16)) === selectedText ? 1 : 0;
                 if (step > 0) {
                     // jump on entity end
-                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : end+1;
-                    nextSelection.nextFocusOffset = end+1;
+                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : end + addZwspExtraStep;
+                    nextSelection.nextFocusOffset = end + addZwspExtraStep;
                 } else {
                     // jump on entity start
-                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : start-1;
-                    nextSelection.nextFocusOffset = start-1;
+                    nextSelection.nextAnchorOffset = shift ? prevAnchorOffset : start - addZwspExtraStep;
+                    nextSelection.nextFocusOffset = start - addZwspExtraStep;
                 }
             }
         }
