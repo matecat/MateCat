@@ -57,7 +57,11 @@ class Engines_Results_MyMemory_Matches {
     }
 
     /**
-     * @param int $layerNum
+     * @param int  $layerNum
+     *
+     * @param null $segmentId
+     * @param null $source
+     * @param null $target
      *
      * @return array
      * @throws Exception
@@ -116,8 +120,8 @@ class Engines_Results_MyMemory_Matches {
                     $match[ 'translation' ]
             );
 
-            $match[ 'segment' ]     = $phAnaliser->getSegment();
-            $match[ 'translation' ] = $phAnaliser->getTranslation();
+            $match[ 'segment' ]     = $phAnaliser->getSegment()->getAfter();
+            $match[ 'translation' ] = $phAnaliser->getTranslation()->getAfter();
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
