@@ -56,7 +56,8 @@ class QualityReport extends React.Component {
         this.setState({
             segmentsFiles,
             files,
-            lastSegment
+            lastSegment,
+            moreSegments: true
         });
     }
 
