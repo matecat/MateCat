@@ -133,7 +133,7 @@ class QualityReportController extends KleinController {
 
         $links = [
                 "base"                   => INIT::$HTTPHOST,
-                'last_segment_delivered' => (int)end($segments_id),
+                'last_segment_id'        => (int)end($segments_id),
                 "pages"                  => $pages,
                 "items_per_page"         => $itemsPerPage,
                 "total_items"            => $total,
