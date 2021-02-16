@@ -3,10 +3,10 @@ import SegmentQR from './SegmentQR';
 class FileDetails extends React.Component {
     getSegments() {
         let segments = [];
-        this.props.file.get('segments').forEach((item) => {
+        this.props.segments.forEach((item) => {
             let segment = (
                 <SegmentQR
-                    key={item.get('sid')}
+                    key={item.get('id')}
                     segment={item}
                     urls={this.props.urls}
                     secondPassReviewEnabled={this.props.secondPassReviewEnabled}
@@ -20,7 +20,7 @@ class FileDetails extends React.Component {
     render() {
         return (
             <div className="qr-segments">
-                <div className="document-name top-10">FILE {this.props.file.get('filename')}</div>
+                <div className="document-name top-10">FILE {this.props.file.get('file_name')}</div>
                 <div className="qr-segments-list">{this.getSegments()}</div>
             </div>
         );

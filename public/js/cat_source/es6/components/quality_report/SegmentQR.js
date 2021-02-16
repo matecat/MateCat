@@ -36,12 +36,14 @@ class SegmentQR extends React.Component {
 
         this.state = {
             translateDiffOn:
+                this.props.segment.get('last_translation') &&
                 !_.isNull(this.props.segment.get('last_translation')) &&
                 _.isNull(this.props.segment.get('last_revisions')),
             reviseDiffOn:
                 !_.isNull(this.props.segment.get('last_revisions')) &&
                 this.revise &&
                 !this.revise2 &&
+                this.props.segment.get('last_translation') &&
                 !_.isNull(this.props.segment.get('last_translation')),
             revise2DiffOn:
                 !_.isNull(this.props.segment.get('last_revisions')) &&
@@ -350,7 +352,7 @@ class SegmentQR extends React.Component {
         return (
             <div className="qr-single-segment">
                 <div className="qr-segment-head shadow-1">
-                    <div className="segment-id">{this.props.segment.get('sid')}</div>
+                    <div className="segment-id">{this.props.segment.get('id')}</div>
                     <div className="segment-production-container">
                         <div className="segment-production">
                             <div className="production word-speed">

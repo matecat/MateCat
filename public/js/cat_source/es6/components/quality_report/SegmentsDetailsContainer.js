@@ -18,12 +18,12 @@ class SegmentsDetails extends React.Component {
                     <FileDetails
                         key={fileObj.get('id')}
                         file={fileObj}
+                        segments={this.props.segmentsFiles.get(fileObj.get('id'))}
                         urls={this.props.urls}
                         secondPassReviewEnabled={this.props.secondPassReviewEnabled}
                     />
                 );
                 files.push(file);
-                this.lastSegment = fileObj.get('segments').last().get('sid');
             });
         }
         return files;
@@ -40,7 +40,7 @@ class SegmentsDetails extends React.Component {
         if ($(window).scrollTop() + $(window).height() > $(document).height() - 200) {
             console.log('Load More Segments!');
             if (this.props.moreSegments) {
-                QualityReportActions.getMoreQRSegments(this.state.filter, this.lastSegment);
+                QualityReportActions.getMoreQRSegments(this.state.filter, this.props.lastSegment);
             }
         }
     }
@@ -48,7 +48,6 @@ class SegmentsDetails extends React.Component {
         this.setState({
             filter: filter,
         });
-        this.lastSegment = 0;
         QualityReportActions.filterSegments(filter, null);
     }
 
@@ -61,12 +60,9 @@ class SegmentsDetails extends React.Component {
     }
 
     render() {
-        let totalSegments = 0;
+        let totalSegments = this.props.segmentsFiles ? this.props.segmentsFiles.size : 0;
 
-        this.props.files &&
-            this.props.files.forEach((file) => {
-                totalSegments = totalSegments + file.get('segments').size;
-            });
+
         return (
             <div className="qr-segment-details-container shadow-2">
                 <div className="qr-segments-summary">
