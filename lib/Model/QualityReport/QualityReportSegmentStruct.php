@@ -78,6 +78,8 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $is_pre_translated = false;
 
+    public $dataRefMap = [];
+
     /**
      * @return float
      */

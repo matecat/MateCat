@@ -175,7 +175,10 @@ class QualityReportSegmentModel {
 
         foreach ( $data as $i => $seg ) {
 
-            $Filter = Filter::getInstance( $featureSet, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid) );
+            $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
+            $Filter = Filter::getInstance( $featureSet, $dataRefMap );
+
+            $seg->dataRefMap = $dataRefMap;
 
             $this->_commonSegmentAssignments( $seg, $Filter );
             $this->_assignIssues( $seg, $issues, $issue_comments );

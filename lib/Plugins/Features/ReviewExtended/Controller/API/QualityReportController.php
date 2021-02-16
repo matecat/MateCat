@@ -162,6 +162,7 @@ class QualityReportController extends KleinController {
 
             $seg                                 = [];
             $seg[ 'comments' ]                   = $segment->comments;
+            $seg[ 'dataRefMap']                  = $segment->dataRefMap;
             $seg[ 'edit_distance' ]              = $segment->edit_distance;
             $seg[ 'ice_locked' ]                 = $segment->ice_locked;
             $seg[ 'ice_modified' ]               = $segment->ice_modified;
