@@ -63,7 +63,7 @@ class QualityReportController extends KleinController {
      *
      * @throws \Exception
      */
-    protected function renderSegments($isForUI = false) {
+    protected function renderSegments( $isForUI = false ) {
 
         $this->project = $this->chunk->getProject();
 
@@ -101,8 +101,8 @@ class QualityReportController extends KleinController {
 
             $this->response->json( [
                     'segments'      => $segments,
-                    'first_segment' => $filesInfo[ 'first_segment' ],
-                    'last_segment'  => $filesInfo[ 'last_segment' ],
+                    'first_segment' => (int)$filesInfo[ 'first_segment' ],
+                    'last_segment'  => (int)$filesInfo[ 'last_segment' ],
                     '_params'       => [
                             'ref_segment' => $this->request->param( 'ref_segment' ),
                             'where'       => $this->request->param( 'where' ),
@@ -132,23 +132,24 @@ class QualityReportController extends KleinController {
         $pages        = ceil( $total / $itemsPerPage );
 
         $links = [
-                "base"           => INIT::$HTTPHOST,
-                "pages"          => $pages,
-                "items_per_page" => $itemsPerPage,
-                "total_items"    => $total,
-                "self"           => $_SERVER[ 'REQUEST_URI' ],
-                "next"           => null,
-                "prev"           => null,
+                "base"                   => INIT::$HTTPHOST,
+                'last_segment_delivered' => (int)end($segments_id),
+                "pages"                  => $pages,
+                "items_per_page"         => $itemsPerPage,
+                "total_items"            => $total,
+                "self"                   => $_SERVER[ 'REQUEST_URI' ],
+                "next"                   => null,
+                "prev"                   => null,
         ];
 
         $filter_query = http_build_query( [ 'filter' => array_filter( $filter ) ] );
         if ( $this->chunk->job_last_segment > end( $segments_id ) ) {
-            $links[ 'next' ] = $links[ 'base' ] . $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
+            $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
                             null );
         }
 
         if ( $this->chunk->job_first_segment < reset( $segments_id ) ) {
-            $links[ 'prev' ] = $links[ 'base' ] . $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) * 2 ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty(
+            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) * 2 ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty(
                     $filter_query ) ? "&" . $filter_query : null );
         }
 
@@ -171,13 +172,14 @@ class QualityReportController extends KleinController {
 
             $seg                                 = [];
             $seg[ 'comments' ]                   = $segment->comments;
-            $seg[ 'dataRefMap']                  = $segment->dataRefMap;
+            $seg[ 'dataRefMap' ]                 = $segment->dataRefMap;
             $seg[ 'edit_distance' ]              = $segment->edit_distance;
             $seg[ 'ice_locked' ]                 = $segment->ice_locked;
             $seg[ 'ice_modified' ]               = $segment->ice_modified;
             $seg[ 'is_pre_translated' ]          = $segment->is_pre_translated;
             $seg[ 'issues' ]                     = $segment->issues;
             $seg[ 'last_revisions' ]             = $segment->last_revisions;
+            $seg[ 'last_translation' ]           = $segment->last_translation;
             $seg[ 'locked' ]                     = $segment->locked;
             $seg[ 'match_type' ]                 = $segment->match_type;
             $seg[ 'parsed_time_to_edit' ]        = $segment->parsed_time_to_edit;
