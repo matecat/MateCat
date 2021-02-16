@@ -173,14 +173,9 @@ class QualityReportSegmentModel {
 
         $Filter = Filter::getInstance( $featureSet );
 
-        $files = [];
+        $segments = [];
 
         foreach ( $data as $i => $seg ) {
-
-            if ( !isset( $files [ $seg->id_file ] ) ) {
-                $files [ $seg->id_file ][ "filename" ] = ZipArchiveExtended::getFileName( $seg->filename );
-                $files [ $seg->id_file ][ "segments" ] = [];
-            }
 
             $this->_commonSegmentAssignments( $seg, $Filter );
             $this->_assignIssues( $seg, $issues, $issue_comments );
@@ -239,10 +234,10 @@ class QualityReportSegmentModel {
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
 
-            $files[ $seg->id_file ][ 'segments' ][] = $seg;
+            $segments[$i] = $seg;
         }
 
-        return $files;
+        return $segments;
     }
 
     /**
