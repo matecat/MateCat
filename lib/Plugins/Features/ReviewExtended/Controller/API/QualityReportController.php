@@ -55,6 +55,15 @@ class QualityReportController extends KleinController {
     }
 
     public function segments() {
+        return $this->renderSegments();
+    }
+
+    /**
+     * @param bool $isForUI
+     *
+     * @throws \Exception
+     */
+    protected function renderSegments($isForUI = false) {
 
         $this->project = $this->chunk->getProject();
 
@@ -83,7 +92,7 @@ class QualityReportController extends KleinController {
 
             $segmentTranslationEventDao = new SegmentTranslationEventDao();
             $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
-            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
+            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
             $filesInfo        = $filesInfoUtility->getInfo();
@@ -115,7 +124,7 @@ class QualityReportController extends KleinController {
      *
      * @return array
      */
-    protected function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
+    private function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
 
         $url          = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         $total        = count( $this->chunk->getSegments() );
@@ -155,7 +164,7 @@ class QualityReportController extends KleinController {
      *
      * @return array
      */
-    protected function _formatSegments( $segments, array $ttlArray, array $filesInfo ) {
+    private function _formatSegments( $segments, array $ttlArray, array $filesInfo ) {
         $outputArray = [];
 
         foreach ( $segments as $index => $segment ) {

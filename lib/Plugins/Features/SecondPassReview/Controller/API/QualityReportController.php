@@ -23,4 +23,8 @@ class QualityReportController extends \Features\ReviewExtended\Controller\API\Qu
         ] );
     }
 
+    public function segments() {
+        return $this->renderSegments(true);
+    }
+
 }
