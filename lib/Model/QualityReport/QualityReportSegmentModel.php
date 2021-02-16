@@ -171,11 +171,11 @@ class QualityReportSegmentModel {
             $last_translations = $this->makeSegmentsVersionsUniform( $segment_ids );
         }
 
-        $Filter = Filter::getInstance( $featureSet );
-
         $segments = [];
 
         foreach ( $data as $i => $seg ) {
+
+            $Filter = Filter::getInstance( $featureSet, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid) );
 
             $this->_commonSegmentAssignments( $seg, $Filter );
             $this->_assignIssues( $seg, $issues, $issue_comments );
