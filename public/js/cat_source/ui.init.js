@@ -55,16 +55,6 @@ $.extend(UI, {
             this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
         }
 
-        if ( UI.firstLoad ) {
-
-            this.lastUpdateRequested = new Date();
-
-            setTimeout(function() {
-            	UI.getUpdates();
-            }, UI.checkUpdatesEvery);
-
-        }
-
         return UI.getSegments(options);
 
     },
