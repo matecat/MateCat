@@ -11,7 +11,9 @@ class QualityReport extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            segmentFiles: null,
+            segmentsFiles: null,
+            files: null,
+            lastSegment: null,
             jobInfo: null,
             moreSegments: true,
             revisionToShow: this.getReviseUrlParameter(),
@@ -41,18 +43,21 @@ class QualityReport extends React.Component {
         } else {
             url.searchParams.delete('id_segment');
         }
-        history.pushState(null, '', url.search);
+        history.pushState(null, '', url);
     }
 
     updateUrlParameter(revisionType) {
         let url = new URL(window.location.href);
         url.searchParams.set('revision_type', revisionType);
-        history.pushState(null, '', url.search);
+        history.pushState(null, '', url);
     }
 
-    renderSegmentsFiles(files) {
+    renderSegmentsFiles(segmentsFiles, files, lastSegment) {
         this.setState({
-            segmentFiles: files,
+            segmentsFiles,
+            files,
+            lastSegment,
+            moreSegments: true
         });
     }
 
@@ -190,7 +195,9 @@ class QualityReport extends React.Component {
                                     secondPassReviewEnabled={this.state.jobInfo.get('quality_summary').size > 1}
                                 />
                                 <SegmentsDetails
-                                    files={this.state.segmentFiles}
+                                    files={this.state.files}
+                                    segmentsFiles={this.state.segmentsFiles}
+                                    lastSegment={this.state.lastSegment}
                                     segmentToFilter={this.state.idSegment}
                                     updateSegmentToFilter={this.updateUrlIdSegment}
                                     urls={this.state.jobInfo.get('urls')}

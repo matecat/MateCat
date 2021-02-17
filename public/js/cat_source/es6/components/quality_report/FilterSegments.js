@@ -105,7 +105,7 @@ class FilterSegments extends React.Component {
         if (value && value !== "") {
             this.filterSelectChanged('id_segment', value);
         } else {
-            let filter = jQuery.extend({}, this.state.filter);
+            let filter = [...this.state.filter]
             filter.id_segment = null;
             this.setState({
                 filter: filter
