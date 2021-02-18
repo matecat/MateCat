@@ -1,4 +1,5 @@
 /**
+/**
  * React Component for the editarea.
 
  */
@@ -95,7 +96,6 @@ class Segment extends React.Component {
             //Used by Segment Filter, Comments, Footer, Review extended
             setTimeout(()=>$(document).trigger('segmentOpened', {segmentId: this.props.segment.original_sid}));
 
-            Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section);
             /************/
             UI.editStart = new Date();
             SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
@@ -442,6 +442,8 @@ class Segment extends React.Component {
         if ( this.props.segment.opened) {
             setTimeout(()=>{
                 this.openSegment();
+                Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section);
+
             });
             setTimeout(()=>{UI.setCurrentSegment()},0);
         }
@@ -483,6 +485,7 @@ class Segment extends React.Component {
                 if ( this.props.segment.opened && !this.props.segment.openComments  ) {
                     SegmentActions.closeSegmentComment(this.props.segment.sid);
                 }
+                Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section);
             })
 
 

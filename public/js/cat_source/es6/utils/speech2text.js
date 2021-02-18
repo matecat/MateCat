@@ -71,10 +71,12 @@ Speech2Text.init  = function () {
             },
             enableMicrophone: function (segment) {
                 Speech2Text.microphone = segment.find('.micSpeech');
-
+                var idSegment = UI.getSegmentId(segment);
+                var segmentObj = SegmentStore.getSegmentByIdToJS(idSegment) ;
                 if (Speech2Text.recognition) {
 
-                    Speech2Text.targetElement = Speech2Text.microphone.parent().find('.editarea');
+                    Speech2Text.targetElement = segmentObj.translation;
+                    Speech2Text.sid = segmentObj.sid;
 
                     Speech2Text.microphone.on('click', Speech2Text.clickMicrophone );
 
@@ -121,11 +123,11 @@ Speech2Text.init  = function () {
 
                 if (Speech2Text.shouldEmptyTargetElement( segment )) {
                     Speech2Text.finalTranscript = '';
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), '');
+                    SegmentActions.replaceEditAreaTextContent(Speech2Text.sid, '');
                     // Speech2Text.targetElement.html('');
                 } else {
 
-                    Speech2Text.finalTranscript = Speech2Text.targetElement.html() + ' ';
+                    Speech2Text.finalTranscript = segment.translation + ' ';
                 }
 
                 Speech2Text.interimTranscript = '';
@@ -133,16 +135,12 @@ Speech2Text.init  = function () {
                 if (!Speech2Text.recognizing) {
                     Speech2Text.recognition.start();
                     Speech2Text.showMatches();
-                    Speech2Text.targetElement.on('blur keyup paste input', function (event) {
-                        Speech2Text.finalTranscript = $(this).html().trim() + ' ';
-                    });
                 }
             },
             stopSpeechRecognition: function (microphone) {
                 microphone.removeClass('micSpeechActive micSpeechReceiving');
 
                 Speech2Text.recognition.stop();
-                Speech2Text.targetElement.off('blur keyup paste input');
 
                 if (Speech2Text.recognizing) {
                     Speech2Text.isStopingRecognition = true;
@@ -186,7 +184,7 @@ Speech2Text.init  = function () {
                 if (!Speech2Text.isStopingRecognition) {
                     var html  = Speech2Text.linebreak(Speech2Text.finalTranscript)
                         + Speech2Text.linebreak(Speech2Text.interimTranscript);
-                    let sid = UI.getSegmentId(Speech2Text.targetElement);
+                    let sid = Speech2Text.sid;
                     SegmentActions.replaceEditAreaTextContent(sid, html);
                     SegmentActions.modifiedTranslation(sid, true);
                 }

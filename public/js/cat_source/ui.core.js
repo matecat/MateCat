@@ -354,42 +354,6 @@ var UI = {
 
 	},
 
-    // Update the translations if job is splitted
-	getUpdates: function() {
-		if (UI.chunkedSegmentsLoaded()) {
-			var lastUpdateRequested = UI.lastUpdateRequested;
-			UI.lastUpdateRequested = new Date();
-			APP.doRequest({
-				data: {
-					action: 'getUpdatedTranslations',
-					last_timestamp: lastUpdateRequested.getTime(),
-					first_segment: UI.getSegmentId($('section').first()),
-					last_segment: UI.getSegmentId($('section').last()),
-                    id_job: config.id_job,
-                    password: config.password
-				},
-				error: function() {
-                    OfflineUtils.failedConnection(0, 'getUpdatedTranslations');
-				},
-				success: function(d) {
-					UI.lastUpdateRequested = new Date();
-					UI.updateSegments(d.data);
-				}
-			});
-		}
-
-		setTimeout(function() {
-			UI.getUpdates();
-		}, UI.checkUpdatesEvery);
-	},
-
-	updateSegments: function(segments) {
-		$.each(segments, function() {
-			SegmentActions.replaceEditAreaTextContent(this.sid, this.translation);
-            SegmentActions.setStatus(this.sid, null, this.status.lowercase());
-		});
-	},
-
     /**
      * removed the #outer div, taking care of extra cleaning needed, like unmounting
      * react components, closing side panel etc.
@@ -405,16 +369,6 @@ var UI = {
         $('#outer').empty();
     },
 
-	pointBackToSegment: function(segmentId) {
-		if (segmentId === '') {
-			this.startSegmentId = config.last_opened_segment;
-            UI.unmountSegments();
-			this.render();
-		} else {
-            UI.unmountSegments();
-			this.render();
-		}
-	},
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
         if (where === "center" && !starting) {
@@ -448,11 +402,6 @@ var UI = {
 
 	},
 
-    getSegmentStructure: function() {
-        return '<section  class="status-draft hasTagsToggle hasTagsAutofill"> <div class="sid"> <div class="txt">0000000</div> <div class="txt' +
-            ' segment-add-inBulk"> <input type="checkbox"> </div> <div class="actions"> <button class="split" href="#" title="Click to split segment"> <i class="icon-split"></i> </button> <p class="split-shortcut">CTRL + S</p> </div> </div> <div class="body"> <div class="header toggle"></div> <div class="text segment-body-content"> <div class="wrap"> <div class="outersource"> <div class="source item" tabindex="0"> </div> <div class="copy" title="Copy source to target"><a href="#"></a><p>CTRL+I</p></div> <div class="target item"> <div class="textarea-container"> <div class="targetarea editarea" contenteditable="true" spellcheck="true"> </div> <div class="toolbar"> <a class="revise-qr-link" title="Segment Quality Report." target="_blank" href="/revise-summary/1143-d1bd30bcde1c?revision_type=1&amp;id_segment=898088">QR</a> <a href="#" class="tagModeToggle " alt="Display full/short tags" title="Display full/short tags"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></span></a> <a href="#" class="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"></a> <ul class="editToolbar"> <li class="uppercase" title="Uppercase"></li> <li class="lowercase" title="Lowercase"></li> <li class="capitalize" title="Capitalized"></li> </ul> </div> </div> <p class="warnings"></p> <ul class="buttons toggle"> <li><a href="#" class="translated"> Translated </a><p>CTRL ENTER</p></li> </ul> </div> </div> </div> <div class="status-container"> <a href="#" class="status no-hover"></a> </div> </div> <div class="timetoedit" data-raw-time-to-edit="0"></div> <div class="edit-distance">Edit Distance: </div> </div> <div class="segment-side-buttons"> <div data-mount="translation-issues-button" class="translation-issues-button"></div> </div> <div class="segment-side-container"></div> </section>'
-    },
-
     renderSegments: function (segments, justCreated, where) {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
@@ -477,20 +426,6 @@ var UI = {
             UI.registerFooterTabs();
         }
     },
-
-	renderAndScrollToSegment: function(sid) {
-        var segment = SegmentStore.getSegmentByIdToJS(sid);
-        if ( segment ) {
-            SegmentActions.openSegment(sid);
-        } else {
-            UI.unmountSegments();
-            this.render({
-                caller: 'link2file',
-                segmentToOpen: sid,
-                scrollToFile: true
-            });
-        }
-	},
 
     getTranslationMismatches: function (id_segment) {
         APP.doRequest({
@@ -560,10 +495,6 @@ var UI = {
             SegmentActions.setTabIndex(id_segment, 'alternatives', numAlt);
         }
     },
-
-	chunkedSegmentsLoaded: function() {
-		return $('section.readonly:not(.ice-locked)').length;
-	},
 
     setTimeToEdit: function(sid) {
         let $segment = UI.getSegmentById(sid);
@@ -818,10 +749,10 @@ var UI = {
 
         var segment_status = segment.status;
 
-        var src_content = segment.updatedSource.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
-        var trg_content = segment.translation.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        const src_content = TagUtils.prepareTextToSend(segment.updatedSource);
+        const trg_content = TagUtils.prepareTextToSend(segment.translation);
 
-		APP.doRequest({
+        APP.doRequest({
 			data: {
 				action: 'getWarning',
 				id: segment.sid,

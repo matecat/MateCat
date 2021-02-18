@@ -143,18 +143,87 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .preferences-modal .user-dqf ,
-.preferences-modal .user-gdrive {
+.preferences-modal .user-gdrive
+{
     //border: 1px solid #ccc;
     padding: 10px 0 0 10px;
     border-radius: 4px;
     background: white;
     width: 100%;
-    min-height: 40px;
+    min-height: 50px;
     margin-bottom: 25px;
     margin-top: 10px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+}
+
+.preferences-modal .user-api,
+{
+    border-radius: 4px;
+    background: white;
+    width: 100%;
+    min-height: 54px;
+    margin-bottom: 25px;
+    margin-top: 10px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 10px;
+    flex-flow: row wrap;
+    .user-api-text {
+        width: 70%;
+        order: 1;
+        label, textarea {
+            resize: none;
+            line-height: 20px;
+            float: left;
+            font-size: 15px;
+            text-align: left;
+            word-wrap: break-word;
+            color: $grey1;
+            white-space: nowrap;
+            width: 100%;
+            border: none;
+            &:focus {
+                outline: none;
+            }
+        }
+    }
+    .user-api-buttons {
+        order: 2;
+    }
+    .user-api-message {
+        order: 3;
+        flex: 1 100%;
+        line-height: 40px;
+        margin-top: 13px;
+        border: 1px solid $greenDefault;
+        background-color: #f7fdf7;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        flex-flow: row;
+        padding: 10px;
+        i {
+            color: $greenDefault;
+            margin-top: 8px;
+            margin-left: 20px;
+        }
+        .user-api-message-content {
+            margin-left: 10px;
+            line-height: 30px;
+        }
+    }
+    &.user-api-created textarea,
+    &.user-api-created label {
+        color: $black;
+    }
+
 }
 
 .user-name {
@@ -335,6 +404,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     margin: 4px 10px 10px 95px;
 }
 
+
 .user-menu-flat {
     margin-right: 8px;
     float: right;
@@ -370,11 +440,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     //background-size: 84%;
     //background-position: 370% center;
     padding-top: 30px;
-    &.manage-bg {
-        background: url(../../img/matecat-manage-call.png) no-repeat;
-        background-size: 84%;
-        background-position: 350% 90px;
-    }
 }
 
 .login-container-left {

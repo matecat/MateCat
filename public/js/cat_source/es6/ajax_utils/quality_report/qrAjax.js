@@ -14,7 +14,7 @@ let QUALITY_REPORT =  {
             data: data,
             type: "GET",
             xhrFields: { withCredentials: true },
-            url : APP.getRandomUrl() + "api/v3/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
+            url : APP.getRandomUrl() + "api/app/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
 
