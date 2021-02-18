@@ -38,7 +38,7 @@ class ChunkTranslationVersionController extends KleinController {
 
         $this->featureSet->loadForProject( $this->chunk->getProject() );
 
-        $formatted = new JsonFormatter( $results, false, $this->featureSet );
+        $formatted = new JsonFormatter( $this->chunk, $results, false, $this->featureSet );
 
         $this->response->json( array(
                 'versions' => $formatted->render()
