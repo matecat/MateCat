@@ -6,7 +6,6 @@ use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
-use Ph\PhAnaliser;
 use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -197,7 +196,7 @@ class setTranslationController extends ajaxController {
 
             $this->featureSet->loadForProject( $this->project );
 
-            $this->filter = Filter::getInstance( $this->featureSet, Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
+            $this->filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $this->featureSet, Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
@@ -322,17 +321,10 @@ class setTranslationController extends ajaxController {
         }
 
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
-        $pipeline->addLast( new SprintfToPH() );
+        $pipeline->addLast( new SprintfToPH($this->chunk->source, $this->chunk->target) );
 
-        $phAnaliser = new PhAnaliser(
-                $this->chunk->source,
-                $this->chunk->target,
-                $pipeline->transform( $this->__postInput[ 'segment' ] ),
-                $pipeline->transform( $this->__postInput[ 'translation' ]
-        ) );
-
-        $src = $phAnaliser->getSegment()->getAfter();
-        $trg = $phAnaliser->getTranslation()->getAfter();
+        $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
+        $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
 
         $check = new QA( $src, $trg );
         $check->setFeatureSet( $this->featureSet );

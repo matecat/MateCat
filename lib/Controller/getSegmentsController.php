@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 
-use Ph\PhAnaliser;
 use Segments\ContextGroupDao;
 
 class getSegmentsController extends ajaxController {
@@ -128,16 +127,6 @@ class getSegmentsController extends ajaxController {
 
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
             $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
-
-            $phAnaliser = new PhAnaliser(
-                    $this->job->source,
-                    $this->job->target,
-                    $seg[ 'segment' ],
-                    $seg[ 'translation' ]
-            );
-
-            $seg[ 'segment' ] = $phAnaliser->getSegment()->getAfter();
-            $seg[ 'translation' ] = $phAnaliser->getTranslation()->getAfter();
 
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );

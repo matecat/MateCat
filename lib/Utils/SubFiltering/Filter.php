@@ -265,7 +265,7 @@ class Filter {
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
-        $channel->addLast( new SprintfToPH() );
+        $channel->addLast( new SprintfToPH($this->source, $this->target) );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
@@ -413,6 +413,10 @@ class Filter {
         }
 
         return $target;
+
+    }
+
+    public function realingSourceAndTarget(){
 
     }
 

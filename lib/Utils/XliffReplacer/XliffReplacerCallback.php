@@ -4,7 +4,6 @@ namespace XliffReplacer;
 
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
-use Ph\PhAnaliser;
 use QA;
 use SubFiltering\Filter;
 use SubFiltering\Filters\DataRefReplace;
@@ -32,6 +31,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * XliffReplacerCallback constructor.
      *
      * @param \FeatureSet $featureSet
+     * @param             $sourceLang
      * @param string      $targetLang
      *
      * @throws \Exception
@@ -48,15 +48,8 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      */
     public function thereAreErrors( $segment, $translation, array $dataRefMap = [] ) {
 
-        $phAnaliser = new PhAnaliser(
-                $this->sourceLang,
-                $this->targetLang,
-                $this->filter->fromLayer0ToLayer1( $segment ),
-                $this->filter->fromLayer0ToLayer1( $translation )
-        );
-
-        $segment     = $phAnaliser->getSegment()->getAfter();
-        $translation = $phAnaliser->getTranslation()->getAfter();
+        $segment     = $this->filter->fromLayer0ToLayer1( $segment );
+        $translation = $this->filter->fromLayer0ToLayer1( $translation );
 
         //
         // ------------------------------------

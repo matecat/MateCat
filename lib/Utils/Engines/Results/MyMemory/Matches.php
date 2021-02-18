@@ -1,6 +1,5 @@
 <?php
 
-use Ph\PhAnaliser;
 use SubFiltering\Filter;
 
 class Engines_Results_MyMemory_Matches {
@@ -78,6 +77,11 @@ class Engines_Results_MyMemory_Matches {
             $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $segmentId );
         }
 
+        if($source and $target){
+            $this->source = $source;
+            $this->target = $target;
+        }
+
         if ( count( $this->_args ) == 1 and is_array( $this->_args[ 0 ] ) ) {
 
             $match = $this->_args[ 0 ];
@@ -113,22 +117,6 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'create-date' ]      = $this->_args[ 4 ];
             $match[ 'last-update-date' ] = $this->_args[ 4 ];
             $match[ 'prop' ]             = ( isset( $this->_args[ 5 ] ) ? $this->_args[ 5 ] : [] );
-        }
-
-        if($source and $target){
-            $this->source = $source;
-            $this->target = $target;
-
-
-            $phAnaliser = new PhAnaliser(
-                    $source,
-                    $target,
-                    $match[ 'segment' ],
-                    $match[ 'translation' ]
-            );
-
-            $match[ 'segment' ]     = $phAnaliser->getSegment()->getAfter();
-            $match[ 'translation' ] = $phAnaliser->getTranslation()->getAfter();
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
