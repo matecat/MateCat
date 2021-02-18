@@ -171,7 +171,7 @@ class QualityReportSegmentModel {
             $last_translations = $this->makeSegmentsVersionsUniform( $segment_ids );
         }
 
-        $Filter = Filter::getInstance( $featureSet );
+        $Filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $featureSet );
 
         $files = [];
 

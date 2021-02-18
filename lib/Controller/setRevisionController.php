@@ -100,7 +100,7 @@ class setRevisionController extends ajaxController {
         $project  = $job_data->getProject();
         $this->featureSet->loadForProject( $project );
 
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $Filter = \SubFiltering\Filter::getInstance( $job_data->source, $job_data->target, $this->featureSet );
 
         list( $original_translation, $none ) = CatUtils::parseSegmentSplit( $this->_postInput[ 'original' ], '', $Filter );
 

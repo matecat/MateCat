@@ -169,7 +169,7 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'total' ] = 0;
 
-        $Filter     = Filter::getInstance( $this->featureSet );
+        $Filter     = Filter::getInstance( $this->chunk->source, $this->chunk->target, $this->featureSet );
         $phAnaliser = new PhAnaliser(
                 $this->chunk->source,
                 $this->chunk->target,

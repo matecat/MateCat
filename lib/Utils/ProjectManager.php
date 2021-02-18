@@ -952,7 +952,8 @@ class ProjectManager {
             $segmentElement[ 'source' ]        = $this->projectStructure[ 'source_language' ];
             $segmentElement[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
             $segmentElement[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
-            $segmentElement[ 'segment' ]       = Filter::getInstance( $this->features )->fromLayer0ToLayer1( $segmentElement[ 'segment' ] );
+            $segmentElement[ 'segment' ]       = Filter::getInstance( $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], $this->features )
+                    ->fromLayer0ToLayer1( $segmentElement[ 'segment' ] );
 
         }
 

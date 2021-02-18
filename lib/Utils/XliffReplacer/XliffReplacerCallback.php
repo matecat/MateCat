@@ -37,7 +37,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * @throws \Exception
      */
     public function __construct( \FeatureSet $featureSet, $sourceLang, $targetLang ) {
-        $this->filter     = Filter::getInstance( $featureSet );
+        $this->filter     = Filter::getInstance( $sourceLang, $targetLang, $featureSet );
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;

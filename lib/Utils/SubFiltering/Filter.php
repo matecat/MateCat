@@ -74,6 +74,19 @@ class Filter {
      */
     protected $_featureSet;
 
+    /**
+     * @var string
+     */
+    protected $source;
+
+    /**
+     * @var string
+     */
+    protected $target;
+
+    /**
+     * @var array
+     */
     protected $dataRefMap = [];
 
     /**
@@ -86,13 +99,15 @@ class Filter {
     }
 
     /**
+     * @param            $source
+     * @param            $target
      * @param FeatureSet $featureSet
      * @param array      $dataRefMap
      *
      * @return Filter
      * @throws \Exception
      */
-    public static function getInstance( FeatureSet $featureSet = null, array $dataRefMap = [] ) {
+    public static function getInstance( $source = null, $target = null, FeatureSet $featureSet = null, array $dataRefMap = [] ) {
 
         if ( $featureSet === null ) {
             $featureSet = new FeatureSet();
@@ -102,6 +117,8 @@ class Filter {
             static::$_INSTANCE = new Filter();
         }
 
+        static::$_INSTANCE->setSource($source);
+        static::$_INSTANCE->setTarget($target);
         static::$_INSTANCE->setDataRefMap($dataRefMap);
         static::$_INSTANCE->_featureSet( $featureSet );
 
@@ -113,6 +130,20 @@ class Filter {
      */
     private function setDataRefMap(array $dataRefMap = []) {
         $this->dataRefMap = $dataRefMap;
+    }
+
+    /**
+     * @param string $source
+     */
+    private function setSource( $source ) {
+        $this->source = $source;
+    }
+
+    /**
+     * @param string $target
+     */
+    private function setTarget( $target ) {
+        $this->target = $target;
     }
 
     /**

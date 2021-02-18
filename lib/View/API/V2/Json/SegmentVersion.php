@@ -43,11 +43,9 @@ class SegmentVersion {
 
         if ( $this->with_issues ) {
             return $this->renderItemsWithIssues();
-        } else {
-            return $this->renderItemsNormal();
         }
 
-        return $out;
+        return $this->renderItemsNormal();
     }
 
     protected function renderItemsWithIssues() {

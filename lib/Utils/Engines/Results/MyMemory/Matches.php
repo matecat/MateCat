@@ -33,6 +33,9 @@ class Engines_Results_MyMemory_Matches {
     protected $featureSet;
     protected $_args;
 
+    private $source;
+    private $target;
+
     public function __construct() {
 
         //NEEDED TO UNIFORM DATA as array( $matches )
@@ -113,6 +116,10 @@ class Engines_Results_MyMemory_Matches {
         }
 
         if($source and $target){
+            $this->source = $source;
+            $this->target = $target;
+
+
             $phAnaliser = new PhAnaliser(
                     $source,
                     $target,
@@ -160,7 +167,7 @@ class Engines_Results_MyMemory_Matches {
      */
     protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
-        $filter = Filter::getInstance( $this->featureSet, $dataRefMap );
+        $filter = Filter::getInstance( $this->source, $this->target, $this->featureSet, $dataRefMap );
         switch ( $layerNum ) {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string );

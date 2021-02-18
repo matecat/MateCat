@@ -30,7 +30,7 @@ class SubFilteringTest extends AbstractTest {
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = Filter::getInstance( $featureSet );
+        $this->filter = Filter::getInstance( 'en-EN','it-IT', $featureSet );
 
     }
 
@@ -384,7 +384,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance( 'en-EN','et-ET', $featureSet, $data_ref_map );
 
         $db_segment     = "Hi %s .";
         $db_translation = "Tere %s .";

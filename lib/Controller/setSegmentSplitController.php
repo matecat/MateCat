@@ -11,6 +11,11 @@ class setSegmentSplitController extends ajaxController {
     private $target;
     private $exec;
 
+    /**
+     * @var Jobs_JobStruct
+     */
+    private $jobStruct;
+
     public function __construct() {
 
         parent::__construct();
@@ -82,8 +87,8 @@ class setSegmentSplitController extends ajaxController {
         }
 
         //check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->job_pass );
-        $this->featureSet->loadForProject( $jobStruct->getProject() );
+        $this->jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->job_pass );
+        $this->featureSet->loadForProject( $this->jobStruct->getProject() );
 
     }
 
@@ -100,7 +105,7 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment = $this->id_segment;
         $translationStruct->id_job     = $this->id_job;
 
-        $Filter = Filter::getInstance( $this->featureSet );
+        $Filter = Filter::getInstance( $this->jobStruct->source, $this->jobStruct->target, $this->featureSet );
         list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->segment, '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */

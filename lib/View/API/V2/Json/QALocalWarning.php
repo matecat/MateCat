@@ -79,7 +79,7 @@ class QALocalWarning extends QAWarning {
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
-            $Filter = Filter::getInstance();
+            $Filter = Filter::getInstance($this->QA->getSourceSegLang(), $this->QA->getTargetSegLang());
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
                 $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawSource );
