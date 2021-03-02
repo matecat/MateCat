@@ -699,12 +699,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             st.translation, 
             st.status,
             st.eq_word_count,
-            s.raw_word_count,
-            od.map as data_ref_map
+            s.raw_word_count
         FROM files 
         JOIN segments s ON s.id_file = files.id
         LEFT JOIN segment_translations st ON s.id = st.id_segment AND st.id_job = :id_job
-        LEFT JOIN segment_original_data od ON s.id = od.id_segment
         WHERE files.id = :id_file
 ";
 
