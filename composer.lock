@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.173.9",
+            "version": "3.173.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d15688cfe291767ba203c97d5833b963f544412f"
+                "reference": "63c6feca49bf4083f33bf250401c0c286759e101"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d15688cfe291767ba203c97d5833b963f544412f",
-                "reference": "d15688cfe291767ba203c97d5833b963f544412f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/63c6feca49bf4083f33bf250401c0c286759e101",
+                "reference": "63c6feca49bf4083f33bf250401c0c286759e101",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.173.9"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.173.19"
             },
-            "time": "2021-02-15T19:28:47+00:00"
+            "time": "2021-03-01T19:15:59+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -756,16 +756,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.46",
+            "version": "v1.0.47",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "07d85a98eae6321670584365e27cae9130869afb"
+                "reference": "17a2d77faa8ca67a37e4f606d0e1d16187d6fe6f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/07d85a98eae6321670584365e27cae9130869afb",
-                "reference": "07d85a98eae6321670584365e27cae9130869afb",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/17a2d77faa8ca67a37e4f606d0e1d16187d6fe6f",
+                "reference": "17a2d77faa8ca67a37e4f606d0e1d16187d6fe6f",
                 "shasum": ""
             },
             "require": {
@@ -801,9 +801,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.46"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.47"
             },
-            "time": "2021-02-16T17:26:56+00:00"
+            "time": "2021-03-02T16:49:43+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -2316,16 +2316,16 @@
         },
         {
             "name": "onelogin/php-saml",
-            "version": "2.19.0",
+            "version": "2.19.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/onelogin/php-saml.git",
-                "reference": "cc6d4e7ef77b57125c3758fe5fbf21aa7e9a2628"
+                "reference": "790a042f2d16a086a563793dab0eeb6a5a8c4e70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/cc6d4e7ef77b57125c3758fe5fbf21aa7e9a2628",
-                "reference": "cc6d4e7ef77b57125c3758fe5fbf21aa7e9a2628",
+                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/790a042f2d16a086a563793dab0eeb6a5a8c4e70",
+                "reference": "790a042f2d16a086a563793dab0eeb6a5a8c4e70",
                 "shasum": ""
             },
             "require": {
@@ -2333,6 +2333,7 @@
                 "ext-dom": "*",
                 "ext-mcrypt": "*",
                 "ext-openssl": "*",
+                "ext-zlib": "*",
                 "php": ">=5.3.2 <7.2"
             },
             "require-dev": {
@@ -2370,7 +2371,7 @@
                 "issues": "https://github.com/onelogin/php-saml/issues",
                 "source": "https://github.com/onelogin/php-saml/"
             },
-            "time": "2020-11-26T18:47:56+00:00"
+            "time": "2021-03-02T11:05:02+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
