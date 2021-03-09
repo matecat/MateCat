@@ -2470,7 +2470,7 @@ class ProjectManager {
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $iceLockArray[ 'match_type' ],
                         'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
-                        'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
+                        'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : null,
                         'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
                         'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
                         'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
