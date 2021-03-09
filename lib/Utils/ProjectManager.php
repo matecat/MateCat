@@ -2462,16 +2462,18 @@ class ProjectManager {
 
                 /* WARNING do not change the order of the keys */
                 $sql_values = [
-                        'id_segment'          => $translation_row [ 0 ],
-                        'id_job'              => $jid,
-                        'segment_hash'        => $translation_row [ 3 ],
-                        'status'              => $iceLockArray[ 'status' ],
-                        'translation'         => $check->getTargetSeg(),
-                        'locked'              => 0, // not allowed to change locked status for pre-translations
-                        'match_type'          => $iceLockArray[ 'match_type' ],
-                        'eq_word_count'       => $iceLockArray[ 'eq_word_count' ],
-                        'suggestion_match'    => $iceLockArray[ 'suggestion_match' ],
-                        'standard_word_count' => $iceLockArray[ 'standard_word_count' ],
+                        'id_segment'             => $translation_row [ 0 ],
+                        'id_job'                 => $jid,
+                        'segment_hash'           => $translation_row [ 3 ],
+                        'status'                  => $iceLockArray[ 'status' ],
+                        'translation'            => $check->getTargetSeg(),
+                        'locked'                 => 0, // not allowed to change locked status for pre-translations
+                        'match_type'             => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
+                        'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
+                        'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
+                        'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
+                        'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
                 ];
 
                 $query_translations_values[] = $sql_values;
