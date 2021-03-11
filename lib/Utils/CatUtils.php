@@ -1000,5 +1000,17 @@ class CatUtils {
 
         return $qa->review_password;
     }
+
+    /**
+     * get last character from a string
+     * (excluding html tags)
+     *
+     * @param $string
+     *
+     * @return string
+     */
+    public static function getLastCharacter($string) {
+        return mb_substr(strip_tags($string), -1);
+    }
 }
 

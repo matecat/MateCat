@@ -222,6 +222,19 @@ $.extend(UI, {
             CatToolActions.updateQualityReport(data['quality-report']);
         });
     },
+    renderAndScrollToSegment: function(sid) {
+        var segment = SegmentStore.getSegmentByIdToJS(sid);
+        if ( segment ) {
+            SegmentActions.openSegment(sid);
+        } else {
+            UI.unmountSegments();
+            this.render({
+                caller: 'link2file',
+                segmentToOpen: sid,
+                scrollToFile: true
+            });
+        }
+    },
 });
 
 var initEvents = function () {

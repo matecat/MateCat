@@ -271,7 +271,8 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'common.js',
                     basePath + 'user_store.js',
-                    basePath + 'login.js'
+                    basePath + 'login.js',
+                    basePath + 'cat_source/es6/ajax_utils/userAjax.js',
                 ],
                 dest: buildPath + 'common.js'
             },

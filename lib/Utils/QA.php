@@ -1669,8 +1669,10 @@ class QA {
 
             // CJK need special handling
             if(CatUtils::isCJK($this->target_seg_lang)){
+
+                // get last char (excluding tags)
                 $this->target_seg = rtrim( $this->target_seg );
-                $lastChar = mb_substr($this->target_seg, -1);
+                $lastChar = CatUtils::getLastCharacter($this->target_seg);
 
                 // Append a space to target for normalization ONLY if $lastChar
                 // is not a special terminate char
@@ -1703,7 +1705,7 @@ class QA {
         // then we add a trailing space to target
         //
         if(CatUtils::isCJK($this->source_seg_lang) and false === CatUtils::isCJK($this->target_seg_lang)){
-            $lastChar = mb_substr($this->source_seg, -1);
+            $lastChar = CatUtils::getLastCharacter($this->source_seg);
             if(in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
