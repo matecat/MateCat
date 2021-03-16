@@ -49,11 +49,14 @@ class Segments_SegmentOriginalDataDao extends DataAccess_AbstractDao {
             " ( :id_segment, :map ) "
         );
 
+        // remove any carriage return or extra space from map
         $json = json_encode($map);
+        $string = str_replace(["\\n", "\\r"], '', $json);
+        $string = trim(preg_replace('/\s+/', ' ', $string));
 
         $stmt->execute( [
                 'id_segment' => $id_segment,
-                'map' => $json
+                'map' => $string
         ] );
     }
 }

@@ -385,6 +385,8 @@ class QA {
             '&apos;',
             '&amp;#39;',
             '&#39;',
+            '&nbsp;',
+            '&quot;',
             '&amp;amp;',
             '&amp;',
     ];

@@ -11,6 +11,12 @@ use SubFiltering\Filters\DataRefReplace;
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
 
     /**
+     * @var Filter
+     */
+    private $filter;
+
+
+    /**
      * @var string
      */
     private $targetLang;
@@ -29,6 +35,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * @throws \Exception
      */
     public function __construct( \FeatureSet $featureSet, $targetLang ) {
+        $this->filter     = Filter::getInstance( $featureSet );
         $this->featureSet = $featureSet;
         $this->targetLang = $targetLang;
     }
@@ -36,7 +43,28 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * @inheritDoc
      */
-    public function thereAreErrors( $segment, $translation ) {
+    public function thereAreErrors( $segment, $translation, array $dataRefMap = [] ) {
+
+        $segment     = $this->filter->fromLayer0ToLayer1( $segment );
+        $translation = $this->filter->fromLayer0ToLayer1( $translation );
+
+        //
+        // ------------------------------------
+        // NOTE 2021-01-25
+        // ------------------------------------
+        //
+        // In Matecat there are some special characters mapped in data_ref_map (like &#39; for example)
+        // that can be omitted in the target.
+        // In this case no |||UNTRANSLATED_CONTENT_START||| should be found in the target
+        //
+        // To skip these characters QA class needs replaced version of segment and target for _addThisElementToDomMap() function
+        //
+        if(!empty($dataRefMap)){
+            $dataRefReplacer     = new DataRefReplacer( $dataRefMap );
+            $segment     = $dataRefReplacer->replace( $segment );
+            $translation = $dataRefReplacer->replace( $translation );
+        }
+
         $check = new QA ( $segment, $translation );
         $check->setFeatureSet( $this->featureSet );
         $check->setTargetSegLang( $this->targetLang );
