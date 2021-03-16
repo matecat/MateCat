@@ -11,17 +11,29 @@ const TEXT_UTILS = {
         var phTagsObject = {};
         var diff;
         source = source.replace(/&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, group1, group2) {
+            var id = Math.floor(Math.random() * 10000);
             if (_.isUndefined(phTagsObject[match])) {
-                phTagsObject[match] = match;
+                phTagsObject[match] = {
+                    id,
+                    match
+                };
+            } else {
+                id = phTagsObject[match].id
             }
-            return '<' + Base64.encode(match) + '>';
+            return '<' + id + '>';
         });
 
         target = target.replace(/&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, gruop1, group2) {
+            var id = Math.floor(Math.random() * 10000000);
             if (_.isUndefined(phTagsObject[match])) {
-                phTagsObject[match] = match;
+                phTagsObject[match] = {
+                    id,
+                    match
+                };
+            } else {
+                id = phTagsObject[match].id
             }
-            return '<' + Base64.encode(match) + '>';
+            return '<' + id + '>';
         });
 
         diff = dmp.diff_main(
@@ -38,11 +50,13 @@ const TEXT_UTILS = {
         var diffTxt = '';
         var self = this;
         $.each(diff, function (index, text) {
-            text[1] = text[1].replace(/<(.*?)>/gi, function (match, text) {
+            text[1] = text[1].replace(/<(.*?)>/gi, function (match, id) {
                 try {
-                    var decodedText = Base64.decode(text);
-                    if (!_.isUndefined(phTagsObject[decodedText])) {
-                        return phTagsObject[decodedText];
+                    var tag = _.find(phTagsObject,function (item) {
+                        return item.id === parseInt(id)
+                    });
+                    if (!_.isUndefined(tag)) {
+                        return tag.match;
                     }
                     return match;
                 } catch (e) {
