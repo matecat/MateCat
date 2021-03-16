@@ -55,8 +55,9 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
 
     if(brackets.length > 0) {
         offsetWithEntities.map(tag => {
+            const start = tag.start;
             brackets.forEach( bracket => {
-                if(tag.start > bracket.offset){
+                if(start > bracket.offset){
                     tag.start -= 3; //
                 }
             })

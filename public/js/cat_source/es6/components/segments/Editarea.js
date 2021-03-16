@@ -325,7 +325,7 @@ class Editarea extends React.Component {
             const newEditorState = EditorState.moveSelectionToEnd(this.state.editorState);
             this.setState({editorState: newEditorState})
         }
-        if(!editorSync.onComposition){
+        if(!this.state.editorState.isInCompositionMode() && !editorSync.onComposition){
             this.checkDecorators(prevProps);
         }
     }
@@ -662,7 +662,7 @@ class Editarea extends React.Component {
             // Stop checking decorators while typing...
             editorSync.onComposition = true;
             // ...remove unwanted decorators like lexiqa...
-            if(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] && !config.targetIsCJK){
+            if( activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] ){
                 editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
                 newActiveDecorators = {
                     ...newActiveDecorators,

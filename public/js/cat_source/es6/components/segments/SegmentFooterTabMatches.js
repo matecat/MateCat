@@ -60,47 +60,7 @@ class SegmentFooterTabMatches extends React.Component {
             item.sourceDiff = item.suggestionDecodedHtml;
 
             if (this.match !== "MT" && parseInt(this.match) > 74 && parseInt(this.match) < 100) {
-                // Clean text without tag and create tagsMap to replace tag after exec_diff
-                const {text: matchDecoded, tagsMap: matchTagsMap} = TagUtils.cleanTextFromTag( this.segment );
-                const {text: sourceDecoded, tagsMap: sourceTagsMap} = TagUtils.cleanTextFromTag( self.props.segment.segment );
-                let diff_obj = TextUtils.execDiff( matchDecoded, sourceDecoded );
-
-                let totalLength = 0;
-                // --- Replace all mapped tags back inside the string
-                diff_obj.forEach((diffItem, index) =>{
-                    if(diffItem[0] <= 0){
-                        let includedTags = [];
-                        let newTotalLength = totalLength + diffItem[1].length;
-                        let firstLoopTotalLength = newTotalLength;
-                        // sort tags by offset because next check is executed consecutively
-                        matchTagsMap.sort((a, b) => {return a.offset-b.offset});
-                        // get every tag included inside the original string slice
-                        matchTagsMap.forEach((tag) => {
-                            // offset+1 is for prepended Unicode Character 'ZERO WIDTH SPACE'
-                            if(tag.offset+1 <= firstLoopTotalLength && tag.offset+1 >= firstLoopTotalLength - diffItem[1].length){
-                                // add tag reference to work array
-                                includedTags.push(tag);
-                                // add tag's length (tag.offset is computed on the dirty string with all tags)
-                                firstLoopTotalLength += tag.match.length
-                            }
-                        })
-                        includedTags.forEach((includedTag) => {
-                            const relativeTagOffset = diffItem[1].length - (newTotalLength - (includedTag.offset+1))
-                            const strBefore = diffItem[1].slice(0 ,relativeTagOffset);
-                            const strAfter = diffItem[1].slice(relativeTagOffset);
-                            // insert tag
-                            const newString = strBefore + includedTag.match + strAfter
-                            // update total parsed length of the temp string
-                            newTotalLength += includedTag.match.length
-                            // update item inside diff_obj
-                            diffItem[1] = newString;
-                        })
-                        // update total parsed length of the complete string
-                        totalLength += diffItem[1].length;
-                    }
-                })
-
-                item.sourceDiff =  TextUtils.diffMatchPatch.diff_prettyHtml( diff_obj ) ;
+                item.sourceDiff = TextUtils.getDiffHtml(this.segment, self.props.segment.segment);
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
                 item.sourceDiff = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(item.sourceDiff)))
             }

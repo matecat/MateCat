@@ -44,6 +44,9 @@
   max-width: 320px;
   vertical-align: middle;
 }
+.deleted .tag {
+  text-decoration: line-through;
+}
 .tag {
   position: relative;
   direction: ltr;
