@@ -138,12 +138,13 @@ APP.addGDriveFile = function(exportIds) {
             APP.tryListGDriveFiles();
         } else {
             var message = "There was an error retrieving the file from Google Drive. Try again and if the error persists contact the Support.";
-            if ( response.error_class === "Google_Service_Exception" ) {
+            if ( response.error_class === "Google\\Service\\Exception" ) {
                 message = "There was an error retrieving the file from Google Drive: " + response.error_msg;
             }
             $('.error-message').find('p').text(message);
             $('.error-message').show();
-            console.error('Error when processing request: ' + response);
+
+            console.error('Error when processing request. Error class: ' + response.error_class + ', Error code: ' + response.error_code + ', Error message: ' + message);
         }
     });
 };
