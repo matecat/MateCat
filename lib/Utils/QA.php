@@ -374,24 +374,6 @@ class QA {
     ];
 
     /**
-     * This map excludes these characters from consistency check
-     * (only if they are present as xliff 2.0 metadata tag in the source)
-     *
-     * @var array
-     */
-    protected $tagsToBeExcludedFromChecks = [
-            '{s}',
-            '&amp;apos;',
-            '&apos;',
-            '&amp;#39;',
-            '&#39;',
-            '&nbsp;',
-            '&quot;',
-            '&amp;amp;',
-            '&amp;',
-    ];
-
-    /**
      * <code>
      * $errorMap = [
      *      'code'  => (int),
@@ -1297,9 +1279,16 @@ class QA {
      *
      * @param DOMElement $element
      *
+     * @throws \Exception
      * @return bool
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
+
+        $tagsToBeExcludedFromChecks = $this->featureSet->filter('qa_inject_excluded_tags',[]);
+
+        if(empty($tagsToBeExcludedFromChecks)){
+            return true;
+        }
 
         $elementHasDataRef = false;
         $elementValue = null;
@@ -1314,7 +1303,7 @@ class QA {
             }
         }
 
-        return !(in_array($elementValue, $this->tagsToBeExcludedFromChecks) and $elementHasDataRef);
+        return !(in_array($elementValue, $tagsToBeExcludedFromChecks) and $elementHasDataRef);
     }
 
     /**
