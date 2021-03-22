@@ -1,6 +1,6 @@
 <?php
 
-class AlterSegmentOriginalData extends AbstractMatecatMigration {
+class AlterTableSegmentOriginalData extends AbstractMatecatMigration {
 
     public $sql_up = [ 'CREATE index id_segment_idx on segment_original_data( id_segment )' ];
 
