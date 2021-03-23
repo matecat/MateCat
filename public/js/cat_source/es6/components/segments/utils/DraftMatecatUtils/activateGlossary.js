@@ -38,8 +38,16 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
     const createGlossaryRegex = (glossaryObj, text) => {
         let re;
         try {
+
             const matches = _.map(glossaryObj, ( elem ) => (elem[0].raw_segment) ? elem[0].raw_segment: elem[0].segment);
-            const escapedMatches = matches.map((match)=>TextUtils.escapeRegExp(match));
+            const matchToExclude = findInclusiveMatches(matches);
+            let matchToUse = [];
+            _.forEach(matches, (match)=> {
+                if (matchToExclude.indexOf(match) === -1) {
+                    matchToUse.push(match);
+                }
+            })
+            const escapedMatches = matchToUse.map((match)=>TextUtils.escapeRegExp(match));
             re = new RegExp( '\\b(' + escapedMatches.join('|') + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {
@@ -49,6 +57,29 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
             return null;
         }
         return re;
+    };
+    /**
+     * This function returns an array of strings that are already contained in other strings.
+     *
+     * Example:
+     *      input ['canestro', 'cane', 'gatto']
+     *      returns [ 'cane' ]
+     *
+     * @param matches
+     * @returns {Array}
+     */
+    const findInclusiveMatches = (matches) => {
+        var inclusiveMatches = [];
+        $.each(matches, function (index) {
+            $.each(matches, function (ind) {
+                if (index != ind) {
+                    if (_.startsWith(matches[index].toLowerCase(), this.toLowerCase())) {
+                        inclusiveMatches.push(this);
+                    }
+                }
+            });
+        });
+        return inclusiveMatches;
     };
 
     const regex = createGlossaryRegex(glossary, text);

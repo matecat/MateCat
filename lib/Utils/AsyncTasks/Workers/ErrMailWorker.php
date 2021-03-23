@@ -10,7 +10,9 @@
 
 namespace AsyncTasks\Workers;
 
-use PHPMailer;
+
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Params;
@@ -42,10 +44,10 @@ class ErrMailWorker extends AbstractWorker {
      *
      * @param AbstractElement $queueElement
      *
-     * @return void
-     *
+     * @return mixed|void
      * @throws EmptyElementException
      * @throws EndQueueException
+     * @throws Exception
      * @throws ReQueueException
      */
     public function process( AbstractElement $queueElement ) {
@@ -59,6 +61,14 @@ class ErrMailWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @param Params $mailConf
+     *
+     * @return bool
+     * @throws EmptyElementException
+     * @throws ReQueueException
+     * @throws Exception
+     */
     protected function _sendErrMailReport( Params $mailConf ){
 
         if( empty( $mailConf->server_configuration ) ){
@@ -76,11 +86,10 @@ class ErrMailWorker extends AbstractWorker {
             $mail->Port       = $mailConf->server_configuration['Port'];
             $mail->Sender     = $mailConf->server_configuration['Sender'];
             $mail->Hostname   = $mailConf->server_configuration['Hostname'];
-
             $mail->From       = $mailConf->server_configuration['From'];
             $mail->FromName   = $mailConf->server_configuration['FromName'];
-            $mail->ReturnPath = $mailConf->server_configuration['ReturnPath'];
-            $mail->addReplyTo( $mail->ReturnPath, $mail->FromName );
+
+            $mail->addReplyTo( $mailConf->server_configuration['ReturnPath'], $mail->FromName );
 
             if( !empty( $mailConf->email_list ) ){
                 foreach( $mailConf->email_list as $email => $uName ){

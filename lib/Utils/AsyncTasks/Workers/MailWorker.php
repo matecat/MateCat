@@ -9,7 +9,8 @@
 
 namespace AsyncTasks\Workers;
 
-use PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -21,10 +22,10 @@ class MailWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
-     * @return bool
+     * @return bool|mixed
      * @throws EndQueueException
      * @throws ReQueueException
-     * @throws \phpmailerException
+     * @throws Exception
      */
     public function process( AbstractElement $queueElement ) {
 
@@ -41,12 +42,10 @@ class MailWorker extends AbstractWorker {
         $mail->Port     = $queueElement->params[ 'port' ];
         $mail->Sender   = $queueElement->params[ 'sender' ];
         $mail->Hostname = $queueElement->params[ 'hostname' ];
-
         $mail->From       = $queueElement->params[ 'from' ];
         $mail->FromName   = $queueElement->params[ 'fromName' ];
-        $mail->ReturnPath = $queueElement->params[ 'returnPath' ];
 
-        $mail->addReplyTo( $mail->ReturnPath, $mail->FromName );
+        $mail->addReplyTo( $queueElement->params[ 'returnPath' ], $mail->FromName );
 
         $mail->Subject = $queueElement->params[ 'subject' ];
         $mail->Body    = $queueElement->params[ 'htmlBody' ];
