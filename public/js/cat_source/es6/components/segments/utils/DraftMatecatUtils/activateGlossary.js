@@ -73,7 +73,7 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
         $.each(matches, function (index) {
             $.each(matches, function (ind) {
                 if (index != ind) {
-                    if (_.startsWith(matches[index], this)) {
+                    if (_.startsWith(matches[index].toLowerCase(), this.toLowerCase())) {
                         inclusiveMatches.push(this);
                     }
                 }
