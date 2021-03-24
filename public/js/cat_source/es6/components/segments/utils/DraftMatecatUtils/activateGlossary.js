@@ -46,17 +46,26 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
                 if (matchToExclude.indexOf(match) === -1) {
                     matchToUse.push(match);
                 }
-            })
-            const escapedMatches = matchToUse.map((match)=>TextUtils.escapeRegExp(match));
+            });
+
+            const escapedMatches = matchToUse.map( ( match ) => TextUtils.escapeRegExp( match ) );
+
+            if ( escapedMatches.length == 0 ) {
+                throw new Error( "Empty matches list" );
+            }
+
             re = new RegExp( '\\b(' + escapedMatches.join('|') + ')\\b', "gi" );
-            //If source languace is Cyrillic or CJK
+
+            //If source language is Cyrillic or CJK
             if ( config.isCJK) {
                 re = new RegExp( '(' + escapedMatches.join('|') + ')', "gi" );
             }
-        } catch ( e ) {
-            return null;
-        }
-        return re;
+
+        } catch ( ignore ) {}
+
+        // this regexp used as default value do not match anything
+        // return this instead of null, null value causes the application crash
+        return re ? re : new RegExp( '(?!.*)', "gi" );
     };
     /**
      * This function returns an array of strings that are already contained in other strings.
@@ -72,9 +81,9 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
         var inclusiveMatches = [];
         $.each(matches, function (index) {
             $.each(matches, function (ind) {
-                if (index != ind) {
-                    if (_.startsWith(matches[index], this)) {
-                        inclusiveMatches.push(this);
+                if (index !== ind) {
+                    if ( _.startsWith( matches[index].toLowerCase(), this.toLowerCase() ) && matches[index].toLowerCase() !== this.toLowerCase() ) {
+                        inclusiveMatches.push( this );
                     }
                 }
             });
