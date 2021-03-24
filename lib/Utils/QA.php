@@ -1284,7 +1284,7 @@ class QA {
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
 
-        $tagsToBeExcludedFromChecks = $this->featureSet->filter('qa_inject_excluded_tags',[]);
+        $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa',[]);
 
         if(empty($tagsToBeExcludedFromChecks)){
             return true;
