@@ -72,7 +72,6 @@ class QualitySummary {
                 self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
 
         return self::populateQualitySummarySection(
-                $chunkReview->review_password,
                 $chunkReview->source_page,
                 $this->chunk,
                 $quality_overall,
@@ -84,7 +83,8 @@ class QualitySummary {
                 $passFail,
                 $chunkReview->total_tte,
                 $is_pass,
-                $model_version
+                $model_version,
+                $chunkReview->review_password
         );
     }
 
@@ -108,7 +108,6 @@ class QualitySummary {
      * @return mixed
      */
     public static function populateQualitySummarySection(
-            $chunkReviewPassword,
             $source_page,
             Jobs_JobStruct $jStruct,
             $quality_overall,
@@ -120,11 +119,16 @@ class QualitySummary {
             $passfail,
             $total_tte,
             $is_pass,
-            $model_version
+            $model_version,
+            $chunkReviewPassword = null
     ) {
 
         $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $source_page );
-        $feedback       = ( new Revise_FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
+
+        $feedback = null;
+        if($chunkReviewPassword){
+            $feedback = ( new Revise_FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
+        }
 
         return [
                 'revision_number'            => $revisionNumber,
