@@ -131,10 +131,27 @@ class Chunk extends \API\V2\Json\Chunk {
             list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
                     $this->legacyRevisionQualityVars( $chunk, $featureSet, $jobStats, $qualityInfoArray );
 
-            $result[ 'quality_summary' ][] = QualitySummary::populateQualitySummarySection( Constants::SOURCE_PAGE_REVISION, $chunk,
-                    $quality_overall, $reviseIssues, $score, $categories,
-                    $total_issues_weight, $total_reviewed_words_count, $passfail,
-                    0, 0 );
+            $chunkReviewsList = $this->getChunkReviews();
+
+            foreach ( $chunkReviewsList as $index => $chunkReview ) {
+                $result[ 'quality_summary' ][] = QualitySummary::populateQualitySummarySection(
+                        $chunkReview->review_password,
+                        Constants::SOURCE_PAGE_REVISION,
+                        $chunk,
+                        $quality_overall,
+                        $reviseIssues,
+                        $score,
+                        $categories,
+                        $total_issues_weight,
+                        $total_reviewed_words_count,
+                        $passfail,
+                        0,
+                        0,
+                        0
+                );
+            }
+
+
         }
 
         /**
