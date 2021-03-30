@@ -36,6 +36,36 @@ class Revise_FeedbackDAO extends DataAccess_AbstractDao {
 
     /**
      * @param $id_job
+     * @param $old_password
+     * @param $new_password
+     * @param $revision_number
+     *
+     * @return int
+     */
+    public function updateFeedbackPassword( $id_job, $old_password, $new_password, $revision_number ) {
+        $query = "UPDATE " . self::TABLE . " 
+                SET password = :new_password
+                WHERE
+                id_job = :id_job AND 
+                password = :old_password AND
+                revision_number = :revision_number
+            ";
+
+        $values = [
+                'id_job'   => $id_job,
+                'old_password' => $old_password,
+                'new_password' => $new_password,
+                'revision_number' => $revision_number
+        ];
+
+        $stmt   = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( $values );
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @param $id_job
      * @param $password
      * @param $revision_number
      *
