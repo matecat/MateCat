@@ -1,6 +1,7 @@
 # IDE stuffs
 .settings
 .idea
+.vscode
 .project
 nbproject/
 webgrind/
