@@ -1,6 +1,6 @@
-module.exports = function(grunt) {
-    var mapFilePath;
 
+
+module.exports = function(grunt) {
     var basePath = '../../public/js/';
     var gruntDir = '../../support_scripts/grunt/';
     var buildPath = '../../public/js/build/';
@@ -233,27 +233,38 @@ module.exports = function(grunt) {
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
-                    // <!-- The Templates plugin is included to render the upload/download listings -->
+                    
+                    // The Templates plugin is included to render the upload/download listings
                     basePath + 'lib/fileupload/tmpl.min.js',
-                    // <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+                    
+                    // The Load Image plugin is included for the preview images and image resizing functionality
                     basePath + 'lib/fileupload/load-image.min.js',
-                    // <!-- The Canvas to Blob plugin is included for image resizing functionality -->
+                    
+                    // The Canvas to Blob plugin is included for image resizing functionality
                     basePath + 'lib/fileupload/canvas-to-blob.min.js',
-                    <!-- jQuery Image Gallery -->
+                    
+                    // jQuery Image Gallery
                     basePath + 'lib/fileupload/jquery.image-gallery.min.js',
-                    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+                    
+                    // The Iframe Transport is required for browsers without support for XHR file uploads
                     basePath + 'lib/fileupload/jquery.iframe-transport.js',
-                    <!-- The basic File Upload plugin -->
+                    
+                    // The basic File Upload plugin
                     basePath + 'lib/fileupload/jquery.fileupload.js',
-                    <!-- The File Upload file processing plugin -->
+                    
+                    // The File Upload file processing plugin
                     basePath + 'lib/fileupload/jquery.fileupload-fp.js',
-                    <!-- The File Upload user interface plugin -->
+                    
+                    // The File Upload user interface plugin
                     basePath + 'lib/fileupload/jquery.fileupload-ui.js',
-                    <!-- The File Upload jQuery UI plugin -->
+                    
+                    // The File Upload jQuery UI plugin
                     basePath + 'lib/fileupload/jquery.fileupload-jui.js',
-                    <!-- The localization script -->
+                    
+                    // The localization script
                     basePath + 'lib/fileupload/locale.js',
-                    <!-- The main application script -->
+
+                    // The main application script
                     basePath + 'lib/fileupload/main.js',
                     basePath + 'lib/semantic.min.js'
                 ],
