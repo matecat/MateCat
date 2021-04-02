@@ -14,15 +14,6 @@ const buildPath = '../../public/js/build/'
 const incPath = '../../inc/'
 const cssBase = '../../public/css/'
 
-// const cssFiles = [
-//     basePath + '../css/scss/common.scss',
-//     basePath + '../css/style.css',
-//     basePath + '../css/mbc-style.css',
-//     basePath + '../css/scss/segment-notes.scss',
-//     basePath + '../css/project-completion-feature.css',
-//     basePath + '../css/editlog.css',
-//     basePath + '../css/lexiqa.css',
-// ];
 const cssWatchFiles = [
   cssBase + 'sass/variables.scss',
   cssBase + 'common.css',
