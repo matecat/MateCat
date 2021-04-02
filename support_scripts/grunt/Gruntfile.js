@@ -1,6 +1,6 @@
-const es2015Preset = require('babel-preset-env')
-const reactPreset = require('babel-preset-react')
-const babelstage2 = require('babel-preset-stage-2')
+const babelPresetEnv = require('babel-preset-env')
+const babelPresetReact = require('babel-preset-react')
+const babelPresetStage2 = require('babel-preset-stage-2')
 const sass = require('node-sass')
 
 function s4() {
@@ -67,14 +67,12 @@ module.exports = function (grunt) {
      *
      * All imports to be attached to window should be defined in
      * the entry point js file.
-     *
-     *
      */
     browserify: {
       libs: {
         options: {
           transform: [
-            ['babelify', {presets: [es2015Preset, reactPreset, babelstage2]}],
+            ['babelify', {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]}],
           ],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
@@ -87,7 +85,7 @@ module.exports = function (grunt) {
       components: {
         options: {
           transform: [
-            ['babelify', {presets: [es2015Preset, reactPreset, babelstage2]}],
+            ['babelify', {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]}],
           ],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
@@ -100,7 +98,7 @@ module.exports = function (grunt) {
       qualityReport: {
         options: {
           transform: [
-            ['babelify', {presets: [es2015Preset, reactPreset, babelstage2]}],
+            ['babelify', {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]}],
           ],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
