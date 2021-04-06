@@ -373,7 +373,7 @@ class SubFilteringTest extends AbstractTest {
     /**
      * @throws \Exception
      */
-    public function testSPlaceholderWithDataRef() {
+    public function testsPHPlaceholderWithDataRefForAirbnb() {
         $data_ref_map = [
                 'source3' => '&lt;/a&gt;',
                 'source4' => '&lt;br&gt;',
@@ -402,6 +402,73 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals($l1_translation, $expected_l1_translation);
         $this->assertEquals($l2_segment, $expected_l2_segment);
         $this->assertEquals($l2_translation, $expected_l2_translation);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPHPlaceholderWithDataRef() {
+        $data_ref_map = [
+                'source1' => '&lt;br&gt;',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment     = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
+        $db_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
+        $expected_l1_segment = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
+        $expected_l1_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
+        $expected_l2_segment = 'Frase semplice: &lt;ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/&gt;.';
+        $expected_l2_translation = 'Simple sentence: &lt;ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/&gt;.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPCPlaceholderWithDataRef() {
+        $data_ref_map = [
+                'd1' => '[',
+                'd2' => '](http://repubblica.it)',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment     = 'Link semplice: &lt;pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1"&gt;La Repubblica&lt;/pc&gt;.';
+        $db_translation = 'Simple link: &lt;pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1"&gt;La Repubblica&lt;/pc&gt;.';
+        $expected_l1_segment = 'Link semplice: <ph id="mtc_1" equiv-text="base64:Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow=="/>La Repubblica<ph id="mtc_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/>.';
+        $expected_l1_translation = 'Simple link: <ph id="mtc_1" equiv-text="base64:Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow=="/>La Repubblica<ph id="mtc_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/>.';
+        $expected_l2_segment = 'Link semplice: &lt;ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Ww=="/&gt;La Repubblica&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/&gt;.';
+        $expected_l2_translation = 'Simple link: &lt;ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Ww=="/&gt;La Repubblica&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/&gt;.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
+
+        $back_to_db_segment = $Filter->fromLayer2ToLayer0( $l2_segment );
+        $back_to_db_translation = $Filter->fromLayer2ToLayer0( $l2_translation );
+
+        $this->assertEquals($db_segment, $back_to_db_segment);
+        $this->assertEquals($db_translation, $back_to_db_translation);
     }
 
 }

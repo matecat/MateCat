@@ -26,7 +26,13 @@ class DataRefRestore extends AbstractHandler {
      * @inheritDoc
      */
     public function transform( $segment ) {
+
+        if(empty($this->dataRefMap)){
+            return $segment;
+        }
+
         $dataRefReplacer = new DataRefReplacer($this->dataRefMap);
+        $segment = str_replace('&quot;', '"', $segment);
 
         return $dataRefReplacer->restore($segment);
     }
