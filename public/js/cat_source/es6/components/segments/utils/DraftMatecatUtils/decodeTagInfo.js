@@ -26,7 +26,7 @@ const decodeTagInfo = (tag) => {
             const contentMatch = placeholderRegex.exec(tagEncodedText);
             if(contentMatch && contentMatch.length > 1) {
                 decodedTagData.content =  decodeNeeded ? atob(contentMatch[1]) : contentMatch[1];
-                decodedTagData.content = unescapeHTML(decodedTagData.content);
+                decodedTagData.content = unescapeHTML(decodedTagData.content).replace(/\n/g, ' ');
             }else if(tagPlaceholder){
                 decodedTagData.content = tagSignatures[tagName].placeholder;
             }
