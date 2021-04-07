@@ -1,8 +1,4 @@
-/node_modules
-/public/api/dist
-/public/**/build
 /public/css/fonts
-/public/css/sass/components/segment/Editor.scss
 /public/holidays
 /public/js
 /nodejs
@@ -13,5 +9,14 @@
 /LICENSE.md
 /composer.*
 
+# Build related files
+/node_modules
+/public/**/build
+
+# Automated files
 package-lock.json
+
+# Tracked minified files (should be removed from tracking in the future..)
 *.min.js
+/public/api/dist
+/public/css/sass/components/segment/Editor.scss
