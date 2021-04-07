@@ -1,5 +1,9 @@
 /node_modules
-/public
+/public/api/dist
+/public/css
+/public/holidays
+/public/img
+/public/js
 /nodejs
 /lib
 /test
@@ -7,4 +11,6 @@
 /README.md
 /LICENSE.md
 /composer.*
+
 package-lock.json
+*.min.js
