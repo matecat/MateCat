@@ -63,7 +63,10 @@ module.exports = function (grunt) {
       libs: {
         options: {
           transform: [
-            ['babelify', {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]}],
+            [
+              'babelify',
+              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+            ],
           ],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
@@ -76,7 +79,10 @@ module.exports = function (grunt) {
       components: {
         options: {
           transform: [
-            ['babelify', {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]}],
+            [
+              'babelify',
+              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+            ],
           ],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
@@ -89,7 +95,10 @@ module.exports = function (grunt) {
       qualityReport: {
         options: {
           transform: [
-            ['babelify', {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]}],
+            [
+              'babelify',
+              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+            ],
           ],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],

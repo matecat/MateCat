@@ -2,9 +2,9 @@
 /public
 /nodejs
 /lib
-/support_scripts
 /test
 /inc
 /README.md
 /LICENSE.md
 /composer.*
+package-lock.json
