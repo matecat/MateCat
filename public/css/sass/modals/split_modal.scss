@@ -1,403 +1,401 @@
 /*Split modal*/
 .popup-split {
-    box-sizing: content-box;
-    .popup#split-modal-cont {
-        margin: 0 auto;
-        position: relative;
-        padding: 0 0 0 0;
-        left: 0;
-        top: 0;
-        background: $grey3;
-        border-radius: 0 0 4px 4px;
-        text-align: left;
-        border: 1px solid #666;
-        min-width: 670px;
+  box-sizing: content-box;
+  .popup#split-modal-cont {
+    margin: 0 auto;
+    position: relative;
+    padding: 0 0 0 0;
+    left: 0;
+    top: 0;
+    background: $grey3;
+    border-radius: 0 0 4px 4px;
+    text-align: left;
+    border: 1px solid #666;
+    min-width: 670px;
+  }
+  .popup .splitbtn-cont {
+    //margin-left: 10px;
+    margin-top: 20px;
+    //width: 100%;
+    .popup-split-job-id {
+      font-weight: 100;
+      font-size: 16px;
+      color: $grey1;
+      margin-right: 5px;
     }
-    .popup .splitbtn-cont {
-        //margin-left: 10px;
-        margin-top: 20px;
-        //width: 100%;
-        .popup-split-job-id {
-            font-weight: 100;
-            font-size: 16px;
-            color: $grey1;
-            margin-right: 5px;
-        }
-    }
+  }
 
-    .error-count {
-        padding: 0;
-        margin-top: 0px;
-        margin-right: 15px !important;
-        font-size: 18px;
-        text-align: right;
-        color: #d65757 !important;
-        display: block;
-        line-height: 13px !important;
-    }
-    .error-number .error-count {
-        display: block;
+  .error-count {
+    padding: 0;
+    margin-top: 0px;
+    margin-right: 15px !important;
+    font-size: 18px;
+    text-align: right;
+    color: #d65757 !important;
+    display: block;
+    line-height: 13px !important;
+  }
+  .error-number .error-count {
+    display: block;
+  }
+  .error-count.current {
+    color: black !important;
+  }
+  .splitbtn-cont {
+    overflow: hidden;
+    font-size: 18px;
+    color: $grey1;
+    font-weight: bold;
+  }
+  .jobcontainer.splitted .splitbtn-cont {
+    display: none;
+  }
+  .splitbtn-cont .label {
+    padding: 5px 10px;
+  }
 
+  .nosplit {
+    float: right;
+    font-size: 20px;
+    color: $grey1;
+    display: none;
+    margin: 45px 140px 0 0;
+  }
+  .jobcontainer.splitted .nosplit {
+    display: block;
+  }
+  .btnsplit {
+    float: right;
+    margin: 0 auto;
+    padding: 20px 0 20px 0;
+    overflow: hidden;
+    .primary {
+      font-family: Calibri, Arial, Helvetica, sans-serif;
+      //padding: 11px 22px;
+      vertical-align: top;
+      //font-size: 18px;
+      //border: 1px solid #797979;
+      border-radius: 2px;
+      float: right;
     }
-    .error-count.current {
-        color: black !important;
-    }
-    .splitbtn-cont {
-        overflow: hidden;
-        font-size: 18px;
-        color: $grey1;
-        font-weight: bold;
-    }
-    .jobcontainer.splitted .splitbtn-cont {
-        display: none;
-    }
-    .splitbtn-cont .label {
-        padding: 5px 10px;
-    }
-
-    .nosplit {
-        float: right;
-        font-size: 20px;
-        color: $grey1;
-        display: none;
-        margin: 45px 140px 0 0;
-    }
-    .jobcontainer.splitted .nosplit {
-        display: block;
-    }
-    .btnsplit {
-        float: right;
-        margin: 0 auto;
-        padding: 20px 0 20px 0;
-        overflow: hidden;
-        .primary {
-            font-family: Calibri, Arial, Helvetica, sans-serif;
-            //padding: 11px 22px;
-            vertical-align: top;
-            //font-size: 18px;
-            //border: 1px solid #797979;
-            border-radius: 2px;
-            float: right;
-        }
-        .cancel-button {
-            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            //font-size: 18px;
-            margin-top: 0;
-            border: 1px solid $grey1;
-            border-radius: 2px;
-            //padding: 11px 22px;
-            background-color: #fff;
-            margin-right: 15px;
-            color: $grey1;
-            &:hover {
-                background-color: $grey3;
-                //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-            }
-            &:focus {
-                box-shadow: none;
-            }
-        }
-    }
-    .none {
-        display: none;
-    }
-
-
-    input[type="text"][disabled] {
-        background: #f0f0f0;
-    }
-
-    h2 {
-        font-size: 24px !important;
-        font-weight: bold !important;
-        padding: 0;
-        margin: 15px 10px !important;
-        margin-bottom: 21px !important;
-    }
-
-    h3 {
-        font-size: 20px !important;
-        font-weight: bold !important;
-        color: #333 !important;
-        width: 48%;
-        display: inline-block;
-        padding-left: 25px;
-        vertical-align: text-top;
-    }
-
-    h4 {
-        font-size: 18px;
-    }
-
-    .container-split-select {
-        display: inline-block;
-        text-align: right;
-        width: 45%;
-        position: relative;
-        top: 2px;
-        .label {
-            display: inline-block;
-        }
-        .splitselect {
-            width: auto;
-            height: 37px;
-            padding: 4px;
-            color: $grey1;
-            font-size: 18px;
-            border: 1px solid $grey1;
-            box-sizing: border-box;
-            display: inline-block;
-            background: white;
-            border-radius: 6px;
-        }
-
-    }
-
-    .splitbtn:before {
-        content: "\f065";
-        margin-right: 3px;
-        font-family: 'icomoon';
-        speak: none;
-        font-style: normal;
-        font-weight: normal;
-        font-variant: normal;
-        text-transform: none;
-        line-height: 1;
-        -webkit-font-smoothing: antialiased;
-    }
-
-
-    .popup-split-project-title {
-        display: none;
-    }
-
-    .splitbtn-cont.disabled {
-        background: none;
-        border: none;
-        opacity: 1 !important;
-    }
-    .disabled, .disabled:hover, .disabled:active {
-        opacity: 0.5 !important;
-        cursor: default;
-        -moz-box-shadow: none;
-        -webkit-box-shadow: none;
-        border: 1px solid $grey1;
-        background: #ccc;
-    }
-
-
-    .uploadbtn {
-        float: right;
-    }
-
-    .split-box2 {
-        display: none;
-        width: 670px;
-        margin: 0 auto;
-        position: fixed;
-        padding: 0px 0 0px 0;
-        top: 50%;
-        left: 50%;
-        margin: -300px 0 0 -350px;
-        z-index: 999999;
-        background: #fff;
-        box-shadow: 0px 0px 25px #000;
-        border-radius: 2px;
-        text-align: left;
-        font-size: 18px;
-        border: 1px solid $grey1;
-    }
-    .split-box3 .input, .split-box2 .input {
-        font-size: 16px;
-        width: 20px;
-        margin-top: -1px;
-        text-align: center;
-    }
-    .split-box3 {
-        margin: 5px 15px;
-    }
-    .split-box3 .jobs {
-        list-style: none;
-        padding: 0;
-        overflow-y: auto;
-        max-height: 325px;
-        width: 645px;
-        margin-top: 20px;
-    }
-
-    .input-small {
-        height: 20px;
-        float: left;
-        text-align: right;
-        width: 70px;
-        margin-right: 0px;
-        padding: 6px 5px 5px 5px;
-        font-size: 18px;
-        background: #fdfdfd;
-        background-size: 13px 11px;
-        box-sizing: content-box;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        box-shadow: inset 0 1px 3px #ddd;
-    }
-
-    .btn-cancel {
-        padding: 2px 15px !important;
-    }
-
-    .split-box3 .jobs li {
-        float: left;
-        margin: 0px 0 10px 0;
-        padding: 0px;
-        width: 99%;
-        border-radius: 0px;
-        background: #ffffff;
+    .cancel-button {
+      font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      //font-size: 18px;
+      margin-top: 0;
+      border: 1px solid $grey1;
+      border-radius: 2px;
+      //padding: 11px 22px;
+      background-color: #fff;
+      margin-right: 15px;
+      color: $grey1;
+      &:hover {
+        background-color: $grey3;
         //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+      }
+      &:focus {
+        box-shadow: none;
+      }
     }
+  }
+  .none {
+    display: none;
+  }
 
-    .split-box3 .jobs li.void {
-        border: 1px solid red !important;
-    }
-    .error-perc {
-        float: left;
-        width: 82%;
-        margin: 25px 0 -20px 20px;
-        text-align: right;
-        color: #FF0000;
-        font-size: 12px
-    }
+  input[type='text'][disabled] {
+    background: #f0f0f0;
+  }
 
-    .error-message {
-        background: #d65757;
-        color: #fff;
-        margin: 0 0 10px 0;
-        float: left;
-        font-weight: bold;
-        width: 100%;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
-        border: 1px solid #c45f5f;
-        margin-top: 10px;
-    }
+  h2 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    padding: 0;
+    margin: 15px 10px !important;
+    margin-bottom: 21px !important;
+  }
 
-    .jobcontainer {
-        padding-bottom: 50px;
-        border-bottom: 1px dashed #ccc;
-    }
+  h3 {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    width: 48%;
+    display: inline-block;
+    padding-left: 25px;
+    vertical-align: text-top;
+  }
 
-    div.wrapper div:last-child {
-        border: none;
-    }
+  h4 {
+    font-size: 18px;
+  }
 
-    .error-message p {
-        padding: 0 10px 0 10px;
-        line-height: 40px !important;
-
+  .container-split-select {
+    display: inline-block;
+    text-align: right;
+    width: 45%;
+    position: relative;
+    top: 2px;
+    .label {
+      display: inline-block;
     }
-
-    .error-message p:before {
-        font-family: 'icomoon';
-        speak: none;
-        font-style: normal;
-        font-weight: normal;
-        font-variant: normal;
-        text-transform: none;
-        line-height: 1;
-        -webkit-font-smoothing: antialiased;
-        content: "\f071";
-        margin-right: 10px;
+    .splitselect {
+      width: auto;
+      height: 37px;
+      padding: 4px;
+      color: $grey1;
+      font-size: 18px;
+      border: 1px solid $grey1;
+      box-sizing: border-box;
+      display: inline-block;
+      background: white;
+      border-radius: 6px;
     }
+  }
 
-    .jobs h4 {
-        margin: 11px 0 0 10px;
-        float: left;
-        line-height: 30px;
-    }
-    .job-details {
-        float: right;
-    }
-    .job-perc {
-        color: #999;
-        margin: 0;
-        float: left;
-        padding: 10px;
-        font-size: 18px;
-        color: #000;
-        text-align: right;
-    }
-    .job-perc p {
-        float: left;
-        font-size: 14px;
-        margin: 1px 6px 0 3px !important;
-        padding: 0;
-        line-height: 30px !important;
-    }
+  .splitbtn:before {
+    content: '\f065';
+    margin-right: 3px;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+  }
 
-    .total .wordsum {
-        font-size: 20px;
-        color: $grey1;
-        text-align: right;
-        margin-right: 15px;
-        margin-top: 10px;
-        padding: 0;
-        line-height: 13px;
-        font-weight: bold;
-        span {
-            color: black;
-        }
+  .popup-split-project-title {
+    display: none;
+  }
+
+  .splitbtn-cont.disabled {
+    background: none;
+    border: none;
+    opacity: 1 !important;
+  }
+  .disabled,
+  .disabled:hover,
+  .disabled:active {
+    opacity: 0.5 !important;
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    border: 1px solid $grey1;
+    background: #ccc;
+  }
+
+  .uploadbtn {
+    float: right;
+  }
+
+  .split-box2 {
+    display: none;
+    width: 670px;
+    margin: 0 auto;
+    position: fixed;
+    padding: 0px 0 0px 0;
+    top: 50%;
+    left: 50%;
+    margin: -300px 0 0 -350px;
+    z-index: 999999;
+    background: #fff;
+    box-shadow: 0px 0px 25px #000;
+    border-radius: 2px;
+    text-align: left;
+    font-size: 18px;
+    border: 1px solid $grey1;
+  }
+  .split-box3 .input,
+  .split-box2 .input {
+    font-size: 16px;
+    width: 20px;
+    margin-top: -1px;
+    text-align: center;
+  }
+  .split-box3 {
+    margin: 5px 15px;
+  }
+  .split-box3 .jobs {
+    list-style: none;
+    padding: 0;
+    overflow-y: auto;
+    max-height: 325px;
+    width: 645px;
+    margin-top: 20px;
+  }
+
+  .input-small {
+    height: 20px;
+    float: left;
+    text-align: right;
+    width: 70px;
+    margin-right: 0px;
+    padding: 6px 5px 5px 5px;
+    font-size: 18px;
+    background: #fdfdfd;
+    background-size: 13px 11px;
+    box-sizing: content-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 3px #ddd;
+  }
+
+  .btn-cancel {
+    padding: 2px 15px !important;
+  }
+
+  .split-box3 .jobs li {
+    float: left;
+    margin: 0px 0 10px 0;
+    padding: 0px;
+    width: 99%;
+    border-radius: 0px;
+    background: #ffffff;
+    //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  }
+
+  .split-box3 .jobs li.void {
+    border: 1px solid red !important;
+  }
+  .error-perc {
+    float: left;
+    width: 82%;
+    margin: 25px 0 -20px 20px;
+    text-align: right;
+    color: #ff0000;
+    font-size: 12px;
+  }
+
+  .error-message {
+    background: #d65757;
+    color: #fff;
+    margin: 0 0 10px 0;
+    float: left;
+    font-weight: bold;
+    width: 100%;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    border: 1px solid #c45f5f;
+    margin-top: 10px;
+  }
+
+  .jobcontainer {
+    padding-bottom: 50px;
+    border-bottom: 1px dashed #ccc;
+  }
+
+  div.wrapper div:last-child {
+    border: none;
+  }
+
+  .error-message p {
+    padding: 0 10px 0 10px;
+    line-height: 40px !important;
+  }
+
+  .error-message p:before {
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    content: '\f071';
+    margin-right: 10px;
+  }
+
+  .jobs h4 {
+    margin: 11px 0 0 10px;
+    float: left;
+    line-height: 30px;
+  }
+  .job-details {
+    float: right;
+  }
+  .job-perc {
+    color: #999;
+    margin: 0;
+    float: left;
+    padding: 10px;
+    font-size: 18px;
+    color: #000;
+    text-align: right;
+  }
+  .job-perc p {
+    float: left;
+    font-size: 14px;
+    margin: 1px 6px 0 3px !important;
+    padding: 0;
+    line-height: 30px !important;
+  }
+
+  .total .wordsum {
+    font-size: 20px;
+    color: $grey1;
+    text-align: right;
+    margin-right: 15px;
+    margin-top: 10px;
+    padding: 0;
+    line-height: 13px;
+    font-weight: bold;
+    span {
+      color: black;
     }
+  }
 
+  .disabled,
+  .disabled:hover,
+  .disabled:active {
+    opacity: 0.5 !important;
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    border: 1px solid $grey1;
+    background: #ccc !important;
+  }
 
-    .disabled, .disabled:hover, .disabled:active {
-        opacity: 0.5 !important;
-        cursor: default;
-        -moz-box-shadow: none;
-        -webkit-box-shadow: none;
-        border: 1px solid $grey1;
-        background: #ccc !important;
+  .uploadloader {
+    background: url(../../img/loader.gif) center center no-repeat;
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-top: 11px;
+    position: absolute;
+    right: 86px;
+    background-size: 20px 20px;
+  }
+
+  .btn-cancel {
+    padding: 2px 15px !important;
+    float: right;
+  }
+
+  .total .wordsum .total-w,
+  .total .curr-w,
+  .total .diff-w {
+    float: right;
+    clear: both;
+    width: 83px;
+    font-weight: bold;
+  }
+
+  .empty {
+    border: 0 !important;
+    background: #f0f0f0 !important;
+    width: 120px;
+  }
+
+  input.input-small {
+    outline: none !important;
+    &:hover {
+      border-color: rgba(34, 36, 38, 0.35);
+      box-shadow: none;
     }
-
-    .uploadloader {
-        background: url(../../img/loader.gif) center center no-repeat;
-        width: 20px;
-        height: 20px;
-        float: right;
-        margin-top: 11px;
-        position: absolute;
-        right: 86px;
-        background-size: 20px 20px;
+    &:focus {
+      border-color: #96c8da;
+      box-shadow: none;
     }
-
-    .btn-cancel {
-        padding: 2px 15px!important;
-        float: right;
-    }
-
-    .total .wordsum .total-w, .total .curr-w, .total .diff-w {
-        float: right;
-        clear: both;
-        width: 83px;
-        font-weight: bold;
-    }
-
-    .empty {
-        border: 0 !important;
-        background: #F0F0F0 !important;
-        width: 120px;
-    }
-
-    input.input-small {
-        outline: none !important;
-        &:hover {
-            border-color: rgba(34, 36, 38, 0.35);
-            box-shadow: none;
-        }
-        &:focus {
-            border-color: #96C8DA;
-            box-shadow: none;
-        }
-    }
-
-
+  }
 }
 /************/

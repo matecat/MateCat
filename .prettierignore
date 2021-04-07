@@ -1,6 +1,9 @@
 /node_modules
 /public/api/dist
-/public/css
+/public/**/build
+/public/css/fonts
+/public/css/sass/components/segment/Editor.scss
+# /public/css
 /public/holidays
 /public/img
 /public/js
