@@ -28,7 +28,6 @@ const cssWatchFiles = [
   cssBase + 'sass/components/*/*.scss',
   cssBase + 'sass/modals/*',
   cssBase + 'sass/vendor_mc/*',
-  cssBase + '../holidays/*.css',
 ]
 const cssWatchFilesUploadPage = [
   cssBase + 'sass/variables.scss',

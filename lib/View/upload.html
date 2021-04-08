@@ -81,9 +81,6 @@
         };
         /*]]>*/
     </script>
-
-    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
-
 </head>
 <body tal:condition="not:supportedBrowser">
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
