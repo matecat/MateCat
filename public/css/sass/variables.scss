@@ -1,10 +1,8 @@
-
 $approved-color: #639d5e;
 $translated-color: #0798bc;
 $rejected-color: #b02429;
 $disabled-color: #ebebeb;
 $disabled-border-color: #b3b3b3;
-
 
 /******* Notifications ***********/
 
@@ -38,14 +36,10 @@ $notification-info: #369cc7;
   transition: $args;
 }
 
-@mixin box-shadow($top, $left, $blur, $color, $inset:"") {
-  -webkit-box-shadow:$top $left $blur $color #{$inset};
-  -moz-box-shadow:$top $left $blur $color #{$inset};
-  box-shadow:$top $left $blur $color #{$inset};
+@mixin box-shadow($top, $left, $blur, $color, $inset: '') {
+  -webkit-box-shadow: $top $left $blur $color #{$inset};
+  -moz-box-shadow: $top $left $blur $color #{$inset};
+  box-shadow: $top $left $blur $color #{$inset};
 }
-
-
-
-
 
 /*********************************/

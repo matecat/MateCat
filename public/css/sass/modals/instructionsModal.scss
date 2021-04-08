@@ -17,7 +17,7 @@
     border-radius: 0px;
     margin-bottom: 20px;
     .title {
-      color:  #666;
+      color: #666;
       &:hover {
         color: #000;
       }
@@ -32,15 +32,13 @@
           display: block;
           float: right;
         }
-
       }
-
     }
     .transition {
       line-height: 25px;
       padding-left: 72px;
       p {
-        line-height: 26px ;
+        line-height: 26px;
         word-break: break-all;
       }
     }
@@ -60,6 +58,4 @@
   .description {
     margin: 10px 20px 0 20px;
   }
-
-
 }

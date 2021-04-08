@@ -1,7 +1,6 @@
 @import 'variables';
 /******* Notifications ************/
 
-
 .notifications-position {
   font-family: inherit;
   position: fixed;
@@ -24,7 +23,7 @@
   bottom: 30px;
   margin: 0 auto;
   left: 50%;
-  margin-left: -($notifications-width / 2)
+  margin-left: -($notifications-width / 2);
 }
 .notifications-position-br {
   @extend .notifications-position;
@@ -32,7 +31,6 @@
   bottom: 30px;
   left: auto;
   right: 0px;
-
 }
 .notifications-position-tl {
   @extend .notifications-position;
@@ -40,7 +38,6 @@
   bottom: auto;
   left: 0px;
   right: auto;
-
 }
 .notifications-position-tc {
   @extend .notifications-position;
@@ -49,7 +46,6 @@
   margin: 0 auto;
   left: 50%;
   margin-left: -($notifications-width / 2);
-
 }
 .notifications-position-tr {
   @extend .notifications-position;
@@ -58,11 +54,10 @@
   left: auto;
 }
 
-
 .notification-type {
   position: relative;
   width: 100%;
-  text-align:left;
+  text-align: left;
   background-color: #fff;
   @include border-radius(2px);
   font-size: 16px;
@@ -116,7 +111,7 @@
     text-align: right;
     a {
       text-decoration: underline;
-      color: #4183C4;
+      color: #4183c4;
       font-weight: 700;
       &:hover {
         text-decoration: none;
@@ -169,13 +164,11 @@
 }
 
 .notifications-wrapper-inside {
-    .translator-notification-sent {
-        font-weight: bold;
-        line-height: 28px;
-        span {
-            color: #4183C4;
-        }
+  .translator-notification-sent {
+    font-weight: bold;
+    line-height: 28px;
+    span {
+      color: #4183c4;
     }
+  }
 }
-
-
