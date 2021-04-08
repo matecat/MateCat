@@ -25,6 +25,7 @@ public/css/build/app.css.map
 public/css/build/*-build.css
 public/js/build
 public/css/build
+/coverage
 
 # NodeJs stuff
 nodejs/*.log
