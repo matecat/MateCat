@@ -1,3 +1,4 @@
+import React from 'react'
 import PropTypes from "prop-types";
 
 const styleInput = {
@@ -66,7 +67,7 @@ export default class InputField extends React.Component {
                        onKeyPress={this.props.onKeyPress}
                        ref={(input) => this.input = input}/>
                 {this.props.showCancel && this.state.value.length > 0 ? (
-                    <div className="ui cancel label" style={styleIcon} onClick={this.resetInput}><i className="icon-cancel3"/></div>
+                    <div data-testid="reset-button" className="ui cancel label" style={styleIcon} onClick={this.resetInput}><i className="icon-cancel3"/></div>
                 ) :  null}
             </div>
         );
