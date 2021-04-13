@@ -1,6 +1,5 @@
 APP.USER = {}
 APP.USER.STORE = {}
-
 ;(function (APP, $, undefined) {
   /**
    * Load all user information from server and update store.
