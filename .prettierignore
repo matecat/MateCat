@@ -1,9 +1,5 @@
 /public/css/fonts
 /public/js/lib
-/public/js/cat_source/es6/components/projects
-/public/js/cat_source/es6/components/quality_report
-/public/js/cat_source/es6/components/review
-/public/js/cat_source/es6/components/review_extended
 /public/js/cat_source/es6/components/segments
 /nodejs
 /plugins
