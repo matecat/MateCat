@@ -1,6 +1,6 @@
 /public/css/fonts
 /public/js/lib
-/public/js/cat_source/es6/components/segments
+/public/js/cat_source/es6/components/segments/utils
 /nodejs
 /plugins
 /lib
