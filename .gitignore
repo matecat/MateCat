@@ -61,7 +61,6 @@ plugins/*
 .maxJobToProcess_jpeer
 
 inc/dqf/dqf_test_secret.ini
-package-lock.json
 
 mmt_fallback_key.ini
 
