@@ -9,16 +9,16 @@ test('works properly', async () => {
   render(<InputField onFieldChanged={onFieldChanged} />)
 
   const elInput = document.querySelector('input')
-  
+
   expect(elInput).toBeVisible()
   expect(elInput).toHaveValue('')
   expect(elInput).toHaveAttribute('type', 'text')
-  
+
   userEvent.type(elInput, 'something')
-  
+
   expect(elInput).toHaveValue('something')
   expect(screen.queryByTestId('reset-button')).not.toBeInTheDocument()
-  
+
   await waitFor(() => {
     expect(onFieldChanged).toHaveBeenCalledTimes(1)
     expect(onFieldChanged).toHaveBeenCalledWith('something')
@@ -27,17 +27,18 @@ test('works properly', async () => {
 
 test('supports reset button', () => {
   const onFieldChanged = jest.fn()
-  render(<InputField value="something" onFieldChanged={onFieldChanged} showCancel />)
-  
-  
+  render(
+    <InputField value="something" onFieldChanged={onFieldChanged} showCancel />,
+  )
+
   const elInput = document.querySelector('input')
   expect(elInput).toHaveValue('something')
-  
+
   const elResetButton = screen.getByTestId('reset-button')
   expect(elResetButton).toBeVisible()
-  
+
   userEvent.click(elResetButton)
-  
+
   expect(elResetButton).not.toBeInTheDocument()
   expect(elInput).toHaveValue('')
   expect(onFieldChanged).toHaveBeenCalledTimes(1)

@@ -1,6 +1,15 @@
 /public/css/fonts
 /public/js/lib
-/public/js/cat_source/es6/components
+/public/js/cat_source/es6/components/icons
+/public/js/cat_source/es6/components/languageSelector
+/public/js/cat_source/es6/components/modals
+/public/js/cat_source/es6/components/notificationsComponent
+/public/js/cat_source/es6/components/outsource
+/public/js/cat_source/es6/components/projects
+/public/js/cat_source/es6/components/quality_report
+/public/js/cat_source/es6/components/review
+/public/js/cat_source/es6/components/review_extended
+/public/js/cat_source/es6/components/segments
 /nodejs
 /plugins
 /lib
