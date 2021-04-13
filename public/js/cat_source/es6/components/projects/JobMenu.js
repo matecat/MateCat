@@ -48,6 +48,12 @@ class JobMenu extends React.Component {
         });
     }
 
+    componentDidMount() {
+        $(this.dropdown).dropdown({
+            belowOrigin: true,
+        });
+    }
+
     render() {
 
         let editLogUrl = this.props.editingLogUrl;
@@ -67,7 +73,23 @@ class JobMenu extends React.Component {
         }
         let menuHtml = <div className="menu">
 
-            <a className="item" onClick={this.props.changePasswordFn.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
+            <div className="item submenu">
+                <div
+                className="ui dropdown"
+                title="Job menu" ref={(dropdown) => (this.dropdown = dropdown)}>
+                    <i className="icon-refresh icon"/> <a>Change Password</a>
+                    <i className="dropdown icon"/>
+                <div className="menu">
+                    <a className={"item"} onClick={()=>this.props.changePasswordFn()}>Translate</a>
+                    <a className={"item"} onClick={()=>this.props.changePasswordFn(1)}>Revise</a>
+                    {/*If second pass enabled*/}
+                    {this.props.job.has('revise_passwords') && this.props.job.get('revise_passwords').size > 1 ? (
+                        <a className={"item"} onClick={()=>this.props.changePasswordFn(2)}>2nd Revise</a>
+                    ) : null}
+
+                </div>
+            </div>
+            </div>
             {splitButton}
             {this.getReviseMenuLink()}
             {this.getSecondPassReviewMenuLink()}

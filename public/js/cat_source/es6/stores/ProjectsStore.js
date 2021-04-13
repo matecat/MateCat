@@ -65,7 +65,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     },
 
-    changeJobPass: function (projectId, jobId, password, oldPassword, oldTranslator) {
+    changeJobPass: function (projectId, jobId, password, oldPassword, revision_number, oldTranslator) {
         let projectOld = this.projects.find(function (prj) {
             return (prj.get('id') == projectId );
         });
@@ -76,8 +76,14 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         });
 
         let indexJob = projectOld.get('jobs').indexOf(jobOld);
-        
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
+
+        if (!revision_number) {
+            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
+        } else if (revision_number === 1) {
+            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 0, 'password'], password);
+        } else if (revision_number === 2) {
+            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 1, 'password'], password);
+        }
         // this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], oldTranslator);
     },
@@ -198,7 +204,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_JOB_PASS:
-            ProjectsStore.changeJobPass(action.projectId, action.jobId, action.password, action.oldPassword, action.oldTranslator);
+            ProjectsStore.changeJobPass(action.projectId, action.jobId, action.password, action.oldPassword, action.revision_number, action.oldTranslator);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.NO_MORE_PROJECTS:
