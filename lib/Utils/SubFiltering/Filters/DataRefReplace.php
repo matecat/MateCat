@@ -39,12 +39,12 @@ class DataRefReplace extends AbstractHandler {
         // NOTES 2021-04-02
         // ************************************************************
         //
-        // Added support for <pc> tags.
-        // At this point <pc> tags are incapsulated into a Matecat <ph> generic tag as:
+        // Added support for xliff 2.0 <pc> tags.
+        // At this point xliff 2.0 <pc> tags are incapsulated into a Matecat <ph> generic tag. Example:
         //
         // Link semplice: &lt;ph id="mtc_1" equiv-text="base64:Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow=="/&gt;La Repubblica&lt;ph id="mtc_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt;.
         //
-        // We need to turn back to orignal <pc> tags in order to use $dataRefReplacer->replace function.
+        // We need to turn back to orignal <pc> tags in order to use $dataRefReplacer->replace() function.
         // Pay attention, only <pc> tags with a correspondence on dataRef map should be converted
         //
         $parsed = \Matecat\XliffParser\Utils\HtmlParser::parse( $segment );
@@ -54,9 +54,9 @@ class DataRefReplace extends AbstractHandler {
 
             // if $element is a matecat <ph>
             if ( $element->tagname === 'ph' and isset( $element->attributes[ 'equiv-text' ] ) ) {
-                $value = base64_decode( str_replace( 'base64:', '', $element->attributes[ 'equiv-text' ] ) );
+                $value = $element->base64_decoded;
 
-                if ( !$this->isAnEncodedClosingPcTag( $value ) ) {
+                if ( !$this->isAnEncodedClosingPcTag( $element->base64_decoded ) ) {
                     if ( $this->isAnEncodedOpeningPcTagWithCorrespondingDataRef( $value ) ) {
                         $segment = str_replace( $element->node, $value, $segment );
                         $closingPcMap[]  = true;
