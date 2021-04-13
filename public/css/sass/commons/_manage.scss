@@ -35,6 +35,9 @@ body.manage {
 
 .ui.top.right.pointing.dropdown {
     .menu {
+        .item.submenu {
+            width: 180px;
+        }
         .item.submenu a {
             padding-left: 6px;
             color: $black;

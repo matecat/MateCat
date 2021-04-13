@@ -84,7 +84,6 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         } else if (revision_number === 2) {
             this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 1, 'password'], password);
         }
-        // this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], oldTranslator);
     },
 
