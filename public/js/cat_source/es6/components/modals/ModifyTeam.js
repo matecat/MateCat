@@ -1,370 +1,456 @@
 import TeamConstants from '../../constants/TeamConstants'
 
 class ModifyTeam extends React.Component {
-
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            team: this.props.team,
-            inputUserError: false,
-            inputNameError: false,
-            showRemoveMessageUserID: null,
-            readyToSend: false,
-            resendInviteArray: []
-        };
-        this.updateTeam = this.updateTeam.bind(this);
-        this.onLabelCreate = this.onLabelCreate.bind(this);
+  constructor(props) {
+    super(props)
+    this.state = {
+      team: this.props.team,
+      inputUserError: false,
+      inputNameError: false,
+      showRemoveMessageUserID: null,
+      readyToSend: false,
+      resendInviteArray: [],
     }
+    this.updateTeam = this.updateTeam.bind(this)
+    this.onLabelCreate = this.onLabelCreate.bind(this)
+  }
 
-    onLabelCreate(value, text){
-        var self = this;
+  onLabelCreate(value, text) {
+    var self = this
 
-        // if ( APP.checkEmail(text) && event.key === 'Enter') {
-        if ( APP.checkEmail(text) ) {
-            $(this.inputNewUSer)
-                .dropdown('set selected', value);
-            this.setState({
-                inputUserError: false
-            });
-            this.addUsers();
-            return true;
-        }  else if (text.indexOf(",") > -1) {
-            let members = text.split(",");
-            members.forEach(function (item) {
-                self.createLabel(item);
-            });
-            return false;
-        } else  {
-            this.createLabel(text);
-            return false;
-        }
-        // else {
-        //     this.setState({
-        //         inputUserError: true
-        //     });
-        //     $(this.inputNewUSer).dropdown('set text', text);
-        //     return false;
-        // }
+    // if ( APP.checkEmail(text) && event.key === 'Enter') {
+    if (APP.checkEmail(text)) {
+      $(this.inputNewUSer).dropdown('set selected', value)
+      this.setState({
+        inputUserError: false,
+      })
+      this.addUsers()
+      return true
+    } else if (text.indexOf(',') > -1) {
+      let members = text.split(',')
+      members.forEach(function (item) {
+        self.createLabel(item)
+      })
+      return false
+    } else {
+      this.createLabel(text)
+      return false
     }
+    // else {
+    //     this.setState({
+    //         inputUserError: true
+    //     });
+    //     $(this.inputNewUSer).dropdown('set text', text);
+    //     return false;
+    // }
+  }
 
-    createLabel(text){
-        var self = this;
-        if ( APP.checkEmail(text)) {
-            $(this.inputNewUSer).find("input.search").val('');
-            $(this.inputNewUSer).dropdown('set selected', text);
-            this.setState({
-                inputUserError: false
-            });
-            return true;
-        } else if (text.indexOf(",") > -1) {
-            let members = text.split(",");
-            members.forEach(function (item) {
-                self.createLabel(item);
-            });
-            return false;
-        } else {
-            this.setState({
-                inputUserError: true
-            });
-            $(this.inputNewUSer).dropdown('set text', text);
-            return true;
-        }
+  createLabel(text) {
+    var self = this
+    if (APP.checkEmail(text)) {
+      $(this.inputNewUSer).find('input.search').val('')
+      $(this.inputNewUSer).dropdown('set selected', text)
+      this.setState({
+        inputUserError: false,
+      })
+      return true
+    } else if (text.indexOf(',') > -1) {
+      let members = text.split(',')
+      members.forEach(function (item) {
+        self.createLabel(item)
+      })
+      return false
+    } else {
+      this.setState({
+        inputUserError: true,
+      })
+      $(this.inputNewUSer).dropdown('set text', text)
+      return true
     }
+  }
 
-    updateTeam(team) {
-        if (this.state.team.get('id') == team.get('id')) {
-            this.setState({
-                team: team
-            });
-        }
+  updateTeam(team) {
+    if (this.state.team.get('id') == team.get('id')) {
+      this.setState({
+        team: team,
+      })
     }
+  }
 
-    showRemoveUser(userId) {
-        this.setState({
-            showRemoveMessageUserID: userId
-        });
+  showRemoveUser(userId) {
+    this.setState({
+      showRemoveMessageUserID: userId,
+    })
+  }
+
+  removeUser(user) {
+    ManageActions.removeUserFromTeam(this.state.team, user)
+    if (user.get('uid') === APP.USER.STORE.user.uid) {
+      APP.ModalWindow.onCloseModal()
     }
+    this.setState({
+      showRemoveMessageUserID: null,
+    })
+  }
 
-    removeUser(user) {
-        ManageActions.removeUserFromTeam(this.state.team, user);
-        if (user.get('uid') === APP.USER.STORE.user.uid) {
-            APP.ModalWindow.onCloseModal();
-        }
-        this.setState({
-            showRemoveMessageUserID: null
-        });
+  undoRemoveAction() {
+    this.setState({
+      showRemoveMessageUserID: null,
+    })
+  }
+
+  resendInvite(mail) {
+    ManageActions.addUserToTeam(this.state.team, mail)
+    var resendInviteArray = this.state.resendInviteArray
+    resendInviteArray.push(mail)
+    this.setState({
+      resendInviteArray: resendInviteArray,
+    })
+  }
+
+  handleKeyPressUserInput(e) {
+    let mail = $(this.inputNewUSer).find('input.search').val()
+    if (e.key == 'Enter') {
+      if (mail == '') {
+        this.addUsers()
+      }
+      return
     }
-
-    undoRemoveAction() {
-        this.setState({
-            showRemoveMessageUserID: null
-        });
+    if (e.key === ' ') {
+      e.stopPropagation()
+      e.preventDefault()
+      this.createLabel(mail)
+    } else {
+      this.setState({
+        inputUserError: false,
+      })
     }
+    return false
+  }
 
-    resendInvite(mail) {
-        ManageActions.addUserToTeam(this.state.team, mail);
-        var resendInviteArray = this.state.resendInviteArray;
-        resendInviteArray.push(mail);
-        this.setState({
-            resendInviteArray: resendInviteArray
-        });
+  addUsers() {
+    var members =
+      $(this.inputNewUSer).dropdown('get value').length > 0
+        ? $(this.inputNewUSer).dropdown('get value').split(',')
+        : []
+    if (members.length > 0) {
+      ManageActions.addUserToTeam(this.state.team, members)
+      $(this.inputNewUSer).dropdown('restore defaults')
     }
+  }
 
-    handleKeyPressUserInput(e) {
-        let mail = $(this.inputNewUSer).find("input.search").val();
-        if (e.key == 'Enter') {
-            if (mail == '') {
-                this.addUsers();
-            }
-            return;
-        }
-        if (e.key === ' ') {
-            e.stopPropagation();
-            e.preventDefault();
-            this.createLabel(mail);
-        } else {
-            this.setState({
-                inputUserError: false
-            });
-        }
-        return false;
+  addUser() {
+    if (APP.checkEmail(this.inputNewUSer.value)) {
+      ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value)
+      var resendInviteArray = this.state.resendInviteArray
+      resendInviteArray.push(this.inputNewUSer.value)
+      this.inputNewUSer.value = ''
+      this.setState({
+        resendInviteArray: resendInviteArray,
+      })
+      return true
+    } else {
+      this.setState({
+        inputUserError: true,
+      })
+      return false
     }
+  }
 
-    addUsers() {
-        var members = ($(this.inputNewUSer).dropdown('get value').length > 0) ? $(this.inputNewUSer).dropdown('get value').split(",") : [];
-        if (members.length > 0 ) {
-            ManageActions.addUserToTeam(this.state.team, members);
-            $(this.inputNewUSer).dropdown('restore defaults');
-        }
+  onKeyPressEvent(e) {
+    if (e.key === 'Enter') {
+      this.changeTeamName()
+      return false
+    } else if (this.inputName.value.length == 0) {
+      this.setState({
+        inputNameError: true,
+      })
+    } else {
+      this.setState({
+        inputNameError: false,
+      })
     }
+  }
 
-    addUser() {
-        if ( APP.checkEmail(this.inputNewUSer.value)) {
-            ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value);
-            var resendInviteArray = this.state.resendInviteArray;
-            resendInviteArray.push(this.inputNewUSer.value);
-            this.inputNewUSer.value = '';
-            this.setState({
-                resendInviteArray: resendInviteArray
-            });
-            return true;
-        } else {
-            this.setState({
-                inputUserError: true
-            });
-            return false;
-        }
+  changeTeamName() {
+    if (
+      this.inputName &&
+      this.inputName.value.length > 0 &&
+      this.inputName.value != this.state.team.get('name')
+    ) {
+      ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value)
+      $(this.inputName).blur()
+      this.setState({
+        readyToSend: true,
+      })
+      return true
+    } else if (this.inputName && this.inputName.value.length == 0) {
+      this.setState({
+        inputNameError: true,
+      })
+      return false
     }
+    return true
+  }
 
-
-    onKeyPressEvent(e) {
-        if (e.key === 'Enter' ) {
-            this.changeTeamName();
-            return false;
-        } else if (this.inputName.value.length == 0) {
-            this.setState({
-                inputNameError: true
-            });
-        } else {
-            this.setState({
-                inputNameError: false,
-            });
-        }
+  applyChanges() {
+    var self = this
+    var teamNameOk = this.changeTeamName()
+    if ($(this.inputNewUSer).dropdown('get value').length > 0) {
+      this.addUsers()
     }
-
-    changeTeamName() {
-        if (this.inputName && this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
-            ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value);
-            $(this.inputName).blur();
-            this.setState({
-                readyToSend: true
-            });
-            return true;
-        } else if (this.inputName && this.inputName.value.length == 0){
-            this.setState({
-                inputNameError: true
-            });
-            return false;
-        }
-        return true;
+    if (teamNameOk) {
+      APP.ModalWindow.onCloseModal()
     }
+  }
 
-    applyChanges() {
-        var self = this;
-        var teamNameOk = this.changeTeamName();
-        if ($(this.inputNewUSer).dropdown('get value').length > 0) {
-            this.addUsers();
-        }
-        if ( teamNameOk )  {
-            APP.ModalWindow.onCloseModal();
-        }
-    }
+  getUserList() {
+    let self = this
 
-    getUserList() {
-        let self = this;
-
-        return this.state.team.get('members').map(function(member, i) {
-            let user = member.get('user');
-            if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
-                if (self.state.team.get('members').size > 1) {
-                    return <div className="item"
-                                key={'user' + user.get('uid')}>
-                        <div className="right floated content top-5 bottom-5">
-                            <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
-                            <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
-                        </div>
-                        <div className="content pad-top-10 pad-bottom-8">
-                            Are you sure you want to leave this team?
-                        </div>
-                    </div>
-                } else {
-                    return <div className="item"
-                                key={'user' + user.get('uid')}>
-                        <div className="right floated content top-20 bottom-5">
-                            <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
-                            <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
-                        </div>
-                        <div className="content pad-top-10 pad-bottom-8">
-                            By removing the last member the team will be deleted.
-                            All projects will be moved to your Personal area.
-                        </div>
-                    </div>;
-                }
-            }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
-                return <div className="item"
-                            key={'user' + user.get('uid')}>
-                    <div className="right floated content top-5 bottom-5">
-                        <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon" /> Confirm</div>
-                        <div className="mini ui icon button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon" /></div>
-                    </div>
-                    <div className="content pad-top-10 pad-bottom-8">
-                        Are you sure you want to remove this user?
-                    </div>
+    return this.state.team.get('members').map(function (member, i) {
+      let user = member.get('user')
+      if (
+        user.get('uid') == APP.USER.STORE.user.uid &&
+        self.state.showRemoveMessageUserID == user.get('uid')
+      ) {
+        if (self.state.team.get('members').size > 1) {
+          return (
+            <div className="item" key={'user' + user.get('uid')}>
+              <div className="right floated content top-5 bottom-5">
+                <div
+                  className="ui mini primary button"
+                  onClick={self.removeUser.bind(self, user)}
+                >
+                  <i className="icon-check icon" />
+                  Confirm
                 </div>
-            } else {
-                return <div className="item"
-                            key={'user' + user.get('uid')}>
-                    <div className="mini ui button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
-
-                    { member.get('user_metadata') ?
-                        (<img className="ui mini circular image"
-                                                          src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>)
-                        :(
-                            <div className="ui tiny image label">{APP.getUserShortName(user.toJS())}</div>
-                        )}
-
-
-                    <div className="middle aligned content">
-                        <div className="content user">
-                            {' ' + user.get('first_name') + ' ' + user.get('last_name')}
-                        </div>
-                        <div className="content email-user-invited">{user.get('email')}</div>
-                    </div>
-
+                <div
+                  className="ui icon mini button red"
+                  onClick={self.undoRemoveAction.bind(self)}
+                >
+                  <i className="icon-cancel3 icon" />
                 </div>
-            }
-
-        });
-
-    }
-
-    getPendingInvitations() {
-        let self = this;
-        if (!this.state.team.get('pending_invitations') || !this.state.team.get('pending_invitations').size > 0) return;
-        return this.state.team.get('pending_invitations').map(function(mail, i) {
-            var inviteResended = (self.state.resendInviteArray.indexOf(mail) > -1);
-            return <div className="item pending-invitation"
-                         key={'user-invitation' + i}>
-                {inviteResended ? (
-
-                        <div className="ui right floated content invite-sent-msg">Invite sent</div>
-                        ) : (
-                        <div>
-                            <div className="mini ui button right floated"
-                                 onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
-                            <div className="ui right floated content pending-msg">Pending user</div>
-                        </div>
-                        )}
-
-                        <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
-                        <div className="middle aligned content">
-                            <div className="content user">
-                                {mail}
-                            </div>
-                        </div>
-
-                    </div>;
-        });
-
-    }
-
-    componentDidUpdate() {
-        var self = this;
-        clearTimeout(this.inputTimeout);
-        if (this.state.readyToSend) {
-            this.inputTimeout = setTimeout(function () {
-                self.setState({
-                    readyToSend: false
-                })
-            }, 1000);
+              </div>
+              <div className="content pad-top-10 pad-bottom-8">
+                Are you sure you want to leave this team?
+              </div>
+            </div>
+          )
+        } else {
+          return (
+            <div className="item" key={'user' + user.get('uid')}>
+              <div className="right floated content top-20 bottom-5">
+                <div
+                  className="ui mini primary button"
+                  onClick={self.removeUser.bind(self, user)}
+                >
+                  <i className="icon-check icon" />
+                  Confirm
+                </div>
+                <div
+                  className="ui icon mini button red"
+                  onClick={self.undoRemoveAction.bind(self)}
+                >
+                  <i className="icon-cancel3 icon" />
+                </div>
+              </div>
+              <div className="content pad-top-10 pad-bottom-8">
+                By removing the last member the team will be deleted. All
+                projects will be moved to your Personal area.
+              </div>
+            </div>
+          )
         }
-    }
-
-    componentDidMount() {
-        $(this.inputNewUSer)
-            .dropdown({
-                allowAdditions: true,
-                action: this.onLabelCreate,
-            });
-        TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam);
-    }
-
-    componentWillUnmount() {
-        TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam);
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.team !== this.state.team ||
-                nextState.inputUserError !== this.state.inputUserError ||
-                nextState.inputNameError !== this.state.inputNameError ||
-                nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID ||
-                nextState.readyToSend !== this.state.readyToSend
+      } else if (self.state.showRemoveMessageUserID == user.get('uid')) {
+        return (
+          <div className="item" key={'user' + user.get('uid')}>
+            <div className="right floated content top-5 bottom-5">
+              <div
+                className="ui mini primary button"
+                onClick={self.removeUser.bind(self, user)}
+              >
+                <i className="icon-check icon" /> Confirm
+              </div>
+              <div
+                className="mini ui icon button red"
+                onClick={self.undoRemoveAction.bind(self)}
+              >
+                <i className="icon-cancel3 icon" />
+              </div>
+            </div>
+            <div className="content pad-top-10 pad-bottom-8">
+              Are you sure you want to remove this user?
+            </div>
+          </div>
         )
-    }
+      } else {
+        return (
+          <div className="item" key={'user' + user.get('uid')}>
+            <div
+              className="mini ui button right floated"
+              onClick={self.showRemoveUser.bind(self, user.get('uid'))}
+            >
+              Remove
+            </div>
 
-    render() {
-        let usersError = (this.state.inputUserError) ? 'error' : '';
-        let orgNameError = (this.state.inputNameError) ? 'error' : '';
-        let userlist = this.getUserList();
-        let pendingUsers = this.getPendingInvitations();
-        let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
-        let applyButtonClass = (this.state.inputUserError || this.state.inputNameError) ?  'disabled' : '';
-        let middleContainerStyle = (this.props.hideChangeName ) ? {paddingTop: "20px"} : {};
-        return <div className="modify-team-modal">
-                { !this.props.hideChangeName ?(
-                <div className="matecat-modal-top">
-                    <div className="ui one column grid left aligned">
-                        <div className="column">
-                            <h2>Change Team Name</h2>
-                            <div className={"ui fluid icon input " + orgNameError}>
-                                <input type="text" defaultValue={this.state.team.get('name')}
-                                       onKeyUp={this.onKeyPressEvent.bind(this)}
-                                       ref={(inputName) => this.inputName = inputName}/>
-                                {icon}
-                            </div>
-                            {this.state.inputNameError ? (
-                                    <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Team name is required</span></div>
-                                ): ''}
-                        </div>
-                    </div>
-                </div>) : ('')}
-            { (this.state.team.get('type') !== "personal" ) ? (
-                    <div className="matecat-modal-middle" style={middleContainerStyle}>
-                        <div className="ui grid left aligned">
-                            <div className="sixteen wide column">
-                                <h2>Invite Members</h2>
-                               {/* <div className={"ui fluid icon input " + usersError }>
+            {member.get('user_metadata') ? (
+              <img
+                className="ui mini circular image"
+                src={
+                  member.get('user_metadata').get('gplus_picture') + '?sz=80'
+                }
+              />
+            ) : (
+              <div className="ui tiny image label">
+                {APP.getUserShortName(user.toJS())}
+              </div>
+            )}
+
+            <div className="middle aligned content">
+              <div className="content user">
+                {' ' + user.get('first_name') + ' ' + user.get('last_name')}
+              </div>
+              <div className="content email-user-invited">
+                {user.get('email')}
+              </div>
+            </div>
+          </div>
+        )
+      }
+    })
+  }
+
+  getPendingInvitations() {
+    let self = this
+    if (
+      !this.state.team.get('pending_invitations') ||
+      !this.state.team.get('pending_invitations').size > 0
+    )
+      return
+    return this.state.team.get('pending_invitations').map(function (mail, i) {
+      var inviteResended = self.state.resendInviteArray.indexOf(mail) > -1
+      return (
+        <div className="item pending-invitation" key={'user-invitation' + i}>
+          {inviteResended ? (
+            <div className="ui right floated content invite-sent-msg">
+              Invite sent
+            </div>
+          ) : (
+            <div>
+              <div
+                className="mini ui button right floated"
+                onClick={self.resendInvite.bind(self, mail)}
+              >
+                Resend Invite
+              </div>
+              <div className="ui right floated content pending-msg">
+                Pending user
+              </div>
+            </div>
+          )}
+
+          <div className="ui tiny image label">
+            {mail.substring(0, 1).toUpperCase()}
+          </div>
+          <div className="middle aligned content">
+            <div className="content user">{mail}</div>
+          </div>
+        </div>
+      )
+    })
+  }
+
+  componentDidUpdate() {
+    var self = this
+    clearTimeout(this.inputTimeout)
+    if (this.state.readyToSend) {
+      this.inputTimeout = setTimeout(function () {
+        self.setState({
+          readyToSend: false,
+        })
+      }, 1000)
+    }
+  }
+
+  componentDidMount() {
+    $(this.inputNewUSer).dropdown({
+      allowAdditions: true,
+      action: this.onLabelCreate,
+    })
+    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+  }
+
+  componentWillUnmount() {
+    TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      nextState.team !== this.state.team ||
+      nextState.inputUserError !== this.state.inputUserError ||
+      nextState.inputNameError !== this.state.inputNameError ||
+      nextState.showRemoveMessageUserID !==
+        this.state.showRemoveMessageUserID ||
+      nextState.readyToSend !== this.state.readyToSend
+    )
+  }
+
+  render() {
+    let usersError = this.state.inputUserError ? 'error' : ''
+    let orgNameError = this.state.inputNameError ? 'error' : ''
+    let userlist = this.getUserList()
+    let pendingUsers = this.getPendingInvitations()
+    let icon =
+      this.state.readyToSend && !this.state.inputNameError ? (
+        <i className="icon-checkmark green icon" />
+      ) : (
+        <i className="icon-pencil icon" />
+      )
+    let applyButtonClass =
+      this.state.inputUserError || this.state.inputNameError ? 'disabled' : ''
+    let middleContainerStyle = this.props.hideChangeName
+      ? {paddingTop: '20px'}
+      : {}
+    return (
+      <div className="modify-team-modal">
+        {!this.props.hideChangeName ? (
+          <div className="matecat-modal-top">
+            <div className="ui one column grid left aligned">
+              <div className="column">
+                <h2>Change Team Name</h2>
+                <div className={'ui fluid icon input ' + orgNameError}>
+                  <input
+                    type="text"
+                    defaultValue={this.state.team.get('name')}
+                    onKeyUp={this.onKeyPressEvent.bind(this)}
+                    ref={(inputName) => (this.inputName = inputName)}
+                  />
+                  {icon}
+                </div>
+                {this.state.inputNameError ? (
+                  <div className="validation-error">
+                    <span
+                      className="text"
+                      style={{color: 'red', fontSize: '14px'}}
+                    >
+                      Team name is required
+                    </span>
+                  </div>
+                ) : (
+                  ''
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          ''
+        )}
+        {this.state.team.get('type') !== 'personal' ? (
+          <div className="matecat-modal-middle" style={middleContainerStyle}>
+            <div className="ui grid left aligned">
+              <div className="sixteen wide column">
+                <h2>Invite Members</h2>
+                {/* <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
@@ -372,44 +458,62 @@ class ModifyTeam extends React.Component {
                                 {this.state.inputUserError ? (
                                         <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
                                     ): ''}*/}
-                                <div className={"ui multiple search selection dropdown " + usersError }
-                                     onKeyUp={this.handleKeyPressUserInput.bind(this)}
-                                     ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}>
-                                    <input name="tags" type="hidden" />
-                                    <div className="default text">insert email or emails separated by commas or press enter</div>
-                                </div>
-                                {this.state.inputUserError ? (
-                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
-                                    ): ''}
-                            </div>
+                <div
+                  className={
+                    'ui multiple search selection dropdown ' + usersError
+                  }
+                  onKeyUp={this.handleKeyPressUserInput.bind(this)}
+                  ref={(inputNewUSer) => (this.inputNewUSer = inputNewUSer)}
+                >
+                  <input name="tags" type="hidden" />
+                  <div className="default text">
+                    insert email or emails separated by commas or press enter
+                  </div>
+                </div>
+                {this.state.inputUserError ? (
+                  <div className="validation-error">
+                    <span
+                      className="text"
+                      style={{color: 'red', fontSize: '14px'}}
+                    >
+                      A valid email is required
+                    </span>
+                  </div>
+                ) : (
+                  ''
+                )}
+              </div>
 
-
-
-                            <div className="sixteen wide column">
-                                <div className="ui members-list team">
-                                    <div className="ui divided list">
-                                        {pendingUsers}
-                                        {userlist}
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </div>
-                    </div>
-                ) : ('')}
-                    <div className="matecat-modal-bottom">
-                        <div className="ui one column grid right aligned">
-                            <div className="column">
-                                <button className={"create-team ui primary button open " + applyButtonClass}
-                                onClick={this.applyChanges.bind(this)}>Close</button>
-                            </div>
-                        </div>
-                    </div>
-
-        </div>;
-    }
+              <div className="sixteen wide column">
+                <div className="ui members-list team">
+                  <div className="ui divided list">
+                    {pendingUsers}
+                    {userlist}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          ''
+        )}
+        <div className="matecat-modal-bottom">
+          <div className="ui one column grid right aligned">
+            <div className="column">
+              <button
+                className={
+                  'create-team ui primary button open ' + applyButtonClass
+                }
+                onClick={this.applyChanges.bind(this)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 }
 
-
-export default ModifyTeam ;
+export default ModifyTeam

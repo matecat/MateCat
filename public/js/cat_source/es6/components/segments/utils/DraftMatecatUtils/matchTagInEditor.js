@@ -1,5 +1,5 @@
-import getEntities from "./getEntities";
-import tagFromEntity from "./tagFromEntity";
+import getEntities from './getEntities'
+import tagFromEntity from './tagFromEntity'
 
 /**
  *
@@ -8,19 +8,21 @@ import tagFromEntity from "./tagFromEntity";
  * @returns {[]|*} - Array of tag placed in current editor state
  */
 const matchTagInEditor = (editorState, entities = []) => {
+  let contentState = editorState.getCurrentContent()
+  if (!contentState.hasText()) return []
 
-    let contentState = editorState.getCurrentContent();
-    if(!contentState.hasText()) return [];
+  if (
+    !Array.isArray(entities) ||
+    (Array.isArray(entities) && entities.length === 0)
+  ) {
+    entities = getEntities(editorState)
+  }
+  let tagRange = []
+  entities.forEach((entity) => {
+    tagRange.push(tagFromEntity(entity))
+  })
 
-    if(!Array.isArray(entities) || Array.isArray(entities) && entities.length === 0){
-        entities = getEntities(editorState);
-    }
-    let tagRange = [];
-    entities.forEach(entity => {
-        tagRange.push(tagFromEntity(entity))
-    });
+  return tagRange
+}
 
-    return tagRange;
-};
-
-export default matchTagInEditor;
+export default matchTagInEditor

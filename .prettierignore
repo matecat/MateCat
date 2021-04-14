@@ -1,9 +1,11 @@
 /public/css/fonts
-/public/js
+/public/js/lib
 /nodejs
+/plugins
 /lib
 /test
 /inc
+/internal_scripts
 /README.md
 /LICENSE.md
 /composer.*
