@@ -3,14 +3,14 @@ const nodeEcmaVersion = 2020
 module.exports = {
   overrides: [
     {
-      files: './support_scripts/**/*.js',
+      files: ['*.js', './support_scripts/**/*.js'],
       parserOptions: {
         ecmaVersion: nodeEcmaVersion,
       },
       env: {node: true},
     },
     {
-      files: '**/*.jest.js',
+      files: ['**/*.jest.js'],
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: nodeEcmaVersion,
