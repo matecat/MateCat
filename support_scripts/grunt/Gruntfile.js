@@ -444,7 +444,7 @@ module.exports = function (grunt) {
         dest: buildPath + 'app.js',
         replacements: [
           {
-            from: /this\.version \= \"(.*?)\"/gi,
+            from: /this\.version \= \'(.*?)\'/gi,
             to: 'this.version = "' + version + '"',
           },
         ],
