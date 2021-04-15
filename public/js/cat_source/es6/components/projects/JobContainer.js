@@ -97,106 +97,152 @@ class JobContainer extends React.Component {
     }
   }
 
-    changePassword(revision_number) {
-        let self = this;
-        let label = "";
-        switch ( revision_number ) {
-            case null: {
-                this.oldPassword = this.props.job.get('password');
-                label = "Translate";
-                break;
-            }
-            case 1: {
-                this.oldPassword = this.props.job.get('revise_passwords').get(0).get("password");
-                label = "Revise";
-                break;
-            }
-            case 2: {
-                this.oldPassword = this.props.job.get('revise_passwords').get(1).get("password");
-                label = "2nd Revise";
-                break;
-            }
+  changePassword(revision_number) {
+    let self = this
+    let label = ''
+    switch (revision_number) {
+      case null: {
+        this.oldPassword = this.props.job.get('password')
+        label = 'Translate'
+        break
+      }
+      case 1: {
+        this.oldPassword = this.props.job
+          .get('revise_passwords')
+          .get(0)
+          .get('password')
+        label = 'Revise'
+        break
+      }
+      case 2: {
+        this.oldPassword = this.props.job
+          .get('revise_passwords')
+          .get(1)
+          .get('password')
+        label = '2nd Revise'
+        break
+      }
+    }
+    this.props
+      .changeJobPasswordFn(
+        this.props.job.toJS(),
+        this.oldPassword,
+        revision_number,
+      )
+      .done(function (data) {
+        let notification = {
+          title: 'Change job ' + label + ' password',
+          text:
+            'The ' +
+            label +
+            ' password has been changed. <a class="undo-password">Undo</a>',
+          type: 'warning',
+          position: 'bl',
+          allowHtml: true,
+          timer: 10000,
         }
-        this.props.changeJobPasswordFn(this.props.job.toJS(), this.oldPassword, revision_number).done(function (data) {
-            let notification = {
-                title: 'Change job ' + label + ' password',
-                text: 'The ' + label + ' password has been changed. <a class="undo-password">Undo</a>',
-                type: 'warning',
-                position: 'bl',
-                allowHtml: true,
-                timer: 10000,
-            };
-            let boxUndo = APP.addNotification(notification);
-            let translator = self.props.job.get('translator');
-            ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo, revision_number);
-            setTimeout(function () {
-                $('.undo-password').off('click');
-                $('.undo-password').on('click', function () {
-                    APP.removeNotification(boxUndo);
-                    self.props.changeJobPasswordFn(self.props.job.toJS(), data.password, revision_number, 1, self.oldPassword ).done(function (data) {
-                        notification = {
-                            title: 'Change job password',
-                            text: 'The previous password has been restored.',
-                            type: 'warning',
-                            position: 'bl',
-                            timer: 7000,
-                        };
-                        APP.addNotification(notification);
-                        ManageActions.changeJobPassword(
-                            self.props.project,
-                            self.props.job,
-                            data.password,
-                            data.undo,
-                            revision_number,
-                            translator
-                        );
-                    });
-                });
-            }, 500);
-        });
-    }
+        let boxUndo = APP.addNotification(notification)
+        let translator = self.props.job.get('translator')
+        ManageActions.changeJobPassword(
+          self.props.project,
+          self.props.job,
+          data.password,
+          data.undo,
+          revision_number,
+        )
+        setTimeout(function () {
+          $('.undo-password').off('click')
+          $('.undo-password').on('click', function () {
+            APP.removeNotification(boxUndo)
+            self.props
+              .changeJobPasswordFn(
+                self.props.job.toJS(),
+                data.password,
+                revision_number,
+                1,
+                self.oldPassword,
+              )
+              .done(function (data) {
+                notification = {
+                  title: 'Change job password',
+                  text: 'The previous password has been restored.',
+                  type: 'warning',
+                  position: 'bl',
+                  timer: 7000,
+                }
+                APP.addNotification(notification)
+                ManageActions.changeJobPassword(
+                  self.props.project,
+                  self.props.job,
+                  data.password,
+                  data.undo,
+                  revision_number,
+                  translator,
+                )
+              })
+          })
+        }, 500)
+      })
+  }
 
-    removeTranslator() {
-        let self = this;
-        this.oldPassword = this.props.job.get('password');
-        this.props.changeJobPasswordFn(this.props.job.toJS(), this.oldPassword).done(function (data) {
-            let notification = {
-                title: 'Job unassigned',
-                text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
-                type: 'warning',
-                position: 'bl',
-                allowHtml: true,
-                timer: 10000,
-            };
-            let boxUndo = APP.addNotification(notification);
-            let translator = self.props.job.get('translator');
-            ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo, null);
-            setTimeout(function () {
-                $('.undo-password').off('click');
-                $('.undo-password').on('click', function () {
-                    APP.removeNotification(boxUndo);
-                    self.props.changeJobPasswordFn(self.props.job.toJS(),data.password, null,  1, self.oldPassword).done(function (data) {
-                        notification = {
-                            title: 'Change job password',
-                            text: 'The previous password has been restored.',
-                            type: 'warning',
-                            position: 'bl',
-                            timer: 7000,
-                        };
-                        APP.addNotification(notification);
-                        ManageActions.changeJobPassword(
-                            self.props.project,
-                            self.props.job,
-                            data.password,
-                            data.undo,
-                            null,
-                            translator
-                        );
-                    });
-                });
-            }, 500);
-        });
-    }
+  removeTranslator() {
+    let self = this
+    this.oldPassword = this.props.job.get('password')
+    this.props
+      .changeJobPasswordFn(this.props.job.toJS(), this.oldPassword)
+      .done(function (data) {
+        let notification = {
+          title: 'Job unassigned',
+          text:
+            'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
+          type: 'warning',
+          position: 'bl',
+          allowHtml: true,
+          timer: 10000,
+        }
+        let boxUndo = APP.addNotification(notification)
+        let translator = self.props.job.get('translator')
+        ManageActions.changeJobPassword(
+          self.props.project,
+          self.props.job,
+          data.password,
+          data.undo,
+          null,
+        )
+        setTimeout(function () {
+          $('.undo-password').off('click')
+          $('.undo-password').on('click', function () {
+            APP.removeNotification(boxUndo)
+            self.props
+              .changeJobPasswordFn(
+                self.props.job.toJS(),
+                data.password,
+                null,
+                1,
+                self.oldPassword,
+              )
+              .done(function (data) {
+                notification = {
+                  title: 'Change job password',
+                  text: 'The previous password has been restored.',
+                  type: 'warning',
+                  position: 'bl',
+                  timer: 7000,
+                }
+                APP.addNotification(notification)
+                ManageActions.changeJobPassword(
+                  self.props.project,
+                  self.props.job,
+                  data.password,
+                  data.undo,
+                  null,
+                  translator,
+                )
+              })
+          })
+        }, 500)
+      })
+  }
 
   archiveJob() {
     ManageActions.changeJobStatus(

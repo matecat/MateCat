@@ -56,27 +56,46 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
     }
   },
 
-    changeJobPass: function (projectId, jobId, password, oldPassword, revision_number, oldTranslator) {
-        let projectOld = this.projects.find(function (prj) {
-            return (prj.get('id') == projectId );
-        });
-        let indexProject = this.projects.indexOf(projectOld);
+  changeJobPass: function (
+    projectId,
+    jobId,
+    password,
+    oldPassword,
+    revision_number,
+    oldTranslator,
+  ) {
+    let projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == projectId
+    })
+    let indexProject = this.projects.indexOf(projectOld)
 
     let jobOld = projectOld.get('jobs').find(function (j) {
       return j.get('id') == jobId && j.get('password') === oldPassword
     })
 
-        let indexJob = projectOld.get('jobs').indexOf(jobOld);
+    let indexJob = projectOld.get('jobs').indexOf(jobOld)
 
-        if (!revision_number) {
-            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
-        } else if (revision_number === 1) {
-            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 0, 'password'], password);
-        } else if (revision_number === 2) {
-            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 1, 'password'], password);
-        }
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], oldTranslator);
-    },
+    if (!revision_number) {
+      this.projects = this.projects.setIn(
+        [indexProject, 'jobs', indexJob, 'password'],
+        password,
+      )
+    } else if (revision_number === 1) {
+      this.projects = this.projects.setIn(
+        [indexProject, 'jobs', indexJob, 'revise_passwords', 0, 'password'],
+        password,
+      )
+    } else if (revision_number === 2) {
+      this.projects = this.projects.setIn(
+        [indexProject, 'jobs', indexJob, 'revise_passwords', 1, 'password'],
+        password,
+      )
+    }
+    this.projects = this.projects.setIn(
+      [indexProject, 'jobs', indexJob, 'translator'],
+      oldTranslator,
+    )
+  },
 
   changeProjectName: function (project, newProject) {
     let projectOld = this.projects.find(function (prj) {
@@ -172,77 +191,143 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 })
 
 // Register callback to handle all updates
-AppDispatcher.register(function(action) {
-
-    switch(action.actionType) {
-        case ManageConstants.RENDER_PROJECTS:
-            ProjectsStore.setProjects(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), Immutable.fromJS(action.teams), action.hideSpinner, action.filtering);
-            break;
-        case ManageConstants.RENDER_ALL_TEAM_PROJECTS:
-            ProjectsStore.setProjects(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.teams), action.hideSpinner);
-            break;
-        case ManageConstants.UPDATE_PROJECTS:
-            ProjectsStore.updateAll(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects);
-            break;
-        case ManageConstants.RENDER_MORE_PROJECTS:
-            ProjectsStore.addProjects(action.project);
-            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.OPEN_JOB_SETTINGS:
-            ProjectsStore.emitChange(ManageConstants.OPEN_JOB_SETTINGS, action.job, action.prName);
-            break;
-        case ManageConstants.OPEN_JOB_TM_PANEL:
-            ProjectsStore.emitChange(ManageConstants.OPEN_JOB_TM_PANEL, action.job, action.prName);
-            break;
-        case ManageConstants.REMOVE_PROJECT:
-            ProjectsStore.removeProject(action.project);
-            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.REMOVE_JOB:
-            ProjectsStore.removeJob(action.project, action.job);
-            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.CHANGE_JOB_PASS:
-            ProjectsStore.changeJobPass(action.projectId, action.jobId, action.password, action.oldPassword, action.revision_number, action.oldTranslator);
-            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.NO_MORE_PROJECTS:
-            ProjectsStore.emitChange(action.actionType);
-            break;
-        case ManageConstants.SHOW_RELOAD_SPINNER:
-            ProjectsStore.emitChange(action.actionType);
-            break;
-        case ManageConstants.CHANGE_PROJECT_NAME:
-            ProjectsStore.changeProjectName(action.project, action.newProject);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
-            ProjectsStore.changeProjectAssignee(action.project, action.user);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.CHANGE_PROJECT_TEAM:
-            ProjectsStore.changeProjectTeam(action.project, action.teamId);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.ADD_SECOND_PASS:
-            ProjectsStore.setSecondPassUrl(action.idProject, action.idJob, action.passwordJob, action.secondPAssPassword);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
-            break;
-        case ManageConstants.HIDE_PROJECT:
-            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
-            break;
-        case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
-        case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
-            ProjectsStore.emitChange(action.actionType, action.idProject);
-            break;
-        case ManageConstants.ASSIGN_TRANSLATOR:
-            ProjectsStore.assignTranslator(action.projectId, action.jobId, action.jobPassword, action.translator);
-            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
-            break;
-    }
-});
+AppDispatcher.register(function (action) {
+  switch (action.actionType) {
+    case ManageConstants.RENDER_PROJECTS:
+      ProjectsStore.setProjects(action.projects)
+      ProjectsStore.emitChange(
+        action.actionType,
+        ProjectsStore.projects,
+        Immutable.fromJS(action.team),
+        Immutable.fromJS(action.teams),
+        action.hideSpinner,
+        action.filtering,
+      )
+      break
+    case ManageConstants.RENDER_ALL_TEAM_PROJECTS:
+      ProjectsStore.setProjects(action.projects)
+      ProjectsStore.emitChange(
+        action.actionType,
+        ProjectsStore.projects,
+        Immutable.fromJS(action.teams),
+        action.hideSpinner,
+      )
+      break
+    case ManageConstants.UPDATE_PROJECTS:
+      ProjectsStore.updateAll(action.projects)
+      ProjectsStore.emitChange(action.actionType, ProjectsStore.projects)
+      break
+    case ManageConstants.RENDER_MORE_PROJECTS:
+      ProjectsStore.addProjects(action.project)
+      ProjectsStore.emitChange(
+        ManageConstants.RENDER_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.OPEN_JOB_SETTINGS:
+      ProjectsStore.emitChange(
+        ManageConstants.OPEN_JOB_SETTINGS,
+        action.job,
+        action.prName,
+      )
+      break
+    case ManageConstants.OPEN_JOB_TM_PANEL:
+      ProjectsStore.emitChange(
+        ManageConstants.OPEN_JOB_TM_PANEL,
+        action.job,
+        action.prName,
+      )
+      break
+    case ManageConstants.REMOVE_PROJECT:
+      ProjectsStore.removeProject(action.project)
+      ProjectsStore.emitChange(
+        ManageConstants.RENDER_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.REMOVE_JOB:
+      ProjectsStore.removeJob(action.project, action.job)
+      ProjectsStore.emitChange(
+        ManageConstants.RENDER_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.CHANGE_JOB_PASS:
+      ProjectsStore.changeJobPass(
+        action.projectId,
+        action.jobId,
+        action.password,
+        action.oldPassword,
+        action.revision_number,
+        action.oldTranslator,
+      )
+      ProjectsStore.emitChange(
+        ManageConstants.RENDER_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.NO_MORE_PROJECTS:
+      ProjectsStore.emitChange(action.actionType)
+      break
+    case ManageConstants.SHOW_RELOAD_SPINNER:
+      ProjectsStore.emitChange(action.actionType)
+      break
+    case ManageConstants.CHANGE_PROJECT_NAME:
+      ProjectsStore.changeProjectName(action.project, action.newProject)
+      ProjectsStore.emitChange(
+        ManageConstants.UPDATE_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
+      ProjectsStore.changeProjectAssignee(action.project, action.user)
+      ProjectsStore.emitChange(
+        ManageConstants.UPDATE_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.CHANGE_PROJECT_TEAM:
+      ProjectsStore.changeProjectTeam(action.project, action.teamId)
+      ProjectsStore.emitChange(
+        ManageConstants.UPDATE_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.ADD_SECOND_PASS:
+      ProjectsStore.setSecondPassUrl(
+        action.idProject,
+        action.idJob,
+        action.passwordJob,
+        action.secondPAssPassword,
+      )
+      ProjectsStore.emitChange(
+        ManageConstants.UPDATE_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.HIDE_PROJECT:
+      ProjectsStore.emitChange(
+        action.actionType,
+        Immutable.fromJS(action.project),
+      )
+      break
+    case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
+    case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
+      ProjectsStore.emitChange(action.actionType, action.idProject)
+      break
+    case ManageConstants.ASSIGN_TRANSLATOR:
+      ProjectsStore.assignTranslator(
+        action.projectId,
+        action.jobId,
+        action.jobPassword,
+        action.translator,
+      )
+      ProjectsStore.emitChange(
+        ManageConstants.RENDER_PROJECTS,
+        ProjectsStore.projects,
+      )
+      break
+  }
+})
 
 module.exports = ProjectsStore
