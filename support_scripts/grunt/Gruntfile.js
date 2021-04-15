@@ -421,14 +421,6 @@ module.exports = function (grunt) {
         dest: cssBase + 'build/legacy-misc.css',
       },
     },
-    jshint: {
-      options: {
-        force: true,
-        smarttabs: true,
-      },
-      // TODO: expand to other js files
-      all: [basePath + 'cat_source/*.js'],
-    },
     strip: {
       app: {
         src: buildPath + 'app.js',
@@ -472,13 +464,10 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-concat')
   grunt.loadNpmTasks('grunt-contrib-watch')
-  grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-text-replace')
   grunt.loadNpmTasks('grunt-strip')
   grunt.loadNpmTasks('grunt-sass')
   grunt.loadNpmTasks('grunt-browserify')
-
-  grunt.registerTask('default', ['jshint'])
 
   /**
    * bundle:js
