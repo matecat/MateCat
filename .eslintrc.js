@@ -3,6 +3,9 @@ const babelEcmaVersion = 2018
 
 module.exports = {
   extends: ['eslint:recommended'],
+  rules: {
+    'no-extra-semi': 'off',
+  },
   overrides: [
     // nodejs 9.11 related files
     {
