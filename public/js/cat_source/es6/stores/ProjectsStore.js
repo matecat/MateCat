@@ -2,68 +2,59 @@
  * Projects Store
  */
 
-import AppDispatcher  from './AppDispatcher';
-import {EventEmitter} from 'events';
-import ManageConstants  from '../constants/ManageConstants';
-import assign  from 'object-assign';
-import Immutable  from 'immutable';
+import AppDispatcher from './AppDispatcher'
+import {EventEmitter} from 'events'
+import ManageConstants from '../constants/ManageConstants'
+import assign from 'object-assign'
+import Immutable from 'immutable'
 
-EventEmitter.prototype.setMaxListeners(0);
-
-
-
-
+EventEmitter.prototype.setMaxListeners(0)
 
 let ProjectsStore = assign({}, EventEmitter.prototype, {
+  projects: null,
 
-    projects : null,
-
-    setProjects: function (projects) {
-        this.projects = Immutable.fromJS(projects);
-    },
-    /**
-     * Update all
-     */
-    updateAll: function (projects) {
-
-        /*this.projects = this.projects.mergeWith((oldProject, newProject, index) => {
+  setProjects: function (projects) {
+    this.projects = Immutable.fromJS(projects)
+  },
+  /**
+   * Update all
+   */
+  updateAll: function (projects) {
+    /*this.projects = this.projects.mergeWith((oldProject, newProject, index) => {
             return (newProject.get('id') === newProject.get('id')) ? oldProject : newProject
         },Immutable.fromJS(projects));*/
-        // this.projects = this.projects.toSet().union(Immutable.fromJS(projects).toSet()).toList();
-        //
-        this.projects = Immutable.fromJS(projects);
+    // this.projects = this.projects.toSet().union(Immutable.fromJS(projects).toSet()).toList();
+    //
+    this.projects = Immutable.fromJS(projects)
+  },
+  /**
+   * Add Projects (pagination)
+   */
+  addProjects: function (projects) {
+    this.projects = this.projects.concat(Immutable.fromJS(projects))
+  },
 
-    },
-    /**
-     * Add Projects (pagination)
-     */
-    addProjects: function(projects) {
-        this.projects = this.projects.concat(Immutable.fromJS(projects));
-    },
+  removeProject: function (project) {
+    let projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == project.get('id')
+    })
+    let index = this.projects.indexOf(projectOld)
+    this.projects = this.projects.delete(index)
+  },
 
-
-    removeProject: function (project) {
-        let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        let index = this.projects.indexOf(projectOld);
-        this.projects = this.projects.delete(index);
-    },
-
-    removeJob: function (project, job) {
-        let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        let indexProject = this.projects.indexOf(projectOld);
-        //Check jobs length
-        if (this.projects.get(indexProject).get('jobs').size === 1) {
-            this.removeProject(project);
-        } else {
-            let indexJob = project.get('jobs').indexOf(job);
-            this.projects = this.projects.deleteIn([indexProject, 'jobs', indexJob]);
-        }
-
-    },
+  removeJob: function (project, job) {
+    let projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == project.get('id')
+    })
+    let indexProject = this.projects.indexOf(projectOld)
+    //Check jobs length
+    if (this.projects.get(indexProject).get('jobs').size === 1) {
+      this.removeProject(project)
+    } else {
+      let indexJob = project.get('jobs').indexOf(job)
+      this.projects = this.projects.deleteIn([indexProject, 'jobs', indexJob])
+    }
+  },
 
     changeJobPass: function (projectId, jobId, password, oldPassword, revision_number, oldTranslator) {
         let projectOld = this.projects.find(function (prj) {
@@ -71,9 +62,9 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         });
         let indexProject = this.projects.indexOf(projectOld);
 
-        let jobOld = projectOld.get('jobs').find(function (j) {
-            return (j.get('id') == jobId && j.get('password') === oldPassword);
-        });
+    let jobOld = projectOld.get('jobs').find(function (j) {
+      return j.get('id') == jobId && j.get('password') === oldPassword
+    })
 
         let indexJob = projectOld.get('jobs').indexOf(jobOld);
 
@@ -87,86 +78,98 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], oldTranslator);
     },
 
-    changeProjectName: function (project, newProject) {
-        let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        let indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject,'name'], newProject.name);
-        this.projects = this.projects.setIn([indexProject,'project_slug'], newProject.project_slug);
-    },
+  changeProjectName: function (project, newProject) {
+    let projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == project.get('id')
+    })
+    let indexProject = this.projects.indexOf(projectOld)
+    this.projects = this.projects.setIn([indexProject, 'name'], newProject.name)
+    this.projects = this.projects.setIn(
+      [indexProject, 'project_slug'],
+      newProject.project_slug,
+    )
+  },
 
-    changeProjectAssignee: function (project, user) {
-        let uid;
-        if (user !== -1)  {
-            uid = user.get('uid');
-        }
-        var projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        var indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject, 'id_assignee'], uid);
-    },
+  changeProjectAssignee: function (project, user) {
+    let uid
+    if (user !== -1) {
+      uid = user.get('uid')
+    }
+    var projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == project.get('id')
+    })
+    var indexProject = this.projects.indexOf(projectOld)
+    this.projects = this.projects.setIn([indexProject, 'id_assignee'], uid)
+  },
 
-    changeProjectTeam: function (project, teamId) {
+  changeProjectTeam: function (project, teamId) {
+    var projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == project.get('id')
+    })
+    var indexProject = this.projects.indexOf(projectOld)
+    this.projects = this.projects.setIn(
+      [indexProject, 'id_team'],
+      parseInt(teamId),
+    )
+  },
 
-        var projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        var indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject, 'id_team'], parseInt(teamId));
-    },
+  updateJobOusource: function (project, job, outsource) {
+    let projectOld = this.projects.find(function (prj) {
+      return prj.get('id') == project.get('id')
+    })
+    let indexProject = this.projects.indexOf(projectOld)
+    if (indexProject != -1) {
+      let indexJob = project.get('jobs').indexOf(job)
+      this.projects = this.projects.setIn(
+        [indexProject, 'jobs', indexJob, 'outsource'],
+        Immutable.fromJS(outsource),
+      )
+    }
+  },
 
-    updateJobOusource: function (project, job, outsource) {
-        let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        let indexProject = this.projects.indexOf(projectOld);
-        if (indexProject != -1) {
-            let indexJob = project.get('jobs').indexOf(job);
-            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'outsource'], Immutable.fromJS(outsource));
-        }
-    },
+  assignTranslator: function (prId, jobId, jobPassword, translator) {
+    let project = this.projects.find(function (prj) {
+      return prj.get('id') == prId
+    })
+    let indexProject = this.projects.indexOf(project)
+    let job = project.get('jobs').find(function (j) {
+      return j.get('id') == jobId && j.get('password') === jobPassword
+    })
+    let indexJob = project.get('jobs').indexOf(job)
+    this.projects = this.projects.setIn(
+      [indexProject, 'jobs', indexJob, 'translator'],
+      Immutable.fromJS(translator),
+    )
+  },
 
-    assignTranslator: function (prId, jobId, jobPassword, translator) {
-        let project = this.projects.find(function (prj) {
-            return prj.get('id') == prId;
-        });
-        let indexProject = this.projects.indexOf(project);
-        let job = project.get('jobs').find(function (j) {
-            return j.get('id') == jobId && j.get('password') === jobPassword;
-        });
-        let indexJob = project.get('jobs').indexOf(job);
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], Immutable.fromJS(translator));
-    },
+  setSecondPassUrl: function (prId, jobId, jobPassword, secondPAssPassword) {
+    let project = this.projects.find(function (prj) {
+      return prj.get('id') == prId
+    })
+    let indexProject = this.projects.indexOf(project)
+    let job = project.get('jobs').find(function (j) {
+      return j.get('id') == jobId && j.get('password') === jobPassword
+    })
+    let indexJob = project.get('jobs').indexOf(job)
+    // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPAssPassword;
+    this.projects = this.projects.setIn(
+      [indexProject, 'jobs', indexJob, 'revise_passwords', 1],
+      Immutable.fromJS({revision_number: 2, password: secondPAssPassword}),
+    )
+  },
 
-    setSecondPassUrl: function (prId, jobId, jobPassword, secondPAssPassword) {
-        let project = this.projects.find(function (prj) {
-            return prj.get('id') == prId;
-        });
-        let indexProject = this.projects.indexOf(project);
-        let job = project.get('jobs').find(function (j) {
-            return j.get('id') == jobId && j.get('password') === jobPassword;
-        });
-        let indexJob = project.get('jobs').indexOf(job);
-        // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPAssPassword;
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 1], Immutable.fromJS({revision_number: 2, password: secondPAssPassword}));
-    },
+  unwrapImmutableObject(object) {
+    if (object && typeof object.toJS === 'function') {
+      return object.toJS()
+    } else {
+      return object
+    }
+  },
 
-    unwrapImmutableObject(object) {
-        if (object && typeof object.toJS === "function") {
-            return object.toJS();
-        } else {
-            return object
-        }
-    },
-
-    emitChange: function(event, args) {
-        this.emit.apply(this, arguments);
-    },
-
-});
-
+  emitChange: function (event, args) {
+    this.emit.apply(this, arguments)
+  },
+})
 
 // Register callback to handle all updates
 AppDispatcher.register(function(action) {
@@ -242,4 +245,4 @@ AppDispatcher.register(function(action) {
     }
 });
 
-module.exports = ProjectsStore;
+module.exports = ProjectsStore

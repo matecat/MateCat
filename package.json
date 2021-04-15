@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "format": "prettier --write .",
+    "test": "jest --watch",
+    "coverage": "jest --coverage"
+  },
+  "private": true,
+  "devDependencies": {
+    "@babel/core": "^7.13.14",
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-react": "^7.13.13",
+    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^13.1.1",
+    "jest": "^26.6.3",
+    "prettier": "^2.2.1"
+  }
+}

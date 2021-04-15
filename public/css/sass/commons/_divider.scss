@@ -1,28 +1,30 @@
 // Top Margin
 
-@each $divider in 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 26, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150, 200, 300, 400, 500 {
+@each $divider in 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+  18, 19, 20, 26, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150, 200, 300, 400, 500
+{
   .top-#{$divider} {
     margin-top: $divider * 1px !important;
   }
   .bottom-#{$divider} {
-    margin-bottom: $divider *1px !important;
+    margin-bottom: $divider * 1px !important;
   }
   .left-#{$divider} {
-    margin-left: $divider *1px !important;
+    margin-left: $divider * 1px !important;
   }
   .right-#{$divider} {
-    margin-right: $divider *1px !important;
+    margin-right: $divider * 1px !important;
   }
   .pad-top-#{$divider} {
     padding-top: $divider * 1px !important;
   }
   .pad-bottom-#{$divider} {
-    padding-bottom: $divider *1px !important;
+    padding-bottom: $divider * 1px !important;
   }
   .pad-right-#{$divider} {
-    padding-right: $divider *1px !important;
+    padding-right: $divider * 1px !important;
   }
   .pad-left-#{$divider} {
-    padding-left: $divider *1px !important;
+    padding-left: $divider * 1px !important;
   }
 }

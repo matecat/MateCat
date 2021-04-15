@@ -1,21 +1,20 @@
 import {
-    EditorState,
-    Modifier,
-    SelectionState,
-    ContentState,
-    CharacterMetadata,
-    BlockMapBuilder,
-    CompositeDecorator
-} from 'draft-js';
+  EditorState,
+  Modifier,
+  SelectionState,
+  ContentState,
+  CharacterMetadata,
+  BlockMapBuilder,
+  CompositeDecorator,
+} from 'draft-js'
 
-import _ from 'lodash';
-import SearchHighlight from '../../SearchHighLight/SearchHighLight.component';
-import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component';
-import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component';
-import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component';
-import LexiqaHighlight from '../../LexiqaHighlight/LexiqaHighlight.component';
-import CompoundDecorator from "../CompoundDecorator"
-
+import _ from 'lodash'
+import SearchHighlight from '../../SearchHighLight/SearchHighLight.component'
+import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component'
+import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component'
+import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component'
+import LexiqaHighlight from '../../LexiqaHighlight/LexiqaHighlight.component'
+import CompoundDecorator from '../CompoundDecorator'
 
 // export const tagStruct = {
 //     'ph': {

@@ -1,52 +1,110 @@
-
 class JobMenu extends React.Component {
+  constructor(props) {
+    super(props)
+  }
 
-    constructor(props) {
-        super(props);
+  openSplitModal() {
+    ModalsActions.openSplitJobModal(
+      this.props.job,
+      this.props.project,
+      UI.reloadProjects,
+    )
+  }
+
+  openMergeModal() {
+    ModalsActions.openMergeModal(
+      this.props.project.toJS(),
+      this.props.job.toJS(),
+      UI.reloadProjects,
+    )
+  }
+
+  getMoreLinks() {}
+
+  openSecondPassUrl() {
+    if (
+      this.props.job.has('revise_passwords') &&
+      this.props.job.get('revise_passwords').size > 1
+    ) {
+      let url =
+        config.hostpath +
+        '/revise2/' +
+        this.props.project.get('name') +
+        '/' +
+        this.props.job.get('source') +
+        '-' +
+        this.props.job.get('target') +
+        '/' +
+        this.props.jobId +
+        '-' +
+        this.props.job.get('revise_passwords').get(1).get('password')
+      window.open(url)
     }
+  }
 
-    openSplitModal() {
-        ModalsActions.openSplitJobModal(this.props.job, this.props.project, UI.reloadProjects);
+  getReviseMenuLink() {
+    let reviseUrl = this.props.reviseUrl
+    return (
+      <a className="item" target="_blank" href={reviseUrl}>
+        <i className="icon-edit icon" /> Revise
+      </a>
+    )
+  }
+
+  getSecondPassReviewMenuLink() {
+    if (
+      this.props.project.has('features') &&
+      this.props.project.get('features').indexOf('second_pass_review') > -1
+    ) {
+      if (
+        this.props.job.has('revise_passwords') &&
+        this.props.job.get('revise_passwords').size > 1
+      ) {
+        let url =
+          config.hostpath +
+          '/revise2/' +
+          this.props.project.get('name') +
+          '/' +
+          this.props.job.get('source') +
+          '-' +
+          this.props.job.get('target') +
+          '/' +
+          this.props.jobId +
+          '-' +
+          this.props.job.get('revise_passwords').get(1).get('password')
+        return (
+          <a className="item" target="_blank" href={url}>
+            <i className="icon-edit icon" />
+            Revise 2
+          </a>
+        )
+      } else {
+        return (
+          <a
+            className="item"
+            target="_blank"
+            onClick={() => this.retrieveSecondPassReviewLink()}
+          >
+            <i className="icon-edit icon" />
+            Generate Revise 2
+          </a>
+        )
+      }
     }
+    return ''
+  }
 
-    openMergeModal() {
-        ModalsActions.openMergeModal(this.props.project.toJS(), this.props.job.toJS(), UI.reloadProjects);
-    }
-
-    getMoreLinks() {
-
-    }
-
-    openSecondPassUrl() {
-        if ( this.props.job.has('revise_passwords') && this.props.job.get('revise_passwords').size > 1) {
-            let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('revise_passwords').get(1).get('password');
-            window.open(url);
-        }
-    }
-
-    getReviseMenuLink() {
-        let reviseUrl = this.props.reviseUrl;
-        return <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
-    }
-
-    getSecondPassReviewMenuLink() {
-        if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 ){
-            if ( this.props.job.has('revise_passwords') && this.props.job.get('revise_passwords').size > 1 ) {
-                let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('revise_passwords').get(1).get('password');
-                return <a className="item" target="_blank" href={url}><i className="icon-edit icon"/>Revise 2</a>
-            } else {
-                return <a className="item" target="_blank" onClick={()=>this.retrieveSecondPassReviewLink()}><i className="icon-edit icon"/>Generate Revise 2</a>
-            }
-        }
-        return '';
-    }
-
-    retrieveSecondPassReviewLink(event) {
-        // event.preventDefault();
-        ManageActions.getSecondPassReview(this.props.project.get('id'), this.props.project.get('password'), this.props.jobId, this.props.job.get('password')).then(()=>{
-            this.openSecondPassUrl();
-        });
-    }
+  retrieveSecondPassReviewLink(event) {
+    // event.preventDefault();
+    ManageActions.getSecondPassReview(
+      this.props.project.get('id'),
+      this.props.project.get('password'),
+      this.props.jobId,
+      this.props.job.get('password'),
+    ).then(() => {
+      this.openSecondPassUrl()
+    })
+  }
 
     componentDidMount() {
         $(this.dropdown).dropdown({
@@ -61,7 +119,7 @@ class JobMenu extends React.Component {
         let jobTMXUrl = this.props.jobTMXUrl;
         let exportXliffUrl = this.props.exportXliffUrl;
 
-        let originalUrl = this.props.originalUrl;
+    let originalUrl = this.props.originalUrl
 
 
         let downloadButton = this.props.getDownloadLabel;
@@ -142,5 +200,4 @@ class JobMenu extends React.Component {
     }
 }
 
-
-export default JobMenu ;
+export default JobMenu

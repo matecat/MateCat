@@ -5,3 +5,17 @@ MateCat Official Repository. MateCat is an enterprise-level, web-based CAT tool 
 See the complete installation guide here:
 
 [http://site.matecat.com/installation-guide/](http://site.matecat.com/installation-guide/)
+
+## Available scripts
+
+### `yarn format`
+
+Format all supported files using [prettier](https://prettier.io/).
+
+### `yarn test`
+
+Run tests related to files changed since last commit in watch mode, thanks to [jest](https://jestjs.io/).
+
+### `yarn coverage`
+
+Run all the tests and collect the coverage information and report it, thanks to [jest](https://jestjs.io/).

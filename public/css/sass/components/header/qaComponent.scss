@@ -22,7 +22,8 @@
   justify-content: flex-start;
 }
 
-.qa-issues-container, .qa-lexiqa-container {
+.qa-issues-container,
+.qa-lexiqa-container {
   width: 150px;
   height: 50px;
   align-items: center;
@@ -40,11 +41,13 @@
   width: 190px;
 }
 
-.qa-issues-container:hover, .qa-lexiqa-container:hover {
+.qa-issues-container:hover,
+.qa-lexiqa-container:hover {
   background-color: #d0d0d0;
 }
 
-.qa-issues-container.selected, .qa-lexiqa-container.selected {
+.qa-issues-container.selected,
+.qa-lexiqa-container.selected {
   box-shadow: inset 0px -3px 0px #4d4d4d;
 }
 
@@ -71,27 +74,27 @@
 }
 
 .icon-qa-total-issues:before {
-  content: "\e903";
+  content: '\e903';
   font-size: 25px;
 }
 
 .icon-qa-glossary:before {
-  content: "\ea4f";
+  content: '\ea4f';
   font-size: 25px;
 }
 
 .icon-conflicts:before {
-  content: "\f071";
+  content: '\f071';
   font-size: 25px;
 }
 
 .icon-qa-issues:before {
-  content: "\ea7f";
+  content: '\ea7f';
   font-size: 25px;
 }
 
 .icon-qa-lexiqa:before {
-  content: "\f044";
+  content: '\f044';
   font-size: 25px;
   margin-top: 0px;
   display: block;
@@ -123,16 +126,17 @@
 }
 
 .icon-qa-right-arrow:before {
-  content: "\ea3c";
+  content: '\ea3c';
   font-size: 18px;
 }
 
 .icon-qa-left-arrow:before {
-  content: "\ea40";
+  content: '\ea40';
   font-size: 18px;
 }
 
-.qa-move-up, .qa-move-down {
+.qa-move-up,
+.qa-move-down {
   color: #797979;
 }
 
@@ -175,7 +179,7 @@
       font-weight: 700;
       margin-right: 5px;
       &.labl {
-        margin-left: 70px
+        margin-left: 70px;
       }
     }
     @media (max-width: 1230px) {
@@ -199,10 +203,10 @@
       .qa-issue {
       }
       .icon-cancel-circle {
-        color: #E1565A;
+        color: #e1565a;
       }
       .icon-warning2 {
-        color: #EA862C;
+        color: #ea862c;
       }
       .ui.basic.buttons {
         button {

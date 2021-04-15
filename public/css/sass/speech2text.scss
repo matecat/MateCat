@@ -1,168 +1,159 @@
 @import '_mixins';
 
 .activeSegmentButton {
-    @include box-shadow(inset 0 1px 2px rgba(0,0,0,.1));
-    @include linear-gradient(#eee, top, #eee, #e0e0e0);
-    border-color:#ccc;
+  @include box-shadow(inset 0 1px 2px rgba(0, 0, 0, 0.1));
+  @include linear-gradient(#eee, top, #eee, #e0e0e0);
+  border-color: #ccc;
 }
 
-
 .editarea.micActive {
-    width: 94%;
-    padding-right: 7%;
+  width: 94%;
+  padding-right: 7%;
 }
 
 .micSpeech {
-    /* @extend .segmentButton; */
+  /* @extend .segmentButton; */
 
-    display: none;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor:pointer;
-    padding:3px 4px 5px 4px;
-    z-index: 9999999;
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  padding: 3px 4px 5px 4px;
+  z-index: 9999999;
 
-    &:hover {
-        svg g {
-            fill: #000000;
-        }
+  &:hover {
+    svg g {
+      fill: #000000;
     }
+  }
 
-
-    
-
-   
-    &.micSpeechActive {
-        svg g {
-            fill: red;
-        }
+  &.micSpeechActive {
+    svg g {
+      fill: red;
     }
+  }
 
-    &.micSpeechReceiving {
-      /*  @extend .activeSegmentButton; */
-
-        svg g {
-            fill: #fff;
-        }
-    }
-
-/*    &.micSpeechActive .micBg, */
-    &.micSpeechReceiving .micBg {
-        background: red;
-          -webkit-border-radius: 60px;
-          -moz-border-radius: 60px;
-          border-radius: 60px;
-          height: 50px;
-          width: 50px;
-          position: absolute;
-        right: -11px;
-        top: -10px;
-        @include animation-duration(1s);
-        @include animation-name(speaking);
-        @include animation-iteration-count(infinite);
-        @include animation-timing-function(ease-in-out);
-        @include animation-direction(alternate);
-
-        svg g {
-            fill: #FFFFFF;
-        }
-    }
+  &.micSpeechReceiving {
+    /*  @extend .activeSegmentButton; */
 
     svg g {
-        fill: #737373;
+      fill: #fff;
     }
+  }
+
+  /*    &.micSpeechActive .micBg, */
+  &.micSpeechReceiving .micBg {
+    background: red;
+    -webkit-border-radius: 60px;
+    -moz-border-radius: 60px;
+    border-radius: 60px;
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    right: -11px;
+    top: -10px;
+    @include animation-duration(1s);
+    @include animation-name(speaking);
+    @include animation-iteration-count(infinite);
+    @include animation-timing-function(ease-in-out);
+    @include animation-direction(alternate);
+
+    svg g {
+      fill: #ffffff;
+    }
+  }
+
+  svg g {
+    fill: #737373;
+  }
 }
 
 section.opened .micSpeech,
 section.opened .micSpeechActive,
 section.opened svg.micBgSpeechActive,
 section.opened svg.micBgSpeechReceiving {
-    display: block;
+  display: block;
 }
 
 section.opened {
-    ul.buttons {
-        margin-top: -13px;
-    }
+  ul.buttons {
+    margin-top: -13px;
+  }
 
-    .toolbar {
-        /* Tied to speech2text removal */
-        /* margin-left: 20px; */
-        float: left;
-        margin-top: 3px;
-        width: 65%;
-    }
+  .toolbar {
+    /* Tied to speech2text removal */
+    /* margin-left: 20px; */
+    float: left;
+    margin-top: 3px;
+    width: 65%;
+  }
 }
 
 $tlbr-btn-bg: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
 $tlbr-btn-bg-act: -webkit-linear-gradient(top, #eee, #e0e0e0);
 
 .tlbr-btn-act {
-    opacity: 1.0;
+  opacity: 1;
 }
 
 .editToolbar {
-    li {
-        @extend .segmentButton;
+  li {
+    @extend .segmentButton;
 
-        &.uppercase {
+    &.uppercase {
+      &:hover {
+        @extend .tlbr-btn-act;
+      }
 
-            &:hover {
-                @extend .tlbr-btn-act;
-            }
-
-            &:active {
-            }
-        }
-
-        &.lowercase {
-
-            &:hover {
-                @extend .tlbr-btn-act;
-            }
-
-            &:active {
-            }
-        }
-
-        &.capitalize {
-
-            &:hover {
-                @extend .tlbr-btn-act;
-            }
-
-            &:active {
-            }
-        }
+      &:active {
+      }
     }
+
+    &.lowercase {
+      &:hover {
+        @extend .tlbr-btn-act;
+      }
+
+      &:active {
+      }
+    }
+
+    &.capitalize {
+      &:hover {
+        @extend .tlbr-btn-act;
+      }
+
+      &:active {
+      }
+    }
+  }
 }
 
 .micBg2 {
-    position: absolute;
-    background: transparent;
-    width: 20px;
-    right: 4px;
-    height: 20px;
-    border-radius: 20px;
+  position: absolute;
+  background: transparent;
+  width: 20px;
+  right: 4px;
+  height: 20px;
+  border-radius: 20px;
 }
 
 .micSpeech {
-    zoom: 0.8;
+  zoom: 0.8;
 }
-
 
 @include keyframes(speaking) {
-    0% {
+  0% {
     -webkit-transform: scale(0.6);
     opacity: 0.6;
-}
- 50% {
+  }
+  50% {
     -webkit-transform: scale(0.8);
     opacity: 0.8;
-    }
- 100% {
+  }
+  100% {
     -webkit-transform: scale(0.6);
     opacity: 0.6;
- }
+  }
 }

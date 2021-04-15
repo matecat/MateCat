@@ -2,48 +2,45 @@
  * Duplicated from draft-js - not part of the public API
  */
 
-import findRangesImmutable from "../immutable/findRangesimmutable";
-import {CharacterMetadata} from "draft-js";
+import findRangesImmutable from '../immutable/findRangesimmutable'
+import {CharacterMetadata} from 'draft-js'
 
-function removeEntitiesAtEdges(
-    contentState,
-    selectionState,
-) {
-    const blockMap = contentState.getBlockMap();
-    const entityMap = contentState.getEntityMap();
+function removeEntitiesAtEdges(contentState, selectionState) {
+  const blockMap = contentState.getBlockMap()
+  const entityMap = contentState.getEntityMap()
 
-    const updatedBlocks = {};
+  const updatedBlocks = {}
 
-    const startKey = selectionState.getStartKey();
-    const startOffset = selectionState.getStartOffset();
-    const startBlock = blockMap.get(startKey);
-    const updatedStart = removeForBlock(entityMap, startBlock, startOffset);
+  const startKey = selectionState.getStartKey()
+  const startOffset = selectionState.getStartOffset()
+  const startBlock = blockMap.get(startKey)
+  const updatedStart = removeForBlock(entityMap, startBlock, startOffset)
 
-    if (updatedStart !== startBlock) {
-        updatedBlocks[startKey] = updatedStart;
-    }
+  if (updatedStart !== startBlock) {
+    updatedBlocks[startKey] = updatedStart
+  }
 
-    const endKey = selectionState.getEndKey();
-    const endOffset = selectionState.getEndOffset();
-    let endBlock = blockMap.get(endKey);
-    if (startKey === endKey) {
-        endBlock = updatedStart;
-    }
+  const endKey = selectionState.getEndKey()
+  const endOffset = selectionState.getEndOffset()
+  let endBlock = blockMap.get(endKey)
+  if (startKey === endKey) {
+    endBlock = updatedStart
+  }
 
-    const updatedEnd = removeForBlock(entityMap, endBlock, endOffset);
+  const updatedEnd = removeForBlock(entityMap, endBlock, endOffset)
 
-    if (updatedEnd !== endBlock) {
-        updatedBlocks[endKey] = updatedEnd;
-    }
+  if (updatedEnd !== endBlock) {
+    updatedBlocks[endKey] = updatedEnd
+  }
 
-    if (!Object.keys(updatedBlocks).length) {
-        return contentState.set('selectionAfter', selectionState);
-    }
+  if (!Object.keys(updatedBlocks).length) {
+    return contentState.set('selectionAfter', selectionState)
+  }
 
-    return contentState.merge({
-        blockMap: blockMap.merge(updatedBlocks),
-        selectionAfter: selectionState,
-    });
+  return contentState.merge({
+    blockMap: blockMap.merge(updatedBlocks),
+    selectionAfter: selectionState,
+  })
 }
 
 /**
@@ -51,65 +48,57 @@ function removeEntitiesAtEdges(
  * returns the start and end of the entity that is overlapping the offset.
  * Note: This method requires that the offset be in an entity range.
  */
-function getRemovalRange(
-    characters,
-    entityKey,
-    offset,
-) {
-    let removalRange;
+function getRemovalRange(characters, entityKey, offset) {
+  let removalRange
 
-    // Iterates through a list looking for ranges of matching items
-    // based on the 'isEqual' callback.
-    // Then instead of returning the result, call the 'found' callback
-    // with each range.
-    // Then filters those ranges based on the 'filter' callback
-    //
-    // Here we use it to find ranges of characters with the same entity key.
-    findRangesImmutable(
-        characters, // the list to iterate through
-        (a, b) => a.getEntity() === b.getEntity(), // 'isEqual' callback
-        element => element.getEntity() === entityKey, // 'filter' callback
-        (start, end) => {
-            // 'found' callback
-            if (start <= offset && end >= offset) {
-                // this entity overlaps the offset index
-                removalRange = {start, end};
-            }
-        },
-    );
+  // Iterates through a list looking for ranges of matching items
+  // based on the 'isEqual' callback.
+  // Then instead of returning the result, call the 'found' callback
+  // with each range.
+  // Then filters those ranges based on the 'filter' callback
+  //
+  // Here we use it to find ranges of characters with the same entity key.
+  findRangesImmutable(
+    characters, // the list to iterate through
+    (a, b) => a.getEntity() === b.getEntity(), // 'isEqual' callback
+    (element) => element.getEntity() === entityKey, // 'filter' callback
+    (start, end) => {
+      // 'found' callback
+      if (start <= offset && end >= offset) {
+        // this entity overlaps the offset index
+        removalRange = {start, end}
+      }
+    },
+  )
 
-    if(typeof removalRange !== 'object') {
-        throw new Error('Removal range must exist within character list.');
-    }
-    return removalRange;
+  if (typeof removalRange !== 'object') {
+    throw new Error('Removal range must exist within character list.')
+  }
+  return removalRange
 }
 
-function removeForBlock(
-    entityMap,
-    block,
-    offset,
-) {
-    let chars = block.getCharacterList();
-    const charBefore = offset > 0 ? chars.get(offset - 1) : undefined;
-    const charAfter = offset < chars.count() ? chars.get(offset) : undefined;
-    const entityBeforeCursor = charBefore ? charBefore.getEntity() : undefined;
-    const entityAfterCursor = charAfter ? charAfter.getEntity() : undefined;
+function removeForBlock(entityMap, block, offset) {
+  let chars = block.getCharacterList()
+  const charBefore = offset > 0 ? chars.get(offset - 1) : undefined
+  const charAfter = offset < chars.count() ? chars.get(offset) : undefined
+  const entityBeforeCursor = charBefore ? charBefore.getEntity() : undefined
+  const entityAfterCursor = charAfter ? charAfter.getEntity() : undefined
 
-    if (entityAfterCursor && entityAfterCursor === entityBeforeCursor) {
-        const entity = entityMap.__get(entityAfterCursor);
-        if (entity.getMutability() !== 'MUTABLE') {
-            let {start, end} = getRemovalRange(chars, entityAfterCursor, offset);
-            let current;
-            while (start < end) {
-                current = chars.get(start);
-                chars = chars.set(start, CharacterMetadata.applyEntity(current, null));
-                start++;
-            }
-            return block.set('characterList', chars);
-        }
+  if (entityAfterCursor && entityAfterCursor === entityBeforeCursor) {
+    const entity = entityMap.__get(entityAfterCursor)
+    if (entity.getMutability() !== 'MUTABLE') {
+      let {start, end} = getRemovalRange(chars, entityAfterCursor, offset)
+      let current
+      while (start < end) {
+        current = chars.get(start)
+        chars = chars.set(start, CharacterMetadata.applyEntity(current, null))
+        start++
+      }
+      return block.set('characterList', chars)
     }
+  }
 
-    return block;
+  return block
 }
 
-export default removeEntitiesAtEdges;
+export default removeEntitiesAtEdges
