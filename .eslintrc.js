@@ -38,7 +38,11 @@ module.exports = {
         ecmaVersion: browserEcmaVersion,
         ecmaFeatures: {jsx: true},
       },
-      extends: ['plugin:react/recommended'],
+      extends: [
+        'plugin:import/errors',
+        'plugin:import/warnings',
+        'plugin:react/recommended',
+      ],
       settings: {
         react: {version: '16.9'},
         // 'import/resolver': {
