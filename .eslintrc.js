@@ -45,9 +45,6 @@ module.exports = {
       ],
       settings: {
         react: {version: '16.9'},
-        // 'import/resolver': {
-        //   node: {extensions: ['.js', '.jsx', '.ts', '.tsx']},
-        // },
       },
       rules: {'react/prop-types': 'off'},
     },
