@@ -2,6 +2,7 @@ const nodeEcmaVersion = 2018
 const babelEcmaVersion = 2018
 
 module.exports = {
+  ignorePatterns: ['**/public/js/lib/**/*.js'],
   extends: ['eslint:recommended'],
   rules: {
     'no-extra-semi': 'off',
@@ -42,19 +43,30 @@ module.exports = {
     {
       files: ['**/public/js/**/*.js'],
       env: {browser: true},
+
+      /**
+       * THE SHAME LIST
+       */
       globals: {
         $: true,
         jQuery: true,
         _: true,
+        React: true,
+        ReactDOM: true,
+        moment: true,
+        sprintf: true,
+        diff_match_patch: true,
+        Base64: true,
         config: true,
         APP: true,
         UI: true,
         PEE: true,
-        React: true,
-        ReactDOM: true,
         MC: true,
         API: true,
         classnames: true,
+        Review: true,
+        ReviewExtended: true,
+        ReviewExtendedFooter: true,
         SegmentFilter: true,
         NotificationBox: true,
         ManageConstants: true,
