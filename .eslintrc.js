@@ -1,5 +1,5 @@
 const nodeEcmaVersion = 2018
-const babelEcmaVersion = 2018
+const browserEcmaVersion = 2018
 
 module.exports = {
   ignorePatterns: ['**/public/js/lib/**/*.js'],
@@ -35,7 +35,7 @@ module.exports = {
       parser: '@babel/eslint-parser',
       parserOptions: {
         sourceType: 'module',
-        ecmaVersion: babelEcmaVersion,
+        ecmaVersion: browserEcmaVersion,
         ecmaFeatures: {jsx: true},
       },
     },
@@ -44,6 +44,7 @@ module.exports = {
     {
       files: ['**/public/js/**/*.js'],
       env: {browser: true},
+      parserOptions: {ecmaVersion: browserEcmaVersion},
 
       rules: {
         strict: 'error',
