@@ -10,16 +10,16 @@ UI = {
   render: function () {
     var self = this
     var headerMountPoint = $('header')[0]
-    ReactDOM.render(
-      React.createElement(Header, {
-        loggedUser: config.isLoggedIn,
-        showSubHeader: false,
-        showModals: false,
-        changeTeam: false,
-        user: APP.USER.STORE,
-      }),
-      headerMountPoint,
-    )
+    // ReactDOM.render(
+    //   React.createElement(Header, {
+    //     loggedUser: config.isLoggedIn,
+    //     showSubHeader: false,
+    //     showModals: false,
+    //     changeTeam: false,
+    //     user: APP.USER.STORE,
+    //   }),
+    //   headerMountPoint,
+    // )
 
     var analyzeMountPoint = $('#analyze-container')[0]
     ReactDOM.render(
@@ -121,6 +121,7 @@ UI = {
     $('#downloadAnalysisReportForm').submit()
   },
 }
+
 $(document).ready(function () {
   UI.init()
 })
