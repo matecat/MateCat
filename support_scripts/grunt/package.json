@@ -59,5 +59,8 @@
       "env",
       "react"
     ]
+  },
+  "engines": {
+    "node": "9.11.2"
   }
 }
