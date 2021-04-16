@@ -67,7 +67,7 @@ class Header extends React.Component {
   }
 
   logoutUser() {
-    $.post('/api/app/user/logout', function (data) {
+    $.post('/api/app/user/logout', function () {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {
