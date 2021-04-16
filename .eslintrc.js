@@ -21,12 +21,13 @@ module.exports = {
     // jest related files
     {
       files: ['**/*.jest.js', '**/*.test.js'],
+      parser: '@babel/eslint-parser',
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: nodeEcmaVersion,
         ecmaFeatures: {jsx: true},
       },
-      env: {jest: true, node: true, browser: true},
+      env: {jest: true, node: true, browser: true, es6: true},
     },
 
     // grunt browserify compiled files

@@ -1,3 +1,5 @@
+'use strict'
+
 APP.USER = {}
 APP.USER.STORE = {}
 ;(function (APP, $, undefined) {

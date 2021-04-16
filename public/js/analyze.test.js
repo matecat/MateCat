@@ -1,8 +1,4 @@
-import {
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
+import {screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {rest} from 'msw'
 
 import {mswServer} from '../mocks/mswServer'
@@ -240,7 +236,7 @@ test('renders properly', async () => {
     ],
   )
 
-  globalThis.config = {
+  global.config = {
     basepath: 'fake_basepath/',
     status: 'fake_project_status',
     isLoggedIn: false,
@@ -248,10 +244,10 @@ test('renders properly', async () => {
     password: 'job_password_123',
     ajaxDomainsNumber: 3000,
   }
-  globalThis.Header = require('./cat_source/es6/components/header/Header.js').default
-  globalThis.AnalyzeMain = require('./cat_source/es6/components/analyze/AnalyzeMain.js').default
-  globalThis.ModalWindow = require('./cat_source/es6/components/modals/ModalWindowComponent.js').default
-  globalThis.AnalyzeActions = require('./cat_source/es6/actions/AnalyzeActions.js')
+  global.Header = require('./cat_source/es6/components/header/Header.js').default
+  global.AnalyzeMain = require('./cat_source/es6/components/analyze/AnalyzeMain.js').default
+  global.ModalWindow = require('./cat_source/es6/components/modals/ModalWindowComponent.js').default
+  global.AnalyzeActions = require('./cat_source/es6/actions/AnalyzeActions.js')
 
   require('./common')
   require('./user_store')

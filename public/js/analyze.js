@@ -1,3 +1,5 @@
+'use strict'
+
 window.UI = null
 
 window.UI = {
