@@ -159,10 +159,13 @@ class Header extends React.Component {
           </div>
         )
       }
+
       return (
         <div
           className={'ui dropdown'}
-          ref={(dropdownProfile) => (this.dropdownProfile = dropdownProfile)}
+          ref={(dropdownProfile) => {
+            this.dropdownProfile = dropdownProfile
+          }}
           id={'profile-menu'}
         >
           <div

@@ -1,6 +1,6 @@
-APP = null
+window.APP = null
 
-APP = {
+window.APP = {
   teamStorageName: 'defaultTeam',
   init: function () {
     this.setLoginEvents()

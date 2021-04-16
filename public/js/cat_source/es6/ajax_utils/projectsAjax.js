@@ -1,8 +1,8 @@
-if (!API) {
-  var API = {}
+if (!window.API) {
+  window.API = {}
 }
 
-API.PROJECTS = {
+window.API.PROJECTS = {
   /**
    * Retrieve Projects. Passing filters is possible to retrieve projects
    */

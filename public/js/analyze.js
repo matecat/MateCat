@@ -1,6 +1,6 @@
-UI = null
+window.UI = null
 
-UI = {
+window.UI = {
   init: function () {
     this.pollingTime = 1000
     this.segmentsThreshold = 50000
@@ -10,16 +10,16 @@ UI = {
   render: function () {
     var self = this
     var headerMountPoint = $('header')[0]
-    // ReactDOM.render(
-    //   React.createElement(Header, {
-    //     loggedUser: config.isLoggedIn,
-    //     showSubHeader: false,
-    //     showModals: false,
-    //     changeTeam: false,
-    //     user: APP.USER.STORE,
-    //   }),
-    //   headerMountPoint,
-    // )
+    ReactDOM.render(
+      React.createElement(Header, {
+        loggedUser: config.isLoggedIn,
+        showSubHeader: false,
+        showModals: false,
+        changeTeam: false,
+        user: APP.USER.STORE,
+      }),
+      headerMountPoint,
+    )
 
     var analyzeMountPoint = $('#analyze-container')[0]
     ReactDOM.render(
