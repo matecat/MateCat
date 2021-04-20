@@ -374,24 +374,6 @@ class QA {
     ];
 
     /**
-     * This map excludes these characters from consistency check
-     * (only if they are present as xliff 2.0 metadata tag in the source)
-     *
-     * @var array
-     */
-    protected $tagsToBeExcludedFromChecks = [
-            '{s}',
-            '&amp;apos;',
-            '&apos;',
-            '&amp;#39;',
-            '&#39;',
-            '&nbsp;',
-            '&quot;',
-            '&amp;amp;',
-            '&amp;',
-    ];
-
-    /**
      * <code>
      * $errorMap = [
      *      'code'  => (int),
@@ -1297,9 +1279,32 @@ class QA {
      *
      * @param DOMElement $element
      *
+     * @throws \Exception
      * @return bool
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
+
+        // This is a map (***SPECIFIC FOR EVERY PLUGIN IN USE***)
+        // of tags to exclude from consistency check
+        $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
+
+        if(empty($tagsToBeExcludedFromChecks)){
+            return true;
+        }
+
+        return $this->elementIsToBeExcludedFromChecks($element, $tagsToBeExcludedFromChecks);
+    }
+
+    /**
+     * This function checks if a tag element is contained in $tagsToBeExcludedFromChecks map and
+     * if has any dataRef attribute
+     *
+     * @param DOMElement $element
+     * @param array $tagsToBeExcludedFromChecks
+     *
+     * @return bool
+     */
+    private function elementIsToBeExcludedFromChecks( DOMElement $element, $tagsToBeExcludedFromChecks) {
 
         $elementHasDataRef = false;
         $elementValue = null;
@@ -1314,7 +1319,7 @@ class QA {
             }
         }
 
-        return !(in_array($elementValue, $this->tagsToBeExcludedFromChecks) and $elementHasDataRef);
+        return !(in_array($elementValue, $tagsToBeExcludedFromChecks) and $elementHasDataRef);
     }
 
     /**

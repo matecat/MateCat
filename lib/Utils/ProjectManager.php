@@ -2198,11 +2198,20 @@ class ProjectManager {
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
-            // persist original data map if present
             /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
             $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+
             if ( isset( $segmentOriginalDataStruct->map ) ) {
+
+                // persist original data map if present
                 Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
+
+                // correct Uber tag errors here
+                $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment = $this->features->filter(
+                        'correctTagErrors',
+                        $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                        $segmentOriginalDataStruct->map
+                );
             }
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
