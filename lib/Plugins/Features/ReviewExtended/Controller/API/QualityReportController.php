@@ -8,7 +8,6 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
-use API\V2\Json\TranslationIssueComment;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
@@ -16,6 +15,7 @@ use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Files\FilesInfoUtility;
 use INIT;
 use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
@@ -55,6 +55,15 @@ class QualityReportController extends KleinController {
     }
 
     public function segments() {
+        return $this->renderSegments();
+    }
+
+    /**
+     * @param bool $isForUI
+     *
+     * @throws \Exception
+     */
+    protected function renderSegments( $isForUI = false ) {
 
         $this->project = $this->chunk->getProject();
 
@@ -78,97 +87,140 @@ class QualityReportController extends KleinController {
         $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
         $options        = [ 'filter' => $filter ];
         $segments_ids   = $qrSegmentModel->getSegmentsIdForQR( $step, $ref_segment, $where, $options );
+
         if ( count( $segments_ids ) > 0 ) {
 
             $segmentTranslationEventDao = new SegmentTranslationEventDao();
             $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
-            $segments = $this->_formatSegments( $segments, $ttlArray );
+            $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+            $filesInfo        = $filesInfoUtility->getInfo();
+
+            $segments = $this->_formatSegments( $segments, $ttlArray, $filesInfo );
 
             $this->response->json( [
-                    'files'  => $segments,
-                    '_links' => $this->_getPaginationLinks( $segments_ids, $step, $filter )
+                    'segments'      => $segments,
+                    'first_segment' => (int)$filesInfo[ 'first_segment' ],
+                    'last_segment'  => (int)$filesInfo[ 'last_segment' ],
+                    '_params'       => [
+                            'ref_segment' => $this->request->param( 'ref_segment' ),
+                            'where'       => $this->request->param( 'where' ),
+                            'step'        => $this->request->param( 'step' ),
+                            'filter'      => $this->request->param( 'filter' ),
+                    ],
+                    '_links'        => $this->_getPaginationLinks( $segments_ids, $step, $filter )
             ] );
 
         } else {
-            $this->response->json( [ 'files' => [] ] );
+            $this->response->json( [ 'segments' => [] ] );
         }
-
     }
 
-    protected function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
+    /**
+     * @param array      $segments_id
+     * @param int        $step
+     * @param array|null $filter
+     *
+     * @return array
+     */
+    private function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
 
-        $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $url          = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $total        = count( $this->chunk->getSegments() );
+        $itemsPerPage = $step / 2;
+        $pages        = ceil( $total / $itemsPerPage );
 
         $links = [
-                "base" => INIT::$HTTPHOST,
-                "self" => $_SERVER[ 'REQUEST_URI' ],
+                "base"                   => INIT::$HTTPHOST,
+                'last_segment_id'        => (int)end($segments_id),
+                "pages"                  => $pages,
+                "items_per_page"         => $itemsPerPage,
+                "total_items"            => $total,
+                "self"                   => $_SERVER[ 'REQUEST_URI' ],
+                "next"                   => null,
+                "prev"                   => null,
         ];
 
         $filter_query = http_build_query( [ 'filter' => array_filter( $filter ) ] );
         if ( $this->chunk->job_last_segment > end( $segments_id ) ) {
-            $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query : null );
+            $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
+                            null );
         }
 
         if ( $this->chunk->job_first_segment < reset( $segments_id ) ) {
-            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) * 2 ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query : null );
+            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) * 2 ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty(
+                    $filter_query ) ? "&" . $filter_query : null );
         }
 
         return $links;
-
     }
 
     /**
      * Change the response json to remove source_page property and change it to revision number.
      *
-     * @param array $files
+     * @param array $segments
      * @param array $ttlArray
+     * @param array $filesInfo
      *
      * @return array
      */
-    protected function _formatSegments( $files, array $ttlArray ) {
+    private function _formatSegments( $segments, array $ttlArray, array $filesInfo ) {
         $outputArray = [];
 
-        foreach ( $files as $k0 => $file ) {
+        foreach ( $segments as $index => $segment ) {
 
-            if ( !isset( $outputArray [ $k0 ] [ 'filename' ] ) ) {
-                $outputArray [ $k0 ] [ 'filename' ] = $file[ 'filename' ];
-            }
+            $seg                                 = [];
+            $seg[ 'comments' ]                   = $segment->comments;
+            $seg[ 'dataRefMap' ]                 = $segment->dataRefMap;
+            $seg[ 'edit_distance' ]              = $segment->edit_distance;
+            $seg[ 'ice_locked' ]                 = $segment->ice_locked;
+            $seg[ 'ice_modified' ]               = $segment->ice_modified;
+            $seg[ 'is_pre_translated' ]          = $segment->is_pre_translated;
+            $seg[ 'issues' ]                     = $segment->issues;
+            $seg[ 'last_revisions' ]             = $segment->last_revisions;
+            $seg[ 'last_translation' ]           = $segment->last_translation;
+            $seg[ 'locked' ]                     = $segment->locked;
+            $seg[ 'match_type' ]                 = $segment->match_type;
+            $seg[ 'parsed_time_to_edit' ]        = $segment->parsed_time_to_edit;
+            $seg[ 'pee' ]                        = $segment->pee;
+            $seg[ 'pee_translation_revise' ]     = $segment->pee_translation_revise;
+            $seg[ 'pee_translation_suggestion' ] = $segment->pee_translation_suggestion;
+            $seg[ 'raw_word_count' ]             = $segment->raw_word_count;
+            $seg[ 'secs_per_word' ]              = $segment->secs_per_word;
+            $seg[ 'segment' ]                    = $segment->segment;
+            $seg[ 'segment_hash' ]               = $segment->segment_hash;
+            $seg[ 'id' ]                         = (int)$segment->sid;
+            $seg[ 'source_page' ]                = $segment->source_page;
+            $seg[ 'status' ]                     = $segment->status;
+            $seg[ 'suggestion' ]                 = $segment->suggestion;
+            $seg[ 'suggestion_match' ]           = $segment->suggestion_match;
+            $seg[ 'suggestion_source' ]          = $segment->suggestion_source;
+            $seg[ 'target' ]                     = $segment->target;
+            $seg[ 'translation' ]                = $segment->translation;
+            $seg[ 'version' ]                    = $segment->version;
+            $seg[ 'version_number' ]             = $segment->version_number;
+            $seg[ 'warnings' ]                   = $segment->warnings;
 
-            foreach ( $file[ 'segments' ] as $k1 => $segment ) {
-                if ( !empty( $segment->issues ) ) {
-                    foreach ( $segment->issues as $k2 => $issue ) {
-                        $segment->issues[ $k2 ][ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
-                                $segment->issues[ $k2 ][ 'source_page' ]
-                        );
-                        unset( $segment->issues[ $k2 ][ 'source_page' ] );
-
-                        if ( !empty( $issue->comments ) ) {
-                            $renderedIssueComments = [];
-                            foreach ( $issue->comments as $k3 => $comment ) {
-                                $renderedIssueComments [] = ( new TranslationIssueComment() )->renderItem( (object)$comment );
-                            }
-                            $issue->comments = null;
-                            $issue->comments = $renderedIssueComments;
-                        }
-                    }
+            // add fileInfo
+            foreach ( $filesInfo[ 'files' ] as $file ) {
+                if ( $file[ 'id' ] === $segment->id_file ) {
+                    $seg[ 'file' ] = $file;
                 }
-
-                // Time to edit array
-                $tte = $this->getTteArrayForSegment( $ttlArray, $segment->sid );
-
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ]                                = $file[ 'segments' ] [ $k1 ]->toArray();
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'time_to_edit' ]             = $tte[ 'total' ];
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'time_to_edit_translation' ] = $tte[ 'translation' ];
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'time_to_edit_revise' ]      = $tte[ 'revise' ];
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'time_to_edit_revise_2' ]    = $tte[ 'revise_2' ];
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'secs_per_word' ]            = $this->getSecsPerWord( $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] );
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ]          = ReviewUtils::sourcePageToRevisionNumber(
-                        $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ]
-                );
-                unset( $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ] );
             }
+
+            // add tte
+            $tte                               = $this->getTteArrayForSegment( $ttlArray, $segment->sid );
+            $seg[ 'time_to_edit' ]             = $tte[ 'total' ];
+            $seg[ 'time_to_edit_translation' ] = $tte[ 'translation' ];
+            $seg[ 'time_to_edit_revise' ]      = $tte[ 'revise' ];
+            $seg[ 'time_to_edit_revise_2' ]    = $tte[ 'revise_2' ];
+            $seg[ 'secs_per_word' ]            = $this->getSecsPerWord( $segment );
+            $seg[ 'revision_number' ]          = ReviewUtils::sourcePageToRevisionNumber( $segment->source_page );
+
+            ksort( $seg );
+
+            $outputArray[] = $seg;
         }
 
         return $outputArray;
@@ -219,13 +271,13 @@ class QualityReportController extends KleinController {
     }
 
     /**
-     * @param $outputArray
+     * @param $segment
      *
      * @return float|int
      */
-    private function getSecsPerWord( $outputArray ) {
-        $tte            = ( $outputArray[ 'time_to_edit' ] ) / 1000;
-        $raw_word_count = $outputArray[ 'raw_word_count' ];
+    private function getSecsPerWord( $segment ) {
+        $tte            = ( $segment->time_to_edit ) / 1000;
+        $raw_word_count = $segment->raw_word_count;
 
         return $tte / $raw_word_count;
     }
