@@ -1284,11 +1284,27 @@ class QA {
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
 
-        $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa',[]);
+        // This is a map (***SPECIFIC FOR EVERY PLUGIN IN USE***)
+        // of tags to exclude from consistency check
+        $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
 
         if(empty($tagsToBeExcludedFromChecks)){
             return true;
         }
+
+        return $this->elementIsToBeExcludedFromChecks($element, $tagsToBeExcludedFromChecks);
+    }
+
+    /**
+     * This function checks if a tag element is contained in $tagsToBeExcludedFromChecks map and
+     * if has any dataRef attribute
+     *
+     * @param DOMElement $element
+     * @param array $tagsToBeExcludedFromChecks
+     *
+     * @return bool
+     */
+    private function elementIsToBeExcludedFromChecks( DOMElement $element, $tagsToBeExcludedFromChecks) {
 
         $elementHasDataRef = false;
         $elementValue = null;
