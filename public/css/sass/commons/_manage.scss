@@ -33,6 +33,33 @@ body.manage {
   left: -99999px;
 }
 
+.ui.top.right.pointing.dropdown {
+  .menu {
+    .item.submenu {
+      width: 180px;
+    }
+    .item.submenu a {
+      padding-left: 6px;
+      color: $black;
+    }
+
+    .item.submenu .dropdown.icon {
+      top: 2px;
+    }
+  }
+}
+
+.ui.top.pointing.dropdown {
+  .menu.left {
+    .item.submenu .ui.dropdown {
+      margin-left: -3px;
+    }
+    .item.submenu .dropdown.icon {
+      left: -6px;
+    }
+  }
+}
+
 // Closing Shadow - Transitions for buttons
 
 .project-list {

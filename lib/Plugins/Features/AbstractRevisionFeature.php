@@ -26,6 +26,7 @@ use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use Revise_FeedbackDAO;
 use RevisionFactory;
 use SegmentTranslationChangeVector;
 use Utils;
@@ -408,6 +409,21 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     }
 
+    /**
+     * @param $job_id
+     * @param $old_password
+     * @param $new_password
+     * @param $revision_number
+     */
+    public function review_password_changed( $job_id, $old_password, $new_password, $revision_number ) {
+        $feedbackDao = new Revise_FeedbackDAO();
+        $feedbackDao->updateFeedbackPassword($job_id, $old_password, $new_password, $revision_number);
+    }
+
+    /**
+     * @param Jobs_JobStruct $job
+     * @param                $old_password
+     */
     public function job_password_changed( Jobs_JobStruct $job, $old_password ) {
         $dao = new ChunkReviewDao();
         $dao->updatePassword( $job->id, $old_password, $job->password );

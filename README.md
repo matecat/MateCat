@@ -12,6 +12,10 @@ See the complete installation guide here:
 
 Format all supported files using [prettier](https://prettier.io/).
 
+### `yarn lint`
+
+Lint JavaScript files using [eslint](https://eslint.org/).
+
 ### `yarn test`
 
 Run tests related to files changed since last commit in watch mode, thanks to [jest](https://jestjs.io/).

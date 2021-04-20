@@ -6,12 +6,13 @@ API.JOB = {
   /**
    * Change the password for the job
    * @param job
+   * @param password
+   * @param revision_number
    * @param undo
    * @param old_pass
    */
-  changeJobPassword: function (job, undo, old_pass) {
+  changeJobPassword: function (job, password, revision_number, undo, old_pass) {
     var id = job.id
-    var password = job.password
 
     return APP.doRequest({
       data: {
@@ -20,6 +21,7 @@ API.JOB = {
         id: id,
         password: password,
         old_password: old_pass,
+        revision_number,
         undo: undo,
       },
       success: function (d) {},

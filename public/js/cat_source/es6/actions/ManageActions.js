@@ -115,6 +115,7 @@ let ManageActions = {
     job,
     password,
     oldPassword,
+    revision_number,
     translator,
   ) {
     AppDispatcher.dispatch({
@@ -123,6 +124,7 @@ let ManageActions = {
       jobId: job.get('id'),
       password: password,
       oldPassword: oldPassword,
+      revision_number,
       oldTranslator: translator,
     })
   },

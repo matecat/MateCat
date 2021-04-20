@@ -1,14 +1,20 @@
 module.exports = (api) => {
-  const isTest = api.env('test')
+  switch (api.env()) {
+    case 'test':
+      return {
+        presets: [
+          '@babel/preset-react',
+          ['@babel/preset-env', {targets: {node: 'current'}}],
+        ],
+        plugins: ['@babel/plugin-proposal-class-properties'],
+      }
+    case 'development':
+      return {
+        presets: ['@babel/preset-react', ['@babel/preset-env']],
+        plugins: ['@babel/plugin-proposal-class-properties'],
+      }
 
-  if (isTest) {
-    return {
-      presets: [
-        '@babel/preset-react',
-        ['@babel/preset-env', {targets: {node: 'current'}}],
-      ],
-    }
+    default:
+      throw new Error('babel.config.js :: environment not supported, yet.')
   }
-
-  throw new Error('babel.config.js :: environment not supported, yet.')
 }
