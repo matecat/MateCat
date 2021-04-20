@@ -100,21 +100,21 @@ class FilterSegments extends React.Component {
     })
   }
 
-  filterIdSegmentChange(value) {
-    if (value && value !== '') {
-      this.filterSelectChanged('id_segment', value)
-    } else {
-      let filter = jQuery.extend({}, this.state.filter)
-      filter.id_segment = null
-      this.setState({
-        filter: filter,
-      })
-      setTimeout(() => {
-        this.props.applyFilter(this.state.filter)
-      })
+    filterIdSegmentChange(value) {
+        if (value && value !== "") {
+            this.filterSelectChanged('id_segment', value);
+        } else {
+            let filter = [...this.state.filter]
+            filter.id_segment = null;
+            this.setState({
+                filter: filter
+            });
+            setTimeout(()=> {
+                this.props.applyFilter(this.state.filter)
+            });
+        }
+        this.props.updateSegmentToFilter(value);
     }
-    this.props.updateSegmentToFilter(value)
-  }
 
   initDropDown() {
     let self = this
