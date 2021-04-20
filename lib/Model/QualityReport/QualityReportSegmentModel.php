@@ -86,19 +86,37 @@ class QualityReportSegmentModel {
         return $segments_id;
     }
 
-    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, Filter $Filter ) {
+    /**
+     * @param QualityReport_QualityReportSegmentStruct $seg
+     * @param Filter                                   $Filter
+     * @param bool                                     $isForUI
+     *
+     * @throws \Exception
+     */
+    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, Filter $Filter, $isForUI = false ) {
         $seg->warnings            = $seg->getLocalWarning();
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
         $seg->secs_per_word       = $seg->getSecsPerWord();
         $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
-        $seg->segment             = $Filter->fromLayer0ToLayer2( $seg->segment );
-        $seg->translation         = $Filter->fromLayer0ToLayer2( $seg->translation );
-        $seg->suggestion          = $Filter->fromLayer0ToLayer2( $seg->suggestion );
+
+        if($isForUI){
+            $seg->segment             = $Filter->fromLayer0ToLayer2( $seg->segment );
+            $seg->translation         = $Filter->fromLayer0ToLayer2( $seg->translation );
+            $seg->suggestion          = $Filter->fromLayer0ToLayer2( $seg->suggestion );
+        }
     }
 
+    /**
+     * @param $seg
+     * @param $issues
+     * @param $issue_comments
+     */
     protected function _assignIssues( $seg, $issues, $issue_comments ) {
         foreach ( $issues as $issue ) {
+
+            $issue->revision_number = ReviewUtils::sourcePageToRevisionNumber($issue->source_page);
+
             if ( isset( $issue_comments[ $issue->issue_id ] ) ) {
                 $issue->comments = $issue_comments[ $issue->issue_id ];
             }
@@ -109,6 +127,10 @@ class QualityReportSegmentModel {
         }
     }
 
+    /**
+     * @param $seg
+     * @param $comments
+     */
     protected function _assignComments( $seg, $comments ) {
         foreach ( $comments as $comment ) {
             $comment->templateMessage();
@@ -119,12 +141,16 @@ class QualityReportSegmentModel {
     }
 
     /**
+     * If the results are needed from UI return a layer2 presentation,
+     * otherwise return just plain text (layer 0)
+     *
      * @param array $segment_ids
+     * @param bool  $isForUI
      *
      * @return array
      * @throws \Exception
      */
-    public function getSegmentsForQR( array $segment_ids ) {
+    public function getSegmentsForQR( array $segment_ids, $isForUI = false ) {
         $segmentsDao = new Segments_SegmentDao;
         $data        = $segmentsDao->getSegmentsForQr( $segment_ids, $this->chunk->id, $this->chunk->password );
 
@@ -171,18 +197,16 @@ class QualityReportSegmentModel {
             $last_translations = $this->makeSegmentsVersionsUniform( $segment_ids );
         }
 
-        $Filter = Filter::getInstance( $featureSet );
-
-        $files = [];
+        $segments = [];
 
         foreach ( $data as $i => $seg ) {
 
-            if ( !isset( $files [ $seg->id_file ] ) ) {
-                $files [ $seg->id_file ][ "filename" ] = ZipArchiveExtended::getFileName( $seg->filename );
-                $files [ $seg->id_file ][ "segments" ] = [];
-            }
+            $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
+            $Filter = Filter::getInstance( $featureSet, $dataRefMap );
 
-            $this->_commonSegmentAssignments( $seg, $Filter );
+            $seg->dataRefMap = $dataRefMap;
+
+            $this->_commonSegmentAssignments( $seg, $Filter, $isForUI );
             $this->_assignIssues( $seg, $issues, $issue_comments );
             $this->_assignComments( $seg, $comments );
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
@@ -193,10 +217,15 @@ class QualityReportSegmentModel {
             // 'last_translation' and 'suggestion' from 'translation' and
             // set is_pre_translated to true
             if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ) {
-                $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+
+                if($isForUI){
+                    $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+                }
 
                 if ( '' === $seg->suggestion ) {
-                    $seg->suggestion        = $Filter->fromLayer0ToLayer2( $seg->translation );
+                    if($isForUI){
+                        $seg->suggestion        = $Filter->fromLayer0ToLayer2( $seg->translation );
+                    }
                     $seg->is_pre_translated = true;
                 }
             }
@@ -214,7 +243,9 @@ class QualityReportSegmentModel {
                 }
 
                 if ( '' === $seg->suggestion ) {
-                    $seg->suggestion        = $Filter->fromLayer0ToLayer2( $translation );
+                    if($isForUI){
+                        $seg->suggestion        = $Filter->fromLayer0ToLayer2( $translation );
+                    }
                     $seg->is_pre_translated = true;
                 }
 
@@ -239,10 +270,10 @@ class QualityReportSegmentModel {
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
 
-            $files[ $seg->id_file ][ 'segments' ][] = $seg;
+            $segments[$i] = $seg;
         }
 
-        return $files;
+        return $segments;
     }
 
     /**

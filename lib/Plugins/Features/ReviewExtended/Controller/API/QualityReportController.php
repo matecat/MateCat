@@ -92,7 +92,7 @@ class QualityReportController extends KleinController {
 
             $segmentTranslationEventDao = new SegmentTranslationEventDao();
             $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
-            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
+            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
             $filesInfo        = $filesInfoUtility->getInfo();

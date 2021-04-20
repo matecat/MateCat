@@ -2,6 +2,7 @@
 
 namespace Files;
 
+use API\V2\Exceptions\NotFoundException;
 use API\V3\Json\FilesInfo;
 use Files\MetadataDao as Files_MetadataDao;
 use Jobs_JobStruct;
