@@ -19,7 +19,7 @@ const tagSignatures = {
     selfClosing: true,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /&lt;ph.*?id="((?:(?!dataRef|equiv-text|subType|type|&gt).)+?)"\s(dataRef=")*((?:(?!equiv-text|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
+    placeholderRegex: /&lt;ph.*?id="(?:(?:(?!dataRef|equiv-text|subType|type|&gt).)+?)"\s(?:(?:(?!equiv-text|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
     decodeNeeded: true,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
