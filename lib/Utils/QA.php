@@ -1284,9 +1284,13 @@ class QA {
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
 
+        $tagsToBeExcludedFromChecks = [];
+
         // This is a map (***SPECIFIC FOR EVERY PLUGIN IN USE***)
         // of tags to exclude from consistency check
-        $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
+        if(null !== $this->featureSet){
+            $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
+        }
 
         if(empty($tagsToBeExcludedFromChecks)){
             return true;
