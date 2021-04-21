@@ -638,6 +638,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
                 //TODO check fo BUG in html encoding html_entity_decode
                 $qaRealign = new \QA( $queueElement->params->segment, html_entity_decode( $this->_matches[ 0 ][ 'raw_translation' ] ) );
+                $qaRealign->setFeatureSet( $this->featureSet );
                 $qaRealign->tryRealignTagID();
 
                 $log_prepend = uniqid( '', true ) . " - SERVER REALIGN IDS PROCEDURE | ";
