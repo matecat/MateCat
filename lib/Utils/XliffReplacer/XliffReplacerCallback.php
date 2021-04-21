@@ -18,6 +18,11 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * @var string
      */
+    private $sourceLang;
+
+    /**
+     * @var string
+     */
     private $targetLang;
 
     /**
@@ -25,13 +30,11 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      */
     private $featureSet;
 
-    private $sourceLang;
-
     /**
      * XliffReplacerCallback constructor.
      *
      * @param \FeatureSet $featureSet
-     * @param             $sourceLang
+     * @param string      $sourceLang
      * @param string      $targetLang
      *
      * @throws \Exception
@@ -62,13 +65,16 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         //
         // To skip these characters QA class needs replaced version of segment and target for _addThisElementToDomMap() function
         //
-        $dataRefReplacer     = new DataRefReplacer( $dataRefMap );
-        $replacedSegment     = $dataRefReplacer->replace( $segment );
-        $replacedTranslation = $dataRefReplacer->replace( $translation );
+        if(!empty($dataRefMap)){
+            $dataRefReplacer     = new DataRefReplacer( $dataRefMap );
+            $segment     = $dataRefReplacer->replace( $segment );
+            $translation = $dataRefReplacer->replace( $translation );
+        }
 
-        $check = new QA ( $replacedSegment, $replacedTranslation );
+        $check = new QA ( $segment, $translation );
         $check->setFeatureSet( $this->featureSet );
         $check->setTargetSegLang( $this->targetLang );
+        $check->setSourceSegLang( $this->sourceLang );
         $check->performTagCheckOnly();
 
         return $check->thereAreErrors();
