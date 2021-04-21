@@ -211,7 +211,18 @@ class Search extends React.Component {
         'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
       successText: 'Continue',
       successCallback: function () {
-        SearchUtils.execReplaceAll(self.state.search)
+        SearchUtils.execReplaceAll(self.state.search).then((d) => {
+          if (d.errors.length) {
+            APP.alert({msg: d.errors[0].message})
+            return false
+          }
+          const currentId = SegmentStore.getCurrentSegmentId()
+          UI.unmountSegments()
+          UI.render({
+            firstLoad: false,
+            segmentToOpen: currentId,
+          })
+        })
         APP.ModalWindow.onCloseModal()
         CatToolActions.storeSearchResults({
           total: 0,
