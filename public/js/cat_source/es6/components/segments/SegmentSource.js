@@ -116,9 +116,7 @@ class SegmentSource extends React.Component {
       )
 
       // If GuessTag enabled, clean string from tag
-      const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
-        this.props.segment,
-      )
+      const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
         ? DraftMatecatUtils.cleanSegmentString(translation)
         : translation
       // TODO: get taggedSource from store
