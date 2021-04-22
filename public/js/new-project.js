@@ -1,3 +1,5 @@
+'use strict'
+
 APP.openOptionsPanel = function (tab, elem) {
   elToClick = $(elem).attr('data-el-to-click') || null
   UI.openLanguageResourcesPanel(tab, elToClick)
