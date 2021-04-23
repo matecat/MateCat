@@ -29,93 +29,54 @@ class DataRefReplace extends AbstractHandler {
 
         // dataRefMap is present only in xliff 2.0 files
         if ( empty( $this->dataRefMap ) ) {
-            return $segment;
+            return $this->replaceXliffPcTagsToMatecatPhTags($segment);
         }
 
         $dataRefReplacer = new DataRefReplacer( $this->dataRefMap );
+        $segment = $dataRefReplacer->replace( $segment );
 
-        //
-        // ************************************************************
-        // NOTES 2021-04-02
-        // ************************************************************
-        //
-        // Added support for xliff 2.0 <pc> tags.
-        // At this point xliff 2.0 <pc> tags are incapsulated into a Matecat <ph> generic tag. Example:
-        //
-        // Link semplice: &lt;ph id="mtc_1" equiv-text="base64:Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow=="/&gt;La Repubblica&lt;ph id="mtc_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt;.
-        //
-        // We need to turn back to orignal <pc> tags in order to use $dataRefReplacer->replace() function.
-        // Pay attention, only <pc> tags with a correspondence on dataRef map should be converted
-        //
-        $parsed = \Matecat\XliffParser\Utils\HtmlParser::parse( $segment );
-        $closingPcMap = [];
-
-        foreach ( $parsed as $element ) {
-
-            // if $element is a matecat <ph>
-            if ( $element->tagname === 'ph' and isset( $element->attributes[ 'equiv-text' ] ) ) {
-                $value = $element->base64_decoded;
-
-                if ( !$this->isAnEncodedClosingPcTag( $element->base64_decoded ) ) {
-                    if ( $this->isAnEncodedOpeningPcTagWithCorrespondingDataRef( $value ) ) {
-                        $segment = str_replace( $element->node, $value, $segment );
-                        $closingPcMap[]  = true;
-                    } else {
-                        $closingPcMap[] = false;
-                    }
-                } else {
-                    if ( end( $closingPcMap ) === true ) {
-                        $segment = str_replace( $element->node, $value, $segment );
-                    }
-
-                    array_pop( $closingPcMap );
-                }
-            }
-        }
-
-        return $dataRefReplacer->replace( $segment );
+        return $this->replaceXliffPcTagsToMatecatPhTags($segment);
     }
 
     /**
-     * @param string $string
+     * This function replace encoded pc tags (from Xliff 2.0) without any dataRef correspondence
+     * to regular Matecat <ph> tag for UI presentation
      *
-     * @return bool
+     * Example:
+     *
+     * Text &lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:eA=="/&gt;&lt;pc id="1u" type="fmt" subType="m:u"&gt;link&lt;/pc&gt;&lt;ph id="source1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source1" equiv-text="base64:eA=="/&gt;.
+     *
+     * is transformed to:
+     *
+     * Text &lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:eA=="/&gt;&lt;ph id="mtc_u_1" equiv-text="base64:Jmx0O3BjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiJmd0Ow=="/&gt;link&lt;ph id="mtc_u_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt;&lt;ph id="source1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source1" equiv-text="base64:eA=="/&gt;.
+     *
+     * @param $segment
+     *
+     * @return string|string[]
      */
-    private function isAnEncodedClosingPcTag( $string ) {
-        return $string === '&lt;/pc&gt;';
-    }
+    private function replaceXliffPcTagsToMatecatPhTags($segment) {
 
-    /**
-     * This function check if $string is an encoded opening <pc> tag which has a corresponding value to replace on dataRef map
-     *
-     * @param string $string
-     *
-     * @return bool
-     */
-    private function isAnEncodedOpeningPcTagWithCorrespondingDataRef( $string ) {
+        preg_match_all('/&lt;(pc .*?)&gt;/iu', $segment, $openingPcTags);
+        preg_match_all('/&lt;(\/pc)&gt;/iu', $segment, $closingPcTags);
 
-        // [2] => dataRefStart
-        // [3] => dataRefEnd
-        // [4] => dataRef
-        preg_match_all( '/(dataRefStart=\"(.*?)\"|dataRefEnd=\"(.*?)\"|dataRef=\"(.*?)\")/iu', $string, $matches );
-
-        $dataRefId = null;
-
-        if ( isset( $matches[ 2 ][ 0 ] ) and "" !== $matches[ 2 ][ 0 ] ) {
-            $dataRefId = $matches[ 2 ][ 0 ];
-        } elseif ( isset( $matches[ 3 ][ 0 ] ) and "" !== $matches[ 3 ][ 0 ] ) {
-            $dataRefId = $matches[ 3 ][ 0 ];
-        } elseif ( isset( $matches[ 4 ][ 0 ] ) and "" !== $matches[ 4 ][ 0 ] ) {
-            $dataRefId = $matches[ 4 ][ 0 ];
+        if(count($openingPcTags[0]) === 0)  {
+            return $segment;
         }
 
-        // if there is no correspondence return false
-        if ( null === $dataRefId or !key_exists( $dataRefId, $this->dataRefMap ) ) {
-            return false;
+        $phIndex = 1;
+
+        foreach ($openingPcTags[0] as $openingPcTag){
+            $phMatecat = '&lt;ph id="mtc_u_'.$phIndex.'" equiv-text="base64:'.base64_encode($openingPcTag).'"/&gt;';
+            $segment = str_replace($openingPcTag, $phMatecat, $segment);
+            $phIndex++;
         }
 
-        // check if is an encoded pc tag
-        return strpos( $string, '&lt;pc' ) !== false;
-    }
+        foreach ($closingPcTags[0] as $closingPcTag){
+            $phMatecat = '&lt;ph id="mtc_u_'.$phIndex.'" equiv-text="base64:'.base64_encode($closingPcTag).'"/&gt;';
+            $segment = str_replace($closingPcTag, $phMatecat, $segment);
+            $phIndex++;
+        }
 
+        return $segment;
+    }
 }

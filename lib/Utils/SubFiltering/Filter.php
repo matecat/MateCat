@@ -178,7 +178,7 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
-        $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new PlaceHoldXliffTags($this->dataRefMap) );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new FromLayer2TorawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
@@ -230,7 +230,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new StandardPHToMateCatCustomPH() );
-        $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new PlaceHoldXliffTags());
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
@@ -264,7 +264,7 @@ class Filter {
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
-        $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new PlaceHoldXliffTags());
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
@@ -293,7 +293,7 @@ class Filter {
     public function fromRawXliffToLayer0( $segment ) {
 
         $channel = new Pipeline();
-        $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new PlaceHoldXliffTags());
         $channel->addLast( new PlaceBreakingSpacesInXliff() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
@@ -319,7 +319,7 @@ class Filter {
     public function fromLayer0ToRawXliff( $segment ) {
 
         $channel = new Pipeline();
-        $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new PlaceHoldXliffTags());
         $channel->addLast( new RemoveDangerousChars() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
