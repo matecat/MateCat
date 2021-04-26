@@ -6,7 +6,7 @@
   "dependencies": {
     "lodash": "^4.17.19",
     "node-ini": "^1.0.0",
-    "sse-channel": "^3.1.1",
+    "sse-channel": "^4.0.0",
     "stompit": "^0.21.0",
     "winston": "^1.0.0"
   },
