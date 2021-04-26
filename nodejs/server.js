@@ -69,10 +69,8 @@ const generateUid = function ( separator ) {
 };
 
 const corsAllow = ( req, res ) => {
-    let re = /[\-\[\]\/{}()*+?.\\^$|]/g;
     return corsAllowedOrigins.some( ( element ) => {
-        const regexp = new RegExp( element.replace( re, '\\$&' ), 'i' );
-        if ( req.headers['origin'] && req.headers['origin'].match( regexp ) ) {
+        if ( req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
             return true;
