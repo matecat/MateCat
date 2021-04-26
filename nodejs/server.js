@@ -69,7 +69,7 @@ const generateUid = function ( separator ) {
 };
 
 const corsAllow = ( req, res ) => {
-    let re = /[\-\[\]\/{}()+?.\\^$|]/g;
+    let re = /[\-\[\]\/{}()*+?.\\^$|]/g;
     return corsAllowedOrigins.some( ( element ) => {
         const regexp = new RegExp( element.replace( re, '\\$&' ), 'i' );
         if ( req.headers['origin'] && req.headers['origin'].match( regexp ) ) {
