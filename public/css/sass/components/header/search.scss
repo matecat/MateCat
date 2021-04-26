@@ -1,432 +1,434 @@
 .searchbox {
-    position: relative;
-    float: left;
-    width: 100%;
-    font-size: 12px;
-    background: #ffffff;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
-    .block.buttons {
-        margin-top: -6px !important;
+  position: relative;
+  float: left;
+  width: 100%;
+  font-size: 12px;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);
+  .block.buttons {
+    margin-top: -6px !important;
+  }
+  .search-inputs {
+    height: 74px;
+  }
+  #exec-filter {
+    float: right;
+  }
+  .block.right {
+    margin-right: 0 !important;
+  }
+  .btn {
+    float: right;
+    font-weight: bold;
+    margin: 4px 0px 3px 10px;
+    padding: 2px 10px;
+    height: 28px;
+    background: #eeeeef;
+    cursor: pointer;
+    font-size: 14px;
+    width: fit-content;
+    text-transform: uppercase;
+    &:disabled {
+      cursor: not-allowed;
+      background: #ffffff;
+      color: #d0d0d0;
+      color: #d0d0d0;
+      border: 1px solid #d0d0d0;
+      font-weight: 100;
     }
-    .search-inputs {
-        height: 74px;
-    }
-    #exec-filter {
-        float: right;
-    }
-    .block.right {
-        margin-right: 0 !important;
-    }
-    .btn {
-        float: right;
-        font-weight: bold;
-        margin: 4px 0px 3px 10px;
-        padding: 2px 10px;
-        height: 28px;
-        background: #eeeeef;
-        cursor: pointer;
-        font-size: 14px;
-        width: fit-content;
-        text-transform: uppercase;
-        &:disabled {
-            cursor: not-allowed;
-            background: #ffffff;
-            color: #d0d0d0;
-            color: #d0d0d0;
-            border: 1px solid #d0d0d0;
-            font-weight: 100;
-        }
-    }
+  }
 
-    input[type=button]:hover {
-        border-width: 1px;
-    }
+  input[type='button']:hover {
+    border-width: 1px;
+  }
+  .search-input {
+    width: 200px;
+    font-size: 12px !important;
+    height: 23px;
+    padding: 0 5px;
+    border: 1px solid #abadb3;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+  }
+
+  .search-input:hover,
+  .search-editarea:hover {
+    -moz-box-shadow: inset 0 1px 1px #e6e7e8;
+    -webkit-box-shadow: inset 0 1px 1px #e6e7e8;
+  }
+
+  .search-input:focus,
+  .search-editarea:focus {
+    -moz-box-shadow: inset 0 1px 2px #ccc;
+    -webkit-box-shadow: inset 0 1px 2px #ccc;
+    color: #000;
+  }
+
+  @media only screen and (max-width: 1200px) {
     .search-input {
-        width: 200px;
-        font-size: 12px !important;
-        height: 23px;
-        padding: 0 5px;
-        border: 1px solid #abadb3;
-        -webkit-transition: all 100ms ease-in;
-        -moz-transition: all 100ms ease-in;
+      width: 160px;
     }
-
-    .search-input:hover, .search-editarea:hover {
-        -moz-box-shadow: inset 0 1px 1px #e6e7e8;
-        -webkit-box-shadow: inset 0 1px 1px #e6e7e8;
+  }
+  @media only screen and (max-width: 1100px) {
+    .search-input {
+      width: 140px;
     }
-
-    .search-input:focus, .search-editarea:focus {
-        -moz-box-shadow: inset 0 1px 2px #ccc;
-        -webkit-box-shadow: inset 0 1px 2px #ccc;
-        color: #000
+  }
+  @media only screen and (max-width: 1050px) {
+    .search-input {
+      width: 132px;
     }
-
-    @media only screen and (max-width: 1200px) {
-        .search-input {
-            width: 160px;
-        }
-    }
-    @media only screen and (max-width: 1100px) {
-        .search-input {
-            width: 140px;
-        }
-    }
-    @media only screen and (max-width: 1050px) {
-        .search-input {
-            width: 132px;
-        }
-    }
-    label {
-        display: inline;
-        width: auto !important;
-        margin-right: 5px;
-        text-transform: uppercase;
-    }
-    input[type=button],
-    input[type=submit] {
-        text-transform: uppercase;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    .block {
-        float: left;
-        margin-right: 10px;
-        text-align: left;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    .block .field {
-        width: 100%;
-        text-align: right;
-        margin-bottom: 5px;
-    }
-    .block.right {
-        float: right !important;
-        margin-top: -5px !important;
-    }
-    .block.right .block {
-        margin-right: 0px;
-        margin-left: 20px;
-    }
-    .block.right .block .btn {
-        margin-right: 0px;
-        margin-left: 10px;
-    }
-    .block.vcentered {
-        padding-top: 7px !important;
-    }
-    .search-options label {
-        text-transform: capitalize;
-    }
+  }
+  label {
+    display: inline;
+    width: auto !important;
+    margin-right: 5px;
+    text-transform: uppercase;
+  }
+  input[type='button'],
+  input[type='submit'] {
+    text-transform: uppercase;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  .block {
+    float: left;
+    margin-right: 10px;
+    text-align: left;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  .block .field {
+    width: 100%;
+    text-align: right;
+    margin-bottom: 5px;
+  }
+  .block.right {
+    float: right !important;
+    margin-top: -5px !important;
+  }
+  .block.right .block {
+    margin-right: 0px;
+    margin-left: 20px;
+  }
+  .block.right .block .btn {
+    margin-right: 0px;
+    margin-left: 10px;
+  }
+  .block.vcentered {
+    padding-top: 7px !important;
+  }
+  .search-options label {
+    text-transform: capitalize;
+  }
 }
 
-input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
-    width: 95px;
+input#exec-cancel,
+input#exec-find,
+input#exec-find,
+button#exec-replace {
+  width: 95px;
 }
-
-
 
 /////////// New Find
 .ui.form {
-    box-sizing: border-box;
-    //TODO: Transform in SCSS Component for all INPUT TYPES
-    input {
-        border-radius: 2px !important;
-        border: 1px solid rgba(34, 36, 38, 0.15) !important;
-        box-shadow: inset 0 1px 3px #ddd !important;
-        font-size: 1.2em !important;
-        padding: 8px 16px 7px !important;
-        &::-webkit-input-placeholder {
-            color: #929292;
-        }
-        &:hover {
-            border-color: rgba(34, 36, 38, 0.35) !important;
-        }
-        &:focus {
-            border-color: #85B7D9 !important;
-            background: #FFFFFF !important;
-            color: rgba(0, 0, 0, 0.8) !important;
-            /*outline: none;*/
-        }
+  box-sizing: border-box;
+  //TODO: Transform in SCSS Component for all INPUT TYPES
+  input {
+    border-radius: 2px !important;
+    border: 1px solid rgba(34, 36, 38, 0.15) !important;
+    box-shadow: inset 0 1px 3px #ddd !important;
+    font-size: 1.2em !important;
+    padding: 8px 16px 7px !important;
+    &::-webkit-input-placeholder {
+      color: #929292;
     }
-    .find-wrapper {
-        .find-container {
-            background-color: #fff;
-            padding: 10px 0 0;
-            margin-bottom: 0;
-            box-shadow: 0 1px 3px #666;
-            border-radius: 0 0 0 0;
+    &:hover {
+      border-color: rgba(34, 36, 38, 0.35) !important;
+    }
+    &:focus {
+      border-color: #85b7d9 !important;
+      background: #ffffff !important;
+      color: rgba(0, 0, 0, 0.8) !important;
+      /*outline: none;*/
+    }
+  }
+  .find-wrapper {
+    .find-container {
+      background-color: #fff;
+      padding: 10px 0 0;
+      margin-bottom: 0;
+      box-shadow: 0 1px 3px #666;
+      border-radius: 0 0 0 0;
+      display: block;
+      color: #4d4d4d;
+      .find-container-inside {
+        height: 100%;
+        padding: 0 6.5% 0 5%;
+        text-align: left;
+        display: flex;
+        .find-list {
+          display: flex;
+          width: 100%;
+          padding-bottom: 10px;
+        }
+        .find-element {
+          display: inline-block;
+          width: 29%;
+          margin-right: 10px;
+          &.find-dropdown-status {
+            width: fit-content;
+            margin-right: 0;
+            //TODO: Transform in SCSS Component for all DROPDOWN BUTTON
+            .find-dropdown {
+              display: flex;
+              align-items: center;
+              .ui.basic.button {
+                font-family: 'calibri', Arial, Helvetica, sans-serif;
+                font-size: 16px !important;
+                padding: 11px 20px;
+                border-radius: 2px;
+                /*transition: 0.3s ease;*/
+                box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset;
+
+                &:hover,
+                &.active {
+                  box-shadow: 0 0 0 1px #0055b8 inset;
+                  color: #0055b8 !important;
+                  background: #fff !important;
+                }
+
+                .text {
+                  /*transition: 0.3s ease;*/
+                  display: flex;
+                }
+                .ui.cancel.label {
+                  position: absolute;
+                  padding: 4px;
+                  background-color: #d6d6d6;
+                  border-radius: 15px;
+                  top: 8px;
+                  line-height: 0px;
+                  right: 0px;
+                  visibility: hidden;
+                  &:hover {
+                    background-color: #cccccc !important;
+                  }
+                }
+              }
+              .ui.input input {
+                box-shadow: inset 0 1px 3px #ddd;
+              }
+              &.not-filtered {
+                .ui.basic.button {
+                  &.disabled {
+                    box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                  }
+                }
+              }
+              &.filtered {
+                .ui.basic.button {
+                  background-color: #ffffff !important;
+                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                  color: #000000 !important;
+                  padding: 9px 20px;
+                  &:hover {
+                    width: fit-content;
+                    .text {
+                      margin-right: 15px;
+                    }
+                    .ui.cancel.label {
+                      visibility: unset;
+                      right: 5px;
+                    }
+                  }
+                }
+              }
+              &.disabled {
+                background: unset;
+                opacity: 0.5 !important;
+                border: none;
+                pointer-events: none;
+                box-shadow: inherit !important;
+                .active .menu.transition {
+                  visibility: hidden !important;
+                  &:after {
+                    display: none;
+                  }
+                }
+              }
+              .circular.label {
+                &.new-color {
+                  box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                  background: #ffffff;
+                }
+                &.draft-color {
+                  background: #e8e8e8;
+                }
+                &.translated-color {
+                  background: $translatedBlue;
+                }
+                &.approved-color {
+                  background: $approvedGreen;
+                }
+                &.approved-2ndpass-color {
+                  background: $approved2Green;
+                }
+                &.rejected-color {
+                  background: #dc2e34;
+                }
+              }
+            }
+          }
+          &.find-clear-all {
+            width: fit-content;
+            margin-right: 0;
+          }
+          .find-in-source {
+            margin-bottom: 5px;
+          }
+          .find-exact-match {
+            display: flex;
+            .exact-match {
+              &:first-child {
+                margin-right: 13px;
+              }
+            }
+          }
+          .find-in-target {
+            input {
+              margin-bottom: 5px;
+            }
+            .enable-replace-check.disable {
+              opacity: 0.5;
+            }
+          }
+          .find-in-replace {
+            input {
+              margin-bottom: 5px;
+            }
+            button {
+              padding: 5px 10px;
+            }
+          }
+
+          .find-clear {
+            margin-left: 13px;
+            border-left: 1px solid #d6d6d7;
+            padding-left: 15px;
+            position: relative;
+            top: 9px;
+            button {
+              color: grey;
+              text-decoration: underline;
+              border: none;
+              background: none;
+              outline: none;
+              &:hover {
+                text-decoration: none;
+              }
+            }
+          }
+        }
+        .find-element-container {
+          display: inline-block;
+          width: 29%;
+          margin-left: 15px;
+          margin-right: 10px;
+          .find-element {
+            width: unset;
             display: block;
-            color: #4d4d4d;
-            .find-container-inside {
-                height: 100%;
-                padding: 0 6.5% 0 5%;
-                text-align: left;
-                display: flex;
-                .find-list {
-                    display: flex;
-                    width: 100%;
-                    padding-bottom: 10px;
-                }
-                .find-element {
-                    display: inline-block;
-                    width: 29%;
-                    margin-right: 10px;
-                    &.find-dropdown-status{
-                        width: fit-content;
-                        margin-right: 0;
-                        //TODO: Transform in SCSS Component for all DROPDOWN BUTTON
-                        .find-dropdown {
-                            display: flex;
-                            align-items: center;
-                            .ui.basic.button {
-                                font-family: "calibri", Arial, Helvetica, sans-serif;
-                                font-size: 16px !important;
-                                padding: 11px 20px;
-                                border-radius: 2px;
-                                /*transition: 0.3s ease;*/
-                                box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset;
-
-                                &:hover,
-                                &.active {
-                                    box-shadow: 0 0 0 1px #0055b8 inset;
-                                    color:#0055b8 !important;
-                                    background: #fff !important;
-                                }
-
-                                .text {
-                                    /*transition: 0.3s ease;*/
-                                    display: flex
-                                }
-                                .ui.cancel.label {
-                                    position: absolute;
-                                    padding: 4px;
-                                    background-color: #d6d6d6;
-                                    border-radius: 15px;
-                                    top: 8px;
-                                    line-height: 0px;
-                                    right: 0px;
-                                    visibility: hidden;
-                                    &:hover {
-                                        background-color: #cccccc !important;
-                                    }
-                                }
-                            }
-                            .ui.input input {
-                                box-shadow: inset 0 1px 3px #ddd;
-                            }
-                            &.not-filtered {
-                                .ui.basic.button {
-
-                                    &.disabled {
-                                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                                    }
-                                }
-                            }
-                            &.filtered {
-                                .ui.basic.button {
-                                    background-color: #ffffff !important;
-                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                    color: #000000 !important;
-                                    padding: 9px 20px;
-                                    &:hover {
-                                        width: fit-content;
-                                        .text {
-                                            margin-right: 15px;
-                                        }
-                                        .ui.cancel.label {
-                                            visibility: unset;
-                                            right: 5px;
-                                        }
-                                    }
-                                }
-                            }
-                            &.disabled {
-                                background: unset;
-                                opacity: 0.5 !important;
-                                border: none;
-                                pointer-events: none;
-                                box-shadow: inherit !important;
-                                .active .menu.transition {
-                                    visibility: hidden !important;
-                                    &:after {
-                                        display: none;
-                                    }
-                                }
-                            }
-                            .circular.label {
-                                &.new-color {
-                                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-                                    background: #FFFFFF
-                                }
-                                &.draft-color {
-                                    background: #E8E8E8;;
-                                }
-                                &.translated-color {
-                                    background: $translatedBlue;
-                                }
-                                &.approved-color {
-                                    background: $approvedGreen;
-                                }
-                                &.approved-2ndpass-color {
-                                    background: $approved2Green;
-                                }
-                                &.rejected-color {
-                                    background: #dc2e34;
-                                }
-                            }
-                        }
-                    }
-                    &.find-clear-all {
-                        width: fit-content;
-                        margin-right: 0;
-                    }
-                    .find-in-source {
-                        margin-bottom: 5px;
-                    }
-                    .find-exact-match {
-                        display: flex;
-                        .exact-match {
-                            &:first-child {
-                                margin-right: 13px;
-                            }
-                        }
-                    }
-                    .find-in-target {
-                        input {
-                            margin-bottom: 5px;
-                        }
-                        .enable-replace-check.disable {
-                            opacity: .5;
-                        }
-                    }
-                    .find-in-replace {
-                        input {
-                            margin-bottom: 5px;
-                        }
-                        button {
-                            padding: 5px 10px;
-                        }
-                    }
-
-                    .find-clear {
-                        margin-left: 13px;
-                        border-left: 1px solid #d6d6d7;
-                        padding-left: 15px;
-                        position: relative;
-                        top: 9px;
-                        button {
-                            color: grey;
-                            text-decoration: underline;
-                            border: none;
-                            background: none;
-                            outline: none;
-                            &:hover {
-                                text-decoration: none;
-                            }
-                        }
-                    }
-                }
-                .find-element-container {
-                    display: inline-block;
-                    width: 29%;
-                    margin-left: 15px;
-                    margin-right: 10px;
-                    .find-element {
-                        width: unset;
-                        display: block;
-                    }
-                }
-                .find-actions {
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: flex-start;
-                    margin-top: 4px;
-
-                    button {
-                        border-radius: 2px;
-                        &:hover,
-                        &.active {
-                            box-shadow: 0 0 0 1px #0055b8 inset;
-                            color:#0055b8 !important;
-                            background: #fff !important;
-                        }
-
-                        &:last-child {
-                            width: max-content;
-                        }
-                        &.disabled {
-                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
-
-                        }
-                    }
-                }
-            }
-            .search-display {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                height: 100%;
-                font-size: 1.2em;
-                padding: 15px 6.5% 15px 5%;
-                text-align: left;
-                background: #f2f4f7;
-                .found {
-                    margin: 0;
-                    margin-right: 20px;
-                    span {
-                        .param {
-                            font-weight: 700;
-                            color: black;
-                            background: yellow;
-                            margin: 0 3px;
-                            padding: 3px 3px;
-                            border-radius: 2px;
-                        }
-                    }
-                }
-                .search-result-buttons {
-                    display: flex;
-                    p {
-                        padding: 8px 5px;
-                        margin-bottom: 0;
-                    }
-                    .ui.basic.button {
-                        width: 36px;
-                        height: 36px;
-                        padding: 0;
-                        margin: 0;
-                        line-height: 36px;
-                        margin-left: 10px;
-                        position: relative;
-                        span {
-                            position: absolute;
-                            font-size: 12px;
-                            color: #878788;
-                            -webkit-transition: all 100ms ease-in;
-                            -moz-transition: all 100ms ease-in;
-                            visibility: hidden;
-                            width: 160px;
-                            left: -50px;
-                            top: 26px;
-                        }
-                        &.disabled {
-                            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
-                            span {
-                                display: none;
-                            }
-                        }
-                        &:hover {
-                            span {
-                                visibility: visible;
-                            }
-                        }
-                    }
-                }
-            }
+          }
         }
+        .find-actions {
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+          margin-top: 4px;
+
+          button {
+            border-radius: 2px;
+            &:hover,
+            &.active {
+              box-shadow: 0 0 0 1px #0055b8 inset;
+              color: #0055b8 !important;
+              background: #fff !important;
+            }
+
+            &:last-child {
+              width: max-content;
+            }
+            &.disabled {
+              box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
+            }
+          }
+        }
+      }
+      .search-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 100%;
+        font-size: 1.2em;
+        padding: 15px 6.5% 15px 5%;
+        text-align: left;
+        background: #f2f4f7;
+        .found {
+          margin: 0;
+          margin-right: 20px;
+          span {
+            .param {
+              font-weight: 700;
+              color: black;
+              background: yellow;
+              margin: 0 3px;
+              padding: 3px 3px;
+              border-radius: 2px;
+            }
+          }
+        }
+        .search-result-buttons {
+          display: flex;
+          p {
+            padding: 8px 5px;
+            margin-bottom: 0;
+          }
+          .ui.basic.button {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            margin: 0;
+            line-height: 36px;
+            margin-left: 10px;
+            position: relative;
+            span {
+              position: absolute;
+              font-size: 12px;
+              color: #878788;
+              -webkit-transition: all 100ms ease-in;
+              -moz-transition: all 100ms ease-in;
+              visibility: hidden;
+              width: 160px;
+              left: -50px;
+              top: 26px;
+            }
+            &.disabled {
+              box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
+              span {
+                display: none;
+              }
+            }
+            &:hover {
+              span {
+                visibility: visible;
+              }
+            }
+          }
+        }
+      }
     }
+  }
 }

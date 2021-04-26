@@ -1,6 +1,6 @@
-import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
-import encodeContent from "./encodeContent";
-import {EditorState} from "draft-js";
+import getFragmentFromSelection from './DraftSource/src/component/handlers/edit/getFragmentFromSelection'
+import encodeContent from './encodeContent'
+import {EditorState} from 'draft-js'
 
 /**
  *
@@ -11,25 +11,25 @@ import {EditorState} from "draft-js";
  *
  */
 const buildFragmentFromText = (plainText) => {
-    // encode plain text
-    const emptyEditorState = EditorState.createEmpty();
-    const plainEditorStateEncoded = encodeContent(emptyEditorState, plainText);
-    let {editorState: clipboardEditorState} =  plainEditorStateEncoded;
-    const contentState = clipboardEditorState.getCurrentContent();
-    // select all content
-    const selectAll = clipboardEditorState.getSelection().merge({
-        anchorKey: contentState.getFirstBlock().getKey(),
-        anchorOffset: 0,
-        focusOffset: contentState.getLastBlock().getText().length,
-        focusKey: contentState.getLastBlock().getKey(),
-    })
-    // force selection on all content
-    clipboardEditorState = EditorState.forceSelection(
-        clipboardEditorState,
-        selectAll
-    )
-    // get fragment
-    return getFragmentFromSelection(clipboardEditorState)
-};
+  // encode plain text
+  const emptyEditorState = EditorState.createEmpty()
+  const plainEditorStateEncoded = encodeContent(emptyEditorState, plainText)
+  let {editorState: clipboardEditorState} = plainEditorStateEncoded
+  const contentState = clipboardEditorState.getCurrentContent()
+  // select all content
+  const selectAll = clipboardEditorState.getSelection().merge({
+    anchorKey: contentState.getFirstBlock().getKey(),
+    anchorOffset: 0,
+    focusOffset: contentState.getLastBlock().getText().length,
+    focusKey: contentState.getLastBlock().getKey(),
+  })
+  // force selection on all content
+  clipboardEditorState = EditorState.forceSelection(
+    clipboardEditorState,
+    selectAll,
+  )
+  // get fragment
+  return getFragmentFromSelection(clipboardEditorState)
+}
 
-export default buildFragmentFromText;
+export default buildFragmentFromText

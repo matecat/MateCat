@@ -8,7 +8,6 @@
  *
  */
 
-
 /*******************************
             Popup
 *******************************/
@@ -18,11 +17,10 @@
   padding: 0;
   border: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
-
 
 /*******************************
             Calendar
@@ -31,7 +29,6 @@
 .ui.calendar .calendar:focus {
   outline: 0;
 }
-
 
 /*******************************
             Grid
@@ -44,7 +41,6 @@
 .ui.calendar .ui.popup .ui.grid > .column {
   width: auto;
 }
-
 
 /*******************************
             Table
@@ -128,13 +124,12 @@
 }
 .ui.calendar .calendar:focus .ui.table tbody tr td.focus,
 .ui.calendar .calendar.active .ui.table tbody tr td.focus {
-  box-shadow: inset 0 0 0 1px #85B7D9;
+  box-shadow: inset 0 0 0 1px #85b7d9;
 }
 .ui.calendar .calendar:focus .ui.table.inverted tbody tr td.focus,
 .ui.calendar .calendar.active .ui.table.inverted tbody tr td.focus {
-  box-shadow: inset 0 0 0 1px #85B7D9;
+  box-shadow: inset 0 0 0 1px #85b7d9;
 }
-
 
 /*******************************
          Theme Overrides

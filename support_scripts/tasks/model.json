@@ -1,138 +1,184 @@
 {
-	"model": {
-        "version" : 1,
+  "model": {
+    "version": 1,
 
-		"label": "Ebay 1",
-		"categories": [{
-			"label": "Accuracy",
-			"subcategories": [{
-				"label": "Mistranslation",
-				"severities": [{
-					"label": "Neutral",
-					"penalty": 0
-				}, {
-					"label": "Minor",
-					"penalty": 1
-				}, {
-					"label": "Major",
-					"penalty": 3
-				}, {
-					"label": "Critical",
-					"penalty": 4
-				}]
-			}, {
-				"label": "Addition",
-				"severities": [{
-					"label": "Neutral",
-					"penalty": 0
-				}, {
-					"label": "Minor",
-					"penalty": 1
-				}, {
-					"label": "Major",
-					"penalty": 3
-				}, {
-					"label": "Critical",
-					"penalty": 4
-				}]
-			}, {
-				"label": "Omission",
-				"severities": [{
-					"label": "Neutral",
-					"penalty": 0
-				}, {
-					"label": "Minor",
-					"penalty": 1
-				}, {
-					"label": "Major",
-					"penalty": 3
-				}, {
-					"label": "Critical",
-					"penalty": 4
-				}]
+    "label": "Ebay 1",
+    "categories": [
+      {
+        "label": "Accuracy",
+        "subcategories": [
+          {
+            "label": "Mistranslation",
+            "severities": [
+              {
+                "label": "Neutral",
+                "penalty": 0
+              },
+              {
+                "label": "Minor",
+                "penalty": 1
+              },
+              {
+                "label": "Major",
+                "penalty": 3
+              },
+              {
+                "label": "Critical",
+                "penalty": 4
+              }
+            ]
+          },
+          {
+            "label": "Addition",
+            "severities": [
+              {
+                "label": "Neutral",
+                "penalty": 0
+              },
+              {
+                "label": "Minor",
+                "penalty": 1
+              },
+              {
+                "label": "Major",
+                "penalty": 3
+              },
+              {
+                "label": "Critical",
+                "penalty": 4
+              }
+            ]
+          },
+          {
+            "label": "Omission",
+            "severities": [
+              {
+                "label": "Neutral",
+                "penalty": 0
+              },
+              {
+                "label": "Minor",
+                "penalty": 1
+              },
+              {
+                "label": "Major",
+                "penalty": 3
+              },
+              {
+                "label": "Critical",
+                "penalty": 4
+              }
+            ]
+          },
+          {
+            "label": "Untranslated",
+            "severities": [
+              {
+                "label": "Neutral",
+                "penalty": 0
+              },
+              {
+                "label": "Minor",
+                "penalty": 1
+              },
+              {
+                "label": "Major",
+                "penalty": 3
+              },
+              {
+                "label": "Critical",
+                "penalty": 4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Terminology",
+        "severities": [
+          {
+            "label": "Neutral",
+            "penalty": 0
+          },
+          {
+            "label": "Minor",
+            "penalty": 1
+          },
+          {
+            "label": "Major",
+            "penalty": 3
+          },
+          {
+            "label": "Critical",
+            "penalty": 4
+          }
+        ]
+      },
+      {
+        "label": "Fluency",
+        "subcategories": [
+          {
+            "label": "Spelling"
+          },
+          {
+            "label": "Grammar"
+          },
+          {
+            "label": "Punctuation"
+          }
+        ]
+      },
+      {
+        "label": "Style",
+        "subcategories": [
+          {
+            "label": "Company Style",
+            "severities": [
+              {
+                "label": "Neutral",
+                "penalty": 0
+              },
+              {
+                "label": "Minor",
+                "penalty": 1
+              },
+              {
+                "label": "Major",
+                "penalty": 3
+              },
+              {
+                "label": "Critical",
+                "penalty": 10
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "severities": [
+      {
+        "label": "Neutral",
+        "penalty": 0
+      },
+      {
+        "label": "Minor",
+        "penalty": 1
+      },
+      {
+        "label": "Major",
+        "penalty": 3
+      },
+      {
+        "label": "Critical",
+        "penalty": 8
+      }
+    ],
 
-			}, {
-				"label": "Untranslated",
-				"severities": [{
-					"label": "Neutral",
-					"penalty": 0
-				}, {
-					"label": "Minor",
-					"penalty": 1
-				}, {
-					"label": "Major",
-					"penalty": 3
-				}, {
-					"label": "Critical",
-					"penalty": 4
-				}]
-			}]
-		}, {
-			"label": "Terminology",
-			"severities": [{
-				"label": "Neutral",
-				"penalty": 0
-			}, {
-				"label": "Minor",
-				"penalty": 1
-			}, {
-				"label": "Major",
-				"penalty": 3
-			}, {
-				"label": "Critical",
-				"penalty": 4
-			}]
-		}, {
-			"label": "Fluency",
-			"subcategories": [{
-				"label": "Spelling"
-			}, {
-				"label": "Grammar"
-			}, {
-				"label": "Punctuation"
-			}]
-		}, {
-			"label": "Style",
-			"subcategories": [{
-				"label": "Company Style",
-				"severities": [{
-					"label": "Neutral",
-					"penalty": 0
-				}, {
-					"label": "Minor",
-					"penalty": 1
-				}, {
-					"label": "Major",
-					"penalty": 3
-				}, {
-					"label": "Critical",
-					"penalty": 10
-				}]
-			}]
-		}],
-		"severities": [
-			{
-				"label": "Neutral",
-				"penalty": 0
-			}, {
-				"label": "Minor",
-				"penalty": 1
-			}, {
-				"label": "Major",
-				"penalty": 3
-			}, {
-				"label": "Critical",
-				"penalty": 8
-			}
-        ],
-
-        "passfail" : {
-            "type" : "points_per_thousand",
-            "options" : {
-                "limit" : 20
-            }
-        }
-
-	}
-
+    "passfail": {
+      "type": "points_per_thousand",
+      "options": {
+        "limit": 20
+      }
+    }
+  }
 }

@@ -26,9 +26,8 @@
  ******
  */
 .mbc-reply-input {
-    background: #ffffff;
+  background: #ffffff;
 }
-
 
 /*
  ******
@@ -72,8 +71,8 @@
  ******
  */
 .mbc-thread-wrap-resolved {
-  background: rgba(124,197,118,.15);
-  border-bottom: 2px solid rgba(124,197,118,.6); /* $approvedGreen */
+  background: rgba(124, 197, 118, 0.15);
+  border-bottom: 2px solid rgba(124, 197, 118, 0.6); /* $approvedGreen */
 }
 
 /*
@@ -126,7 +125,6 @@
   word-wrap: break-word;
 }
 
-
 /*
  ******
  New incoming message notification
@@ -134,7 +132,7 @@
  */
 
 .mbc-new-message-notification {
-  background-color: #FFF9CC;
+  background-color: #fff9cc;
   color: #6d6e71;
   font-size: 14px;
   left: 0;
@@ -162,7 +160,6 @@ a.mbc-new-message-link:hover {
   padding: 0 6px 0 0;
 }
 
-
 /*
  ******
  ******
@@ -187,34 +184,34 @@ a.mbc-new-message-link:hover {
   border: 1px solid #dedede;
   box-shadow: inset 0 1px 2px #ccc;
   -webkit-box-shadow: inset 0 1px 2px #ccc;
-    min-height: 40px;
-    overflow-y: auto;
-    max-height: 160px;
-    border-radius: 20px;
+  min-height: 40px;
+  overflow-y: auto;
+  max-height: 160px;
+  border-radius: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
-.mbc-comment-textarea:hover{
+.mbc-comment-textarea:hover {
   border-color: rgba(34, 36, 38, 0.35);
   box-shadow: none;
 }
 .mbc-comment-textarea:focus {
-  border: 1px solid #96C8DA;
-  box-shadow: inset 0px 0px 2px 2px #96C8DA;
+  border: 1px solid #96c8da;
+  box-shadow: inset 0px 0px 2px 2px #96c8da;
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:empty:not(:focus):before {
-    content: attr(data-placeholder);
-    color: #999;
-    position: absolute;
-    top: 10px;
+  content: attr(data-placeholder);
+  color: #999;
+  position: absolute;
+  top: 10px;
 }
 
 .tagging-item {
-    color: $translatedBlue;
+  color: $translatedBlue;
 }
 
 .mbc-comment-textinput {
@@ -354,9 +351,15 @@ a:active.mbc-comment-default-btn {
  */
 a.mbc-comment-send-btn:link,
 a.mbc-comment-send-btn:visited {
-  background: -webkit-gradient(linear, left top, left bottom, from($translatedBlue), to(#119ec4));
-  background: -moz-linear-gradient(top,  $translatedBlue,  #119ec4);
-  background: linear-gradient(top,  $translatedBlue,  #119ec4);
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from($translatedBlue),
+    to(#119ec4)
+  );
+  background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+  background: linear-gradient(top, $translatedBlue, #119ec4);
   border: 1px solid #848689;
   color: #fff;
 }
@@ -388,7 +391,8 @@ a.mbc-comment-resolve-btn:visited {
 
 a.mbc-comment-resolve-btn:hover,
 a.mbc-comment-resolve-btn:active {
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 /*
@@ -439,13 +443,12 @@ a.mbc-view-link:visited {
  */
 .mbc-nth-comment-label {
   display: block;
-  border-bottom: 1px solid #CCCCCC;
+  border-bottom: 1px solid #cccccc;
   font-size: 16px;
-  color: #9A9A9A;
+  color: #9a9a9a;
   line-height: 1.8;
   margin-bottom: 6px;
 }
-
 
 /*
  ******
@@ -460,7 +463,7 @@ a.mbc-close-icon:link,
 a.mbc-close-icon:visited {
   background: #fff;
   border-radius: 20px;
-  color: #AEAEAE;
+  color: #aeaeae;
   display: block;
   font-size: 15px;
   height: 14px;
@@ -479,16 +482,14 @@ a.mbc-close-icon:hover {
   text-align: center;
 }
 
-
 .mbc-close-icon:before {
-  content: "\ea0d";
+  content: '\ea0d';
   display: block;
   margin-left: -1px;
   margin-top: 0px;
   text-align: center;
   vertical-align: middle;
 }
-
 
 /*
  ******
@@ -512,7 +513,6 @@ a.mbc-close-icon:hover {
   display: block !important;
   top: 0px;
 }
-
 
 /*
  ******
@@ -578,7 +578,7 @@ a.mbc-close-icon:hover {
  Highlight element in header unique properties
  */
 .mbc-comment-highlight-history {
-  color:#6d6e71;
+  color: #6d6e71;
   position: absolute;
   right: 7px;
   top: 10px;
@@ -596,7 +596,6 @@ a.mbc-close-icon:hover {
   float: right;
 }
 
-
 /*
  ******
  ******
@@ -605,14 +604,12 @@ a.mbc-close-icon:hover {
  ******
  */
 
-
-
 /*
  ******
  Commenting opened. Article width reduced and room made for comment ballon
  ******
  */
-article section{
+article section {
   //-webkit-backface-visibility: hidden;
   //-webkit-transition: width .2s ease;
   //transition: width .2s ease;
@@ -645,10 +642,9 @@ article .mbc-comment-balloon-outer {
 }
 /* Warnings style.css line 136 */
 .mbc-warnings {
-  color:#D65959;
-  font-size:14px;
+  color: #d65959;
+  font-size: 14px;
 }
-
 
 /*
  ******
@@ -668,18 +664,18 @@ article .mbc-comment-balloon-outer {
   text-align: center;
   width: 45px;
   &.open svg {
-      opacity: 1;
+    opacity: 1;
   }
   &.mbc-history-balloon-icon-has-no-comments {
-      opacity: 0.4;
-      cursor: default;
-      pointer-events: none;
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
   }
 }
 
 #mbc-history:hover {
   /* #filterSwitch:hover line 86 style.css */
-  color:#ccc;
+  color: #ccc;
 }
 
 /*
@@ -691,8 +687,8 @@ article .mbc-comment-balloon-outer {
  */
 
 .mbc-history-balloon-outer {
-  background-color: rgba(247,247,247,1); /* #f7f77f */
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  background-color: rgba(247, 247, 247, 1); /* #f7f77f */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   margin-top: 20px;
   padding-top: 10px;
   position: absolute;
@@ -714,7 +710,7 @@ article .mbc-comment-balloon-outer {
 }
 
 .mbc-history-balloon {
-  background-color: rgba(247,247,247,1); /* #ffffff */
+  background-color: rgba(247, 247, 247, 1); /* #ffffff */
   padding: 0;
   position: relative;
 }
@@ -735,7 +731,6 @@ article .mbc-comment-balloon-outer {
   max-height: 500px;
   overflow-y: auto;
 }
-
 
 /*
  ******
@@ -774,11 +769,11 @@ article .mbc-comment-balloon-outer {
 
 .divider {
   background-color: #dadada;
-  display:block; /* for use on default inline elements like span */
+  display: block; /* for use on default inline elements like span */
   height: 1px;
   margin: 0;
   overflow: hidden;
-  width:100%;
+  width: 100%;
 }
 
 /*
@@ -795,14 +790,13 @@ article .mbc-comment-balloon-outer {
  Triangle top top in history balloon
  */
 .mbc-triangle-top {
-  border-right: 14px solid rgba(247,247,247,1); /* #f7f77f */
+  border-right: 14px solid rgba(247, 247, 247, 1); /* #f7f77f */
   border-top: 14px solid transparent;
-  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
   float: right;
   margin-right: 20px;
   margin-top: -24px;
-
 }
 
 /*
@@ -829,7 +823,6 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.2));
   margin-left: -14px;
   position: absolute;
-
 }
 
 .mbc-open-view.mbc-re-messages {
@@ -840,7 +833,6 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   border-left: 14px solid transparent;
   filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
 }
-
 
 /*
 **********
@@ -881,7 +873,6 @@ Close icon ballon - Right panel
   right: -15px;
 }
 
-
 /*
  ******
  Clearfix helpers
@@ -893,7 +884,7 @@ Close icon ballon - Right panel
 .mbc-clearfix:before,
 .mbc-clearfix:after {
   display: table;
-  content: "";
+  content: '';
   line-height: 0;
 }
 
@@ -907,11 +898,11 @@ Close icon ballon - Right panel
  ******
  */
 .mbc-hide {
-  display: none!important;
+  display: none !important;
 }
 
 .mbc-visible {
-  display: block!important;
+  display: block !important;
 }
 /*
  ******
@@ -919,20 +910,17 @@ Close icon ballon - Right panel
  ******
  */
 
-
 .mbc-comment-icon-button {
-    visibility: hidden;
-    display:block;
+  visibility: hidden;
+  display: block;
 }
 .mbc-comment-icon-button.has-object {
-    visibility: visible;
-    display:block;
+  visibility: visible;
+  display: block;
 }
 
 section:hover .mbc-comment-icon-button,
 .segment-side-buttons:hover .mbc-comment-icon-button,
-.mbc-comment-icon-button:hover
- {
-    visibility: visible;
+.mbc-comment-icon-button:hover {
+  visibility: visible;
 }
-

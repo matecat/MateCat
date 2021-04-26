@@ -2198,11 +2198,20 @@ class ProjectManager {
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
-            // persist original data map if present
             /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
             $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+
             if ( isset( $segmentOriginalDataStruct->map ) ) {
+
+                // persist original data map if present
                 Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
+
+                // correct Uber tag errors here
+                $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment = $this->features->filter(
+                        'correctTagErrors',
+                        $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                        $segmentOriginalDataStruct->map
+                );
             }
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
@@ -2462,16 +2471,18 @@ class ProjectManager {
 
                 /* WARNING do not change the order of the keys */
                 $sql_values = [
-                        'id_segment'          => $translation_row [ 0 ],
-                        'id_job'              => $jid,
-                        'segment_hash'        => $translation_row [ 3 ],
-                        'status'              => $iceLockArray[ 'status' ],
-                        'translation'         => $check->getTargetSeg(),
-                        'locked'              => 0, // not allowed to change locked status for pre-translations
-                        'match_type'          => $iceLockArray[ 'match_type' ],
-                        'eq_word_count'       => $iceLockArray[ 'eq_word_count' ],
-                        'suggestion_match'    => $iceLockArray[ 'suggestion_match' ],
-                        'standard_word_count' => $iceLockArray[ 'standard_word_count' ],
+                        'id_segment'             => $translation_row [ 0 ],
+                        'id_job'                 => $jid,
+                        'segment_hash'           => $translation_row [ 3 ],
+                        'status'                  => $iceLockArray[ 'status' ],
+                        'translation'            => $check->getTargetSeg(),
+                        'locked'                 => 0, // not allowed to change locked status for pre-translations
+                        'match_type'             => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
+                        'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
+                        'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
+                        'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
+                        'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
                 ];
 
                 $query_translations_values[] = $sql_values;

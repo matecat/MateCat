@@ -1,30 +1,30 @@
 header {
-    .revision-mark {
-      /*float: left;
+  .revision-mark {
+    /*float: left;
       position: relative;*/
-      width: 24px;
-      height: 24px;
-      left: -7px;
-      top: 11px;
+    width: 24px;
+    height: 24px;
+    left: -7px;
+    top: 11px;
 
-      font-weight: bold;
-      font-size: 16px;
-      line-height: 23px;
-      color: white;
-      text-align: center;
-      border-radius: 2px;
-      margin-top: 7px;
-      border: 1px solid #ffffff;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 23px;
+    color: white;
+    text-align: center;
+    border-radius: 2px;
+    margin-top: 7px;
+    border: 1px solid #ffffff;
 
-      &.revision-r1 {
-          background: $approvedGreen;
-      }
-      &.revision-r2 {
-          background: $approved2Green;
-      }
+    &.revision-r1 {
+      background: $approvedGreen;
     }
-
-    #files-instructions svg {
-        display: block;
+    &.revision-r2 {
+      background: $approved2Green;
     }
+  }
+
+  #files-instructions svg {
+    display: block;
+  }
 }
