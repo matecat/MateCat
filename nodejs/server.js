@@ -43,10 +43,7 @@ var browserChannel = new SseChannel( {
     retryTimeout: 250,
     historySize: 300, // XXX
     pingInterval: 15000,
-    jsonEncode: true,
-    cors: {
-        origins: ['*'] // Defaults to []
-    }
+    jsonEncode: true
 } );
 
 /**
