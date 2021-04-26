@@ -1,15 +1,15 @@
-var SseChannel = require( 'sse-channel' );
-var http = require( 'http' );
-var os = require( 'os' );
-var stompit = require( 'stompit' );
-var url = require( 'url' );
-var qs = require( 'querystring' );
-var _ = require( 'lodash' );
-var winston = require( 'winston' );
-var path = require( 'path' );
-var ini = require( 'node-ini' );
+const SseChannel = require( 'sse-channel' );
+const http = require( 'http' );
+const os = require( 'os' );
+const stompit = require( 'stompit' );
+const url = require( 'url' );
+const qs = require( 'querystring' );
+const _ = require( 'lodash' );
+const winston = require( 'winston' );
+const path = require( 'path' );
+const ini = require( 'node-ini' );
 
-var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
+const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const COMMENTS_TYPE = 'comment';
 const CONTRIBUTIONS_TYPE = 'contribution';
@@ -21,8 +21,15 @@ const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
 winston.level = config.log.level;
 
+const corsAllowedOrigins = [
+    'https://beta.matecat.com',
+    'https://www.matecat.com',
+    'https://dev.matecat.com',
+    'https://localhost'
+];
+
 // Connections Options for stompit
-var connectOptions = {
+const connectOptions = {
     'host': config.queue.host,
     'port': config.queue.port,
     'connectHeaders': {
@@ -33,20 +40,17 @@ var connectOptions = {
     }
 };
 
-var subscribeHeaders = {
+const subscribeHeaders = {
     'destination': config.queue.name,
     'ack': 'client-individual'
 };
 
 //SSE Channel Options
-var browserChannel = new SseChannel( {
+const browserChannel = new SseChannel( {
     retryTimeout: 250,
-    historySize: 300, // XXX
+    historySize: 300,
     pingInterval: 15000,
-    jsonEncode: true,
-    cors: {
-        origins: ['*'] // Defaults to []
-    }
+    jsonEncode: true
 } );
 
 /**
@@ -54,8 +58,8 @@ var browserChannel = new SseChannel( {
  * @param separator
  * @returns {*}
  */
-var generateUid = function ( separator ) {
-    var delim = separator || "";
+const generateUid = function ( separator ) {
+    const delim = separator || "";
 
     function S4() {
         return (((1 + Math.random()) * 0x10000) | 0).toString( 16 ).substring( 1 );
@@ -64,6 +68,18 @@ var generateUid = function ( separator ) {
     return (S4() + S4() + delim + S4());
 };
 
+const corsAllow = ( req, res ) => {
+    let re = /[\-\[\]\/{}()+?.\\^$|]/g;
+    return corsAllowedOrigins.some( ( element ) => {
+        const regexp = new RegExp( element.replace( re, '\\$&' ), 'i' );
+        if ( req.headers['origin'] && req.headers['origin'].match( regexp ) ) {
+            res.setHeader( 'Access-Control-Allow-Origin', element );
+            res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
+            return true;
+        }
+    } );
+}
+
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
     // winston.debug('browserChannel message', message);
@@ -71,13 +87,12 @@ browserChannel.on( 'message', function ( message ) {
 
 //Event triggered when a client disconnect
 browserChannel.on( 'disconnect', function ( context, res ) {
-    winston.debug('browserChannel disconnect', res._clientId);
+    winston.debug( 'browserChannel disconnect', res._clientId );
 } );
 
 //Event triggered when a client connect
 browserChannel.on( 'connect', function ( context, req, res ) {
     // winston.debug('browserChannel connect ', res._clientId, res._matecatJobId);
-
     //Send a message to the client to communicate the clientId
     browserChannel.send( {
         data: {
@@ -91,22 +106,31 @@ browserChannel.on( 'connect', function ( context, req, res ) {
  * We create an HTTP server listening the address in config.path
  * and add new clients to the browserChannel
  */
-http.createServer( function ( req, res ) {
+http.createServer( ( req, res ) => {
+
     // find job id from requested path
-    var parsedUrl = url.parse( req.url );
-    var path = parsedUrl.path;
+    const parsedUrl = url.parse( req.url );
+    const path = parsedUrl.path;
 
+    if ( corsAllow( req, res ) ) {
 
-    if ( path.indexOf( config.server.path ) === 0 ) {
-        var query = qs.parse( parsedUrl.query );
+        if ( path.indexOf( config.server.path ) === 0 ) {
 
-        res._clientId = generateUid();
-        res._matecatJobId = query.jid;
-        res._matecatPw = query.pw;
+            const query = qs.parse( parsedUrl.query );
 
-        browserChannel.addClient( req, res );
+            res._clientId = generateUid();
+            res._matecatJobId = query.jid;
+            res._matecatPw = query.pw;
+
+            browserChannel.addClient( req, res );
+
+        } else {
+            res.writeHead( 404 );
+            res.end();
+        }
+
     } else {
-        res.writeHead( 404 );
+        res.writeHead( 401 );
         res.end();
     }
 
@@ -114,8 +138,8 @@ http.createServer( function ( req, res ) {
     winston.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
 
-var checkCandidate = function ( type, response, message ) {
-    var candidate = false;
+const checkCandidate = function ( type, response, message ) {
+    let candidate;
     switch ( type ) {
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
@@ -148,18 +172,18 @@ var checkCandidate = function ( type, response, message ) {
     return candidate;
 };
 
-var stompMessageReceived = function ( body ) {
-    var message = JSON.parse( body );
+const stompMessageReceived = function ( body ) {
+    const message = JSON.parse( body );
 
-    var dest = _.filter( browserChannel.connections, function ( serverResponse ) {
+    const dest = _.filter( browserChannel.connections, function ( serverResponse ) {
         if ( typeof serverResponse._clientId === 'undefined' ) {
             return false;
         }
 
-        var candidate = checkCandidate( message._type, serverResponse, message);
+        const candidate = checkCandidate( message._type, serverResponse, message );
 
         if ( candidate ) {
-            if ( message._type === CONTRIBUTIONS_TYPE) {
+            if ( message._type === CONTRIBUTIONS_TYPE ) {
                 winston.debug( 'Contribution segment-id: ' + message.data.payload.id_segment );
             }
             winston.debug( 'candidate found', serverResponse._clientId );
@@ -175,7 +199,7 @@ var stompMessageReceived = function ( body ) {
     }, dest );
 };
 
-var startStompConnection = function () {
+const startStompConnection = function () {
 
     /**
      * Start connection with the amq queue
@@ -204,9 +228,7 @@ var startStompConnection = function () {
 
                 if ( error ) {
                     winston.debug( '!! read message error ' + error.message );
-                    return;
-                }
-                else {
+                } else {
                     stompMessageReceived( body );
                     message.ack();
                 }
