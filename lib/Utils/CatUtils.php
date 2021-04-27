@@ -1,7 +1,9 @@
 <?php
 
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use SubFiltering\Filter;
+use Validator\JobValidatorObject;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
 define( "GTPLACEHOLDER", "##GREATERTHAN##" );
@@ -31,11 +33,38 @@ class CatUtils {
 
     public static $cjk = [ 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 ];
 
+    /**
+     * @param $langCode
+     *
+     * @return bool
+     */
     public static function isCJK( $langCode ) {
         return array_key_exists( explode( '-', $langCode )[ 0 ], self::$cjk );
     }
 
-    // ----------------------------------------------------------------
+    /**
+     * @return string[]
+     */
+    public static function CJKFullwidthPunctuationChars() {
+        return [
+                '，',
+                '。',
+                '、',
+                '！',
+                '？',
+                '：',
+                '；',
+                '「',
+                '」',
+                '『',
+                '』',
+                '（',
+                '）',
+                '—',
+                '《',
+                '》',
+        ];
+    }
 
     public static function placeholdamp( $s ) {
         $s = preg_replace( "/\&/", AMPPLACEHOLDER, $s );
@@ -138,7 +167,7 @@ class CatUtils {
      *
      * @return string
      */
-    public static function reApplySegmentSplit( $segment, Array $chunk_positions ) {
+    public static function reApplySegmentSplit( $segment, array $chunk_positions ) {
 
         $string_chunks = [];
         $last_sum      = 0;
@@ -184,26 +213,26 @@ class CatUtils {
      * @param array $job_stats
      *
      * @return array
+     * @throws Exception
      */
     protected static function _performanceEstimationTime( array $job_stats ) {
 
         $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
-        if ( !empty( $last_10_worked_ids ) ) {
+        if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
+
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
             $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
-            if ( $estimation_temp[ 0 ][ 'data_validity' ] == 1 ) {
-                $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
-                // 7.2 hours
-                // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
-                // 1 h 32 m
-                // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-                $job_stats[ 'ESTIMATED_COMPLETION' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
-            }
+
+            $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
+            // 7.2 hours
+            // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
+            // 1 h 32 m
+            // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
+            $job_stats[ 'ESTIMATED_COMPLETION' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
         }
 
         return $job_stats;
-
     }
 
     /**
@@ -424,6 +453,9 @@ class CatUtils {
      */
     public static function segment_raw_word_count( $string, $source_lang = 'en-US', Filter $filter = null ) {
 
+        //first two letter of code lang
+        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
         $string = self::clean_raw_string_4_word_count( $string, $source_lang, $filter );
 
         /**
@@ -444,6 +476,13 @@ class CatUtils {
         $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
 
         /**
+         * Remove english possessive word count
+         */
+        if ( $source_lang_two_letter == "en" ) {
+            $string = str_replace( ' s ', ' ', $string );
+        }
+
+        /**
          * Now reset chars
          */
         $string = str_replace( [ "¯", '¸' ], [ '-', '_' ], $string );
@@ -455,12 +494,9 @@ class CatUtils {
             return 0;
         }
 
-        //first two letter of code lang
-        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
-
             $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
-
         } else {
 
             $words_array = preg_split( '/[\s]+/u', $string );
@@ -564,9 +600,42 @@ class CatUtils {
     public static function unicode2chr( $o ) {
         if ( function_exists( 'mb_convert_encoding' ) ) {
             return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
-        } else {
-            return chr( intval( $o ) );
         }
+
+        return chr( intval( $o ) );
+    }
+
+    /**
+     * This function converts Unicode entites with no corresponding HTML entity
+     * to their original value
+     *
+     * @param $str
+     *
+     * @return string|string[]
+     */
+    public static function restoreUnicodeEntitesToOriginalValues( $str ) {
+
+        $entities = [
+                "157" // https://www.codetable.net/decimal/157
+        ];
+
+        foreach ( $entities as $entity ) {
+            $value = self::unicode2chr( $entity );
+            $str   = str_replace( "&#" . $entity . ";", $value, $str );
+        }
+
+        return $str;
+    }
+
+    /**
+     * This function trims, strips tags from a html entity decoded string
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function trimAndStripFromAnHtmlEntityDecoded( $str ) {
+        return trim( strip_tags( html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
     }
 
     /**
@@ -649,9 +718,9 @@ class CatUtils {
 
         $result = null;
         if ( $featureSet->hasRevisionFeature() ) {
-            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[0];
+            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
         } else {
-            $result = self::getQualityInfoFromJobStruct( $job, $featureSet ) ;
+            $result = self::getQualityInfoFromJobStruct( $job, $featureSet );
         }
 
         return $result;
@@ -664,7 +733,7 @@ class CatUtils {
      * @return array
      */
     public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
-        $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
+        $struct      = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
         $reviseClass = new Constants_Revise;
 
         $jobQA = new Revise_JobQA(
@@ -678,6 +747,7 @@ class CatUtils {
          */
         list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
         $jobQA->retrieveJobErrorTotals();
+
         return $jobQA->evalJobVote();
     }
 
@@ -809,5 +879,138 @@ class CatUtils {
 
     }
 
+    /**
+     * Check if a job is revision from a jid/password combination
+     * (password could refer to a T, R1 or R2 job)
+     *
+     * @param $jid
+     * @param $password
+     *
+     * @return bool|null
+     */
+    public static function getIsRevisionFromIdJobAndPassword( $jid, $password ) {
+
+        $jobValidator = new \Validator\JobValidator();
+
+        try {
+            /** @var JobValidatorObject $validatorObject */
+            $validatorObject = $jobValidator->validate( new JobValidatorObject(), [
+                    'jid'      => $jid,
+                    'password' => $password
+            ] );
+
+            if ( $validatorObject->t == 1 ) {
+                return false;
+            }
+
+            if ( $validatorObject->r1 == 1 or $validatorObject->r2 == 1 ) {
+                return true;
+            }
+
+        } catch ( \Exception $exception ) {
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getIsRevisionFromRequestUri() {
+
+        if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
+            return false;
+        }
+
+        $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+
+        return self::isARevisePath( $_from_url[ 'path' ] );
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getIsRevisionFromReferer() {
+
+        if ( !isset( $_SERVER[ 'HTTP_REFERER' ] ) ) {
+            return false;
+        }
+
+        $_from_url = parse_url( @$_SERVER[ 'HTTP_REFERER' ] );
+
+        return self::isARevisePath( $_from_url[ 'path' ] );
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return bool
+     */
+    private static function isARevisePath( $path ) {
+        return strpos( $path, "/revise" ) === 0;
+    }
+
+    /**
+     * Get a job from a combination of ID and ANY password (t,r1 or r2)
+     *
+     * @param $jobId
+     * @param $jobPassword
+     *
+     * @return \DataAccess_IDaoStruct|Jobs_JobStruct
+     */
+    public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ) {
+        $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
+
+        if ( !$job ) {
+            /** @var ChunkReviewStruct $chunkReview */
+            $chunkReview = \Features\ReviewExtended\Model\ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
+
+            if ( !$chunkReview ) {
+                return null;
+            }
+
+            $job = $chunkReview->getChunk();
+        }
+
+        return $job;
+    }
+
+    /**
+     * Get the correct password for job url
+     *
+     * If source_page is 1, the translation password is returned.
+     *
+     * Otherwise the function try to return the corresponding review_password
+     *      *
+     * @param Jobs_JobStruct $job
+     * @param int            $sourcePage
+     *
+     * @return string|null
+     */
+    public static function getJobPassword( Jobs_JobStruct $job, $sourcePage = 1 ) {
+        if ( $sourcePage <= 1 ) {
+            return $job->password;
+        }
+
+        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $job->id, $job->password, $sourcePage );
+        if ( !$qa ) {
+            return null;
+        }
+
+        return $qa->review_password;
+    }
+
+    /**
+     * get last character from a string
+     * (excluding html tags)
+     *
+     * @param $string
+     *
+     * @return string
+     */
+    public static function getLastCharacter($string) {
+        return mb_substr(strip_tags($string), -1);
+    }
 }
 

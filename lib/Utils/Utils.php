@@ -5,15 +5,32 @@ use FilesStorage\FilesStorageFactory;
 
 class Utils {
 
+    public static function getSourcePageFromReferer() {
+        return self::returnSourcePageAsInt( parse_url( @$_SERVER[ 'HTTP_REFERER' ] ) );
+    }
+
+
     /**
      * @return int
      */
     public static function getSourcePage() {
-        $_from_url  = parse_url( @$_SERVER[ 'REQUEST_URI' ] );
+        return self::returnSourcePageAsInt( parse_url( @$_SERVER[ 'REQUEST_URI' ] ) );
+    }
+
+    /**
+     * @param array $url
+     *
+     * @return int
+     */
+    private static function returnSourcePageAsInt( $url ) {
         $sourcePage = Constants::SOURCE_PAGE_TRANSLATE;
 
+        if ( !isset( $url[ 'path' ] ) ) {
+            return $sourcePage;
+        }
+
         // this regex matches /revise /revise[2-9]
-        preg_match( '/revise([2-9]|\'\')?\//s', $_from_url[ 'path' ], $matches );
+        preg_match( '/revise([2-9]|\'\')?\//s', $url[ 'path' ], $matches );
 
         if ( count( $matches ) === 1 ) { // [0] => revise/
             $sourcePage = ReviewUtils::revisionNumberToSourcePage( Constants::SOURCE_PAGE_TRANSLATE );
@@ -197,14 +214,16 @@ class Utils {
 
     public static function encryptPass( $clear_pass, $salt ) {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+
         return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
-    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ){
-        if( sha1( $clear_pass . $salt ) == $db_hashed_pass ){ //TODO: old implementation, remove in a next future when hopefully all people will be migrated to password_hash
+    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ) {
+        if ( sha1( $clear_pass . $salt ) == $db_hashed_pass ) { //TODO: old implementation, remove in a next future when hopefully all people will be migrated to password_hash
             return sha1( $clear_pass . $salt );
         } else {
             $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+
             return password_verify( $pepperedPass, $db_hashed_pass );
         }
     }
@@ -226,11 +245,11 @@ class Utils {
 
         $_pwd = md5( uniqid( '', true ) );
 
-        if( $more_entropy ){
+        if ( $more_entropy ) {
             $_pwd = base64_encode( $_pwd ); //we want more characters not only [0-9a-f]
         }
 
-        $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -8, 6 ); //exclude last 2 char2 because they can be == sign
+        $pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -8, 6 ); //exclude last 2 char2 because they can be == sign
 
         if ( $maxlength > 12 ) {
             while ( strlen( $pwd ) < $maxlength ) {
@@ -286,7 +305,7 @@ class Utils {
     }
 
     public static function is_assoc( $array ) {
-        return is_array( $array ) AND (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
+        return is_array( $array ) and (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
     }
 
     public static function curlFile( $filePath ) {
@@ -516,7 +535,7 @@ class Utils {
 
             if ( $raise && $error != JSON_ERROR_NONE ) {
                 throw new Exception( $msg, $error );
-            } elseif( $error != JSON_ERROR_NONE ){
+            } elseif ( $error != JSON_ERROR_NONE ) {
                 return $msg;
             }
 
@@ -573,7 +592,7 @@ class Utils {
             $fs    = FilesStorageFactory::create();
             $files = $fs->getFilesForJob( $jobId );
             foreach ( $files as $file ) {
-                $fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
+                $fileType = \Matecat\XliffParser\XliffUtils\XliffProprietaryDetect::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
                 if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {
                     // If only one XLIFF is not created with MateCat Filters, we can't say
                     // that the project is entirely based on new Filters
@@ -721,5 +740,16 @@ class Utils {
 
         return $new == $old;
     }
-}
 
+    /**
+     * shortcut to htmlentities (UTF-8 charset)
+     * avoiding double-encoding
+     *
+     * @param $string
+     *
+     * @return string
+     */
+    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
+        return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
+    }
+}

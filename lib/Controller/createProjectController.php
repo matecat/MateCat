@@ -3,7 +3,9 @@
 use ConnectedServices\GDrive as GDrive;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 class createProjectController extends ajaxController {
 
@@ -401,11 +403,11 @@ class createProjectController extends ajaxController {
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function getFileMetadata($filename) {
-        $info          = DetectProprietaryXliff::getInfo( $filename );
-        $isXliff       = DetectProprietaryXliff::isXliffExtension( AbstractFilesStorage::pathinfo_fix($filename) );
-        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $isTMX         = DetectProprietaryXliff::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $info          = XliffProprietaryDetect::getInfo( $filename );
+        $isXliff       = XliffFiles::isXliff( $filename );
+        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
+        $isTMX         = XliffFiles::isTMXFile( $filename );
+        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
         $forceXliff = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',
@@ -413,7 +415,7 @@ class createProjectController extends ajaxController {
                 $this->userIsLogged,
                 $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
         );
-        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filename, $forceXliff );
+        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
 
         $metadata                      = [];
         $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];

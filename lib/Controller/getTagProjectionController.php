@@ -22,6 +22,7 @@ class getTagProjectionController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
+                'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password'    => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
@@ -50,6 +51,7 @@ class getTagProjectionController extends ajaxController {
         $this->source_lang = $this->__postInput[ 'source_lang' ];
         $this->target_lang = $this->__postInput[ 'target_lang' ];
         $this->suggestion  = $this->__postInput[ 'suggestion' ];
+        $this->id_segment  = $this->__postInput[ 'id_segment' ];
 
         \Log::$fileName = 'tagProjection.log';
 
@@ -99,7 +101,9 @@ class getTagProjectionController extends ajaxController {
          */
         $engine = Engine::getInstance( 1 );
         $engine->setFeatureSet( $this->featureSet );
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
+        $dateRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment);
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet, $dateRefMap );
 
         $config                  = array();
         $config[ 'source' ]      = $Filter->fromLayer2ToLayer1( $this->source );
@@ -110,7 +114,7 @@ class getTagProjectionController extends ajaxController {
 
         $result = $engine->getTagProjection( $config );
         if( empty( $result->error ) ){
-            $this->result[ 'data' ][ 'translation' ] = $result->responseData;
+            $this->result[ 'data' ][ 'translation' ] = $Filter->fromLayer1ToLayer2($result->responseData);
             $this->result[ 'code' ] = 0;
         } else {
             $this->result[ 'code' ] = $result->error->code;

@@ -8,7 +8,7 @@ class xliffToTargetController extends downloadController {
     protected $errorMessage;
 
     public function doAction() {
-        // Just add the XLIFF extension, the DetectProprietaryXliff class needs it
+        // Just add the XLIFF extension, the XliffProprietaryDetect class needs it
         $file_path       = $_FILES['xliff']['tmp_name'] . '.xlf';
         move_uploaded_file($_FILES['xliff']['tmp_name'], $file_path);
 

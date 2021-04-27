@@ -643,7 +643,6 @@
 			},
 			// Look for quotes or equals to get an exact match; ignore type since iExact could be numeric
 			exact: function( c, data ) {
-				/*jshint eqeqeq:false */
 				if ( tsfRegex.exact.test( data.iFilter ) ) {
 					var txt = data.iFilter.replace( tsfRegex.exact, '' ),
 						filter = tsf.parseFilter( c, txt, data ) || '';
@@ -2496,7 +2495,6 @@
 })(jQuery, window);
 
 /*! Widget: resizable - updated 11/4/2015 (v2.24.3) */
-/*jshint browser:true, jquery:true, unused:false */
 ;(function ($, window) {
 	'use strict';
 	var ts = $.tablesorter || {};

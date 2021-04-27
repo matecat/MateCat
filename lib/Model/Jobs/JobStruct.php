@@ -40,6 +40,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $status_translator;
     public $status;
 
+    public $standard_analysis_wc;
+
     /**
      * Column 'completed' cannot be null, moreover it is BIT(1) and
      * PDO does not works well in this case without explicitly
@@ -267,31 +269,62 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         $this->rejected_words;
     }
 
+    /**
+     * @return bool
+     */
     public function isCanceled() {
         return $this->status == Constants_JobStatus::STATUS_CANCELLED ;
     }
 
+    /**
+     * @return bool
+     */
     public function isArchived() {
         return $this->status == Constants_JobStatus::STATUS_ARCHIVED ;
     }
 
+    /**
+     * @param $is_review
+     *
+     * @return $this
+     */
     public function setIsReview($is_review){
         $this->is_review = $is_review;
         return $this;
     }
 
+    /**
+     * @param $_revisionNumber
+     */
     public function setSourcePage( $_revisionNumber ){
         $this->_sourcePage = $_revisionNumber;
     }
 
+    /**
+     * @return mixed
+     */
     public function getSourcePage(){
-        return ( $this->is_review  && $this->_sourcePage > 2 ) ? $this->_sourcePage : 2;
+        return $this->_sourcePage;
     }
 
+    /**
+     * @return mixed
+     */
     public function getIsReview(){
         return $this->is_review;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSecondPassReview(){
+        return $this->is_review  && $this->_sourcePage == 3;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
     public function isArchiveable() {
         $lastUpdate  = new DateTime( $this->last_update );
         $oneMonthAgo = new DateTime();

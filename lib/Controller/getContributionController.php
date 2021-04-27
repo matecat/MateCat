@@ -4,42 +4,43 @@ use Contribution\Request;
 
 class getContributionController extends ajaxController {
 
+    protected $id_job;
+    protected $password;
     protected $id_segment;
     protected $id_client;
     private   $concordance_search;
     private   $switch_languages;
-    private   $id_job;
     private   $num_results;
     private   $text;
     private   $id_translator;
-    private   $password;
 
     protected $context_before;
     protected $context_after;
     protected $id_before;
     protected $id_after;
 
-    private $__postInput = array();
+    private $__postInput = [];
 
     public function __construct() {
 
         parent::__construct();
 
         $filterArgs = [
-                'id_segment'     => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_job'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'num_results'    => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'text'           => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id_translator'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'password'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'is_concordance' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'from_target'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'context_before' => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'context_after'  => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id_before'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_after'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_client'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'cross_language'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
+                'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'num_results'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'text'             => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_translator'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'is_concordance'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'context_before'   => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'context_after'    => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_before'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_after'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'cross_language'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -48,9 +49,9 @@ class getContributionController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI
 //        $this->__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
-        $this->id_segment         = $this->__postInput[ 'id_segment' ];
-        $this->id_before          = $this->__postInput[ 'id_before' ];
-        $this->id_after           = $this->__postInput[ 'id_after' ];
+        $this->id_segment = $this->__postInput[ 'id_segment' ];
+        $this->id_before  = $this->__postInput[ 'id_before' ];
+        $this->id_after   = $this->__postInput[ 'id_after' ];
 
         $this->id_job             = $this->__postInput[ 'id_job' ];
         $this->num_results        = $this->__postInput[ 'num_results' ];
@@ -59,8 +60,9 @@ class getContributionController extends ajaxController {
         $this->concordance_search = $this->__postInput[ 'is_concordance' ];
         $this->switch_languages   = $this->__postInput[ 'from_target' ];
         $this->password           = $this->__postInput[ 'password' ];
+        $this->received_password  = $this->__postInput[ 'current_password' ];
         $this->id_client          = $this->__postInput[ 'id_client' ];
-        $this->cross_language     = $this->__postInput[ 'cross_language' ] ;
+        $this->cross_language     = $this->__postInput[ 'cross_language' ];
 
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
@@ -87,7 +89,7 @@ class getContributionController extends ajaxController {
             $this->result[ 'errors' ][] = [ "code" => -3, "message" => "missing id_job" ];
         }
 
-        if( empty( $this->id_client ) ){
+        if ( empty( $this->id_client ) ) {
             $this->result[ 'errors' ][] = [ "code" => -4, "message" => "missing id_client" ];
         }
 
@@ -103,16 +105,19 @@ class getContributionController extends ajaxController {
         //get Job Info, we need only a row of jobs ( split )
         $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
 
+        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment );
+
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
         $this->readLoginInfo();
-        if( !$this->concordance_search ){
+        if ( !$this->concordance_search ) {
             $this->_getContexts();
         }
 
         $contributionRequest                    = new \Contribution\ContributionRequestStruct();
         $contributionRequest->user              = $this->user;
+        $contributionRequest->dataRefMap        = $dataRefMap;
         $contributionRequest->contexts          = [
                 'context_before' => $this->context_before,
                 'segment'        => $this->text,
@@ -142,7 +147,7 @@ class getContributionController extends ajaxController {
     /**
      * @throws Exception
      */
-    protected function _getContexts(){
+    protected function _getContexts() {
 
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(

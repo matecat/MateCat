@@ -2,8 +2,10 @@
 
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
 use Teams\MembershipDao;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -125,6 +127,11 @@ class NewController extends ajaxController {
                 'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'instructions'    => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_REQUIRE_ARRAY,
+                ],
+                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -578,6 +585,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
         $projectStructure[ 'due_date' ]                     = ( !isset( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
+        $projectStructure[ 'instructions' ]                 = $this->postInput[ 'instructions' ];
 
         if ( $this->user ) {
             $projectStructure[ 'userIsLogged' ] = true;
@@ -609,7 +617,6 @@ class NewController extends ajaxController {
 
         $this->projectStructure = $projectStructure;
 
-
         Queue::sendProject( $projectStructure );
 
         $this->_pollForCreationResult();
@@ -628,11 +635,11 @@ class NewController extends ajaxController {
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function getFileMetadata($filename) {
-        $info          = DetectProprietaryXliff::getInfo( $filename );
-        $isXliff       = DetectProprietaryXliff::isXliffExtension( AbstractFilesStorage::pathinfo_fix($filename) );
-        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $isTMX         = DetectProprietaryXliff::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $info          = XliffProprietaryDetect::getInfo( $filename );
+        $isXliff       = XliffFiles::isXliff( $filename );
+        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
+        $isTMX         = XliffFiles::isTMXFile( $filename );
+        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
         $forceXliff = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',
@@ -640,7 +647,7 @@ class NewController extends ajaxController {
                 $this->userIsLogged,
                 $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
         );
-        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filename, $forceXliff );
+        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
 
         $metadata                      = [];
         $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
@@ -800,6 +807,11 @@ class NewController extends ajaxController {
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
             $this->metadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
             Log::doJsonLog( "Passed parameter metadata as json string." );
+        }
+
+        // project_info
+        if ( !empty( $this->postInput[ 'project_info' ] ) ) {
+            $this->metadata[ 'project_info' ] = $this->postInput[ 'project_info' ];
         }
 
         //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )

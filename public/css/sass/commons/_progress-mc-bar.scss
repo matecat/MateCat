@@ -1,107 +1,115 @@
 #manage-container .progress-bar {
-	height: 20px;
-	top: 15px;
-	float: left;
-	min-width: 115px;
-	border-radius: 10px;
-	/* margin-bottom: 10px; */
-	padding-top: 7px;
+  height: 20px;
+  top: 15px;
+  float: left;
+  min-width: 115px;
+  border-radius: 10px;
+  /* margin-bottom: 10px; */
+  padding-top: 7px;
 }
 
 .analyze .progress-bar {
-	height: 20px;
-	margin-top: -8px;
-	float: left;
-	min-width: 115px;
-	border-radius: 10px;
-	margin-bottom: 10px;
+  height: 20px;
+  margin-top: -8px;
+  float: left;
+  min-width: 115px;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
 .progress-bar {
-	.progr {
-		background-color: inherit;
-	    //min-width: 120px;
-	    position: relative;
-		.meter {
-		    height: 18px;
-		    width: 100%;
-		    float: left;
-		    margin: 0px 15px 0px 0 !important;
-		    background-color: #d0d1d1;
-		    overflow: hidden;
-			border-radius: 10px;
-			a {
-			    display: block;
-				height: 100%;
-				max-width: 100%;
-				float: left;
-				overflow: hidden;
-				-webkit-transition: all 200ms ease-in;
-				transition: all 200ms ease-in;
-			}
-		    a:after {
-				content: "";
-			    position: absolute;
-			    top: 0px;
-			    left: 0;
-			    bottom: 0;
-			    right: 0;
-			    background-image: -webkit-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
-			    z-index: 0;
-			    -webkit-background-size: 50px 50px;
-			    -moz-background-size: 50px 50px;
-			    background-size: 50px 50px;
-			    -webkit-animation: move 2s linear infinite;
-			    overflow: hidden;
-			    height: 18px;
-				opacity: 0.3;
-				pointer-events: none;
-		    }
-		}
-		.translated-bar {
-			background-color: $translatedBlue;
-		}
-		.approved-bar {
-			background-color: $approvedGreen;
-		}
-		.approved-bar-2nd-pass {
-			background-color: $approved2Green;
-		}
-		.warning-bar {
-			background-color: $rebuttedRed;
-		}
-		.draft-bar {
-			background-color: $grey4;
-		}
-	}
+  .progr {
+    background-color: inherit;
+    //min-width: 120px;
+    position: relative;
+    .meter {
+      height: 18px;
+      width: 100%;
+      float: left;
+      margin: 0px 15px 0px 0 !important;
+      background-color: #d0d1d1;
+      overflow: hidden;
+      border-radius: 10px;
+      a {
+        display: block;
+        height: 100%;
+        max-width: 100%;
+        float: left;
+        overflow: hidden;
+        -webkit-transition: all 200ms ease-in;
+        transition: all 200ms ease-in;
+      }
+      a:after {
+        content: '';
+        position: absolute;
+        top: 0px;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: -webkit-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.2) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0.2) 75%,
+          transparent 75%,
+          transparent
+        );
+        z-index: 0;
+        -webkit-background-size: 50px 50px;
+        -moz-background-size: 50px 50px;
+        background-size: 50px 50px;
+        -webkit-animation: move 2s linear infinite;
+        overflow: hidden;
+        height: 18px;
+        opacity: 0.3;
+        pointer-events: none;
+      }
+    }
+    .translated-bar {
+      background-color: $translatedBlue;
+    }
+    .approved-bar {
+      background-color: $approvedGreen;
+    }
+    .approved-bar-2nd-pass {
+      background-color: $approved2Green;
+    }
+    .warning-bar {
+      background-color: $rebuttedRed;
+    }
+    .draft-bar {
+      background-color: $grey4;
+    }
+  }
 }
 
 .multiple {
-	.btn {
-		.progress-bar {
-		    border: 0px;
-		    height: 6px;
-		    margin-top: 0px;
-	   
-			.progr {
-				height: 23px;
-				width: 100%;
-				min-width: 1px;
-				.meter {
-			      	height: 8px;
-				    margin: -5px 0 0 0 !important;
-				    border: 0px;
-					border-radius: 8px;
-					a {
-					    height: 8px;
-					    border-radius: 0px;
-						&:after {
-						    top: -5px;
-						    height: 8px;	
-						}
-					}
-				}
-			}
-		}
-	}
-}
+  .btn {
+    .progress-bar {
+      border: 0px;
+      height: 6px;
+      margin-top: 0px;
 
+      .progr {
+        height: 23px;
+        width: 100%;
+        min-width: 1px;
+        .meter {
+          height: 8px;
+          margin: -5px 0 0 0 !important;
+          border: 0px;
+          border-radius: 8px;
+          a {
+            height: 8px;
+            border-radius: 0px;
+            &:after {
+              top: -5px;
+              height: 8px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -186,6 +186,7 @@ class Job {
                 'outsource'             => $outsource,
                 'translator'            => $translator,
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
+                'standard_wc'           => (float)$chunk->standard_analysis_wc,
                 'quality_summary'       => [
                         'equivalent_class' => $chunk->getQualityInfo(),
                         'quality_overall'  => $chunk->getQualityOverall(),

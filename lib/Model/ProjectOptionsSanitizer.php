@@ -57,6 +57,7 @@ class ProjectOptionsSanitizer {
             'ms-MY',
             'mr-IN',
             'nb-NO',
+            'fa-IR',
             'pl-PL',
             'pt-PT',
             'pt-BR',
@@ -77,6 +78,7 @@ class ProjectOptionsSanitizer {
             'th-TH',
             'tr-TR',
             'uk-UA',
+            'ur-PK',
             'vi-VN'
 
     ];

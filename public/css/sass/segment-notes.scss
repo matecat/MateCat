@@ -1,119 +1,122 @@
 div.segment-notes ul.graysmall li {
-    width: 90%;
+  width: 90%;
 }
 
 div.segment-notes ul.graysmall li span.note-label {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .segments-notes-container {
-    float: left;
+  float: left;
 }
 .segments-preview-footer {
-    display: inline-block;
-    padding: 15px 20px 0px;
-    width: 50%;
-    box-sizing: border-box;
-    position: relative;
-    border: 5px solid white;
-    border-right: 1px solid #ccc;
-    float: left;
+  display: inline-block;
+  padding: 15px 20px 0px;
+  width: 50%;
+  box-sizing: border-box;
+  position: relative;
+  border: 5px solid white;
+  border-right: 1px solid #ccc;
+  float: left;
 }
 
 .segment-notes-container {
-    display: inline-block;
-    max-width: 95%;
-    box-sizing: border-box;
-    vertical-align: top;
-    text-align: left;
-    float:left;
+  display: inline-block;
+  max-width: 95%;
+  box-sizing: border-box;
+  vertical-align: top;
+  text-align: left;
+  float: left;
 }
 
 .segments-preview-container {
-    max-width: 380px;
-    max-height: 260px;
-    min-height: 170px;
-    background-image: url(../../img/loading.gif);
-    background-size: 30px 30px;
-    background-repeat: no-repeat;
-    background-position: 50%;
-    overflow-y: auto;
-    cursor: pointer;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
-    margin: 0 auto;
+  max-width: 380px;
+  max-height: 260px;
+  min-height: 170px;
+  background-image: url(../../img/loading.gif);
+  background-size: 30px 30px;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  overflow-y: auto;
+  cursor: pointer;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24);
+  margin: 0 auto;
 }
 
 .segments-preview-container:hover {
-    box-shadow: 0 0 0 #e0e0e0, 0 0 8px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.24);
-    transition: 0.2s ease;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 8px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.24);
+  transition: 0.2s ease;
 }
 
 .segments-preview-container img {
-    width: 100%;
-    text-align: center;
+  width: 100%;
+  text-align: center;
 }
 
 .segments-notes-container div.note,
 .segments-notes-container div.context-group {
-    text-align: left;
-    padding: 12px 20px;
-    color: #666;
-    list-style: none;
-    font-size: 16px;
-    float: left;
-    width: 100%;
-    word-break: break-word;
+  text-align: left;
+  padding: 12px 20px;
+  color: #666;
+  list-style: none;
+  font-size: 16px;
+  float: left;
+  width: 100%;
+  word-break: break-word;
 }
 
-.segments-notes-container div.note p{
-    margin: 0;
-    line-height: 25px;
+.segments-notes-container div.note p {
+  margin: 0;
+  line-height: 25px;
 }
 
 .segments-notes-container div.note p a {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .segments-notes-container div.note p a:hover {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .segments-notes-container .note-label,
-.segments-notes-container .context-group-name
-{
-    font-weight: bold;
+.segments-notes-container .context-group-name {
+  font-weight: bold;
 }
 
 .tab-preview-screenshot {
-    text-align: center;
-    padding-top: 10px;
+  text-align: center;
+  padding-top: 10px;
 }
 
 .tab-preview-screenshot button {
-    font-size: 14px;
-    text-align: center;
-    margin: 0 3px;
-    border-radius: 2px;
-    border: 1px solid #C6C6C6;
-    cursor: pointer;
-    color: #666666;
-    outline: none;
-    position: relative;
-    background-color: transparent;
+  font-size: 14px;
+  text-align: center;
+  margin: 0 3px;
+  border-radius: 2px;
+  border: 1px solid #c6c6c6;
+  cursor: pointer;
+  color: #666666;
+  outline: none;
+  position: relative;
+  background-color: transparent;
 }
 
 .tab-preview-screenshot button:hover {
-    color: #000000;
+  color: #000000;
 }
 
 .tab-preview-screenshot button i {
-    position: relative;
-    top: 2px;
-    margin: 0;
+  position: relative;
+  top: 2px;
+  margin: 0;
 }
 
-.preview-button, .n-segments-available, .text-n-segments-available {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 100;
+.preview-button,
+.n-segments-available,
+.text-n-segments-available {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 100;
 }

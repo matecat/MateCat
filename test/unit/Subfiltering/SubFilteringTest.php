@@ -210,9 +210,9 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
 
         //These tests are skipped because the integrity can not be granted
-//        $string_from_UI = '<g id="1">##$_09$##Si noti che ci vogliono circa 3 ore dopo aver ingerito</g><g id="2">&lt;a </g><g id="3"/>href<g id="4"> =</g><g id="5">"https://www.supersmart.com/fr--Phytonutriments--CBD-25-mg--0771--WNN" target<x id="6"/>=<x id="7"/><x id="8"/>"_blank"</g><g id="9">&gt;</g><g id="10">una capsula di CBD da 25 mg</g><g id="11"><ph id="mtc_1" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/></g><bx id="12"/> affinché i livelli ematici raggiungano il picco.';
-//        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
-//        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
+        $string_from_UI = '<g id="1">##$_09$##Si noti che ci vogliono circa 3 ore dopo aver ingerito</g><g id="2">&lt;a </g><g id="3"/>href<g id="4"> =</g><g id="5">"https://www.supersmart.com/fr--Phytonutriments--CBD-25-mg--0771--WNN" target<x id="6"/>=<x id="7"/><x id="8"/>"_blank"</g><g id="9">&gt;</g><g id="10">una capsula di CBD da 25 mg</g><g id="11"><ph id="mtc_1" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/></g><bx id="12"/> affinché i livelli ematici raggiungano il picco.';
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
 
     }
 
@@ -232,9 +232,9 @@ class SubFilteringTest extends AbstractTest {
 
     }
 
-    public function test_3_HandlingNBSP(){
+    public function test_3_HandlingNBSP() {
 
-        $segment = $expectedL1 = '5 tips for creating a great   guide';
+        $segment       = $expectedL1 = '5 tips for creating a great   guide';
         $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . CatUtils::nbspPlaceholder . ' guide';
 
         $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
@@ -368,6 +368,40 @@ class SubFilteringTest extends AbstractTest {
 
         $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
 
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testSPlaceholderWithDataRef() {
+        $data_ref_map = [
+                'source3' => '&lt;/a&gt;',
+                'source4' => '&lt;br&gt;',
+                'source5' => '&lt;br&gt;',
+                'source1' => '&lt;br&gt;',
+                'source2' => '&lt;a href=%s&gt;',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment     = "Hi %s .";
+        $db_translation = "Tere %s .";
+        $expected_l1_segment = "Hi <ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/> .";
+        $expected_l1_translation = "Tere <ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/> .";
+        $expected_l2_segment = "Hi &lt;ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/&gt; .";
+        $expected_l2_translation = "Tere &lt;ph id=\"mtc_1\" equiv-text=\"base64:JXM=\"/&gt; .";
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
     }
 
 }

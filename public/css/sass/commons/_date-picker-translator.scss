@@ -1,57 +1,62 @@
 .xdsoft_datetimepicker {
-    font-family: Calibri, Arial, Helvetica, sans-serif;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today {
-    color: $translatedBlue;
+  color: $translatedBlue;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current {
-    background: $translatedBlue;
-    box-shadow: none;
-    color: #ffffff;
+  background: $translatedBlue;
+  box-shadow: none;
+  color: #ffffff;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:hover {
-    color: #666 !important;
-    background: #d0d0d0 !important;
-    box-shadow: none !important;
+  color: #666 !important;
+  background: #d0d0d0 !important;
+  box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:active {
-    color: #ffffff !important;
-    background: $translatedBlue !important;
-    box-shadow: none !important;
+  color: #ffffff !important;
+  background: $translatedBlue !important;
+  box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:focus {
-    color: #ffffff !important;
-    background: $translatedBlue !important;
-    box-shadow: none !important;
+  color: #ffffff !important;
+  background: $translatedBlue !important;
+  box-shadow: none !important;
 }
 
-.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current {
-    background: $translatedBlue;
-    box-shadow: none;
+.xdsoft_datetimepicker
+  .xdsoft_timepicker
+  .xdsoft_time_box
+  > div
+  > div.xdsoft_current {
+  background: $translatedBlue;
+  box-shadow: none;
 }
 
-.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover {
-    color: #666 !important;
-    background: #d0d0d0 !important;
-    box-shadow: none !important;
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box > div > div:hover {
+  color: #666 !important;
+  background: #d0d0d0 !important;
+  box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .blue-gradient-button {
-    background: $translatedBlue;
-    color: white;
-    font-family: Calibri;
-    border: 1px solid #797979 !important;
-    padding: 4px;
+  background: $translatedBlue;
+  color: white;
+  font-family: Calibri;
+  border: 1px solid #797979 !important;
+  padding: 4px;
 }
 
 .xdsoft_datetimepicker .blue-gradient-button:hover {
-    background: $translatedBlue;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-    color: #fff;
-    border: 1px solid #797979 !important;
+  background: $translatedBlue;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  color: #fff;
+  border: 1px solid #797979 !important;
 }

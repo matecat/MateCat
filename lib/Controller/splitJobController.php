@@ -107,8 +107,8 @@ class splitJobController extends ajaxController {
                 case 'apply':
                     $this->checkSplitAccess( $this->project_struct->getJobs() );
 
-                    $pStruct[ 'job_to_split' ]      = $this->job_id;
-                    $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
+                    $pStruct[ 'job_to_split' ]       = $this->job_id;
+                    $pStruct[ 'job_to_split_pass' ]  = $this->job_pass;
 
                     $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values );
                     $pManager->applySplit( $pStruct );

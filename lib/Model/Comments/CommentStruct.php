@@ -15,6 +15,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
   public $message_type;
   public $message;
   public $timestamp ;
+  public $revision_number ;
 
   // returned values
   public $formatted_date;

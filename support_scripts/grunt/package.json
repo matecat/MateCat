@@ -14,15 +14,15 @@
     "babelify": "^8.0.0",
     "browserify": "^16.3.0",
     "classnames": "^2.2.6",
+    "draft-js": "^0.11.4",
     "envify": "^4.1.0",
-    "escape-string-regexp": "^2.0.0",
+    "escape-string-regexp": "^3.0.0",
     "flux": "^3.1.3",
     "grunt": "^1.0.4",
     "grunt-browserify": "^5.3.0",
     "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-jshint": "^2.0.0",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-sass": "~2.0.0",
+    "grunt-sass": "~3.1.0",
     "grunt-string-replace": "~1.3.1",
     "grunt-strip": "^0.2.1",
     "grunt-text-replace": "^0.4.0",
@@ -30,32 +30,30 @@
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.4.1",
     "keymirror": "^0.1.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lokijs": "^1.3.11",
     "moment": "^2.24.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.14.1",
+    "nvm": "0.0.4",
     "object-assign": "^4.1.1",
     "prop-types": "^15.6.0",
     "react": "^16.9.0",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.9.0",
-    "react-dnd": "^5.0.0",
     "react-tagsinput": "^3.19.0",
     "react-tiny-virtual-list": "^2.2.0",
     "react-transition-group": "^4.2.2",
     "react-window": "^1.8.3",
-    "semantic-ui": "^2.4.1",
-    "showdown": "^1.9.0",
-    "sprintf-js": "^1.1.1"
+    "showdown": "^1.9.1",
+    "sprintf-js": "^1.1.1",
+    "xss": "^1.0.8",
+    "yarn": "^1.22.4"
   },
   "devDependencies": {
-    "grunt-cli": "^1.3.2",
-    "babel-preset-stage-2": "^6.24.1"
+    "babel-preset-stage-2": "^6.24.1",
+    "grunt-cli": "^1.3.2"
   },
-  "babel": {
-    "presets": [
-      "env",
-      "react"
-    ]
+  "engines": {
+    "node": "9.11.2"
   }
 }

@@ -52,12 +52,12 @@ class SearchModel {
     /**
      * @throws Exception
      */
-    public function replaceAll(){
+    public function replaceAll() {
 
-        $sql = $this->_loadReplaceAllQuery();
+        $sql       = $this->_loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
-        $sqlBatch = [];
+        $sqlBatch  = [];
         $sqlValues = [];
         foreach ( $resultSet as $key => $tRow ) {
 
@@ -71,9 +71,9 @@ class SearchModel {
             /**
              * Escape for database
              */
-            $sqlBatch[] = "(?,?,?)";
-            $sqlValues[] = $tRow['id_segment'];
-            $sqlValues[] = $tRow['id_job'];
+            $sqlBatch[]  = "(?,?,?)";
+            $sqlValues[] = $tRow[ 'id_segment' ];
+            $sqlValues[] = $tRow[ 'id_job' ];
             $sqlValues[] = $trMod;
 
         }
@@ -82,7 +82,7 @@ class SearchModel {
         //but we can assume that max translation length is more or less 2.5KB
         // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
         // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
@@ -93,8 +93,8 @@ class SearchModel {
             ";
 
             $data = [
-                    'id_segment' => $sqlValuesChunk[ $k ][ 0 ],
-                    'id_job' => $sqlValuesChunk[ $k ][ 1 ],
+                    'id_segment'  => $sqlValuesChunk[ $k ][ 0 ],
+                    'id_job'      => $sqlValuesChunk[ $k ][ 1 ],
                     'translation' => $sqlValuesChunk[ $k ][ 2 ],
             ];
 
@@ -102,7 +102,7 @@ class SearchModel {
 
                 $this->_insertQuery( $sqlUpdate, $data );
 
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
 
                 $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
 				- job id            : " . $this->queryParams->job . "
@@ -112,7 +112,7 @@ class SearchModel {
                 Log::$fileName = 'ReplaceAll_Failures.log';
                 Log::doJsonLog( $sql );
                 Log::doJsonLog( $resultSet );
-                Log::doJsonLog( $sqlInsert );
+//                Log::doJsonLog( $sqlInsert );
                 Log::doJsonLog( $msg );
 
                 Utils::sendErrMailReport( $msg );
@@ -137,20 +137,26 @@ class SearchModel {
         $sql = null;
         switch ( $this->queryParams->key ) {
             case 'source':
-                $sql = $this->_loadSearchInSourceQuery();
+                $results = $this->_getQuery( $this->_loadSearchInSourceQuery() );
                 break;
             case 'target':
-                $sql = $this->_loadSearchInTargetQuery();
+                $results = $this->_getQuery( $this->_loadSearchInTargetQuery() );
                 break;
             case 'coupled':
-                $sql = $this->_loadSearchCoupledQuery();
+                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery() ), $this->_getQuery( $this->_loadSearchInTargetQuery() ) );
+                $results    = [];
+
+                // in this case $results is the merge of the results of two queries,
+                // every segment id will possibly have 2 occurrences (source and target)
+                foreach ( $rawResults as $rawResult ) {
+                    $results[ $rawResult[ 'id' ] ][] = $rawResult[ 'text' ];
+                }
+
                 break;
             case 'status_only':
-                $sql = $this->_loadSearchStatusOnlyQuery();
+                $results = $this->_getQuery( $this->_loadSearchStatusOnlyQuery() );
                 break;
         }
-
-        $results = $this->_getQuery( $sql );
 
         $vector = [
                 'sid_list' => [],
@@ -162,12 +168,40 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, false, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
+                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm );
                 $matchesCount = count( $matches );
 
-                if ( $matchesCount > 0 and $matches[ 0 ][ 0 ] !== '' ) {
+                if ( $this->hasMatches( $matches ) ) {
                     $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
                     $vector[ 'count' ]      = $vector[ 'count' ] + $matchesCount;
+                }
+            }
+
+            if ( $vector[ 'count' ] == 0 ) {
+                $vector[ 'sid_list' ] = [];
+                $vector[ 'count' ]    = 0;
+            }
+
+        } elseif ( $this->queryParams->key === 'coupled' ) {
+
+            foreach ( $results as $id => $occurrence ) {
+
+                // check if exists match target
+                if ( isset( $occurrence[ 1 ] ) ) {
+
+                    // match source
+                    $searchTermSource   = $this->queryParams->source;
+                    $matchesSource      = $this->find( $occurrence[ 0 ], $searchTermSource );
+                    $matchesSourceCount = count( $matchesSource );
+
+                    $searchTermTarget   = $this->queryParams->target;
+                    $matchesTarget      = $this->find( $occurrence[ 1 ], $searchTermTarget );
+                    $matchesTargetCount = count( $matchesTarget );
+
+                    if ( $this->hasMatches( $matchesSource ) and $this->hasMatches( $matchesTarget ) ) {
+                        $vector[ 'sid_list' ][] = strval($id);
+                        $vector[ 'count' ]      = $vector[ 'count' ] + $matchesTargetCount + $matchesSourceCount;
+                    }
                 }
             }
 
@@ -185,6 +219,26 @@ class SearchModel {
         }
 
         return $vector;
+    }
+
+    /**
+     * @param array $matches
+     *
+     * @return bool
+     */
+    private function hasMatches( array $matches ) {
+
+        return count( $matches ) > 0 and $matches[ 0 ][ 0 ] !== '';
+    }
+
+    /**
+     * @param string $haystack
+     * @param string $needle
+     *
+     * @return array
+     */
+    private function find( $haystack, $needle ) {
+        return WholeTextFinder::find( $haystack, $needle, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
     }
 
     /**

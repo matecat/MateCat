@@ -33,6 +33,27 @@ class MetadataDao extends \DataAccess_AbstractDao {
     /**
      * @param $id_job
      * @param $password
+     *
+     * @return \DataAccess_IDaoStruct[]
+     */
+    public function getByJobIdAndPassword( $id_job, $password ) {
+        $stmt = $this->_getStatementForCache(
+                "SELECT * FROM job_metadata WHERE " .
+                " id_job = :id_job " .
+                " AND password = :password "
+        );
+
+        $result = $this->_fetchObject( $stmt, new MetadataStruct() , array(
+            'id_job' => $id_job,
+            'password' => $password,
+        ) );
+
+        return @$result;
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
      * @param $key
      * @return MetadataStruct
      */

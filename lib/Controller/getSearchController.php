@@ -394,6 +394,10 @@ class getSearchController extends ajaxController {
                 }
             }
 
+            $filter = Filter::getInstance( $this->featureSet );
+            $replacedTranslation = $filter->fromLayer1ToLayer0( $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] ) );
+            $replacedTranslation = Utils::stripBOM( $replacedTranslation );
+
             // Setup $new_translation
             $new_translation                         = new Translations_SegmentTranslationStruct();
             $new_translation->id_segment             = $tRow[ 'id_segment' ];
@@ -401,7 +405,7 @@ class getSearchController extends ajaxController {
             $new_translation->status                 = $this->_getNewStatus( $old_translation );
             $new_translation->time_to_edit           = $old_translation->time_to_edit;
             $new_translation->segment_hash           = $segment->segment_hash;
-            $new_translation->translation            = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
+            $new_translation->translation            = $replacedTranslation;
             $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
             $new_translation->suggestion_position    = $old_translation->suggestion_position;
             $new_translation->warning                = $old_translation->warning;
