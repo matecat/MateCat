@@ -597,7 +597,7 @@ class Xliff_Parser {
                     //
                     // Note 2020-02-11
                     // ------------------------------------------------------------------
-                    // We substituted saveXML() with saveHTML() in order to transform all chars to entities.
+                    // We tried to substitute saveXML() with saveHTML() in order to transform all chars to entities.
                     //
                     // Consider this example:
                     //
@@ -606,12 +606,12 @@ class Xliff_Parser {
                     // saveXML() will convert it to the emoji char
                     // saveHTML() will convert it to a hexadecimal representation
                     //
-                    // The color skin tone emojis are interpreted as a white space in ProjectManager:2531, and for this reason
-                    // the count of characters in $segment will be wrong. And then $before, $cleanSegment, $after will be broken
+                    // The color skin tone emojis was interpreted as a white space in ProjectManager:2531, and for this reason
+                    // the count of characters in $segment was wrong. And then $before, $cleanSegment, $after was broken
                     //
-                    // Loop on the child nodes, saveHTML concatenation
+                    // Loop on the child nodes, saveXML concatenation
                     foreach ( $_tag->childNodes as $node ) {
-                        $_tmpTag .= $dDoc->saveHTML( $node );
+                        $_tmpTag .= $dDoc->saveXML( $node );
                     }
 
                 }

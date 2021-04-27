@@ -172,7 +172,7 @@ GLOSSARY_READ[pid_set_name]  = "ch_pid_glossary_read"
 GLOSSARY_READ[max_executors] = 1
 GLOSSARY_READ[redis_key]     = "glossary_read"
 GLOSSARY_READ[loggerName]    = "glossary_read.log"
-​
+
 ;;###################################
 ;;##### Key Name GlossaryWrite  #####
 ;;###################################

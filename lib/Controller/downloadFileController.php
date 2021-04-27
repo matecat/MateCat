@@ -10,7 +10,10 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use XliffReplacer\XliffReplacerCallback;
 use XliffReplacer\XliffReplacerFactory;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
 
@@ -88,7 +91,7 @@ class downloadFileController extends downloadController {
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
             $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, (int)$this->id_job );
-            $jobData = $this->job = $chunkReviewStruct->getChunk();
+            $jobData           = $this->job = $chunkReviewStruct->getChunk();
         }
 
         // check for Password correctness
@@ -177,19 +180,28 @@ class downloadFileController extends downloadController {
                         , $xliffFilePath
                 );
 
-                $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
-
-                //instantiate parser
-                $xsp = XliffReplacerFactory::getInstance( $fileType, $data, $transUnits, $_target_lang );
-                $xsp->setFileDescriptors( $xliffFilePath, $outputPath );
-
-                if ( $this->download_type == 'omegat' ) {
-                    $xsp->setSourceInTarget( true );
+                // if Filestorage is on S3, download the file on a temp dir
+                if ( AbstractFilesStorage::isOnS3() ) {
+                    $s3Client            = S3FilesStorage::getStaticS3Client();
+                    $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
+                    $params[ 'key' ]     = $xliffFilePath;
+                    $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $xliffFilePath, PATHINFO_BASENAME );
+                    $s3Client->downloadItem( $params );
+                    $xliffFilePath = $params[ 'save_as' ];
                 }
 
-                //run parsing
+                $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
+
+                // instantiate parser
+                $xsp = new \Matecat\XliffParser\XliffParser();
+
+                // instantiateXliffReplacerCallback
+                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
+
+                // run xliff replacer
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation( $this->featureSet );
+                $setSourceInTarget = $this->download_type === 'omegat';
+                $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
                 //free memory
                 unset( $xsp );
@@ -334,14 +346,16 @@ class downloadFileController extends downloadController {
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
 
-                    $this->setFilename( $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ] );
+                    $filename = $this->generateFilename($this->getDefaultFileName( $this->project ), $jobData[ 'target' ]);
+
+                    $this->setFilename( $filename );
                     $this->startRemoteFileService( $output_content );
 
                     if ( $this->openOriginalFiles ) {
-                        $this->outputResultForOriginalFiles(); //TODO remove download original from download File // Remove echo
+                        $this->outputResultForOriginalFiles();
                     } else {
                         $this->updateRemoteFiles( $this->getOutputContentsWithZipFiles( $output_content ) );
-                        $this->outputResultForRemoteFiles(); //TODO Remove echo
+                        $this->outputResultForRemoteFiles();
                     }
 
                 } else {
@@ -351,7 +365,7 @@ class downloadFileController extends downloadController {
 
                     if ( count( $output_content ) > 1 ) {
 
-                        //cast $output_content elements to ZipContentObject
+                        // cast $output_content elements to ZipContentObject
                         foreach ( $output_content as $key => $__output_content_elem ) {
                             $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
                         }
@@ -368,20 +382,20 @@ class downloadFileController extends downloadController {
 
                     } else {
 
-                        //always an array with 1 element, pop it, Ex: array( array() )
+                        // always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
 
+                        $filename = $this->generateFilename($oContent->output_filename);
+
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
-                            $this->setFilename( $oContent->output_filename );
+                            $this->setFilename( $filename );
                         } else {
-                            $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null ) ) );
+                            $this->setFilename( self::forceOcrExtension( $filename . ( $this->forceXliff ? ".xlf" : null ) ) );
                         }
 
                         $this->setOutputContent( $oContent );
                         $this->setMimeType();
-
                     }
-
                 }
 
             } catch ( Exception $e ) {
@@ -411,6 +425,65 @@ class downloadFileController extends downloadController {
 
         $this->_saveActivity();
 
+    }
+
+    /**
+     * @param string $originalFilename
+     * @param null $target
+     *
+     * @return mixed|string
+     */
+    private function generateFilename($originalFilename, $target = null) {
+        $pathInfo = AbstractFilesStorage::pathinfo_fix( $originalFilename );
+        $extension = ($this->isAnIWorkFile($pathInfo[ 'extension' ])) ? $this->overrideExtensionForIWorkFiles($pathInfo[ 'extension' ])  : $pathInfo[ 'extension' ];
+
+        $filename = '';
+
+        if(isset($pathInfo['dirname']) and $pathInfo['dirname'] != ''){
+            $filename .= $pathInfo['dirname'] . DIRECTORY_SEPARATOR;
+        }
+
+        $filename .= $pathInfo[ 'filename' ];
+
+        if($target){
+            $filename .= "_" . $target;
+        }
+
+        $filename .= "." .$extension;
+
+        return $filename;
+    }
+
+    /**
+     * @param string $extension
+     *
+     * @return bool
+     */
+    private function isAnIWorkFile($extension) {
+        return in_array($extension, ['pages', 'numbers', 'key']);
+    }
+
+    /**
+     * We need to convert iWorks file extensions
+     * because Matecat filters converts them
+     * to the corresponding MS Office format
+     *
+     * @param string $extension
+     *
+     * @return string
+     */
+    private function overrideExtensionForIWorkFiles($extension){
+
+        switch ($extension){
+            case "key":
+                return "pptx";
+
+            case "numbers":
+                return "xlsx";
+
+            case "pages":
+                return "docx";
+        }
     }
 
     /**
@@ -571,8 +644,7 @@ class downloadFileController extends downloadController {
      */
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
-        $extension = AbstractFilesStorage::pathinfo_fix( $path );
-        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
+        if ( !XliffFiles::isXliff( $path ) ) {
             return $documentContent;
         }
 
@@ -588,7 +660,7 @@ class downloadFileController extends downloadController {
         }
 
         //avoid in memory copy of very large files if possible
-        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+        $detect_result = XliffProprietaryDetect::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
         //clean mrk tags for GlobalSight application compatibility
         //this should be a sax parser instead of in memory copy for every trans-unit
@@ -633,7 +705,10 @@ class downloadFileController extends downloadController {
         //group files by zip archive
         foreach ( $output_content as $idFile => $fileInformations ) {
 
-            //If this file comes from a ZIP, add it to $zipFiles
+            $fileInformations['output_filename'] = $this->generateFilename($fileInformations['output_filename']);
+            $output_content[ $idFile ]['output_filename'] = $fileInformations['output_filename'];
+
+            // If this file comes from a ZIP, add it to $zipFiles
             if ( isset( $fileInformations[ 'zipfilename' ] ) ) {
                 $zipFileName = $fileInformations[ 'zipfilename' ];
 
@@ -746,34 +821,38 @@ class downloadFileController extends downloadController {
                         [ DIRECTORY_SEPARATOR, "" ],
                         $filePath );
                 $realZipFilePath = ltrim( $realZipFilePath, "/" );
+                $newRealZipFilePath = $this->generateFilename($realZipFilePath);
 
                 //remove the tmx from the original zip ( we want not to be exported as preview )
-                if ( AbstractFilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                if ( AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                    $zip->deleteName( $newRealZipFilePath );
                     $zip->deleteName( $realZipFilePath );
                     continue;
                 }
 
-                //fix the file names inside the zip file, so we compare with our files
+                // fix the file names inside the zip file, so we compare with our files
                 // and if matches we can substitute them with the converted ones
                 foreach ( $newInternalZipFiles as $index => $newInternalZipFile ) {
 
                     if ( $this->forceXliff ) {
                         $declaredOutputFileName = preg_replace( '/\.xlf|\.xliff|\.sdlxliff$/', '', $newInternalZipFile->output_filename );
-                        $isTheSameFile          = ( $declaredOutputFileName == $realZipFilePath );
+                        $isTheSameFile          = ( $declaredOutputFileName == $newRealZipFilePath );
                     } else {
-                        $isTheSameFile = ( $newInternalZipFile->output_filename == $realZipFilePath );
+                        $isTheSameFile = ( $newInternalZipFile->output_filename == $newRealZipFilePath );
                     }
 
                     if ( $isTheSameFile ) {
 
                         $zip->deleteName( $realZipFilePath );
-                        if ( AbstractFilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
-                            $realZipFilePath .= '.docx';
+                        $zip->deleteName( $newRealZipFilePath );
+
+                        if ( AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
+                            $newRealZipFilePath .= '.docx';
                         } elseif ( $this->forceXliff ) {
-                            $realZipFilePath = $newInternalZipFile->output_filename;
+                            $newRealZipFilePath = $newInternalZipFile->output_filename;
                         }
 
-                        $zip->addFromString( $realZipFilePath, $newInternalZipFile->getContent() );
+                        $zip->addFromString( $newRealZipFilePath, $newInternalZipFile->getContent() );
 
                     }
                 }

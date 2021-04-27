@@ -88,6 +88,9 @@ class setTranslationController extends ajaxController {
                 'password'                => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
+                'current_password'                => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
                 'propagate'               => [
                         'filter' => FILTER_VALIDATE_BOOLEAN, 'flags' => FILTER_NULL_ON_FAILURE
                 ],
@@ -116,9 +119,10 @@ class setTranslationController extends ajaxController {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job         = $this->__postInput[ 'id_job' ];
-        $this->password       = $this->__postInput[ 'password' ];
-        $this->revisionNumber = $this->__postInput[ 'revision_number' ];
+        $this->id_job             = $this->__postInput[ 'id_job' ];
+        $this->password           = $this->__postInput[ 'password' ];
+        $this->received_password  = $this->__postInput[ 'current_password' ];
+        $this->revisionNumber     = $this->__postInput[ 'revision_number' ];
 
         /*
          * set by the client, mandatory
@@ -191,8 +195,8 @@ class setTranslationController extends ajaxController {
             $this->project = $this->chunk->getProject();
 
             $this->featureSet->loadForProject( $this->project );
-            $this->filter = Filter::getInstance( $this->featureSet );
 
+            $this->filter = Filter::getInstance( $this->featureSet, Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
@@ -330,7 +334,8 @@ class setTranslationController extends ajaxController {
             $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );
         } else {
             $err_json    = '';
-            $translation = $this->filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
+            $targetNormalized = $check->getTrgNormalized();
+            $translation = $this->filter->fromLayer1ToLayer0( $targetNormalized );
         }
 
         //PATCH TO FIX BOM INSERTIONS

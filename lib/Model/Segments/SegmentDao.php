@@ -1,15 +1,14 @@
 <?php
 
-use Segments\SegmentUIStruct;
 use Features\ReviewExtended\ReviewUtils;
+use Segments\SegmentUIStruct;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
     protected static $auto_increment_field = [ 'id' ];
 
 
-
-    const ISSUE_CATEGORY_ALL = 'all' ;
+    const ISSUE_CATEGORY_ALL = 'all';
 
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->database->getConnection();
@@ -253,25 +252,23 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
                     }
                 }
-            }
-            elseif (
+            } elseif (
                     isset( $options[ 'filter' ][ 'issue_category' ] ) &&
                     $options[ 'filter' ][ 'issue_category' ] == self::ISSUE_CATEGORY_ALL
             ) {
                 if ( $chunk->getProject()->getFeaturesSet()->hasRevisionFeature() ) {
-                    $options_conditions_query .= " AND e.id_category IS NOT NULL " ;
-                }
-                else {
+                    $options_conditions_query .= " AND e.id_category IS NOT NULL ";
+                } else {
                     $options_conditions_query .= " AND ( " .
-                            implode(' OR ', array_map( function( $name ) {
+                            implode( ' OR ', array_map( function ( $name ) {
                                 return " ( sr.$name != 'none' AND sr.$name != '') ";
-                            }, Constants_Revise::$categoriesDbNames ) ) . " ) " ;
+                            }, Constants_Revise::$categoriesDbNames ) ) . " ) ";
                 }
             }
 
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {
-                $options_conditions_query .= " AND (
+                $options_conditions_query                .= " AND (
                     e.severity = :severity OR (
                         sr.err_typing = :severity OR
                         sr.err_translation = :severity OR
@@ -283,25 +280,24 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             }
         }
 
-        if ( isset( $options['filter']['id_segment'] ) && !empty( $options['filter']['id_segment'] ) ) {
-            $options_conditions_query .= " AND s.id = :id_segment " ;
-            $options_conditions_values[ 'id_segment' ] = $options['filter']['id_segment'] ;
+        if ( isset( $options[ 'filter' ][ 'id_segment' ] ) && !empty( $options[ 'filter' ][ 'id_segment' ] ) ) {
+            $options_conditions_query                  .= " AND s.id = :id_segment ";
+            $options_conditions_values[ 'id_segment' ] = $options[ 'filter' ][ 'id_segment' ];
 
         }
 
-        if ( isset( $options['filter']['revision_number'] ) && !empty( $options['filter']['revision_number'] ) ) {
+        if ( isset( $options[ 'filter' ][ 'revision_number' ] ) && !empty( $options[ 'filter' ][ 'revision_number' ] ) ) {
             $join_revision_number = " JOIN segment_translation_events ste on s.id = ste.id_segment " .
-                    " AND ste.id_job = j.id  "  .
-                    " AND ste.source_page = :source_page  "  .
+                    " AND ste.id_job = j.id  " .
+                    " AND ste.source_page = :source_page  " .
                     " AND ste.version_number = st.version_number " .
-                    " AND ste.final_revision = 1 " ;
+                    " AND ste.final_revision = 1 ";
 
-            $options_conditions_values['source_page'] = ReviewUtils::revisionNumberToSourcePage(
+            $options_conditions_values[ 'source_page' ] = ReviewUtils::revisionNumberToSourcePage(
                     $options[ 'filter' ] [ 'revision_number' ]
-            ) ;
-        }
-        else {
-            $join_revision_number = '' ;
+            );
+        } else {
+            $join_revision_number = '';
         }
 
         $queryAfter = "
@@ -398,7 +394,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 'id_job'      => $chunk->id,
                 'password'    => $chunk->password,
                 'ref_segment' => $ref_segment
-            ], $options_conditions_values );
+        ], $options_conditions_values );
 
         $stmt->execute( $conditions_values );
         $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
@@ -423,7 +419,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
-        reset( $segments_id ) ;
+        reset( $segments_id );
         $min = current( $segments_id );
         $max = end( $segments_id );
 
@@ -480,7 +476,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $stmt = $db->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct" );
-        $stmt->execute( array_merge( [$job_id, $min, $max], $segments_id, [ $job_id, $job_password ] ) );
+        $stmt->execute( array_merge( [ $job_id, $min, $max ], $segments_id, [ $job_id, $job_password ] ) );
 
         $results = $stmt->fetchAll();
 
@@ -548,7 +544,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
             } catch ( PDOException $e ) {
                 Log::doJsonLog( "Segment import - DB Error: " . $e->getMessage() );
-                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - " . var_export( $chunk, true ), -2 );
             }
 
         }
@@ -569,7 +565,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         switch ( $where ) {
             case 'after':
-                $step = $step * 2;
+                $step     = $step * 2;
                 $subQuery = "
                 SELECT * FROM (
                     SELECT segments.id AS __sid
@@ -585,7 +581,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 ";
                 break;
             case 'before':
-                $step = $step * 2;
+                $step     = $step * 2;
                 $subQuery = "
                 SELECT * FROM (
                     SELECT  segments.id AS __sid
@@ -649,6 +645,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.warning,
                 sts.source_chunk_lengths,
                 sts.target_chunk_lengths,
+                sod.map AS data_ref_map,
                 IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
                 , COALESCE( autopropagated_from, 0 ) as autopropagated_from
                 ,( SELECT COUNT( segment_hash )
@@ -664,6 +661,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 JOIN segment_translations st ON st.id_segment = s.id
                 JOIN jobs j ON j.id = st.id_job
                 LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = :id_job
+                LEFT JOIN segment_original_data sod ON sod.id_segment = s.id
                 JOIN (
 
                   $subQuery
@@ -701,22 +699,25 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             st.translation, 
             st.status,
             st.eq_word_count,
-            s.raw_word_count
+            s.raw_word_count,
+            od.map as data_ref_map
         FROM files 
         JOIN segments s ON s.id_file = files.id
         LEFT JOIN segment_translations st ON s.id = st.id_segment AND st.id_job = :id_job
+        LEFT JOIN segment_original_data od ON s.id = od.id_segment
         WHERE files.id = :id_file
 ";
 
         $bind_keys = [
-                'id_job'   => $jStruct->id,
-                'id_file'  => $id_file
+                'id_job'  => $jStruct->id,
+                'id_file' => $id_file
         ];
 
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
 
         $stm->setFetchMode( PDO::FETCH_ASSOC );
         $stm->execute( $bind_keys );
+
         return $stm->fetchAll();
 
     }
@@ -748,51 +749,74 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $isPropagationToAlreadyTranslatedAvailable );
         $stm->setFetchMode( PDO::FETCH_ASSOC );
         $stm->execute( $bind_keys );
+
         return $stm->fetch();
 
     }
 
+    /**
+     * @param int    $jid
+     * @param string $jpassword
+     * @param null   $sid
+     *
+     * @return array
+     */
     public function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 
         $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
         $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
-        $jStructs   = Jobs_JobDao::getById( $jid );
-        $filtered   = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
+        $jStructs = Jobs_JobDao::getById( $jid );
+        $filtered = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
             return $item->password == $jpassword;
         } );
 
         $currentJob = array_pop( $filtered );
 
-        $bind_keys = [];
-
+        /**
+         * Get all the available translations for this segment id,
+         * the amount of equal translations,
+         * a list of id,
+         * and an editable boolean field identifying if jobs is mine or not
+         *
+         * ---------------------------------------
+         * NOTE 2020-07-07
+         * ---------------------------------------
+         * A more strict condition was added in order to check the translation mismatch
+         *
+         */
+        
         if ( $sid != null ) {
 
-            /**
-             * Get all the available translations for this segment id,
-             * the amount of equal translations,
-             * a list of id,
-             * and an editable boolean field identifying if jobs is mine or not
-             *
-             */
             $query = "
-			SELECT
-			translation,
-			COUNT( distinct id_segment ) as TOT,
-			GROUP_CONCAT( distinct id_segment ) AS involved_id,
-			IF( password = '{$currentJob->password}' AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
-				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$jStructs[0]->job_first_segment} AND " . end( $jStructs )->job_last_segment . "
-				WHERE segment_hash = (
-					SELECT segment_hash FROM segments WHERE id = :id_segment
-				)
-				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
-				AND id_job = {$jStructs[0]->id}
-				AND id_segment != :id_segment
-				GROUP BY translation, id_job
-		";
+                SELECT
+                translation,
+                COUNT( distinct id_segment ) as TOT,
+                GROUP_CONCAT( distinct id_segment ) AS involved_id,
+                IF( password = :job_password AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
+                    FROM segment_translations
+                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
+                    WHERE segment_hash = (
+                        SELECT segment_hash FROM segments WHERE id = :id_segment
+                    )
+                    AND segment_translations.status IN( :st_translated , :st_approved )
+                    AND id_job = :id_job
+                    AND id_segment != :id_segment
+                    AND translation != (
+                        SELECT translation FROM segment_translations where id_segment = :id_segment and id_job=:id_job
+                    )
+                    GROUP BY translation, id_job
+            ";
 
-            $bind_keys = [ 'id_segment' => $sid ];
+            $bind_keys = [
+                    'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
+                    'job_last_segment'  => end( $jStructs )->job_last_segment,
+                    'job_password'      => $currentJob->password,
+                    'st_approved'       => $st_approved,
+                    'st_translated'     => $st_translated,
+                    'id_job'            => $jStructs[ 0 ]->id,
+                    'id_segment'        => $sid
+            ];
 
         } else {
             //TODO cache this query?
@@ -807,23 +831,33 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
              *
              */
             $query = "
-			SELECT
-			COUNT( segment_hash ) AS total_sources,
-			COUNT( DISTINCT translation ) AS translations_available,
-			IF( password = '{$currentJob->password}', MIN( id_segment ), NULL ) AS first_of_my_job
-				FROM segment_translations
-				JOIN jobs ON id_job = id AND id_segment between {$currentJob->job_first_segment} AND {$currentJob->job_last_segment}
-				WHERE id_job = {$currentJob->id}
-				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
-				GROUP BY segment_hash, CONCAT( id_job, '-', password )
-				HAVING translations_available > 1
-		";
+                SELECT
+                COUNT( segment_hash ) AS total_sources,
+                COUNT( DISTINCT translation ) AS translations_available,
+                IF( password = :job_password, MIN( id_segment ), NULL ) AS first_of_my_job
+                    FROM segment_translations
+                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
+                    WHERE id_job = :id_job
+                    AND segment_translations.status IN( :st_translated , :st_approved )
+                    GROUP BY segment_hash, CONCAT( id_job, '-', password )
+                    HAVING translations_available > 1
+            ";
+
+            $bind_keys = [
+                    'job_first_segment' => $currentJob->job_first_segment,
+                    'job_last_segment'  => $currentJob->job_last_segment,
+                    'job_password'      => $currentJob->password,
+                    'st_approved'       => $st_approved,
+                    'st_translated'     => $st_translated,
+                    'id_job'            => $currentJob->id,
+            ];
 
         }
 
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
         $stm->setFetchMode( PDO::FETCH_ASSOC );
         $stm->execute( $bind_keys );
+
         return $stm->fetchAll();
 
     }
@@ -854,9 +888,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
 
         $bind_values = [
-                'jid'               => $jid,
-                'sid'               => $sid,
-                'password'          => $password
+                'jid'      => $jid,
+                'sid'      => $sid,
+                'password' => $password
         ];
 
         $query = "SELECT s.id, st.status
@@ -874,6 +908,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt = Database::obtain()->getConnection()->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute( $bind_values );
+
         return $stmt->fetchAll();
 
     }

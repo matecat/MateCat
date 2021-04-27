@@ -26,6 +26,7 @@ use Routes;
 use SegmentTranslationChangeVector;
 use TransactionableTrait;
 use Users_UserDao;
+use Users_UserStruct;
 
 class SegmentTranslationModel implements ISegmentTranslationModel {
 
@@ -120,12 +121,12 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         for ( $i = 0; $i < count( $this->_chunkReviews ); $i++ ) {
 
             // build a new ChunkReviewStruct
-            $chunkReview                       = new ChunkReviewStruct();
-            $chunkReview->id                   = $this->_chunkReviews[ $i ]->id;
-            $chunkReview->id_project           = $this->_chunkReviews[ $i ]->id_project;
-            $chunkReview->id_job               = $this->_chunkReviews[ $i ]->id_job;
-            $chunkReview->password             = $this->_chunkReviews[ $i ]->password;
-            $chunkReview->source_page          = $this->_chunkReviews[ $i ]->source_page;
+            $chunkReview              = new ChunkReviewStruct();
+            $chunkReview->id          = $this->_chunkReviews[ $i ]->id;
+            $chunkReview->id_project  = $this->_chunkReviews[ $i ]->id_project;
+            $chunkReview->id_job      = $this->_chunkReviews[ $i ]->id_job;
+            $chunkReview->password    = $this->_chunkReviews[ $i ]->password;
+            $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
 
             if ( $this->_model->isEnteringReviewedState() && $destinationSourcePage == $chunkReview->source_page ) {
                 // expect the first chunk review record to be the final
@@ -305,9 +306,9 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         $segmentInfo = [
-                'segment_source'  => htmlentities( $this->_model->getSegmentStruct()->segment, ENT_HTML5 | ENT_NOQUOTES ),
-                'old_translation' => htmlentities( $this->_model->getEventModel()->getOldTranslation()->translation, ENT_HTML5 | ENT_NOQUOTES ),
-                'new_translation' => htmlentities( $this->_model->getEventModel()->getTranslation()->translation, ENT_HTML5 | ENT_NOQUOTES ),
+                'segment_source'  => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getSegmentStruct()->segment ),
+                'old_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getEventModel()->getOldTranslation()->translation ),
+                'new_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getEventModel()->getTranslation()->translation ),
                 'issues'          => $serialized_issues
         ];
 
@@ -351,14 +352,15 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
         $notifiedEmails = [];
         foreach ( $emails as $email ) {
-            if ( !in_array( $email[ 'recipient' ]->email, $notifiedEmails ) ) {
+            $recipientEmail = $email[ 'recipient' ]->email;
+
+            if ( !in_array( $recipientEmail, $notifiedEmails ) ) {
                 $delivery = new RevisionChangedNotificationEmail( $segmentInfo, $email, $url, $userWhoChangedTheSegment );
                 $delivery->send();
-                $notifiedEmails[] = $email[ 'recipient' ]->email;
+                $notifiedEmails[] = $recipientEmail;
             }
         }
     }
-
 
     protected function advancementWordCount() {
         if ( $this->_model->getEventModel()->getOldTranslation()->isICE() || $this->_model->getEventModel()->getOldTranslation()->isPreTranslated() ) {

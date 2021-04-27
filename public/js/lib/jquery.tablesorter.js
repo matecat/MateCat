@@ -16,7 +16,6 @@
 * @author Christian Bach - christian.bach@polyester.se
 * @contributor Rob Garrison - https://github.com/Mottie/tablesorter
 */
-/*jshint browser:true, jquery:true, unused:false, expr: true */
 ;( function( $ ) {
 	'use strict';
 	var ts = $.tablesorter = {
@@ -738,7 +737,6 @@
 		},
 
 		getParserById : function( name ) {
-			/*jshint eqeqeq:false */
 			if ( name == 'false' ) { return false; }
 			var indx,
 				len = ts.parsers.length;
@@ -1607,7 +1605,7 @@
 		},
 
 		// sort multiple columns
-		multisort : function( c ) { /*jshint loopfunc:true */
+		multisort : function( c ) {
 			var tbodyIndex, sortTime, colMax, rows,
 				table = c.table,
 				dir = 0,
@@ -2108,7 +2106,6 @@
 
 		// $.isEmptyObject from jQuery v1.4
 		isEmptyObject : function( obj ) {
-			/*jshint forin: false */
 			for ( var name in obj ) {
 				return false;
 			}
@@ -2459,7 +2456,6 @@
 	if ( !( window.console && window.console.log ) ) {
 		// access $.tablesorter.logs for browsers that don't have a console...
 		ts.logs = [];
-		/*jshint -W020 */
 		console = {};
 		console.log = console.warn = console.error = console.table = function() {
 			var arg = arguments.length > 1 ? arguments : arguments[0];

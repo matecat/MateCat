@@ -31,24 +31,24 @@ class convertFileController extends ajaxController {
     public function __construct() {
         parent::__construct();
 
-        $filterArgs = array(
-                'file_name'         => array(
+        $filterArgs = [
+                'file_name'         => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH
-                ),
-                'source_lang'       => array(
+                ],
+                'source_lang'       => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'target_lang'       => array(
+                ],
+                'target_lang'       => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'segmentation_rule' => array(
+                ],
+                'segmentation_rule' => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
-        );
+                ]
+        ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -78,24 +78,26 @@ class convertFileController extends ajaxController {
         $this->validateSourceLang();
         $this->validateTargetLangs();
 
-        if( !Utils::isTokenValid( $this->cookieDir ) ){
+        if ( !Utils::isTokenValid( $this->cookieDir ) ) {
             $this->result[ 'code' ]     = -19; // No Good, Default
-            $this->result[ 'errors' ][] = array( "code" => -19, "message" => "Invalid Upload Token." );
+            $this->result[ 'errors' ][] = [ "code" => -19, "message" => "Invalid Upload Token." ];
+
             return false;
         }
 
         if ( !Utils::isValidFileName( $this->file_name ) || empty( $this->file_name ) ) {
             $this->result[ 'code' ]     = -1; // No Good, Default
-            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Invalid File." );
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Invalid File." ];
+
             return false;
         }
 
-        if( !empty( $this->result[ 'errors' ] ) ){
+        if ( !empty( $this->result[ 'errors' ] ) ) {
             return false;
         }
 
         if ( $this->isLoggedIn() ) {
-            $this->featureSet->loadFromUserEmail( $this->user->email ) ;
+            $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
         $ext = AbstractFilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
@@ -115,10 +117,10 @@ class convertFileController extends ajaxController {
             if ( $this->convertZipFile ) {
                 $this->handleZip( $conversionHandler );
             } else {
-                $this->result[ 'errors' ][] = array(
+                $this->result[ 'errors' ][] = [
                         "code"    => -2,
                         "message" => "Nested zip files are not allowed"
-                );
+                ];
 
                 return false;
             }
@@ -129,7 +131,7 @@ class convertFileController extends ajaxController {
 
         }
 
-        ( isset( $this->result[ 'errors' ] ) ) ? null : $this->result[ 'errors' ] = array();
+        ( isset( $this->result[ 'errors' ] ) ) ? null : $this->result[ 'errors' ] = [];
 
         if ( count( $this->result[ 'errors' ] ) == 0 ) {
             $this->result[ 'code' ] = 1;
@@ -142,7 +144,7 @@ class convertFileController extends ajaxController {
         try {
             $this->lang_handler->validateLanguage( $this->source_lang );
         } catch ( Exception $e ) {
-            $this->result[ 'errors' ][]    = [ "code" => -3, "message" => $e->getMessage() ];
+            $this->result[ 'errors' ][] = [ "code" => -3, "message" => $e->getMessage() ];
         }
     }
 
@@ -152,7 +154,7 @@ class convertFileController extends ajaxController {
         $targets = array_unique( $targets );
 
         if ( empty( $targets ) ) {
-            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => "Missing target language." ];
+            $this->result[ 'errors' ][] = [ "code" => -4, "message" => "Missing target language." ];
         }
 
         try {
@@ -162,107 +164,111 @@ class convertFileController extends ajaxController {
             }
 
         } catch ( Exception $e ) {
-            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
+            $this->result[ 'errors' ][] = [ "code" => -4, "message" => $e->getMessage() ];
         }
 
         $this->target_lang = implode( ',', $targets );
     }
 
     private function handleZip( ConversionHandler $conversionHandler ) {
-        
-      // this makes the conversionhandler accumulate eventual errors on files and continue
-      $conversionHandler->setStopOnFileException( false );
 
-      $internalZipFileNames = $conversionHandler->extractZipFile();
-      //call convertFileWrapper and start conversions for each file
+        // this makes the conversionhandler accumulate eventual errors on files and continue
+        $conversionHandler->setStopOnFileException( false );
 
-      if ( $conversionHandler->uploadError ) {
-        $fileErrors = $conversionHandler->getUploadedFiles();
+        $internalZipFileNames = $conversionHandler->extractZipFile();
+        //call convertFileWrapper and start conversions for each file
 
-        foreach ( $fileErrors as $fileError ) {
-          if ( count( $fileError->error ) == 0 ) {
-            continue;
-          }
+        if ( $conversionHandler->uploadError ) {
+            $fileErrors = $conversionHandler->getUploadedFiles();
 
-          $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
+            foreach ( $fileErrors as $fileError ) {
+                if ( count( $fileError->error ) == 0 ) {
+                    continue;
+                }
 
-          /*
-           * TODO
-           * return error code is 2 because
-           *      <=0 is for errors
-           *      1   is OK
-           *
-           * In this case, we raise warnings, hence the return code must be a new code
-           */
-          $this->result[ 'code' ]                      = 2;
-          $this->result[ 'errors' ][ $brokenFileName ] = array(
-            'code'    => $fileError->error[ 'code' ],
-            'message' => $fileError->error[ 'message' ],
-            'debug' => $brokenFileName
-          );
+                $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
+
+                /*
+                 * TODO
+                 * return error code is 2 because
+                 *      <=0 is for errors
+                 *      1   is OK
+                 *
+                 * In this case, we raise warnings, hence the return code must be a new code
+                 */
+                $this->result[ 'code' ]                      = 2;
+                $this->result[ 'errors' ][ $brokenFileName ] = [
+                        'code'    => $fileError->error[ 'code' ],
+                        'message' => $fileError->error[ 'message' ],
+                        'debug'   => $brokenFileName
+                ];
+            }
+
         }
 
-      }
-
-      $realFileNames = array_map(
-        array( 'ZipArchiveExtended', 'getFileName' ),
-        $internalZipFileNames
-      );
-
-      foreach ( $realFileNames as $i => &$fileObject ) {
-        $fileObject               = array(
-          'name' => $fileObject,
-          'size' => filesize( $this->intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
+        $realFileNames = array_map(
+                [ 'ZipArchiveExtended', 'getFileName' ],
+                $internalZipFileNames
         );
-      }
 
-      $this->result[ 'data' ][ 'zipFiles' ] = json_encode( $realFileNames );
-
-      $stdFileObjects = array();
-
-      if ( $internalZipFileNames !== null ) {
-        foreach ( $internalZipFileNames as $fName ) {
-
-          $newStdFile       = new stdClass();
-          $newStdFile->name = $fName;
-          $stdFileObjects[] = $newStdFile;
-
+        foreach ( $realFileNames as $i => &$fileObject ) {
+            $fileObject = [
+                    'name' => $fileObject,
+                    'size' => filesize( $this->intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
+            ];
         }
-      } else {
-        $errors = $conversionHandler->getResult();
-        $errors = array_map( array( 'Upload', 'formatExceptionMessage' ), $errors[ 'errors' ] );
 
-        $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
+        $this->result[ 'data' ][ 'zipFiles' ] = json_encode( $realFileNames );
 
-        return false;
-      }
+        $stdFileObjects = [];
 
-      /* Do conversions here */
-      $converter              = new ConvertFileWrapper( $stdFileObjects, false );
-      $converter->intDir      = $this->intDir;
-      $converter->errDir      = $this->errDir;
-      $converter->cookieDir   = $this->cookieDir;
-      $converter->source_lang = $this->source_lang;
-      $converter->target_lang = $this->target_lang;
-      $converter->featureSet  = $this->featureSet;
-      $converter->doAction();
+        if ( $internalZipFileNames !== null ) {
+            foreach ( $internalZipFileNames as $fName ) {
 
-      $errors = $converter->checkResult();
-      if ( count( $errors ) > 0 ) {
-        $this->result[ 'code' ] = 2;
+                $newStdFile       = new stdClass();
+                $newStdFile->name = $fName;
+                $stdFileObjects[] = $newStdFile;
+
+            }
+        } else {
+            $errors = $conversionHandler->getResult();
+            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors[ 'errors' ] );
+
+            $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
+
+            return false;
+        }
+
+        /* Do conversions here */
+        $converter              = new ConvertFileWrapper( $stdFileObjects, false );
+        $converter->intDir      = $this->intDir;
+        $converter->errDir      = $this->errDir;
+        $converter->cookieDir   = $this->cookieDir;
+        $converter->source_lang = $this->source_lang;
+        $converter->target_lang = $this->target_lang;
+        $converter->featureSet  = $this->featureSet;
+        $converter->doAction();
+
+        $errors = $converter->checkResult();
+
         foreach ( $errors as $__err ) {
-          $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
-          if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
-            $this->result[ 'errors' ][ $brokenFileName ] = array(
-              'code'    => $__err[ 'code' ],
-              'message' => $__err[ 'message' ],
-              'debug'   => $brokenFileName
-            );
-          }
+            // this is an array which identified not converted files such as xliff files
+            $notConvertedFile = ["code" => 0, "message" => "OK"];
+
+            if( $__err !== $notConvertedFile ){
+                $this->result[ 'code' ] = 2;
+
+                $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
+
+                if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
+                    $this->result[ 'errors' ][ $brokenFileName ] = [
+                            'code'    => $__err[ 'code' ],
+                            'message' => $__err[ 'message' ],
+                            'debug'   => $brokenFileName
+                    ];
+                }
+            }
         }
-      }
-
     }
-
 }

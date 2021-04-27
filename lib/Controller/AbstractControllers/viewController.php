@@ -1,16 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- */
 
-
-/**
- * Abstract class for all html views
- *
- * Date: 27/01/14
- * Time: 18.56
- *
- */
 abstract class viewController extends controller {
 
     /**
@@ -109,10 +98,10 @@ abstract class viewController extends controller {
     /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
      *
-     * @see controller::finalize
-     *
      * @return mixed|void
      * @throws Exception
+     * @see controller::finalize
+     *
      */
     public function finalize() {
 
@@ -121,7 +110,7 @@ abstract class viewController extends controller {
             $this->setTemplateVars();
             $this->featureSet->run( 'appendDecorators', $this, $this->template );
             $this->setTemplateFinalVars();
-        } catch ( Exception $ignore ){
+        } catch ( Exception $ignore ) {
             Log::doJsonLog( $ignore );
         }
 
@@ -139,7 +128,9 @@ abstract class viewController extends controller {
 
         $this->logPageCall();
 
-        if( isset( $ignore ) ) throw $ignore;
+        if ( isset( $ignore ) ) {
+            throw $ignore;
+        }
 
     }
 
@@ -225,9 +216,22 @@ abstract class viewController extends controller {
      * @return bool
      */
     public static function isRevision() {
-        $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 
-        return strpos( $_from_url[ 'path' ], "/revise" ) === 0;
+        $controller = static::getInstance();
+
+        if (isset($controller->id_job) and isset($controller->received_password)){
+            $jid        = $controller->jid;
+            $password   = $controller->received_password;
+            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+
+            if ( null === $isRevision ) {
+                $isRevision = CatUtils::getIsRevisionFromRequestUri();
+            }
+
+            return $isRevision;
+        }
+
+        return CatUtils::getIsRevisionFromRequestUri();
     }
 
     protected function render404( $customTemplate = '404.html' ) {
@@ -245,7 +249,7 @@ abstract class viewController extends controller {
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param  PHPTAL|string $skeleton_file
+     * @param PHPTAL|string $skeleton_file
      */
     protected function makeTemplate( $skeleton_file ) {
         try {

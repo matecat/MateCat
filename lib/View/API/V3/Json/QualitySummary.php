@@ -31,8 +31,14 @@ class QualitySummary {
      */
     protected $project;
 
+    /**
+     * QualitySummary constructor.
+     *
+     * @param Chunks_ChunkStruct     $chunk
+     * @param Projects_ProjectStruct $project
+     */
     public function __construct( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project ) {
-        $this->chunk = $chunk;
+        $this->chunk   = $chunk;
         $this->project = $project;
     }
 
@@ -44,15 +50,14 @@ class QualitySummary {
      */
     public function render( $chunkReviewList ) {
 
-        $result = [];
+        $result                      = [];
         $result[ 'quality_summary' ] = [];
 
-        foreach( $chunkReviewList as $chunkReview ){
+        foreach ( $chunkReviewList as $chunkReview ) {
             $result[ 'quality_summary' ][] = $this->renderItem( $chunkReview );
         }
 
         return $result;
-
     }
 
     /**
@@ -66,19 +71,25 @@ class QualitySummary {
         list( $passFail, $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model_version ) =
                 self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
 
-        $result = self::populateQualitySummarySection( $chunkReview->source_page,
-                $this->chunk, $quality_overall, $reviseIssues, $score, $categories,
-                $total_issues_weight, $total_reviewed_words_count, $passFail,
+        return self::populateQualitySummarySection(
+                $chunkReview->source_page,
+                $this->chunk,
+                $quality_overall,
+                $reviseIssues,
+                $score,
+                $categories,
+                $total_issues_weight,
+                $total_reviewed_words_count,
+                $passFail,
                 $chunkReview->total_tte,
-                $is_pass, $model_version
+                $is_pass,
+                $model_version,
+                $chunkReview->review_password
         );
-
-        return $result;
-
     }
 
-
     /**
+     * @param                $chunkReviewPassword
      * @param                $source_page
      * @param Jobs_JobStruct $jStruct
      * @param                $quality_overall
@@ -96,15 +107,32 @@ class QualitySummary {
      *
      * @return mixed
      */
-    public static function populateQualitySummarySection( $source_page, Jobs_JobStruct $jStruct, $quality_overall, $reviseIssues, $score, $categories,
-                                                          $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte, $is_pass, $model_version ) {
+    public static function populateQualitySummarySection(
+            $source_page,
+            Jobs_JobStruct $jStruct,
+            $quality_overall,
+            $reviseIssues,
+            $score,
+            $categories,
+            $total_issues_weight,
+            $total_reviewed_words_count,
+            $passfail,
+            $total_tte,
+            $is_pass,
+            $model_version,
+            $chunkReviewPassword = null
+    ) {
 
         $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $source_page );
-        $feedback = (new Revise_FeedbackDAO())->getFeedback($jStruct->id, $revisionNumber);
 
-        $result = [
+        $feedback = null;
+        if($chunkReviewPassword){
+            $feedback = ( new Revise_FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
+        }
+
+        return [
                 'revision_number'            => $revisionNumber,
-                'feedback'                   => $feedback['feedback'],
+                'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
                 'model_version'              => ( $model_version ? (int)$model_version : null ),
                 'equivalent_class'           => $jStruct->getQualityInfo(),
                 'is_pass'                    => $is_pass,
@@ -118,9 +146,6 @@ class QualitySummary {
                 'passfail'                   => $passfail,
                 'total_time_to_edit'         => (int)$total_tte
         ];
-
-        return $result;
-
     }
 
     /**
@@ -181,7 +206,5 @@ class QualitySummary {
                 $passFail,
                 $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model->hash
         ];
-
     }
-
 }

@@ -19,9 +19,10 @@ class catController extends viewController {
     protected $received_password;
 
     private   $cid             = "";
-    private   $jid             = "";
+    protected $jid             = "";
     protected $password        = "";
     protected $review_password = "";
+    protected $currentPassword = "";
     private   $create_date     = "";
 
     private $start_time = 0.00;
@@ -266,6 +267,8 @@ class catController extends viewController {
             $this->review_password = $this->password;
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         }
+
+        $this->currentPassword = $this->review_password;
     }
 
     protected function _saveActivity(){
@@ -304,6 +307,7 @@ class catController extends viewController {
         if( $this->job_archived ) parent::makeTemplate( 'job_archived.html' );
 
         $this->template->jid = $this->jid;
+        $this->template->currentPassword = $this->currentPassword;
 
         $this->template->id_team = null;
 

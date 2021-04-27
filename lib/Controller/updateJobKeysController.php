@@ -9,6 +9,12 @@
 
 class updateJobKeysController extends ajaxController {
 
+    // for self::isRevision()
+    // controller MUST have those two protected properties
+    // @TODO remove this in the near future
+    protected $received_password;
+    protected $id_job;
+
     private $job_id;
     private $job_pass;
 
@@ -20,20 +26,24 @@ class updateJobKeysController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        
+
         //Session Enabled
 
         //define input filters
         $filterArgs = [
-                'job_id'       => [
+                'job_id'             => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
-                'job_pass'     => [
+                'job_pass'           => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'current_password'   => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'data'         => [
+                'data'               => [
                         'filter' => FILTER_UNSAFE_RAW,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -43,25 +53,27 @@ class updateJobKeysController extends ajaxController {
         $_postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //assign variables
-        $this->job_id       = $_postInput[ 'job_id' ];
-        $this->job_pass     = $_postInput[ 'job_pass' ];
-        $this->tm_keys      = $_postInput[ 'data' ]; // this will be filtered inside the TmKeyManagement class
-        $this->only_private = !$_postInput[ 'get_public_matches' ];
+        $this->id_job            = $_postInput[ 'job_id' ];
+        $this->received_password = $_postInput[ 'current_password' ];
+        $this->job_id            = $_postInput[ 'job_id' ];
+        $this->job_pass          = $_postInput[ 'job_pass' ];
+        $this->tm_keys           = $_postInput[ 'data' ]; // this will be filtered inside the TmKeyManagement class
+        $this->only_private      = !$_postInput[ 'get_public_matches' ];
 
         //check for eventual errors on the input passed
-        $this->result[ 'errors' ] = array();
+        $this->result[ 'errors' ] = [];
         if ( empty( $this->job_id ) ) {
-            $this->result[ 'errors' ][ ] = array(
+            $this->result[ 'errors' ][] = [
                     'code'    => -1,
                     'message' => "Job id missing"
-            );
+            ];
         }
 
         if ( empty( $this->job_pass ) ) {
-            $this->result[ 'errors' ][ ] = array(
+            $this->result[ 'errors' ][] = [
                     'code'    => -2,
                     'message' => "Job pass missing"
-            );
+            ];
         }
 
         //get Job Info, we need only a row of job
@@ -72,19 +84,11 @@ class updateJobKeysController extends ajaxController {
 
         //check for Password correctness
         if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->job_pass ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "Wrong password" );
+            $this->result[ 'errors' ][] = [ "code" => -10, "message" => "Wrong password" ];
         }
 
         $this->readLoginInfo();
-
-        if ( self::isRevision() ) {
-            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $this->user->email == $this->jobData['owner'] ){
-            $this->userRole = TmKeyManagement_Filter::OWNER;
-        }
-
     }
-
 
     /**
      * When Called it perform the controller action to retrieve/manipulate data
@@ -92,6 +96,14 @@ class updateJobKeysController extends ajaxController {
      * @return mixed
      */
     function doAction() {
+
+        // moved here because self::isRevision() in constructor
+        // generates an infinite loop
+        if ( self::isRevision() ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif ( $this->user->email == $this->jobData[ 'owner' ] ) {
+            $this->userRole = TmKeyManagement_Filter::OWNER;
+        }
 
         //if some error occured, stop execution.
         if ( count( @$this->result[ 'errors' ] ) ) {
@@ -156,18 +168,18 @@ class updateJobKeysController extends ajaxController {
         /*
          * sanitize owner role key type
          */
-        foreach( $tm_keys['mine'] as $k => $val ){
-            $tm_keys['mine'][$k]['owner'] = ( $this->userRole == TmKeyManagement_Filter::OWNER );
+        foreach ( $tm_keys[ 'mine' ] as $k => $val ) {
+            $tm_keys[ 'mine' ][ $k ][ 'owner' ] = ( $this->userRole == TmKeyManagement_Filter::OWNER );
         }
 
-        $tm_keys = array_merge( $tm_keys['ownergroup'], $tm_keys['mine'], $tm_keys['anonymous'] );
+        $tm_keys       = array_merge( $tm_keys[ 'ownergroup' ], $tm_keys[ 'mine' ], $tm_keys[ 'anonymous' ] );
         $this->tm_keys = json_encode( $tm_keys );
 
         try {
-            $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->user->uid );
+            $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData[ 'tm_keys' ], $this->userRole, $this->user->uid );
 
-            Log::doJsonLog('Before: ' . $this->jobData['tm_keys'] );
-            Log::doJsonLog('After: ' . json_encode($totalTmKeys) );
+            Log::doJsonLog( 'Before: ' . $this->jobData[ 'tm_keys' ] );
+            Log::doJsonLog( 'After: ' . json_encode( $totalTmKeys ) );
 
             if ( $this->jobOwnerIsMe() ) {
                 $this->jobData[ 'only_private_tm' ] = $this->only_private;
@@ -175,21 +187,21 @@ class updateJobKeysController extends ajaxController {
 
             $this->jobData->tm_keys = json_encode( $totalTmKeys );
 
-            $jobDao  = new \Jobs_JobDao( Database::obtain() );
+            $jobDao = new \Jobs_JobDao( Database::obtain() );
             $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys' ] ] );
             $jobDao->destroyCache( $this->jobData );
 
-            $this->result['data'] = 'OK';
+            $this->result[ 'data' ] = 'OK';
 
-        } catch ( Exception $e ){
-            $this->result[ 'data' ]      = 'KO';
-            $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+        } catch ( Exception $e ) {
+            $this->result[ 'data' ]     = 'KO';
+            $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => $e->getMessage() ];
         }
 
     }
 
     private function jobOwnerIsMe() {
-        return $this->userIsLogged && $this->jobData['owner'] == $this->user->email ;
+        return $this->userIsLogged && $this->jobData[ 'owner' ] == $this->user->email;
     }
 
 } 

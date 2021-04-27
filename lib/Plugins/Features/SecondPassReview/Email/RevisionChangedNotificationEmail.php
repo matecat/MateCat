@@ -9,6 +9,7 @@
 namespace Features\SecondPassReview\Email ;
 
 use Email\AbstractEmail;
+use Users_UserStruct;
 
 class RevisionChangedNotificationEmail extends AbstractEmail {
 
@@ -49,7 +50,22 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
 
     public function send()
     {
-        $this->sendTo($this->recipientUser->email, $this->recipientUser->fullName() );
+        if(false === $this->isRecipientTheChangeAuthor($this->recipientUser->email, $this->changeAuthor)){
+            $this->sendTo($this->recipientUser->email, $this->recipientUser->fullName() );
+        }
     }
 
+    /**
+     * @param string                $email
+     * @param Users_UserStruct|null $user
+     *
+     * @return bool
+     */
+    private function isRecipientTheChangeAuthor( $email, Users_UserStruct $user = null ) {
+        if ( null === $user ) {
+            return false;
+        }
+
+        return $user->getEmail() === $email;
+    }
 }

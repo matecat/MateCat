@@ -67,6 +67,13 @@ route( '/api/app/heartbeat/ping',                                               
 
 $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
     route( '/quality-report', 'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
+    route( '/quality-report/segments', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
+
+$klein->with( '/api/app/api-key', function () {
+    route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );
+    route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
+    route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
+} );

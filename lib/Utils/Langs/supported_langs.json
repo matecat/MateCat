@@ -203,6 +203,16 @@
     ,
         {
             "localized":[{
+                "en":"Bihari"
+            }],
+            "isocode":"bh",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"bh-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Bislama"
             }],
             "isocode":"bi",
@@ -343,6 +353,7 @@
             "rfc3066code":"zh-CN"
         }
     ,
+
         {
             "localized":[{
                 "en":"Chinese Traditional"
@@ -361,6 +372,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"zh-HK"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Chinese Macau"
+            }],
+            "isocode":"zh",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"zh-MO"
         }
     ,
         {
@@ -1074,6 +1095,16 @@
     ,
         {
             "localized":[{
+                "en":"Kashmiri"
+            }],
+            "isocode":"ks",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ks-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Kazakh"
             }],
             "isocode":"kk",
@@ -1636,6 +1667,16 @@
     ,
         {
             "localized":[{
+                "en":"Pali"
+            }],
+            "isocode":"pi",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"pi-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Punjabi"
             }],
             "isocode":"pa",
@@ -1833,6 +1874,16 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"sg-SG"
+        }
+    ,
+	{
+            "localized":[{
+                "en":"Sanskrit"
+            }],
+            "isocode":"sa",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"sa-IN"
         }
     ,
         {
@@ -2262,10 +2313,10 @@
             "localized":[{
                 "en":"Tswana"
             }],
-            "isocode":"tsn",
+            "isocode":"tn",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"tsn-BW"
+            "rfc3066code":"tn-BW"
         }
     ,
         {

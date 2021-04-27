@@ -11,12 +11,13 @@ class PlaceBreakingSpacesInXliff extends AbstractHandler {
      */
     public function transform( $segment ) {
         return str_replace(
-                [ "\r\n", "\r", "\n", "\t" ],
+                [ "\r\n", "\r", "\n", "\t", "" ],
                 [
                         '&#13;&#10;',
                         '&#13;',
                         '&#10;',
-                        '&#09;'
+                        '&#09;',
+                        '&#157;'
                 ], $segment );
     }
 }

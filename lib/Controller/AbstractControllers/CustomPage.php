@@ -17,9 +17,6 @@ class CustomPage extends viewController {
 
     public function __construct() {
 
-        //load Template Engine
-        require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
-
         //SESSION ENABLED
         parent::sessionStart();
         $this->setBrowserSupport();

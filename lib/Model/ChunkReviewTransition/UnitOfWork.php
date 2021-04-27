@@ -101,7 +101,7 @@ class UnitOfWork implements IUnitOfWork {
 
         $chunkReviewDao = new ChunkReviewDao();
 
-        // just one UPDATE for each ChunkReview
+        // just ONE UPDATE for each ChunkReview
         foreach ( $data as $id => $datum ) {
 
             $chunkReview = $chunkReviewDao->findById( $id );
@@ -112,28 +112,29 @@ class UnitOfWork implements IUnitOfWork {
             $datum[ 'advancement_wc' ]       = $this->recheckDatum( $chunkReview, $datum, 'advancement_wc' );
             $datum[ 'total_tte' ]            = $this->recheckDatum( $chunkReview, $datum, 'total_tte' );
 
-            $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
+            $chunkReviewDao->passFailCountsAtomicUpdate( $chunkReview, $datum );
         }
     }
 
     /**
      * @param ChunkReviewStruct $chunkReview
-     * @param                   $datum
+     * @param array             $datum
      *
      * @return bool
      * @throws \Exception
      */
     private function calculateIsPass( ChunkReviewStruct $chunkReview, $datum ) {
-        $lqaModelLimit                     = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
-        $chunkReview->reviewed_words_count += $datum[ 'reviewed_words_count' ];
-        $chunkReview->penalty_points       += $datum[ 'penalty_points' ];
-        $score                             = ( $chunkReview->reviewed_words_count == 0 ) ? 0 : $chunkReview->penalty_points / $chunkReview->reviewed_words_count * 1000;
+        $lqaModelLimit = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+        $wordCount     = $chunkReview->reviewed_words_count + $datum[ 'reviewed_words_count' ];
+        $penaltyPoints = $chunkReview->penalty_points + $datum[ 'penalty_points' ];
+        $score         = ( $wordCount == 0 ) ? 0 : $penaltyPoints / $wordCount * 1000;
 
         return ( $score <= $lqaModelLimit );
     }
 
     /**
      * This method does not allow to update a ChunkReviewStruct field to a negative value
+     * (in case of negative values this method set them to 0)
      *
      * @param ChunkReviewStruct $chunkReview
      * @param array             $datum
@@ -143,15 +144,11 @@ class UnitOfWork implements IUnitOfWork {
      */
     private function recheckDatum( ChunkReviewStruct $chunkReview, $datum, $key ) {
 
-        if ( $chunkReview->$key > 0 ) {
-            if ( ( $chunkReview->$key + $datum[ $key ] ) < 0 ) {
-                return 0;
-            }
-
-            return $datum[ $key ];
+        if ( ( $chunkReview->$key + $datum[ $key ] ) < 0 ) {
+            return 0;
         }
 
-        return 0;
+        return $datum[ $key ];
     }
 
     /**

@@ -8,11 +8,11 @@
 
 namespace API\V3;
 
+use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V3\Json\FilesInfo;
 use Chunks_ChunkStruct;
-use Jobs_JobDao;
+use Files\FilesInfoUtility;
 use Projects_ProjectStruct;
 
 
@@ -32,8 +32,8 @@ class FileInfoController extends KleinController {
         $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
+            $this->setProject( $Validator->getChunk()->getProject() );
             //those are not needed at moment, so avoid unnecessary queries
-//            $this->setProject( $Validator->getChunk()->getProject() );
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
@@ -48,13 +48,36 @@ class FileInfoController extends KleinController {
     }
 
     public function getInfo() {
-
-        /**
-         * get info for every file
-         */
-        $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
-        $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );
-
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+        $this->response->json( $filesInfoUtility->getInfo() );
     }
 
+    /**
+     * @throws NotFoundException
+     */
+    public function getInstructions() {
+
+        $id_file          = $this->request->param( 'id_file' );
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+        $instructions     = $filesInfoUtility->getInstructions( $id_file );
+
+        if ( !$instructions ) {
+            throw new NotFoundException( 'No instructions for this file' );
+        }
+
+        $this->response->json( $instructions );
+    }
+
+    public function setInstructions() {
+
+        $id_file          = $this->request->param( 'id_file' );
+        $instructions     = $this->request->param( 'instructions' );
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+
+        if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
+            $this->response->json( true );
+        } else {
+            throw new NotFoundException( 'File not found on this project' );
+        }
+    }
 }

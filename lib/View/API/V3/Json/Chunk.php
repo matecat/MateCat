@@ -15,7 +15,6 @@ use CatUtils;
 use Chunks_ChunkStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
-use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
 use Langs_LanguageDomains;
@@ -23,7 +22,6 @@ use Langs_Languages;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectStruct;
-use RevisionFactory;
 use Utils;
 use WordCount_Struct;
 
@@ -101,6 +99,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 'subject'                 => $chunk->subject,
                 'subject_printable'       => $subjects[ $subject_key ][ 'display' ],
                 'owner'                   => $chunk->owner,
+                'time_to_edit'            => $this->getTimeToEditArray( $chunk->id ),
                 'total_time_to_edit'      => (int)$chunk->total_time_to_edit,
                 'avg_post_editing_effort' => (float)$chunk->avg_post_editing_effort,
                 'open_threads_count'      => (int)$chunk->getOpenThreadsCount(),
@@ -112,7 +111,8 @@ class Chunk extends \API\V2\Json\Chunk {
                 'stats'                   => $this->_getStats( $jobStats ),
                 'outsource'               => $outsource,
                 'translator'              => $translator,
-                'total_raw_wc'            => (int)$chunk->total_raw_wc
+                'total_raw_wc'            => (int)$chunk->total_raw_wc,
+                'standard_wc'             => (float)$chunk->standard_analysis_wc
         ];
 
         if ( $featureSet->hasRevisionFeature() ) {
@@ -131,10 +131,20 @@ class Chunk extends \API\V2\Json\Chunk {
             list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
                     $this->legacyRevisionQualityVars( $chunk, $featureSet, $jobStats, $qualityInfoArray );
 
-            $result[ 'quality_summary' ][] = QualitySummary::populateQualitySummarySection( Constants::SOURCE_PAGE_REVISION, $chunk,
-                    $quality_overall, $reviseIssues, $score, $categories,
-                    $total_issues_weight, $total_reviewed_words_count, $passfail,
-                    0, 0 );
+            $result[ 'quality_summary' ][] = QualitySummary::populateQualitySummarySection(
+                    Constants::SOURCE_PAGE_REVISION,
+                    $chunk,
+                    $quality_overall,
+                    $reviseIssues,
+                    $score,
+                    $categories,
+                    $total_issues_weight,
+                    $total_reviewed_words_count,
+                    $passfail,
+                    0,
+                    0,
+                    0
+            );
         }
 
         /**
@@ -163,6 +173,27 @@ class Chunk extends \API\V2\Json\Chunk {
         }
 
         return $this->chunk_reviews;
+    }
+
+    /**
+     * @param $chunk_id
+     *
+     * @return array
+     */
+    protected function getTimeToEditArray( $chunk_id ) {
+
+        $jobDao   = new \Jobs_JobDao();
+        $tteT     = (int)$jobDao->getTimeToEdit( $chunk_id, 1 )['tte'];
+        $tteR1    = (int)$jobDao->getTimeToEdit( $chunk_id, 2 )['tte'];
+        $tteR2    = (int)$jobDao->getTimeToEdit( $chunk_id, 3 )['tte'];
+        $tteTotal = $tteT + $tteR1 + $tteR2;
+
+        return [
+                'total' => $tteTotal,
+                't'     => $tteT,
+                'r1'    => $tteR1,
+                'r2'    => $tteR2,
+        ];
     }
 
     /**

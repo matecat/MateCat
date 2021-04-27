@@ -54,12 +54,13 @@ class FromLayer2ToRawXML extends AbstractHandler {
 
         //normal control characters must be converted to entities
         $segment = str_replace(
-                [ "\r\n", "\r", "\n", "\t" ],
+                [ "\r\n", "\r", "\n", "\t", "", ],
                 [
                         '&#13;&#10;',
                         '&#13;',
                         '&#10;',
-                        '&#09;'
+                        '&#09;',
+                        '&#157;',
                 ], $segment );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities

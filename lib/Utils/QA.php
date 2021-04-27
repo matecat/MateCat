@@ -1,5 +1,6 @@
 <?php
 
+use BxExG\Mapper;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 
@@ -237,9 +238,19 @@ class QA {
 
     const ERR_SPACE_MISMATCH_TEXT = 1101;
 
+    const ERR_BOUNDARY_HEAD_SPACE_MISMATCH = 1102;
+
+    const ERR_BOUNDARY_TAIL_SPACE_MISMATCH = 1103;
+
+    const ERR_SPACE_MISMATCH_AFTER_TAG = 1104;
+
+    const ERR_SPACE_MISMATCH_BEFORE_TAG = 1105;
+
     const ERR_SYMBOL_MISMATCH = 1200;
 
     const ERR_EX_BX_NESTED_IN_G = 1300;
+    const ERR_EX_BX_WRONG_POSITION = 1301;
+    const ERR_EX_BX_COUNT_MISMATCH = 1302;
 
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
     const SMART_COUNT_MISMATCH = 2001;
@@ -323,6 +334,11 @@ class QA {
             1100 => 'More/fewer whitespaces found next to the tags.',
 
             1101 => 'More/fewer whitespaces found in the text.',
+
+            1102 => 'Leading space in target not corresponding to source.',
+            1103 => 'Trailing space in target not corresponding to source.',
+            1104 => 'Whitespace(s) mismatch AFTER a tag.',
+            1105 => 'Whitespace(s) mismatch BEFORE a tag.',
         /*
          * grouping
          * 17 => 'Dollar sign mismatch',
@@ -338,6 +354,8 @@ class QA {
             1200 => 'Symbol mismatch',
 
             1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+            1301 => 'Wrong <ex> and/or <bx> placement',
+            1302 => '<ex>, <bx> and/or <g> total count mismatch',
 
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',
@@ -413,6 +431,7 @@ class QA {
 
     protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
+    protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
     const ERROR   = 'ERROR';
     const WARNING = 'WARNING';
@@ -476,11 +495,25 @@ class QA {
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
+            case self::ERR_EX_BX_COUNT_MISMATCH:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
+                ] );
+                break;
             case self::ERR_EX_BX_NESTED_IN_G:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
                         'outcome' => self::ERR_EX_BX_NESTED_IN_G,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
+                ] );
+                break;
+            case self::ERR_EX_BX_WRONG_POSITION:
+                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_WRONG_POSITION,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
                 ] );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
@@ -521,7 +554,41 @@ class QA {
                 break;
 
             case self::ERR_BOUNDARY_HEAD:
+                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                        'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH )
+                ] );
+                break;
+
             case self::ERR_BOUNDARY_TAIL:
+                // if source target is CJK we won't to add an trailing space mismatch error
+                if(false === CatUtils::isCJK($this->getSourceSegLang())){
+                    $this->exceptionList[ self::INFO ][] = errObject::get( [
+                            'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
+                            'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
+                            'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH )
+                    ] );
+                }
+                break;
+
+            case self::ERR_SPACE_MISMATCH_AFTER_TAG:
+                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                        'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_AFTER_TAG ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_AFTER_TAG )
+                ] );
+                break;
+
+            case self::ERR_SPACE_MISMATCH_BEFORE_TAG:
+                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                        'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_BEFORE_TAG ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_BEFORE_TAG )
+                ] );
+                break;
+
+
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH,
@@ -801,34 +868,8 @@ class QA {
          *
          * @see getTrgNormalized
          */
-        preg_match_all( self::$regexpAscii, $source_seg, $matches_src );
-        preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
-
-//        Log::doJsonLog($source_seg);
-//        Log::doJsonLog($target_seg);
-
-        if ( !empty( $matches_src[ 1 ] ) ) {
-            $test_src = $source_seg;
-            foreach ( $matches_src[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
-                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
-            }
-            //Source Content wrong use placeholded one
-            $source_seg = $test_src;
-        }
-
-        if ( !empty( $matches_trg[ 1 ] ) ) {
-            $test_trg = $target_seg;
-            foreach ( $matches_trg[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
-                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg, 1 );
-            }
-            //Target Content wrong use placeholded one
-            $target_seg = $test_trg;
-        }
-
-//        Log::hexDump($source_seg);
-//        Log::hexDump($target_seg);
+        $source_seg = $this->replaceAscii($source_seg);
+        $target_seg = $this->replaceAscii($target_seg);
 
         /**
          * Do it again for entities because
@@ -838,12 +879,69 @@ class QA {
          * does not works for not printable chars
          *
          */
-        preg_match_all( self::$regexpEntity, $source_seg, $matches_src );
-        preg_match_all( self::$regexpEntity, $target_seg, $matches_trg );
+        $source_seg = $this->replaceEntities($source_seg);
+        $target_seg = $this->replaceEntities($target_seg);
 
-        if ( !empty( $matches_src[ 1 ] ) ) {
-            $test_src = $source_seg;
-            foreach ( $matches_src[ 1 ] as $v ) {
+        /**
+         * We insert a default placeholder inside empty html tags to avoid saveXML() function invoked by getTrgNormalized()
+         * to contract them.
+         *
+         * Example:
+         *
+         * <g id="23"></g> would be contracted to <g ="23"/>
+         */
+        $source_seg = $this->fillEmptyHTMLTagsWithPlaceholder($source_seg);
+        $target_seg = $this->fillEmptyHTMLTagsWithPlaceholder($target_seg);
+
+        $this->source_seg = $source_seg;
+        $this->target_seg = $target_seg;
+
+        $this->srcDom = $this->_loadDom( $source_seg, self::ERR_SOURCE );
+        $this->trgDom = $this->_loadDom( $target_seg, self::ERR_TARGET );
+
+        if ( $this->thereAreErrors() ) {
+            $this->_getTagDiff();
+        }
+
+        $this->_resetDOMMaps();
+
+    }
+
+    /**
+     * @param $seg
+     *
+     * @return string|string[]|null
+     */
+    private function replaceAscii($seg){
+
+        preg_match_all( self::$regexpAscii, $seg, $matches );
+
+        if ( !empty( $matches[ 1 ] ) ) {
+            $test_src = $seg;
+            foreach ( $matches[ 1 ] as $v ) {
+                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
+                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
+            }
+
+            // Source Content wrong use placeholded one
+            $seg = $test_src;
+        }
+
+        return $seg;
+    }
+
+    /**
+     * @param $seg
+     *
+     * @return string|string[]|null
+     */
+    private function replaceEntities($seg) {
+
+        preg_match_all( self::$regexpEntity, $seg, $matches );
+
+        if ( !empty( $matches[ 1 ] ) ) {
+            $test_src = $seg;
+            foreach ( $matches[ 1 ] as $v ) {
                 $byte = sprintf( "%02X", hexdec( $v ) );
                 if ( $byte[ 0 ] == '0' ) {
                     $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
@@ -857,49 +955,33 @@ class QA {
                 }
 
             }
+
             //Source Content wrong use placeholded one
-            $source_seg = $test_src;
+            $seg = $test_src;
         }
 
-        if ( !empty( $matches_trg[ 1 ] ) ) {
-            $test_trg = $target_seg;
-            foreach ( $matches_trg[ 1 ] as $v ) {
-                $byte = sprintf( "%02X", hexdec( $v ) );
-                if ( $byte[ 0 ] == '0' ) {
-                    $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
-                } else {
-                    $regexp = '/&#x(' . $byte . ');/u';
-                }
+        return $seg;
+    }
 
-                $key = "" . sprintf( "%02X", hexdec( $v ) ) . "";
-                if ( array_key_exists( $key, self::$asciiPlaceHoldMap ) ) {
-                    $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg );
-                }
+    /**
+     * @param $seg
+     *
+     * @return string|string[]
+     */
+    private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
+        preg_match_all('/<([^ >]+)[^>]*><\/\1>/', $seg, $matches);
+
+        if ( !empty( $matches[ 0 ] ) ) {
+            foreach ($matches[ 0 ]  as $match){
+                $matches = explode("><", $match);
+                $replacedHtmlTag = $matches[0].'>'.self::$emptyHtmlTagsPlaceholder.'<'.$matches[1];
+
+                $seg = str_replace($match, $replacedHtmlTag, $seg);
             }
-            //Target Content wrong use placeholded one
-            $target_seg = $test_trg;
         }
 
-//        Log::doJsonLog($_POST);
-//        Log::doJsonLog($source_seg);
-//        Log::doJsonLog($target_seg);
-//        Log::hexDump($source_seg);
-//        Log::hexDump($target_seg);
-
-        $this->source_seg = $source_seg;
-        $this->target_seg = $target_seg;
-
-        $this->srcDom = $this->_loadDom( $source_seg, self::ERR_SOURCE );
-        $this->trgDom = $this->_loadDom( $target_seg, self::ERR_TARGET );
-
-
-        if ( $this->thereAreErrors() ) {
-            $this->_getTagDiff();
-        }
-
-        $this->_resetDOMMaps();
-
+        return $seg;
     }
 
     /**
@@ -964,7 +1046,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return $this->target_seg;
+        return str_replace(self::$emptyHtmlTagsPlaceholder, '', $this->target_seg);
     }
 
     public function getDomMaps() {
@@ -1110,51 +1192,57 @@ class QA {
 
                 $elementID = $element->getAttribute( 'id' );
 
-                $plainRef = [
-                        'type'      => 'DOMElement',
-                        'name'      => $element->tagName,
-                        'id'        => $elementID,
-                        'parent_id' => $parentID,
-                        'node_idx'  => $i,
-                        'innerHTML' => $element->ownerDocument->saveXML( $element )
-                ];
+                if($this->_addThisElementToDomMap($element)){
+                    $plainRef = [
+                            'type'       => 'DOMElement',
+                            'name'       => $element->tagName,
+                            'id'         => $elementID,
+                            'parent_id'  => $parentID,
+                            'node_idx'   => $i,
+                            'innerHTML'  => $element->ownerDocument->saveXML( $element ),
+                    ];
 
-                //set depth and increment for next occurrence
-                $srcDomElements[ 'DOMElement' ][] = $plainRef;
+                    //set depth and increment for next occurrence
+                    $srcDomElements[ 'DOMElement' ][] = $plainRef;
 
-                //count occurrences of this tag name when needed, also transport id reference.
-                @$srcDomElements[ $element->tagName ][] = $elementID;
+                    //count occurrences of this tag name when needed, also transport id reference.
+                    @$srcDomElements[ $element->tagName ][] = $elementID;
 
-                // reverse Lookup, from id to tag name
-                //
-                // Note 2020-01-21
-                // -------------------------------------------------
-                //
-                // If the element is a PH, we extract the decoded content and us it as key for refID map.
-                //
-                // In this way, _checkTagMismatch() method is capable to recognize PH content differences.
-                //
-                // Example:
-                //
-                // SOURCE                                                              | TARGET
-                // --------------------------------------------------------------------+------------------------------------------------
-                // Your average weekly price with a (mtc_1)%1$sdiscount is (mtc_2)%2$s | (mtc_1)%{time_left}您的平均每週優惠價為(mtc_2)%2$s
-                //
-                // Source and target PH content does not match, _checkTagMismatch() will throw an error.
-                //
-                if ( $element->tagName === 'ph' ) {
-                    $innerHTML = $plainRef[ 'innerHTML' ];
-                    $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
-                    preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
-                    $html = base64_decode( $html[ 0 ][ 1 ] );
+                    // reverse Lookup, from id to tag name
+                    //
+                    // Note 2020-01-21
+                    // -------------------------------------------------
+                    //
+                    // If the element is a PH, we extract the decoded content and us it as key for refID map.
+                    //
+                    // In this way, _checkTagMismatch() method is capable to recognize PH content differences.
+                    //
+                    // Example:
+                    //
+                    // SOURCE                                                              | TARGET
+                    // --------------------------------------------------------------------+------------------------------------------------
+                    // Your average weekly price with a (mtc_1)%1$sdiscount is (mtc_2)%2$s | (mtc_1)%{time_left}您的平均每週優惠價為(mtc_2)%2$s
+                    //
+                    // Source and target PH content does not match, _checkTagMismatch() will throw an error.
+                    //
+                    if ( $element->tagName === 'ph' ) {
+                        $innerHTML = $plainRef[ 'innerHTML' ];
+                        $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
+                        preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
 
-                    @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
-                } else {
-                    @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
-                }
+                        if(isset($html[ 0 ][ 1 ])){
+                            $html = base64_decode( $html[ 0 ][ 1 ] );
+                            @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
+                        } else {
+                            @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                        }
+                    } else {
+                        @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                    }
 
-                if ( $element->hasChildNodes() ) {
-                    $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
+                    if ( $element->hasChildNodes() ) {
+                        $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
+                    }
                 }
 
             } else {
@@ -1176,7 +1264,66 @@ class QA {
             $srcDomElements[ 'elemCount' ]++;
 
         }
-        //Log::doJsonLog($srcDomElements);
+    }
+
+    /**
+     * This function determines if an element should be added to DOM map used for consistency check.
+     *
+     * It does not add not allowed characters present in source as xliff 2.0 metadata tags.
+     *
+     * For example, consider this tag:
+     *
+     * <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O3AgY2xhc3M9JnF1b3Q7Y21sbl9fcGFyYWdyYXBoJnF1b3Q7Jmd0Ow=="/>
+     *
+     * This function extracts content from equiv-text and checks if it's an allowed value or not.
+     *
+     * @param DOMElement $element
+     *
+     * @throws \Exception
+     * @return bool
+     */
+    protected function _addThisElementToDomMap( DOMElement $element) {
+
+        $tagsToBeExcludedFromChecks = [];
+
+        // This is a map (***SPECIFIC FOR EVERY PLUGIN IN USE***)
+        // of tags to exclude from consistency check
+        if(null !== $this->featureSet){
+            $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
+        }
+
+        if(empty($tagsToBeExcludedFromChecks)){
+            return true;
+        }
+
+        return $this->elementIsToBeExcludedFromChecks($element, $tagsToBeExcludedFromChecks);
+    }
+
+    /**
+     * This function checks if a tag element is contained in $tagsToBeExcludedFromChecks map and
+     * if has any dataRef attribute
+     *
+     * @param DOMElement $element
+     * @param array $tagsToBeExcludedFromChecks
+     *
+     * @return bool
+     */
+    private function elementIsToBeExcludedFromChecks( DOMElement $element, $tagsToBeExcludedFromChecks) {
+
+        $elementHasDataRef = false;
+        $elementValue = null;
+
+        foreach ($element->attributes as $attribute){
+            if ($attribute->name === 'equiv-text'){
+                $elementValue = base64_decode( str_replace('base64:','', $attribute->value) );
+            }
+
+            if($attribute->name === 'dataRef'){
+                $elementHasDataRef = true;
+            }
+        }
+
+        return !(in_array($elementValue, $tagsToBeExcludedFromChecks) and $elementHasDataRef);
     }
 
     /**
@@ -1491,7 +1638,7 @@ class QA {
 //            Log::hexDump($this->source_seg);
 //            Log::hexDump($this->target_seg);
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_HEAD_TEXT );
+                $this->_addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
             }
         }
 
@@ -1506,7 +1653,7 @@ class QA {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_TAIL );
+                $this->_addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
             }
         }
 
@@ -1520,7 +1667,7 @@ class QA {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_HEAD );
+                $this->_addError( self::ERR_BOUNDARY_HEAD_TEXT );
             }
         }
 
@@ -1528,27 +1675,59 @@ class QA {
         preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->source_seg, $source_tags );
         preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->target_seg, $target_tags );
 
-        //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
+        // so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
-            //Append a space to target for normalization.
-            $this->target_seg = rtrim( $this->target_seg );
-            $this->target_seg .= $source_tags[ 1 ][ 0 ];
+            // CJK need special handling
+            if(CatUtils::isCJK($this->target_seg_lang)){
 
-            //Suppress Warning
-            //$this->_addError(self::ERR_BOUNDARY_TAIL);
+                // get last char (excluding tags)
+                $this->target_seg = rtrim( $this->target_seg );
+                $lastChar = CatUtils::getLastCharacter($this->target_seg);
+
+                // Append a space to target for normalization ONLY if $lastChar
+                // is not a special terminate char
+                if(!in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
+
+                    $this->target_seg .= $source_tags[ 1 ][ 0 ];
+
+                    $this->_addError(self::ERR_BOUNDARY_TAIL);
+                }
+            } else {
+                // Append a space to target for normalization.
+                // We can't use $source_tags[ 1 ][ 0 ] because for CJK is not a space
+                $this->target_seg = rtrim( $this->target_seg );
+                $this->target_seg .= ' ';
+
+                $this->_addError(self::ERR_BOUNDARY_TAIL);
+            }
 
         } elseif ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && empty( $source_tags[ 0 ] ) ) {
             $this->target_seg = rtrim( $this->target_seg );
         }
 
+        //
+        // --------------------------------------------------
+        // NOTE 2020-06-10
+        // --------------------------------------------------
+        //
+        // If source is CJK and target is NOT CJK
+        // and source terminates with CJKTerminateChars
+        // then we add a trailing space to target
+        //
+        if(CatUtils::isCJK($this->source_seg_lang) and false === CatUtils::isCJK($this->target_seg_lang)){
+            $lastChar = CatUtils::getLastCharacter($this->source_seg);
+            if(in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
+                $this->target_seg = rtrim( $this->target_seg );
+                $this->target_seg .= ' ';
+            }
+        }
+
         $this->trgDom = $this->_loadDom( $this->target_seg, self::ERR_TARGET );
+
         //Save normalized dom Element
         $this->normalizedTrgDOM = clone $this->trgDom;
-
     }
-
-    //
 
     /**
      * Try to perform an heuristic re-align of tags id by position.
@@ -1767,29 +1946,17 @@ class QA {
 
     /**
      * Perform a check for <bx> and/or <ex> tag(s) inside a <g> tag
+     *
+     * Please see the corresponding documentation on \BxExG\Validator class
      */
     protected function _checkBxAndExInsideG() {
 
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
+        $bxExGValidator = new \BxExG\Validator($this);
+        $errors = $bxExGValidator->validate();
 
-        @$dom->loadHTML($this->target_seg);
-        $g = $dom->getElementsByTagName ( 'g' );
-
-        for ($i=0;$i<$g->length;$i++){
-            /** @var DOMElement $node */
-            $node = $g->item($i);
-
-            for ($k=0;$k<$node->childNodes->length;$k++){
-                $nodeName = $node->childNodes->item($k)->nodeName;
-
-                if( $nodeName === 'ex' or $nodeName === 'bx' ){
-                    $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
-                }
-            }
+        foreach ($errors as $error){
+            $this->_addError( $error );
         }
-
-        libxml_clear_errors();
     }
 
     /**
@@ -2042,16 +2209,15 @@ class QA {
     public function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
+
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
-//            try {
-//                throw new Exception();
-//            } catch ( Exception $e ){
-//                Log::doJsonLog( "\n" . $this->trgDom->saveXML() );
-//                Log::doJsonLog( $e->getTraceAsString() . "\n\n");
-//            }
+            /**
+             * Remove placeholder from empty HTML tags
+             */
+            $matches[ 1 ] = str_replace(self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ]);
 
             /**
              * Why i do this?? I'm replacing Placeholders of non printable chars
@@ -2143,7 +2309,7 @@ class QA {
     protected function _checkTailCRNL( $srcNodeContent, $trgNodeContent ) {
 
         $headSrcCRNL = mb_split( '[\r\n]+$', $srcNodeContent );
-        $headTrgCRNL = mb_split( '^[\r\n]+$', $trgNodeContent );
+        $headTrgCRNL = mb_split( '[\r\n]+$', $trgNodeContent );
         if ( ( count( $headSrcCRNL ) > 1 || count( $headTrgCRNL ) > 1 ) && end( $headSrcCRNL ) !== end( $headTrgCRNL ) ) {
             $this->_addError( self::ERR_CR_TAIL );
         }
@@ -2162,7 +2328,7 @@ class QA {
     protected function _checkSymbolConsistency() {
 
         $symbols = [
-                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '*'
+                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '\\*'
         ];
 
         $specialSymbols = [ '$', '#' ];
@@ -2207,7 +2373,7 @@ class QA {
                     case self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ]:
                         $this->_addError( self::ERR_TAB_MISMATCH );
                         break;
-                    case '*':
+                    case '\\*':
                         $this->_addError( self::ERR_STARSIGN_MISMATCH );
                         break;
                 }

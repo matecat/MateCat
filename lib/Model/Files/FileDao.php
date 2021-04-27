@@ -71,6 +71,13 @@ class Files_FileDao extends DataAccess_AbstractDao {
         ));
     }
 
+    public static function isFileInProject($id_file, $id_project) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * FROM files where id_project = :id_project and id = :id_file ");
+        $stmt->execute( [ 'id_project' => $id_project, 'id_file' => $id_file ] );
+        return $stmt->rowCount();
+    }
+
     /**
      * @param $id
      *

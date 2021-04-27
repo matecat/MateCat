@@ -45,6 +45,8 @@ class Engines_Results_MyMemory_Matches {
             throw new Exception( "Invalid arg 1 " . __CLASS__ . " constructor" );
         }
 
+        // $args[ 0 ]
+
         $this->_args = $args;
 
     }
@@ -59,9 +61,15 @@ class Engines_Results_MyMemory_Matches {
      * @return array
      * @throws Exception
      */
-    public function getMatches( $layerNum = 2 ) {
+    public function getMatches( $layerNum = 2, $segmentId = null ) {
 
         $match = [];
+        $dataRefMap = [];
+
+        if(null!==$segmentId){
+            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap($segmentId);
+        }
+
         if ( count( $this->_args ) == 1 and is_array( $this->_args[ 0 ] ) ) {
 
             $match = $this->_args[ 0 ];
@@ -83,14 +91,14 @@ class Engines_Results_MyMemory_Matches {
 
             /* MyMemory Match */
             $match[ 'raw_segment' ]     = $match[ 'segment' ];
-            $match[ 'segment' ]         = $this->getLayer( $match[ 'segment' ], $layerNum );
+            $match[ 'segment' ]         = $this->getLayer( $match[ 'segment' ], $layerNum, $dataRefMap );
             $match[ 'raw_translation' ] = $match[ 'translation' ];
-            $match[ 'translation' ]     = $this->getLayer( $match[ 'translation' ], $layerNum );
+            $match[ 'translation' ]     = $this->getLayer( $match[ 'translation' ], $layerNum, $dataRefMap );
 
         } elseif( count( $this->_args ) >= 5 and !is_array( $this->_args[ 0 ] ) ) {
-            $match[ 'segment' ]          = $this->getLayer( $this->_args[ 0 ], $layerNum );
+            $match[ 'segment' ]          = $this->getLayer( $this->_args[ 0 ], $layerNum, $dataRefMap );
             $match[ 'raw_segment' ]      = $this->_args[ 0 ];
-            $match[ 'translation' ]      = $this->getLayer( $this->_args[ 1 ], $layerNum );
+            $match[ 'translation' ]      = $this->getLayer( $this->_args[ 1 ], $layerNum, $dataRefMap );
             $match[ 'raw_translation' ]  = $this->_args[ 1 ];
             $match[ 'match' ]            = $this->_args[ 2 ];
             $match[ 'created-by' ]       = $this->_args[ 3 ];
@@ -125,15 +133,17 @@ class Engines_Results_MyMemory_Matches {
     }
 
     /**
-     * @param $string
-     * @param $layerNum
+     * @param       $string
+     * @param       $layerNum
+     *
+     * @param array $dataRefMap
      *
      * @return mixed
      * @throws Exception
      */
-    protected function getLayer( $string, $layerNum ){
+    protected function getLayer( $string, $layerNum, array $dataRefMap = [] ){
 
-        $filter = Filter::getInstance( $this->featureSet );
+        $filter = Filter::getInstance( $this->featureSet, $dataRefMap );
         switch( $layerNum ){
             case 0:
                 return $filter->fromLayer1ToLayer0( $string );

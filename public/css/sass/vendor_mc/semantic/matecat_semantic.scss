@@ -1,15 +1,15 @@
-
-@import "../../../../../support_scripts/grunt/semantic/dist/semantic";
-@import "../../commons/colors";
-@import "semantic_overrides";
+@import 'semantic';
+@import '../../commons/colors';
+@import 'semantic_overrides';
 
 @font-face {
   font-family: 'Icons';
-  src:  url('../../fonts/icomoon.eot?13r8r1');
-  src:  url('../../fonts/icomoon.eot?13r8r1#iefix') format('embedded-opentype'),
-  url('../../fonts/icomoon.ttf?13r8r1') format('truetype'),
-  url('../../fonts/icomoon.woff?13r8r1') format('woff'),
-  url('../../fonts/icomoon.svg?13r8r1#icomoon') format('svg');font-style: normal;
+  src: url('../../fonts/icomoon.eot?13r8r1');
+  src: url('../../fonts/icomoon.eot?13r8r1#iefix') format('embedded-opentype'),
+    url('../../fonts/icomoon.ttf?13r8r1') format('truetype'),
+    url('../../fonts/icomoon.woff?13r8r1') format('woff'),
+    url('../../fonts/icomoon.svg?13r8r1#icomoon') format('svg');
+  font-style: normal;
   font-weight: normal;
   font-variant: normal;
   text-decoration: inherit;
@@ -17,11 +17,11 @@
 }
 
 a {
-    color: $linkBlue;
-    &:hover{
-        color: $linkBlueHover;
-    }
-    &:active {
-        color: $linkBlueActive;
-    }
+  color: $linkBlue;
+  &:hover {
+    color: $linkBlueHover;
+  }
+  &:active {
+    color: $linkBlueActive;
+  }
 }
