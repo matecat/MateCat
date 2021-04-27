@@ -8,6 +8,7 @@ const _ = require( 'lodash' );
 const winston = require( 'winston' );
 const path = require( 'path' );
 const ini = require( 'node-ini' );
+const uuid = require( 'uuid' );
 
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
@@ -21,12 +22,7 @@ const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
 winston.level = config.log.level;
 
-const corsAllowedOrigins = [
-    'https://beta.matecat.com',
-    'https://www.matecat.com',
-    'https://dev.matecat.com',
-    'https://localhost'
-];
+const allowedOrigins = config.cors.allowedOrigins;
 
 // Connections Options for stompit
 const connectOptions = {
@@ -53,23 +49,8 @@ const browserChannel = new SseChannel( {
     jsonEncode: true
 } );
 
-/**
- * Function used to create an unique id
- * @param separator
- * @returns {*}
- */
-const generateUid = function ( separator ) {
-    const delim = separator || "";
-
-    function S4() {
-        return (((1 + Math.random()) * 0x10000) | 0).toString( 16 ).substring( 1 );
-    }
-
-    return (S4() + S4() + delim + S4());
-};
-
 const corsAllow = ( req, res ) => {
-    return corsAllowedOrigins.some( ( element ) => {
+    return allowedOrigins.some( ( element ) => {
         if ( req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
@@ -116,7 +97,7 @@ http.createServer( ( req, res ) => {
 
             const query = qs.parse( parsedUrl.query );
 
-            res._clientId = generateUid();
+            res._clientId = uuid.v4();
             res._matecatJobId = query.jid;
             res._matecatPw = query.pw;
 

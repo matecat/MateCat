@@ -13,3 +13,7 @@ passcode = passcode
 [log]
 file = log/server.log
 level = debug
+
+[cors]
+allowedOrigins[] = https://localhost
+allowedOrigins[] = http://localhost
