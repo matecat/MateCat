@@ -41,17 +41,18 @@ class glossaryController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-                'exec'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
-                'id_job'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
-                'segment'        => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'newsegment'     => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'translation'    => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'from_target'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'newtranslation' => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'comment'        => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'automatic'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'id'             => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
+                'exec'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'segment'          => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'newsegment'       => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'translation'      => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'newtranslation'   => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'comment'          => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'automatic'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'id'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -59,17 +60,18 @@ class glossaryController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->exec           = $__postInput[ 'exec' ];
-        $this->id_job         = $__postInput[ 'id_job' ];
-        $this->password       = $__postInput[ 'password' ];
-        $this->segment        = $__postInput[ 'segment' ];
-        $this->newsegment     = $__postInput[ 'newsegment' ];
-        $this->translation    = $__postInput[ 'translation' ];
-        $this->fromtarget     = $__postInput[ 'from_target' ];
-        $this->newtranslation = $__postInput[ 'newtranslation' ];
-        $this->comment        = $__postInput[ 'comment' ];
-        $this->automatic      = $__postInput[ 'automatic' ];
-        $this->id_match       = $__postInput[ 'id' ];
+        $this->exec              = $__postInput[ 'exec' ];
+        $this->id_job            = $__postInput[ 'id_job' ];
+        $this->password          = $__postInput[ 'password' ];
+        $this->received_password = $__postInput[ 'current_password' ];
+        $this->segment           = $__postInput[ 'segment' ];
+        $this->newsegment        = $__postInput[ 'newsegment' ];
+        $this->translation       = $__postInput[ 'translation' ];
+        $this->fromtarget        = $__postInput[ 'from_target' ];
+        $this->newtranslation    = $__postInput[ 'newtranslation' ];
+        $this->comment           = $__postInput[ 'comment' ];
+        $this->automatic         = $__postInput[ 'automatic' ];
+        $this->id_match          = $__postInput[ 'id' ];
     }
 
     public function doAction() {
@@ -267,7 +269,7 @@ class glossaryController extends ajaxController {
             WorkerClient::enqueue( $queue, '\AsyncTasks\Workers\GlossaryWorker', $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( Exception $e ) {
             # Handle the error, logging, ...
-            $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
+            $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
             Log::doJsonLog( $output );
