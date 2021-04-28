@@ -1,0 +1,21 @@
+sudo: false
+dist: bionic
+
+node_js:
+  - "14"
+
+cache: yarn
+
+branches:
+  only:
+    - develop
+addons:
+  apt:
+    update: true
+
+install:
+  - yarn install
+  - cd support/script && npm install
+
+script:
+  - yarn coverage
