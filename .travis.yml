@@ -16,7 +16,8 @@ addons:
 
 install:
   - yarn install
-  - cd support_scripts/grunt && npm install
+  - nvm 9 && cd support_scripts/grunt && npm install
+  - nvm 14
 
 script:
   - yarn coverage
