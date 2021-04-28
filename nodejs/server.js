@@ -65,12 +65,12 @@ browserChannel.on( 'message', function ( message ) {
 } );
 
 //Event triggered when a client disconnect
-browserChannel.on( 'disconnect', function ( context, res ) {
+browserChannel.on( 'disconnect', ( context, res ) => {
     winston.debug( 'browserChannel disconnect', res._clientId );
 } );
 
 //Event triggered when a client connect
-browserChannel.on( 'connect', function ( context, req, res ) {
+browserChannel.on( 'connect', ( context, req, res ) => {
     // winston.debug('browserChannel connect ', res._clientId, res._matecatJobId);
     //Send a message to the client to communicate the clientId
     browserChannel.send( {
@@ -113,11 +113,11 @@ http.createServer( ( req, res ) => {
         res.end();
     }
 
-} ).listen( config.server.port, config.server.address, function () {
+} ).listen( config.server.port, config.server.address, () => {
     winston.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
 
-const checkCandidate = function ( type, response, message ) {
+const checkCandidate = ( type, response, message ) => {
     let candidate;
     switch ( type ) {
         case COMMENTS_TYPE:
@@ -151,39 +151,49 @@ const checkCandidate = function ( type, response, message ) {
     return candidate;
 };
 
-const stompMessageReceived = function ( body ) {
-    const message = JSON.parse( body );
+const stompMessageReceived = ( body ) => {
 
-    const dest = _.filter( browserChannel.connections, function ( serverResponse ) {
+    let message = null;
+    try {
+        message = JSON.parse( body );
+    } catch ( e ) {
+        winston.debug( "Invalid json payload received ", body );
+        return;
+    }
+
+    const dest = _.filter( browserChannel.connections, ( serverResponse ) => {
+
         if ( typeof serverResponse._clientId === 'undefined' ) {
             return false;
         }
 
         const candidate = checkCandidate( message._type, serverResponse, message );
 
-        if ( candidate ) {
-            if ( message._type === CONTRIBUTIONS_TYPE ) {
-                winston.debug( 'Contribution segment-id: ' + message.data.payload.id_segment );
-            }
-            winston.debug( 'candidate found', serverResponse._clientId );
-        }
+        winston.debug( 'candidate for ' + message._type, candidate ? serverResponse._clientId : null );
 
         return candidate;
+
     } );
+
+    if ( !dest || (dest && dest.length === 0) ) {
+        winston.debug( "Unknown message type, no available recipient found ", body );
+        return;
+    }
 
     message.data.payload._type = message._type;
 
     browserChannel.send( {
         data: message.data.payload
     }, dest );
+
 };
 
-const startStompConnection = function () {
+const startStompConnection = () => {
 
     /**
      * Start connection with the amq queue
      */
-    stompit.connect( connectOptions, function ( error, client ) {
+    stompit.connect( connectOptions, ( error, client ) => {
 
         if ( typeof client === 'undefined' ) {
             setTimeout( startStompConnection, 10000 );
@@ -191,7 +201,13 @@ const startStompConnection = function () {
             return;
         }
 
-        client.subscribe( subscribeHeaders, function ( error, message ) {
+        client.on( "error", () => {
+            client.disconnect();
+            startStompConnection();
+        } )
+
+        client.subscribe( subscribeHeaders, ( error, message ) => {
+
             winston.debug( '** event received in client subscription' );
 
             if ( error ) {
@@ -203,14 +219,15 @@ const startStompConnection = function () {
                 return;
             }
 
-            message.readString( 'utf-8', function ( error, body ) {
+            message.readString( 'utf-8', ( error, body ) => {
 
                 if ( error ) {
                     winston.debug( '!! read message error ' + error.message );
                 } else {
                     stompMessageReceived( body );
-                    message.ack();
+                    client.ack( message );
                 }
+
             } );
         } );
     } );
