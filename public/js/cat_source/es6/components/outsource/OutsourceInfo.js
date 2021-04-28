@@ -1,3 +1,5 @@
+import React from 'react'
+
 class OutsourceInfo extends React.Component {
   constructor(props) {
     super(props)

@@ -249,6 +249,7 @@ test('renders properly', async () => {
   global.ModalWindow = require('./cat_source/es6/components/modals/ModalWindowComponent.js').default
   global.AnalyzeActions = require('./cat_source/es6/actions/AnalyzeActions.js')
 
+  require('./lib/diff_match_patch')
   require('./common')
   require('./user_store')
   require('./login')

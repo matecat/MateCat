@@ -1,3 +1,4 @@
+import React from 'react'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 class AnalyzeHeader extends React.Component {
@@ -354,9 +355,7 @@ class AnalyzeHeader extends React.Component {
     }
   }
 
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return !nextProps.data.equals(this.props.data)
   }
 

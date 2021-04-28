@@ -1,10 +1,12 @@
+import React from 'react'
+import {TransitionGroup, CSSTransition} from 'react-transition-group'
+
 import AnalyzeConstants from '../../constants/AnalyzeConstants'
 import AnalyzeActions from '../../actions/AnalyzeActions'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
 import AnalyzeStore from '../../stores/AnalyzeStore'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 class AnalyzeMain extends React.Component {
   constructor(props) {

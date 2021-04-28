@@ -1,6 +1,7 @@
+import React from 'react'
+
 import ModalContainerComponent from './ModalContainerComponent'
 import ModalOverlayComponent from './ModalOverlayComponent'
-import PropTypes from 'prop-types'
 
 class ModalWindowComponent extends React.Component {
   constructor(props) {
