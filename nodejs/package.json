@@ -9,7 +9,7 @@
     "sse-channel": "^4.0.0",
     "stompit": "^1.0.0",
     "uuid": "^8.3.2",
-    "winston": "^1.0.0"
+    "winston": "^3.3.3"
   },
   "devDependencies": {},
   "scripts": {

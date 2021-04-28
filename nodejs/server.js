@@ -19,8 +19,14 @@ const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 
 // Init logger
-winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
-winston.level = config.log.level;
+const logger = winston.createLogger( {
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.Console( {level: 'debug'} ),
+        new winston.transports.File( {filename: path.resolve( __dirname, config.log.file ), level: config.log.level} ),
+    ],
+} );
 
 const allowedOrigins = config.cors.allowedOrigins;
 
@@ -61,12 +67,12 @@ const corsAllow = ( req, res ) => {
 
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
-    // winston.debug('browserChannel message', message);
+    // logger.debug('browserChannel message', message);
 } );
 
 //Event triggered when a client disconnect
 browserChannel.on( 'disconnect', ( context, res ) => {
-    winston.debug( 'browserChannel disconnect', res._clientId );
+    logger.debug( 'browserChannel disconnect', res._clientId );
 } );
 
 //Event triggered when a client connect
@@ -114,7 +120,7 @@ http.createServer( ( req, res ) => {
     }
 
 } ).listen( config.server.port, config.server.address, () => {
-    winston.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
+    logger.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
 
 const checkCandidate = ( type, response, message ) => {
@@ -157,7 +163,7 @@ const stompMessageReceived = ( body ) => {
     try {
         message = JSON.parse( body );
     } catch ( e ) {
-        winston.debug( "Invalid json payload received ", body );
+        logger.debug( [ "Invalid json payload received ", body ] );
         return;
     }
 
@@ -169,14 +175,14 @@ const stompMessageReceived = ( body ) => {
 
         const candidate = checkCandidate( message._type, serverResponse, message );
 
-        winston.debug( 'candidate for ' + message._type, candidate ? serverResponse._clientId : null );
+        logger.debug( [ 'candidate for ' + message._type, candidate ? serverResponse._clientId : null ] );
 
         return candidate;
 
     } );
 
     if ( !dest || (dest && dest.length === 0) ) {
-        winston.debug( "Unknown message type, no available recipient found ", body );
+        logger.debug( [ "Unknown message type, no available recipient found ", body ] );
         return;
     }
 
@@ -197,21 +203,21 @@ const startStompConnection = () => {
 
         if ( typeof client === 'undefined' ) {
             setTimeout( startStompConnection, 10000 );
-            winston.debug( "** client error, restarting connection in 10 seconds", error );
+            logger.debug( "** client error, restarting connection in 10 seconds", error );
             return;
         }
 
         client.on( "error", () => {
             client.disconnect();
             startStompConnection();
-        } )
+        } );
 
         client.subscribe( subscribeHeaders, ( error, message ) => {
 
-            winston.debug( '** event received in client subscription' );
+            logger.debug( '** event received in client subscription' );
 
             if ( error ) {
-                winston.debug( '!! subscribe error ' + error.message );
+                logger.debug( '!! subscribe error ' + error.message );
 
                 client.disconnect();
                 startStompConnection();
@@ -222,7 +228,7 @@ const startStompConnection = () => {
             message.readString( 'utf-8', ( error, body ) => {
 
                 if ( error ) {
-                    winston.debug( '!! read message error ' + error.message );
+                    logger.debug( '!! read message error ' + error.message );
                 } else {
                     stompMessageReceived( body );
                     client.ack( message );
