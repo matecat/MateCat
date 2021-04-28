@@ -103,12 +103,14 @@ class ProjectManagerModel {
                         locked, 
                         match_type, 
                         eq_word_count,
+                        serialized_errors_list,
+                        warning,
                         suggestion_match,
                         standard_word_count
                 )
                 VALUES ";
 
-        $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ?, ? )";
+        $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ?, ?, ?, ? )";
 
         Log::doJsonLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
 

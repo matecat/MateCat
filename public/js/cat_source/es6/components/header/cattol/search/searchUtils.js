@@ -379,7 +379,7 @@ let SearchUtils = {
     let replace = p.replace ? p.replace : ''
     let dd = new Date()
 
-    APP.doRequest({
+    return APP.doRequest({
       data: {
         action: 'getSearch',
         function: 'replaceAll',
@@ -393,16 +393,6 @@ let SearchUtils = {
         exactmatch: p['exact-match'],
         replace: replace,
         revision_number: config.revisionNumber,
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          APP.alert({msg: d.errors[0].message})
-          return false
-        }
-        UI.unmountSegments()
-        UI.render({
-          firstLoad: false,
-        })
       },
     })
   },

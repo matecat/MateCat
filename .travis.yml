@@ -1,0 +1,23 @@
+dist: bionic
+language: node_js
+
+node_js:
+  - 14
+
+cache: yarn
+
+branches:
+  only:
+    - develop
+addons:
+  apt:
+    update: true
+
+install:
+  - yarn install
+  - nvm install 9 && cd support_scripts/grunt && npm install
+  - nvm use 14
+  - cd ../..
+
+script:
+  - yarn coverage

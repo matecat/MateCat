@@ -404,9 +404,9 @@ const SegmentActions = {
   },
   copySourceToTarget: function () {
     let currentSegment = SegmentStore.getCurrentSegment()
-
+    SegmentActions.disableTPOnSegment(currentSegment)
     if (currentSegment) {
-      let source = currentSegment.updatedSource
+      let source = currentSegment.segment
       let sid = currentSegment.sid
       // Escape html
       source = unescapeHTMLLeaveTags(source)
