@@ -2,7 +2,7 @@ sudo: false
 dist: bionic
 
 node_js:
-  - "14"
+  - "9"
 
 cache: yarn
 
