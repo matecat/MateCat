@@ -1,6 +1,6 @@
-UI = null
+window.UI = null
 
-UI = {
+window.UI = {
   init: function () {
     this.pollingTime = 1000
     this.segmentsThreshold = 50000
@@ -121,6 +121,7 @@ UI = {
     $('#downloadAnalysisReportForm').submit()
   },
 }
+
 $(document).ready(function () {
   UI.init()
 })

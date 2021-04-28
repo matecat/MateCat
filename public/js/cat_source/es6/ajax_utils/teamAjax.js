@@ -1,8 +1,8 @@
-if (!API) {
-  var API = {}
+if (!window.API) {
+  window.API = {}
 }
 
-API.TEAM = {
+window.API.TEAM = {
   getAllTeams: function (force) {
     try {
       if (APP && APP.USER.STORE.teams && !force) {

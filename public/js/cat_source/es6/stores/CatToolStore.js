@@ -6,7 +6,6 @@ import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import CatToolConstants from '../constants/CatToolConstants'
 import assign from 'object-assign'
-import SegmentConstants from '../constants/SegmentConstants'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -54,7 +53,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   storeSearchResult: function (data) {
     this.searchResults = data
   },
-  emitChange: function (event, args) {
+  emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
