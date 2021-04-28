@@ -1,6 +1,5 @@
 const SseChannel = require( 'sse-channel' );
 const http = require( 'http' );
-const os = require( 'os' );
 const stompit = require( 'stompit' );
 const url = require( 'url' );
 const qs = require( 'querystring' );
@@ -163,7 +162,8 @@ const stompMessageReceived = ( body ) => {
     try {
         message = JSON.parse( body );
     } catch ( e ) {
-        logger.debug( [ "Invalid json payload received ", body ] );
+        logger.debug( ["Invalid json payload received ",
+            body] );
         return;
     }
 
@@ -175,14 +175,16 @@ const stompMessageReceived = ( body ) => {
 
         const candidate = checkCandidate( message._type, serverResponse, message );
 
-        logger.debug( [ 'candidate for ' + message._type, candidate ? serverResponse._clientId : null ] );
+        logger.debug( ['candidate for ' + message._type,
+            candidate ? serverResponse._clientId : null] );
 
         return candidate;
 
     } );
 
     if ( !dest || (dest && dest.length === 0) ) {
-        logger.debug( [ "Unknown message type, no available recipient found ", body ] );
+        logger.debug( ["Unknown message type, no available recipient found ",
+            body] );
         return;
     }
 
