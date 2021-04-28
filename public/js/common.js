@@ -1,5 +1,3 @@
-'use strict'
-
 window.APP = null
 
 window.APP = {

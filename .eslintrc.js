@@ -51,10 +51,6 @@ module.exports = {
       files: ['**/public/js/**/*.js'],
       env: {browser: true},
       parserOptions: {ecmaVersion: browserEcmaVersion},
-
-      rules: {
-        strict: 'error',
-      },
     },
   ],
 }
