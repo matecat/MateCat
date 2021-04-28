@@ -55,10 +55,15 @@ const browserChannel = new SseChannel( {
 } );
 
 const corsAllow = ( req, res ) => {
+
     return allowedOrigins.some( ( element ) => {
         if ( req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
+            logger.debug( "Allowed domain " + req.headers['origin'] );
+            return true;
+        } else if ( !req.headers['origin'] ) {
+            logger.debug( "Allowed Request from same origin " + req.headers['host'] );
             return true;
         }
     } );
@@ -162,30 +167,22 @@ const stompMessageReceived = ( body ) => {
     try {
         message = JSON.parse( body );
     } catch ( e ) {
-        logger.debug( ["Invalid json payload received ",
-            body] );
+        logger.debug( ["Invalid json payload received ", body] );
         return;
     }
 
     const dest = _.filter( browserChannel.connections, ( serverResponse ) => {
-
         if ( typeof serverResponse._clientId === 'undefined' ) {
             return false;
         }
-
-        const candidate = checkCandidate( message._type, serverResponse, message );
-
-        logger.debug( ['candidate for ' + message._type,
-            candidate ? serverResponse._clientId : null] );
-
-        return candidate;
-
+        return checkCandidate( message._type, serverResponse, message );
     } );
 
     if ( !dest || (dest && dest.length === 0) ) {
-        logger.debug( ["Unknown message type, no available recipient found ",
-            body] );
+        logger.debug( ["Unknown message type, no available recipient found ", body] );
         return;
+    } else {
+        logger.debug( ['candidate for ' + message._type, dest[0]._clientId] );
     }
 
     message.data.payload._type = message._type;
