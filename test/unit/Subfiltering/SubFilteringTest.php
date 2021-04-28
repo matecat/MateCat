@@ -451,6 +451,29 @@ class SubFilteringTest extends AbstractTest {
      **************************
      */
 
+    public function testPCWithoutAnyDataRefMap() {
+        $data_ref_map = [];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
+        $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
+        $expected_l2_segment = 'Practice using &lt;ph id="mtc_u_1" equiv-text="base64:Jmx0O3BjIGlkPSIxYiIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOmIiJmd0Ow=="/&gt;coaching frameworks&lt;ph id="mtc_u_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt; and skills with peers and coaches in a safe learning environment.';
+
+        $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db_segment_from_l1 = $Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment_from_l1, $db_segment);
+    }
+
+
     public function testMostSimpleCaseOfPC() {
         $data_ref_map = [
             'd1' => '_',
