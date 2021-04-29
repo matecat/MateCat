@@ -51,7 +51,7 @@ class DataRefRestore extends AbstractHandler {
      *
      * @param $segment
      *
-     * @return string|
+     * @return string
      */
     private function restoreXliffPcTagsFromMatecatPhTags( $segment)
     {
