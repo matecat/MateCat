@@ -101,7 +101,7 @@ class JobContainer extends React.Component {
     let self = this
     let label = ''
     switch (revision_number) {
-      case null: {
+      case undefined: {
         this.oldPassword = this.props.job.get('password')
         label = 'Translate'
         break
