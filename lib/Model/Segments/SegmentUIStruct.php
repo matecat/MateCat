@@ -39,5 +39,6 @@ class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements Data
     public $notes;
     public $version_number;
     public $data_ref_map;
+    public $context_groups;
 
 }
