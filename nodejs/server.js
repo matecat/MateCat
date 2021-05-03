@@ -12,6 +12,7 @@ const uuid = require( 'uuid' );
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const COMMENTS_TYPE = 'comment';
+const GLOSSARY_TYPE = 'glossary';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
@@ -151,6 +152,11 @@ const checkCandidate = ( type, response, message ) => {
                 response._clientId === message.data.id_client;
             break;
         case CROSS_LANG_CONTRIBUTIONS:
+            candidate = response._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
+                response._clientId === message.data.id_client;
+            break;
+        case GLOSSARY_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
