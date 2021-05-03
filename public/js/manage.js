@@ -1,6 +1,6 @@
-UI = null
+window.UI = null
 
-UI = {
+window.UI = {
   init: function () {
     this.Search = {}
     this.Search.filter = {}
@@ -265,7 +265,6 @@ UI = {
   },
 
   filterProjects: function (userUid, name, status) {
-    var self = this
     this.Search.filter = {}
     this.Search.currentPage = 1
     var filter = {}
@@ -328,7 +327,7 @@ UI = {
       allowHtml: true,
       autoDismiss: false,
     }
-    var boxUndo = APP.addNotification(notification)
+    APP.addNotification(notification)
   },
 
   selectPersonalTeam: function () {

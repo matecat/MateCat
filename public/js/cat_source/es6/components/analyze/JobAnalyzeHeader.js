@@ -1,3 +1,5 @@
+import React from 'react'
+
 class JobAnalyzeHeader extends React.Component {
   constructor(props) {
     super(props)
@@ -7,22 +9,16 @@ class JobAnalyzeHeader extends React.Component {
     this.total = 0
     this.payable = 0
     let self = this
-    this.props.totals.forEach(function (chunk, i) {
+    this.props.totals.forEach(function (chunk) {
       self.payable = self.payable + chunk.get('TOTAL_PAYABLE').get(0)
     })
 
-    _.each(this.props.jobInfo.chunks, function (chunk, i) {
+    _.each(this.props.jobInfo.chunks, function (chunk) {
       self.total = self.total + chunk.total_raw_word_count
     })
   }
 
-  componentDidUpdate() {}
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate() {
     return true
   }
 

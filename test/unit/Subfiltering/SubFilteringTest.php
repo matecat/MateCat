@@ -322,11 +322,8 @@ class SubFilteringTest extends AbstractTest {
         $segmentL2 = $this->filter->fromLayer0ToLayer2( $db_segment );
 
         $this->assertEquals( $segment_to_UI, $segmentL2 );
-
         $this->assertEquals( $db_segment, $this->filter->fromLayer1ToLayer0( $segment_from_UI ) );
-
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segment_from_UI ) );
-
         $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
 
     }
@@ -361,19 +358,21 @@ class SubFilteringTest extends AbstractTest {
         $segmentL2 = $this->filter->fromLayer0ToLayer2( $db_segment );
 
         $this->assertEquals( $segment_to_UI, $segmentL2 );
-
         $this->assertEquals( $db_segment, $this->filter->fromLayer1ToLayer0( $segment_from_UI ) );
-
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segment_from_UI ) );
-
         $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
-
     }
+
+    /**
+     **************************
+     * <ph> tags test (xliff 2.0)
+     **************************
+     */
 
     /**
      * @throws \Exception
      */
-    public function testSPlaceholderWithDataRef() {
+    public function testsPHPlaceholderWithDataRefForAirbnb() {
         $data_ref_map = [
                 'source3' => '&lt;/a&gt;',
                 'source4' => '&lt;br&gt;',
@@ -402,6 +401,203 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals($l1_translation, $expected_l1_translation);
         $this->assertEquals($l2_segment, $expected_l2_segment);
         $this->assertEquals($l2_translation, $expected_l2_translation);
+
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+        $back_to_db_translation =$Filter->fromLayer1ToLayer0($l1_translation);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+        $this->assertEquals($back_to_db_translation, $db_translation);
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function testPHPlaceholderWithDataRef() {
+        $data_ref_map = [
+                'source1' => '&lt;br&gt;',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment     = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
+        $db_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
+        $expected_l1_segment = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
+        $expected_l1_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
+        $expected_l2_segment = 'Frase semplice: &lt;ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/&gt;.';
+        $expected_l2_translation = 'Simple sentence: &lt;ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/&gt;.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
+
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+        $back_to_db_translation =$Filter->fromLayer1ToLayer0($l1_translation);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+        $this->assertEquals($back_to_db_translation, $db_translation);
+    }
+
+    /**
+     **************************
+     * <pc> tags test (xliff 2.0)
+     **************************
+     */
+
+    public function testPCWithoutAnyDataRefMap() {
+        $data_ref_map = [];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
+        $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
+        $expected_l2_segment = 'Practice using &lt;ph id="mtc_u_1" equiv-text="base64:Jmx0O3BjIGlkPSIxYiIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOmIiJmd0Ow=="/&gt;coaching frameworks&lt;ph id="mtc_u_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt; and skills with peers and coaches in a safe learning environment.';
+
+        $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db_segment_from_l1 = $Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment_from_l1, $db_segment);
+    }
+
+
+    public function testMostSimpleCaseOfPC() {
+        $data_ref_map = [
+            'd1' => '_',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
+        $db_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
+        $expected_l1_segment = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
+        $expected_l1_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
+        $expected_l2_segment = 'Testo libero contenente &lt;ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Xw=="/&gt;corsivo&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d1" equiv-text="base64:Xw=="/&gt;.';
+        $expected_l2_translation = 'Free text containing &lt;ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Xw=="/&gt;curvise&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d1" equiv-text="base64:Xw=="/&gt;.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
+
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+        $back_to_db_translation =$Filter->fromLayer1ToLayer0($l1_translation);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+        $this->assertEquals($back_to_db_translation, $db_translation);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testDoublePCPlaceholderWithDataRef() {
+        $data_ref_map = [
+                'd1' => '[',
+                'd2' => '](http://repubblica.it)',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment     = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
+        $db_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
+        $expected_l1_segment = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
+        $expected_l1_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
+        $expected_l2_segment = 'Link semplice: &lt;ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Ww=="/&gt;La Repubblica&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/&gt;.';
+        $expected_l2_translation = 'Simple link: &lt;ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Ww=="/&gt;La Repubblica&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/&gt;.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
+
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+        $back_to_db_translation =$Filter->fromLayer1ToLayer0($l1_translation);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+        $this->assertEquals($back_to_db_translation, $db_translation);
+    }
+
+    public function testPCLayer2ToLayer0() {
+
+        $data_ref_map = [
+                'd1' => '_',
+                'd2' => '**',
+                'd3' => '`',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $expected_db_translation = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>';
+        $l2_translation = 'Testo libero contenente <ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Xw=="/>corsivo<ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d1" equiv-text="base64:Xw=="/>';
+
+        $db_translation = $Filter->fromLayer2ToLayer0( $l2_translation );
+
+        $this->assertEquals($db_translation, $expected_db_translation);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testWithPCTagsWithAndWithoutDataRefInTheSameSegment() {
+
+        $data_ref_map = [
+                'source1' => 'x',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+
+        $db_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
+        $db_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
+        $expected_l1_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
+        $expected_l1_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
+        $expected_l2_segment = 'Text &lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:eA=="/&gt;&lt;ph id="mtc_u_1" equiv-text="base64:Jmx0O3BjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiJmd0Ow=="/&gt;link&lt;ph id="mtc_u_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt;&lt;ph id="source1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source1" equiv-text="base64:eA=="/&gt;.';
+        $expected_l2_translation = 'Testo &lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:eA=="/&gt;&lt;ph id="mtc_u_1" equiv-text="base64:Jmx0O3BjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiJmd0Ow=="/&gt;link&lt;ph id="mtc_u_2" equiv-text="base64:Jmx0Oy9wYyZndDs="/&gt;&lt;ph id="source1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source1" equiv-text="base64:eA=="/&gt;.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+        $l2_translation = $Filter->fromLayer1ToLayer2( $l1_translation );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l1_translation, $expected_l1_translation);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+        $this->assertEquals($l2_translation, $expected_l2_translation);
+
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+        $back_to_db_translation =$Filter->fromLayer1ToLayer0($l1_translation);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+        $this->assertEquals($back_to_db_translation, $db_translation);
+    }
 }

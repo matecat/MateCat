@@ -1,3 +1,5 @@
+import React from 'react'
+
 import JobAnalyze from './JobAnalyze'
 
 class ProjectAnalyze extends React.Component {
@@ -8,7 +10,7 @@ class ProjectAnalyze extends React.Component {
   getJobs() {
     var self = this
     let idArray = []
-    return this.props.project.get('jobs').map(function (job, i) {
+    return this.props.project.get('jobs').map(function (job) {
       if (
         idArray.indexOf(job.get('id')) < 0 &&
         !_.isUndefined(self.props.jobsInfo[job.get('id')])
@@ -35,7 +37,7 @@ class ProjectAnalyze extends React.Component {
     })
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return (
       !nextProps.volumeAnalysis.equals(this.props.volumeAnalysis) ||
       nextProps.status !== this.props.status

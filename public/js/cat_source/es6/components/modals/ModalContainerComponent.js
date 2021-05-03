@@ -1,3 +1,4 @@
+import React from 'react'
 import PropTypes from 'prop-types'
 
 class ModalComponent extends React.Component {
@@ -62,9 +63,5 @@ ModalComponent.propTypes = {
   onClose: PropTypes.func,
   title: PropTypes.string,
 }
-//
-// ModalComponent.defaultProps = {
-//
-// };
 
 export default ModalComponent

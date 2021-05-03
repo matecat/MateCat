@@ -1,3 +1,5 @@
+import React from 'react'
+
 import AnalyzeActions from '../../actions/AnalyzeActions'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 
@@ -527,7 +529,7 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   componentDidUpdate() {
-    let changedData = _.pick(this.payableValuesChenged, (item, i, array) => {
+    let changedData = _.pick(this.payableValuesChenged, (item) => {
       return item === true
     })
     if (_.size(changedData) > 0) {
