@@ -23,13 +23,10 @@ class SegmentFooterTabMessages extends React.Component {
           ) {
             return
           }
-          //parse url link
-          // let note = TextUtils.replaceUrl(item.note.replace(/[ ]*\n/g, '<br>\n'))
           let note = item.note
           let html = (
             <div className="note" key={'note-' + index}>
               <span className="note-label">Note: </span>
-              {/*<span dangerouslySetInnerHTML={self.allowHTML(note)} />*/}
               <span>{note}</span>
             </div>
           )
@@ -52,7 +49,6 @@ class SegmentFooterTabMessages extends React.Component {
           let text = item.json
           let html = (
             <div key={'note-json' + index} className="note">
-              {' '}
               {text}
             </div>
           )
@@ -69,7 +65,6 @@ class SegmentFooterTabMessages extends React.Component {
               className="context-item"
               key={contextGroup.id + context.attr['context-type']}
             >
-              {/*<span className="context-item-label">{context.attr["context-type"]}</span>*/}
               <span className="context-item-name">{context.content}</span>
             </div>,
           )
