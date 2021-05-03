@@ -20,7 +20,7 @@ module.exports = {
 
     // jest related files
     {
-      files: ['**/*.jest.js', '**/*.test.js'],
+      files: ['**/*.jest.js', '**/*.test.js', '**/mocks/**/*.js'],
       parser: '@babel/eslint-parser',
       parserOptions: {
         sourceType: 'module',

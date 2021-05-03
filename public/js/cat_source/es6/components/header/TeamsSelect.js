@@ -1,9 +1,8 @@
-import TeamConstants from '../../constants/TeamConstants'
+import React from 'react'
+
 import ManageConstants from '../../constants/ManageConstants'
 import TeamsStore from '../../stores/TeamsStore'
-import IconTick from '../icons/IconTick'
 import IconDown from '../icons/IconDown'
-import IconUserLogout from '../icons/IconUserLogout'
 import IconSettings from '../icons/IconSettings'
 
 class TeamsSelect extends React.Component {
@@ -124,14 +123,13 @@ class TeamsSelect extends React.Component {
   getTeamsSelect = () => {
     const {openModifyTeam, changeTeamHandler, openCreateTeams} = this
     const {teams, changeTeam, showModals, selectedTeamId} = this.props
-    const {} = this.state
 
     let result = ''
     let dropdownIcon = <IconDown width={16} height={16} color={'#788190'} />
     let dontShowCursorClass = teams.size == 1 ? 'disable-dropdown-team' : ''
     let personalTeam = ''
     if (teams.size > 0 && changeTeam) {
-      let items = teams.map((team, i) => {
+      let items = teams.map((team) => {
         let iconModal = ''
         if (team.get('type') == 'personal') {
           personalTeam = (

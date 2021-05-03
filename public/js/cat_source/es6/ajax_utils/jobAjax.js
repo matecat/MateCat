@@ -1,8 +1,8 @@
-if (!API) {
-  var API = {}
+if (!window.API) {
+  window.API = {}
 }
 
-API.JOB = {
+window.API.JOB = {
   /**
    * Change the password for the job
    * @param job

@@ -1,5 +1,7 @@
-import OutsourceInfo from './OutsourceInfo'
+import React from 'react'
 import Immutable from 'immutable'
+
+import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
 
 class OutsourceVendor extends React.Component {
@@ -1172,7 +1174,7 @@ class OutsourceVendor extends React.Component {
       let currencyToShow = Cookies.get('matecat_currency')
       $(this.currencySelect).dropdown('set selected', currencyToShow)
       $(this.currencySelect).dropdown({
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           self.onCurrencyChange(value)
         },
       })
