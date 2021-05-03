@@ -108,6 +108,7 @@ API.SEGMENT = {
       id_job: config.id_job,
       password: config.password,
       current_password: config.currentPassword,
+      client_id: config.id_client,
     }
     return $.ajax({
       data: data,
@@ -128,6 +129,7 @@ API.SEGMENT = {
       id_job: config.id_job,
       password: config.password,
       current_password: config.currentPassword,
+      client_id: config.id_client,
     }
     return $.ajax({
       data: data,
@@ -145,6 +147,7 @@ API.SEGMENT = {
       id_job: config.id_job,
       password: config.password,
       id: id,
+      client_id: config.id_client,
     }
     return $.ajax({
       data: data,
@@ -162,6 +165,7 @@ API.SEGMENT = {
       comment: comment,
       id_job: config.id_job,
       password: config.password,
+      client_id: config.id_client,
     }
     return $.ajax({
       data: data,
@@ -188,6 +192,7 @@ API.SEGMENT = {
       comment: comment,
       id_job: config.id_job,
       password: config.password,
+      client_id: config.id_client,
     }
 
     return $.ajax({
