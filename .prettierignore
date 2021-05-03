@@ -1,5 +1,7 @@
 /public/css/fonts
+/public/css/sass/vendor_mc/semantic/semantic.css
 /public/js/lib
+/vendor
 /nodejs
 /plugins
 /lib
