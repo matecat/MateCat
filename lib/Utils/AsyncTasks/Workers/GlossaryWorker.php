@@ -52,8 +52,7 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function delete( $payload ) {
 
-        $message = [];
-
+        $message    = [];
         $tm_keys    = $payload[ 'tm_keys' ];
         $user       = $this->getUser( $payload[ 'user' ] );
         $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
@@ -93,7 +92,14 @@ class GlossaryWorker extends AbstractWorker {
         $message[ 'code' ] = $set_successful;
         $message[ 'data' ] = ( $set_successful ? 'OK' : null );
 
-        $this->publishMessage( 'glossary_delete', $message );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
+
     }
 
     /**
@@ -105,8 +111,7 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function get( $payload ) {
 
-        $message = [];
-
+        $message      = [];
         $user         = $this->getUser( $payload[ 'user' ] );
         $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
         $_TMS         = $this->getEngine( $featureSet );
@@ -193,7 +198,14 @@ class GlossaryWorker extends AbstractWorker {
 
         $message[ 'data' ][ 'matches' ] = $TMS_RESULT;
 
-        $this->publishMessage( 'glossary_get', $message );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
+
     }
 
     /**
@@ -325,7 +337,13 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'errors' ][] = [ "code" => -1, "message" => "We got an error, please try again." ];
         }
 
-        $this->publishMessage( 'glossary_set', $message );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
     }
 
     /**
@@ -337,8 +355,7 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function update( $payload ) {
 
-        $message = [];
-
+        $message    = [];
         $user       = $this->getUser( $payload[ 'user' ] );
         $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
         $_TMS       = $this->getEngine( $featureSet );
@@ -392,7 +409,26 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'data' ][ 'matches' ] = $TMS_GET_RESULT;
         }
 
-        $this->publishMessage( 'glossary_update', $message );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
+    }
+
+    private function setResponsePayload( $id_client, $jobData, $message ) {
+        return [
+                '_type' => 'glossary',
+                'data'  => [
+                        'payload'   => $message,
+                        'id_client' => $id_client,
+                        'id_job'    => $jobData[ 'id' ],
+                        'passwords' => $jobData[ 'password' ]
+                ]
+        ];
+
     }
 
     /**
@@ -401,14 +437,7 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @throws \StompException
      */
-    private function publishMessage( $type, array $message ) {
-
-        $_object = [
-                '_type' => $type,
-                'data'  => [
-                    'payload' => $message,
-                ]
-        ];
+    private function publishMessage( $_object ) {
 
         $message = json_encode( $_object );
 

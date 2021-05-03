@@ -12,6 +12,10 @@ class glossaryController extends ajaxController {
 
     const GLOSSARY_WRITE = 'GLOSSARY_WRITE';
     const GLOSSARY_READ  = 'GLOSSARY_READ';
+    /**
+     * @var string
+     */
+    protected $id_client;
 
     private $exec;
     private $id_job;
@@ -52,7 +56,8 @@ class glossaryController extends ajaxController {
                 'newtranslation'   => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'comment'          => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'automatic'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'id'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
+                'id'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -72,6 +77,7 @@ class glossaryController extends ajaxController {
         $this->comment           = $__postInput[ 'comment' ];
         $this->automatic         = $__postInput[ 'automatic' ];
         $this->id_match          = $__postInput[ 'id' ];
+        $this->id_client         = $__postInput[ 'id_client' ];
     }
 
     public function doAction() {
@@ -163,6 +169,7 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'get',
                 'payload' => [
+                        'id_client'      => $this->id_client,
                         'tm_keys'        => $this->jobData[ 'tm_keys' ],
                         'userRole'       => $this->userRole,
                         'user'           => $this->user->toArray(),
@@ -192,6 +199,7 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'set',
                 'payload' => [
+                        'id_client'      => $this->id_client,
                         'tm_keys'        => $this->jobData[ 'tm_keys' ],
                         'userRole'       => $this->userRole,
                         'user'           => $this->user->toArray(),
@@ -220,6 +228,7 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'update',
                 'payload' => [
+                        'id_client'      => $this->id_client,
                         'tm_keys'        => $this->jobData[ 'tm_keys' ],
                         'userRole'       => $this->userRole,
                         'user'           => $this->user->toArray(),
@@ -246,6 +255,7 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'delete',
                 'payload' => [
+                        'id_client'      => $this->id_client,
                         'tm_keys'        => $this->jobData[ 'tm_keys' ],
                         'userRole'       => $this->userRole,
                         'user'           => $this->user->toArray(),

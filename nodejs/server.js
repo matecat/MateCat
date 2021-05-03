@@ -12,6 +12,7 @@ var ini = require( 'node-ini' );
 var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const COMMENTS_TYPE = 'comment';
+const GLOSSARY_TYPE = 'glossary';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
@@ -71,7 +72,7 @@ browserChannel.on( 'message', function ( message ) {
 
 //Event triggered when a client disconnect
 browserChannel.on( 'disconnect', function ( context, res ) {
-    winston.debug('browserChannel disconnect', res._clientId);
+    winston.debug( 'browserChannel disconnect', res._clientId );
 } );
 
 //Event triggered when a client connect
@@ -142,6 +143,11 @@ var checkCandidate = function ( type, response, message ) {
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
             break;
+        case GLOSSARY_TYPE:
+            candidate = response._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
+                response._clientId === message.data.id_client;
+            break;
         default:
             candidate = false;
     }
@@ -156,10 +162,10 @@ var stompMessageReceived = function ( body ) {
             return false;
         }
 
-        var candidate = checkCandidate( message._type, serverResponse, message);
+        var candidate = checkCandidate( message._type, serverResponse, message );
 
         if ( candidate ) {
-            if ( message._type === CONTRIBUTIONS_TYPE) {
+            if ( message._type === CONTRIBUTIONS_TYPE ) {
                 winston.debug( 'Contribution segment-id: ' + message.data.payload.id_segment );
             }
             winston.debug( 'candidate found', serverResponse._clientId );
@@ -205,8 +211,7 @@ var startStompConnection = function () {
                 if ( error ) {
                     winston.debug( '!! read message error ' + error.message );
                     return;
-                }
-                else {
+                } else {
                     stompMessageReceived( body );
                     message.ack();
                 }
