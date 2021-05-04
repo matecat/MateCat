@@ -94,7 +94,9 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
                 $this->setResponsePayload(
+                        'glossary_delete',
                         $payload[ 'id_client' ],
+                        $payload[ 'id_segment' ],
                         $payload[ 'jobData' ],
                         $message
                 )
@@ -200,7 +202,9 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
                 $this->setResponsePayload(
+                        'glossary_get',
                         $payload[ 'id_client' ],
+                        $payload[ 'id_segment' ],
                         $payload[ 'jobData' ],
                         $message
                 )
@@ -339,7 +343,9 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
                 $this->setResponsePayload(
+                        'glossary_set',
                         $payload[ 'id_client' ],
+                        $payload[ 'id_segment' ],
                         $payload[ 'jobData' ],
                         $message
                 )
@@ -411,21 +417,24 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
                 $this->setResponsePayload(
+                        'glossary_update',
                         $payload[ 'id_client' ],
+                        $payload[ 'id_segment' ],
                         $payload[ 'jobData' ],
                         $message
                 )
         );
     }
 
-    private function setResponsePayload( $id_client, $jobData, $message ) {
+    private function setResponsePayload( $type, $id_client, $id_segment, $jobData, $message ) {
         return [
-                '_type' => 'glossary',
+                '_type' => $type,
                 'data'  => [
-                        'payload'   => $message,
-                        'id_client' => $id_client,
-                        'id_job'    => $jobData[ 'id' ],
-                        'passwords' => $jobData[ 'password' ]
+                        'payload'    => $message,
+                        'id_client'  => $id_client,
+                        'id_segment' => $id_segment,
+                        'id_job'     => $jobData[ 'id' ],
+                        'passwords'  => $jobData[ 'password' ]
                 ]
         ];
 
