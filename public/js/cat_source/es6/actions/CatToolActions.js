@@ -82,6 +82,12 @@ let CatToolActions = {
   startNotifications: function () {
     Notifications.start()
   },
+  clientConntected: function ( clientId ) {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.CLIENT_CONNECT,
+      clientId
+    })
+  },
   renderQualityReportButton() {
     var revision_number = config.revisionNumber ? config.revisionNumber : '1'
     var qrParam = config.secondRevisionsCount

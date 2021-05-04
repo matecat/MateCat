@@ -713,12 +713,6 @@ const SegmentActions = {
     })
   },
 
-  // getGlossaryForSegment: function ( text ) {
-  //     return API.SEGMENT.getGlossaryForSegment(text)
-  //         .fail(function (  ) {
-  //             OfflineUtils.failedConnection( 0, 'glossary' );
-  //         });
-  // },
   getGlossaryForSegment: function (sid, fid, text) {
     let requestes = [
       {
@@ -751,7 +745,7 @@ const SegmentActions = {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
       if (typeof segment.glossary === 'undefined') {
-        API.SEGMENT.getGlossaryForSegment(request.text)
+        API.SEGMENT.getGlossaryForSegment(sid, request.text)
           .done(function (response) {
             AppDispatcher.dispatch({
               actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
@@ -771,7 +765,7 @@ const SegmentActions = {
   searchGlossary: function (sid, fid, text, fromTarget) {
     text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
     text = text.replace(/\"/g, '')
-    API.SEGMENT.getGlossaryMatch(text, fromTarget)
+    API.SEGMENT.getGlossaryMatch(sid, text, fromTarget)
       .done((response) => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
@@ -787,7 +781,7 @@ const SegmentActions = {
   },
 
   deleteGlossaryItem: function (source, target, id, name, sid) {
-    return API.SEGMENT.deleteGlossaryItem(source, target, id)
+    return API.SEGMENT.deleteGlossaryItem(sid, source, target, id)
       .fail(function () {
         OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
@@ -808,7 +802,7 @@ const SegmentActions = {
 
   addGlossaryItem: function (source, target, comment, sid) {
     source = TextUtils.htmlEncode(source)
-    return API.SEGMENT.addGlossaryItem(source, target, comment)
+    return API.SEGMENT.addGlossaryItem(sid, source, target, comment)
       .fail(function () {
         OfflineUtils.failedConnection(0, 'addGlossaryItem')
       })

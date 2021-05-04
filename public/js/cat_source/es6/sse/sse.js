@@ -33,6 +33,10 @@ let SSE = {
     }
   },
   initEvents: function () {
+    $(document).on('sse:ack', function (ev, message) {
+      config.id_client = message.data.clientId
+      CatToolActions.clientConntected(message.data.clientId);
+    })
     $(document).on('sse:concordance', function (ev, message) {
       SegmentActions.setConcordanceResult(message.data.id_segment, message.data)
     })
@@ -108,7 +112,6 @@ let SSE = {
 
 let NOTIFICATIONS = {
   start: function () {
-    var self = this
     SSE.init()
     this.source = SSE.getSource('notifications')
     this.addEvents()
@@ -145,10 +148,6 @@ let NOTIFICATIONS = {
       },
       false,
     )
-
-    $(document).on('sse:ack', function (ev, message) {
-      config.id_client = message.data.clientId
-    })
   },
 }
 

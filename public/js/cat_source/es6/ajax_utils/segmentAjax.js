@@ -99,7 +99,7 @@ API.SEGMENT = {
     })
   },
 
-  getGlossaryForSegment: function (source) {
+  getGlossaryForSegment: function (sid, source) {
     var data = {
       exec: 'get',
       segment: source,
@@ -109,6 +109,7 @@ API.SEGMENT = {
       password: config.password,
       current_password: config.currentPassword,
       id_client: config.id_client,
+      id_segment: sid
     }
     return $.ajax({
       data: data,
@@ -118,7 +119,7 @@ API.SEGMENT = {
     })
   },
 
-  getGlossaryMatch: function (source, fromTarget) {
+  getGlossaryMatch: function (sid, source, fromTarget) {
     var data = {
       action: 'glossary',
       exec: 'get',
@@ -130,6 +131,7 @@ API.SEGMENT = {
       password: config.password,
       current_password: config.currentPassword,
       id_client: config.id_client,
+      id_segment: sid
     }
     return $.ajax({
       data: data,
@@ -139,7 +141,7 @@ API.SEGMENT = {
     })
   },
 
-  deleteGlossaryItem: function (source, target, id) {
+  deleteGlossaryItem: function (sid, source, target, id) {
     var data = {
       exec: 'delete',
       segment: source,
@@ -148,6 +150,7 @@ API.SEGMENT = {
       password: config.password,
       id: id,
       id_client: config.id_client,
+      id_segment: sid
     }
     return $.ajax({
       data: data,
@@ -157,7 +160,7 @@ API.SEGMENT = {
     })
   },
 
-  addGlossaryItem: function (source, target, comment) {
+  addGlossaryItem: function (sid, source, target, comment) {
     var data = {
       exec: 'set',
       segment: source,
@@ -166,6 +169,7 @@ API.SEGMENT = {
       id_job: config.id_job,
       password: config.password,
       id_client: config.id_client,
+      id_segment: sid
     }
     return $.ajax({
       data: data,
