@@ -1,5 +1,5 @@
-import IconFilter from '../../icons/IconFilter'
-import IconTick from '../../icons/IconTick'
+import React from 'react'
+
 import IconDown from '../../icons/IconDown'
 import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'
@@ -33,7 +33,7 @@ class FilterProjects extends React.Component {
           }
           $(this.dropdownUsers).dropdown({
             fullTextSearch: 'exact',
-            onChange: function (value, text, $selectedItem) {
+            onChange: function (value) {
               self.changeUser(value)
             },
           })
@@ -44,7 +44,7 @@ class FilterProjects extends React.Component {
     }
   }
 
-  getSnapshotBeforeUpdate(propsBefore, stateBefore) {
+  getSnapshotBeforeUpdate(propsBefore) {
     if (_.isUndefined(this.props.selectedTeam)) return null
     if (
       _.isUndefined(propsBefore.selectedTeam) ||
@@ -125,7 +125,7 @@ class FilterProjects extends React.Component {
       this.props.selectedTeam.get('members') &&
       this.props.selectedTeam.get('members').size > 1
     ) {
-      let members = this.props.selectedTeam.get('members').map((member, i) => {
+      let members = this.props.selectedTeam.get('members').map((member) => {
         let classDisable = member.get('projects') === 0 ? 'disabled' : ''
         let userIcon = (
           <a className="ui circular label">
@@ -232,17 +232,14 @@ class FilterProjects extends React.Component {
     switch (this.state.currentStatus) {
       case 'active':
         return <div className="active">Active:</div>
-        break
       case 'archived':
         return <div className="archived">Archived:</div>
-        break
       case 'cancelled':
         return <div className="cancelled">Cancelled:</div>
-        break
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return (
       _.isUndefined(this.props.selectedTeam) ||
       (!_.isUndefined(nextProps.selectedTeam) &&
@@ -252,7 +249,7 @@ class FilterProjects extends React.Component {
 
   render() {
     let membersFilter = this.getUserFilter()
-    let currentStatusLabel = this.getCurrentStatusLabel()
+
     return (
       <section className="row sub-head">
         <div className="ui grid">

@@ -1,3 +1,5 @@
+import React from 'react'
+
 import JobAnalyzeHeader from './JobAnalyzeHeader'
 import JobTableHeader from './JobTableHeader'
 import ChunkAnalyze from './ChunkAnalyze'
@@ -66,8 +68,6 @@ class JobAnalyze extends React.Component {
     }
   }
 
-  componentDidUpdate() {}
-
   componentDidMount() {
     AnalyzeStore.addListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails)
   }
@@ -76,7 +76,7 @@ class JobAnalyze extends React.Component {
     AnalyzeStore.removeListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails)
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate() {
     return true
   }
 

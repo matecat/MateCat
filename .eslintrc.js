@@ -20,13 +20,14 @@ module.exports = {
 
     // jest related files
     {
-      files: ['**/*.jest.js', '**/*.test.js'],
+      files: ['**/*.jest.js', '**/*.test.js', '**/mocks/**/*.js'],
+      parser: '@babel/eslint-parser',
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: nodeEcmaVersion,
         ecmaFeatures: {jsx: true},
       },
-      env: {jest: true, node: true, browser: true},
+      env: {jest: true, node: true, browser: true, es6: true},
     },
 
     // grunt browserify compiled files
@@ -38,11 +39,7 @@ module.exports = {
         ecmaVersion: browserEcmaVersion,
         ecmaFeatures: {jsx: true},
       },
-      extends: [
-        'plugin:import/errors',
-        'plugin:import/warnings',
-        'plugin:react/recommended',
-      ],
+      extends: ['plugin:react/recommended'],
       settings: {
         react: {version: '16.9'},
       },
@@ -54,10 +51,6 @@ module.exports = {
       files: ['**/public/js/**/*.js'],
       env: {browser: true},
       parserOptions: {ecmaVersion: browserEcmaVersion},
-
-      rules: {
-        strict: 'error',
-      },
     },
   ],
 }

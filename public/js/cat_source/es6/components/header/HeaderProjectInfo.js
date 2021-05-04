@@ -1,5 +1,6 @@
+import React from 'react'
+
 class HeaderJobInfo extends React.Component {
-  componentDidMount() {}
   render() {
     return (
       <div className="header-project-info">

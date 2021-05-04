@@ -1,3 +1,5 @@
+import React from 'react'
+
 class OpenJobBox extends React.Component {
   constructor(props) {
     super(props)
@@ -12,12 +14,6 @@ class OpenJobBox extends React.Component {
       window.location.protocol + '//' + window.location.host + this.props.url
     )
   }
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  componentDidUpdate() {}
 
   render() {
     return (

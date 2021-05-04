@@ -1,3 +1,5 @@
+import React from 'react'
+
 class ChunkAnalyzeFile extends React.Component {
   constructor(props) {
     super(props)
@@ -49,7 +51,7 @@ class ChunkAnalyzeFile extends React.Component {
 
   componentDidUpdate() {
     let self = this
-    let changedData = _.pick(this.dataChange, function (item, i, array) {
+    let changedData = _.pick(this.dataChange, function (item) {
       return item === true
     })
     if (_.size(changedData) > 0) {
@@ -62,11 +64,7 @@ class ChunkAnalyzeFile extends React.Component {
     }
   }
 
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate() {
     return true
   }
 

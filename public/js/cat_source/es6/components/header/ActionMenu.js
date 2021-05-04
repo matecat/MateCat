@@ -1,3 +1,5 @@
+import React from 'react'
+
 import Icon3Dots from '../icons/Icon3Dots'
 
 class ActionMenu extends React.Component {

@@ -9,12 +9,14 @@
 
 namespace Segments;
 
-
 use ArrayAccess;
+use DataAccess\ArrayAccessTrait;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 
 class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+
+    use ArrayAccessTrait;
 
     public $id;
     public $id_project;
@@ -27,39 +29,6 @@ class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAc
         if( $decode ){
             $this->context_json = json_decode( $this->context_json );
         }
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function offsetExists( $offset ) {
-        return property_exists( $this, $offset );
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return mixed
-     */
-    public function offsetGet( $offset ) {
-        return $this->$offset;
-    }
-
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     */
-    public function offsetSet( $offset, $value ) {
-        $this->$offset = $value;
-    }
-
-    /**
-     * @param mixed $offset
-     */
-    public function offsetUnset( $offset ) {
-        $this->$offset = null;
     }
 
 }

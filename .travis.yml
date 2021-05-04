@@ -20,3 +20,6 @@ install:
 
 script:
   - yarn coverage
+notifications:
+  email: false
+  slack: translated:CYliYwF0qSEh6nITRZZQIk4k
