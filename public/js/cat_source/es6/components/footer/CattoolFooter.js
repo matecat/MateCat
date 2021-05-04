@@ -1,6 +1,8 @@
+import React from 'react'
+import _ from 'lodash'
+
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
-import _ from 'lodash'
 
 class CattoolFooter extends React.Component {
   constructor(props) {
@@ -109,7 +111,7 @@ class CattoolFooter extends React.Component {
         </div>
 
         {/*// <!-- to from -->*/}
-        <div className="item language">
+        <div className="item language" data-testid="language-pair">
           <p>
             <span>{this.sourceLang}</span>
             <span className="to-arrow"> &#8594; </span>
@@ -119,7 +121,7 @@ class CattoolFooter extends React.Component {
 
         {/*// <!-- progress -->*/}
 
-        <div className="progress-bar">
+        <div className="progress-bar" data-testid="progress-bar">
           <div className="meter" style={{width: '100%', position: 'relative'}}>
             {_.isUndefined(this.state.stats) ? (
               <div className="bg-loader" />
@@ -161,7 +163,7 @@ class CattoolFooter extends React.Component {
             ) : null}
           </div>
           <div className="percent">
-            <span id="stat-progress">
+            <span id="stat-progress" data-testid="progress-bar-amount">
               {this.state.stats
                 ? this.state.stats.PROGRESS_PERC_FORMATTED
                 : '-'}
@@ -177,6 +179,7 @@ class CattoolFooter extends React.Component {
               {config.allow_link_to_analysis ? (
                 <a
                   target="_blank"
+                  rel="noreferrer"
                   href={
                     '/jobanalysis/' +
                     this.props.idProject +

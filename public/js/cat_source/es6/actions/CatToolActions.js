@@ -4,8 +4,6 @@ import Notifications from '../sse/sse'
 import Review_QualityReportButton from '../components/review/QualityReportButton'
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
-import AnalyzeConstants from '../constants/AnalyzeConstants'
-import SegmentConstants from '../constants/SegmentConstants'
 import Footer from '../components/footer/Footer'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 
@@ -37,7 +35,7 @@ let CatToolActions = {
       state: state,
     })
   },
-  reloadSegmentFilter: function (segments, state) {
+  reloadSegmentFilter: function () {
     AppDispatcher.dispatch({
       actionType: CattolConstants.RELOAD_SEGMENT_FILTER,
     })

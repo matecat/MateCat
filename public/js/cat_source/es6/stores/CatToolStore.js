@@ -2,10 +2,11 @@
  * Analyze Store
  */
 
-import AppDispatcher from './AppDispatcher'
-import {EventEmitter} from 'events'
-import CatToolConstants from '../constants/CatToolConstants'
 import assign from 'object-assign'
+import {EventEmitter} from 'events'
+
+import AppDispatcher from './AppDispatcher'
+import CatToolConstants from '../constants/CatToolConstants'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -119,4 +120,5 @@ AppDispatcher.register(function (action) {
       break
   }
 })
+
 module.exports = CatToolStore

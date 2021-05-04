@@ -1,7 +1,9 @@
+import React from 'react'
+import classnames from 'classnames'
+
 import IconQR from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
-import classnames from 'classnames'
 
 class QualityReportButton extends React.Component {
   constructor(props) {
