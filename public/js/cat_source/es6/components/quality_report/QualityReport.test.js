@@ -1,5 +1,9 @@
+import {screen} from '@testing-library/react'
+
 test('renders properly', async () => {
   global.config = {}
+
+  require('../../../../common')
 
   {
     const header = document.createElement('header')
@@ -11,4 +15,8 @@ test('renders properly', async () => {
   }
 
   await import('./QualityReport')
+
+  expect(screen.getByText('Loading')).toBeVisible()
+
+  screen.debug()
 })
