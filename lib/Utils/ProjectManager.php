@@ -749,10 +749,8 @@ class ProjectManager {
 
             }
 
-            if ( $this->total_segments > 100000 || ( $this->files_word_count * count( $this->projectStructure[ 'target_language' ] ) ) > 1000000 ) {
-                //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
-                //OR
-                //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
+            //Allow projects with less than 250.000 words or characters ( for cjk languages )
+            if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
                 throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
             }
 
@@ -2199,7 +2197,7 @@ class ProjectManager {
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            $segmentOriginalDataStruct = @$this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
 
