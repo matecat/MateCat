@@ -6,12 +6,10 @@ module.exports = (api) => {
           '@babel/preset-react',
           ['@babel/preset-env', {targets: {node: 'current'}}],
         ],
-        plugins: ['@babel/plugin-proposal-class-properties'],
       }
     case 'development':
       return {
         presets: ['@babel/preset-react', ['@babel/preset-env']],
-        plugins: ['@babel/plugin-proposal-class-properties'],
       }
 
     default:
