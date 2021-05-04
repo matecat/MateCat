@@ -185,7 +185,7 @@ const stompMessageReceived = ( body ) => {
     } );
 
     if ( !dest || (dest && dest.length === 0) ) {
-        logger.debug( ["Unknown message type, no available recipient found ", body] );
+        logger.debug( ["Unknown message type, no available recipient found ", message.data.id_client] );
         return;
     } else {
         logger.debug( ['candidate for ' + message._type, dest[0]._clientId] );
