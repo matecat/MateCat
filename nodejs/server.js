@@ -12,7 +12,10 @@ var ini = require( 'node-ini' );
 var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const COMMENTS_TYPE = 'comment';
-const GLOSSARY_TYPE = 'glossary';
+const GLOSSARY_TYPE_G = 'glossary_get';
+const GLOSSARY_TYPE_S = 'glossary_set';
+const GLOSSARY_TYPE_D = 'glossary_delete';
+const GLOSSARY_TYPE_U = 'glossary_update';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
@@ -116,7 +119,7 @@ http.createServer( function ( req, res ) {
 } );
 
 var checkCandidate = function ( type, response, message ) {
-    var candidate = false;
+    let candidate;
     switch ( type ) {
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
@@ -143,7 +146,10 @@ var checkCandidate = function ( type, response, message ) {
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
             break;
-        case GLOSSARY_TYPE:
+        case GLOSSARY_TYPE_G:
+        case GLOSSARY_TYPE_S:
+        case GLOSSARY_TYPE_D:
+        case GLOSSARY_TYPE_U:
             candidate = response._matecatJobId === message.data.id_job &&
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
@@ -151,6 +157,7 @@ var checkCandidate = function ( type, response, message ) {
         default:
             candidate = false;
     }
+
     return candidate;
 };
 
