@@ -1,3 +1,5 @@
+import React from 'react'
+
 import InputField from '../common/InputField'
 
 class FilterSegments extends React.Component {
@@ -119,21 +121,21 @@ class FilterSegments extends React.Component {
   initDropDown() {
     let self = this
     $(this.statusDropdown).dropdown({
-      onChange: function (value, text, $selectedItem) {
+      onChange: function (value) {
         if (value && value !== '') {
           self.filterSelectChanged('status', value)
         }
       },
     })
     $(this.categoryDropdown).dropdown({
-      onChange: (value, text, $selectedItem) => {
+      onChange: (value) => {
         if (value && value !== '') {
           self.filterSelectChanged('issue_category', value)
         }
       },
     })
     $(this.severityDropdown).dropdown({
-      onChange: (value, text, $selectedItem) => {
+      onChange: (value) => {
         if (value && value !== '') {
           self.filterSelectChanged('severity', value)
         }

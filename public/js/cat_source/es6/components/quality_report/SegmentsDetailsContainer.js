@@ -1,3 +1,5 @@
+import React from 'react'
+
 import Filters from './FilterSegments'
 import FileDetails from './FileDetails'
 import QualityReportActions from '../../actions/QualityReportActions'

@@ -1,8 +1,14 @@
 import React from 'react'
 
+<<<<<<< HEAD
 export const IconQR = ({
   width = '42',
   height = width,
+=======
+const IconQR = ({
+  width = '42',
+  height = '42',
+>>>>>>> f04bf4f18 (Fixing the test)
   color1 = '#FAFAFA',
   color2 = '#FFFFFF',
 }) => {

@@ -1,9 +1,6 @@
-const IconUserLogout = ({
-  width = '42',
-  height = '42',
-  style,
-  color = '#000000',
-}) => {
+import React from 'react'
+
+const IconUserLogout = ({width = '42', height = '42', style}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

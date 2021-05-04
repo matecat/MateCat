@@ -1,3 +1,5 @@
+import React from 'react'
+
 class ProductionSummary extends React.Component {
   getTimeToEdit() {
     let str_pad_left = function (string, pad, length) {
@@ -44,8 +46,8 @@ class ProductionSummary extends React.Component {
       'The score is compared to a max. amount of tolerated error points.' +
       '<a style="text-decoration: underline" href="https://site.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
       '</div>'
-    let tooltipText2 =
-      '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>'
+    // let tooltipText2 =
+    //   '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>'
     let score = parseFloat(this.props.qualitySummary.get('score'))
     let limit = this.props.qualitySummary.get('passfail')
       ? parseInt(
@@ -72,7 +74,7 @@ class ProductionSummary extends React.Component {
     let stats = this.props.jobInfo.get('stats')
     let approvedWords = stats.get('approved')
     let approvedWords2ndPass
-    let totalApprovedWord = 0
+    // let totalApprovedWord = 0
     if (
       this.props.secondPassReviewEnabled &&
       stats.has('revises') &&
@@ -88,9 +90,9 @@ class ProductionSummary extends React.Component {
       approvedWords2ndPass = approved2ndPass
         ? approved2ndPass.get('advancement_wc')
         : null
-      totalApprovedWord += approvedWords2ndPass
+      // totalApprovedWord += approvedWords2ndPass
     }
-    totalApprovedWord += approvedWords
+    // totalApprovedWord += approvedWords
     return (
       <div className="qr-production shadow-2">
         <div className="qr-effort job-id">

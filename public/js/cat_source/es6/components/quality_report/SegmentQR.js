@@ -1,6 +1,8 @@
+import React from 'react'
+import classnames from 'classnames'
+
 import TextUtils from '../../utils/textUtils'
 import TagUtils from '../../utils/tagUtils'
-import classnames from 'classnames'
 import SegmentQRLine from './SegmentQRLine'
 import SegmentQRIssue from './SegmentQRIssue'
 
