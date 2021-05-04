@@ -102,14 +102,14 @@ class HtmlToPh extends AbstractHandler {
          * - starting with / ( optional )
          * - NOT starting with a number
          * - containing [a-zA-Z0-9\-\._] at least 1
-         * - ending with a letter a-zA-Z or a quote "' or /
+         * - ending with a letter a-zA-Z0-9 or a quote "' or /
          *
          */
         if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._]+?(?:\s[:_a-z]+=.+?)?\s*[\/]{0,1}>#is', $buffer ) ){
-            if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#is', $buffer ) ){ //H tag are an exception
-                //tag can not end with a number
-                return false;
-            }
+//            if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#is', $buffer ) ){ //H tag are an exception
+//                //tag can not end with a number
+//                return false;
+//            }
 
             //this case covers when filters create an xliff tag inside an html tag:
             //EX:
