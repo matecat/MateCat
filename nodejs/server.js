@@ -210,7 +210,6 @@ var startStompConnection = function () {
 
                 if ( error ) {
                     winston.debug( '!! read message error ' + error.message );
-                    return;
                 } else {
                     stompMessageReceived( body );
                     message.ack();
