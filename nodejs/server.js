@@ -61,7 +61,7 @@ const browserChannel = new SseChannel( {
 const corsAllow = ( req, res ) => {
 
     return allowedOrigins.some( ( element ) => {
-        if ( req.headers['origin'] && req.headers['origin'] === element ) {
+        if ( element === '*' || req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
             logger.debug( "Allowed domain " + req.headers['origin'] );

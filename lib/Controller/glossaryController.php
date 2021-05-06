@@ -25,7 +25,6 @@ class glossaryController extends ajaxController {
     private $translation;
     private $newtranslation;
     private $comment;
-    private $automatic;
     private $id_match;
     /**
      * @var Engines_MyMemory
@@ -55,7 +54,6 @@ class glossaryController extends ajaxController {
                 'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'newtranslation'   => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'comment'          => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'automatic'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'id'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
@@ -76,7 +74,6 @@ class glossaryController extends ajaxController {
         $this->fromtarget        = $__postInput[ 'from_target' ];
         $this->newtranslation    = $__postInput[ 'newtranslation' ];
         $this->comment           = $__postInput[ 'comment' ];
-        $this->automatic         = $__postInput[ 'automatic' ];
         $this->id_match          = $__postInput[ 'id' ];
         $this->id_client         = $__postInput[ 'id_client' ];
         $this->id_segment        = $__postInput[ 'id_segment' ];
@@ -180,7 +177,6 @@ class glossaryController extends ajaxController {
                         'jobData'        => $this->jobData->toArray(),
                         'tmProps'        => $this->jobData->getTMProps(),
                         'config'         => $config,
-                        'automatic'      => $this->automatic,
                         'segment'        => $this->segment,
                         'userIsLogged'   => $this->userIsLogged,
                         'fromtarget'     => $this->fromtarget,
