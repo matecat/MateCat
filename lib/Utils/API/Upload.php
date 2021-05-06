@@ -69,17 +69,21 @@ class Upload {
             throw new Exception ( "No files received." );
         }
 
+        if ( $this->_filesAreTooMuch( $filesToUpload ) ) {
+            throw new Exception ( "Too much files uploaded. Maximum value is " . INIT::$MAX_NUM_FILES );
+        }
+
         foreach ( $filesToUpload as $inputName => $file ) {
 
-            if( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ){
+            if ( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ) {
 
                 $_file = [];
                 foreach ( $file[ 'tmp_name' ] as $index => $value ) {
-                    $_file[ 'tmp_name' ] = $file[ 'tmp_name' ][ $index ];
-                    $_file[ 'name' ]     = $file[ 'name' ][ $index ];
-                    $_file[ 'size' ]     = $file[ 'size' ][ $index ];
-                    $_file[ 'type' ]     = $file[ 'type' ][ $index ];
-                    $_file[ 'error' ]    = $file[ 'error' ][ $index ];
+                    $_file[ 'tmp_name' ]            = $file[ 'tmp_name' ][ $index ];
+                    $_file[ 'name' ]                = $file[ 'name' ][ $index ];
+                    $_file[ 'size' ]                = $file[ 'size' ][ $index ];
+                    $_file[ 'type' ]                = $file[ 'type' ][ $index ];
+                    $_file[ 'error' ]               = $file[ 'error' ][ $index ];
                     $result->{$_file[ 'tmp_name' ]} = $this->_uploadFile( $_file );
                 }
 
@@ -175,7 +179,7 @@ class Upload {
 
             $out_filename = ZipArchiveExtended::getFileName( $fileName );
 
-            if( $fileType !== null ){
+            if ( $fileType !== null ) {
 
                 if ( !$this->_isRightMime( $fileUp ) ) {
                     $this->setObjectErrorOrThrowException(
@@ -205,21 +209,22 @@ class Upload {
 
             $mod_name = $this->fixFileName( $fileUp->name );
 
-            if( !Utils::isValidFileName( $mod_name ) ){
+            if ( !Utils::isValidFileName( $mod_name ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ( __METHOD__ . " -> Invalid File Name '" . ZipArchiveExtended::getFileName( $fileUp->name ) ."'" )
+                        new Exception ( __METHOD__ . " -> Invalid File Name '" . ZipArchiveExtended::getFileName( $fileUp->name ) . "'" )
                 );
             }
 
             //Exit on Error
-            if( !empty( $fileUp->error ) ){
+            if ( !empty( $fileUp->error ) ) {
                 @unlink( $fileTmpName );
+
                 return $fileUp;
             }
 
             //All Right!!! GO!!!
-            if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name )) {
+            if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
                         new Exception ( __METHOD__ . " -> Failed To Store File '$out_filename' On Server." )
@@ -272,13 +277,28 @@ class Upload {
      */
     public function fixFileName( $stringName, $upCount = true ) {
 
-        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
+        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
 
         while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
             $string = static::upCountName( $string );
         }
 
         return $string;
+
+    }
+
+    protected function _filesAreTooMuch( $filesToUpload ) {
+
+        $count = 0;
+        foreach ( $filesToUpload as $key => $value ) {
+            if ( is_array( $value[ 'tmp_name' ] ) ) {
+                $count += count( $value[ 'tmp_name' ] );
+            } else {
+                $count++;
+            }
+        }
+
+        return $count > INIT::$MAX_NUM_FILES;
 
     }
 
@@ -337,10 +357,10 @@ class Upload {
         if ( $this->raiseException ) {
             throw $exn;
         } else {
-            $fileUp->error = array(
+            $fileUp->error = [
                     'code'    => $exn->getCode(),
                     'message' => $exn->getMessage()
-            );
+            ];
         }
     }
 }

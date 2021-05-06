@@ -476,6 +476,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             $zip = new ZipArchive();
             $zip->open( $zip_file );
             $qa_model = $zip->getFromName( '__meta/qa_model.json' );
+
+            if ( AbstractFilesStorage::isOnS3() ){
+                unlink( $zip_file );
+            }
+
         }
 
         // File is not a zip OR model was not found in zip
@@ -513,10 +518,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                         ]
                 ]
         ];
-
-        if ( AbstractFilesStorage::isOnS3() ){
-            unlink( $zip_file );
-        }
 
     }
 
