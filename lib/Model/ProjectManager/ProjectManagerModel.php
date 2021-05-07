@@ -158,7 +158,12 @@ class ProjectManagerModel {
 
             foreach ( $segments as $id_segment ) {
                 foreach ( $entries as $note ) {
-                    $insert_values[] = [ $id_segment, $internal_id, $note, null ];
+
+                    // NOTE
+                    // we need to strip tags from $note
+                    // to prevent possible xss attacks
+                    // from the UI
+                    $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
                 }
             }
 
