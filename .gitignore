@@ -26,7 +26,6 @@ public/css/build/*-build.css
 public/js/build
 public/css/build
 /coverage
-semantic
 
 # NodeJs stuff
 nodejs/*.log
