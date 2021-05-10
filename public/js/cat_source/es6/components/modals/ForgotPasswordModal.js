@@ -1,7 +1,7 @@
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'react-addons-update'
+import update from 'immutability-helper'
 class ForgotPasswordModal extends React.Component {
   constructor(props) {
     super(props)
