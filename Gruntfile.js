@@ -9,10 +9,10 @@ function s4() {
     .substring(1)
 }
 
-const basePath = '../../public/js/'
-const buildPath = '../../public/js/build/'
-const incPath = '../../inc/'
-const cssBase = '../../public/css/'
+const basePath = 'public/js/'
+const buildPath = 'public/js/build/'
+const incPath = 'inc/'
+const cssBase = 'public/css/'
 
 const cssWatchFiles = [
   cssBase + 'sass/variables.scss',
