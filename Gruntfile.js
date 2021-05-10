@@ -1,6 +1,5 @@
-const babelPresetEnv = require('babel-preset-env')
-const babelPresetReact = require('babel-preset-react')
-const babelPresetStage2 = require('babel-preset-stage-2')
+const babelPresetEnv = require('@babel/preset-env')
+const babelPresetReact = require('@babel/preset-react')
 const sass = require('node-sass')
 
 function s4() {
@@ -64,7 +63,7 @@ module.exports = function (grunt) {
           transform: [
             [
               'babelify',
-              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
             ],
           ],
           browserifyOptions: {
@@ -80,7 +79,7 @@ module.exports = function (grunt) {
           transform: [
             [
               'babelify',
-              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
             ],
           ],
           browserifyOptions: {
@@ -96,7 +95,7 @@ module.exports = function (grunt) {
           transform: [
             [
               'babelify',
-              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
             ],
           ],
           browserifyOptions: {
