@@ -1,5 +1,3 @@
-const babelPresetEnv = require('@babel/preset-env')
-const babelPresetReact = require('@babel/preset-react')
 const sass = require('node-sass')
 
 function s4() {
@@ -186,7 +184,6 @@ module.exports = function (grunt) {
           // basePath + 'lib/rangy-selectionsaverestore.js',
           basePath + 'lib/base64.min.js',
           basePath + 'lib/moment.min.js',
-          basePath + 'lib/lokijs.min.js',
           basePath + 'lib/lodash.min.js',
           basePath + 'lib/sprintf.min.js',
           basePath + 'lib/calendar.min.js',
