@@ -369,5 +369,26 @@
         UI.registerReviseTab()
       }
     },
+    translateAndGoToNext: function () {
+      var segment = SegmentStore.getCurrentSegment()
+      if (!segment || UI.isReadonlySegment(segment)) {
+        return
+      }
+      if (config.isReview) {
+        setTimeout(function () {
+          UI.clickOnApprovedButton(segment, false)
+        })
+      } else {
+        if (!segment.tagged) {
+          setTimeout(function () {
+            UI.startSegmentTagProjection(segment.sid)
+          })
+        } else if (segment.translation.trim() !== '') {
+          setTimeout(function () {
+            UI.clickOnTranslatedButton(segment, false)
+          })
+        }
+      }
+    },
   })
 })(jQuery)
