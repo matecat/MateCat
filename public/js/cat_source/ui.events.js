@@ -132,7 +132,8 @@ $.extend(UI, {
               })
             }
           } else {
-            var nextUntranslatedSegmentId = SegmentStore.getNextUntranslatedSegmentId()
+            var nextUntranslatedSegmentId =
+              SegmentStore.getNextUntranslatedSegmentId()
             if (!segment.tagged) {
               setTimeout(function () {
                 UI.startSegmentTagProjection(segment.sid)
@@ -159,43 +160,7 @@ $.extend(UI, {
           Shortcuts.shortCutsKeyType
         ],
         function (e) {
-          e.preventDefault()
-          e.stopPropagation()
-          var segment = SegmentStore.getCurrentSegment()
-          if (!segment || UI.isReadonlySegment(segment)) {
-            return
-          }
-          if (config.isReview) {
-            setTimeout(function () {
-              UI.clickOnApprovedButton(segment, false)
-            })
-          } else {
-            if (!segment.tagged) {
-              setTimeout(function () {
-                UI.startSegmentTagProjection(segment.sid)
-              })
-            } else if (segment.translation.trim() !== '') {
-              setTimeout(function () {
-                UI.clickOnTranslatedButton(segment, false)
-              })
-            }
-          }
-        },
-      )
-      .on(
-        'keydown.shortcuts',
-        null,
-        Shortcuts.cattol.events.openComments.keystrokes[
-          Shortcuts.shortCutsKeyType
-        ],
-        function (e) {
-          e.preventDefault()
-          var segment = SegmentStore.getCurrentSegment()
-          if (segment) {
-            SegmentActions.openSegmentComment(segment.sid)
-            SegmentActions.scrollToSegment(segment.sid)
-            CommentsActions.setFocusOnCurrentInput()
-          }
+          UI.translateAndGoToNext()
         },
       )
       .on(
