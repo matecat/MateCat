@@ -37,6 +37,10 @@ class PlaceHoldXliffTags extends AbstractHandler {
         $segment = preg_replace( '|<(/ept)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(ph .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/ph)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(ec .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/ec)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(sc .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/sc)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(pc .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/pc)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(it .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
