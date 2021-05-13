@@ -4,7 +4,7 @@
     "lint": "eslint --ignore-path .gitignore .",
     "test": "jest --watch",
     "coverage": "jest --coverage",
-    "prepare": "husky install support_scripts/.husky"
+    "prepare": "husky install support_scripts/husky"
   },
   "private": true,
   "dependencies": {
