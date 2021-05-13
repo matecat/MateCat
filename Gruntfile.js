@@ -1,6 +1,3 @@
-const babelPresetEnv = require('babel-preset-env')
-const babelPresetReact = require('babel-preset-react')
-const babelPresetStage2 = require('babel-preset-stage-2')
 const sass = require('node-sass')
 
 function s4() {
@@ -9,10 +6,10 @@ function s4() {
     .substring(1)
 }
 
-const basePath = '../../public/js/'
-const buildPath = '../../public/js/build/'
-const incPath = '../../inc/'
-const cssBase = '../../public/css/'
+const basePath = 'public/js/'
+const buildPath = 'public/js/build/'
+const incPath = 'inc/'
+const cssBase = 'public/css/'
 
 const cssWatchFiles = [
   cssBase + 'sass/variables.scss',
@@ -64,7 +61,7 @@ module.exports = function (grunt) {
           transform: [
             [
               'babelify',
-              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
             ],
           ],
           browserifyOptions: {
@@ -80,7 +77,7 @@ module.exports = function (grunt) {
           transform: [
             [
               'babelify',
-              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
             ],
           ],
           browserifyOptions: {
@@ -96,7 +93,7 @@ module.exports = function (grunt) {
           transform: [
             [
               'babelify',
-              {presets: [babelPresetEnv, babelPresetReact, babelPresetStage2]},
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
             ],
           ],
           browserifyOptions: {
@@ -187,7 +184,6 @@ module.exports = function (grunt) {
           // basePath + 'lib/rangy-selectionsaverestore.js',
           basePath + 'lib/base64.min.js',
           basePath + 'lib/moment.min.js',
-          basePath + 'lib/lokijs.min.js',
           basePath + 'lib/lodash.min.js',
           basePath + 'lib/sprintf.min.js',
           basePath + 'lib/calendar.min.js',
