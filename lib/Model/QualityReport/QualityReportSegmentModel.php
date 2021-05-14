@@ -199,7 +199,7 @@ class QualityReportSegmentModel {
 
         $segments = [];
 
-        foreach ( $data as $seg ) {
+        foreach ( $data as $index => $seg ) {
 
             $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
             $Filter = Filter::getInstance( $featureSet, $dataRefMap );
@@ -270,7 +270,7 @@ class QualityReportSegmentModel {
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
 
-            $segments[] = $seg;
+            $segments[ $index ] = $seg;
         }
 
         return $segments;
