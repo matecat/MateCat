@@ -610,9 +610,7 @@ class Editarea extends React.Component {
         return 'add-issue'
       } else if (displayPopover && !hasCommandModifier(e)) {
         return 'enter-press'
-      } else if (
-        Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType]
-      ) {
+      } else if (e.ctrlKey || e.metaKey) {
         return 'translate'
       }
     } else if (e.key === 'Escape') {
