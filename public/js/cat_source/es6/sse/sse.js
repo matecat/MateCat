@@ -35,7 +35,7 @@ let SSE = {
   initEvents: function () {
     $(document).on('sse:ack', function (ev, message) {
       config.id_client = message.data.clientId
-      CatToolActions.clientConntected(message.data.clientId);
+      CatToolActions.clientConntected(message.data.clientId)
     })
     $(document).on('sse:concordance', function (ev, message) {
       SegmentActions.setConcordanceResult(message.data.id_segment, message.data)
@@ -45,6 +45,30 @@ let SSE = {
       SegmentActions.bulkChangeStatusCallback(
         message.data.segment_ids,
         message.data.status,
+      )
+    })
+    $(document).on('sse:glossary_get', function (ev, message) {
+      SegmentActions.setGlossaryForSegment(
+        message.data.id_segment,
+        message.data.matches,
+      )
+    })
+    $(document).on('sse:glossary_set', function (ev, message) {
+      SegmentActions.addGlossaryItemToCache(
+        message.data.id_segment,
+        message.data.matches[0],
+      )
+    })
+    $(document).on('sse:glossary_delete', function (ev, message) {
+      SegmentActions.deleteGlossaryFromCache(
+        message.data.id_segment,
+        message.data.matchs[0],
+      )
+    })
+    $(document).on('sse:glossary_update', function (ev, message) {
+      SegmentActions.updateglossaryCache(
+        message.data.id_segment,
+        message.data.matchs[0],
       )
     })
     if (config.translation_matches_enabled) {
@@ -101,6 +125,10 @@ let SSE = {
       'concordance',
       'bulk_segment_status_change',
       'cross_language_matches',
+      'glossary_get',
+      'glossary_set',
+      'glossary_delete',
+      'glossary_update',
     ]
     this.eventIdentifier = 'sse:' + this._type
 

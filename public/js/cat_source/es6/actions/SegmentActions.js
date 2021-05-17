@@ -677,14 +677,6 @@ const SegmentActions = {
       },
     )
   },
-  renderSegmentGlossary: function (sid, segment) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.RENDER_GLOSSARY,
-      sid: sid,
-      segment: segment,
-    })
-  },
-
   activateTab: function (sid, tab) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.OPEN_TAB,
@@ -706,13 +698,6 @@ const SegmentActions = {
       tabName: tabName,
     })
   },
-
-  getGlossaryMatch: function (text) {
-    return API.SEGMENT.getGlossaryMatch(text).fail(function () {
-      OfflineUtils.failedConnection(0, 'glossary')
-    })
-  },
-
   getGlossaryForSegment: function (sid, fid, text) {
     let requestes = [
       {
@@ -745,19 +730,12 @@ const SegmentActions = {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
       if (typeof segment.glossary === 'undefined') {
-        API.SEGMENT.getGlossaryForSegment(sid, request.text)
-          .done(function (response) {
-            AppDispatcher.dispatch({
-              actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
-              sid: request.sid,
-              fid: request.fid,
-              glossary:
-                response.data.matches.length !== 0 ? response.data.matches : {},
-            })
-          })
-          .fail(function (error) {
-            OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
-          })
+        //Response inside SSE Channel
+        API.SEGMENT.getGlossaryForSegment(request.sid, request.text).fail(
+          function (error) {
+            OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
+          },
+        )
       }
     }
   },
@@ -765,23 +743,26 @@ const SegmentActions = {
   searchGlossary: function (sid, fid, text, fromTarget) {
     text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
     text = text.replace(/\"/g, '')
-    API.SEGMENT.getGlossaryMatch(sid, text, fromTarget)
-      .done((response) => {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
-          sid: sid,
-          fid: fid,
-          glossary:
-            response.data.matches.length !== 0 ? response.data.matches : {},
-        })
-      })
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'glossary')
-      })
+    API.SEGMENT.getGlossaryMatch(sid, text, fromTarget).fail(function () {
+      OfflineUtils.failedConnection(0, 'glossary')
+    })
   },
 
-  deleteGlossaryItem: function (source, target, id, name, sid) {
-    return API.SEGMENT.deleteGlossaryItem(sid, source, target, id)
+  setGlossaryForSegment: (sid, matches) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+      sid: sid,
+      glossary: matches,
+    })
+  },
+
+  deleteGlossaryItem: function (match, sid) {
+    return API.SEGMENT.deleteGlossaryItem(
+      sid,
+      match.segment,
+      match.target,
+      match.id,
+    )
       .fail(function () {
         OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
@@ -791,13 +772,16 @@ const SegmentActions = {
           sid: sid,
           message: 'A glossary item has been deleted',
         })
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
-          sid: sid,
-          matchId: id,
-          name: name,
-        })
+        SegmentActions.deleteGlossaryFromCache(sid, match)
       })
+  },
+
+  deleteGlossaryFromCache: (sid, match) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
+      sid: sid,
+      match,
+    })
   },
 
   addGlossaryItem: function (source, target, comment, sid) {
@@ -820,32 +804,22 @@ const SegmentActions = {
           sid: sid,
           message: msg,
         })
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
-          sid: sid,
-          match:
-            response.data.matches.length !== 0
-              ? response.data.matches[source.replace(/\'/g, '&apos;')]
-              : {},
-          name: source.replace(/\'/g, '&apos;'),
-        })
       })
   },
-  updateGlossaryItem: function (
-    idItem,
-    source,
-    target,
-    newTranslation,
-    comment,
-    name,
-    sid,
-  ) {
+  addGlossaryItemToCache: (sid, match, name) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
+      sid: sid,
+      match,
+    })
+  },
+  updateGlossaryItem: function (match, newTranslation, newComment, sid) {
     return API.SEGMENT.updateGlossaryItem(
-      idItem,
-      source,
-      target,
+      match.id,
+      match.segment,
+      match.target,
       newTranslation,
-      comment,
+      newComment,
     )
       .fail(function () {
         OfflineUtils.failedConnection(0, 'updateGlossaryItem')
@@ -856,16 +830,15 @@ const SegmentActions = {
           sid: sid,
           message: 'A glossary item has been updated',
         })
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.CHANGE_GLOSSARY,
-          sid: sid,
-          matchId: idItem,
-          name: name,
-          comment: comment,
-          target_note: comment,
-          translation: newTranslation,
-        })
       })
+  },
+
+  updateglossaryCache: (sid, match) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHANGE_GLOSSARY,
+      sid: sid,
+      match,
+    })
   },
 
   updateGlossaryData(data) {
@@ -1039,8 +1012,7 @@ const SegmentActions = {
 
   showApproveAllModalWarnirng: function () {
     var props = {
-      text:
-        'It was not possible to approve all segments. There are some segments that have not been translated.',
+      text: 'It was not possible to approve all segments. There are some segments that have not been translated.',
       successText: 'Ok',
       successCallback: function () {
         APP.ModalWindow.onCloseModal()

@@ -35,7 +35,6 @@ module.exports = keyMirror({
   SET_CL_CONTRIBUTIONS: null,
   CHOOSE_CONTRIBUTION: null,
   DELETE_CONTRIBUTION: null,
-  RENDER_GLOSSARY: null,
   SET_GLOSSARY_TO_CACHE: null,
   CHANGE_GLOSSARY: null,
   DELETE_FROM_GLOSSARY: null,
