@@ -58,28 +58,30 @@ class SegmentFooterTabMessages extends React.Component {
     }
     if (this.props.context_groups && this.props.context_groups.context_json) {
       this.props.context_groups.context_json.forEach((contextGroup) => {
-        let contextElems = []
-        contextGroup.contexts.forEach((context) => {
-          contextElems.push(
+        if (contextGroup.attr.length > 0 && contextGroup.contexts.length > 0) {
+          let contextElems = []
+          contextGroup.contexts.forEach((context) => {
+            contextElems.push(
+              <div
+                className="context-item"
+                key={contextGroup.id + context.attr['context-type']}
+              >
+                <span className="context-item-name">{context.content}</span>
+              </div>,
+            )
+          })
+          notesHtml.push(
             <div
-              className="context-item"
-              key={contextGroup.id + context.attr['context-type']}
+              className="context-group"
+              key={contextGroup.id + contextGroup.attr.name}
             >
-              <span className="context-item-name">{context.content}</span>
+              <span className="context-group-name">
+                {contextGroup.attr.name}:{' '}
+              </span>
+              {contextElems}
             </div>,
           )
-        })
-        notesHtml.push(
-          <div
-            className="context-group"
-            key={contextGroup.id + contextGroup.attr.name}
-          >
-            <span className="context-group-name">
-              {contextGroup.attr.name}:{' '}
-            </span>
-            {contextElems}
-          </div>,
-        )
+        }
       })
     }
     if (notesHtml.length === 0) {
