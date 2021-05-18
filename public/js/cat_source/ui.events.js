@@ -105,9 +105,6 @@ $.extend(UI, {
           // UI.gotoNextSegment();
         },
       )
-      .on('keyup.shortcuts', null, 'ctrl', function (e) {
-        SegmentActions.openSelectedSegment()
-      })
       .on(
         'keydown.shortcuts',
         null,

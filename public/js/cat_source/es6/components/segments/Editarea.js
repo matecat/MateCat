@@ -610,8 +610,10 @@ class Editarea extends React.Component {
         return 'add-issue'
       } else if (displayPopover && !hasCommandModifier(e)) {
         return 'enter-press'
-      } else if (e.ctrlKey || e.metaKey) {
+      } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
         return 'translate'
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+        return 'next-translate'
       }
     } else if (e.key === 'Escape') {
       return 'close-tag-menu'
@@ -703,8 +705,9 @@ class Editarea extends React.Component {
       case 'add-issue':
         return 'handled'
       case 'translate':
-        UI.translateAndGoToNext()
-        return 'handled'
+        return 'not-handled'
+      case 'next-translate':
+        return 'not-handled'
       default:
         return 'not-handled'
     }
