@@ -54,6 +54,8 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_set', function (ev, message) {
+      let match = message.data.matches[0]
+      match.id = match.id_match[0]
       SegmentActions.addGlossaryItemToCache(
         message.data.id_segment,
         message.data.matches[0],
