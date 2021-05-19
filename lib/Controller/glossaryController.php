@@ -262,6 +262,7 @@ class glossaryController extends ajaxController {
                         'userRole'       => $this->userRole,
                         'user'           => $this->user->toArray(),
                         'featuresString' => $this->projectFeaturesString,
+                        'jobData'        => $this->jobData->toArray(),
                         'id_match'       => $this->id_match,
                         'config'         => $config,
                 ],

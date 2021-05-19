@@ -59,7 +59,12 @@ class GlossaryWorker extends AbstractWorker {
         $_TMS       = $this->getEngine( $featureSet );
         $userRole   = $payload[ 'userRole' ];
         $id_match   = $payload[ 'id_match' ];
-        $config     = $payload[ 'config' ];
+
+        // $payload[ 'config' ] is is a Params class (stdClass), it implements ArrayAccess interface,
+        // but it is defined to allow "_set" only for existing properties
+        // so, trying to set $payload[ 'config' ]['whatever'] will result in a not found key name and the value will be ignored
+        // Fix: reassign an array
+        $config = $payload[ 'config' ]->toArray();
 
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
@@ -85,7 +90,7 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $set_successful = true;
-        if ( array_search( false, $set_code, true ) ) {
+        if ( array_search( false, $set_code, true ) !== false ) {
             $set_successful = false;
         }
 
@@ -118,7 +123,13 @@ class GlossaryWorker extends AbstractWorker {
         $tm_keys      = $payload[ 'tm_keys' ];
         $userRole     = $payload[ 'userRole' ];
         $jobData      = $payload[ 'jobData' ];
-        $config       = $payload[ 'config' ];
+
+        // $config['id_user'] is is a Params class (stdClass), it implements ArrayAccess interface,
+        // but it is defined to allow "_set" only for existing properties
+        // so, trying to set $config['id_user'][] will result in an empty key name and the value will be ignored
+        // Fix: reassign an array
+        $config       = $payload[ 'config' ]->toArray();
+
         $segment      = $payload[ 'segment' ];
         $userIsLogged = $payload[ 'userIsLogged' ];
         $fromtarget   = $payload[ 'fromtarget' ];
@@ -126,19 +137,11 @@ class GlossaryWorker extends AbstractWorker {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $user->uid, $userRole );
 
-        // $config['id_user'] is is a Params class (stdClass), it implements ArrayAccess interface,
-        // but it is defined to allow "_set" only for existing properties
-        // so, trying to set $config['id_user'][] will result in an empty key name and the value will be ignored
-        // Fix: reassign an array
         if ( count( $tm_keys ) ) {
-            $keys = [];
-            /**
-             * @var $tm_key TmKeyManagement_TmKeyStruct
-             */
+            $config[ 'id_user' ] = [];
             foreach ( $tm_keys as $tm_key ) {
-                $keys[] = $tm_key->key;
+                $config[ 'id_user' ][] = $tm_key->key;
             }
-            $config[ 'id_user' ] = $keys; //  <-- Note
         }
 
         $TMS_RESULT = $_TMS->get( $config )->get_glossary_matches_as_array();
@@ -316,7 +319,7 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $set_successful = true;
-        if ( array_search( false, $set_code, true ) ) {
+        if ( array_search( false, $set_code, true ) !== false ) {
             //There's an error, for now skip, let's assume that are not errors
             $set_successful = false;
         }
@@ -335,6 +338,7 @@ class GlossaryWorker extends AbstractWorker {
                             'last_updated_by'  => "Matecat user",
                             'created_by'       => "Matecat user",
                             'target_note'      => $config[ 'tnote' ],
+                            'id_match'         => $set_code
                     ]
             ];
 
@@ -371,7 +375,7 @@ class GlossaryWorker extends AbstractWorker {
         $tm_keys    = $payload[ 'tm_keys' ];
         $userRole   = $payload[ 'userRole' ];
         $tmProps    = $payload[ 'tmProps' ];
-        $config     = $payload[ 'config' ];
+        $config     = $payload[ 'config' ]->toArray(); // get Array
 
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
@@ -403,7 +407,7 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $set_successful = true;
-        if ( array_search( false, $set_code, true ) ) {
+        if ( array_search( false, $set_code, true ) !== false ) {
             $set_successful = false;
         }
 
@@ -416,8 +420,8 @@ class GlossaryWorker extends AbstractWorker {
         $message = [];
         if ( $set_successful ) {
             //remove ugly structure from mymemory
-            $raw_matches = $_TMS->get( $config )->get_glossary_matches_as_array();
-            $matches = array_pop( $raw_matches );
+            $raw_matches          = $_TMS->get( $config )->get_glossary_matches_as_array();
+            $matches              = array_pop( $raw_matches );
             $message[ 'matches' ] = array_pop( $matches );
         } else {
             $message[ 'error' ] = [ "code" => -1, "message" => "We got an error, please try again." ];
