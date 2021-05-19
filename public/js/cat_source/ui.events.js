@@ -105,9 +105,6 @@ $.extend(UI, {
           // UI.gotoNextSegment();
         },
       )
-      .on('keyup.shortcuts', null, 'ctrl', function (e) {
-        SegmentActions.openSelectedSegment()
-      })
       .on(
         'keydown.shortcuts',
         null,
@@ -230,6 +227,19 @@ $.extend(UI, {
           e.preventDefault()
           e.stopPropagation()
           SegmentActions.openSplitSegment(UI.currentSegmentId)
+        },
+      )
+      .on(
+        'keydown.shortcuts',
+        null,
+        Shortcuts.cattol.events.openComments.keystrokes[
+          Shortcuts.shortCutsKeyType
+        ],
+        function (e) {
+          e.preventDefault()
+          e.stopPropagation()
+          var current = SegmentStore.getCurrentSegmentId()
+          if (current) SegmentActions.openSegmentComment(current)
         },
       )
       .on('keydown.shortcuts', null, 'ctrl+u', function (e) {
