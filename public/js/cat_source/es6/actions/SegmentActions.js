@@ -817,9 +817,10 @@ const SegmentActions = {
     return API.SEGMENT.updateGlossaryItem(
       match.id,
       match.segment,
-      match.target,
+      match.translation,
       newTranslation,
       newComment,
+      sid,
     )
       .fail(function () {
         OfflineUtils.failedConnection(0, 'updateGlossaryItem')

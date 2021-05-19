@@ -109,7 +109,7 @@ API.SEGMENT = {
       password: config.password,
       current_password: config.currentPassword,
       id_client: config.id_client,
-      id_segment: sid
+      id_segment: sid,
     }
     return $.ajax({
       data: data,
@@ -131,7 +131,7 @@ API.SEGMENT = {
       password: config.password,
       current_password: config.currentPassword,
       id_client: config.id_client,
-      id_segment: sid
+      id_segment: sid,
     }
     return $.ajax({
       data: data,
@@ -150,7 +150,7 @@ API.SEGMENT = {
       password: config.password,
       id: id,
       id_client: config.id_client,
-      id_segment: sid
+      id_segment: sid,
     }
     return $.ajax({
       data: data,
@@ -169,7 +169,7 @@ API.SEGMENT = {
       id_job: config.id_job,
       password: config.password,
       id_client: config.id_client,
-      id_segment: sid
+      id_segment: sid,
     }
     return $.ajax({
       data: data,
@@ -185,6 +185,7 @@ API.SEGMENT = {
     target,
     newTranslation,
     comment,
+    sid,
   ) {
     var data = {
       exec: 'update',
@@ -197,6 +198,7 @@ API.SEGMENT = {
       id_job: config.id_job,
       password: config.password,
       id_client: config.id_client,
+      id_segment: sid,
     }
 
     return $.ajax({

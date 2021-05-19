@@ -59,16 +59,16 @@ let SSE = {
         message.data.matches[0],
       )
     })
-    $(document).on('sse:glossary_delete', function (ev, message) {
-      SegmentActions.deleteGlossaryFromCache(
-        message.data.id_segment,
-        message.data.matchs[0],
-      )
-    })
+    // $(document).on('sse:glossary_delete', function (ev, message) {
+    //   SegmentActions.deleteGlossaryFromCache(
+    //     message.data.id_segment,
+    //     message.data.matchs[0],
+    //   )
+    // })
     $(document).on('sse:glossary_update', function (ev, message) {
       SegmentActions.updateglossaryCache(
         message.data.id_segment,
-        message.data.matchs[0],
+        message.data.matches,
       )
     })
     if (config.translation_matches_enabled) {
