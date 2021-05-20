@@ -791,7 +791,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 SELECT
                 translation,
                 jobs.source as source,
-                job.target as target,
+                jobs.target as target,
                 COUNT( distinct id_segment ) as TOT,
                 GROUP_CONCAT( distinct id_segment ) AS involved_id,
                 IF( password = :job_password AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
