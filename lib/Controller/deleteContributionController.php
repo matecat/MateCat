@@ -69,7 +69,7 @@ class deleteContributionController extends ajaxController {
         $tms    = Engine::getInstance( $jobStruct[ 'id_tms' ] );
         $config = $tms->getConfigStruct();
 
-        $Filter                  = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $Filter                  = \SubFiltering\Filter::getInstance( $this->source_lang, $this->target_lang, $this->featureSet );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $this->source );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $this->target );
         $config[ 'source' ]      = $this->source_lang;

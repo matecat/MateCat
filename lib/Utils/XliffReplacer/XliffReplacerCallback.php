@@ -19,6 +19,11 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * @var string
      */
+    private $sourceLang;
+
+    /**
+     * @var string
+     */
     private $targetLang;
 
     /**
@@ -30,13 +35,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * XliffReplacerCallback constructor.
      *
      * @param \FeatureSet $featureSet
+     * @param string      $sourceLang
      * @param string      $targetLang
      *
      * @throws \Exception
      */
-    public function __construct( \FeatureSet $featureSet, $targetLang ) {
-        $this->filter     = Filter::getInstance( $featureSet );
+    public function __construct( \FeatureSet $featureSet, $sourceLang, $targetLang ) {
+        $this->filter     = Filter::getInstance( $sourceLang, $targetLang, $featureSet );
         $this->featureSet = $featureSet;
+        $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
     }
 
@@ -68,6 +75,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         $check = new QA ( $segment, $translation );
         $check->setFeatureSet( $this->featureSet );
         $check->setTargetSegLang( $this->targetLang );
+        $check->setSourceSegLang( $this->sourceLang );
         $check->performTagCheckOnly();
 
         return $check->thereAreErrors();
