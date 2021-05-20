@@ -116,10 +116,13 @@ class SearchModelTest extends AbstractTest {
         $queryParamsStruct[ 'key' ]                                 = $key;
         $queryParamsStruct[ ( $key === 'target' ) ? 'trg' : 'src' ] = $word;
 
+        // jobData
+        $jobData = Jobs_JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
+
         // instantiate the filters
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $filters = Filter::getInstance( $featureSet );
+        $filters = Filter::getInstance( $jobData->source, $jobData->target, $featureSet );
 
         // instantiate the searchModel
         $searchModel = new SearchModel( $queryParamsStruct, $filters );

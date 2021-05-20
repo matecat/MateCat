@@ -56,7 +56,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $this->featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = Filter::getInstance( $this->featureSet );
+        $this->filter = Filter::getInstance( 'en-US', 'it-IT', $this->featureSet );
 
 
         //purge ActiveMQ

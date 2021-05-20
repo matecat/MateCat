@@ -30,7 +30,10 @@ class ReviseTranslationIssuesController extends KleinController {
                 $this->request->id_job,
                 $this->request->id_segment
         );
-        $version_formatter = new SegmentVersion( $records, true, $this->featureSet );
+
+        $chunk = \Chunks_ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+
+        $version_formatter = new SegmentVersion( $chunk, $records, true, $this->featureSet );
         $this->response->json( [ 'versions' => $version_formatter->render() ] );
     }
 

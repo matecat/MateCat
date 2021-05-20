@@ -2,7 +2,7 @@
 
 namespace API\V2\Json;
 
-use Features\SecondPassReview;
+use Chunks_ChunkStruct;
 use FeatureSet;
 use LQA\EntryStruct;
 use SubFiltering\Filter;
@@ -14,17 +14,24 @@ class SegmentVersion {
     private $with_issues;
 
     /**
+     * @var Chunks_ChunkStruct
+     */
+    private $chunk;
+
+    /**
      * SegmentVersion constructor.
      *
-     * @param                  $data
-     * @param bool             $with_issues
-     * @param FeatureSet|null  $featureSet
+     * @param Chunks_ChunkStruct $chunk
+     * @param                    $data
+     * @param bool               $with_issues
+     * @param FeatureSet|null    $featureSet
      *
      * @throws \Exception
      */
-    public function __construct( $data, $with_issues = false, FeatureSet $featureSet = null ) {
+    public function __construct( Chunks_ChunkStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
         $this->data        = $data;
         $this->with_issues = $with_issues;
+        $this->chunk       = $chunk;
 
         if ( $featureSet == null ) {
             $featureSet = new FeatureSet();
@@ -43,11 +50,9 @@ class SegmentVersion {
 
         if ( $this->with_issues ) {
             return $this->renderItemsWithIssues();
-        } else {
-            return $this->renderItemsNormal();
         }
 
-        return $out;
+        return $this->renderItemsNormal();
     }
 
     protected function renderItemsWithIssues() {
@@ -139,7 +144,8 @@ class SegmentVersion {
      * @throws \Exception
      */
     public function renderItem( $version ) {
-        $Filter = Filter::getInstance( $this->featureSet );
+        $Filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $this->featureSet );
+
         return [
                 'id'              => (int)$version->id,
                 'id_segment'      => (int)$version->id_segment,

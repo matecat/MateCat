@@ -422,7 +422,7 @@ class glossaryController extends ajaxController {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->user->uid, $this->userRole );
 
-        $Filter                  = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $Filter                  = \SubFiltering\Filter::getInstance( $config[ 'source' ], $config[ 'target' ], $this->featureSet );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $config[ 'segment' ] );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $config[ 'translation' ] );
 
