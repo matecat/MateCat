@@ -102,7 +102,7 @@ class HtmlToPh extends AbstractHandler {
          * - starting with / ( optional )
          * - NOT starting with a number
          * - containing [a-zA-Z0-9\-\._] at least 1
-         * - ending with a letter a-zA-Z or a quote "' or /
+         * - ending with a letter a-zA-Z0-9 or a quote "' or /
          *
          */
         if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._]+?(?:\s[:_a-z]+=.+?)?\s*[\/]{0,1}>#is', $buffer ) ){

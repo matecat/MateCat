@@ -179,7 +179,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @internal param $jid
      * @internal param $password
      */
-    public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step = 20, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step, $ref_segment, $where = "after", $options = [] ) {
 
         $db = Database::obtain()->getConnection();
 
@@ -376,17 +376,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         switch ( $where ) {
             case 'after':
-                $subQuery = sprintf( $queryAfter, $options_join_query, $options_conditions_query, (int)( $step / 2 ), (int)( $step / 2 ) );
+                $subQuery = sprintf( $queryAfter, $options_join_query, $options_conditions_query, $step, $step );
                 break;
             case 'before':
-                $subQuery = sprintf( $queryBefore, $options_join_query, $options_conditions_query, (int)( $step / 2 ), (int)( $step / 2 ) );
+                $subQuery = sprintf( $queryBefore, $options_join_query, $options_conditions_query, $step, $step );
                 break;
             case 'center':
-                $subQuery = sprintf( $queryCenter, $options_join_query, $options_conditions_query, (int)( $step / 2 ), (int)( $step / 2 ), $options_join_query, $options_conditions_query, (int)( $step / 2 ) );
+                $subQuery = sprintf( $queryCenter, $options_join_query, $options_conditions_query, $step, $step, $options_join_query, $options_conditions_query, $step );
                 break;
             default:
                 throw new Exception( "No direction selected" );
-                break;
         }
 
         $stmt              = $db->prepare( $subQuery );

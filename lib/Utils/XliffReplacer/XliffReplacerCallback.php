@@ -15,6 +15,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      */
     private $filter;
 
+
     /**
      * @var string
      */

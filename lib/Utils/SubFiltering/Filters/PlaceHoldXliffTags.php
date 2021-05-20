@@ -10,6 +10,7 @@
 namespace SubFiltering\Filters;
 
 
+use Matecat\XliffParser\Utils\HtmlParser;
 use SubFiltering\Commons\AbstractHandler;
 use SubFiltering\Commons\Constants;
 
@@ -36,6 +37,12 @@ class PlaceHoldXliffTags extends AbstractHandler {
         $segment = preg_replace( '|<(/ept)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(ph .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/ph)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(ec .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/ec)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(sc .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/sc)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(pc .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/pc)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(it .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/it)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(mrk\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
@@ -46,7 +53,5 @@ class PlaceHoldXliffTags extends AbstractHandler {
                     return Constants::LTPLACEHOLDER . base64_encode( $matches[ 1 ] ) . Constants::GTPLACEHOLDER;
                 }, $segment
         ); //base64 of the tag content to avoid unwanted manipulation
-
     }
-
 }

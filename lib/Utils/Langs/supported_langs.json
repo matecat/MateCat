@@ -353,6 +353,7 @@
             "rfc3066code":"zh-CN"
         }
     ,
+
         {
             "localized":[{
                 "en":"Chinese Traditional"
@@ -371,6 +372,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"zh-HK"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Chinese Traditional Macau"
+            }],
+            "isocode":"zh",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"zh-MO"
         }
     ,
         {

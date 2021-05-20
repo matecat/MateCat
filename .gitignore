@@ -1,6 +1,7 @@
 # IDE stuffs
 .settings
 .idea
+.vscode
 .project
 nbproject/
 webgrind/
@@ -24,6 +25,7 @@ public/css/build/app.css.map
 public/css/build/*-build.css
 public/js/build
 public/css/build
+/coverage
 
 # NodeJs stuff
 nodejs/*.log
@@ -41,6 +43,7 @@ internal_scripts
 local_storage
 test_storage
 lib/Utils/fileupload/thumbnails/*
+tmp/
 
 task_manager_config.ini
 
@@ -59,6 +62,8 @@ plugins/*
 .maxJobToProcess_jpeer
 
 inc/dqf/dqf_test_secret.ini
-package-lock.json
 
 mmt_fallback_key.ini
+
+inc/google_translate/mmt_fallback_credentials.json
+.DS_Store

@@ -48,7 +48,7 @@ class QualityReportSegmentModel {
      * @return array
      * @throws \Exception
      */
-    public function getSegmentsIdForQR( $step = 20, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( $step, $ref_segment, $where = "after", $options = [] ) {
         if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != 'all' ) {
             $subCategories = ( new CategoryDao() )->findByIdModelAndIdParent(
                     $this->chunk->getProject()->id_qa_model,
@@ -114,6 +114,9 @@ class QualityReportSegmentModel {
      */
     protected function _assignIssues( $seg, $issues, $issue_comments ) {
         foreach ( $issues as $issue ) {
+
+            $issue->revision_number = ReviewUtils::sourcePageToRevisionNumber($issue->source_page);
+
             if ( isset( $issue_comments[ $issue->issue_id ] ) ) {
                 $issue->comments = $issue_comments[ $issue->issue_id ];
             }
@@ -196,7 +199,7 @@ class QualityReportSegmentModel {
 
         $segments = [];
 
-        foreach ( $data as $i => $seg ) {
+        foreach ( $data as $index => $seg ) {
 
             $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
             $Filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $featureSet, $dataRefMap );
@@ -267,7 +270,7 @@ class QualityReportSegmentModel {
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
 
-            $segments[$i] = $seg;
+            $segments[ $index ] = $seg;
         }
 
         return $segments;

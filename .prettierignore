@@ -1,0 +1,25 @@
+/public/css/fonts
+/public/css/sass/vendor_mc/semantic/semantic.css
+/public/js/lib
+/vendor
+/nodejs
+/plugins
+/lib
+/test
+/inc
+/internal_scripts
+/README.md
+/LICENSE.md
+/composer.*
+
+# Build related files
+/node_modules
+/public/**/build
+
+# Automated files
+package-lock.json
+
+# Tracked minified files (should be removed from tracking in the future..)
+*.min.js
+/public/api/dist
+/public/css/sass/components/segment/Editor.scss
