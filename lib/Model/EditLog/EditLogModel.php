@@ -242,7 +242,9 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc .= "%";
 
-            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+
+            $Filter = \SubFiltering\Filter::getInstance( $this->jobData->source, $this->jobData->target, $this->featureSet );
             $sug_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->suggestion ) );
             $tra_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->translation ) );
 

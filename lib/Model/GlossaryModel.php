@@ -73,7 +73,7 @@ class GlossaryModel {
 
     public function get($segment, $translation) {
 
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $Filter = \SubFiltering\Filter::getInstance( $this->job->source, $this->job->target, $this->featureSet );
 
         $config[ 'segment' ] = $Filter->fromLayer2ToLayer0( preg_replace( '#<(?:/?[^>]+/?)>#', "", $segment ) );
         $config[ 'translation' ] = $translation ;

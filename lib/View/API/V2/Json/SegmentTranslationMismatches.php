@@ -42,8 +42,6 @@ class SegmentTranslationMismatches {
      */
     public function render() {
 
-        $Filter = Filter::getInstance( $this->featureSet );
-
         $result = [
                 'editable'       => [],
                 'not_editable'   => [],
@@ -51,6 +49,8 @@ class SegmentTranslationMismatches {
         ];
 
         foreach ( $this->data as $position => $row ) {
+
+            $Filter = Filter::getInstance( $row['source'], $row['target'], $this->featureSet );
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [

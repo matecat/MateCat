@@ -729,7 +729,7 @@ TRG;
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $filter = Filter::getInstance( $featureSet );
+        $filter = Filter::getInstance( 'en-EN','pt-PT', $featureSet );
 
         $targetLang  = 'pt-PT';
         $segment     = '<ph id="source1" dataRef="source1"/>When you partner with Uber Eats, you have access to the Restaurant Dashboard to manage your establishment<ph id="source2" dataRef="source2"/>s orders.';
