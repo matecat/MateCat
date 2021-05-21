@@ -140,7 +140,7 @@ API.SEGMENT = {
       url: APP.getRandomUrl() + '?action=glossary',
     })
   },
-
+  // Parameter id must be an array because if it is done after a set the elements can be more than one
   deleteGlossaryItem: function (sid, source, target, id) {
     var data = {
       exec: 'delete',
@@ -148,7 +148,7 @@ API.SEGMENT = {
       translation: target,
       id_job: config.id_job,
       password: config.password,
-      id: id,
+      id: Array.isArray(id) ? id : [id],
       id_client: config.id_client,
       id_segment: sid,
     }
