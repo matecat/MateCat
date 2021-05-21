@@ -58,7 +58,7 @@ class GlossaryWorker extends AbstractWorker {
         $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
         $_TMS       = $this->getEngine( $featureSet );
         $userRole   = $payload[ 'userRole' ];
-        $id_match   = $payload[ 'id_match' ];
+        $id_matches = $payload[ 'id_match' ];
 
         // $payload[ 'config' ] is is a Params class (stdClass), it implements ArrayAccess interface,
         // but it is defined to allow "_set" only for existing properties
@@ -69,24 +69,23 @@ class GlossaryWorker extends AbstractWorker {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
 
+        $keys_hashes = [];
+        foreach ( $tm_keys as $tm_key ) {
+            $keys_hashes[] = $tm_key->key;
+        }
+
         $Filter                  = Filter::getInstance( $featureSet );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $config[ 'segment' ] );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $config[ 'translation' ] );
 
         //prepare the error report
         $set_code = [];
-        //set the glossary entry for each key with write grants
-        if ( count( $tm_keys ) ) {
-
-            /**
-             * @var $tm_key TmKeyManagement_TmKeyStruct
-             */
-            foreach ( $tm_keys as $tm_key ) {
-                $config[ 'id_user' ]  = $tm_key->key;
-                $config[ 'id_match' ] = $id_match;
-                $TMS_RESULT           = $_TMS->delete( $config );
-                $set_code[]           = $TMS_RESULT;
-            }
+        //delete all id from the keys
+        foreach ( $id_matches as $id_match ) {
+            $config[ 'id_user' ] = $keys_hashes;
+            $config[ 'id' ]      = $id_match;
+            $TMS_RESULT          = $_TMS->delete( $config );
+            $set_code[]          = $TMS_RESULT;
         }
 
         $set_successful = true;
@@ -117,18 +116,18 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function get( $payload ) {
 
-        $user         = $this->getUser( $payload[ 'user' ] );
-        $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
-        $_TMS         = $this->getEngine( $featureSet );
-        $tm_keys      = $payload[ 'tm_keys' ];
-        $userRole     = $payload[ 'userRole' ];
-        $jobData      = $payload[ 'jobData' ];
+        $user       = $this->getUser( $payload[ 'user' ] );
+        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
+        $_TMS       = $this->getEngine( $featureSet );
+        $tm_keys    = $payload[ 'tm_keys' ];
+        $userRole   = $payload[ 'userRole' ];
+        $jobData    = $payload[ 'jobData' ];
 
         // $config['id_user'] is is a Params class (stdClass), it implements ArrayAccess interface,
         // but it is defined to allow "_set" only for existing properties
         // so, trying to set $config['id_user'][] will result in an empty key name and the value will be ignored
         // Fix: reassign an array
-        $config       = $payload[ 'config' ]->toArray();
+        $config = $payload[ 'config' ]->toArray();
 
         $segment      = $payload[ 'segment' ];
         $userIsLogged = $payload[ 'userIsLogged' ];
