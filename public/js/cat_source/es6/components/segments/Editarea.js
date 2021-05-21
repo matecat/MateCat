@@ -34,7 +34,6 @@ import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
-import Shortcuts from '../../utils/shortcuts'
 
 const editorSync = {
   editorFocused: true,
@@ -587,7 +586,7 @@ class Editarea extends React.Component {
   myKeyBindingFn = (e) => {
     const {displayPopover} = this.state
     const {handleCursorMovement} = this
-
+    const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
     if (
       (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
       (isOptionKeyCommand(e) || e.altKey) &&
@@ -610,6 +609,8 @@ class Editarea extends React.Component {
         return 'add-issue'
       } else if (displayPopover && !hasCommandModifier(e)) {
         return 'enter-press'
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+        return 'next-translate'
       } else if (e.ctrlKey || e.metaKey) {
         return 'translate'
       }
@@ -627,9 +628,9 @@ class Editarea extends React.Component {
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       !e.shiftKey &&
       e.altKey &&
-      isOptionKeyCommand(e)
+      (isOptionKeyCommand(e) || isChromeBook)
     ) {
-      return 'insert-nbsp-tag' // MacOS
+      return 'insert-nbsp-tag' // MacOS && Chromebook
     } else if (e.key === 'ArrowLeft' && !e.altKey) {
       if (e.shiftKey) {
         if (handleCursorMovement(-1, true, config.isTargetRTL))
@@ -646,6 +647,8 @@ class Editarea extends React.Component {
         if (handleCursorMovement(1, false, config.isTargetRTL))
           return 'right-nav'
       }
+    } else if (e.ctrlKey && e.key === 'k') {
+      return 'tm-search'
     }
     return getDefaultKeyBinding(e)
   }
@@ -703,8 +706,9 @@ class Editarea extends React.Component {
       case 'add-issue':
         return 'handled'
       case 'translate':
-        UI.translateAndGoToNext()
-        return 'handled'
+        return 'not-handled'
+      case 'next-translate':
+        return 'not-handled'
       default:
         return 'not-handled'
     }

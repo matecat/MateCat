@@ -113,9 +113,9 @@ class getSegmentsController extends ajaxController {
             $seg[ 'target_chunk_lengths' ] = json_decode( $seg[ 'target_chunk_lengths' ], true );
 
             // inject original data ref map (FOR XLIFF 2.0)
-            $data_ref_map = json_decode($seg['data_ref_map'], true);
-            $seg['data_ref_map'] = $data_ref_map;
-            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet, null !== $data_ref_map ? $data_ref_map : [] );
+            $data_ref_map          = json_decode( $seg[ 'data_ref_map' ], true );
+            $seg[ 'data_ref_map' ] = $data_ref_map;
+            $Filter                = \SubFiltering\Filter::getInstance( $this->job->source, $this->job->target, $this->featureSet, null !== $data_ref_map ? $data_ref_map : [] );
 
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
@@ -137,7 +137,7 @@ class getSegmentsController extends ajaxController {
         $this->result[ 'data' ][ 'files' ] = $this->data;
         $this->result[ 'data' ][ 'where' ] = $this->where;
 
-        $this->result['data'] = $this->featureSet->filter('filterGetSegmentsResult', $this->result['data'], $this->job );
+        $this->result[ 'data' ] = $this->featureSet->filter( 'filterGetSegmentsResult', $this->result[ 'data' ], $this->job );
     }
 
     private function getOptionalQueryFields() {

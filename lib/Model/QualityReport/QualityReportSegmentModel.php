@@ -202,7 +202,7 @@ class QualityReportSegmentModel {
         foreach ( $data as $index => $seg ) {
 
             $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
-            $Filter = Filter::getInstance( $featureSet, $dataRefMap );
+            $Filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $featureSet, $dataRefMap );
 
             $seg->dataRefMap = $dataRefMap;
 

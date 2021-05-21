@@ -22,7 +22,9 @@ class SegmentVersion extends KleinController {
                 $this->request->id_segment
         );
 
-        $formatted = new JsonFormatter( $results );
+        $chunk = \Chunks_ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+
+        $formatted = new JsonFormatter( $chunk, $results );
 
         $this->response->json( [
                 'versions' => $formatted->render()

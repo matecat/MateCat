@@ -627,7 +627,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 MIN( segments.id ) AS first_segment, 
                 MAX( segments.id ) AS last_segment,
                 filename AS file_name, 
-                SUM( IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, raw_word_count, st.eq_word_count ) ) AS weighted_words,
+                SUM( st.eq_word_count ) AS weighted_words,
+                sum( standard_word_count ) AS standard_words,
                 SUM( raw_word_count ) AS raw_words
         FROM files_job
         JOIN files ON files_job.id_file = files.id
@@ -637,15 +638,13 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         WHERE files_job.id_job = :id_job
         AND segments.show_in_cattool = 1 
         GROUP BY id_file
-        ORDER BY first_segment;
-        ";
+        ORDER BY first_segment";
 
         $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
 
         return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job' => $chunkStruct->id
         ] );
-
     }
 
     /**

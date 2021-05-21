@@ -12,7 +12,6 @@ use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use XliffReplacer\XliffReplacerCallback;
-use XliffReplacer\XliffReplacerFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
@@ -196,7 +195,7 @@ class downloadFileController extends downloadController {
                 $xsp = new \Matecat\XliffParser\XliffParser();
 
                 // instantiateXliffReplacerCallback
-                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
+                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
 
                 // run xliff replacer
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
