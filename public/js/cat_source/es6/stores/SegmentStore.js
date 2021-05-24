@@ -589,37 +589,23 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(glossary),
     )
   },
-  deleteFromGlossary: function (sid, matchId, name) {
+  deleteFromGlossary: function (sid, match) {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
-    delete glossary[name]
+    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
+    glossaryIndex > -1 && glossary.splice(glossaryIndex, 1)
     this._segments = this._segments.setIn(
       [index, 'glossary'],
       Immutable.fromJS(glossary),
     )
   },
-  changeGlossaryItem: function (
-    sid,
-    matchId,
-    name,
-    comment,
-    target_note,
-    translation,
-  ) {
+  addOrUpdateGlossaryItem: function (sid, match) {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
-    glossary[name][0].comment = comment
-    glossary[name][0].target_note = comment
-    glossary[name][0].translation = translation
-    this._segments = this._segments.setIn(
-      [index, 'glossary'],
-      Immutable.fromJS(glossary),
-    )
-  },
-  addGlossaryItem: function (sid, match, name) {
-    let index = this.getSegmentIndex(sid)
-    let glossary = this._segments.get(index).get('glossary').toJS()
-    glossary[name] = match
+    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
+    glossaryIndex > -1
+      ? (glossary[glossaryIndex] = match)
+      : glossary.push(match)
     this._segments = this._segments.setIn(
       [index, 'glossary'],
       Immutable.fromJS(glossary),
@@ -1388,7 +1374,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(action.actionType, action.sid)
       break
     case SegmentConstants.DELETE_FROM_GLOSSARY:
-      SegmentStore.deleteFromGlossary(action.sid, action.matchId, action.name)
+      SegmentStore.deleteFromGlossary(action.sid, action.match)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1396,14 +1382,7 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHANGE_GLOSSARY:
-      SegmentStore.changeGlossaryItem(
-        action.sid,
-        action.matchId,
-        action.name,
-        action.comment,
-        action.target_note,
-        action.translation,
-      )
+      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1411,7 +1390,7 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
-      SegmentStore.addGlossaryItem(action.sid, action.match, action.name)
+      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1428,9 +1407,6 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.CONCORDANCE_RESULT:
       SegmentStore.setConcordanceMatches(action.sid, action.matches)
       SegmentStore.emitChange(action.actionType, action.sid, action.matches)
-      break
-    case SegmentConstants.RENDER_GLOSSARY:
-      SegmentStore.emitChange(action.actionType, action.sid, action.segment)
       break
     case SegmentConstants.SET_SEGMENT_TAGGED:
       SegmentStore.setSegmentAsTagged(action.id, action.fid)

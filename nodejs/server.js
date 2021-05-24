@@ -12,7 +12,10 @@ const uuid = require( 'uuid' );
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const COMMENTS_TYPE = 'comment';
-const GLOSSARY_TYPE = 'glossary';
+const GLOSSARY_TYPE_G = 'glossary_get';
+const GLOSSARY_TYPE_S = 'glossary_set';
+const GLOSSARY_TYPE_D = 'glossary_delete';
+const GLOSSARY_TYPE_U = 'glossary_update';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
@@ -58,7 +61,7 @@ const browserChannel = new SseChannel( {
 const corsAllow = ( req, res ) => {
 
     return allowedOrigins.some( ( element ) => {
-        if ( req.headers['origin'] && req.headers['origin'] === element ) {
+        if ( element === '*' || req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
             logger.debug( "Allowed domain " + req.headers['origin'] );
@@ -82,7 +85,7 @@ browserChannel.on( 'disconnect', ( context, res ) => {
 
 //Event triggered when a client connect
 browserChannel.on( 'connect', ( context, req, res ) => {
-    // winston.debug('browserChannel connect ', res._clientId, res._matecatJobId);
+    // logger.debug('browserChannel connect ', res._clientId, res._matecatJobId);
     //Send a message to the client to communicate the clientId
     browserChannel.send( {
         data: {
@@ -156,7 +159,10 @@ const checkCandidate = ( type, response, message ) => {
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
             break;
-        case GLOSSARY_TYPE:
+        case GLOSSARY_TYPE_G:
+        case GLOSSARY_TYPE_S:
+        case GLOSSARY_TYPE_D:
+        case GLOSSARY_TYPE_U:
             candidate = response._matecatJobId === message.data.id_job &&
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
@@ -164,6 +170,7 @@ const checkCandidate = ( type, response, message ) => {
         default:
             candidate = false;
     }
+
     return candidate;
 };
 

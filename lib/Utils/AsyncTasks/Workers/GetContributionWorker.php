@@ -111,11 +111,6 @@ class GetContributionWorker extends AbstractWorker {
      */
     protected function _publishPayload( array $content, ContributionRequestStruct $contributionStruct, $isCrossLang = false ) {
 
-        $payload = [
-                'id_segment' => $contributionStruct->segmentId,
-                'matches'    => $content,
-        ];
-
         $type = 'contribution';
 
         if ( $contributionStruct->concordanceSearch ) {
@@ -131,7 +126,10 @@ class GetContributionWorker extends AbstractWorker {
                 'data'  => [
                         'id_job'    => $contributionStruct->getJobStruct()->id,
                         'passwords' => $contributionStruct->getJobStruct()->password,
-                        'payload'   => $payload,
+                        'payload'   => [
+                                'id_segment' => $contributionStruct->segmentId,
+                                'matches'    => $content,
+                        ],
                         'id_client' => $contributionStruct->id_client,
                 ]
         ];

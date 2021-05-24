@@ -43,7 +43,6 @@ class SegmentFooterTabGlossary extends React.Component {
 
   searchInGlossary(e) {
     if (e.key === 'Enter') {
-      let self = this
       e.preventDefault()
       let txt = this.source.textContent
       let target = this.target.textContent
@@ -81,42 +80,30 @@ class SegmentFooterTabGlossary extends React.Component {
     }
   }
 
-  deleteMatch(name, idMatch, event) {
+  deleteMatch(match, event) {
     event.preventDefault()
-    let source = TagUtils.decodePlaceholdersToTextSimple(
-      this.props.segment.glossary[name][0].segment,
-    )
-    let target = TagUtils.decodePlaceholdersToTextSimple(
-      this.props.segment.glossary[name][0].translation,
-    )
-    SegmentActions.deleteGlossaryItem(
-      source,
-      target,
-      idMatch,
-      name,
-      this.props.id_segment,
-    )
+    SegmentActions.deleteGlossaryItem(match, this.props.id_segment)
   }
 
-  updateGlossaryItem(source, e) {
+  updateGlossaryItem(match, e) {
     if (e.key === 'Enter') {
       e.preventDefault()
-      let self = this
-      let target = $(this.matches[source]).find('.sugg-target span').text()
-      let comment =
-        $(this.matches[source]).find('.details .comment').length > 0
-          ? $(this.matches[source]).find('.details .comment').text()
-          : $(this.matches[source])
-              .find('.glossary-add-comment .gl-comment')
-              .text()
-      let matches = $.extend(true, {}, this.props.segment.glossary)
+      const newTarget = $(this.matches[match.segment])
+        .find('.sugg-target span')
+        .text()
+      const newComment = match.comment
+      //Disable update comment
+      // const newComment =
+      //   $(this.matches[match.segment]).find('.details .comment').length > 0
+      //     ? $(this.matches[match.segment]).find('.details .comment').text()
+      //     : $(this.matches[match.segment])
+      //         .find('.glossary-add-comment .gl-comment')
+      //         .text()
+
       SegmentActions.updateGlossaryItem(
-        matches[source][0].id,
-        matches[source][0].segment,
-        matches[source][0].translation,
-        target,
-        comment,
-        source,
+        match,
+        newTarget,
+        newComment,
         this.props.id_segment,
       )
 
@@ -168,7 +155,6 @@ class SegmentFooterTabGlossary extends React.Component {
     let source = this.source.textContent.trim()
     let target = this.target.textContent.trim()
     if (this.checkAddItemButton(source, target)) {
-      let self = this
       let comment = this.comment ? this.comment.textContent : null
       this.setState({
         loading: true,
@@ -217,142 +203,138 @@ class SegmentFooterTabGlossary extends React.Component {
   }
   renderMatches() {
     let htmlResults = []
-    if (_.size(this.props.segment.glossary)) {
-      let self = this
-      $.each(this.props.segment.glossary, (name, value) => {
-        $.each(value, (index, match) => {
-          // let match = value[0];
-          if (match.segment === '' || match.translation === '') return
-          let cb = match.created_by
-          let disabled = match.id == '0' ? true : false
-          let sourceNoteEmpty =
-            _.isUndefined(match.source_note) || match.source_note === ''
-          let targetNoteEmpty =
-            _.isUndefined(match.target_note) || match.target_note === ''
+    if (this.props.segment.glossary && this.props.segment.glossary.length > 0) {
+      this.props.segment.glossary.forEach((match, index) => {
+        if (match.segment === '' || match.translation === '') return
+        let cb = match.created_by
+        let disabled = match.id == '0' ? true : false
+        let sourceNoteEmpty =
+          _.isUndefined(match.source_note) || match.source_note === ''
+        let targetNoteEmpty =
+          _.isUndefined(match.target_note) || match.target_note === ''
 
-          if (sourceNoteEmpty && targetNoteEmpty) {
-            match.comment = ''
-          } else if (!targetNoteEmpty) {
-            match.comment = match.target_note
-          } else if (!sourceNoteEmpty) {
-            match.comment = match.source_note
-          }
+        if (sourceNoteEmpty && targetNoteEmpty) {
+          match.comment = ''
+        } else if (!targetNoteEmpty) {
+          match.comment = match.target_note
+        } else if (!sourceNoteEmpty) {
+          match.comment = match.source_note
+        }
 
-          let leftTxt = match.segment
-          let rightTxt = match.translation
-          let commentOriginal = match.comment
-          if (commentOriginal) {
-            commentOriginal = commentOriginal.replace(/\#\{/gi, '<mark>')
-            commentOriginal = commentOriginal.replace(/\}\#/gi, '</mark>')
-          }
+        let leftTxt = match.segment
+        let rightTxt = match.translation
+        let commentOriginal = match.comment
+        if (commentOriginal) {
+          commentOriginal = commentOriginal.replace(/\#\{/gi, '<mark>')
+          commentOriginal = commentOriginal.replace(/\}\#/gi, '</mark>')
+        }
+        // Temporary removed because not working on MM side
+        let addCommentHtml = ''
+        {
+          /*<div className="glossary-add-comment">*/
+        }
+        {
+          /*<a href="#" onClick={this.openAddCommentExistingMatch.bind(this, match.segment)}>Add a Comment</a>*/
+        }
+        {
+          /*<div className="input gl-comment" contentEditable="true" style={{display: 'none'}}*/
+        }
+        {
+          /*onKeyPress={this.updateGlossaryItem.bind(this, match.segment)}/>*/
+        }
+        {
+          /*</div>;*/
+        }
 
-          let addCommentHtml = ''
-          {
-            /*<div className="glossary-add-comment">*/
-          }
-          {
-            /*<a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>*/
-          }
-          {
-            /*<div className="input gl-comment" contentEditable="true" style={{display: 'none'}}*/
-          }
-          {
-            /*onKeyPress={self.updateGlossaryItem.bind(self, name)}/>*/
-          }
-          {
-            /*</div>;*/
-          }
-
-          let html = (
-            <div
-              key={name + '-' + index}
-              ref={(match) => (self.matches[name] = match)}
-            >
-              <div className="glossary-item">
-                <span>{name}</span>
-              </div>
-              <ul className="graysmall" data-id={match.id}>
-                <li className="sugg-source">
-                  <div
-                    id={self.props.id_segment + '-tm-' + match.id + '-edit'}
-                    className="switch-editing icon-edit"
-                    title="Edit"
-                    onClick={self.editExistingMatch.bind(self, name)}
+        let html = (
+          <div
+            key={match.segment + '-' + index}
+            ref={(matchref) => (this.matches[match.segment] = matchref)}
+          >
+            <div className="glossary-item">
+              <span>{match.segment}</span>
+            </div>
+            <ul className="graysmall" data-id={match.id}>
+              <li className="sugg-source">
+                <div
+                  id={this.props.id_segment + '-tm-' + match.id + '-edit'}
+                  className="switch-editing icon-edit"
+                  title="Edit"
+                  onClick={this.editExistingMatch.bind(this, match.segment)}
+                />
+                {disabled ? (
+                  ''
+                ) : (
+                  <span
+                    id={this.props.id_segment + '-tm-' + match.id + '-delete'}
+                    className="trash"
+                    title="delete this row"
+                    onClick={this.deleteMatch.bind(this, match)}
                   />
-                  {disabled ? (
-                    ''
-                  ) : (
-                    <span
-                      id={self.props.id_segment + '-tm-' + match.id + '-delete'}
-                      className="trash"
-                      title="delete this row"
-                      onClick={self.deleteMatch.bind(self, name, match.id)}
-                    />
+                )}
+                <span
+                  id={this.props.id_segment + '-tm-' + match.id + '-source'}
+                  className="suggestion_source"
+                  dangerouslySetInnerHTML={this.allowHTML(
+                    TagUtils.decodePlaceholdersToTextSimple(leftTxt, true),
                   )}
-                  <span
-                    id={self.props.id_segment + '-tm-' + match.id + '-source'}
-                    className="suggestion_source"
-                    dangerouslySetInnerHTML={self.allowHTML(
-                      TagUtils.decodePlaceholdersToTextSimple(leftTxt, true),
-                    )}
-                  />
-                </li>
-                <li
-                  className="b sugg-target"
-                  onMouseDown={() => self.copyItemInEditArea(rightTxt)}
-                >
-                  <span
-                    id={
-                      self.props.id_segment + '-tm-' + match.id + '-translation'
-                    }
+                />
+              </li>
+              <li
+                className="b sugg-target"
+                onMouseDown={() => this.copyItemInEditArea(rightTxt)}
+              >
+                <span
+                  id={
+                    this.props.id_segment + '-tm-' + match.id + '-translation'
+                  }
+                  className={
+                    'translation ' + (this.state.editing ? 'editing' : '')
+                  }
+                  data-original={TagUtils.decodePlaceholdersToTextSimple(
+                    rightTxt,
+                    true,
+                  )}
+                  dangerouslySetInnerHTML={this.allowHTML(
+                    TagUtils.decodePlaceholdersToTextSimple(rightTxt, true),
+                  )}
+                  onKeyPress={this.updateGlossaryItem.bind(this, match)}
+                  contentEditable={this.state.editing}
+                />
+              </li>
+              <li className="details">
+                {!match.comment || match.comment === '' ? (
+                  addCommentHtml
+                ) : (
+                  <div
                     className={
-                      'translation ' + (this.state.editing ? 'editing' : '')
+                      'comment ' + (this.state.editing ? 'editing' : '')
                     }
                     data-original={TagUtils.decodePlaceholdersToTextSimple(
-                      rightTxt,
+                      commentOriginal,
                       true,
                     )}
-                    dangerouslySetInnerHTML={self.allowHTML(
-                      TagUtils.decodePlaceholdersToTextSimple(rightTxt, true),
-                    )}
-                    onKeyPress={self.updateGlossaryItem.bind(self, name)}
-                    contentEditable={this.state.editing}
-                  />
-                </li>
-                <li className="details">
-                  {!match.comment || match.comment === '' ? (
-                    addCommentHtml
-                  ) : (
-                    <div
-                      className={
-                        'comment ' + (this.state.editing ? 'editing' : '')
-                      }
-                      data-original={TagUtils.decodePlaceholdersToTextSimple(
+                    dangerouslySetInnerHTML={this.allowHTML(
+                      TagUtils.decodePlaceholdersToTextSimple(
                         commentOriginal,
                         true,
-                      )}
-                      dangerouslySetInnerHTML={self.allowHTML(
-                        TagUtils.decodePlaceholdersToTextSimple(
-                          commentOriginal,
-                          true,
-                        ),
-                      )}
-                      contentEditable={this.state.editing}
-                    />
-                  )}
-                  <ul className="graysmall-details">
-                    <li>{match.last_update_date}</li>
-                    <li className="graydesc">
-                      Source:
-                      <span className="bold"> {cb}</span>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-          )
-          htmlResults.push(html)
-        })
+                      ),
+                    )}
+                    contentEditable={this.state.editing}
+                  />
+                )}
+                <ul className="graysmall-details">
+                  <li>{match.last_update_date}</li>
+                  <li className="graydesc">
+                    Source:
+                    <span className="bold"> {cb}</span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        )
+        htmlResults.push(html)
       })
     }
     return htmlResults
