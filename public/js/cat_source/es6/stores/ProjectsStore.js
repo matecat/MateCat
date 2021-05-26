@@ -185,7 +185,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
     }
   },
 
-  emitChange: function (event, args) {
+  emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
@@ -326,6 +326,9 @@ AppDispatcher.register(function (action) {
         ManageConstants.RENDER_PROJECTS,
         ProjectsStore.projects,
       )
+      break
+    case ManageConstants.RELOAD_PROJECTS:
+      ProjectsStore.emitChange(action.actionType)
       break
   }
 })

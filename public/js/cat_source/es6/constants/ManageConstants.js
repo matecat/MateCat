@@ -4,6 +4,7 @@ module.exports = keyMirror({
   RENDER_PROJECTS: null,
   RENDER_ALL_TEAM_PROJECTS: null,
   UPDATE_PROJECTS: null,
+  RELOAD_PROJECTS: null,
   RENDER_MORE_PROJECTS: null,
   OPEN_JOB_SETTINGS: null,
   REMOVE_PROJECT: null,

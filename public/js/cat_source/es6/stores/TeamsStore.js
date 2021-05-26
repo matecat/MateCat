@@ -64,7 +64,7 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
     this.teams = this.teams.delete(index)
   },
 
-  emitChange: function (event, args) {
+  emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
@@ -77,22 +77,28 @@ AppDispatcher.register(function (action) {
       TeamsStore.emitChange(action.actionType, TeamsStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_NAME:
-      let updatedName = TeamsStore.updateTeamName(action.team)
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAM, updatedName)
+      TeamsStore.emitChange(
+        TeamConstants.UPDATE_TEAM,
+        TeamsStore.updateTeamName(action.team),
+      )
       TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_MEMBERS:
-      let org = TeamsStore.updateTeamMembers(
-        action.team,
-        action.members,
-        action.pending_invitations,
+      TeamsStore.emitChange(
+        TeamConstants.UPDATE_TEAM,
+        TeamsStore.updateTeamMembers(
+          action.team,
+          action.members,
+          action.pending_invitations,
+        ),
       )
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAM, org)
       TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
       break
     case TeamConstants.UPDATE_TEAM:
-      let updated = TeamsStore.updateTeam(action.team)
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAM, updated)
+      TeamsStore.emitChange(
+        TeamConstants.UPDATE_TEAM,
+        TeamsStore.updateTeam(action.team),
+      )
       TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
       break
     case TeamConstants.UPDATE_TEAMS:
@@ -100,7 +106,7 @@ AppDispatcher.register(function (action) {
       TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
       break
     case TeamConstants.CHOOSE_TEAM:
-      TeamsStore.emitChange(action.actionType, action.teamId)
+      TeamsStore.emitChange(action.actionType, action.teamId, action.team)
       break
     case ManageConstants.REMOVE_TEAM:
       TeamsStore.removeTeam(action.team)

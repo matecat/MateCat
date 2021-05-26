@@ -1,3 +1,6 @@
+import React from 'react'
+import ModalsActions from '../../actions/ModalsActions'
+import ManageActions from '../../actions/ManageActions'
 class JobMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -45,7 +48,7 @@ class JobMenu extends React.Component {
   getReviseMenuLink() {
     let reviseUrl = this.props.reviseUrl
     return (
-      <a className="item" target="_blank" href={reviseUrl}>
+      <a className="item" target="_blank" href={reviseUrl} rel="noreferrer">
         <i className="icon-edit icon" /> Revise
       </a>
     )
@@ -73,7 +76,7 @@ class JobMenu extends React.Component {
           '-' +
           this.props.job.get('revise_passwords').get(1).get('password')
         return (
-          <a className="item" target="_blank" href={url}>
+          <a className="item" target="_blank" href={url} rel="noreferrer">
             <i className="icon-edit icon" />
             Revise 2
           </a>
@@ -94,7 +97,7 @@ class JobMenu extends React.Component {
     return ''
   }
 
-  retrieveSecondPassReviewLink(event) {
+  retrieveSecondPassReviewLink() {
     // event.preventDefault();
     ManageActions.getSecondPassReview(
       this.props.project.get('id'),
@@ -113,7 +116,6 @@ class JobMenu extends React.Component {
   }
 
   render() {
-    let editLogUrl = this.props.editingLogUrl
     let qaReportUrl = this.props.qAReportUrl
     let jobTMXUrl = this.props.jobTMXUrl
     let exportXliffUrl = this.props.exportXliffUrl
@@ -182,19 +184,23 @@ class JobMenu extends React.Component {
         {this.getSecondPassReviewMenuLink()}
         {this.getMoreLinks()}
         <div className="divider" />
-        <a className="item" target="_blank" href={qaReportUrl}>
+        <a className="item" target="_blank" href={qaReportUrl} rel="noreferrer">
           <i className="icon-qr-matecat icon" /> QA Report
         </a>
-        {/*<a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>*/}
         {downloadButton}
         <div className="divider" />
-        <a className="item" target="_blank" href={originalUrl}>
+        <a className="item" target="_blank" href={originalUrl} rel="noreferrer">
           <i className="icon-download icon" /> Download Original
         </a>
-        <a className="item" target="_blank" href={exportXliffUrl}>
+        <a
+          className="item"
+          target="_blank"
+          href={exportXliffUrl}
+          rel="noreferrer"
+        >
           <i className="icon-download icon" /> Export XLIFF
         </a>
-        <a className="item" target="_blank" href={jobTMXUrl}>
+        <a className="item" target="_blank" href={jobTMXUrl} rel="noreferrer">
           <i className="icon-download icon" /> Export TMX
         </a>
         <div className="divider" />
@@ -212,19 +218,33 @@ class JobMenu extends React.Component {
           {splitButton}
           {this.getReviseMenuLink()}
           {this.getMoreLinks()}
-          <a className="item" target="_blank" href={qaReportUrl}>
+          <a
+            className="item"
+            target="_blank"
+            href={qaReportUrl}
+            rel="noreferrer"
+          >
             <i className="icon-qr-matecat icon" /> QA Report
           </a>
-          {/*<a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>*/}
           {downloadButton}
           <div className="divider" />
-          <a className="item" target="_blank" href={originalUrl}>
+          <a
+            className="item"
+            target="_blank"
+            href={originalUrl}
+            rel="noreferrer"
+          >
             <i className="icon-download icon" /> Download Original
           </a>
-          <a className="item" target="_blank" href={exportXliffUrl}>
+          <a
+            className="item"
+            target="_blank"
+            href={exportXliffUrl}
+            rel="noreferrer"
+          >
             <i className="icon-download icon" /> Export XLIFF
           </a>
-          <a className="item" target="_blank" href={jobTMXUrl}>
+          <a className="item" target="_blank" href={jobTMXUrl} rel="noreferrer">
             <i className="icon-download icon" /> Export TMX
           </a>
           <div className="divider" />
@@ -242,19 +262,33 @@ class JobMenu extends React.Component {
           {splitButton}
           {this.getReviseMenuLink()}
           {this.getMoreLinks()}
-          <a className="item" target="_blank" href={qaReportUrl}>
+          <a
+            className="item"
+            target="_blank"
+            href={qaReportUrl}
+            rel="noreferrer"
+          >
             <i className="icon-qr-matecat icon" /> QA Report
           </a>
-          {/*<a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>*/}
           {downloadButton}
           <div className="divider" />
-          <a className="item" target="_blank" href={originalUrl}>
+          <a
+            className="item"
+            target="_blank"
+            href={originalUrl}
+            rel="noreferrer"
+          >
             <i className="icon-download icon" /> Download Original
           </a>
-          <a className="item" target="_blank" href={exportXliffUrl}>
+          <a
+            className="item"
+            target="_blank"
+            href={exportXliffUrl}
+            rel="noreferrer"
+          >
             <i className="icon-download icon" /> Export XLIFF
           </a>
-          <a className="item" target="_blank" href={jobTMXUrl}>
+          <a className="item" target="_blank" href={jobTMXUrl} rel="noreferrer">
             <i className="icon-download icon" /> Export TMX
           </a>
           <div className="divider" />

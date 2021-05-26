@@ -1,5 +1,7 @@
 import TeamConstants from '../../constants/TeamConstants'
-
+import TeamsStore from '../../stores/TeamsStore'
+import ManageActions from '../../actions/ManageActions'
+import React from 'react'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -194,7 +196,6 @@ class ModifyTeam extends React.Component {
   }
 
   applyChanges() {
-    var self = this
     var teamNameOk = this.changeTeamName()
     if ($(this.inputNewUSer).dropdown('get value').length > 0) {
       this.addUsers()

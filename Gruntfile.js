@@ -108,6 +108,26 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'qa-report.js',
       },
+      manage: {
+        options: {
+          transform: [
+            [
+              'babelify',
+              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
+            ],
+          ],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [
+          basePath + 'cat_source/es6/components/projects/*.js',
+          basePath + 'cat_source/es6/ajax_utils/*.js',
+          // basePath + 'outsource.js',
+        ],
+        dest: buildPath + 'manage.js',
+      },
     },
 
     /**
@@ -255,14 +275,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
         ],
         dest: buildPath + 'common.js',
-      },
-      manage: {
-        src: [
-          basePath + 'manage.js',
-          basePath + 'outsource.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'manage.js',
       },
       analyze_new: {
         src: [
@@ -477,12 +489,12 @@ module.exports = function (grunt) {
     'browserify:libs',
     'browserify:components',
     'browserify:qualityReport',
+    'browserify:manage',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
     'concat:app',
     'concat:common',
-    'concat:manage',
     'concat:analyze_new',
     'concat:upload',
     'replace:version',
@@ -500,12 +512,12 @@ module.exports = function (grunt) {
     'browserify:libs',
     'browserify:components',
     'browserify:qualityReport',
+    'browserify:manage',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
     'concat:app',
     'concat:common',
-    'concat:manage',
     'concat:analyze_new',
     'concat:upload',
     'replace:version',
