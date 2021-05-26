@@ -113,8 +113,7 @@ test('renders properly', async () => {
                       revise_urls: [
                         {
                           revision_number: 1,
-                          url:
-                            'https://www.matecat.com/revise/test/fr-CH-de-DE/3882183-d94b6ee2af48',
+                          url: 'https://www.matecat.com/revise/test/fr-CH-de-DE/3882183-d94b6ee2af48',
                         },
                       ],
                       original_download_url:
@@ -244,12 +243,7 @@ test('renders properly', async () => {
     password: 'job_password_123',
     ajaxDomainsNumber: 3000,
   }
-  global.Header = require('./cat_source/es6/components/header/Header.js').default
-  global.AnalyzeMain = require('./cat_source/es6/components/analyze/AnalyzeMain.js').default
-  global.ModalWindow = require('./cat_source/es6/components/modals/ModalWindowComponent.js').default
-  global.AnalyzeActions = require('./cat_source/es6/actions/AnalyzeActions.js')
 
-  require('./lib/diff_match_patch')
   require('./common')
   require('./user_store')
   require('./login')
