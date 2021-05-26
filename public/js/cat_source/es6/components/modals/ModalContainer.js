@@ -1,62 +1,48 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import $ from 'jquery'
 
-export class ModalContainer extends React.Component {
-  closeModal = (event) => {
+export const ModalContainer = ({title, styleContainer, children, onClose}) => {
+  const handleClose = (event) => {
     event.stopPropagation()
 
     if (
       $(event.target).closest('.matecat-modal-content').length == 0 ||
       $(event.target).hasClass('close-matecat-modal')
     ) {
-      this.props.onClose()
+      onClose()
     }
   }
 
-  componentDidMount() {
+  React.useEffect(() => {
     $('body').addClass('side-popup')
     document.activeElement.blur()
-  }
 
-  componentWillUnmount() {
-    $('body').removeClass('side-popup')
-  }
+    return () => {
+      $('body').removeClass('side-popup')
+    }
+  }, [])
 
-  render() {
-    const {title, styleContainer, children} = this.props
+  return (
+    <div id="matecat-modal" className="matecat-modal" onClick={handleClose}>
+      <div className="matecat-modal-content" style={styleContainer}>
+        <div className="matecat-modal-header">
+          <div className="modal-logo" />
 
-    return (
-      <div
-        id="matecat-modal"
-        className="matecat-modal"
-        onClick={this.closeModal}
-      >
-        <div className="matecat-modal-content" style={styleContainer}>
-          <div className="matecat-modal-header">
-            <div className="modal-logo" />
-
-            <div>
-              <h2>{title}</h2>
-            </div>
-
-            <div>
-              <span
-                className="close-matecat-modal x-popup"
-                data-testid="close-button"
-                onClick={this.closeModal}
-              />
-            </div>
+          <div>
+            <h2>{title}</h2>
           </div>
 
-          <div className="matecat-modal-body">{children}</div>
+          <div>
+            <span
+              className="close-matecat-modal x-popup"
+              data-testid="close-button"
+              onClick={handleClose}
+            />
+          </div>
         </div>
-      </div>
-    )
-  }
-}
 
-ModalContainer.propTypes = {
-  onClose: PropTypes.func,
-  title: PropTypes.string,
+        <div className="matecat-modal-body">{children}</div>
+      </div>
+    </div>
+  )
 }
