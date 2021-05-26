@@ -4,7 +4,7 @@ import _ from 'lodash'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 
-class CattoolFooter extends React.Component {
+export class CattoolFooter extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -262,5 +262,3 @@ class CattoolFooter extends React.Component {
     )
   }
 }
-
-export default CattoolFooter

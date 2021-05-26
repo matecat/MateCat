@@ -1,10 +1,13 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
 import Notifications from '../sse/sse'
 import Review_QualityReportButton from '../components/review/QualityReportButton'
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
-import Footer from '../components/footer/Footer'
+import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 
 let CatToolActions = {
@@ -80,10 +83,10 @@ let CatToolActions = {
   startNotifications: function () {
     Notifications.start()
   },
-  clientConntected: function ( clientId ) {
+  clientConntected: function (clientId) {
     AppDispatcher.dispatch({
       actionType: CattolConstants.CLIENT_CONNECT,
-      clientId
+      clientId,
     })
   },
   renderQualityReportButton() {
@@ -134,8 +137,7 @@ let CatToolActions = {
   renderFooter: function () {
     var mountPoint = $('footer.stats-foo')[0]
     ReactDOM.render(
-      React.createElement(Footer, {
-        cattool: true,
+      React.createElement(CattolFooter, {
         idProject: config.id_project,
         idJob: config.job_id,
         password: config.password,
@@ -205,9 +207,8 @@ let CatToolActions = {
         // };
         //
         // APP.addNotification(notification);
-        const isModalClosed = CommonUtils.getFromSessionStorage(
-          'feedback-modal',
-        )
+        const isModalClosed =
+          CommonUtils.getFromSessionStorage('feedback-modal')
         if (!isModalClosed) {
           CatToolActions.openFeedbackModal('', config.revisionNumber)
         }
