@@ -5,6 +5,11 @@ import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 
+/**
+ * @NOTE because the state of this component is manipulated
+ * outside of the React tree, we currently cannot convert it
+ * into a function component...
+ */
 export class QualityReportButton extends React.Component {
   constructor(props) {
     super(props)
