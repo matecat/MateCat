@@ -1,13 +1,18 @@
 import React from 'react'
 import classnames from 'classnames'
 
-import IconQR from '../icons/IconQR'
+import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 
-class QualityReportButton extends React.Component {
+export class QualityReportButton extends React.Component {
   constructor(props) {
     super(props)
+
+    /**
+     * @NOTE for legacy reasons this state is manipulated
+     * from outside of the React tree...
+     */
     this.state = {
       is_pass: null,
       score: null,
@@ -16,16 +21,14 @@ class QualityReportButton extends React.Component {
     }
   }
 
-  getVote() {
-    if (this.state.is_pass != null) {
-      if (this.state.is_pass) {
-        return 'excellent'
-      } else {
-        return 'fail'
-      }
-    } else {
-      return this.state.vote
+  getVote = () => {
+    const {is_pass, vote} = this.state
+
+    if (is_pass != null) {
+      return is_pass ? 'excellent' : 'fail'
     }
+
+    return vote
   }
 
   updateProgress = (stats) => {
@@ -52,38 +55,41 @@ class QualityReportButton extends React.Component {
   }
 
   render() {
+    const {quality_report_href} = this.props
+    const {progress, feedback} = this.state
+
     let classes, label, menu, alert
-    if (this.state.progress && config.isReview) {
+    if (progress && config.isReview) {
       if (config.revisionNumber === 1 || config.revisionNumber === 2) {
         classes = classnames({
           'ui simple pointing top center floating dropdown': true,
         })
-        label = !this.state.feedback
-          ? 'Write feedback (R' + config.revisionNumber + ')'
-          : 'Edit feedback (R' + config.revisionNumber + ')'
+
+        label = !feedback
+          ? `Write feedback (R${config.revisionNumber})`
+          : `Edit feedback (R${config.revisionNumber})`
+
         menu = (
           <ul className="menu" id="qualityReportMenu">
             <li className="item">
               <a
                 title="Open QR"
-                onClick={() =>
-                  window.open(this.props.quality_report_href, '_blank')
-                }
+                onClick={() => {
+                  window.open(quality_report_href, '_blank')
+                }}
               >
                 Open QR
               </a>
             </li>
             <li className="item">
-              <a
-                title="Revision Feedback"
-                onClick={(e) => this.openFeedbackModal(e)}
-              >
+              <a title="Revision Feedback" onClick={this.openFeedbackModal}>
                 {label}
               </a>
             </li>
           </ul>
         )
-        if (!this.state.feedback && this.state.progress) {
+
+        if (!feedback && progress) {
           alert = <div className="feedback-alert" />
         }
       }
@@ -94,15 +100,19 @@ class QualityReportButton extends React.Component {
         id="quality-report"
         className={classes}
         data-vote={this.getVote()}
-        onClick={() => window.open(this.props.quality_report_href, '_blank')}
+        data-testid="report-button"
+        onClick={() => {
+          window.open(quality_report_href, '_blank')
+        }}
       >
         <IconQR width={30} height={30} />
+
         {alert}
+
         <div className="dropdown-menu-overlay" />
+
         {menu}
       </div>
     )
   }
 }
-
-export default QualityReportButton
