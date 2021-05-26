@@ -102,8 +102,6 @@ let CatToolActions = {
       }),
       $('#quality-report-button')[0],
     )
-
-    // window.quality_report_btn_component.setState({progress: 10})
   },
   renderSubHeader() {
     ReactDOM.render(
