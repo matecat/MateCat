@@ -1,4 +1,4 @@
-import classnames from 'classnames'
+import React from 'react'
 
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
