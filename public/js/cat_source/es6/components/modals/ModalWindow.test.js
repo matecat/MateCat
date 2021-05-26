@@ -31,8 +31,17 @@ test('works properly', () => {
     onClose,
   )
 
-  expect(screen.getByRole('heading', {name: 'Random title'})).toBeVisible()
+  const elTitle = screen.getByRole('heading', {name: 'Random title'})
+  expect(elTitle).toBeVisible()
   expect(screen.getByText('something')).toBeVisible()
+
+  /**
+   * clicking inside the area of the modal should not trigger
+   * the close mechanism
+   */
+  userEvent.click(elTitle)
+
+  expect(elTitle).toBeVisible()
 
   const elButtonClose = screen.getByTestId('close-button')
   expect(elButtonClose).toBeVisible()
@@ -65,8 +74,17 @@ test('works properly ModalOverlay version', () => {
     onClose,
   )
 
-  expect(screen.getByRole('heading', {name: 'Random title'})).toBeVisible()
+  const elTitle = screen.getByRole('heading', {name: 'Random title'})
+  expect(elTitle).toBeVisible()
   expect(screen.getByText('something')).toBeVisible()
+
+  /**
+   * clicking inside the area of the modal should not trigger
+   * the close mechanism
+   */
+  userEvent.click(elTitle)
+
+  expect(elTitle).toBeVisible()
 
   const elButtonClose = screen.getByTestId('close-button')
   expect(elButtonClose).toBeVisible()
@@ -75,4 +93,5 @@ test('works properly ModalOverlay version', () => {
 
   expect(onCloseCallback).toHaveBeenCalledTimes(1)
   expect(elButtonClose).not.toBeVisible()
+  expect(elTitle).not.toBeVisible()
 })
