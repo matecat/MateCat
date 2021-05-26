@@ -35,6 +35,41 @@ class ProjectContainer extends React.Component {
     }
   }
 
+  hideProjectAfterChangeAssignee = (project, user) => {
+    if (this.props.project.get('id') === project.get('id')) {
+      const {selectedUser, team} = this.props
+      const uid = user ? user.get('uid') : -1
+      if (
+        (uid !== selectedUser &&
+          selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
+        (team.get('type') == 'personal' && uid !== APP.USER.STORE.user.uid)
+      ) {
+        setTimeout(() => {
+          $(this.project).transition('fly right')
+        }, 500)
+        setTimeout(() => {
+          ManageActions.removeProject(this.props.project)
+        }, 1000)
+        let name = user.toJS
+          ? user.get('first_name') + ' ' + user.get('last_name')
+          : 'Not assigned'
+        let notification = {
+          title: 'Assignee changed',
+          text:
+            'The project ' +
+            this.props.project.get('name') +
+            ' has been assigned to ' +
+            name,
+          type: 'success',
+          position: 'bl',
+          allowHtml: true,
+          timer: 3000,
+        }
+        APP.addNotification(notification)
+      }
+    }
+  }
+
   initDropdowns() {
     let self = this
     if (this.dropdownUsers && !this.dropdownUsersInitialized) {
@@ -541,10 +576,18 @@ class ProjectContainer extends React.Component {
     this.getLastAction()
 
     ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject)
+    ProjectsStore.addListener(
+      ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+      this.hideProjectAfterChangeAssignee,
+    )
   }
 
   componentWillUnmount() {
     ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject)
+    ProjectsStore.removeListener(
+      ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+      this.hideProjectAfterChangeAssignee,
+    )
   }
 
   shouldComponentUpdate(nextProps, nextState) {

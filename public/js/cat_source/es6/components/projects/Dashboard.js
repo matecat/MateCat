@@ -17,13 +17,13 @@ class Dashboard extends React.Component {
     this.Search = {}
     this.Search.filter = {}
     this.Search.currentPage = 1
-    this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER
     //Update manage
     this.pageLeft = false
     this.state = {
       teams: [],
       selectedTeam: undefined,
       showProjects: false,
+      selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
 
     API.TEAM.getAllTeams().done((data) => {
@@ -59,6 +59,7 @@ class Dashboard extends React.Component {
           } else {
             this.setState({showProjects: true})
             ManageActions.renderProjects(response.data, selectedTeam, teams)
+            ManageActions.storeSelectedTeam(selectedTeam)
           }
         })
       })
@@ -100,6 +101,7 @@ class Dashboard extends React.Component {
         window.location = '/'
       } else {
         ManageActions.renderProjects(response.data, selectedTeam, teams)
+        ManageActions.storeSelectedTeam(selectedTeam)
       }
     })
   }
@@ -110,6 +112,7 @@ class Dashboard extends React.Component {
       selectedTeam.members = data.members
       selectedTeam.pending_invitations = data.pending_invitations
       this.setState({selectedTeam})
+      ManageActions.storeSelectedTeam(selectedTeam)
     })
   }
 
@@ -141,6 +144,7 @@ class Dashboard extends React.Component {
 
   refreshProjects = () => {
     if (this.Search.currentPage === 1) {
+      const {selectedTeam} = this.state
       API.PROJECTS.getProjects(this.state.selectedTeam, this.Search).done(
         (response) => {
           if (
@@ -161,7 +165,7 @@ class Dashboard extends React.Component {
             response.errors.length
           ) {
             window.location = '/'
-          } else {
+          } else if (selectedTeam.id === this.state.selectedTeam.id) {
             const projects = response.data
             ManageActions.updateProjects(projects)
           }
@@ -286,6 +290,43 @@ class Dashboard extends React.Component {
       continueDownloadFunction()
     }
   }
+  filterProjects = (userUid, name, status) => {
+    this.Search.filter = {}
+    this.Search.currentPage = 1
+    var filter = {}
+    if (typeof userUid != 'undefined') {
+      if (userUid === ManageConstants.NOT_ASSIGNED_FILTER) {
+        filter.no_assignee = true
+      } else if (userUid !== ManageConstants.ALL_MEMBERS_FILTER) {
+        filter.id_assignee = userUid
+      }
+      this.setState({
+        selectedUser: userUid,
+      })
+    }
+    if (typeof name !== 'undefined') {
+      filter.pn = name
+    }
+    if (typeof status !== 'undefined') {
+      filter.status = status
+    }
+    this.Search.filter = $.extend(this.Search.filter, filter)
+    if (!_.isEmpty(this.Search.filter)) {
+      this.Search.currentPage = 1
+    }
+    API.PROJECTS.getProjects(this.state.selectedTeam, this.Search).done(
+      (response) => {
+        const projects = response.data
+        ManageActions.renderProjects(
+          projects,
+          this.state.selectedTeam,
+          this.state.teams,
+          false,
+          true,
+        )
+      },
+    )
+  }
 
   //********* Modals **************//
 
@@ -350,6 +391,10 @@ class Dashboard extends React.Component {
       ManageConstants.RELOAD_PROJECTS,
       this.refreshProjects,
     )
+    ProjectsStore.addListener(
+      ManageConstants.FILTER_PROJECTS,
+      this.filterProjects,
+    )
 
     //Modals
     TeamsStore.addListener(
@@ -387,9 +432,13 @@ class Dashboard extends React.Component {
       ManageConstants.RELOAD_PROJECTS,
       this.refreshProjects,
     )
+    ProjectsStore.removeListener(
+      ManageConstants.FILTER_PROJECTS,
+      this.filterProjects,
+    )
 
     //Modals
-    TeamsStore.removeEventListener(
+    TeamsStore.removeListener(
       ManageConstants.UPDATE_TEAM_MEMBERS,
       this.removeUserFilter,
     )
@@ -427,6 +476,7 @@ class Dashboard extends React.Component {
             downloadTranslationFn={this.downloadTranslation}
             teams={Immutable.fromJS(this.state.teams)}
             team={Immutable.fromJS(this.state.selectedTeam)}
+            selectedUser={this.state.selectedUser}
           />
         ) : (
           <div className="ui active inverted dimmer">

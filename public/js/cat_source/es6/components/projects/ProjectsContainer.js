@@ -3,6 +3,7 @@ import TeamConstants from '../../constants/TeamConstants'
 import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import TeamsStore from '../../stores/TeamsStore'
+import ManageActions from '../../actions/ManageActions'
 import React from 'react'
 import Immutable from 'immutable'
 class ProjectsContainer extends React.Component {
@@ -236,6 +237,7 @@ class ProjectsContainer extends React.Component {
         downloadTranslationFn={this.props.downloadTranslationFn}
         team={this.state.team}
         teams={this.state.teams}
+        selectedUser={this.props.selectedUser}
       />
     ))
 

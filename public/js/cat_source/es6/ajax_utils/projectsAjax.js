@@ -39,8 +39,6 @@ window.API.PROJECTS = {
    * @param status
    */
   changeJobsOrProjectStatus: function (type, object, status) {
-    // Se Job cancella tutti arJobs = 21-10d78b343b8e:active
-
     var id = object.id
     var password = object.password
 
@@ -50,9 +48,6 @@ window.API.PROJECTS = {
       id: id, // Job or Project Id
       password: password, // Job or Project Password
     }
-
-    // Filters
-    data = $.extend(data, UI.Search.filter)
 
     return $.ajax({
       data: data,

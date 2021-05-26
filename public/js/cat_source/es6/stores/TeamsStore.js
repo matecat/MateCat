@@ -13,7 +13,7 @@ EventEmitter.prototype.setMaxListeners(0)
 
 let TeamsStore = assign({}, EventEmitter.prototype, {
   teams: [],
-
+  selectedTeam: {},
   users: [],
 
   user: null,
@@ -61,7 +61,11 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
 
   removeTeam: function (team) {
     let index = this.teams.indexOf(team)
-    this.teams = this.teams.delete(index)
+    if (index !== -1) this.teams = this.teams.delete(index)
+  },
+
+  getSelectedTeam: function () {
+    return this.selectedTeam
   },
 
   emitChange: function () {
@@ -137,6 +141,8 @@ AppDispatcher.register(function (action) {
     case ManageConstants.OPEN_INFO_TEAMS_POPUP:
       TeamsStore.emitChange(action.actionType)
       break
+    case ManageConstants.SELECTED_TEAM:
+      TeamsStore.selectedTeam = action.selectedTeam
   }
 })
 module.exports = TeamsStore

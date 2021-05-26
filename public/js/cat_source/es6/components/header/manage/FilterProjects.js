@@ -3,7 +3,8 @@ import React from 'react'
 import IconDown from '../../icons/IconDown'
 import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'
-
+import ManageActions from '../../../actions/ManageActions'
+import ManageConstants from '../../../constants/ManageConstants'
 class FilterProjects extends React.Component {
   constructor(props) {
     super(props)

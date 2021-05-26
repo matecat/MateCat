@@ -11,7 +11,13 @@ let ManageActions = {
    * @param teams
    * @param hideSpinner
    * */
-  renderProjects: function (projects, team, teams, hideSpinner) {
+  renderProjects: function (
+    projects,
+    team,
+    teams,
+    hideSpinner,
+    filtering = false,
+  ) {
     this.popupInfoTeamsStorageName = 'infoTeamPopup-' + config.userMail
     AppDispatcher.dispatch({
       actionType: ManageConstants.RENDER_PROJECTS,
@@ -19,7 +25,7 @@ let ManageActions = {
       team: team,
       teams: teams,
       hideSpinner: hideSpinner,
-      filtering: false,
+      filtering: filtering,
     })
   },
 
@@ -71,10 +77,7 @@ let ManageActions = {
           project: project,
         })
         setTimeout(function () {
-          AppDispatcher.dispatch({
-            actionType: ManageConstants.REMOVE_PROJECT,
-            project: project,
-          })
+          ManageActions.removeProject(project)
         }, 1000)
       },
     )
@@ -111,25 +114,6 @@ let ManageActions = {
     })
   },
 
-  changeJobPasswordFromOutsource: function (
-    projectId,
-    jobId,
-    oldPassword,
-    password,
-  ) {
-    if ($('body').hasClass('manage')) {
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.CHANGE_JOB_PASS,
-        projectId: projectId,
-        jobId: jobId,
-        password: password,
-        oldPassword: oldPassword,
-      })
-    } else {
-      UI.updateJobPassword(password)
-    }
-  },
-
   noMoreProjects: function () {
     AppDispatcher.dispatch({
       actionType: ManageConstants.NO_MORE_PROJECTS,
@@ -144,25 +128,38 @@ let ManageActions = {
 
   filterProjects: function (member, name, status) {
     this.showReloadSpinner()
-    let memberUid =
+    const memberUid =
       member && member.toJS ? member.get('user').get('uid') : member
-    UI.filterProjects(memberUid, name, status).then(function (response) {
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.RENDER_PROJECTS,
-        projects: response.data,
-        hideSpinner: false,
-        filtering: true,
-      })
+    AppDispatcher.dispatch({
+      actionType: ManageConstants.FILTER_PROJECTS,
+      memberUid,
+      name,
+      status,
     })
   },
 
-  changeProjectAssignee: function (team, project, user) {
-    var uid
-    if (user === -1) {
-      uid = -1
-    } else {
-      uid = user.get('uid')
+  removeProject: function (project) {
+    AppDispatcher.dispatch({
+      actionType: ManageConstants.REMOVE_PROJECT,
+      project: project,
+    })
+  },
+
+  showNotificationProjectsChanged: function () {
+    var notification = {
+      title: 'Ooops...',
+      text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
+      type: 'warning',
+      position: 'bl',
+      allowHtml: true,
+      autoDismiss: false,
     }
+    APP.addNotification(notification)
+  },
+
+  changeProjectAssignee: function (team, project, user) {
+    const uid = user ? user.get('uid') : -1
+
     API.PROJECTS.changeProjectAssignee(team.get('id'), project.get('id'), uid)
       .done(function () {
         AppDispatcher.dispatch({
@@ -170,41 +167,6 @@ let ManageActions = {
           project: project,
           user: user,
         })
-        if (
-          (uid !== UI.selectedUser &&
-            UI.selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
-          (UI.selectedTeam.type == 'personal' &&
-            uid !== APP.USER.STORE.user.uid)
-        ) {
-          setTimeout(function () {
-            AppDispatcher.dispatch({
-              actionType: ManageConstants.HIDE_PROJECT,
-              project: project,
-            })
-          }, 500)
-          setTimeout(function () {
-            AppDispatcher.dispatch({
-              actionType: ManageConstants.REMOVE_PROJECT,
-              project: project,
-            })
-          }, 1000)
-          let name = user.toJS
-            ? user.get('first_name') + ' ' + user.get('last_name')
-            : 'Not assigned'
-          let notification = {
-            title: 'Assignee changed',
-            text:
-              'The project ' +
-              project.get('name') +
-              ' has been assigned to ' +
-              name,
-            type: 'success',
-            position: 'bl',
-            allowHtml: true,
-            timer: 3000,
-          }
-          APP.addNotification(notification)
-        }
         API.TEAM.getTeamMembers(team.get('id')).done(function (data) {
           team = team.set('members', data.members)
           team = team.set('pending_invitations', data.pending_invitations)
@@ -215,9 +177,9 @@ let ManageActions = {
         })
       })
       .fail(function () {
-        UI.showNotificationProjectsChanged()
+        ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
-          actionType: ManageActions.RELOAD_PROJECTS,
+          actionType: ManageConstants.RELOAD_PROJECTS,
         })
       })
   },
@@ -243,7 +205,8 @@ let ManageActions = {
           return team.get('id') == teamId
         })
         team = team.toJS()
-        if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
+        const selectedTeam = TeamsStore.getSelectedTeam()
+        if (selectedTeam.type == 'personal' && team.type !== 'personal') {
           API.TEAM.getTeamMembers(teamId).then(function (data) {
             team.members = data.members
             team.pending_invitations = data.pending_invitations
@@ -260,8 +223,8 @@ let ManageActions = {
             })
           })
         } else if (
-          teamId !== UI.selectedTeam.id &&
-          UI.selectedTeam.type !== 'personal'
+          teamId !== selectedTeam.id &&
+          selectedTeam.type !== 'personal'
         ) {
           setTimeout(function () {
             AppDispatcher.dispatch({
@@ -289,34 +252,27 @@ let ManageActions = {
             timer: 3000,
           }
           APP.addNotification(notification)
-          API.TEAM.getTeamMembers(UI.selectedTeam.id).then(function (data) {
-            UI.selectedTeam.members = data.members
-            UI.selectedTeam.pending_invitations = data.pending_invitations
+          API.TEAM.getTeamMembers(selectedTeam.id).then(function (data) {
+            selectedTeam.members = data.members
+            selectedTeam.pending_invitations = data.pending_invitations
             AppDispatcher.dispatch({
               actionType: TeamConstants.UPDATE_TEAM,
-              team: UI.selectedTeam,
+              team: selectedTeam,
             })
             setTimeout(function () {
               AppDispatcher.dispatch({
                 actionType: ManageConstants.CHANGE_PROJECT_TEAM,
                 project: project,
-                teamId: UI.selectedTeam.id,
+                teamId: selectedTeam.id,
               })
             })
           })
         }
-        // else {
-        //     AppDispatcher.dispatch({
-        //         actionType: ManageConstants.CHANGE_PROJECT_TEAM,
-        //         project: project,
-        //         teamId: teamId
-        //     });
-        // }
       })
       .fail(function () {
-        UI.showNotificationProjectsChanged()
+        ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
-          actionType: ManageActions.RELOAD_PROJECTS,
+          actionType: ManageConstants.RELOAD_PROJECTS,
         })
       })
   },
@@ -424,7 +380,7 @@ let ManageActions = {
    * @param members
    */
   createTeam: function (teamName, members) {
-    API.TEAM.createTeam(teamName, members).done(function (response) {
+    API.TEAM.createTeam(teamName, members).done((response) => {
       let team = response.team
       this.showReloadSpinner()
       APP.setTeamInStorage(team.id)
@@ -473,7 +429,9 @@ let ManageActions = {
     var userId = user.get('uid')
     API.TEAM.removeUserFromTeam(team.toJS(), userId).done(function (data) {
       if (userId === APP.USER.STORE.user.uid) {
-        if (UI.selectedTeam.id === team.get('id')) {
+        const selectedTeam = TeamsStore.getSelectedTeam()
+
+        if (selectedTeam.id === team.get('id')) {
           API.TEAM.getAllTeams(true).done(function (data) {
             AppDispatcher.dispatch({
               actionType: TeamConstants.RENDER_TEAMS,
@@ -496,7 +454,7 @@ let ManageActions = {
         })
       }
       AppDispatcher.dispatch({
-        actionType: ManageActions.RELOAD_PROJECTS,
+        actionType: ManageConstants.RELOAD_PROJECTS,
       })
     })
   },
@@ -508,6 +466,12 @@ let ManageActions = {
         oldTeam: team,
         team: data.team[0],
       })
+    })
+  },
+  storeSelectedTeam: function (selectedTeam) {
+    AppDispatcher.dispatch({
+      actionType: ManageConstants.SELECTED_TEAM,
+      selectedTeam,
     })
   },
 }

@@ -47,12 +47,12 @@ $.extend(UI, {
       allowHtml: true,
       timer: 10000,
     }
-    var boxUndo = APP.addNotification(notification)
-    ManageActions.changeJobPasswordFromOutsource(
+    APP.addNotification(notification)
+    ManageActions.changeJobPassword(
       project.id,
       job.id,
-      job.password,
       response.job.password,
+      job.password,
     )
     ManageActions.assignTranslator(
       project.id,
@@ -158,8 +158,7 @@ $.extend(UI, {
     APP.ModalWindow.onCloseModal()
     var notification = {
       title: 'Problems sending the job',
-      text:
-        'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+      text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
       type: 'error',
       position: 'bl',
       allowHtml: true,
