@@ -1,13 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import $ from 'jquery'
 
-class ModalComponent extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
-  closeModal(event) {
+export class ModalOverlay extends React.Component {
+  closeModal = (event) => {
     event.stopPropagation()
+
     if (
       $(event.target).closest('.matecat-modal-content').length == 0 ||
       $(event.target).hasClass('close-matecat-modal')
@@ -17,51 +15,43 @@ class ModalComponent extends React.Component {
   }
 
   componentDidMount() {
-    $('body').addClass('side-popup')
     document.activeElement.blur()
   }
 
-  componentWillUnmount() {
-    $('body').removeClass('side-popup')
-  }
-
-  allowHTML(string) {
-    return {__html: string}
-  }
-
   render() {
+    const {styleContainer, title, children} = this.props
+
     return (
       <div
-        id="matecat-modal"
-        className="matecat-modal"
-        onClick={(e) => this.closeModal.call(this, e)}
+        id="matecat-modal-overlay"
+        className="matecat-modal-overlay"
+        onClick={this.closeModal}
       >
-        <div
-          className="matecat-modal-content"
-          style={this.props.styleContainer}
-        >
+        <div className="matecat-modal-content" style={styleContainer}>
           <div className="matecat-modal-header">
             <div className="modal-logo" />
+
             <div>
-              <h2>{this.props.title}</h2>
+              <h2>{title}</h2>
             </div>
+
             <div>
               <span
                 className="close-matecat-modal x-popup"
-                onClick={this.closeModal.bind(this)}
+                data-testid="close-button"
+                onClick={this.closeModal}
               />
             </div>
           </div>
-          <div className="matecat-modal-body">{this.props.children}</div>
+
+          <div className="matecat-modal-body">{children}</div>
         </div>
       </div>
     )
   }
 }
 
-ModalComponent.propTypes = {
+ModalOverlay.propTypes = {
   onClose: PropTypes.func,
   title: PropTypes.string,
 }
-
-export default ModalComponent
