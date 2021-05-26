@@ -1,5 +1,7 @@
 <?php
 
+use Matecat\SubFiltering\MateCatFilter;
+
 class getTagProjectionController extends ajaxController {
 
     protected $__postInput = array();
@@ -103,7 +105,7 @@ class getTagProjectionController extends ajaxController {
         $engine->setFeatureSet( $this->featureSet );
 
         $dateRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment);
-        $Filter = \SubFiltering\Filter::getInstance( $this->source_lang, $this->target_lang, $this->featureSet, $dateRefMap );
+        $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_lang, $this->target_lang,  $dateRefMap );
 
         $config                  = array();
         $config[ 'source' ]      = $Filter->fromLayer2ToLayer1( $this->source );

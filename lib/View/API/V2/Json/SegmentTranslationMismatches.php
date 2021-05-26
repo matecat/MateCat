@@ -9,8 +9,7 @@
 
 namespace API\V2\Json;
 
-
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 class SegmentTranslationMismatches {
 
@@ -20,18 +19,19 @@ class SegmentTranslationMismatches {
 
     /**
      * SegmentTranslationMismatches constructor.
-     *
      * from query: getWarning( id_job, password )
      *
-     * @param array            $Translation_mismatches
+     * @param                  $Translation_mismatches
      * @param                  $thereArePropagations
      * @param \FeatureSet|null $featureSet
+     *
+     * @throws \Exception
      */
     public function __construct( $Translation_mismatches, $thereArePropagations, \FeatureSet $featureSet = null ) {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
         if( $featureSet == null ){
-            $featureSet = new FeatureSet();
+            $featureSet = new \FeatureSet();
         }
         $this->featureSet = $featureSet;
     }
@@ -50,7 +50,7 @@ class SegmentTranslationMismatches {
 
         foreach ( $this->data as $position => $row ) {
 
-            $Filter = Filter::getInstance( $row['source'], $row['target'], $this->featureSet );
+            $Filter = MateCatFilter::getInstance( $this->featureSet, $row['source'], $row['target'], [] );
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [

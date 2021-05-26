@@ -13,9 +13,9 @@ use Database;
 use Exception;
 use Log;
 use Matecat\Finder\WholeTextFinder;
+use Matecat\SubFiltering\MateCatFilter;
 use PDO;
 use PDOException;
-use SubFiltering\Filter;
 
 class SearchModel {
 
@@ -30,7 +30,7 @@ class SearchModel {
     protected $db;
 
     /**
-     * @var Filter
+     * @var MateCatFilter
      */
     private $filters;
 
@@ -38,11 +38,9 @@ class SearchModel {
      * SearchModel constructor.
      *
      * @param SearchQueryParamsStruct $queryParams
-     *
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @param MateCatFilter          $filters
      */
-    public function __construct( SearchQueryParamsStruct $queryParams, Filter $filters ) {
+    public function __construct( SearchQueryParamsStruct $queryParams, MateCatFilter $filters ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
         $this->filters     = $filters;

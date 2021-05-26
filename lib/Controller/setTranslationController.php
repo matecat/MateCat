@@ -6,11 +6,11 @@ use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
-use SubFiltering\Commons\Pipeline;
-use SubFiltering\Filter;
-use SubFiltering\Filters\FromViewNBSPToSpaces;
-use SubFiltering\Filters\PhCounter;
-use SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
+use Matecat\SubFiltering\Filters\PhCounter;
+use Matecat\SubFiltering\Filters\SprintfToPH;
 
 class setTranslationController extends ajaxController {
 
@@ -70,7 +70,7 @@ class setTranslationController extends ajaxController {
     protected $context_before;
     protected $context_after;
 
-    /** @var Filter */
+    /** @var MateCatFilter */
     protected $filter;
 
     /**
@@ -196,7 +196,8 @@ class setTranslationController extends ajaxController {
 
             $this->featureSet->loadForProject( $this->project );
 
-            $this->filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $this->featureSet, Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
+            /** @var MateCatFilter filter */
+            $this->filter = MateCatFilter::getInstance( $this->featureSet, $this->chunk->source, $this->chunk->target,  Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING

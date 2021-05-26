@@ -1,8 +1,8 @@
 <?php
 
 use BxExG\Mapper;
-use SubFiltering\Filters\LtGtEncode;
-use SubFiltering\Filters\RestoreXliffTagsForView;
+use Matecat\SubFiltering\Filters\LtGtEncode;
+use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 
 /**
  * Class errObject

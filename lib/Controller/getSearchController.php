@@ -6,7 +6,7 @@ use Matecat\Finder\WholeTextFinder;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 class getSearchController extends ajaxController {
 
@@ -130,7 +130,8 @@ class getSearchController extends ajaxController {
         //get Job Info
         $this->job_data = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
 
-        $filter            = Filter::getInstance( $this->job_data->source, $this->job_data->target, $this->featureSet );
+        /** @var MateCatFilter $filter */
+        $filter            = MateCatFilter::getInstance( $this->featureSet, $this->job_data->source, $this->job_data->target, []  );
         $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
@@ -395,7 +396,7 @@ class getSearchController extends ajaxController {
                 }
             }
 
-            $filter = Filter::getInstance( $this->job_data->source, $this->job_data->target,  $this->featureSet );
+            $filter = MateCatFilter::getInstance( $this->featureSet, $this->job_data->source, $this->job_data->target, []  );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 

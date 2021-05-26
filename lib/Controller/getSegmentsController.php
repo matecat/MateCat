@@ -5,6 +5,7 @@
  */
 
 use Segments\ContextGroupDao;
+use Matecat\SubFiltering\MateCatFilter;
 
 class getSegmentsController extends ajaxController {
 
@@ -115,7 +116,7 @@ class getSegmentsController extends ajaxController {
             // inject original data ref map (FOR XLIFF 2.0)
             $data_ref_map          = json_decode( $seg[ 'data_ref_map' ], true );
             $seg[ 'data_ref_map' ] = $data_ref_map;
-            $Filter                = \SubFiltering\Filter::getInstance( $this->job->source, $this->job->target, $this->featureSet, null !== $data_ref_map ? $data_ref_map : [] );
+            $Filter                = MateCatFilter::getInstance( $this->featureSet, $this->job->source, $this->job->target,  null !== $data_ref_map ? $data_ref_map : [] );
 
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )

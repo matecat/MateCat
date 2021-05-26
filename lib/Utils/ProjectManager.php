@@ -20,7 +20,7 @@ use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\XliffUtils\XliffVersionDetector;
 use ProjectManager\ProjectManagerModel;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -89,6 +89,10 @@ class ProjectManager {
      * @var Database|IDatabase
      */
     protected $dbHandler;
+
+    /**
+     * @var MateCatFilter
+     */
     protected $filter;
 
     /**
@@ -191,7 +195,7 @@ class ProjectManager {
 
         $this->_log( $this->features->getCodes() );
 
-        $this->filter = Filter::getInstance( $this->features );
+        $this->filter = MateCatFilter::getInstance( $this->features, null, null, [] );
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',
@@ -436,7 +440,7 @@ class ProjectManager {
          */
         $this->features->run( 'validateProjectCreation', $this->projectStructure );
 
-        $this->filter = Filter::getInstance( $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], $this->features );
+        $this->filter = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [] );
 
         /**
          * @var ArrayObject $this ->projectStructure['result']['errors']

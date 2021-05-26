@@ -5,7 +5,7 @@ namespace AsyncTasks\Workers;
 use Database;
 use Engine;
 use Stomp;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TmKeyManagement_Filter;
@@ -74,7 +74,7 @@ class GlossaryWorker extends AbstractWorker {
             $keys_hashes[] = $tm_key->key;
         }
 
-        $Filter                  = Filter::getInstance( $featureSet );
+        $Filter                  = MateCatFilter::getInstance( $featureSet, null, null, [] );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $config[ 'segment' ] );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $config[ 'translation' ] );
 

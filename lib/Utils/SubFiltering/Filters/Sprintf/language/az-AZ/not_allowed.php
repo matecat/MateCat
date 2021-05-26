@@ -1,6 +1,0 @@
-<?php
-
-return [
-        '%-ban',
-        '%-dir',
-];

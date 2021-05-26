@@ -6,8 +6,8 @@ use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use Log;
 use QA;
-use SubFiltering\Filter;
-use SubFiltering\Filters\RemoveDangerousChars;
+use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Filters\RemoveDangerousChars;
 
 class XliffSAXTranslationReplacer {
 
@@ -42,7 +42,7 @@ class XliffSAXTranslationReplacer {
     protected $featureSet;
 
     /**
-     * @var Filter
+     * @var MateCatFilter
      */
     protected $filter;
 
@@ -113,7 +113,7 @@ class XliffSAXTranslationReplacer {
         }
 
         $this->featureSet = $featureSet;
-        $this->filter     = Filter::getInstance( $featureSet );
+        $this->filter     = MateCatFilter::getInstance( $featureSet, null, null, [] );
 
         //write xml header
         fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );

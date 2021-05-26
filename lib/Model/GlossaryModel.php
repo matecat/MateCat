@@ -8,6 +8,8 @@
  *
  */
 
+use Matecat\SubFiltering\MateCatFilter;
+
 class GlossaryModel {
 
     const MYMEMORY_ID = 1;
@@ -73,7 +75,7 @@ class GlossaryModel {
 
     public function get($segment, $translation) {
 
-        $Filter = \SubFiltering\Filter::getInstance( $this->job->source, $this->job->target, $this->featureSet );
+        $Filter = MateCatFilter::getInstance( $this->featureSet, $this->job->source, $this->job->target );
 
         $config[ 'segment' ] = $Filter->fromLayer2ToLayer0( preg_replace( '#<(?:/?[^>]+/?)>#', "", $segment ) );
         $config[ 'translation' ] = $translation ;
