@@ -1,6 +1,8 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+
 import JobSummary from './JobSummary'
 import SegmentsDetails from './SegmentsDetailsContainer'
-import ReactDom from 'react-dom'
 import QRActions from '../../actions/QualityReportActions'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
@@ -76,7 +78,7 @@ class QualityReport extends React.Component {
     let self = this
     if (this.reviewDropdown) {
       $(this.reviewDropdown).dropdown({
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           if (value && value !== '') {
             self.updateUrlParameter(value)
             self.setState({
@@ -251,7 +253,7 @@ if (config.isLoggedIn) {
       }),
       headerMountPoint,
     )
-    ReactDom.render(
+    ReactDOM.render(
       React.createElement(QualityReport),
       document.getElementById('qr-root'),
     )
@@ -267,7 +269,7 @@ if (config.isLoggedIn) {
     }),
     headerMountPoint,
   )
-  ReactDom.render(
+  ReactDOM.render(
     React.createElement(QualityReport),
     document.getElementById('qr-root'),
   )
