@@ -33,7 +33,6 @@ class SubFilteringTest extends AbstractTest {
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
         $this->filter = MateCatFilter::getInstance( $featureSet, 'en-EN','it-IT', [] );
-
     }
 
     /**
@@ -333,7 +332,7 @@ class SubFilteringTest extends AbstractTest {
     public function testSprintf() {
 
         $channel = new Pipeline();
-        $channel->addLast( new SprintfToPH() );
+        $channel->addLast( new SprintfToPH('hu-HU', 'az-AZ') );
 
         $segment         = 'Legalább 10%-os befejezett foglalás 20%-dir VAGY';
         $seg_transformed = $channel->transform( $segment );

@@ -3,7 +3,6 @@
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\MateCatFilter;
-use SubFiltering\Filter;
 use Validator\JobValidatorObject;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
