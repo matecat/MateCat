@@ -7,15 +7,17 @@
  *
  */
 
-use SubFiltering\Commons\Pipeline;
-use SubFiltering\Filter;
-use SubFiltering\Filters\LtGtDecode;
-use SubFiltering\Filters\LtGtDoubleDecode;
+use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Filters\LtGtDecode;
+use Matecat\SubFiltering\Filters\LtGtDoubleDecode;
+use Matecat\SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\Filters\TwigToPh;
 
 class SubFilteringTest extends AbstractTest {
 
     /**
-     * @var \SubFiltering\Filter
+     * @var MateCatFilter
      */
     protected $filter;
 
@@ -30,7 +32,7 @@ class SubFilteringTest extends AbstractTest {
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = Filter::getInstance( 'en-EN','it-IT', $featureSet );
+        $this->filter = MateCatFilter::getInstance( $featureSet, 'en-EN','it-IT', [] );
 
     }
 
@@ -331,7 +333,7 @@ class SubFilteringTest extends AbstractTest {
     public function testSprintf() {
 
         $channel = new Pipeline();
-        $channel->addLast( new \SubFiltering\Filters\SprintfToPH() );
+        $channel->addLast( new SprintfToPH() );
 
         $segment         = 'Legalább 10%-os befejezett foglalás 20%-dir VAGY';
         $seg_transformed = $channel->transform( $segment );
@@ -345,7 +347,7 @@ class SubFilteringTest extends AbstractTest {
         $expected = 'Dear <ph id="mtc_1" equiv-text="base64:e3tjdXN0b21lci5maXJzdF9uYW1lfX0="/>, This is <ph id="mtc_2" equiv-text="base64:e3thZ2VudC5hbGlhc319"/> with Airbnb.';
 
         $channel = new Pipeline();
-        $channel->addLast( new \SubFiltering\Filters\TwigToPh() );
+        $channel->addLast( new TwigToPh() );
         $seg_transformed = $channel->transform( $segment );
         $this->assertEquals( $expected, $seg_transformed );
     }
@@ -383,7 +385,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( 'en-EN','et-ET', $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'en-EN','et-ET', $data_ref_map );
 
         $db_segment     = "Hi %s .";
         $db_translation = "Tere %s .";
@@ -419,7 +421,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $db_segment     = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
         $db_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
@@ -464,7 +466,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $db_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
         $expected_l1_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
@@ -486,7 +488,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $db_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
         $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
@@ -511,7 +513,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $db_segment = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
         $db_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
@@ -548,7 +550,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $db_segment     = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
         $db_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
@@ -584,7 +586,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $expected_db_translation = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>';
         $l2_translation = 'Testo libero contenente <ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Xw=="/>corsivo<ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d1" equiv-text="base64:Xw=="/>';
@@ -605,7 +607,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = MateCatFilter::getInstance( $featureSet, 'it-IT', 'en-EN', $data_ref_map );
 
         $db_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
         $db_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
