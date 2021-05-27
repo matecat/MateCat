@@ -1,3 +1,5 @@
+import React from 'react'
+
 class CopySourceModal extends React.Component {
   constructor(props) {
     super(props)
@@ -34,12 +36,6 @@ class CopySourceModal extends React.Component {
     }
   }
 
-  componentDidUpdate() {}
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
   render() {
     return (
       <div className="copy-source-modal">
@@ -67,8 +63,7 @@ class CopySourceModal extends React.Component {
             ref={(checkbox) => (this.checkbox = checkbox)}
           />
           <label htmlFor="copy_s2t_dont_show">
-            {' '}
-            Don't show this dialog again for the current job
+            {` Don't show this dialog again for the current job`}
           </label>
         </div>
       </div>

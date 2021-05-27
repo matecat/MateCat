@@ -1,3 +1,5 @@
+import React from 'react'
+
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
 import SegmentFilterUtils from './segment_filter'
@@ -82,7 +84,7 @@ class SegmentsFilter extends React.Component {
     SegmentFilterUtils.closeFilter()
   }
 
-  doSubmitFilter(segmentToOpen = null) {
+  doSubmitFilter() {
     let sample
     if (this.applyFilters) return //updating the dropdown
     if (this.state.samplingType) {
@@ -209,13 +211,13 @@ class SegmentsFilter extends React.Component {
     })
   }
 
-  moveUp(e) {
+  moveUp() {
     if (this.state.filtering && this.state.filteredCount > 1) {
       UI.gotoPreviousSegment()
     }
   }
 
-  moveDown(e) {
+  moveDown() {
     if (this.state.filtering && this.state.filteredCount > 1) {
       UI.gotoNextSegment()
     }
@@ -255,17 +257,17 @@ class SegmentsFilter extends React.Component {
     if (this.props.active && !this.dropdownInitialized) {
       this.dropdownInitialized = true
       $(this.statusDropdown).dropdown({
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           self.filterSelectChanged(value)
         },
       })
       $(this.filtersDropdown).dropdown({
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           self.moreFilterSelectChanged(value)
         },
       })
       $(this.dataSampleDropDown).dropdown({
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           self.dataSampleChange(value)
         },
       })

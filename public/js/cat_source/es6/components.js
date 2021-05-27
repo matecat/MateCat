@@ -2,6 +2,7 @@
 // but I found this is not a good practice since the dot may create troubles.
 // Underscores seem to be a better convention.
 import JobMetadata from './components/header/cattol/JobMetadata'
+import {ModalWindow} from './components/modals/ModalWindow'
 
 window.MC = {}
 
@@ -39,7 +40,7 @@ window.SegmentsContainer =
 /*
 Todo move this
  */
-window.ModalWindow = require('./components/modals/ModalWindowComponent').default
+window.ModalWindow = ModalWindow
 window.SuccessModal = require('./components/modals/SuccessModal').default
 window.ConfirmRegister = require('./components/modals/ConfirmRegister').default
 window.PreferencesModal =

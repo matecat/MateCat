@@ -1,7 +1,8 @@
-const IconQR = ({
+import React from 'react'
+
+export const IconQR = ({
   width = '42',
-  height = '42',
-  style,
+  height = width,
   color1 = '#FAFAFA',
   color2 = '#FFFFFF',
 }) => {
@@ -35,5 +36,3 @@ const IconQR = ({
     </svg>
   )
 }
-
-export default IconQR
