@@ -21,11 +21,11 @@ let ManageActions = {
     this.popupInfoTeamsStorageName = 'infoTeamPopup-' + config.userMail
     AppDispatcher.dispatch({
       actionType: ManageConstants.RENDER_PROJECTS,
-      projects: projects,
-      team: team,
-      teams: teams,
-      hideSpinner: hideSpinner,
-      filtering: filtering,
+      projects,
+      team,
+      teams,
+      hideSpinner,
+      filtering,
     })
   },
 
