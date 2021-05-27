@@ -113,6 +113,21 @@ let ManageActions = {
       oldTranslator: translator,
     })
   },
+  //TODO: remove
+  changeJobPasswordFromOutsource: function (
+    project,
+    job,
+    password,
+    oldPassword,
+  ) {
+    AppDispatcher.dispatch({
+      actionType: ManageConstants.CHANGE_JOB_PASS,
+      projectId: project.id,
+      jobId: job.id,
+      password: password,
+      oldPassword: oldPassword,
+    })
+  },
 
   noMoreProjects: function () {
     AppDispatcher.dispatch({

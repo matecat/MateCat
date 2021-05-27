@@ -108,11 +108,10 @@ class Dashboard extends React.Component {
 
   getTeamStructure = (team) => {
     return API.TEAM.getTeamMembers(team.id).then((data) => {
-      let {selectedTeam} = this.state
-      selectedTeam.members = data.members
-      selectedTeam.pending_invitations = data.pending_invitations
-      this.setState({selectedTeam})
-      ManageActions.storeSelectedTeam(selectedTeam)
+      team.members = data.members
+      team.pending_invitations = data.pending_invitations
+      this.setState({team})
+      ManageActions.storeSelectedTeam(team)
     })
   }
 

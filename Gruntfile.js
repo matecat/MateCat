@@ -122,12 +122,10 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
-          basePath + 'cat_source/es6/ajax_utils/*.js',
           basePath + 'cat_source/es6/components/projects/*.js',
           basePath + 'cat_source/es6/components.js',
-          // basePath + 'outsource.js',
         ],
-        dest: buildPath + 'manage.js',
+        dest: buildPath + 'manage-components.js',
       },
     },
 
@@ -267,7 +265,13 @@ module.exports = function (grunt) {
         src: [basePath + 'lib/semantic.min.js'],
         dest: buildPath + 'semantic.js',
       },
-
+      manage: {
+        src: [
+          basePath + 'outsource.js',
+          basePath + 'cat_source/es6/ajax_utils/*.js',
+        ],
+        dest: buildPath + 'manage.js',
+      },
       common: {
         src: [
           basePath + 'common.js',
@@ -497,6 +501,7 @@ module.exports = function (grunt) {
     'concat:app',
     'concat:common',
     'concat:analyze_new',
+    'concat:manage',
     'concat:upload',
     'replace:version',
   ])
@@ -520,6 +525,7 @@ module.exports = function (grunt) {
     'concat:app',
     'concat:common',
     'concat:analyze_new',
+    'concat:manage',
     'concat:upload',
     'replace:version',
   ])

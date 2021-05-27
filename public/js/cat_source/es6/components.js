@@ -20,6 +20,7 @@ window.OutsourceActions = require('./actions/OutsourceActions')
 window.CatToolActions = require('./actions/CatToolActions')
 window.SegmentActions = require('./actions/SegmentActions')
 window.CommentsActions = require('./actions/CommentsActions')
+window.ManageActions = require('./actions/ManageActions')
 
 window.SegmentStore = require('./stores/SegmentStore')
 window.CatToolStore = require('./stores/CatToolStore')

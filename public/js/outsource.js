@@ -1,4 +1,8 @@
-$.extend(UI, {
+if (!window.UI) {
+  window.UI = {}
+}
+
+$.extend(window.UI, {
   sendJobToTranslator: function (email, date, timezone, job, project) {
     API.JOB.sendTranslatorRequest(email, date, timezone, job)
       .done(function (data) {
@@ -48,11 +52,11 @@ $.extend(UI, {
       timer: 10000,
     }
     APP.addNotification(notification)
-    ManageActions.changeJobPassword(
-      project.id,
-      job.id,
-      response.job.password,
+    ManageActions.changeJobPasswordFromOutsource(
+      project,
+      job,
       job.password,
+      response.job.password,
     )
     ManageActions.assignTranslator(
       project.id,
