@@ -446,12 +446,12 @@ class CatUtils {
      * @param                 $string
      * @param string          $source_lang
      *
-     * @param Filter|null     $filter
+     * @param MateCatFilter|null     $filter
      *
      * @return float|int
      * @throws Exception
      */
-    public static function segment_raw_word_count( $string, $source_lang = 'en-US', Filter $filter = null ) {
+    public static function segment_raw_word_count( $string, $source_lang = 'en-US', MateCatFilter $filter = null ) {
 
         //first two letter of code lang
         $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
