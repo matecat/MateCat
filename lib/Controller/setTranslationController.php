@@ -194,10 +194,11 @@ class setTranslationController extends ajaxController {
 
             $this->project = $this->chunk->getProject();
 
-            $this->featureSet->loadForProject( $this->project );
+            $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+            $featureSet->loadForProject( $this->project );
 
             /** @var MateCatFilter filter */
-            $this->filter = MateCatFilter::getInstance( $this->featureSet, $this->chunk->source, $this->chunk->target,  Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
+            $this->filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target,  Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING

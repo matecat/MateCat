@@ -48,9 +48,11 @@ class SegmentTranslationMismatches {
                 'prop_available' => $this->thereArePropagations
         ];
 
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
         foreach ( $this->data as $position => $row ) {
 
-            $Filter = MateCatFilter::getInstance( $this->featureSet, $row['source'], $row['target'], [] );
+            $Filter = MateCatFilter::getInstance( $featureSet, $row['source'], $row['target'], [] );
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [

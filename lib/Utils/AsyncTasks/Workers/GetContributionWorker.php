@@ -521,7 +521,7 @@ class GetContributionWorker extends AbstractWorker {
 
         if ( count( $matches ) > 0 ) {
 
-            $Filter = MateCatFilter::getInstance( $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, $featureSet );
+            $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
 
             foreach ( $matches as $k => $m ) {
 

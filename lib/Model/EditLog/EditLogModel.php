@@ -245,7 +245,8 @@ class EditLog_EditLogModel {
 
             $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
 
-            $Filter = MateCatFilter::getInstance( $this->featureSet, $this->jobData->source, $this->jobData->target, [] );
+            $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+            $Filter = MateCatFilter::getInstance( $featureSet, $this->jobData->source, $this->jobData->target, [] );
             $sug_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->suggestion ) );
             $tra_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->translation ) );
 

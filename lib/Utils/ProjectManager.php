@@ -438,9 +438,10 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        $this->features->run( 'validateProjectCreation', $this->projectStructure );
+        $featureSet = ( $this->features !== null ) ? $this->features : new \FeatureSet();
+        $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
-        $this->filter = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [] );
+        $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [] );
 
         /**
          * @var ArrayObject $this ->projectStructure['result']['errors']
@@ -760,7 +761,7 @@ class ProjectManager {
                 throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
             }
 
-            $this->features->run( "beforeInsertSegments", $this->projectStructure,
+            $featureSet->run( "beforeInsertSegments", $this->projectStructure,
                     [
                             'total_project_segments' => $this->total_segments,
                             'files_wc'               => $this->files_word_count
@@ -859,11 +860,11 @@ class ProjectManager {
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
         ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
 
-        $this->features->run( 'postProjectCreate', $this->projectStructure );
+        $featureSet->run( 'postProjectCreate', $this->projectStructure );
 
         Database::obtain()->commit();
 
-        $this->features->run( 'postProjectCommit', $this->projectStructure );
+        $featureSet->run( 'postProjectCommit', $this->projectStructure );
 
         try {
 

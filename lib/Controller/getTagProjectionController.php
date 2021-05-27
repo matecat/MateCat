@@ -4,7 +4,7 @@ use Matecat\SubFiltering\MateCatFilter;
 
 class getTagProjectionController extends ajaxController {
 
-    protected $__postInput = array();
+    protected $__postInput = [];
 
     protected $password   = "";
     protected $suggestion = "";
@@ -23,22 +23,22 @@ class getTagProjectionController extends ajaxController {
 
         parent::__construct();
 
-        $filterArgs = array(
-                'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'password'    => array(
+        $filterArgs = [
+                'id_segment'  => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_job'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'    => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'source'      => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'target'      => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'suggestion'  => array( 'filter' => FILTER_UNSAFE_RAW ),
-                'source_lang' => array(
+                ],
+                'source'      => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'target'      => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'suggestion'  => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'source_lang' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'target_lang' => array(
+                ],
+                'target_lang' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+        ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -62,23 +62,23 @@ class getTagProjectionController extends ajaxController {
     public function doAction() {
 
         if ( is_null( $this->source ) || $this->source === '' ) {
-            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing source segment" );
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "missing source segment" ];
         }
 
         if ( is_null( $this->target ) || $this->target === '' ) {
-            $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing target segment" );
+            $this->result[ 'errors' ][] = [ "code" => -2, "message" => "missing target segment" ];
         }
 
         if ( empty( $this->source_lang ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -3, "message" => "missing source lang" );
+            $this->result[ 'errors' ][] = [ "code" => -3, "message" => "missing source lang" ];
         }
 
         if ( empty( $this->target_lang ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing target lang" );
+            $this->result[ 'errors' ][] = [ "code" => -2, "message" => "missing target lang" ];
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -4, "message" => "id_job not valid" );
+            $this->result[ 'errors' ][] = [ "code" => -4, "message" => "id_job not valid" ];
 
             $msg = "\n\n Critical. Quit. \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doJsonLog( $msg );
@@ -104,10 +104,11 @@ class getTagProjectionController extends ajaxController {
         $engine = Engine::getInstance( 1 );
         $engine->setFeatureSet( $this->featureSet );
 
-        $dateRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment);
-        $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_lang, $this->target_lang,  $dateRefMap );
+        $dateRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->source_lang, $this->target_lang, $dateRefMap );
 
-        $config                  = array();
+        $config                  = [];
         $config[ 'source' ]      = $Filter->fromLayer2ToLayer1( $this->source );
         $config[ 'target' ]      = $Filter->fromLayer2ToLayer1( $this->target );
         $config[ 'source_lang' ] = $this->source_lang;
@@ -115,16 +116,16 @@ class getTagProjectionController extends ajaxController {
         $config[ 'suggestion' ]  = $Filter->fromLayer2ToLayer1( $this->suggestion );
 
         $result = $engine->getTagProjection( $config );
-        if( empty( $result->error ) ){
-            $this->result[ 'data' ][ 'translation' ] = $Filter->fromLayer1ToLayer2($result->responseData);
-            $this->result[ 'code' ] = 0;
+        if ( empty( $result->error ) ) {
+            $this->result[ 'data' ][ 'translation' ] = $Filter->fromLayer1ToLayer2( $result->responseData );
+            $this->result[ 'code' ]                  = 0;
         } else {
-            $this->result[ 'code' ] = $result->error->code;
+            $this->result[ 'code' ]   = $result->error->code;
             $this->result[ 'errors' ] = $result->error;
             $this->logTagProjection(
                     [
                             'request' => $config,
-                            'error' => $result->error
+                            'error'   => $result->error
                     ]
             );
         }
@@ -135,7 +136,7 @@ class getTagProjectionController extends ajaxController {
 
     public function logTagProjection( $msg = null ) {
 
-        if( !$msg ){
+        if ( !$msg ) {
             \Log::doJsonLog( $this->result[ 'data' ] );
         } else {
             \Log::doJsonLog( $msg );

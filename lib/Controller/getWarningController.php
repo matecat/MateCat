@@ -168,13 +168,14 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'total' ] = 0;
 
-        $Filter     = MateCatFilter::getInstance( $this->featureSet, $this->chunk->source, $this->chunk->target, [] );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
         $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
-        $QA->setFeatureSet( $this->featureSet );
+        $QA->setFeatureSet( $featureSet );
         $QA->setSourceSegLang( $this->chunk->source );
         $QA->setTargetSegLang( $this->chunk->target );
         $QA->performConsistencyCheck();

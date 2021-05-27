@@ -432,7 +432,8 @@ class TMSService {
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
-        $Filter  = MateCatFilter::getInstance( $this->featureSet, $sourceLang, $targetLang, [] );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $Filter  = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [] );
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>

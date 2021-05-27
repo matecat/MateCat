@@ -139,7 +139,8 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
-        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target, [] );
+        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new \FeatureSet();
+        $filter     = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target, [] );
         $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];

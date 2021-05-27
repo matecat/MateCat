@@ -104,8 +104,10 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment = $this->id_segment;
         $translationStruct->id_job     = $this->id_job;
 
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $this->featureSet, $this->jobStruct->source, $this->jobStruct->target, [] );
+        $Filter = MateCatFilter::getInstance( $featureSet, $this->jobStruct->source, $this->jobStruct->target, [] );
         list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->segment, '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
