@@ -1,4 +1,7 @@
-class QualitySummaryTableOldRevise extends React.Component {
+import React from 'react'
+import _ from 'lodash'
+
+export class QualitySummaryTableOldRevise extends React.Component {
   constructor(props) {
     super(props)
     this.lqaNestedCategories = this.props.qualitySummary.get('categories')
@@ -83,14 +86,11 @@ class QualitySummaryTableOldRevise extends React.Component {
     this.totalWeight = 0
     this.lqaNestedCategories.forEach((cat, index) => {
       let catHtml = []
-      catHtml.push(
-        <div className="qr-element qr-issue-name">{cat.get('label')}</div>,
-      )
       let totalIssues = this.getIssuesForCategory(cat.get('id'))
       let catTotalWeightValue = 0,
         toleratedIssuesValue = 0,
         voteValue = ''
-      this.severities.forEach((currentSev) => {
+      this.severities.forEach((currentSev, i) => {
         let severityFound = cat.get('severities').filter((sev) => {
           return sev.get('label') === currentSev.get('label')
         })
@@ -106,12 +106,14 @@ class QualitySummaryTableOldRevise extends React.Component {
           toleratedIssuesValue = totalIssues.get('allowed')
           voteValue = totalIssues.get('vote')
           catHtml.push(
-            <div className="qr-element severity">
+            <div className="qr-element severity" key={`severity-${i}`}>
               {totalIssues.get('founds').get(currentSev.get('label'))}
             </div>,
           )
         } else {
-          catHtml.push(<div className="qr-element severity" />)
+          catHtml.push(
+            <div className="qr-element severity" key="severity-empty" />,
+          )
         }
       })
       let catTotalWeightHtml = (
@@ -138,6 +140,7 @@ class QualitySummaryTableOldRevise extends React.Component {
           className="qr-body-list"
           key={cat.get('id') + index + cat.get('label')}
         >
+          <div className="qr-element qr-issue-name">{cat.get('label')}</div>
           {catHtml}
           {catTotalWeightHtml}
           {toleratedIssuesHtml}
@@ -158,5 +161,3 @@ class QualitySummaryTableOldRevise extends React.Component {
     )
   }
 }
-
-export default QualitySummaryTableOldRevise
