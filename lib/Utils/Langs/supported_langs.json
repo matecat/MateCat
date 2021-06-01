@@ -52,6 +52,16 @@
     ,
         {
             "localized":[{
+                "en":"Arabic Egyptian"
+            }],
+            "isocode":"ar",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ar-EG"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Aragonese"
             }],
             "isocode":"an",
