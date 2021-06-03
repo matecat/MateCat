@@ -110,9 +110,9 @@ class Segment extends React.Component {
       UI.editStart = new Date()
       if (config.id_client) {
         SegmentActions.getGlossaryForSegment(
-            this.props.segment.sid,
-            this.props.fid,
-            this.props.segment.segment,
+          this.props.segment.sid,
+          this.props.fid,
+          this.props.segment.segment,
         )
       }
 
@@ -133,7 +133,6 @@ class Segment extends React.Component {
       !this.props.segment.opened
     ) {
       this.openSegment()
-
     }
   }
 
@@ -362,8 +361,7 @@ class Segment extends React.Component {
       this.props.segment.revision_number === 2
     ) {
       var props = {
-        text:
-          'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
+        text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
           APP.ModalWindow.onCloseModal()
@@ -478,9 +476,9 @@ class Segment extends React.Component {
   clientConnected = () => {
     if (this.props.segment.opened) {
       SegmentActions.getGlossaryForSegment(
-          this.props.segment.sid,
-          this.props.fid,
-          this.props.segment.segment,
+        this.props.segment.sid,
+        this.props.fid,
+        this.props.segment.segment,
       )
     }
   }
@@ -520,7 +518,7 @@ class Segment extends React.Component {
       this.forceUpdateSegment,
     )
     CatToolStore.addListener(
-        CatToolConstants.CLIENT_CONNECT,
+      CatToolConstants.CLIENT_CONNECT,
       this.clientConnected,
     )
 
@@ -567,8 +565,8 @@ class Segment extends React.Component {
       this.forceUpdateSegment,
     )
     CatToolStore.removeListener(
-        CatToolConstants.CLIENT_CONNECT,
-        this.clientConnected,
+      CatToolConstants.CLIENT_CONNECT,
+      this.clientConnected,
     )
     //Review
     SegmentStore.removeListener(
