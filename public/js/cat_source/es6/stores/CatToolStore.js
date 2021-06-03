@@ -19,7 +19,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     searchResultsDictionary: {},
     featuredSearchResult: 0,
     clientConnected: false,
-    clientId: undefined
+    clientId: undefined,
   },
   storeFilesInfo: function (files) {
     this.files = files
@@ -56,7 +56,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   storeSearchResult: function (data) {
     this.searchResults = data
   },
-  clientConnect: function ( clientId ) {
+  clientConnect: function (clientId) {
     this.clientConnected = true
     this.clientId = clientId
   },
@@ -113,7 +113,7 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.UPDATE_QR:
       CatToolStore.updateQR(action.qr)
-          break
+      break
     case CatToolConstants.CLIENT_CONNECT:
       CatToolStore.clientConnect(action.clientId)
       CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT)

@@ -331,7 +331,7 @@ class SubFilteringTest extends AbstractTest {
     public function testSprintf() {
 
         $channel = new Pipeline();
-        $channel->addLast( new \SubFiltering\Filters\SprintfToPH() );
+        $channel->addLast( new \SubFiltering\Filters\SprintfToPH('hu-HU','az-AZ') );
 
         $segment         = 'Legalább 10%-os befejezett foglalás 20%-dir VAGY';
         $seg_transformed = $channel->transform( $segment );
@@ -419,7 +419,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance( 'en-US','it-IT', $featureSet, $data_ref_map );
 
         $db_segment     = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
         $db_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
@@ -486,7 +486,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance( 'en-US','it-IT', $featureSet, $data_ref_map );
 
         $db_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
         $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
@@ -511,7 +511,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance( 'en-US','it-IT', $featureSet, $data_ref_map );
 
         $db_segment = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
         $db_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
@@ -548,7 +548,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance( 'en-US','it-IT', $featureSet, $data_ref_map );
 
         $db_segment     = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
         $db_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
@@ -584,7 +584,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance( 'en-US','it-IT', $featureSet, $data_ref_map );
 
         $expected_db_translation = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>';
         $l2_translation = 'Testo libero contenente <ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Xw=="/>corsivo<ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d1" equiv-text="base64:Xw=="/>';
@@ -605,7 +605,7 @@ class SubFilteringTest extends AbstractTest {
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $Filter = \SubFiltering\Filter::getInstance( $featureSet, $data_ref_map );
+        $Filter = \SubFiltering\Filter::getInstance('en-US','it-IT', $featureSet, $data_ref_map );
 
         $db_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
         $db_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
@@ -630,4 +630,32 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals($back_to_db_segment, $db_segment);
         $this->assertEquals($back_to_db_translation, $db_translation);
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPCFromLayer1ToLayer2() {
+        $data_ref_map = [
+            'd1' => '&lt;a rel="noopener" href="https://www.forbes.com/sites/johnkoetsier/2020/06/05/the-100-safest-countries-in-the-world-for-covid-19/#3f405ed468c5" target="_blank" title="read more" data-anchor="#3f405ed468c5"&gt;',
+            'd2' => '&lt;/a&gt;',
+        ];
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translated,mmt" );
+        $Filter = \SubFiltering\Filter::getInstance('en-US','ca-ES', $featureSet, $data_ref_map );
+
+        $l1_segment = '<ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d2" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/>';
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $expected_l2_segment = '&lt;ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d2" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/&gt;';
+
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_l1_segment =$Filter->fromLayer2ToLayer1($l1_segment);
+
+        $this->assertEquals($back_to_l1_segment, $l1_segment);
+    }
+
+
+
 }
