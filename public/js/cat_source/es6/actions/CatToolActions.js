@@ -1,12 +1,14 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+import $ from 'jquery'
+
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
 import Notifications from '../sse/sse'
-import Review_QualityReportButton from '../components/review/QualityReportButton'
+import {QualityReportButton} from '../components/review/QualityReportButton'
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
-import AnalyzeConstants from '../constants/AnalyzeConstants'
-import SegmentConstants from '../constants/SegmentConstants'
-import Footer from '../components/footer/Footer'
+import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 
 let CatToolActions = {
@@ -37,7 +39,7 @@ let CatToolActions = {
       state: state,
     })
   },
-  reloadSegmentFilter: function (segments, state) {
+  reloadSegmentFilter: function () {
     AppDispatcher.dispatch({
       actionType: CattolConstants.RELOAD_SEGMENT_FILTER,
     })
@@ -82,13 +84,19 @@ let CatToolActions = {
   startNotifications: function () {
     Notifications.start()
   },
+  clientConntected: function (clientId) {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.CLIENT_CONNECT,
+      clientId,
+    })
+  },
   renderQualityReportButton() {
     var revision_number = config.revisionNumber ? config.revisionNumber : '1'
     var qrParam = config.secondRevisionsCount
       ? '?revision_type=' + revision_number
       : ''
     window.quality_report_btn_component = ReactDOM.render(
-      React.createElement(Review_QualityReportButton, {
+      React.createElement(QualityReportButton, {
         vote: config.overall_quality_class,
         quality_report_href: config.quality_report_href + qrParam,
       }),
@@ -130,8 +138,7 @@ let CatToolActions = {
   renderFooter: function () {
     var mountPoint = $('footer.stats-foo')[0]
     ReactDOM.render(
-      React.createElement(Footer, {
-        cattool: true,
+      React.createElement(CattolFooter, {
         idProject: config.id_project,
         idJob: config.job_id,
         password: config.password,
@@ -201,9 +208,8 @@ let CatToolActions = {
         // };
         //
         // APP.addNotification(notification);
-        const isModalClosed = CommonUtils.getFromSessionStorage(
-          'feedback-modal',
-        )
+        const isModalClosed =
+          CommonUtils.getFromSessionStorage('feedback-modal')
         if (!isModalClosed) {
           CatToolActions.openFeedbackModal('', config.revisionNumber)
         }

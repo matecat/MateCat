@@ -62,7 +62,7 @@ export const activateGlossary = (
     let re
     try {
       const matches = _.map(glossaryObj, (elem) =>
-        elem[0].raw_segment ? elem[0].raw_segment : elem[0].segment,
+        elem.raw_segment ? elem.raw_segment : elem.segment,
       )
       const matchToExclude = findInclusiveMatches(matches)
       let matchToUse = []

@@ -49,7 +49,7 @@ class TmKeyManagement_TmKeyManagement {
      * @param   $user_role   string  A constant string of one of the following: TmKeyManagement_Filter::ROLE_TRANSLATOR, TmKeyManagement_Filter::ROLE_REVISOR
      * @param   $uid         int     The user ID, used to retrieve the personal keys
      *
-     * @return  array|mixed  An array of TmKeyManagement_TmKeyStruct objects
+     * @return  TmKeyManagement_TmKeyStruct[]  An array of TmKeyManagement_TmKeyStruct objects
      * @throws  Exception    Throws Exception if :<br/>
      *                   <ul>
      *                      <li>Json string is malformed</li>

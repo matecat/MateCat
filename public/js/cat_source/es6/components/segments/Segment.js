@@ -18,7 +18,8 @@ import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
-import CommentsStore from '../../stores/CommentsStore'
+import CatToolStore from '../../stores/CatToolStore'
+import CatToolConstants from '../../constants/CatToolConstants'
 
 import Immutable from 'immutable'
 
@@ -107,13 +108,14 @@ class Segment extends React.Component {
 
       /************/
       UI.editStart = new Date()
-      SegmentActions.getGlossaryForSegment(
-        this.props.segment.sid,
-        this.props.fid,
-        this.props.segment.segment,
-      )
+      if (config.id_client) {
+        SegmentActions.getGlossaryForSegment(
+          this.props.segment.sid,
+          this.props.fid,
+          this.props.segment.segment,
+        )
+      }
 
-      // window.location.hash = this.props.segment.sid;
       history.replaceState(
         null,
         null,
@@ -124,7 +126,6 @@ class Segment extends React.Component {
 
   openSegmentFromAction(sid) {
     sid = sid + ''
-    // clearTimeout(this.openSegmentTimeOut);
     if (
       (sid === this.props.segment.sid ||
         (this.props.segment.original_sid === sid &&
@@ -132,9 +133,6 @@ class Segment extends React.Component {
       !this.props.segment.opened
     ) {
       this.openSegment()
-      // this.openSegmentTimeOut = setTimeout( () => {
-      //     this.openSegment();
-      // });
     }
   }
 
@@ -237,10 +235,8 @@ class Segment extends React.Component {
       sid === -1 ||
       sid.split('-')[0] == this.props.segment.sid
     ) {
-      let self = this
       let classes = this.state.segment_classes.slice()
       if (newClass.indexOf(' ') > 0) {
-        let self = this
         let classesSplit = newClass.split(' ')
         _.forEach(classesSplit, function (item) {
           if (classes.indexOf(item) < 0) {
@@ -272,7 +268,6 @@ class Segment extends React.Component {
         }
       }
       if (className.indexOf(' ') > 0) {
-        let self = this
         let classesSplit = className.split(' ')
         _.forEach(classesSplit, function (item) {
           removeFn(item)
@@ -366,8 +361,7 @@ class Segment extends React.Component {
       this.props.segment.revision_number === 2
     ) {
       var props = {
-        text:
-          'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
+        text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
           APP.ModalWindow.onCloseModal()
@@ -479,6 +473,16 @@ class Segment extends React.Component {
     }
   }
 
+  clientConnected = () => {
+    if (this.props.segment.opened) {
+      SegmentActions.getGlossaryForSegment(
+        this.props.segment.sid,
+        this.props.fid,
+        this.props.segment.segment,
+      )
+    }
+  }
+
   forceUpdateSegment(sid) {
     if (this.props.segment.sid === sid) {
       this.forceUpdate()
@@ -512,6 +516,10 @@ class Segment extends React.Component {
     SegmentStore.addListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.CLIENT_CONNECT,
+      this.clientConnected,
     )
 
     //Review
@@ -555,6 +563,10 @@ class Segment extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
+    )
+    CatToolStore.removeListener(
+      CatToolConstants.CLIENT_CONNECT,
+      this.clientConnected,
     )
     //Review
     SegmentStore.removeListener(
