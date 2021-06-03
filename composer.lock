@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.183.4",
+            "version": "3.183.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "4bf2caf137d027328576bcbebc341dbd7ff21b85"
+                "reference": "cf9c877e799c43e22d0e0cbc840e91d1885b13b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4bf2caf137d027328576bcbebc341dbd7ff21b85",
-                "reference": "4bf2caf137d027328576bcbebc341dbd7ff21b85",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/cf9c877e799c43e22d0e0cbc840e91d1885b13b6",
+                "reference": "cf9c877e799c43e22d0e0cbc840e91d1885b13b6",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.4"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.7"
             },
-            "time": "2021-05-24T18:15:59+00:00"
+            "time": "2021-05-27T01:00:13+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.13",
+            "version": "v1.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "47c636cebf074a7bd6e66b5ab45c74e31227d933"
+                "reference": "d5ff07d8eca4212eb214859ff7bf5f4b781ce11b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/47c636cebf074a7bd6e66b5ab45c74e31227d933",
-                "reference": "47c636cebf074a7bd6e66b5ab45c74e31227d933",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/d5ff07d8eca4212eb214859ff7bf5f4b781ce11b",
+                "reference": "d5ff07d8eca4212eb214859ff7bf5f4b781ce11b",
                 "shasum": ""
             },
             "require": {
@@ -750,9 +750,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/whole-text-finder/issues",
-                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.13"
+                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.14"
             },
-            "time": "2020-12-02T14:48:07+00:00"
+            "time": "2021-05-27T16:45:20+00:00"
         },
         {
             "name": "matecat/xliff-parser",
