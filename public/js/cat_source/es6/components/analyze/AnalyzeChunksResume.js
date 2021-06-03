@@ -246,6 +246,9 @@ class AnalyzeChunksResume extends React.Component {
                   <div className="title-total-words ttw">
                     <div>{chunk.total_raw_word_count_print}</div>
                   </div>
+                  <div className="title-standard-words tsw">
+                    <div>{chunkAnalysis.get('standard_word_count').get(1)}</div>
+                  </div>
                   <div
                     className="title-matecat-words tmw"
                     ref={(container) =>
@@ -411,6 +414,10 @@ class AnalyzeChunksResume extends React.Component {
                       {/*<div className="cell-label">Total words:</div>*/}
                       <div>{total_raw}</div>
                     </div>
+                    <div className="title-standard-words tsw">
+                      {/*<div className="cell-label">Other CAT tool</div>*/}
+                      <div>{total_standard}</div>
+                    </div>
                     <div
                       className="title-matecat-words tmw"
                       ref={(container) =>
@@ -492,6 +499,9 @@ class AnalyzeChunksResume extends React.Component {
                 </div>
                 <div className="titles-compare">
                   <div className="title-total-words ttw">
+                    <div>0</div>
+                  </div>
+                  <div className="title-standard-words tsw">
                     <div>0</div>
                   </div>
                   <div className="title-matecat-words tmw">
@@ -580,6 +590,14 @@ class AnalyzeChunksResume extends React.Component {
                   <h5>Total character count</h5>
                 </div>
               )}
+              <div className="title-standard-words">
+                <h5>
+                  Industry weighted
+                  <span data-tooltip="As counted by other CAT tools">
+                    <i className="icon-info icon" />
+                  </span>
+                </h5>
+              </div>
               <div className="title-matecat-words">
                 <h5>MateCat weighted</h5>
               </div>
