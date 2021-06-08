@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.183.12",
+            "version": "3.183.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "ee5225729f6428870b5168576b0450c0bb668976"
+                "reference": "5664b49a3338acb1dac095778f4136bd1e514d7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ee5225729f6428870b5168576b0450c0bb668976",
-                "reference": "ee5225729f6428870b5168576b0450c0bb668976",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5664b49a3338acb1dac095778f4136bd1e514d7d",
+                "reference": "5664b49a3338acb1dac095778f4136bd1e514d7d",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.12"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.14"
             },
-            "time": "2021-06-03T18:12:48+00:00"
+            "time": "2021-06-07T18:19:21+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "3806072ab8e302cc493208c332fb9ae161d502cd"
+                "reference": "8dfdbe8f4d174e029fd0556c8410725c46ce0031"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/3806072ab8e302cc493208c332fb9ae161d502cd",
-                "reference": "3806072ab8e302cc493208c332fb9ae161d502cd",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/8dfdbe8f4d174e029fd0556c8410725c46ce0031",
+                "reference": "8dfdbe8f4d174e029fd0556c8410725c46ce0031",
                 "shasum": ""
             },
             "require": {
@@ -753,9 +753,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.0.1"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.0.2"
             },
-            "time": "2021-06-04T07:24:21+00:00"
+            "time": "2021-06-08T15:24:11+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
