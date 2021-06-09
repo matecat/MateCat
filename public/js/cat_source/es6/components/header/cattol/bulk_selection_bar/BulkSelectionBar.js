@@ -1,28 +1,21 @@
 import React from 'react'
+import classnames from 'classnames'
+
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
+import SegmentActions from '../../../../actions/SegmentActions'
 
-class BulkSelectionBar extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      count: 0,
-      segmentsArray: [],
-      changingStatus: false,
-    }
-
-    this.countInBulkElements = this.countInBulkElements.bind(this)
-    this.setSegmentsinBulk = this.setSegmentsinBulk.bind(this)
-    this.toggleSegment = this.toggleSegment.bind(this)
-    this.removeAll = this.removeAll.bind(this)
-    this.onClickBulk = this.onClickBulk.bind(this)
-    this.onClickBack = this.onClickBack.bind(this)
+export class BulkSelectionBar extends React.Component {
+  state = {
+    count: 0,
+    segmentsArray: [],
+    changingStatus: false,
   }
 
-  countInBulkElements(segments) {
+  countInBulkElements = (segments) => {
     let segmentsArray = this.state.segmentsArray
     if (segments && segments.size > 0) {
-      segments.map(function (segment) {
+      segments.map((segment) => {
         let index = segmentsArray.indexOf(segment.get('sid'))
         if (segment.get('inBulk') && index === -1) {
           segmentsArray.push(segment.get('sid'))
@@ -31,12 +24,14 @@ class BulkSelectionBar extends React.Component {
         }
       })
     }
+
     this.setState({
       count: segmentsArray.length,
       segmentsArray: segmentsArray,
     })
   }
-  setSegmentsinBulk(segments) {
+
+  setSegmentsinBulk = (segments) => {
     let segmentsArray = segments
 
     this.setState({
@@ -44,13 +39,15 @@ class BulkSelectionBar extends React.Component {
       segmentsArray: segmentsArray,
     })
   }
-  removeAll() {
+
+  removeAll = () => {
     this.setState({
       count: 0,
       segmentsArray: [],
     })
   }
-  toggleSegment(sid) {
+
+  toggleSegment = (sid) => {
     let index = this.state.segmentsArray.indexOf(sid)
     let array = this.state.segmentsArray.slice(0)
     if (index > -1) {
@@ -63,36 +60,36 @@ class BulkSelectionBar extends React.Component {
       segmentsArray: array,
     })
   }
-  onClickBack() {
+
+  onClickBack = () => {
     SegmentActions.removeSegmentsOnBulk()
     this.setState({
       changingStatus: false,
     })
   }
 
-  onClickBulk() {
+  onClickBulk = () => {
     this.setState({
       changingStatus: true,
     })
+
     if (this.props.isReview) {
       SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
-        (response) => {
+        () => {
           this.onClickBack()
           UI.reloadQualityReport()
         },
       )
     } else {
       SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
-        (response) => {
+        () => {
           this.onClickBack()
         },
       )
     }
-    // SegmentActions.closeSegment(UI.currentSegmentId);
   }
 
   componentDidMount() {
-    // SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.countInBulkElements);
     SegmentStore.addListener(
       SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
       this.toggleSegment,
@@ -108,7 +105,6 @@ class BulkSelectionBar extends React.Component {
   }
 
   componentWillUnmount() {
-    // SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.countInBulkElements);
     SegmentStore.removeListener(
       SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
       this.toggleSegment,
@@ -124,16 +120,21 @@ class BulkSelectionBar extends React.Component {
   }
 
   render() {
+    const {isReview} = this.props
+    const {count, changingStatus} = this.state
+
     let buttonClass = classnames({
       'ui button approve-all-segments': true,
-      'translated-all-bulked': !this.props.isReview,
-      'approved-all-bulked': this.props.isReview,
+      'translated-all-bulked': !isReview,
+      'approved-all-bulked': isReview,
       'approved-2nd-pass':
-        config.secondRevisionsCount &&
-        config.revisionNumber &&
-        config.revisionNumber === 2,
+        config.secondRevisionsCount && config.revisionNumber === 2,
     })
-    return this.state.count > 0 ? (
+
+    console.log(this.props)
+    console.log(this.state)
+
+    return count == 0 ? null : (
       <div className="bulk-approve-bar">
         <div className="bulk-back-info">
           <div className="bulk-back">
@@ -142,18 +143,19 @@ class BulkSelectionBar extends React.Component {
               <i className="icon-arrow-left2 icon" /> back
             </button>
           </div>
-          {this.state.count === 1 ? (
+
+          {count === 1 ? (
             <div className="bulk-info">
-              <b>{this.state.count} Segment selected</b>
+              <b>{count} Segment selected</b>
             </div>
           ) : (
             <div className="bulk-info">
-              <b>{this.state.count} Segments selected</b>
+              <b>{count} Segments selected</b>
             </div>
           )}
         </div>
 
-        {this.state.changingStatus ? (
+        {changingStatus ? (
           <div className="bulk-activity-icons">
             <div className="label-filters labl">
               Applying changes
@@ -164,13 +166,11 @@ class BulkSelectionBar extends React.Component {
           <div className="bulk-activity-icons">
             <button className={buttonClass} onClick={this.onClickBulk}>
               <i className="icon-checkmark5 icon" />{' '}
-              {this.props.isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
+              {isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
             </button>
           </div>
         )}
       </div>
-    ) : null
+    )
   }
 }
-
-export default BulkSelectionBar
