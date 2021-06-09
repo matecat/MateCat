@@ -61,17 +61,6 @@ module.exports = function (grunt) {
      * the entry point js file.
      */
     browserify: {
-      libs: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [basePath + 'cat_source/es6/react-libs.js'],
-        dest: buildPath + 'react.js',
-      },
       components: {
         options: {
           transform: [babelifyTransform],
@@ -80,7 +69,10 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [basePath + 'cat_source/es6/*.js'],
+        src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+        ],
         dest: buildPath + 'cat-react.js',
       },
       qualityReport: {
@@ -472,7 +464,6 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundle:js', [
-    'browserify:libs',
     'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
@@ -496,7 +487,6 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundleDev:js', [
-    'browserify:libs',
     'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
