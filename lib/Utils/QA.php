@@ -1678,24 +1678,9 @@ class QA {
         // so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
-            // CJK need special handling
-            if(CatUtils::isCJK($this->target_seg_lang)){
-
-                // get last char (excluding tags)
-                $this->target_seg = rtrim( $this->target_seg );
-                $lastChar = CatUtils::getLastCharacter($this->target_seg);
-
-                // Append a space to target for normalization ONLY if $lastChar
-                // is not a special terminate char
-                if(!in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
-
-                    $this->target_seg .= $source_tags[ 1 ][ 0 ];
-
-                    $this->_addError(self::ERR_BOUNDARY_TAIL);
-                }
-            } else {
-                // Append a space to target for normalization.
-                // We can't use $source_tags[ 1 ][ 0 ] because for CJK is not a space
+            // Append a space to target for normalization
+            // only if target is NOT a CJK language
+            if(false === CatUtils::isCJK($this->target_seg_lang)){
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
 
