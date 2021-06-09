@@ -101,11 +101,7 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [
-          basePath + 'cat_source/es6/components/quality_report/*.js',
-          basePath + 'cat_source/es6/ajax_utils/quality_report/*.js',
-          basePath + 'cat_source/es6/utils/textUtils.js',
-        ],
+        src: `${basePath}cat_source/es6/components/quality_report/QualityReport.js`,
         dest: buildPath + 'qa-report.js',
       },
     },
@@ -432,7 +428,7 @@ module.exports = function (grunt) {
         dest: buildPath + 'app.js',
         replacements: [
           {
-            from: /this\.version \= \'(.*?)\'/gi,
+            from: /this\.version = '(.*?)'/gi,
             to: 'this.version = "' + version + '"',
           },
         ],
