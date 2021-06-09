@@ -101,7 +101,7 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: `${basePath}cat_source/es6/components/quality_report/*.js`,
+        src: `${basePath}cat_source/es6/components/quality_report/QualityReport.js`,
         dest: buildPath + 'qa-report.js',
       },
     },
