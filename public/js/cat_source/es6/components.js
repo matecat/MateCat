@@ -25,7 +25,7 @@ window.CommentsActions = require('./actions/CommentsActions')
 
 window.ProjectsStore = require('./stores/ProjectsStore')
 window.TeamsStore = require('./stores/TeamsStore')
-window.SegmentStore = require('./stores/SegmentStore')
+window.SegmentStore = require('./stores/SegmentStore').default
 window.CatToolStore = require('./stores/CatToolStore')
 
 window.ProjectsContainer =

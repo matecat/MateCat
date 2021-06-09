@@ -1,12 +1,14 @@
-import {render, screen} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import React from 'react'
 
 import {BulkSelectionBar} from './BulkSelectionBar'
 
-test('renders properly', () => {
+test('renders properly', async () => {
   global.config = {}
 
-  render(<BulkSelectionBar isReview />)
+  render(<BulkSelectionBar />)
 
-  screen.debug()
+  await waitFor(() => {
+    expect(screen.getByText('back')).toBeVisible()
+  })
 })

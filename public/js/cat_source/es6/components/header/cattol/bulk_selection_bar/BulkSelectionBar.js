@@ -32,11 +32,9 @@ export class BulkSelectionBar extends React.Component {
   }
 
   setSegmentsinBulk = (segments) => {
-    let segmentsArray = segments
-
     this.setState({
-      count: segmentsArray.length,
-      segmentsArray: segmentsArray,
+      count: segments.length,
+      segmentsArray: segments,
     })
   }
 
