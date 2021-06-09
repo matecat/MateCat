@@ -39,7 +39,7 @@ module.exports = {
         ecmaVersion: browserEcmaVersion,
         ecmaFeatures: {jsx: true},
       },
-      extends: ['plugin:react/recommended'],
+      extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
       settings: {
         react: {version: '16.9'},
       },
