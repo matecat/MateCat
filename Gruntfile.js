@@ -36,6 +36,11 @@ const cssWatchFilesUploadPage = [
 ]
 const cssWatchManage = [cssBase + 'sass/commons/*']
 
+const babelifyTransform = [
+  'babelify',
+  {presets: ['@babel/preset-react', ['@babel/preset-env']]},
+]
+
 module.exports = function (grunt) {
   const conf = grunt.file.read(incPath + 'version.ini')
   const version = conf
@@ -58,12 +63,7 @@ module.exports = function (grunt) {
     browserify: {
       libs: {
         options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
+          transform: [babelifyTransform],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
           },
@@ -74,12 +74,7 @@ module.exports = function (grunt) {
       },
       components: {
         options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
+          transform: [babelifyTransform],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
           },
@@ -90,12 +85,7 @@ module.exports = function (grunt) {
       },
       qualityReport: {
         options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
+          transform: [babelifyTransform],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
           },
@@ -110,12 +100,7 @@ module.exports = function (grunt) {
       },
       manage: {
         options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
+          transform: [babelifyTransform],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
           },
