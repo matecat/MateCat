@@ -62,7 +62,7 @@ class Signup {
 
         $this->__doValidation() ;
 
-        if ( isset( $this->user->uid ) ) {
+        if ( $this->__userAlreadyExists() ) {
             $this->__updatePersistedUser() ;
             Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
         } else {
@@ -75,7 +75,12 @@ class Signup {
         }
 
         $this->__saveWantedUrl();
-        $this->__sendConfirmationRequestEmail();
+
+        // send confirmation email only if
+        // user is not active
+        if(!$this->__userAlreadyExistsAndIsActive()){
+            $this->__sendConfirmationRequestEmail();
+        }
     }
 
     public function getError() {
@@ -107,6 +112,24 @@ class Signup {
         $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
     }
 
+    /**
+     * Check if a user already exists
+     *
+     * @return bool
+     */
+    private function __userAlreadyExists(){
+        return isset( $this->user->uid);
+    }
+
+    /**
+     * Check if a user already exists AND is active
+     *
+     * @return bool
+     */
+    private function __userAlreadyExistsAndIsActive(){
+        return ( isset( $this->user->uid) and null !== $this->user->email_confirmed_at );
+    }
+
 
     private function __doValidation() {
         $dao = new \Users_UserDao() ;
@@ -114,10 +137,6 @@ class Signup {
 
         if ( $persisted ) {
             $this->user = $persisted ;
-        }
-
-        if ( $persisted && !is_null($persisted->email_confirmed_at) ) {
-            throw new ValidationError('User with same email already exists');
         }
 
         \Users_UserValidator::validatePassword( $this->params['password'] ) ;

@@ -2203,14 +2203,17 @@ class ProjectManager {
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
 
-                // persist original data map if present
-                Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
+                // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
+                // to allow the correct tag handling by the plugins
+                $map = $this->features->filter('sanitizeOriginalDataMap', $segmentOriginalDataStruct->map);
 
-                // correct Uber tag errors here
+                // persist original data map if present
+                Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $map );
+
                 $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment = $this->features->filter(
                         'correctTagErrors',
                         $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
-                        $segmentOriginalDataStruct->map
+                        $map
                 );
             }
 
