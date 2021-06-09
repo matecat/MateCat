@@ -103,7 +103,7 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
-          basePath + 'cat_source/es6/components/projects/*.js',
+          basePath + 'cat_source/es6/components/projects/Dashboard.js',
           basePath + 'cat_source/es6/components.js',
         ],
         dest: buildPath + 'manage-components.js',
