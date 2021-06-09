@@ -1,4 +1,7 @@
 import React from 'react'
+import $ from 'jquery'
+import _ from 'lodash'
+
 import CatToolConstants from '../../../constants/CatToolConstants'
 import CatToolStore from '../../../stores/CatToolStore'
 import {BulkSelectionBar} from './bulk_selection_bar/BulkSelectionBar'
@@ -9,35 +12,29 @@ import SegmentConstants from '../../../constants/SegmentConstants'
 import SegmentStore from '../../../stores/SegmentStore'
 
 class SubHeaderContainer extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      selectionBar: true,
-      search: false,
-      segmentFilter: false,
-      qaComponent: false,
-      totalWarnings: 0,
-      warnings: {
-        ERROR: {
-          Categories: {},
-          total: 0,
-        },
-        WARNING: {
-          Categories: {},
-          total: 0,
-        },
-        INFO: {
-          Categories: {},
-          total: 0,
-        },
+  state = {
+    selectionBar: true,
+    search: false,
+    segmentFilter: false,
+    qaComponent: false,
+    totalWarnings: 0,
+    warnings: {
+      ERROR: {
+        Categories: {},
+        total: 0,
       },
-    }
-    this.closeSubHeader = this.closeSubHeader.bind(this)
-    this.toggleContainer = this.toggleContainer.bind(this)
-    this.showContainer = this.showContainer.bind(this)
-    this.receiveGlobalWarnings = this.receiveGlobalWarnings.bind(this)
+      WARNING: {
+        Categories: {},
+        total: 0,
+      },
+      INFO: {
+        Categories: {},
+        total: 0,
+      },
+    },
   }
-  showContainer(container) {
+
+  showContainer = (container) => {
     switch (container) {
       case 'search':
         this.setState({
@@ -62,7 +59,7 @@ class SubHeaderContainer extends React.Component {
         break
     }
   }
-  toggleContainer(container) {
+  toggleContainer = (container) => {
     switch (container) {
       case 'search':
         this.setState({
@@ -87,7 +84,7 @@ class SubHeaderContainer extends React.Component {
         break
     }
   }
-  updateIcon(total, warnings) {
+  updateIcon = (total, warnings) => {
     if (total > 0) {
       if (warnings.ERROR.total > 0) {
         $('#notifbox')
@@ -121,14 +118,41 @@ class SubHeaderContainer extends React.Component {
         .text('')
     }
   }
-
-  closeSubHeader() {
+  closeSubHeader = () => {
     this.setState({
       search: false,
       segmentFilter: false,
       qaComponent: false,
     })
   }
+
+  receiveGlobalWarnings = (warnings) => {
+    let totalWarnings = []
+    if (warnings.lexiqa && warnings.lexiqa.length > 0) {
+      warnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings.lexiqa)
+    }
+    Object.keys(warnings.matecat).map((key) => {
+      let totalCategoryWarnings = []
+      Object.keys(warnings.matecat[key].Categories).map((key2) => {
+        totalCategoryWarnings.push(...warnings.matecat[key].Categories[key2])
+        totalWarnings.push(...warnings.matecat[key].Categories[key2])
+      })
+      warnings.matecat[key].total = totalCategoryWarnings.filter(
+        (value, index, self) => {
+          return self.indexOf(value) === index
+        },
+      ).length
+    })
+    let tot = totalWarnings.filter((value, index, self) => {
+      return self.indexOf(value) === index
+    }).length
+    this.updateIcon(tot, warnings.matecat)
+    this.setState({
+      warnings: warnings.matecat,
+      totalWarnings: tot,
+    })
+  }
+
   componentDidMount() {
     CatToolStore.addListener(
       CatToolConstants.SHOW_CONTAINER,
@@ -167,53 +191,30 @@ class SubHeaderContainer extends React.Component {
     )
   }
 
-  receiveGlobalWarnings(warnings) {
-    let totalWarnings = []
-    if (warnings.lexiqa && warnings.lexiqa.length > 0) {
-      warnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings.lexiqa)
-    }
-    Object.keys(warnings.matecat).map((key) => {
-      let totalCategoryWarnings = []
-      Object.keys(warnings.matecat[key].Categories).map((key2) => {
-        totalCategoryWarnings.push(...warnings.matecat[key].Categories[key2])
-        totalWarnings.push(...warnings.matecat[key].Categories[key2])
-      })
-      warnings.matecat[key].total = totalCategoryWarnings.filter(
-        (value, index, self) => {
-          return self.indexOf(value) === index
-        },
-      ).length
-    })
-    let tot = totalWarnings.filter((value, index, self) => {
-      return self.indexOf(value) === index
-    }).length
-    this.updateIcon(tot, warnings.matecat)
-    this.setState({
-      warnings: warnings.matecat,
-      totalWarnings: tot,
-    })
-  }
-
   render() {
+    const {filtersEnabled} = this.props
+    const {search, segmentFilter, qaComponent, warnings, totalWarnings} =
+      this.state
+
     return (
       <div>
         <Search
-          active={this.state.search}
+          active={search}
           isReview={config.isReview}
           searchable_statuses={config.searchable_statuses}
         />
-        {this.props.filtersEnabled ? (
-          <SegmentsFilter
-            active={this.state.segmentFilter}
-            isReview={config.isReview}
-          />
+
+        {filtersEnabled ? (
+          <SegmentsFilter active={segmentFilter} isReview={config.isReview} />
         ) : null}
+
         <QaComponent
-          active={this.state.qaComponent}
+          active={qaComponent}
           isReview={config.isReview}
-          warnings={this.state.warnings}
-          totalWarnings={this.state.totalWarnings}
+          warnings={warnings}
+          totalWarnings={totalWarnings}
         />
+
         <BulkSelectionBar isReview={config.isReview} />
       </div>
     )

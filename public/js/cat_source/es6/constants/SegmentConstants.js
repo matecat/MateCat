@@ -4,7 +4,7 @@
 
 import keyMirror from 'keymirror'
 
-module.exports = keyMirror({
+export default keyMirror({
   RENDER_SEGMENTS: null,
   ADD_SEGMENTS: null,
   ADD_SEGMENT_CLASS: null,

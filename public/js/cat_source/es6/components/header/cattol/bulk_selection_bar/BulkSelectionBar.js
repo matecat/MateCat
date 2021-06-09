@@ -129,9 +129,6 @@ export class BulkSelectionBar extends React.Component {
         config.secondRevisionsCount && config.revisionNumber === 2,
     })
 
-    console.log(this.props)
-    console.log(this.state)
-
     return count == 0 ? null : (
       <div className="bulk-approve-bar">
         <div className="bulk-back-info">
