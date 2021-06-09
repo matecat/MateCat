@@ -1213,4 +1213,4 @@ const SegmentActions = {
   },
 }
 
-module.exports = SegmentActions
+export default SegmentActions

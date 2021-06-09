@@ -1,7 +1,7 @@
 import React from 'react'
 import CatToolConstants from '../../../constants/CatToolConstants'
 import CatToolStore from '../../../stores/CatToolStore'
-import SegmentSelectionPanel from './bulk_selection_bar/BulkSelectionBar'
+import {BulkSelectionBar} from './bulk_selection_bar/BulkSelectionBar'
 import SegmentsFilter from './segment_filter/SegmentsFilter'
 import Search from './search/Search'
 import QaComponent from './QAComponent'
@@ -214,10 +214,7 @@ class SubHeaderContainer extends React.Component {
           warnings={this.state.warnings}
           totalWarnings={this.state.totalWarnings}
         />
-        <SegmentSelectionPanel
-          active={this.state.selectionBar}
-          isReview={config.isReview}
-        />
+        <BulkSelectionBar isReview={config.isReview} />
       </div>
     )
   }

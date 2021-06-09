@@ -20,7 +20,7 @@ window.TeamsActions = require('./actions/TeamsActions')
 window.ModalsActions = require('./actions/ModalsActions')
 window.OutsourceActions = require('./actions/OutsourceActions')
 window.CatToolActions = require('./actions/CatToolActions')
-window.SegmentActions = require('./actions/SegmentActions')
+window.SegmentActions = require('./actions/SegmentActions').default
 window.CommentsActions = require('./actions/CommentsActions')
 
 window.ProjectsStore = require('./stores/ProjectsStore')
