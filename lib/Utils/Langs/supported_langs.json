@@ -2195,6 +2195,17 @@
             "isocode":"ta",
             "enabled":true,
             "rtl":false,
+            "languageRegionCode":"ta-IN",
+            "rfc3066code":"ta-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Tamil Sri Lanka"
+            }],
+            "isocode":"ta",
+            "enabled":true,
+            "rtl":false,
             "languageRegionCode":"ta-LK",
             "rfc3066code":"ta-LK"
         }
