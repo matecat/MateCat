@@ -56,22 +56,6 @@ module.exports = function (grunt) {
      * the entry point js file.
      */
     browserify: {
-      libs: {
-        options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [basePath + 'cat_source/es6/react-libs.js'],
-        dest: buildPath + 'react.js',
-      },
       components: {
         options: {
           transform: [
@@ -85,7 +69,10 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [basePath + 'cat_source/es6/*.js'],
+        src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+        ],
         dest: buildPath + 'cat-react.js',
       },
       qualityReport: {
@@ -101,11 +88,7 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [
-          basePath + 'cat_source/es6/components/quality_report/*.js',
-          basePath + 'cat_source/es6/ajax_utils/quality_report/*.js',
-          basePath + 'cat_source/es6/utils/textUtils.js',
-        ],
+        src: `${basePath}cat_source/es6/components/quality_report/QualityReport.js`,
         dest: buildPath + 'qa-report.js',
       },
     },
@@ -432,7 +415,7 @@ module.exports = function (grunt) {
         dest: buildPath + 'app.js',
         replacements: [
           {
-            from: /this\.version \= \'(.*?)\'/gi,
+            from: /this\.version = '(.*?)'/gi,
             to: 'this.version = "' + version + '"',
           },
         ],
@@ -474,7 +457,6 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundle:js', [
-    'browserify:libs',
     'browserify:components',
     'browserify:qualityReport',
     'concat:libs',
@@ -497,7 +479,6 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundleDev:js', [
-    'browserify:libs',
     'browserify:components',
     'browserify:qualityReport',
     'concat:libs',
