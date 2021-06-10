@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.183.15",
+            "version": "3.184.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "ca0865f4aed816dd54c2101acc32cd4daa176b09"
+                "reference": "d5fa8bc58a90947cdcd08efa3f306422debaffc6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ca0865f4aed816dd54c2101acc32cd4daa176b09",
-                "reference": "ca0865f4aed816dd54c2101acc32cd4daa176b09",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d5fa8bc58a90947cdcd08efa3f306422debaffc6",
+                "reference": "d5fa8bc58a90947cdcd08efa3f306422debaffc6",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.15"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.184.0"
             },
-            "time": "2021-06-08T18:14:14+00:00"
+            "time": "2021-06-09T18:25:48+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -215,16 +215,16 @@
         },
         {
             "name": "google/apiclient",
-            "version": "v2.9.1",
+            "version": "v2.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client.git",
-                "reference": "2fb6e702aca5d68203fa737f89f6f774022494c6"
+                "reference": "e9ef4c26a044b8d39a46bcf296be795fe24a1849"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/2fb6e702aca5d68203fa737f89f6f774022494c6",
-                "reference": "2fb6e702aca5d68203fa737f89f6f774022494c6",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/e9ef4c26a044b8d39a46bcf296be795fe24a1849",
+                "reference": "e9ef4c26a044b8d39a46bcf296be795fe24a1849",
                 "shasum": ""
             },
             "require": {
@@ -239,7 +239,7 @@
             },
             "require-dev": {
                 "cache/filesystem-adapter": "^0.3.2|^1.1",
-                "composer/composer": "^1.10",
+                "composer/composer": "^1.10.22",
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
                 "phpcompatibility/php-compatibility": "^9.2",
                 "phpunit/phpunit": "^5.7||^8.5.13",
@@ -278,9 +278,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client/issues",
-                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.9.1"
+                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.9.2"
             },
-            "time": "2021-01-19T17:48:59+00:00"
+            "time": "2021-06-09T22:15:08+00:00"
         },
         {
             "name": "google/apiclient-services",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.0.3",
+            "version": "v1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "e0acda74190752412dbb7aafaa3a058ac53427b8"
+                "reference": "ee86a699dd349a24a53b404064b9598f254386db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/e0acda74190752412dbb7aafaa3a058ac53427b8",
-                "reference": "e0acda74190752412dbb7aafaa3a058ac53427b8",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/ee86a699dd349a24a53b404064b9598f254386db",
+                "reference": "ee86a699dd349a24a53b404064b9598f254386db",
                 "shasum": ""
             },
             "require": {
@@ -753,9 +753,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.0.3"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.0.4"
             },
-            "time": "2021-06-09T14:37:26+00:00"
+            "time": "2021-06-10T10:47:43+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
