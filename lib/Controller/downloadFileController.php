@@ -846,11 +846,11 @@ class downloadFileController extends downloadController {
                         //
                         // If the zip contains xliff files we have for example:
                         //
-                        // prova.sdlxliff.xlf
+                        // test.sdlxliff.xlf
                         //
                         // And we can't use the regex /\.xlf|\.xliff|\.sdlxliff$/, because in this case we obtain:
                         //
-                        // prova
+                        // test
                         //
                         // (the regex trimmed out .sdlxliff.xlf)
                         //
