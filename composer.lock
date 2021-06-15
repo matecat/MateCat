@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.184.0",
+            "version": "3.184.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d5fa8bc58a90947cdcd08efa3f306422debaffc6"
+                "reference": "2e1e8544258ea1a8f6c6ccaf651c8b5830a03a03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d5fa8bc58a90947cdcd08efa3f306422debaffc6",
-                "reference": "d5fa8bc58a90947cdcd08efa3f306422debaffc6",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2e1e8544258ea1a8f6c6ccaf651c8b5830a03a03",
+                "reference": "2e1e8544258ea1a8f6c6ccaf651c8b5830a03a03",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.184.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.184.3"
             },
-            "time": "2021-06-09T18:25:48+00:00"
+            "time": "2021-06-14T18:18:58+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "ee86a699dd349a24a53b404064b9598f254386db"
+                "reference": "c53ff9da28185e81d6816cee854c6089655161cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/ee86a699dd349a24a53b404064b9598f254386db",
-                "reference": "ee86a699dd349a24a53b404064b9598f254386db",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/c53ff9da28185e81d6816cee854c6089655161cf",
+                "reference": "c53ff9da28185e81d6816cee854c6089655161cf",
                 "shasum": ""
             },
             "require": {
@@ -753,9 +753,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.0.4"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.0.5"
             },
-            "time": "2021-06-10T10:47:43+00:00"
+            "time": "2021-06-15T09:49:13+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1270,16 +1270,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.8",
+            "version": "3.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "d9615a6fb970d9933866ca8b4036ec3407b020b6"
+                "reference": "a127a5133804ff2f47ae629dd529b129da616ad7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d9615a6fb970d9933866ca8b4036ec3407b020b6",
-                "reference": "d9615a6fb970d9933866ca8b4036ec3407b020b6",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/a127a5133804ff2f47ae629dd529b129da616ad7",
+                "reference": "a127a5133804ff2f47ae629dd529b129da616ad7",
                 "shasum": ""
             },
             "require": {
@@ -1361,7 +1361,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.8"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.9"
             },
             "funding": [
                 {
@@ -1377,7 +1377,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-19T03:20:48+00:00"
+            "time": "2021-06-14T06:54:45+00:00"
         },
         {
             "name": "phptal/phptal",

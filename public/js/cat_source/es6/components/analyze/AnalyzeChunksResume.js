@@ -392,9 +392,8 @@ class AnalyzeChunksResume extends React.Component {
                         readOnly
                         value={this.getUrl(chunkJob)}
                         ref={(el) =>
-                          (this.jobLinkRef[
-                            this.props.jobsInfo[indexJob].jid
-                          ] = el)
+                          (this.jobLinkRef[this.props.jobsInfo[indexJob].jid] =
+                            el)
                         }
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -422,9 +421,8 @@ class AnalyzeChunksResume extends React.Component {
                     <div
                       className="title-matecat-words tmw"
                       ref={(container) =>
-                        (this.containers[
-                          this.props.jobsInfo[indexJob].jid
-                        ] = container)
+                        (this.containers[this.props.jobsInfo[indexJob].jid] =
+                          container)
                       }
                     >
                       {/*<div className="cell-label" >Weighted words:</div>*/}

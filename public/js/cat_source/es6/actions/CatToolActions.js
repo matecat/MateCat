@@ -1,10 +1,11 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
+import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
 import Notifications from '../sse/sse'
-import Review_QualityReportButton from '../components/review/QualityReportButton'
+import {QualityReportButton} from '../components/review/QualityReportButton'
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import {CattolFooter} from '../components/footer/CattoolFooter'
@@ -95,7 +96,7 @@ let CatToolActions = {
       ? '?revision_type=' + revision_number
       : ''
     window.quality_report_btn_component = ReactDOM.render(
-      React.createElement(Review_QualityReportButton, {
+      React.createElement(QualityReportButton, {
         vote: config.overall_quality_class,
         quality_report_href: config.quality_report_href + qrParam,
       }),

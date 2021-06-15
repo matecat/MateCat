@@ -39,6 +39,8 @@ class GlossaryWorker extends AbstractWorker {
             throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
 
+        $this->_checkDatabaseConnection();
+
         $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
 
         $this->{$action}( $payload );
