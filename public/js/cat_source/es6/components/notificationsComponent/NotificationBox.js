@@ -15,6 +15,7 @@
  * dismissable      (Boolean, Default true) If show or not the button to close the notification
  * timer            (Number, Default 700) The timer to auto dismiss the notification
  */
+import React from 'react'
 
 import NotificationItem from './NotificationItem'
 

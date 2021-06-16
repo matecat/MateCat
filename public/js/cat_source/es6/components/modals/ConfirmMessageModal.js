@@ -1,49 +1,58 @@
+import React from 'react'
 import PropTypes from 'prop-types'
 
+const allowHTML = (__html) => ({__html})
+
 class ConfirmMessageModal extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
-  allowHTML(string) {
-    return {__html: string}
-  }
-
   render() {
+    const {
+      modalName,
+      text,
+      cancelCallback,
+      cancelText,
+      warningCallback,
+      warningText,
+      successCallback,
+      successText,
+    } = this.props
+
     return (
       <div className="message-modal">
         <div className="matecat-modal-middle">
-          <div className={'ui one column grid ' + this.props.modalName}>
+          <div className={'ui one column grid ' + modalName}>
             <div className="column left aligned" style={{fontSize: '18px'}}>
-              <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
+              <p dangerouslySetInnerHTML={allowHTML(text)} />
             </div>
+
             <div className="column right aligned">
-              {this.props.cancelCallback ? (
+              {cancelCallback ? (
                 <div
                   className="ui button cancel-button"
-                  onClick={this.props.cancelCallback}
+                  onClick={cancelCallback}
                 >
-                  {this.props.cancelText}
+                  {cancelText}
                 </div>
               ) : (
                 ''
               )}
-              {this.props.warningCallback ? (
+
+              {warningCallback ? (
                 <div
                   className="ui primary button button-modal warning-button orange margin left-10 right-20"
-                  onClick={this.props.warningCallback}
+                  onClick={warningCallback}
                 >
-                  {this.props.warningText}
+                  {warningText}
                 </div>
               ) : (
                 ''
               )}
-              {this.props.successCallback ? (
+
+              {successCallback ? (
                 <div
                   className="ui primary button right floated"
-                  onClick={this.props.successCallback}
+                  onClick={successCallback}
                 >
-                  {this.props.successText}
+                  {successText}
                 </div>
               ) : (
                 ''

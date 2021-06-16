@@ -395,11 +395,16 @@ class Segment extends React.Component {
 
   handleChangeBulk(event) {
     event.stopPropagation()
+
+    const {segment, fid, setBulkSelection, setLastSelectedSegment} = this.props
+
+    console.log({fid, segment})
+
     if (event.shiftKey) {
-      this.props.setBulkSelection(this.props.segment.sid, this.props.fid)
+      setBulkSelection(segment.sid, fid)
     } else {
-      SegmentActions.toggleSegmentOnBulk(this.props.segment.sid, this.props.fid)
-      this.props.setLastSelectedSegment(this.props.segment.sid, this.props.fid)
+      SegmentActions.toggleSegmentOnBulk(segment.sid, fid)
+      setLastSelectedSegment(segment.sid, fid)
     }
   }
 

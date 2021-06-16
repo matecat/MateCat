@@ -19,7 +19,7 @@ window.AnalyzeActions = require('./actions/AnalyzeActions')
 window.TeamsActions = require('./actions/TeamsActions')
 window.ModalsActions = require('./actions/ModalsActions')
 window.OutsourceActions = require('./actions/OutsourceActions')
-window.CatToolActions = require('./actions/CatToolActions')
+window.CatToolActions = require('./actions/CatToolActions').default
 window.SegmentActions = require('./actions/SegmentActions').default
 window.CommentsActions = require('./actions/CommentsActions')
 

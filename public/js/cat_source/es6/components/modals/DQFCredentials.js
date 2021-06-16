@@ -1,7 +1,9 @@
+import update from 'immutability-helper'
+import React from 'react'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
 
 class DQFCredentials extends React.Component {
   constructor(props) {

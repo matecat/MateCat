@@ -2,7 +2,7 @@
  Component: ui.header
  */
 
-$.extend(UI, {
+$.extend(window.UI, {
   initHeader: function () {
     if (SearchUtils.searchEnabled)
       $('#action-search').show(100, function () {
@@ -28,7 +28,7 @@ $.extend(UI, {
     this.createJobMenu()
   },
   logoutAction: function () {
-    $.post('/api/app/user/logout', function (data) {
+    $.post('/api/app/user/logout', function () {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {

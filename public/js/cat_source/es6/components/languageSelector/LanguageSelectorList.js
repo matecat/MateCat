@@ -1,3 +1,5 @@
+import React from 'react'
+
 class LanguageSelectorList extends React.Component {
   constructor(props) {
     super(props)

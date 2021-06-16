@@ -12,25 +12,6 @@ export class BulkSelectionBar extends React.Component {
     changingStatus: false,
   }
 
-  countInBulkElements = (segments) => {
-    let segmentsArray = this.state.segmentsArray
-    if (segments && segments.size > 0) {
-      segments.map((segment) => {
-        let index = segmentsArray.indexOf(segment.get('sid'))
-        if (segment.get('inBulk') && index === -1) {
-          segmentsArray.push(segment.get('sid'))
-        } else if (!segment.get('inBulk') && index > -1) {
-          segmentsArray.splice(index, 1)
-        }
-      })
-    }
-
-    this.setState({
-      count: segmentsArray.length,
-      segmentsArray: segmentsArray,
-    })
-  }
-
   setSegmentsinBulk = (segments) => {
     this.setState({
       count: segments.length,
@@ -42,20 +23,6 @@ export class BulkSelectionBar extends React.Component {
     this.setState({
       count: 0,
       segmentsArray: [],
-    })
-  }
-
-  toggleSegment = (sid) => {
-    let index = this.state.segmentsArray.indexOf(sid)
-    let array = this.state.segmentsArray.slice(0)
-    if (index > -1) {
-      array.splice(index, 1)
-    } else {
-      array.push(sid)
-    }
-    this.setState({
-      count: array.length,
-      segmentsArray: array,
     })
   }
 
@@ -89,10 +56,6 @@ export class BulkSelectionBar extends React.Component {
 
   componentDidMount() {
     SegmentStore.addListener(
-      SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
-      this.toggleSegment,
-    )
-    SegmentStore.addListener(
       SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
       this.removeAll,
     )
@@ -103,10 +66,6 @@ export class BulkSelectionBar extends React.Component {
   }
 
   componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
-      this.toggleSegment,
-    )
     SegmentStore.removeListener(
       SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
       this.removeAll,

@@ -1,4 +1,4 @@
-ReviewExtended = {
+window.ReviewExtended = {
   enabled: function () {
     return Review.type === 'extended'
   },

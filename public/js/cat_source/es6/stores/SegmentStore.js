@@ -1453,7 +1453,7 @@ AppDispatcher.register(function (action) {
         action.data,
       )
       break
-    case SegmentConstants.TOGGLE_SEGMENT_ON_BULK:
+    case SegmentConstants.TOGGLE_SEGMENT_ON_BULK: {
       SegmentStore.setToggleBulkOption(action.sid, action.fid)
       SegmentStore.emitChange(
         SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
@@ -1465,6 +1465,7 @@ AppDispatcher.register(function (action) {
         action.fid,
       )
       break
+    }
     case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
       SegmentStore.removeBulkOption()
       SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, [])

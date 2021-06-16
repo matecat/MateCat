@@ -1,3 +1,4 @@
+import React from 'react'
 import TagsInput from 'react-tagsinput'
 
 class LanguageSelectorSearch extends React.Component {

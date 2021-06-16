@@ -1,5 +1,8 @@
+import React from 'react'
+
 import SegmentConstants from '../../constants/SegmentConstants'
 import CommonUtils from '../../utils/commonUtils'
+
 class ReviewExtendedIssue extends React.Component {
   constructor(props) {
     super(props)

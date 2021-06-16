@@ -1,4 +1,6 @@
 import {getXliffRegExpression} from './tagModel'
+import TagUtils from '../../../../utils/tagUtils'
+
 /**
  *
  * @param segmentString
@@ -57,30 +59,28 @@ export const decodeTagsToPlainText = (text) => {
 
   if (text) {
     // Match G - temporary until backend put IDs in closing tags </g>
-    decoded = TagUtils.matchTag( text )
+    decoded = TagUtils.matchTag(text)
     // Match PH
     decoded = decoded.replace(
-        /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
-        ( match, text ) => {
-          try {
-            return Base64.decode( text )
-          } catch ( e ) {
-            console.error("Fail decoding tags in text",match, text);
-          }
-        },
+      /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
+      (match, text) => {
+        try {
+          return Base64.decode(text)
+        } catch (e) {
+          console.error('Fail decoding tags in text', match, text)
+        }
+      },
     )
     // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)
     decoded = decoded.replace(
-        /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-        ( match, text ) => {
-          return text
-        },
+      /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
+      (match, text) => {
+        return text
+      },
     )
     // Convert placeholder (nbsp, tab, lineFeed, carriageReturn)
-    decoded = TagUtils.decodePlaceholdersToPlainText( decoded )
+    decoded = TagUtils.decodePlaceholdersToPlainText(decoded)
     return decoded
-
-
   }
   return ''
 }
