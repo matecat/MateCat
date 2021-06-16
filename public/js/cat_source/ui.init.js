@@ -72,7 +72,7 @@ $.extend(UI, {
     UI.body = $('body')
     UI.checkCrossLanguageSettings()
     // If some icon is added on the top header menu, the file name is resized
-    APP.addDomObserver($('.header-menu')[0], function () {
+    APP.addDomObserver($('.header-menu')[0], () => {
       APP.fitText($('#pname-container'), $('#pname'), 25)
     })
     CommonUtils.setBrowserHistoryBehavior()

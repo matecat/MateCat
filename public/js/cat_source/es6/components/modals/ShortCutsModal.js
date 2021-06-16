@@ -1,4 +1,7 @@
+import React from 'react'
+
 import Shortcuts from '../../utils/shortcuts'
+
 class ShortCutsModal extends React.Component {
   constructor(props) {
     super(props)

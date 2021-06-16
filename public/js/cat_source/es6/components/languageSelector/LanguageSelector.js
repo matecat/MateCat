@@ -1,3 +1,5 @@
+import React from 'react'
+
 import LanguageSelectorList from './LanguageSelectorList'
 import LanguageSelectorSearch from './LanguageSelectorSearch'
 
@@ -13,11 +15,8 @@ class LanguageSelector extends React.Component {
   }
 
   componentDidMount() {
-    const {
-      selectedLanguagesFromDropdown,
-      languagesList,
-      fromLanguage,
-    } = this.props
+    const {selectedLanguagesFromDropdown, languagesList, fromLanguage} =
+      this.props
     document.addEventListener('keydown', this.pressEscKey)
 
     this.setState({

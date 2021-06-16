@@ -1,5 +1,8 @@
+import React from 'react'
+
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
+
 class ProjectContainer extends React.Component {
   constructor(props) {
     super(props)

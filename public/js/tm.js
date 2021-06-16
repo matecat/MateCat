@@ -3,7 +3,7 @@
  Created by andreamartines on 02/10/14.
  Loaded by cattool and upload page.
  */
-;(function ($, undefined) {
+;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
     var winBottom = winTop + $(window).height()
@@ -19,8 +19,8 @@
       UI.initOptionsTip()
       UI.initTmxTooltips()
       //Fix: When you move to a page using the browser arrow the checkbox seems to be not checked
-      $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true);
-      $('#inactivetm').find('tr.mine input').prop('checked', false);
+      $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true)
+      $('#inactivetm').find('tr.mine input').prop('checked', false)
 
       UI.checkTMKeysUpdateChecks()
       UI.checkCrossLanguageSettings()
@@ -150,14 +150,14 @@
           UI.addMTEngine(provider, providerName)
         }
       })
-      $('#add-mt-provider-cancel').click(function (e) {
+      $('#add-mt-provider-cancel').click(function () {
         $('.add-mt-engine').show()
         $('.insert-tm').addClass('hide')
         $('#mt_engine_int').val('none').trigger('change')
         $('.insert-tm').addClass('hide').removeAttr('style')
         $('#add-mt-provider-cancel').show()
       })
-      $('#add-mt-provider-cancel-int').click(function (e) {
+      $('#add-mt-provider-cancel-int').click(function () {
         $('.add-mt-engine').show()
         $('.insert-tm').addClass('hide')
         $('#mt_engine_int').val('none').trigger('change')
@@ -199,7 +199,7 @@
           e.preventDefault()
           UI.addFormUpload(this, 'glossary')
         })
-        .on('change paste', '#new-tm-key', function (event) {
+        .on('change paste', '#new-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
             UI.checkTMKey('change')
@@ -361,7 +361,7 @@
 
           UI.openExportTmx(this)
         })
-        .on('click', '.shareKey:not(.disabled)', function (e) {
+        .on('click', '.shareKey:not(.disabled)', function () {
           var tr = $(this).closest('tr')
           if (
             tr.hasClass('mymemory') ||
@@ -371,7 +371,7 @@
             return
           UI.openShareResource($(this))
         })
-        .on('mousedown', '.mgmt-tm .downloadGlossary', function (e) {
+        .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
           //Todo
           if ($(this).hasClass('disabled')) return false
           UI.downloadGlossary($(this))
@@ -762,8 +762,7 @@
               callback: 'continueTMDisable',
               okTxt: 'Continue',
               context: JSON.stringify(data),
-              msg:
-                'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
+              msg: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
             })
             return false
           }
@@ -1226,14 +1225,12 @@
     allTMUploadsCompleted: function () {
       if ($('#activetm .uploadfile.uploading').length) {
         APP.alert({
-          msg:
-            'There is one or more TM uploads in progress. Try again when all uploads are completed!',
+          msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!',
         })
         return false
       } else if ($('tr td a.downloading').length) {
         APP.alert({
-          msg:
-            'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
+          msg: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
         })
         return false
       } else {
@@ -1563,7 +1560,6 @@
       var tr = $(button).closest('tr')
       tr.addClass('tm-key-deleting')
       var key = tr.find('.privatekey').text()
-      var descr = tr.find('.edit-desc').data('descr')
       message = message.replace('XXX', key)
       // message = message.replace('YYY', descr);
       if (elem.attr('id') === 'activetm') {
@@ -1608,7 +1604,7 @@
           )
           // console.log('Error deleting TM!!');
         },
-        success: function (d) {
+        success: function () {
           UI.hideAllBoxOnTables()
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
@@ -1629,7 +1625,7 @@
             .text('There was an error saving your data. Please retry!')
             .show()
         },
-        success: function (d) {
+        success: function () {
           // console.log('success');
           UI.hideAllBoxOnTables()
           $('.mgmt-table-mt tr[data-id=' + this + ']').remove()
@@ -1762,7 +1758,6 @@
     activateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" checked class="temp" />')
-      var cbox = tr.find('input[type=checkbox]')
       var tbody = tr.parents('tbody')
       $(tbody).prepend(tr)
       tbody
@@ -1865,7 +1860,7 @@
             )
 
             var optionData = configData[fieldName][optionKey]['data']
-            for (var dataKey in optionData) {
+            for (let dataKey in optionData) {
               option.attr('data-' + dataKey, optionData[dataKey])
             }
 
@@ -2407,19 +2402,14 @@
             .closest('.share-popup-container')
             .find('.share-popup-key')
             .text()
-      var descr = tr.length
-        ? tr.find('.edit-desc').data('descr')
-        : button
-            .closest('.share-popup-container')
-            .find('.share-popup-description')
-            .text()
       var msg =
         'The resource <span style="font-weight: bold">' +
         key +
         '</span> has been shared.'
 
       var validateEmail = function (emails) {
-        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        var re =
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         var result = true
         emails.split(',').forEach(function (email) {
           if (!re.test(email.trim())) result = email
@@ -2552,14 +2542,18 @@
     },
 
     checkCrossLanguageSettings: function () {
-      var settings = localStorage.getItem('multiMatchLangs')
+      let settings = localStorage.getItem('multiMatchLangs')
+
       if (settings) {
-        var selectPrimary = $('#multi-match-1')
-        var selectSecondary = $('#multi-match-2')
+        const selectPrimary = $('#multi-match-1')
+        const selectSecondary = $('#multi-match-2')
+
         settings = JSON.parse(settings)
         UI.crossLanguageSettings = settings
+
         selectPrimary.val(settings.primary)
         selectSecondary.val(settings.secondary)
+
         if (settings.primary) selectSecondary.removeAttr('disabled')
       }
     },

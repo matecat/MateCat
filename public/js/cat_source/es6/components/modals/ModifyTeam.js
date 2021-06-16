@@ -1,3 +1,5 @@
+import React from 'react'
+
 import TeamConstants from '../../constants/TeamConstants'
 
 class ModifyTeam extends React.Component {

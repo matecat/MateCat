@@ -1,3 +1,5 @@
+import React from 'react'
+
 import Shortcuts from '../../utils/shortcuts'
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component {

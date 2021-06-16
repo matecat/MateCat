@@ -1,3 +1,5 @@
+import React from 'react'
+
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import CommonUtils from '../../utils/commonUtils'
@@ -193,8 +195,7 @@ class JobContainer extends React.Component {
       .done(function (data) {
         let notification = {
           title: 'Job unassigned',
-          text:
-            'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
+          text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
           type: 'warning',
           position: 'bl',
           allowHtml: true,

@@ -1,3 +1,5 @@
+import React from 'react'
+
 import ReviewExtendedIssuesContainer from './ReviewExtendedIssuesContainer'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import SegmentConstants from '../../constants/SegmentConstants'

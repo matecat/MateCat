@@ -1,8 +1,8 @@
-if (!API) {
-  var API = {}
+if (!window.API) {
+  window.API = {}
 }
 
-API.SEGMENT = {
+window.API.SEGMENT = {
   setTranslation: function (segment) {
     var contextBefore = UI.getContextBefore(segment.sid)
     var idBefore = UI.getIdBefore(segment.sid)
