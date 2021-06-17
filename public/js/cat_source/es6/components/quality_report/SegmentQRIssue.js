@@ -1,3 +1,5 @@
+import React from 'react'
+
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {
     let array = []
