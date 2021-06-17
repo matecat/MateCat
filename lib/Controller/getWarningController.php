@@ -2,7 +2,7 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Translations\WarningDao;
 
 class getWarningController extends ajaxController {
@@ -168,13 +168,14 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'total' ] = 0;
 
-        $Filter     = Filter::getInstance( $this->chunk->source, $this->chunk->target, $this->featureSet );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
         $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
-        $QA->setFeatureSet( $this->featureSet );
+        $QA->setFeatureSet( $featureSet );
         $QA->setSourceSegLang( $this->chunk->source );
         $QA->setTargetSegLang( $this->chunk->target );
         $QA->performConsistencyCheck();

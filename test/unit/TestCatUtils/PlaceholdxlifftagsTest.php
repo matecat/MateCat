@@ -1,6 +1,6 @@
 <?php
 
-use SubFiltering\Filters\PlaceHoldXliffTags;
+use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 
 /**
  * @group regression

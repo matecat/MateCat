@@ -17,7 +17,7 @@ use Exception;
 use Jobs_JobDao;
 use PDOException;
 use Projects_ProjectDao;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -139,7 +139,8 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
-        $filter     = Filter::getInstance( $queueElement->params->source, $queueElement->params->target, $this->featureSet );
+        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new \FeatureSet();
+        $filter     = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target, [] );
         $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];

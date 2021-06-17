@@ -1,16 +1,18 @@
 <?php
 
+use Matecat\SubFiltering\MateCatFilter;
+
 class deleteContributionController extends ajaxController {
 
     protected $id_job;
     protected $password;
-    private $id_match;
-    private $target;
-    private $source;
-    private $source_lang;
-    private $target_lang;
-    private $id_translator;
-    private $tm_keys;
+    private   $id_match;
+    private   $target;
+    private   $source;
+    private   $source_lang;
+    private   $target_lang;
+    private   $id_translator;
+    private   $tm_keys;
 
     public function __construct() {
 
@@ -69,7 +71,8 @@ class deleteContributionController extends ajaxController {
         $tms    = Engine::getInstance( $jobStruct[ 'id_tms' ] );
         $config = $tms->getConfigStruct();
 
-        $Filter                  = \SubFiltering\Filter::getInstance( $this->source_lang, $this->target_lang, $this->featureSet );
+        $featureSet              = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $Filter                  = MateCatFilter::getInstance( $featureSet, $this->source_lang, $this->target_lang, [] );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $this->source );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $this->target );
         $config[ 'source' ]      = $this->source_lang;

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bc49402e2646f84d5fc31ccad40a7be7",
+    "content-hash": "4cbf435f5dc9a6430685ca6f6aa0025b",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.183.7",
+            "version": "3.184.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "cf9c877e799c43e22d0e0cbc840e91d1885b13b6"
+                "reference": "34e6b2abfb9d9d2f619c7218fb366371099e26b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/cf9c877e799c43e22d0e0cbc840e91d1885b13b6",
-                "reference": "cf9c877e799c43e22d0e0cbc840e91d1885b13b6",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/34e6b2abfb9d9d2f619c7218fb366371099e26b7",
+                "reference": "34e6b2abfb9d9d2f619c7218fb366371099e26b7",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.183.7"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.184.4"
             },
-            "time": "2021-05-27T01:00:13+00:00"
+            "time": "2021-06-15T18:14:30+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -161,16 +161,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v5.2.1",
+            "version": "v5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "f42c9110abe98dd6cfe9053c49bc86acc70b2d23"
+                "reference": "3c2d70f2e64e2922345e89f2ceae47d2463faae1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/f42c9110abe98dd6cfe9053c49bc86acc70b2d23",
-                "reference": "f42c9110abe98dd6cfe9053c49bc86acc70b2d23",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/3c2d70f2e64e2922345e89f2ceae47d2463faae1",
+                "reference": "3c2d70f2e64e2922345e89f2ceae47d2463faae1",
                 "shasum": ""
             },
             "require": {
@@ -209,22 +209,22 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v5.2.1"
+                "source": "https://github.com/firebase/php-jwt/tree/v5.3.0"
             },
-            "time": "2021-02-12T00:02:00+00:00"
+            "time": "2021-05-20T17:37:02+00:00"
         },
         {
             "name": "google/apiclient",
-            "version": "v2.9.1",
+            "version": "v2.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client.git",
-                "reference": "2fb6e702aca5d68203fa737f89f6f774022494c6"
+                "reference": "e9ef4c26a044b8d39a46bcf296be795fe24a1849"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/2fb6e702aca5d68203fa737f89f6f774022494c6",
-                "reference": "2fb6e702aca5d68203fa737f89f6f774022494c6",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/e9ef4c26a044b8d39a46bcf296be795fe24a1849",
+                "reference": "e9ef4c26a044b8d39a46bcf296be795fe24a1849",
                 "shasum": ""
             },
             "require": {
@@ -239,7 +239,7 @@
             },
             "require-dev": {
                 "cache/filesystem-adapter": "^0.3.2|^1.1",
-                "composer/composer": "^1.10",
+                "composer/composer": "^1.10.22",
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
                 "phpcompatibility/php-compatibility": "^9.2",
                 "phpunit/phpunit": "^5.7||^8.5.13",
@@ -278,9 +278,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client/issues",
-                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.9.1"
+                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.9.2"
             },
-            "time": "2021-01-19T17:48:59+00:00"
+            "time": "2021-06-09T22:15:08+00:00"
         },
         {
             "name": "google/apiclient-services",
@@ -700,6 +700,62 @@
                 "source": "https://github.com/matecat/simple-s3/tree/v1.5.11"
             },
             "time": "2020-01-17T13:42:03+00:00"
+        },
+        {
+            "name": "matecat/subfiltering",
+            "version": "v1.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/matecat/subfiltering.git",
+                "reference": "429d6cec508346c7311255f5bf1743a4e4e0abfd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/429d6cec508346c7311255f5bf1743a4e4e0abfd",
+                "reference": "429d6cec508346c7311255f5bf1743a4e4e0abfd",
+                "shasum": ""
+            },
+            "require": {
+                "matecat/xliff-parser": "^1.0",
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Matecat\\SubFiltering\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mauro Cassani",
+                    "email": "maurocassani1978@gmail.com",
+                    "homepage": "https://github.com/mauretto78"
+                },
+                {
+                    "name": "Domenico Lupinetti",
+                    "email": "ostico@gmail.com",
+                    "homepage": "https://github.com/ostico"
+                }
+            ],
+            "description": "Matecat Subfiltering component",
+            "homepage": "https://github.com/matecat/subfiltering",
+            "keywords": [
+                "filter",
+                "php",
+                "subfiltering"
+            ],
+            "support": {
+                "issues": "https://github.com/matecat/subfiltering/issues",
+                "source": "https://github.com/matecat/subfiltering/tree/v1.0.6"
+            },
+            "time": "2021-06-16T13:29:23+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1214,16 +1270,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.8",
+            "version": "3.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "d9615a6fb970d9933866ca8b4036ec3407b020b6"
+                "reference": "a127a5133804ff2f47ae629dd529b129da616ad7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d9615a6fb970d9933866ca8b4036ec3407b020b6",
-                "reference": "d9615a6fb970d9933866ca8b4036ec3407b020b6",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/a127a5133804ff2f47ae629dd529b129da616ad7",
+                "reference": "a127a5133804ff2f47ae629dd529b129da616ad7",
                 "shasum": ""
             },
             "require": {
@@ -1305,7 +1361,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.8"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.9"
             },
             "funding": [
                 {
@@ -1321,7 +1377,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-19T03:20:48+00:00"
+            "time": "2021-06-14T06:54:45+00:00"
         },
         {
             "name": "phptal/phptal",
@@ -3630,5 +3686,5 @@
         "php": ">=5.5.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }

@@ -5,13 +5,12 @@ namespace XliffReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use QA;
-use SubFiltering\Filter;
-use SubFiltering\Filters\DataRefReplace;
+use Matecat\SubFiltering\MateCatFilter;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
 
     /**
-     * @var Filter
+     * @var MateCatFilter
      */
     private $filter;
 
@@ -41,7 +40,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * @throws \Exception
      */
     public function __construct( \FeatureSet $featureSet, $sourceLang, $targetLang ) {
-        $this->filter     = Filter::getInstance( $sourceLang, $targetLang, $featureSet );
+        $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
