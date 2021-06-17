@@ -1,5 +1,4 @@
 import React from 'react'
-import $ from 'jquery'
 
 class ProductionSummary extends React.Component {
   getTimeToEdit = () => {
