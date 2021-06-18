@@ -1,4 +1,5 @@
-import {getXliffRegExpression} from './tagModel'
+import {getXliffRegExpression, tagSignatures, TagStruct} from './tagModel'
+import decodeTagInfo from "./decodeTagInfo";
 /**
  *
  * @param segmentString
@@ -33,6 +34,21 @@ export const unescapeHTML = (escapedHTML) => {
   } catch (e) {
     return ''
   }
+}
+
+export const unescapeHTMLRecursive = (escapedHTML) => {
+  let matchArray;
+  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/;
+
+  try {
+    while ((matchArray = regex.exec(escapedHTML)) !== null) {
+      escapedHTML = unescapeHTML(escapedHTML)
+    }
+  } catch (e) {
+    console.error('Error unescapeHTMLRecursive')
+  }
+
+  return escapedHTML;
 }
 
 /**
