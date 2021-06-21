@@ -812,16 +812,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.65",
+            "version": "v1.0.66",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "749754399253b511b4c8681c032980a89c78e46f"
+                "reference": "c4b078df3b029f969e4d46ad3f78c9f44039eb59"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/749754399253b511b4c8681c032980a89c78e46f",
-                "reference": "749754399253b511b4c8681c032980a89c78e46f",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/c4b078df3b029f969e4d46ad3f78c9f44039eb59",
+                "reference": "c4b078df3b029f969e4d46ad3f78c9f44039eb59",
                 "shasum": ""
             },
             "require": {
@@ -857,9 +857,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.65"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.66"
             },
-            "time": "2021-06-18T12:59:51+00:00"
+            "time": "2021-06-21T14:03:21+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -944,16 +944,16 @@
         },
         {
             "name": "mtdowling/jmespath.php",
-            "version": "2.6.0",
+            "version": "2.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jmespath/jmespath.php.git",
-                "reference": "42dae2cbd13154083ca6d70099692fef8ca84bfb"
+                "reference": "9b87907a81b87bc76d19a7fb2d61e61486ee9edb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jmespath/jmespath.php/zipball/42dae2cbd13154083ca6d70099692fef8ca84bfb",
-                "reference": "42dae2cbd13154083ca6d70099692fef8ca84bfb",
+                "url": "https://api.github.com/repos/jmespath/jmespath.php/zipball/9b87907a81b87bc76d19a7fb2d61e61486ee9edb",
+                "reference": "9b87907a81b87bc76d19a7fb2d61e61486ee9edb",
                 "shasum": ""
             },
             "require": {
@@ -961,7 +961,7 @@
                 "symfony/polyfill-mbstring": "^1.17"
             },
             "require-dev": {
-                "composer/xdebug-handler": "^1.4",
+                "composer/xdebug-handler": "^1.4 || ^2.0",
                 "phpunit/phpunit": "^4.8.36 || ^7.5.15"
             },
             "bin": [
@@ -999,9 +999,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jmespath/jmespath.php/issues",
-                "source": "https://github.com/jmespath/jmespath.php/tree/2.6.0"
+                "source": "https://github.com/jmespath/jmespath.php/tree/2.6.1"
             },
-            "time": "2020-07-31T21:01:56+00:00"
+            "time": "2021-06-14T00:11:39+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
