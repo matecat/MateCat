@@ -1,5 +1,13 @@
+import React from 'react'
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
+import TeamsActions from '../../actions/TeamsActions'
+import {isUndefined} from 'lodash'
+import ManageActions from '../../actions/ManageActions'
+import ModalsActions from '../../actions/ModalsActions'
+import ProjectsStore from '../../stores/ProjectsStore'
+import moment from 'moment'
+
 class ProjectContainer extends React.Component {
   constructor(props) {
     super(props)
@@ -10,8 +18,6 @@ class ProjectContainer extends React.Component {
       lastAction: null,
       jobsActions: null,
       projectName: this.props.project.get('name'),
-      inputSelected: false,
-      inputNameChanged: false,
     }
     this.getActivityLogUrl = this.getActivityLogUrl.bind(this)
     this.changeUser = this.changeUser.bind(this)
@@ -26,6 +32,41 @@ class ProjectContainer extends React.Component {
   hideProject(project) {
     if (this.props.project.get('id') === project.get('id')) {
       $(this.project).transition('fly right')
+    }
+  }
+
+  hideProjectAfterChangeAssignee = (project, user) => {
+    if (this.props.project.get('id') === project.get('id')) {
+      const {selectedUser, team} = this.props
+      const uid = user ? user.get('uid') : -1
+      if (
+        (uid !== selectedUser &&
+          selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
+        (team.get('type') == 'personal' && uid !== APP.USER.STORE.user.uid)
+      ) {
+        setTimeout(() => {
+          $(this.project).transition('fly right')
+        }, 500)
+        setTimeout(() => {
+          ManageActions.removeProject(this.props.project)
+        }, 1000)
+        let name = user.toJS
+          ? user.get('first_name') + ' ' + user.get('last_name')
+          : 'Not assigned'
+        let notification = {
+          title: 'Assignee changed',
+          text:
+            'The project ' +
+            this.props.project.get('name') +
+            ' has been assigned to ' +
+            name,
+          type: 'success',
+          position: 'bl',
+          allowHtml: true,
+          timer: 3000,
+        }
+        APP.addNotification(notification)
+      }
     }
   }
 
@@ -48,7 +89,7 @@ class ProjectContainer extends React.Component {
       }
       $(this.dropdownUsers).dropdown({
         fullTextSearch: 'exact',
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           self.changeUser(value)
         },
       })
@@ -66,7 +107,7 @@ class ProjectContainer extends React.Component {
       )
       $(this.dropdownTeams).dropdown({
         fullTextSearch: 'exact',
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           self.changeTeam(value)
         },
       })
@@ -75,11 +116,10 @@ class ProjectContainer extends React.Component {
   }
 
   thereIsChunkOutsourced(idJob) {
-    let self = this
     let outsourceChunk = this.props.project.get('jobs').find(function (item) {
       return !!item.get('outsource') && item.get('id') === idJob
     })
-    return !_.isUndefined(outsourceChunk)
+    return !isUndefined(outsourceChunk)
   }
 
   removeProject() {
@@ -134,57 +174,20 @@ class ProjectContainer extends React.Component {
     }
   }
 
-  onKeyUpEvent(event) {
-    if (event.key == 'Enter') {
-      this.changeProjectName(event)
-      this.inputName.blur()
-    }
-  }
-
-  inputNameClick() {
-    this.setState({
-      inputSelected: true,
-      inputNameChanged: false,
-    })
-  }
-
-  inputNameOnBlur(event) {
-    this.changeProjectName(event)
-  }
-
   openChangeTeamModal() {
     ModalsActions.openChangeTeamModal(this.props.project)
-  }
-
-  changeProjectName(event) {
-    if (
-      event.target.value !== this.props.project.get('name') &&
-      event.target.value !== ''
-    ) {
-      ManageActions.changeProjectName(
-        this.props.team,
-        this.props.project,
-        event.target.value,
-      )
-      this.setState({
-        projectName: event.target.value,
-        inputNameChanged: true,
-        inputSelected: false,
-      })
-    } else {
-      this.inputName.value = this.props.project.get('name')
-      this.setState({
-        inputNameChanged: false,
-        inputSelected: false,
-      })
-    }
   }
 
   getProjectMenu(activityLogUrl) {
     let menuHtml = (
       <div className="menu">
         <div className="scrolling menu">
-          <a className="item" href={activityLogUrl} target="_blank">
+          <a
+            className="item"
+            href={activityLogUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             <i className="icon-download-logs icon" />
             Activity Log
           </a>
@@ -205,7 +208,12 @@ class ProjectContainer extends React.Component {
       menuHtml = (
         <div className="menu">
           <div className="scrolling menu">
-            <a className="item" href={activityLogUrl} target="_blank">
+            <a
+              className="item"
+              href={activityLogUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
               <i className="icon-download-logs icon" />
               Activity Log
             </a>
@@ -226,7 +234,12 @@ class ProjectContainer extends React.Component {
       menuHtml = (
         <div className="menu">
           <div className="scrolling menu">
-            <a className="item" href={activityLogUrl} target="_blank">
+            <a
+              className="item"
+              href={activityLogUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
               <i className="icon-download-logs icon" /> Activity Log
             </a>
 
@@ -314,10 +327,15 @@ class ProjectContainer extends React.Component {
     )
   }
 
-  getJobSplitOrMergeButton(isChunk, mergeUrl, splitUrl) {
+  getJobSplitOrMergeButton(isChunk, mergeUrl) {
     if (isChunk) {
       return (
-        <a className="merge ui basic button" target="_blank" href={mergeUrl}>
+        <a
+          className="merge ui basic button"
+          target="_blank"
+          href={mergeUrl}
+          rel="noreferrer"
+        >
           <i className="icon-compress icon" /> Merge
         </a>
       )
@@ -341,9 +359,6 @@ class ProjectContainer extends React.Component {
       let next_job_id = orderedJobs.get(i + 1)
         ? orderedJobs.get(i + 1).get('id')
         : 0
-      let job_chunks = orderedJobs.count(function (currentJob, i) {
-        return currentJob.get('id') === job.get('id')
-      })
       //To check if is a chunk (jobs with same id)
       let isChunk = false
       if (tempIdsArray.indexOf(job.get('id')) > -1) {
@@ -408,7 +423,7 @@ class ProjectContainer extends React.Component {
 
   createUserDropDown(users) {
     var self = this
-    let members = users.map(function (member, i) {
+    let members = users.map(function (member) {
       let user = member.get('user')
       let userIcon = (
         <a className="ui circular label">
@@ -507,14 +522,13 @@ class ProjectContainer extends React.Component {
 
   getDropDownTeams() {
     let result = ''
-    var self = this
     if (this.props.teams && this.props.teams.size > 1) {
-      let teams = this.props.teams.map(function (team, i) {
+      let teams = this.props.teams.map(function (team) {
         return (
           <div
             className="item "
             data-value={team.get('id')}
-            key={'team-dropdown-item' + team.get('id')}
+            key={'team-dropdown-item' + team.get('id') + team.get('name')}
           >
             {team.get('name')}
           </div>
@@ -550,13 +564,10 @@ class ProjectContainer extends React.Component {
   }
 
   componentDidUpdate() {
-    let self = this
     this.initDropdowns()
   }
 
   componentDidMount() {
-    let self = this
-
     $(this.dropdown).dropdown({
       direction: 'downward',
     })
@@ -565,10 +576,18 @@ class ProjectContainer extends React.Component {
     this.getLastAction()
 
     ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject)
+    ProjectsStore.addListener(
+      ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+      this.hideProjectAfterChangeAssignee,
+    )
   }
 
   componentWillUnmount() {
     ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject)
+    ProjectsStore.removeListener(
+      ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+      this.hideProjectAfterChangeAssignee,
+    )
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -576,19 +595,13 @@ class ProjectContainer extends React.Component {
       !nextProps.project.equals(this.props.project) ||
       nextState.lastAction !== this.state.lastAction ||
       !nextProps.team.equals(this.props.team) ||
-      !nextProps.teams.equals(this.props.teams) ||
-      nextState.inputSelected !== this.state.inputSelected ||
-      nextState.inputNameChanged !== this.state.inputNameChanged
+      !nextProps.teams.equals(this.props.teams)
     )
   }
 
   render() {
-    let self = this
     let activityLogUrl = this.getActivityLogUrl()
     let projectMenu = this.getProjectMenu(activityLogUrl)
-    // let tMIcon = this.checkTMIcon();
-    let payableWords = this.props.project.get('tm_analysis')
-    let analyzeUrl = this.getAnalyzeUrl()
     let jobsLength = this.props.project.get('jobs').size
 
     let targetsLangs = [],
@@ -610,6 +623,7 @@ class ProjectContainer extends React.Component {
               target="_blank"
               className="right activity-log"
               title="Activity log"
+              rel="noreferrer"
             >
               <i>
                 {' '}
@@ -631,6 +645,7 @@ class ProjectContainer extends React.Component {
               target="_blank"
               className="right activity-log"
               title="Activity log"
+              rel="noreferrer"
             >
               <i>
                 {' '}
@@ -659,13 +674,6 @@ class ProjectContainer extends React.Component {
     // Users dropdown
     let dropDownUsers = this.getDropDownUsers()
     let dropDownTeams = this.getDropDownTeams()
-    //Input Class
-    let inputClass = this.state.inputSelected ? 'selected' : ''
-    let inputIcon = this.state.inputNameChanged ? (
-      <i className="icon-checkmark green icon" />
-    ) : (
-      <i className="icon-pencil icon" />
-    )
 
     return (
       <div
