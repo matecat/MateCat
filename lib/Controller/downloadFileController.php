@@ -12,7 +12,6 @@ use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use XliffReplacer\XliffReplacerCallback;
-use XliffReplacer\XliffReplacerFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
@@ -196,7 +195,7 @@ class downloadFileController extends downloadController {
                 $xsp = new \Matecat\XliffParser\XliffParser();
 
                 // instantiateXliffReplacerCallback
-                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
+                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
 
                 // run xliff replacer
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
@@ -835,7 +834,29 @@ class downloadFileController extends downloadController {
                 foreach ( $newInternalZipFiles as $index => $newInternalZipFile ) {
 
                     if ( $this->forceXliff ) {
-                        $declaredOutputFileName = preg_replace( '/\.xlf|\.xliff|\.sdlxliff$/', '', $newInternalZipFile->output_filename );
+
+                        //
+                        // ---------------------------------------------
+                        // NOTE 2021-06-11
+                        // ---------------------------------------------
+                        //
+                        // If we are downloading intermediate xlf files at this point we have files in this format:
+                        //
+                        // xxxx.xlf
+                        //
+                        // If the zip contains xliff files we have for example:
+                        //
+                        // test.sdlxliff.xlf
+                        //
+                        // And we can't use the regex /\.xlf|\.xliff|\.sdlxliff$/, because in this case we obtain:
+                        //
+                        // test
+                        //
+                        // (the regex trimmed out .sdlxliff.xlf)
+                        //
+                        // Much better using AbstractFilesStorage::pathinfo_fix function to get the real filename (with no xlf extension)
+                        //
+                        $declaredOutputFileName = AbstractFilesStorage::pathinfo_fix( $newInternalZipFile->output_filename, PATHINFO_FILENAME );
                         $isTheSameFile          = ( $declaredOutputFileName == $newRealZipFilePath );
                     } else {
                         $isTheSameFile = ( $newInternalZipFile->output_filename == $newRealZipFilePath );

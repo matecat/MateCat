@@ -5,6 +5,7 @@ namespace AsyncTasks\Workers;
 use Database;
 use Engine;
 use Stomp;
+use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TmKeyManagement_Filter;
@@ -38,6 +39,8 @@ class GlossaryWorker extends AbstractWorker {
             throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
 
+        $this->_checkDatabaseConnection();
+
         $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
 
         $this->{$action}( $payload );
@@ -52,48 +55,58 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function delete( $payload ) {
 
-        $message = [];
-
         $tm_keys    = $payload[ 'tm_keys' ];
         $user       = $this->getUser( $payload[ 'user' ] );
         $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
         $_TMS       = $this->getEngine( $featureSet );
         $userRole   = $payload[ 'userRole' ];
-        $id_match   = $payload[ 'id_match' ];
-        $config     = $payload[ 'config' ];
+        $id_matches = $payload[ 'id_match' ];
+
+        // $payload[ 'config' ] is is a Params class (stdClass), it implements ArrayAccess interface,
+        // but it is defined to allow "_set" only for existing properties
+        // so, trying to set $payload[ 'config' ]['whatever'] will result in a not found key name and the value will be ignored
+        // Fix: reassign an array
+        $config = $payload[ 'config' ]->toArray();
 
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
 
-        $Filter                  = \SubFiltering\Filter::getInstance( $featureSet );
+        $keys_hashes = [];
+        foreach ( $tm_keys as $tm_key ) {
+            $keys_hashes[] = $tm_key->key;
+        }
+
+        $Filter                  = MateCatFilter::getInstance( $featureSet, null, null, [] );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $config[ 'segment' ] );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $config[ 'translation' ] );
 
         //prepare the error report
         $set_code = [];
-        //set the glossary entry for each key with write grants
-        if ( count( $tm_keys ) ) {
-
-            /**
-             * @var $tm_key TmKeyManagement_TmKeyStruct
-             */
-            foreach ( $tm_keys as $tm_key ) {
-                $config[ 'id_user' ]  = $tm_key->key;
-                $config[ 'id_match' ] = $id_match;
-                $TMS_RESULT           = $_TMS->delete( $config );
-                $set_code[]           = $TMS_RESULT;
-            }
+        //delete all id from the keys
+        foreach ( $id_matches as $id_match ) {
+            $config[ 'id_user' ] = $keys_hashes;
+            $config[ 'id' ]      = $id_match;
+            $TMS_RESULT          = $_TMS->delete( $config );
+            $set_code[]          = $TMS_RESULT;
         }
 
         $set_successful = true;
-        if ( array_search( false, $set_code, true ) ) {
+        if ( array_search( false, $set_code, true ) !== false ) {
             $set_successful = false;
         }
 
-        $message[ 'code' ] = $set_successful;
-        $message[ 'data' ] = ( $set_successful ? 'OK' : null );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        'glossary_delete',
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        [
+                                'data'       => ( $set_successful ? 'OK' : 'KO' ),
+                                'id_segment' => $payload[ 'id_segment' ]
+                        ]
+                )
+        );
 
-        $this->publishMessage( 'glossary_delete', $message );
     }
 
     /**
@@ -105,16 +118,19 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function get( $payload ) {
 
-        $message = [];
+        $user       = $this->getUser( $payload[ 'user' ] );
+        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
+        $_TMS       = $this->getEngine( $featureSet );
+        $tm_keys    = $payload[ 'tm_keys' ];
+        $userRole   = $payload[ 'userRole' ];
+        $jobData    = $payload[ 'jobData' ];
 
-        $user         = $this->getUser( $payload[ 'user' ] );
-        $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
-        $_TMS         = $this->getEngine( $featureSet );
-        $tm_keys      = $payload[ 'tm_keys' ];
-        $userRole     = $payload[ 'userRole' ];
-        $jobData      = $payload[ 'jobData' ];
-        $config       = $payload[ 'config' ];
-        $automatic    = $payload[ 'automatic' ];
+        // $config['id_user'] is is a Params class (stdClass), it implements ArrayAccess interface,
+        // but it is defined to allow "_set" only for existing properties
+        // so, trying to set $config['id_user'][] will result in an empty key name and the value will be ignored
+        // Fix: reassign an array
+        $config = $payload[ 'config' ]->toArray();
+
         $segment      = $payload[ 'segment' ];
         $userIsLogged = $payload[ 'userIsLogged' ];
         $fromtarget   = $payload[ 'fromtarget' ];
@@ -124,15 +140,18 @@ class GlossaryWorker extends AbstractWorker {
 
         if ( count( $tm_keys ) ) {
             $config[ 'id_user' ] = [];
-            /**
-             * @var $tm_key TmKeyManagement_TmKeyStruct
-             */
             foreach ( $tm_keys as $tm_key ) {
                 $config[ 'id_user' ][] = $tm_key->key;
             }
         }
 
         $TMS_RESULT = $_TMS->get( $config )->get_glossary_matches_as_array();
+
+        //check if user is logged. If so, get the uid.
+        $uid = null;
+        if ( $userIsLogged ) {
+            $uid = $user->uid;
+        }
 
         /**
          * Return only exact matches in glossary when a search is executed over the entire segment
@@ -146,54 +165,63 @@ class GlossaryWorker extends AbstractWorker {
          * Return: House of Commons
          *
          */
-        if ( $automatic ) {
-            $tmp_result = [];
-            foreach ( $TMS_RESULT as $k => $val ) {
-                // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-                if ( ( $res = mb_stripos( $segment, preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k ) ) ) === false ) {
-                    unset( $TMS_RESULT[ $k ] );
-                } else {
-                    $tmp_result[ $k ] = $res;
-                }
+        $tmp_result = [];
+        foreach ( $TMS_RESULT as $k => $val ) {
+            // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+            if ( ( $res = mb_stripos( $segment, preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k ) ) ) === false ) {
+                unset( $TMS_RESULT[ $k ] ); // unset glossary terms not contained in the request
+            } else {
+                $tmp_result[ $k ] = $res;
             }
-            asort( $tmp_result );
-            $tmp_result = array_keys( $tmp_result );
-
-            $ordered_Result = [];
-            foreach ( $tmp_result as $glossary_matches ) {
-                $_k                    = preg_replace( '/\xE2\x80\x8B$/', '', $glossary_matches ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-                $ordered_Result[ $_k ] = $TMS_RESULT[ $glossary_matches ];
-            }
-            $TMS_RESULT = $ordered_Result;
         }
 
-        //check if user is logged. If so, get the uid.
-        $uid = null;
-        if ( $userIsLogged ) {
-            $uid = $user->uid;
-        }
+        asort( $tmp_result );
+        $tmp_result = array_keys( $tmp_result );
 
-        foreach ( $TMS_RESULT as $k => $glossaryMatch ) {
-            $TMS_RESULT[ $k ][ 0 ][ 'last_updated_by' ] = Utils::changeMemorySuggestionSource(
-                    $glossaryMatch[ 0 ],
+        $matches = [];
+        foreach ( $tmp_result as $glossary_matches ) {
+
+            $current_match = array_pop( $TMS_RESULT[ $glossary_matches ] );
+
+            $current_match[ 'segment' ]         = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'segment' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+            $current_match[ 'raw_segment' ]     = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'raw_segment' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+            $current_match[ 'translation' ]     = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'translation' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+            $current_match[ 'raw_translation' ] = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'raw_translation' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
+
+            $current_match[ 'last_updated_by' ] = Utils::changeMemorySuggestionSource(
+                    $current_match,
                     $jobData[ 'tm_keys' ],
                     $jobData[ 'owner' ],
-                    $uid );
+                    $uid
+            );
 
-            $TMS_RESULT[ $k ][ 0 ][ 'created_by' ] = $TMS_RESULT[ $k ][ 0 ][ 'last_updated_by' ];
+            $current_match[ 'created_by' ] = $current_match[ 'last_updated_by' ];
+
             if ( $fromtarget ) { //Search by target
-                $source                                     = $TMS_RESULT[ $k ][ 0 ][ 'segment' ];
-                $rawsource                                  = $TMS_RESULT[ $k ][ 0 ][ 'raw_segment' ];
-                $TMS_RESULT[ $k ][ 0 ][ 'segment' ]         = $TMS_RESULT[ $k ][ 0 ][ 'translation' ];
-                $TMS_RESULT[ $k ][ 0 ][ 'translation' ]     = $source;
-                $TMS_RESULT[ $k ][ 0 ][ 'raw_segment' ]     = $TMS_RESULT[ $k ][ 0 ][ 'raw_translation' ];
-                $TMS_RESULT[ $k ][ 0 ][ 'raw_translation' ] = $rawsource;
+                $source                             = $current_match[ 'segment' ];
+                $rawsource                          = $current_match[ 'raw_segment' ];
+                $current_match[ 'segment' ]         = $current_match[ 'translation' ];
+                $current_match[ 'translation' ]     = $source;
+                $current_match[ 'raw_segment' ]     = $current_match[ 'raw_translation' ];
+                $current_match[ 'raw_translation' ] = $rawsource;
             }
+
+            $matches[] = $current_match;
+
         }
 
-        $message[ 'data' ][ 'matches' ] = $TMS_RESULT;
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        'glossary_get',
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        [
+                                'matches'    => $matches,
+                                'id_segment' => $payload[ 'id_segment' ]
+                        ]
+                )
+        );
 
-        $this->publishMessage( 'glossary_get', $message );
     }
 
     /**
@@ -204,9 +232,6 @@ class GlossaryWorker extends AbstractWorker {
      * @throws \Exception
      */
     private function set( $payload ) {
-
-        $message             = [];
-        $message[ 'errors' ] = [];
 
         $user         = $this->getUser( $payload[ 'user' ] );
         $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
@@ -295,37 +320,45 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $set_successful = true;
-        if ( array_search( false, $set_code, true ) ) {
+        if ( array_search( false, $set_code, true ) !== false ) {
             //There's an error, for now skip, let's assume that are not errors
             $set_successful = false;
         }
 
+        $message = [
+                'id_segment' => $payload[ 'id_segment' ],
+        ];
+
         if ( $set_successful ) {
 //          Often the get method after a set is not in real time, so return the same values ( FAKE )
-//          $TMS_GET_RESULT = $this->_TMS->get($config)->get_glossary_matches_as_array();
-//          $this->result['data']['matches'] = $TMS_GET_RESULT;
-            $message[ 'data' ][ 'matches' ] = [
-                    $config[ 'segment' ] => [
-                            [
-                                    'segment'          => $config[ 'segment' ],
-                                    'translation'      => $config[ 'translation' ],
-                                    'last_update_date' => date_create()->format( 'Y-m-d H:i:m' ),
-                                    'last_updated_by'  => "Matecat user",
-                                    'created_by'       => "Matecat user",
-                                    'target_note'      => $config[ 'tnote' ],
-                            ]
+            $message[ 'matches' ] = [
+                    [
+                            'segment'          => $config[ 'segment' ],
+                            'translation'      => $config[ 'translation' ],
+                            'last_update_date' => date_create()->format( 'Y-m-d H:i:m' ),
+                            'last_updated_by'  => "Matecat user",
+                            'created_by'       => "Matecat user",
+                            'target_note'      => $config[ 'tnote' ],
+                            'id_match'         => $set_code
                     ]
             ];
 
             if ( isset( $new_key ) ) {
-                $message[ 'data' ][ 'created_tm_key' ] = true;
+                $message[ 'new_tm_key' ] = $new_key->key;
             }
 
         } else {
-            $message[ 'errors' ][] = [ "code" => -1, "message" => "We got an error, please try again." ];
+            $message[ 'error' ] = [ "code" => -1, "message" => "We got an error, please try again." ];
         }
 
-        $this->publishMessage( 'glossary_set', $message );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        'glossary_set',
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
     }
 
     /**
@@ -337,15 +370,13 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function update( $payload ) {
 
-        $message = [];
-
         $user       = $this->getUser( $payload[ 'user' ] );
         $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
         $_TMS       = $this->getEngine( $featureSet );
         $tm_keys    = $payload[ 'tm_keys' ];
         $userRole   = $payload[ 'userRole' ];
         $tmProps    = $payload[ 'tmProps' ];
-        $config     = $payload[ 'config' ];
+        $config     = $payload[ 'config' ]->toArray(); // get Array
 
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
@@ -377,7 +408,7 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $set_successful = true;
-        if ( array_search( false, $set_code, true ) ) {
+        if ( array_search( false, $set_code, true ) !== false ) {
             $set_successful = false;
         }
 
@@ -387,12 +418,38 @@ class GlossaryWorker extends AbstractWorker {
             $config[ 'id_user' ][] = $tm_key->key;
         }
 
+        $message = [];
         if ( $set_successful ) {
-            $TMS_GET_RESULT                 = $_TMS->get( $config )->get_glossary_matches_as_array();
-            $message[ 'data' ][ 'matches' ] = $TMS_GET_RESULT;
+            //remove ugly structure from mymemory
+            $raw_matches          = $_TMS->get( $config )->get_glossary_matches_as_array();
+            $matches              = array_pop( $raw_matches );
+            $message[ 'matches' ] = array_pop( $matches );
+        } else {
+            $message[ 'error' ] = [ "code" => -1, "message" => "We got an error, please try again." ];
         }
+        $message[ 'id_segment' ] = $payload[ 'id_segment' ];
 
-        $this->publishMessage( 'glossary_update', $message );
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        'glossary_update',
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
+    }
+
+    private function setResponsePayload( $type, $id_client, $jobData, $message ) {
+        return [
+                '_type' => $type,
+                'data'  => [
+                        'payload'   => $message,
+                        'id_client' => $id_client,
+                        'id_job'    => $jobData[ 'id' ],
+                        'passwords' => $jobData[ 'password' ]
+                ]
+        ];
+
     }
 
     /**
@@ -401,14 +458,7 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @throws \StompException
      */
-    private function publishMessage( $type, array $message ) {
-
-        $_object = [
-                '_type' => $type,
-                'data'  => [
-                    'payload' => $message,
-                ]
-        ];
+    private function publishMessage( $_object ) {
 
         $message = json_encode( $_object );
 

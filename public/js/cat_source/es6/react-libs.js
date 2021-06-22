@@ -1,3 +1,5 @@
-window.ReactDOM = require('react-dom')
-window.React = require('react')
-window.React.addons = {}
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+window.ReactDOM = ReactDOM
+window.React = React

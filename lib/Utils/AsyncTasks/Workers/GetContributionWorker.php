@@ -16,7 +16,7 @@ use FeatureSet;
 use INIT;
 use PostProcess;
 use Stomp;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -111,11 +111,6 @@ class GetContributionWorker extends AbstractWorker {
      */
     protected function _publishPayload( array $content, ContributionRequestStruct $contributionStruct, $isCrossLang = false ) {
 
-        $payload = [
-                'id_segment' => $contributionStruct->segmentId,
-                'matches'    => $content,
-        ];
-
         $type = 'contribution';
 
         if ( $contributionStruct->concordanceSearch ) {
@@ -131,7 +126,10 @@ class GetContributionWorker extends AbstractWorker {
                 'data'  => [
                         'id_job'    => $contributionStruct->getJobStruct()->id,
                         'passwords' => $contributionStruct->getJobStruct()->password,
-                        'payload'   => $payload,
+                        'payload'   => [
+                                'id_segment' => $contributionStruct->segmentId,
+                                'matches'    => $content,
+                        ],
                         'id_client' => $contributionStruct->id_client,
                 ]
         ];
@@ -188,7 +186,8 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
-        $Filter = Filter::getInstance( $featureSet, json_decode($contributionStruct->dataRefMap, true) );
+        $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, json_decode($contributionStruct->dataRefMap,
+                true) );
 
         foreach ( $matches as &$match ) {
             $match[ 'target' ] = $targetLang;
@@ -446,7 +445,10 @@ class GetContributionWorker extends AbstractWorker {
 
             $temp_matches = $tmEngine->get( $config );
             if ( !empty( $temp_matches ) ) {
-                $tms_match = $temp_matches->get_matches_as_array(2, $contributionStruct->segmentId);
+
+                $tms_match = $temp_matches->get_matches_as_array(2, $contributionStruct->segmentId, $_config[ 'source' ] , $_config[ 'target' ]);
+
+                \Log::doJsonLog('PIPPO: '. json_encode($tms_match));
             }
         }
 
@@ -519,7 +521,7 @@ class GetContributionWorker extends AbstractWorker {
 
         if ( count( $matches ) > 0 ) {
 
-            $Filter = Filter::getInstance( $featureSet );
+            $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
 
             foreach ( $matches as $k => $m ) {
 

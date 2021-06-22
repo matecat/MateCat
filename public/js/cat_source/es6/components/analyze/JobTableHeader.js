@@ -1,15 +1,11 @@
+import React from 'react'
+
 class JobTableHeader extends React.Component {
   constructor(props) {
     super(props)
   }
 
-  componentDidUpdate() {}
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate() {
     return true
   }
 

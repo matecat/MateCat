@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default class GMTSelect extends React.Component {
   constructor(props) {
     super(props)
@@ -13,7 +15,7 @@ export default class GMTSelect extends React.Component {
     $(this.gmtSelect).dropdown('set selected', timezoneToShow)
     $(this.gmtSelect).dropdown({
       direction: direction,
-      onChange: function (value, text, $selectedItem) {
+      onChange: function (value) {
         if (self.props.changeValue) {
           self.props.changeValue(value)
         }

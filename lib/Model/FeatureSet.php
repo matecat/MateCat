@@ -4,6 +4,7 @@ use AbstractControllers\IController;
 use API\V2\Exceptions\AuthenticationError;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
+use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 
 /**
  * Created by PhpStorm.
@@ -11,9 +12,8 @@ use Features\BaseFeature;
  * Date: 3/11/16
  * Time: 11:00 AM
  */
-class FeatureSet {
-
-
+class FeatureSet implements FeatureSetInterface
+{
     /**
      * @var BasicFeatureStruct[]
      */

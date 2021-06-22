@@ -4,7 +4,6 @@
  */
 import React from 'react'
 import Immutable from 'immutable'
-import showdown from 'showdown'
 class SegmentFooterTabMessages extends React.Component {
   constructor(props) {
     super(props)
@@ -24,18 +23,11 @@ class SegmentFooterTabMessages extends React.Component {
           ) {
             return
           }
-          let regExpUrl = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gim
-          let note = item.note.replace(regExpUrl, function (match, text) {
-            let href =
-              text[text.length - 1] === '.'
-                ? text.substring(0, text.length - 1)
-                : text
-            return '<a href="' + href + '" target="_blank">' + text + '</a>'
-          })
+          let note = item.note
           let html = (
             <div className="note" key={'note-' + index}>
               <span className="note-label">Note: </span>
-              <span dangerouslySetInnerHTML={self.allowHTML(note)} />
+              <span>{note}</span>
             </div>
           )
           notesHtml.push(html)
@@ -54,14 +46,11 @@ class SegmentFooterTabMessages extends React.Component {
             notesHtml.push(html)
           })
         } else if (typeof item.json === 'string') {
-          let converter = new showdown.Converter()
-          let text = converter.makeHtml(item.json)
+          let text = item.json
           let html = (
-            <div
-              key={'note-json' + index}
-              className="note"
-              dangerouslySetInnerHTML={self.allowHTML(text)}
-            />
+            <div key={'note-json' + index} className="note">
+              {text}
+            </div>
           )
           notesHtml.push(html)
         }
@@ -69,29 +58,27 @@ class SegmentFooterTabMessages extends React.Component {
     }
     if (this.props.context_groups && this.props.context_groups.context_json) {
       this.props.context_groups.context_json.forEach((contextGroup) => {
-        let contextElems = []
-        contextGroup.contexts.forEach((context) => {
-          contextElems.push(
+        if (contextGroup.attr.length > 0 && contextGroup.contexts.length > 0) {
+          const contextElems = contextGroup.contexts.map((context) => (
             <div
               className="context-item"
               key={contextGroup.id + context.attr['context-type']}
             >
-              {/*<span className="context-item-label">{context.attr["context-type"]}</span>*/}
               <span className="context-item-name">{context.content}</span>
+            </div>
+          ))
+          notesHtml.push(
+            <div
+              className="context-group"
+              key={contextGroup.id + contextGroup.attr.name}
+            >
+              <span className="context-group-name">
+                {contextGroup.attr.name}:{' '}
+              </span>
+              {contextElems}
             </div>,
           )
-        })
-        notesHtml.push(
-          <div
-            className="context-group"
-            key={contextGroup.id + contextGroup.attr.name}
-          >
-            <span className="context-group-name">
-              {contextGroup.attr.name}:{' '}
-            </span>
-            {contextElems}
-          </div>,
-        )
+        }
       })
     }
     if (notesHtml.length === 0) {

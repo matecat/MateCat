@@ -1,3 +1,5 @@
+import React from 'react'
+
 import IconFilter from '../../icons/IconFilter'
 import IconTick from '../../icons/IconTick'
 

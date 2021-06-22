@@ -11,9 +11,9 @@ namespace unit\Subfiltering;
 
 
 use AbstractTest;
-use SubFiltering\Commons\Pipeline;
-use SubFiltering\Filters\HtmlPlainTextDecoder;
-use SubFiltering\Filters\HtmlToPh;
+use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
+use Matecat\SubFiltering\Filters\HtmlToPh;
 
 class HtmlParserTest extends AbstractTest {
 

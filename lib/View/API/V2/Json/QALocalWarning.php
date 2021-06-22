@@ -11,7 +11,7 @@ namespace API\V2\Json;
 
 
 use QA;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 class QALocalWarning extends QAWarning {
 
@@ -79,7 +79,9 @@ class QALocalWarning extends QAWarning {
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
-            $Filter = Filter::getInstance();
+            $featureSet = new \FeatureSet();
+            $Filter = MateCatFilter::getInstance( $featureSet, $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
+            ($this->id_segment) );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
                 $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawSource );

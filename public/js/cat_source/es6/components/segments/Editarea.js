@@ -26,11 +26,8 @@ import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
-const {
-  hasCommandModifier,
-  isOptionKeyCommand,
-  isCtrlKeyCommand,
-} = KeyBindingUtil
+const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
+  KeyBindingUtil
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import insertText from './utils/DraftMatecatUtils/insertText'
@@ -138,11 +135,8 @@ class Editarea extends React.Component {
 
   addSearchDecorator = () => {
     let {editorState, tagRange} = this.state
-    let {
-      searchParams,
-      occurrencesInSearch,
-      currentInSearchIndex,
-    } = this.props.segment
+    let {searchParams, occurrencesInSearch, currentInSearchIndex} =
+      this.props.segment
     const textToSearch = searchParams.target ? searchParams.target : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,
@@ -264,9 +258,8 @@ class Editarea extends React.Component {
       segment,
       segment: {sourceTagMap},
     } = this.props
-    const {decodedSegment, entitiesRange} = DraftMatecatUtils.decodeSegment(
-      editorState,
-    )
+    const {decodedSegment, entitiesRange} =
+      DraftMatecatUtils.decodeSegment(editorState)
     if (decodedSegment !== '') {
       let contentState = editorState.getCurrentContent()
       let plainText = contentState
@@ -282,9 +275,8 @@ class Editarea extends React.Component {
       )
       // Add missing tag to store for highlight warnings on tags
       const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
-      const lxqDecodedTranslation = DraftMatecatUtils.prepareTextForLexiqa(
-        editorState,
-      )
+      const lxqDecodedTranslation =
+        DraftMatecatUtils.prepareTextForLexiqa(editorState)
       //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
       SegmentActions.updateTranslation(
         segment.sid,
@@ -594,7 +586,7 @@ class Editarea extends React.Component {
   myKeyBindingFn = (e) => {
     const {displayPopover} = this.state
     const {handleCursorMovement} = this
-
+    const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
     if (
       (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
       (isOptionKeyCommand(e) || e.altKey) &&
@@ -617,6 +609,10 @@ class Editarea extends React.Component {
         return 'add-issue'
       } else if (displayPopover && !hasCommandModifier(e)) {
         return 'enter-press'
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+        return 'next-translate'
+      } else if (e.ctrlKey || e.metaKey) {
+        return 'translate'
       }
     } else if (e.key === 'Escape') {
       return 'close-tag-menu'
@@ -632,9 +628,9 @@ class Editarea extends React.Component {
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       !e.shiftKey &&
       e.altKey &&
-      isOptionKeyCommand(e)
+      (isOptionKeyCommand(e) || isChromeBook)
     ) {
-      return 'insert-nbsp-tag' // MacOS
+      return 'insert-nbsp-tag' // MacOS && Chromebook
     } else if (e.key === 'ArrowLeft' && !e.altKey) {
       if (e.shiftKey) {
         if (handleCursorMovement(-1, true, config.isTargetRTL))
@@ -651,6 +647,8 @@ class Editarea extends React.Component {
         if (handleCursorMovement(1, false, config.isTargetRTL))
           return 'right-nav'
       }
+    } else if (e.ctrlKey && e.key === 'k') {
+      return 'tm-search'
     }
     return getDefaultKeyBinding(e)
   }
@@ -707,6 +705,10 @@ class Editarea extends React.Component {
         return 'handled'
       case 'add-issue':
         return 'handled'
+      case 'translate':
+        return 'not-handled'
+      case 'next-translate':
+        return 'not-handled'
       default:
         return 'not-handled'
     }
@@ -1085,10 +1087,8 @@ class Editarea extends React.Component {
 
   pasteFragment = (text, html) => {
     const {editorState} = this.state
-    const {
-      fragment: clipboardFragment,
-      plainText: clipboardPlainText,
-    } = SegmentStore.getFragmentFromClipboard()
+    const {fragment: clipboardFragment, plainText: clipboardPlainText} =
+      SegmentStore.getFragmentFromClipboard()
     // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
     // otherwise we're handling an external copy
     if (
@@ -1130,9 +1130,8 @@ class Editarea extends React.Component {
       const nbspSign = tagSignatures['nbsp'].encodedPlaceholder
       const tabSign = tagSignatures['tab'].encodedPlaceholder
       cleanText = cleanText.replace(/°/gi, nbspSign).replace(/\t/gi, tabSign)
-      const plainTextClipboardFragment = DraftMatecatUtils.buildFragmentFromText(
-        cleanText,
-      )
+      const plainTextClipboardFragment =
+        DraftMatecatUtils.buildFragmentFromText(cleanText)
       const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
         plainTextClipboardFragment,
         editorState,

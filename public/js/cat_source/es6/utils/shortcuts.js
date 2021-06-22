@@ -85,7 +85,7 @@ const Shortcuts = {
       },
       searchInConcordance: {
         label:
-          'Perform TM Search search on word(s) selected in the source or target segment',
+          'Perform TM Search search on word(s) selected in the source segment',
         equivalent: '',
         keystrokes: {
           standard: 'alt+k',

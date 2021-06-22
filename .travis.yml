@@ -1,0 +1,23 @@
+dist: bionic
+language: node_js
+
+node_js:
+  - 14
+
+cache: yarn
+
+branches:
+  only:
+    - develop
+addons:
+  apt:
+    update: true
+
+install:
+  - yarn install
+
+script:
+  - yarn coverage
+notifications:
+  email: false
+  slack: translated:CYliYwF0qSEh6nITRZZQIk4k

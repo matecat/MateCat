@@ -12,7 +12,7 @@ const TEXT_UTILS = {
     var diff
     source = source.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
-      function (match, group1, group2) {
+      function (match) {
         var id = Math.floor(Math.random() * 10000)
         if (_.isUndefined(phTagsObject[match])) {
           phTagsObject[match] = {
@@ -28,7 +28,7 @@ const TEXT_UTILS = {
 
     target = target.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
-      function (match, gruop1, group2) {
+      function (match) {
         var id = Math.floor(Math.random() * 10000000)
         if (_.isUndefined(phTagsObject[match])) {
           phTagsObject[match] = {
@@ -377,7 +377,8 @@ const TEXT_UTILS = {
     return text
   },
   replaceUrl: function (textToReplace) {
-    let regExpUrl = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gim
+    let regExpUrl =
+      /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gim
     return textToReplace.replace(regExpUrl, function (match, text) {
       let href =
         text[text.length - 1] === '.'

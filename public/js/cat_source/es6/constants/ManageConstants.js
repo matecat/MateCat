@@ -4,6 +4,7 @@ module.exports = keyMirror({
   RENDER_PROJECTS: null,
   RENDER_ALL_TEAM_PROJECTS: null,
   UPDATE_PROJECTS: null,
+  RELOAD_PROJECTS: null,
   RENDER_MORE_PROJECTS: null,
   OPEN_JOB_SETTINGS: null,
   REMOVE_PROJECT: null,
@@ -28,7 +29,7 @@ module.exports = keyMirror({
   FILTER_PROJECTS: null,
   CHANGE_PROJECT_ASSIGNEE: null,
   CHANGE_PROJECT_TEAM: null,
-
+  SELECTED_TEAM: null,
   ALL_MEMBERS_FILTER: null,
   NOT_ASSIGNED_FILTER: null,
 

@@ -1,6 +1,8 @@
+import React from 'react'
+import {TransitionGroup, CSSTransition} from 'react-transition-group'
+
 import ChunkAnalyzeHeader from './ChunkAnalyzeHeader'
 import ChunkAnalyzeFile from './ChunkAnalyzeFile'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 class ChunkAnalyze extends React.Component {
   constructor(props) {
@@ -32,13 +34,7 @@ class ChunkAnalyze extends React.Component {
     })
   }
 
-  componentDidUpdate() {}
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate() {
     return true
   }
 

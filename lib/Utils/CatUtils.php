@@ -2,7 +2,7 @@
 
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Validator\JobValidatorObject;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
@@ -121,12 +121,12 @@ class CatUtils {
      * @param        $segment
      * @param string $separateWithChar
      *
-     * @param Filter $Filter
+     * @param MateCatFilter $Filter
      *
      * @return array
      * @throws Exception
      */
-    public static function parseSegmentSplit( $segment, $separateWithChar, Filter $Filter ) {
+    public static function parseSegmentSplit( $segment, $separateWithChar, MateCatFilter $Filter ) {
         $split_chunks    = explode( self::splitPlaceHolder, $segment );
         $chunk_positions = [];
 
@@ -360,15 +360,15 @@ class CatUtils {
      * @param                 $string
      * @param string          $source_lang
      *
-     * @param Filter|null     $Filter
+     * @param MateCatFilter|null     $Filter
      *
      * @return mixed|string
      * @throws \Exception
      */
-    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', Filter $Filter = null ) {
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null ) {
 
         if ( $Filter === null ) {
-            $Filter = SubFiltering\Filter::getInstance();
+            $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang, null, []);
         }
 
         $string = $Filter->fromLayer0ToLayer1( $string );
@@ -446,12 +446,12 @@ class CatUtils {
      * @param                 $string
      * @param string          $source_lang
      *
-     * @param Filter|null     $filter
+     * @param MateCatFilter|null     $filter
      *
      * @return float|int
      * @throws Exception
      */
-    public static function segment_raw_word_count( $string, $source_lang = 'en-US', Filter $filter = null ) {
+    public static function segment_raw_word_count( $string, $source_lang = 'en-US', MateCatFilter $filter = null ) {
 
         //first two letter of code lang
         $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];

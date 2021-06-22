@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'react-addons-update'
+import update from 'immutability-helper'
 
 class LoginModal extends React.Component {
   constructor(props) {

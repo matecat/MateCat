@@ -20,7 +20,7 @@ use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\XliffUtils\XliffVersionDetector;
 use ProjectManager\ProjectManagerModel;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -89,6 +89,10 @@ class ProjectManager {
      * @var Database|IDatabase
      */
     protected $dbHandler;
+
+    /**
+     * @var MateCatFilter
+     */
     protected $filter;
 
     /**
@@ -191,7 +195,7 @@ class ProjectManager {
 
         $this->_log( $this->features->getCodes() );
 
-        $this->filter = Filter::getInstance( $this->features );
+        $this->filter = MateCatFilter::getInstance( $this->features, null, null, [] );
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',
@@ -434,7 +438,10 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        $this->features->run( 'validateProjectCreation', $this->projectStructure );
+        $featureSet = ( $this->features !== null ) ? $this->features : new \FeatureSet();
+        $featureSet->run( 'validateProjectCreation', $this->projectStructure );
+
+        $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [] );
 
         /**
          * @var ArrayObject $this ->projectStructure['result']['errors']
@@ -749,14 +756,12 @@ class ProjectManager {
 
             }
 
-            if ( $this->total_segments > 100000 || ( $this->files_word_count * count( $this->projectStructure[ 'target_language' ] ) ) > 1000000 ) {
-                //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
-                //OR
-                //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
+            //Allow projects with less than 250.000 words or characters ( for cjk languages )
+            if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
                 throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
             }
 
-            $this->features->run( "beforeInsertSegments", $this->projectStructure,
+            $featureSet->run( "beforeInsertSegments", $this->projectStructure,
                     [
                             'total_project_segments' => $this->total_segments,
                             'files_wc'               => $this->files_word_count
@@ -855,11 +860,11 @@ class ProjectManager {
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
         ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
 
-        $this->features->run( 'postProjectCreate', $this->projectStructure );
+        $featureSet->run( 'postProjectCreate', $this->projectStructure );
 
         Database::obtain()->commit();
 
-        $this->features->run( 'postProjectCommit', $this->projectStructure );
+        $featureSet->run( 'postProjectCommit', $this->projectStructure );
 
         try {
 
@@ -958,7 +963,7 @@ class ProjectManager {
             $segmentElement[ 'source' ]        = $this->projectStructure[ 'source_language' ];
             $segmentElement[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
             $segmentElement[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
-            $segmentElement[ 'segment' ]       = Filter::getInstance( $this->features )->fromLayer0ToLayer1( $segmentElement[ 'segment' ] );
+            $segmentElement[ 'segment' ]       = $this->filter->fromLayer0ToLayer1( $segmentElement[ 'segment' ] );
 
         }
 
@@ -2199,18 +2204,21 @@ class ProjectManager {
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            $segmentOriginalDataStruct = @$this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
 
-                // persist original data map if present
-                Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
+                // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
+                // to allow the correct tag handling by the plugins
+                $map = $this->features->filter('sanitizeOriginalDataMap', $segmentOriginalDataStruct->map);
 
-                // correct Uber tag errors here
+                // persist original data map if present
+                Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $map );
+
                 $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment = $this->features->filter(
                         'correctTagErrors',
                         $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
-                        $segmentOriginalDataStruct->map
+                        $map
                 );
             }
 

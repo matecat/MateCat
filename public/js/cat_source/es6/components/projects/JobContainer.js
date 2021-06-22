@@ -1,7 +1,11 @@
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import CommonUtils from '../../utils/commonUtils'
-
+import ManageActions from '../../actions/ManageActions'
+import ModalsActions from '../../actions/ModalsActions'
+import ManageConstants from '../../constants/ManageConstants'
+import ProjectsStore from '../../stores/ProjectsStore'
+import React from 'react'
 class JobContainer extends React.Component {
   constructor(props) {
     super(props)
@@ -101,7 +105,7 @@ class JobContainer extends React.Component {
     let self = this
     let label = ''
     switch (revision_number) {
-      case null: {
+      case undefined: {
         this.oldPassword = this.props.job.get('password')
         label = 'Translate'
         break
@@ -193,8 +197,7 @@ class JobContainer extends React.Component {
       .done(function (data) {
         let notification = {
           title: 'Job unassigned',
-          text:
-            'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
+          text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
           type: 'warning',
           position: 'bl',
           allowHtml: true,
@@ -379,10 +382,6 @@ class JobContainer extends React.Component {
       ' &password=' +
       this.props.job.get('password') +
       '&download_type=all'
-
-    let downloadButton = this.getDownloadLabel()
-    let splitButton
-
     return (
       <JobMenu
         jobId={this.props.job.get('id')}
@@ -462,7 +461,7 @@ class JobContainer extends React.Component {
     if (this.props.job.get('private_tm_key').size) {
       let keys = this.props.job.get('private_tm_key')
       let tooltipText = ''
-      keys.forEach(function (key, i) {
+      keys.forEach(function (key) {
         let descript = key.get('name')
           ? key.get('name')
           : 'Private TM and Glossary'
@@ -513,6 +512,7 @@ class JobContainer extends React.Component {
             data-variation="tiny"
             target="_blank"
             ref={(tooltip) => (this.commentsTooltip = tooltip)}
+            rel="noreferrer"
           >
             <i className="icon-uniE96B icon" />
           </a>
@@ -539,6 +539,7 @@ class JobContainer extends React.Component {
             data-position="top center"
             data-variation="tiny"
             ref={(tooltip) => (this.activityTooltip = tooltip)}
+            rel="noreferrer"
           >
             <i className={'icon-qr-matecat icon ' + classQuality} />
           </a>
@@ -564,6 +565,7 @@ class JobContainer extends React.Component {
             data-position="top center"
             data-variation="tiny"
             ref={(tooltip) => (this.warningTooltip = tooltip)}
+            rel="noreferrer"
           >
             <i className="icon-notice icon red" />
           </a>
@@ -585,6 +587,7 @@ class JobContainer extends React.Component {
           href={url}
           target="_blank"
           data-position="top center"
+          rel="noreferrer"
         >
           <i className="icon-notice icon red" />
           {tooltipText}
@@ -605,6 +608,7 @@ class JobContainer extends React.Component {
             className=" ui icon basic button "
             href={translatedUrl}
             target="_blank"
+            rel="noreferrer"
           >
             <i className="icon-uniE96B icon" />
             There is an open thread
@@ -616,6 +620,7 @@ class JobContainer extends React.Component {
             className=" ui icon basic button "
             href={translatedUrl}
             target="_blank"
+            rel="noreferrer"
           >
             <i className="icon-uniE96B icon" />
             There are <span style={{fontWeight: 'bold'}}>
@@ -642,6 +647,7 @@ class JobContainer extends React.Component {
           href={url}
           target="_blank"
           data-position="top center"
+          rel="noreferrer"
         >
           <i className={'icon-qr-matecat icon ' + classQuality} />
           {tooltipText}
@@ -658,6 +664,7 @@ class JobContainer extends React.Component {
           className="btn waves-effect merge waves-dark"
           target="_blank"
           href={mergeUrl}
+          rel="noreferrer"
         >
           <i className="large icon-compress right" />
           Merge
@@ -669,6 +676,7 @@ class JobContainer extends React.Component {
           className="btn waves-effect split waves-dark"
           target="_blank"
           href={splitUrl}
+          rel="noreferrer"
         >
           <i className="large icon-expand right" />
           Split
@@ -683,7 +691,7 @@ class JobContainer extends React.Component {
       return (
         <div>
           <span>Modified: </span>{' '}
-          <a target="_blank" href={this.props.activityLogUrl}>
+          <a target="_blank" href={this.props.activityLogUrl} rel="noreferrer">
             {' '}
             {date.toDateString()}
           </a>
@@ -747,6 +755,7 @@ class JobContainer extends React.Component {
             className="outsource-logo-box"
             href={this.props.job.get('outsource').get('quote_review_link')}
             target="_blank"
+            rel="noreferrer"
           >
             <img
               className="outsource-logo"
@@ -1134,7 +1143,7 @@ class JobContainer extends React.Component {
                 </div>
               </div>
               <div className="job-payable">
-                <a href={analysisUrl} target="_blank">
+                <a href={analysisUrl} target="_blank" rel="noreferrer">
                   <span id="words">
                     {this.props.job.get('stats').get('TOTAL_FORMATTED')}
                   </span>{' '}
@@ -1171,6 +1180,7 @@ class JobContainer extends React.Component {
                 className="open-translate ui primary button open"
                 target="_blank"
                 href={translateUrl}
+                rel="noreferrer"
               >
                 Open
               </a>

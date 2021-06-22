@@ -1,6 +1,9 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import $ from 'jquery'
+
 import JobSummary from './JobSummary'
 import SegmentsDetails from './SegmentsDetailsContainer'
-import ReactDom from 'react-dom'
 import QRActions from '../../actions/QualityReportActions'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
@@ -76,7 +79,7 @@ class QualityReport extends React.Component {
     let self = this
     if (this.reviewDropdown) {
       $(this.reviewDropdown).dropdown({
-        onChange: function (value, text, $selectedItem) {
+        onChange: function (value) {
           if (value && value !== '') {
             self.updateUrlParameter(value)
             self.setState({
@@ -112,7 +115,17 @@ class QualityReport extends React.Component {
   }
 
   render() {
-    let spinnerContainer = {
+    const {
+      jobInfo,
+      revisionToShow,
+      files,
+      segmentsFiles,
+      lastSegment,
+      idSegment,
+      moreSegments,
+    } = this.state
+
+    const spinnerContainer = {
       position: 'absolute',
       height: '100%',
       width: '100%',
@@ -121,26 +134,26 @@ class QualityReport extends React.Component {
       left: 0,
       zIndex: 3,
     }
+
     let quality_summary
-    if (this.state.jobInfo) {
-      quality_summary = this.state.jobInfo
-        .get('quality_summary')
-        .find((value) => {
-          return (
-            value.get('revision_number') === parseInt(this.state.revisionToShow)
-          )
-        })
+    if (jobInfo) {
+      quality_summary = jobInfo.get('quality_summary').find((value) => {
+        return value.get('revision_number') === parseInt(revisionToShow)
+      })
     }
+
     return (
       <div className="qr-container">
         <div className="qr-container-inside">
           <div className="qr-job-summary-container">
             <div className="qr-bg-head" />
-            {this.state.jobInfo ? (
+
+            {jobInfo ? (
               <div className="qr-job-summary">
                 <div className="qr-header">
                   <h3>QR Job summary</h3>
-                  {this.state.jobInfo.get('quality_summary').size > 1 ? (
+
+                  {jobInfo.get('quality_summary').size > 1 ? (
                     <div className="qr-filter-list">
                       <div className="filter-dropdown right-10">
                         <div className={'filter-reviewType active'}>
@@ -149,7 +162,7 @@ class QualityReport extends React.Component {
                             style={{marginBottom: '12px'}}
                             ref={(dropdown) => (this.reviewDropdown = dropdown)}
                           >
-                            {this.state.revisionToShow === '1' ? (
+                            {revisionToShow === '1' ? (
                               <div className="text">
                                 <div
                                   className={
@@ -168,6 +181,7 @@ class QualityReport extends React.Component {
                                 2nd Revision
                               </div>
                             )}
+
                             <div className="menu">
                               <div
                                 className="item"
@@ -200,24 +214,26 @@ class QualityReport extends React.Component {
                     </div>
                   ) : null}
                 </div>
+
                 <JobSummary
-                  jobInfo={this.state.jobInfo}
+                  jobInfo={jobInfo}
                   qualitySummary={quality_summary}
                   secondPassReviewEnabled={
-                    this.state.jobInfo.get('quality_summary').size > 1
+                    jobInfo.get('quality_summary').size > 1
                   }
                 />
+
                 <SegmentsDetails
-                  files={this.state.files}
-                  segmentsFiles={this.state.segmentsFiles}
-                  lastSegment={this.state.lastSegment}
-                  segmentToFilter={this.state.idSegment}
+                  files={files}
+                  segmentsFiles={segmentsFiles}
+                  lastSegment={lastSegment}
+                  segmentToFilter={idSegment}
                   updateSegmentToFilter={this.updateUrlIdSegment}
-                  urls={this.state.jobInfo.get('urls')}
+                  urls={jobInfo.get('urls')}
                   categories={quality_summary.get('categories')}
-                  moreSegments={this.state.moreSegments}
+                  moreSegments={moreSegments}
                   secondPassReviewEnabled={
-                    this.state.jobInfo.get('quality_summary').size > 1
+                    jobInfo.get('quality_summary').size > 1
                   }
                 />
               </div>
@@ -251,7 +267,7 @@ if (config.isLoggedIn) {
       }),
       headerMountPoint,
     )
-    ReactDom.render(
+    ReactDOM.render(
       React.createElement(QualityReport),
       document.getElementById('qr-root'),
     )
@@ -267,7 +283,7 @@ if (config.isLoggedIn) {
     }),
     headerMountPoint,
   )
-  ReactDom.render(
+  ReactDOM.render(
     React.createElement(QualityReport),
     document.getElementById('qr-root'),
   )

@@ -1,7 +1,7 @@
 <?php
 
-use SubFiltering\Filter;
-use SubFiltering\Filters\RestoreXliffTagsForView;
+use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 
 /**
  * @group regression
@@ -34,7 +34,7 @@ class RestorexlifftagsforviewTest extends AbstractTest
         $this->featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = Filter::getInstance( $this->featureSet );
+        $this->filter = MateCatFilter::getInstance($this->featureSet, 'en-US','it-IT', [] );
 
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+use Matecat\SubFiltering\MateCatFilter;
+
 class setCurrentSegmentController extends ajaxController {
 
     protected $password;
@@ -111,9 +113,11 @@ class setCurrentSegmentController extends ajaxController {
         $_dbReviseStruct = Revise_ReviseStruct::setDefaultValues( $_dbReviseStruct );
         $dbReviseStruct  = self::prepareReviseStructReturnValues( $_dbReviseStruct );
 
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
         $this->result[ 'nextSegmentId' ] = $nextSegmentId;
         $this->result[ 'error_data' ]    = $dbReviseStruct;
-        $this->result[ 'original' ]      = SubFiltering\Filter::getInstance( $this->featureSet )->fromLayer0ToLayer2( $_dbReviseStruct->original_translation );
+        $this->result[ 'original' ]      = MateCatFilter::getInstance( $featureSet, $job_data->source, $job_data->target, [] )->fromLayer0ToLayer2( $_dbReviseStruct->original_translation );
 
     }
 

@@ -294,14 +294,10 @@ class FastAnalysis extends AbstractDaemon {
             throw new Exception( $exceptionMsg, self::ERR_NO_SEGMENTS );
         }
 
-        //TODO Remove when MyMemory FastAnalysis will be rewritten
-        if ( count( $this->segments ) > 100000 ) {
-            throw new Exception( "Project too large. Skip.", self::ERR_TOO_LARGE );
-        }
-
         //compose a lookup array
         $this->segment_hashes = [];
 
+        $total_source_words = 0;
         $fastSegmentsRequest = [];
         foreach ( $this->segments as $pos => $segment ) {
 
@@ -312,6 +308,11 @@ class FastAnalysis extends AbstractDaemon {
 
             //set a reverse lookup array to get the right segment is by its position
             $this->segment_hashes[ $segment[ 'jsid' ] ] = $pos;
+
+            $total_source_words += $segment[ 'raw_word_count' ];
+            if( $total_source_words > INIT::$MAX_SOURCE_WORDS ){
+                throw new Exception( "Project too large. Skip.", self::ERR_TOO_LARGE );
+            }
 
         }
 

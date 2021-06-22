@@ -1,10 +1,16 @@
 import ProjectContainer from './ProjectContainer'
 import TeamConstants from '../../constants/TeamConstants'
+import ManageConstants from '../../constants/ManageConstants'
+import ProjectsStore from '../../stores/ProjectsStore'
+import TeamsStore from '../../stores/TeamsStore'
+import ManageActions from '../../actions/ManageActions'
+import React from 'react'
+import Immutable from 'immutable'
 class ProjectsContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      projects: [],
+      projects: Immutable.fromJS([]),
       more_projects: true,
       reloading_projects: false,
       team: this.props.team,
@@ -220,10 +226,9 @@ class ProjectsContainer extends React.Component {
   }
 
   render() {
-    let self = this
     let projects = this.state.projects
 
-    let items = projects.map((project, i) => (
+    let items = projects.map((project) => (
       <ProjectContainer
         key={project.get('id')}
         project={project}
@@ -232,6 +237,7 @@ class ProjectsContainer extends React.Component {
         downloadTranslationFn={this.props.downloadTranslationFn}
         team={this.state.team}
         teams={this.state.teams}
+        selectedUser={this.props.selectedUser}
       />
     ))
 

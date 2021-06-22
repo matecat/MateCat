@@ -12,4 +12,5 @@ module.exports = keyMirror({
   SET_PROGRESS: null,
   UPDATE_QR: null,
   STORE_SEARCH_RESULT: null,
+  CLIENT_CONNECT: null,
 })

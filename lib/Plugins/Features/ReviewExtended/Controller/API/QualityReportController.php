@@ -67,9 +67,9 @@ class QualityReportController extends KleinController {
 
         $this->project = $this->chunk->getProject();
 
-        $ref_segment = $this->request->param( 'ref_segment' );
+        $ref_segment = (int)$this->request->param( 'ref_segment' );
         $where       = $this->request->param( 'where' );
-        $step        = $this->request->param( 'step' );
+        $step        = (int)$this->request->param( 'step' );
         $filter      = $this->request->param( 'filter' );
 
         if ( empty( $ref_segment ) ) {
@@ -104,9 +104,9 @@ class QualityReportController extends KleinController {
                     'first_segment' => (int)$filesInfo[ 'first_segment' ],
                     'last_segment'  => (int)$filesInfo[ 'last_segment' ],
                     '_params'       => [
-                            'ref_segment' => $this->request->param( 'ref_segment' ),
+                            'ref_segment' => !empty( $ref_segment ) ? $ref_segment : null,
                             'where'       => $this->request->param( 'where' ),
-                            'step'        => $this->request->param( 'step' ),
+                            'step'        => !empty( $this->request->param( 'step' ) ) ? $step : null,
                             'filter'      => $this->request->param( 'filter' ),
                     ],
                     '_links'        => $this->_getPaginationLinks( $segments_ids, $step, $filter )
@@ -126,20 +126,19 @@ class QualityReportController extends KleinController {
      */
     private function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
 
-        $url          = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-        $total        = count( $this->chunk->getSegments() );
-        $itemsPerPage = $step / 2;
-        $pages        = ceil( $total / $itemsPerPage );
+        $url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $total = count( $this->chunk->getSegments() );
+        $pages = ceil( $total / $step );
 
         $links = [
-                "base"                   => INIT::$HTTPHOST,
-                'last_segment_id'        => (int)end($segments_id),
-                "pages"                  => $pages,
-                "items_per_page"         => $itemsPerPage,
-                "total_items"            => $total,
-                "self"                   => $_SERVER[ 'REQUEST_URI' ],
-                "next"                   => null,
-                "prev"                   => null,
+                "base"            => INIT::$HTTPHOST,
+                'last_segment_id' => (int)end( $segments_id ),
+                "pages"           => $pages,
+                "items_per_page"  => $step,
+                "total_items"     => $total,
+                "self"            => $_SERVER[ 'REQUEST_URI' ],
+                "next"            => null,
+                "prev"            => null,
         ];
 
         $filter_query = http_build_query( [ 'filter' => array_filter( $filter ) ] );
@@ -149,7 +148,7 @@ class QualityReportController extends KleinController {
         }
 
         if ( $this->chunk->job_first_segment < reset( $segments_id ) ) {
-            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) * 2 ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty(
+            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty(
                     $filter_query ) ? "&" . $filter_query : null );
         }
 

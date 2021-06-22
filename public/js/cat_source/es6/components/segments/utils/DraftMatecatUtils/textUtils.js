@@ -1,4 +1,5 @@
-import {getXliffRegExpression} from './tagModel'
+import {getXliffRegExpression, tagSignatures, TagStruct} from './tagModel'
+import decodeTagInfo from './decodeTagInfo'
 /**
  *
  * @param segmentString
@@ -35,6 +36,21 @@ export const unescapeHTML = (escapedHTML) => {
   }
 }
 
+export const unescapeHTMLRecursive = (escapedHTML) => {
+  let matchArray
+  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
+
+  try {
+    while ((matchArray = regex.exec(escapedHTML)) !== null) {
+      escapedHTML = unescapeHTML(escapedHTML)
+    }
+  } catch (e) {
+    console.error('Error unescapeHTMLRecursive')
+  }
+
+  return escapedHTML
+}
+
 /**
  *
  * @param escapedHTML
@@ -54,7 +70,7 @@ export const unescapeHTMLLeaveTags = (escapedHTML) => {
 
 export const decodeTagsToPlainText = (text) => {
   let decoded = ''
-  //
+
   if (text) {
     // Match G - temporary until backend put IDs in closing tags </g>
     decoded = TagUtils.matchTag(text)
@@ -62,7 +78,11 @@ export const decodeTagsToPlainText = (text) => {
     decoded = decoded.replace(
       /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
       (match, text) => {
-        return Base64.decode(text)
+        try {
+          return Base64.decode(text)
+        } catch (e) {
+          console.error('Fail decoding tags in text', match, text)
+        }
       },
     )
     // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)

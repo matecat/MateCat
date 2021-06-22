@@ -1,6 +1,6 @@
 <?php
 
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * @group  regression
@@ -31,7 +31,7 @@ class View2rawxliffTest extends AbstractTest {
         $this->featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = Filter::getInstance( $this->featureSet );
+        $this->filter = MateCatFilter::getInstance($this->featureSet, 'en-US','it-IT', [] );
 
     }
 

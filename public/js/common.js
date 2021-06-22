@@ -1,6 +1,6 @@
-APP = null
+window.APP = null
 
-APP = {
+window.APP = {
   teamStorageName: 'defaultTeam',
   init: function () {
     this.setLoginEvents()
@@ -595,7 +595,7 @@ APP = {
     if (_.isUndefined(element)) return
     MutationObserver = window.MutationObserver || window.WebKitMutationObserver
 
-    var observer = new MutationObserver(function (mutations, observer) {
+    var observer = new MutationObserver(function () {
       // fired when a mutation occurs
       callback.call()
     })
@@ -719,14 +719,13 @@ APP = {
 
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
-      return _.filter(config.flash_messages.service, function (service, index) {
+      return _.filter(config.flash_messages.service, function (service) {
         return service.key == name
       })
     }
   },
 
   checkGlobalMassages: function () {
-    var self = this
     if (config.global_message) {
       var messages = JSON.parse(config.global_message)
       $.each(messages, function () {
@@ -758,7 +757,8 @@ APP = {
   },
 
   checkEmail: function (text) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    var re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     if (!re.test(text.trim())) {
       return false
     }
@@ -777,7 +777,7 @@ APP = {
     if (config.isLoggedIn) {
       if (localStorage.getItem(this.teamStorageName)) {
         var lastId = localStorage.getItem(this.teamStorageName)
-        var team = teams.find(function (t, i) {
+        var team = teams.find(function (t) {
           return parseInt(t.id) === parseInt(lastId)
         })
         if (team) {
@@ -833,8 +833,7 @@ APP = {
           if (parseInt(tokenData.code) < 0) {
             var notification = {
               title: 'Error',
-              text:
-                'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact support@matecat.com',
+              text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact support@matecat.com',
               type: 'error',
             }
             APP.addNotification(notification)
@@ -900,7 +899,6 @@ APP = {
       window.googleDriveWindows = {}
     }
 
-    var winName
     if (UI.isSafari) {
       var windowReference = window.open()
     }
@@ -954,7 +952,7 @@ APP = {
           callback()
         }
       })
-      .fail(function (error) {
+      .fail(function () {
         var cookie = Cookies.get(downloadToken)
         if (cookie) {
           var notification = {
@@ -1046,7 +1044,7 @@ APP = {
       timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
     }
     var dd = new Date(date)
-    var timeZoneFrom = timeZoneFrom
+    timeZoneFrom = timeZoneFrom
       ? timeZoneFrom
       : -1 * (new Date().getTimezoneOffset() / 60) //TODO UTC0 ? Why the browser gmt
     dd.setMinutes(dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60)
@@ -1115,10 +1113,11 @@ APP = {
 
   checkQueryParams: function () {
     var action = APP.getParameterByName('action')
+    var interval
     if (action) {
       switch (action) {
         case 'download':
-          var interval = setTimeout(function () {
+          interval = setTimeout(function () {
             $('#downloadProject').trigger('click')
             clearInterval(interval)
           }, 300)
@@ -1126,7 +1125,7 @@ APP = {
           break
         case 'openComments':
           if (MBC.enabled()) {
-            var interval = setInterval(function () {
+            interval = setInterval(function () {
               if ($('.mbc-history-balloon-outer')) {
                 $('.mbc-history-balloon-outer').addClass('mbc-visible')
                 $('#mbc-history').addClass('open')
@@ -1137,7 +1136,7 @@ APP = {
           APP.removeParam('action')
           break
         case 'warnings':
-          var interval = setInterval(function () {
+          interval = setInterval(function () {
             if ($('#notifbox.warningbox')) {
               $('#point2seg').trigger('mousedown')
               clearInterval(interval)

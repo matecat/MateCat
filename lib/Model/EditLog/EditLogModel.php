@@ -1,7 +1,8 @@
 <?php
 
-use SubFiltering\Filters\PlaceHoldXliffTags;
-use SubFiltering\Filters\RestoreXliffTagsForView;
+use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
+use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
+use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * Created by PhpStorm.
@@ -242,7 +243,10 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc .= "%";
 
-            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+
+            $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+            $Filter = MateCatFilter::getInstance( $featureSet, $this->jobData->source, $this->jobData->target, [] );
             $sug_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->suggestion ) );
             $tra_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->translation ) );
 

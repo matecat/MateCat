@@ -1,7 +1,8 @@
+import React from 'react'
+import {TransitionGroup, CSSTransition} from 'react-transition-group'
+
 import AssignToTranslator from './AssignToTranslator'
 import OutsourceVendor from './OutsourceVendor'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
-import OpenJobBox from '../../components/outsource/OpenJobBox'
 
 class OutsourceContainer extends React.Component {
   constructor(props) {
@@ -81,7 +82,7 @@ class OutsourceContainer extends React.Component {
     window.removeEventListener('keydown', this._handleEscKey)
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     let self = this
     if (this.props.openOutsource) {
       setTimeout(function () {

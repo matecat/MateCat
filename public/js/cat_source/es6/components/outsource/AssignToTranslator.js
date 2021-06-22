@@ -1,4 +1,7 @@
+import React from 'react'
+
 import GMTSelect from './GMTSelect'
+
 class AssignToTranslator extends React.Component {
   constructor(props) {
     super(props)
@@ -56,7 +59,7 @@ class AssignToTranslator extends React.Component {
       className: {
         calendar: 'calendar-outsource',
       },
-      onChange: function (date, text, mode) {
+      onChange: function (date, text) {
         if (text === '') return false
         self.checkSendToTranslatorButton()
       },
@@ -73,7 +76,7 @@ class AssignToTranslator extends React.Component {
       time = date.time.split(':')[0]
     }
     $(this.dropdownTime).dropdown({
-      onChange: function (value, text, $selectedItem) {
+      onChange: function () {
         self.checkSendToTranslatorButton()
       },
     })
@@ -81,12 +84,9 @@ class AssignToTranslator extends React.Component {
   }
 
   componentDidMount() {
-    let self = this
     this.initDate()
     this.initTime()
   }
-
-  componentWillUnmount() {}
 
   componentDidUpdate() {
     this.initDate()
@@ -95,12 +95,7 @@ class AssignToTranslator extends React.Component {
   render() {
     let date = new Date()
     let translatorEmail = ''
-    let delivery = ''
     if (this.props.job.get('translator')) {
-      let delivery = APP.fromDateToString(
-        this.props.job.get('translator').get('delivery_timestamp') * 1000,
-      )
-      // date =  delivery.day + ' ' + delivery.month + ' ' + delivery.year + ' at ' + delivery.time;
       date = new Date(
         this.props.job.get('translator').get('delivery_timestamp') * 1000,
       )

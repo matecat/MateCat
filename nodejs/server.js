@@ -1,28 +1,40 @@
-var SseChannel = require( 'sse-channel' );
-var http = require( 'http' );
-var os = require( 'os' );
-var stompit = require( 'stompit' );
-var url = require( 'url' );
-var qs = require( 'querystring' );
-var _ = require( 'lodash' );
-var winston = require( 'winston' );
-var path = require( 'path' );
-var ini = require( 'node-ini' );
+const SseChannel = require( 'sse-channel' );
+const http = require( 'http' );
+const stompit = require( 'stompit' );
+const url = require( 'url' );
+const qs = require( 'querystring' );
+const _ = require( 'lodash' );
+const winston = require( 'winston' );
+const path = require( 'path' );
+const ini = require( 'node-ini' );
+const uuid = require( 'uuid' );
 
-var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
+const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const COMMENTS_TYPE = 'comment';
+const GLOSSARY_TYPE_G = 'glossary_get';
+const GLOSSARY_TYPE_S = 'glossary_set';
+const GLOSSARY_TYPE_D = 'glossary_delete';
+const GLOSSARY_TYPE_U = 'glossary_update';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 
 // Init logger
-winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
-winston.level = config.log.level;
+const logger = winston.createLogger( {
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.Console( {level: 'debug'} ),
+        new winston.transports.File( {filename: path.resolve( __dirname, config.log.file ), level: config.log.level} ),
+    ],
+} );
+
+const allowedOrigins = config.cors.allowedOrigins;
 
 // Connections Options for stompit
-var connectOptions = {
+const connectOptions = {
     'host': config.queue.host,
     'port': config.queue.port,
     'connectHeaders': {
@@ -33,51 +45,47 @@ var connectOptions = {
     }
 };
 
-var subscribeHeaders = {
+const subscribeHeaders = {
     'destination': config.queue.name,
     'ack': 'client-individual'
 };
 
 //SSE Channel Options
-var browserChannel = new SseChannel( {
+const browserChannel = new SseChannel( {
     retryTimeout: 250,
-    historySize: 300, // XXX
+    historySize: 300,
     pingInterval: 15000,
-    jsonEncode: true,
-    cors: {
-        origins: ['*'] // Defaults to []
-    }
+    jsonEncode: true
 } );
 
-/**
- * Function used to create an unique id
- * @param separator
- * @returns {*}
- */
-var generateUid = function ( separator ) {
-    var delim = separator || "";
+const corsAllow = ( req, res ) => {
 
-    function S4() {
-        return (((1 + Math.random()) * 0x10000) | 0).toString( 16 ).substring( 1 );
-    }
-
-    return (S4() + S4() + delim + S4());
-};
+    return allowedOrigins.some( ( element ) => {
+        if ( element === '*' || req.headers['origin'] && req.headers['origin'] === element ) {
+            res.setHeader( 'Access-Control-Allow-Origin', element );
+            res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
+            logger.debug( "Allowed domain " + req.headers['origin'] );
+            return true;
+        } else if ( !req.headers['origin'] ) {
+            logger.debug( "Allowed Request from same origin " + req.headers['host'] );
+            return true;
+        }
+    } );
+}
 
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
-    // winston.debug('browserChannel message', message);
+    // logger.debug('browserChannel message', message);
 } );
 
 //Event triggered when a client disconnect
-browserChannel.on( 'disconnect', function ( context, res ) {
-    winston.debug('browserChannel disconnect', res._clientId);
+browserChannel.on( 'disconnect', ( context, res ) => {
+    logger.debug( 'browserChannel disconnect', res._clientId );
 } );
 
 //Event triggered when a client connect
-browserChannel.on( 'connect', function ( context, req, res ) {
-    // winston.debug('browserChannel connect ', res._clientId, res._matecatJobId);
-
+browserChannel.on( 'connect', ( context, req, res ) => {
+    // logger.debug('browserChannel connect ', res._clientId, res._matecatJobId);
     //Send a message to the client to communicate the clientId
     browserChannel.send( {
         data: {
@@ -91,31 +99,40 @@ browserChannel.on( 'connect', function ( context, req, res ) {
  * We create an HTTP server listening the address in config.path
  * and add new clients to the browserChannel
  */
-http.createServer( function ( req, res ) {
+http.createServer( ( req, res ) => {
+
     // find job id from requested path
-    var parsedUrl = url.parse( req.url );
-    var path = parsedUrl.path;
+    const parsedUrl = url.parse( req.url );
+    const path = parsedUrl.path;
 
+    if ( corsAllow( req, res ) ) {
 
-    if ( path.indexOf( config.server.path ) === 0 ) {
-        var query = qs.parse( parsedUrl.query );
+        if ( path.indexOf( config.server.path ) === 0 ) {
 
-        res._clientId = generateUid();
-        res._matecatJobId = query.jid;
-        res._matecatPw = query.pw;
+            const query = qs.parse( parsedUrl.query );
 
-        browserChannel.addClient( req, res );
+            res._clientId = uuid.v4();
+            res._matecatJobId = query.jid;
+            res._matecatPw = query.pw;
+
+            browserChannel.addClient( req, res );
+
+        } else {
+            res.writeHead( 404 );
+            res.end();
+        }
+
     } else {
-        res.writeHead( 404 );
+        res.writeHead( 401 );
         res.end();
     }
 
-} ).listen( config.server.port, config.server.address, function () {
-    winston.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
+} ).listen( config.server.port, config.server.address, () => {
+    logger.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
 
-var checkCandidate = function ( type, response, message ) {
-    var candidate = false;
+const checkCandidate = ( type, response, message ) => {
+    let candidate;
     switch ( type ) {
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
@@ -142,57 +159,77 @@ var checkCandidate = function ( type, response, message ) {
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;
             break;
+        case GLOSSARY_TYPE_G:
+        case GLOSSARY_TYPE_S:
+        case GLOSSARY_TYPE_D:
+        case GLOSSARY_TYPE_U:
+            candidate = response._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
+                response._clientId === message.data.id_client;
+            break;
         default:
             candidate = false;
     }
+
     return candidate;
 };
 
-var stompMessageReceived = function ( body ) {
-    var message = JSON.parse( body );
+const stompMessageReceived = ( body ) => {
 
-    var dest = _.filter( browserChannel.connections, function ( serverResponse ) {
+    let message = null;
+    try {
+        message = JSON.parse( body );
+    } catch ( e ) {
+        logger.debug( ["Invalid json payload received ", body] );
+        return;
+    }
+
+    const dest = _.filter( browserChannel.connections, ( serverResponse ) => {
         if ( typeof serverResponse._clientId === 'undefined' ) {
             return false;
         }
-
-        var candidate = checkCandidate( message._type, serverResponse, message);
-
-        if ( candidate ) {
-            if ( message._type === CONTRIBUTIONS_TYPE) {
-                winston.debug( 'Contribution segment-id: ' + message.data.payload.id_segment );
-            }
-            winston.debug( 'candidate found', serverResponse._clientId );
-        }
-
-        return candidate;
+        return checkCandidate( message._type, serverResponse, message );
     } );
+
+    if ( !dest || (dest && dest.length === 0) ) {
+        logger.debug( ["Unknown message type, no available recipient found ", message.data.id_client] );
+        return;
+    } else {
+        logger.debug( ['candidate for ' + message._type, dest[0]._clientId] );
+    }
 
     message.data.payload._type = message._type;
 
     browserChannel.send( {
         data: message.data.payload
     }, dest );
+
 };
 
-var startStompConnection = function () {
+const startStompConnection = () => {
 
     /**
      * Start connection with the amq queue
      */
-    stompit.connect( connectOptions, function ( error, client ) {
+    stompit.connect( connectOptions, ( error, client ) => {
 
         if ( typeof client === 'undefined' ) {
             setTimeout( startStompConnection, 10000 );
-            winston.debug( "** client error, restarting connection in 10 seconds", error );
+            logger.debug( "** client error, restarting connection in 10 seconds", error );
             return;
         }
 
-        client.subscribe( subscribeHeaders, function ( error, message ) {
-            winston.debug( '** event received in client subscription' );
+        client.on( "error", () => {
+            client.disconnect();
+            startStompConnection();
+        } );
+
+        client.subscribe( subscribeHeaders, ( error, message ) => {
+
+            logger.debug( '** event received in client subscription' );
 
             if ( error ) {
-                winston.debug( '!! subscribe error ' + error.message );
+                logger.debug( '!! subscribe error ' + error.message );
 
                 client.disconnect();
                 startStompConnection();
@@ -200,16 +237,15 @@ var startStompConnection = function () {
                 return;
             }
 
-            message.readString( 'utf-8', function ( error, body ) {
+            message.readString( 'utf-8', ( error, body ) => {
 
                 if ( error ) {
-                    winston.debug( '!! read message error ' + error.message );
-                    return;
-                }
-                else {
+                    logger.debug( '!! read message error ' + error.message );
+                } else {
                     stompMessageReceived( body );
-                    message.ack();
+                    client.ack( message );
                 }
+
             } );
         } );
     } );

@@ -1,7 +1,6 @@
 <?php
 
-
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 class setSegmentSplitController extends ajaxController {
 
@@ -10,6 +9,11 @@ class setSegmentSplitController extends ajaxController {
     private $segment;
     private $target;
     private $exec;
+
+    /**
+     * @var Jobs_JobStruct
+     */
+    private $jobStruct;
 
     public function __construct() {
 
@@ -82,8 +86,8 @@ class setSegmentSplitController extends ajaxController {
         }
 
         //check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->job_pass );
-        $this->featureSet->loadForProject( $jobStruct->getProject() );
+        $this->jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->job_pass );
+        $this->featureSet->loadForProject( $this->jobStruct->getProject() );
 
     }
 
@@ -100,7 +104,10 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment = $this->id_segment;
         $translationStruct->id_job     = $this->id_job;
 
-        $Filter = Filter::getInstance( $this->featureSet );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance( $featureSet, $this->jobStruct->source, $this->jobStruct->target, [] );
         list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->segment, '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */

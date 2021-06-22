@@ -2,7 +2,7 @@
 
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * Class SearchModelTest
@@ -116,10 +116,15 @@ class SearchModelTest extends AbstractTest {
         $queryParamsStruct[ 'key' ]                                 = $key;
         $queryParamsStruct[ ( $key === 'target' ) ? 'trg' : 'src' ] = $word;
 
+        // jobData
+        $jobData = Jobs_JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
+
         // instantiate the filters
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $filters = Filter::getInstance( $featureSet );
+
+        /** @var MateCatFilter $filters */
+        $filters = MateCatFilter::getInstance( $featureSet, $jobData->source, $jobData->target, [] );
 
         // instantiate the searchModel
         $searchModel = new SearchModel( $queryParamsStruct, $filters );

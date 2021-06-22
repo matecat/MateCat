@@ -138,6 +138,17 @@ class NewController extends ajaxController {
 
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+        /**
+         * ----------------------------------
+         * Note 2021-05-28
+         * ----------------------------------
+         *
+         * We trim every space private_tm_key
+         * in order to avoid mispelling errors
+         *
+         */
+        $this->postInput[ 'private_tm_key' ] = preg_replace("/\s+/", "", $this->postInput[ 'private_tm_key' ]);
+
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
@@ -840,6 +851,7 @@ class NewController extends ajaxController {
     }
 
     private static function __parseTmKeyInput( $tmKeyString ) {
+        $tmKeyString = trim($tmKeyString);
         $tmKeyInfo = explode( ":", $tmKeyString );
         $read      = true;
         $write     = true;

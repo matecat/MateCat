@@ -1,7 +1,9 @@
-import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import assign from 'object-assign'
 import Immutable from 'immutable'
+import _ from 'lodash'
+
+import AppDispatcher from './AppDispatcher'
 import QRConstants from '../constants/QualityReportConstants'
 
 EventEmitter.prototype.setMaxListeners(0)
@@ -51,7 +53,7 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
     this._lastSegment = segmentsData._links.last_segment_id
   },
 
-  emitChange: function (event, args) {
+  emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })

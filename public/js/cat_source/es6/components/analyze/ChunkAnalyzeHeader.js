@@ -1,3 +1,5 @@
+import React from 'react'
+
 class ChunkAnalyzeHeader extends React.Component {
   constructor(props) {
     super(props)
@@ -50,7 +52,7 @@ class ChunkAnalyzeHeader extends React.Component {
 
   componentDidUpdate() {
     let self = this
-    let changedData = _.pick(this.dataChange, function (item, i, array) {
+    let changedData = _.pick(this.dataChange, function (item) {
       return item === true
     })
     if (_.size(changedData) > 0) {
@@ -63,11 +65,7 @@ class ChunkAnalyzeHeader extends React.Component {
     }
   }
 
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate() {
     return true
   }
 

@@ -5,16 +5,20 @@ namespace XliffReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use QA;
-use SubFiltering\Filter;
-use SubFiltering\Filters\DataRefReplace;
+use Matecat\SubFiltering\MateCatFilter;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
 
     /**
-     * @var Filter
+     * @var MateCatFilter
      */
     private $filter;
 
+
+    /**
+     * @var string
+     */
+    private $sourceLang;
 
     /**
      * @var string
@@ -30,13 +34,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * XliffReplacerCallback constructor.
      *
      * @param \FeatureSet $featureSet
+     * @param string      $sourceLang
      * @param string      $targetLang
      *
      * @throws \Exception
      */
-    public function __construct( \FeatureSet $featureSet, $targetLang ) {
-        $this->filter     = Filter::getInstance( $featureSet );
+    public function __construct( \FeatureSet $featureSet, $sourceLang, $targetLang ) {
+        $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
         $this->featureSet = $featureSet;
+        $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
     }
 
@@ -68,6 +74,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         $check = new QA ( $segment, $translation );
         $check->setFeatureSet( $this->featureSet );
         $check->setTargetSegLang( $this->targetLang );
+        $check->setSourceSegLang( $this->sourceLang );
         $check->performTagCheckOnly();
 
         return $check->thereAreErrors();

@@ -1,4 +1,8 @@
-$.extend(UI, {
+if (!window.UI) {
+  window.UI = {}
+}
+
+$.extend(window.UI, {
   sendJobToTranslator: function (email, date, timezone, job, project) {
     API.JOB.sendTranslatorRequest(email, date, timezone, job)
       .done(function (data) {
@@ -47,10 +51,10 @@ $.extend(UI, {
       allowHtml: true,
       timer: 10000,
     }
-    var boxUndo = APP.addNotification(notification)
+    APP.addNotification(notification)
     ManageActions.changeJobPasswordFromOutsource(
-      project.id,
-      job.id,
+      project,
+      job,
       job.password,
       response.job.password,
     )
@@ -158,8 +162,7 @@ $.extend(UI, {
     APP.ModalWindow.onCloseModal()
     var notification = {
       title: 'Problems sending the job',
-      text:
-        'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+      text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
       type: 'error',
       position: 'bl',
       allowHtml: true,

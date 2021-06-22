@@ -1,5 +1,5 @@
 import {tagSignatures} from './tagModel'
-import {getIdAttributeRegEx, unescapeHTML} from './textUtils'
+import {getIdAttributeRegEx, unescapeHTMLRecursive} from './textUtils'
 
 /**
  *
@@ -32,10 +32,9 @@ const decodeTagInfo = (tag) => {
         decodedTagData.content = decodeNeeded
           ? atob(contentMatch[1])
           : contentMatch[1]
-        decodedTagData.content = unescapeHTML(decodedTagData.content).replace(
-          /\n/g,
-          ' ',
-        )
+        decodedTagData.content = unescapeHTMLRecursive(
+          decodedTagData.content,
+        ).replace(/\n/g, ' ')
       } else if (tagPlaceholder) {
         decodedTagData.content = tagSignatures[tagName].placeholder
       }

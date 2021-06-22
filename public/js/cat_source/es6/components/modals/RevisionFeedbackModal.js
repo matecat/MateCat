@@ -1,4 +1,4 @@
-import classnames from 'classnames'
+import React from 'react'
 
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
@@ -28,8 +28,7 @@ class RevisionFeedbackModal extends React.Component {
       .fail(() => {
         var notification = {
           title: 'Feedback not sent',
-          text:
-            'An error occurred while sending feedback please try again or contact support.',
+          text: 'An error occurred while sending feedback please try again or contact support.',
           type: 'error',
         }
         APP.addNotification(notification)

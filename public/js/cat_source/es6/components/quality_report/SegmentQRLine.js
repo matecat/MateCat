@@ -1,8 +1,6 @@
-class SegmentQRLine extends React.Component {
-  constructor(props) {
-    super(props)
-  }
+import React from 'react'
 
+class SegmentQRLine extends React.Component {
   allowHTML(string) {
     return {__html: string}
   }

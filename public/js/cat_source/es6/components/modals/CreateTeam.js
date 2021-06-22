@@ -1,3 +1,5 @@
+import React from 'react'
+import ManageActions from '../../actions/ManageActions'
 class CreateTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -57,7 +59,7 @@ class CreateTeam extends React.Component {
     })
   }
 
-  handleKeyPress(e) {
+  handleKeyPress() {
     if (this.inputNewOrg.value.length > 0) {
       this.setState({
         readyToSend: true,
