@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import $ from 'jquery'
+// import $ from 'jquery'
 
 import JobSummary from './JobSummary'
 import SegmentsDetails from './SegmentsDetailsContainer'
