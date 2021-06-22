@@ -5,7 +5,7 @@ namespace API\V2\Json;
 use Chunks_ChunkStruct;
 use FeatureSet;
 use LQA\EntryStruct;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 class SegmentVersion {
 
@@ -144,7 +144,9 @@ class SegmentVersion {
      * @throws \Exception
      */
     public function renderItem( $version ) {
-        $Filter = Filter::getInstance( $this->chunk->source, $this->chunk->target, $this->featureSet );
+
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         return [
                 'id'              => (int)$version->id,

@@ -1,6 +1,4 @@
-import ProductionSummary from './ProductionSummary'
-import QualitySummaryTable from './QualitySummaryTable'
-import QualitySummaryTableOld from './QualitySummaryTableOldRevise'
+import React from 'react'
 
 class RevisionFeedback extends React.Component {
   render() {

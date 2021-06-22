@@ -1,7 +1,9 @@
 import {rest} from 'msw'
-import {screen, waitFor} from '@testing-library/react'
+import React from 'react'
+import {screen, waitFor, render} from '@testing-library/react'
 
-import {mswServer} from '../mocks/mswServer'
+import {mswServer} from '../../../../../mocks/mswServer'
+import Dashboard from './Dashboard'
 
 test('renders properly', async () => {
   mswServer.use(
@@ -102,15 +104,14 @@ test('renders properly', async () => {
     isLoggedIn: true,
   }
 
-  require('./lib/diff_match_patch')
-  require('./common')
-  require('./user_store')
-  require('./login')
-  require('./cat_source/es6/react-libs')
-  require('./cat_source/es6/components')
-  require('./cat_source/es6/ajax_utils/teamAjax')
-  require('./cat_source/es6/ajax_utils/projectsAjax')
-  require('./cat_source/es6/ajax_utils/jobAjax')
+  require('../../../../common')
+  require('../../../../user_store')
+  require('../../../../login')
+  require('../../../../cat_source/es6/react-libs')
+  require('../../../../cat_source/es6/components')
+  require('../../../../cat_source/es6/ajax_utils/teamAjax')
+  require('../../../../cat_source/es6/ajax_utils/projectsAjax')
+  require('../../../../cat_source/es6/ajax_utils/jobAjax')
 
   {
     const elHeader = document.createElement('header')
@@ -124,10 +125,7 @@ test('renders properly', async () => {
     document.body.appendChild(elContainer)
   }
 
-  await import('./manage')
-
-  UI.init()
-  UI.render()
+  render(<Dashboard />)
 
   await waitFor(() => {
     expect(screen.getByPlaceholderText('Search by project name')).toBeVisible()

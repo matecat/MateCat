@@ -14,7 +14,6 @@ window.NotificationBox =
 
 window.ManageConstants = require('./constants/ManageConstants')
 
-window.ManageActions = require('./actions/ManageActions')
 window.AnalyzeActions = require('./actions/AnalyzeActions')
 window.TeamsActions = require('./actions/TeamsActions')
 window.ModalsActions = require('./actions/ModalsActions')
@@ -22,14 +21,11 @@ window.OutsourceActions = require('./actions/OutsourceActions')
 window.CatToolActions = require('./actions/CatToolActions')
 window.SegmentActions = require('./actions/SegmentActions')
 window.CommentsActions = require('./actions/CommentsActions')
+window.ManageActions = require('./actions/ManageActions')
 
-window.ProjectsStore = require('./stores/ProjectsStore')
-window.TeamsStore = require('./stores/TeamsStore')
 window.SegmentStore = require('./stores/SegmentStore')
 window.CatToolStore = require('./stores/CatToolStore')
 
-window.ProjectsContainer =
-  require('./components/projects/ProjectsContainer').default
 window.Header = require('./components/header/Header').default
 window.JobMetadata = require('./components/header/cattol/JobMetadata').default
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default

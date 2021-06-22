@@ -3,10 +3,10 @@
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Matecat\Finder\WholeTextFinder;
+use Matecat\SubFiltering\MateCatFilter;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
-use SubFiltering\Filter;
 
 class getSearchController extends ajaxController {
 
@@ -130,7 +130,9 @@ class getSearchController extends ajaxController {
         //get Job Info
         $this->job_data = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
 
-        $filter            = Filter::getInstance( $this->job_data->source, $this->job_data->target, $this->featureSet );
+        /** @var MateCatFilter $filter */
+        $featureSet        = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $filter            = MateCatFilter::getInstance( $featureSet, $this->job_data->source, $this->job_data->target, [] );
         $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
@@ -368,10 +370,10 @@ class getSearchController extends ajaxController {
             ];
 
             if ( $old_translation->translation !== $tRow[ 'translation' ] && in_array( $old_translation->status, [
-                    Constants_TranslationStatus::STATUS_TRANSLATED,
-                    Constants_TranslationStatus::STATUS_APPROVED,
-                    Constants_TranslationStatus::STATUS_REJECTED
-            ] )
+                            Constants_TranslationStatus::STATUS_TRANSLATED,
+                            Constants_TranslationStatus::STATUS_APPROVED,
+                            Constants_TranslationStatus::STATUS_REJECTED
+                    ] )
             ) {
                 $TPropagation                             = new Translations_SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
@@ -402,7 +404,8 @@ class getSearchController extends ajaxController {
                 }
             }
 
-            $filter = Filter::getInstance( $this->job_data->source, $this->job_data->target,  $this->featureSet );
+            $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+            $filter              = MateCatFilter::getInstance( $featureSet, $this->job_data->source, $this->job_data->target, [] );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 

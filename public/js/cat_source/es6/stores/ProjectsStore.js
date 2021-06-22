@@ -185,7 +185,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
     }
   },
 
-  emitChange: function (event, args) {
+  emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
@@ -281,6 +281,7 @@ AppDispatcher.register(function (action) {
       break
     case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
       ProjectsStore.changeProjectAssignee(action.project, action.user)
+      ProjectsStore.emitChange(action.actionType, action.project, action.user)
       ProjectsStore.emitChange(
         ManageConstants.UPDATE_PROJECTS,
         ProjectsStore.projects,
@@ -325,6 +326,17 @@ AppDispatcher.register(function (action) {
       ProjectsStore.emitChange(
         ManageConstants.RENDER_PROJECTS,
         ProjectsStore.projects,
+      )
+      break
+    case ManageConstants.RELOAD_PROJECTS:
+      ProjectsStore.emitChange(action.actionType)
+      break
+    case ManageConstants.FILTER_PROJECTS:
+      ProjectsStore.emitChange(
+        action.actionType,
+        action.memberUid,
+        action.name,
+        action.status,
       )
       break
   }

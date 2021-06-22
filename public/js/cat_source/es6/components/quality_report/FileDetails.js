@@ -1,3 +1,5 @@
+import React from 'react'
+
 import SegmentQR from './SegmentQR'
 
 class FileDetails extends React.Component {

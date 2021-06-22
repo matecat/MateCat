@@ -36,6 +36,11 @@ const cssWatchFilesUploadPage = [
 ]
 const cssWatchManage = [cssBase + 'sass/commons/*']
 
+const babelifyTransform = [
+  'babelify',
+  {presets: ['@babel/preset-react', ['@babel/preset-env']]},
+]
+
 module.exports = function (grunt) {
   const conf = grunt.file.read(incPath + 'version.ini')
   const version = conf
@@ -58,12 +63,7 @@ module.exports = function (grunt) {
     browserify: {
       components: {
         options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
+          transform: [babelifyTransform],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
           },
@@ -77,12 +77,7 @@ module.exports = function (grunt) {
       },
       qualityReport: {
         options: {
-          transform: [
-            [
-              'babelify',
-              {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-            ],
-          ],
+          transform: [babelifyTransform],
           browserifyOptions: {
             paths: [__dirname + '/node_modules'],
           },
@@ -90,6 +85,17 @@ module.exports = function (grunt) {
         },
         src: `${basePath}cat_source/es6/components/quality_report/QualityReport.js`,
         dest: buildPath + 'qa-report.js',
+      },
+      manage: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [basePath + 'cat_source/es6/components/projects/Dashboard.js'],
+        dest: buildPath + 'manage-components.js',
       },
     },
 
@@ -229,7 +235,13 @@ module.exports = function (grunt) {
         src: [basePath + 'lib/semantic.min.js'],
         dest: buildPath + 'semantic.js',
       },
-
+      manage: {
+        src: [
+          basePath + 'outsource.js',
+          basePath + 'cat_source/es6/ajax_utils/*.js',
+        ],
+        dest: buildPath + 'manage.js',
+      },
       common: {
         src: [
           basePath + 'common.js',
@@ -238,14 +250,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
         ],
         dest: buildPath + 'common.js',
-      },
-      manage: {
-        src: [
-          basePath + 'manage.js',
-          basePath + 'outsource.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'manage.js',
       },
       analyze_new: {
         src: [
@@ -459,13 +463,14 @@ module.exports = function (grunt) {
   grunt.registerTask('bundle:js', [
     'browserify:components',
     'browserify:qualityReport',
+    'browserify:manage',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
     'concat:app',
     'concat:common',
-    'concat:manage',
     'concat:analyze_new',
+    'concat:manage',
     'concat:upload',
     'replace:version',
   ])
@@ -481,13 +486,14 @@ module.exports = function (grunt) {
   grunt.registerTask('bundleDev:js', [
     'browserify:components',
     'browserify:qualityReport',
+    'browserify:manage',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
     'concat:app',
     'concat:common',
-    'concat:manage',
     'concat:analyze_new',
+    'concat:manage',
     'concat:upload',
     'replace:version',
   ])

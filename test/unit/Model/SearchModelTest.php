@@ -2,7 +2,7 @@
 
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * Class SearchModelTest
@@ -122,7 +122,9 @@ class SearchModelTest extends AbstractTest {
         // instantiate the filters
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $filters = Filter::getInstance( $jobData->source, $jobData->target, $featureSet );
+
+        /** @var MateCatFilter $filters */
+        $filters = MateCatFilter::getInstance( $featureSet, $jobData->source, $jobData->target, [] );
 
         // instantiate the searchModel
         $searchModel = new SearchModel( $queryParamsStruct, $filters );

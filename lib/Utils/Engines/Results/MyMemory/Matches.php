@@ -1,6 +1,6 @@
 <?php
 
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 class Engines_Results_MyMemory_Matches {
 
@@ -155,7 +155,8 @@ class Engines_Results_MyMemory_Matches {
      */
     protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
-        $filter = Filter::getInstance( $this->source, $this->target, $this->featureSet, $dataRefMap );
+        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
+        $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
         switch ( $layerNum ) {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string );

@@ -7,7 +7,7 @@
  *
  */
 
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * Description of QATest
@@ -16,8 +16,9 @@ use SubFiltering\Filter;
  */
 class Tests_TagPositionTest extends AbstractTest {
 
-    /** @var Filter */
+    /** @var MateCatFilter */
     protected $filter;
+
     /** @var FeatureSet */
     protected $featureSet;
 
@@ -33,7 +34,7 @@ class Tests_TagPositionTest extends AbstractTest {
         $this->featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = Filter::getInstance( 'en-EN','it-IT', $this->featureSet );
+        $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-EN','it-IT', [] );
 
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use Contribution\Request;
+use Matecat\SubFiltering\MateCatFilter;
 
 class getContributionController extends ajaxController {
 
@@ -152,6 +153,8 @@ class getContributionController extends ajaxController {
      */
     protected function _getContexts($source, $target) {
 
+        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new \FeatureSet();
+
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
                 [
@@ -161,9 +164,9 @@ class getContributionController extends ajaxController {
                 ]
         );
 
-        $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
+        $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $Filter = \SubFiltering\Filter::getInstance( $source, $target, $this->featureSet );
+        $Filter = MateCatFilter::getInstance( $featureSet, $source, $target, [] );
 
         $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
         $this->text           = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );

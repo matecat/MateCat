@@ -2,6 +2,7 @@
 
 use Features\ReviewExtended\ReviewUtils;
 use Features\ReviewExtended\Model\QualityReportDao;
+use Matecat\SubFiltering\MateCatFilter;
 
 class setRevisionController extends ajaxController {
 
@@ -96,11 +97,14 @@ class setRevisionController extends ajaxController {
             return;
         }
 
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
         $job_data = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password_job );
         $project  = $job_data->getProject();
-        $this->featureSet->loadForProject( $project );
+        $featureSet->loadForProject( $project );
 
-        $Filter = \SubFiltering\Filter::getInstance( $job_data->source, $job_data->target, $this->featureSet );
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance( $featureSet, $job_data->source, $job_data->target, [] );
 
         list( $original_translation, $none ) = CatUtils::parseSegmentSplit( $this->_postInput[ 'original' ], '', $Filter );
 

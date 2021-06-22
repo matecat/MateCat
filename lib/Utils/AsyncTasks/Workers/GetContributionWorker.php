@@ -16,7 +16,7 @@ use FeatureSet;
 use INIT;
 use PostProcess;
 use Stomp;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -186,7 +186,8 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
-        $Filter = Filter::getInstance( $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, $featureSet, json_decode($contributionStruct->dataRefMap, true) );
+        $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, json_decode($contributionStruct->dataRefMap,
+                true) );
 
         foreach ( $matches as &$match ) {
             $match[ 'target' ] = $targetLang;
@@ -520,7 +521,7 @@ class GetContributionWorker extends AbstractWorker {
 
         if ( count( $matches ) > 0 ) {
 
-            $Filter = Filter::getInstance( $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, $featureSet );
+            $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
 
             foreach ( $matches as $k => $m ) {
 

@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+use Matecat\SubFiltering\MateCatFilter;
 use Segments\ContextGroupDao;
 
 class getSegmentsController extends ajaxController {
@@ -62,7 +63,9 @@ class getSegmentsController extends ajaxController {
         $this->job     = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         $this->project = $this->job->getProject();
 
-        $this->featureSet->loadForProject( $this->project );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
+        $featureSet->loadForProject( $this->project );
 
         $lang_handler = Langs_Languages::getInstance();
 
@@ -103,7 +106,7 @@ class getSegmentsController extends ajaxController {
                 $this->data[ $id_file ][ 'segments' ]    = [];
             }
 
-            $seg = $this->featureSet->filter( 'filter_get_segments_segment_data', $seg );
+            $seg = $featureSet->filter( 'filter_get_segments_segment_data', $seg );
 
             $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( $seg[ 'time_to_edit' ] );
 
@@ -115,7 +118,8 @@ class getSegmentsController extends ajaxController {
             // inject original data ref map (FOR XLIFF 2.0)
             $data_ref_map          = json_decode( $seg[ 'data_ref_map' ], true );
             $seg[ 'data_ref_map' ] = $data_ref_map;
-            $Filter                = \SubFiltering\Filter::getInstance( $this->job->source, $this->job->target, $this->featureSet, null !== $data_ref_map ? $data_ref_map : [] );
+
+            $Filter     = MateCatFilter::getInstance( $featureSet, $this->job->source, $this->job->target, null !== $data_ref_map ? $data_ref_map : [] );
 
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
@@ -137,7 +141,7 @@ class getSegmentsController extends ajaxController {
         $this->result[ 'data' ][ 'files' ] = $this->data;
         $this->result[ 'data' ][ 'where' ] = $this->where;
 
-        $this->result[ 'data' ] = $this->featureSet->filter( 'filterGetSegmentsResult', $this->result[ 'data' ], $this->job );
+        $this->result[ 'data' ] = $featureSet->filter( 'filterGetSegmentsResult', $this->result[ 'data' ], $this->job );
     }
 
     private function getOptionalQueryFields() {

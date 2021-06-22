@@ -7,14 +7,14 @@
  *
  */
 
-use SubFiltering\Filter;
-use SubFiltering\Filters\LtGtDecode;
-use SubFiltering\Filters\LtGtDoubleDecode;
+use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Filters\LtGtDecode;
+use Matecat\SubFiltering\Filters\LtGtDoubleDecode;
 
 class ParseSplittedSegmentTest extends AbstractTest {
 
     /**
-     * @var \SubFiltering\Filter
+     * @var MateCatFilter
      */
     protected $filter;
 

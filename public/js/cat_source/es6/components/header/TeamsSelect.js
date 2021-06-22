@@ -4,6 +4,9 @@ import ManageConstants from '../../constants/ManageConstants'
 import TeamsStore from '../../stores/TeamsStore'
 import IconDown from '../icons/IconDown'
 import IconSettings from '../icons/IconSettings'
+import ManageActions from '../../actions/ManageActions'
+import TeamsActions from '../../actions/TeamsActions'
+import ModalsActions from '../../actions/ModalsActions'
 
 class TeamsSelect extends React.Component {
   constructor(props) {

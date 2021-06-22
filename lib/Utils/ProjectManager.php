@@ -20,7 +20,7 @@ use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\XliffUtils\XliffVersionDetector;
 use ProjectManager\ProjectManagerModel;
-use SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -89,6 +89,10 @@ class ProjectManager {
      * @var Database|IDatabase
      */
     protected $dbHandler;
+
+    /**
+     * @var MateCatFilter
+     */
     protected $filter;
 
     /**
@@ -191,7 +195,7 @@ class ProjectManager {
 
         $this->_log( $this->features->getCodes() );
 
-        $this->filter = Filter::getInstance( $this->features );
+        $this->filter = MateCatFilter::getInstance( $this->features, null, null, [] );
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',
@@ -434,9 +438,10 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        $this->features->run( 'validateProjectCreation', $this->projectStructure );
+        $featureSet = ( $this->features !== null ) ? $this->features : new \FeatureSet();
+        $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
-        $this->filter = Filter::getInstance( $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], $this->features );
+        $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [] );
 
         /**
          * @var ArrayObject $this ->projectStructure['result']['errors']
@@ -756,7 +761,7 @@ class ProjectManager {
                 throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
             }
 
-            $this->features->run( "beforeInsertSegments", $this->projectStructure,
+            $featureSet->run( "beforeInsertSegments", $this->projectStructure,
                     [
                             'total_project_segments' => $this->total_segments,
                             'files_wc'               => $this->files_word_count
@@ -855,11 +860,11 @@ class ProjectManager {
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
         ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
 
-        $this->features->run( 'postProjectCreate', $this->projectStructure );
+        $featureSet->run( 'postProjectCreate', $this->projectStructure );
 
         Database::obtain()->commit();
 
-        $this->features->run( 'postProjectCommit', $this->projectStructure );
+        $featureSet->run( 'postProjectCommit', $this->projectStructure );
 
         try {
 

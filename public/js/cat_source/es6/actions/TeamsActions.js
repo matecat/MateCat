@@ -17,18 +17,6 @@ let TeamsActions = {
     })
   },
 
-  createTeam: function (teamName, members) {
-    let team
-    let self = this
-    return API.TEAM.createTeam(teamName, members).done(function (response) {
-      team = response.team
-      AppDispatcher.dispatch({
-        actionType: TeamConstants.ADD_TEAM,
-        team: team,
-      })
-    })
-  },
-
   updateTeam: function (team) {
     API.TEAM.getTeamMembers(team.id).then(function (data) {
       team.members = data.members

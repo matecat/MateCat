@@ -1,5 +1,4 @@
 import React from 'react'
-
 import TeamSelect from './TeamsSelect'
 import ProjectInfo from './HeaderProjectInfo'
 import FilterProjects from './manage/FilterProjects'
