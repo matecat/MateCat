@@ -19,8 +19,8 @@
       UI.initOptionsTip()
       UI.initTmxTooltips()
       //Fix: When you move to a page using the browser arrow the checkbox seems to be not checked
-      $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true);
-      $('#inactivetm').find('tr.mine input').prop('checked', false);
+      $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true)
+      $('#inactivetm').find('tr.mine input').prop('checked', false)
 
       UI.checkTMKeysUpdateChecks()
       UI.checkCrossLanguageSettings()
@@ -762,8 +762,7 @@
               callback: 'continueTMDisable',
               okTxt: 'Continue',
               context: JSON.stringify(data),
-              msg:
-                'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
+              msg: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
             })
             return false
           }
@@ -1226,14 +1225,12 @@
     allTMUploadsCompleted: function () {
       if ($('#activetm .uploadfile.uploading').length) {
         APP.alert({
-          msg:
-            'There is one or more TM uploads in progress. Try again when all uploads are completed!',
+          msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!',
         })
         return false
       } else if ($('tr td a.downloading').length) {
         APP.alert({
-          msg:
-            'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
+          msg: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
         })
         return false
       } else {
@@ -2419,7 +2416,8 @@
         '</span> has been shared.'
 
       var validateEmail = function (emails) {
-        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        var re =
+          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         var result = true
         emails.split(',').forEach(function (email) {
           if (!re.test(email.trim())) result = email

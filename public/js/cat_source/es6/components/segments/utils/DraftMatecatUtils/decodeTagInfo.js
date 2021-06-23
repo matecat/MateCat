@@ -32,10 +32,9 @@ const decodeTagInfo = (tag) => {
         decodedTagData.content = decodeNeeded
           ? atob(contentMatch[1])
           : contentMatch[1]
-        decodedTagData.content = unescapeHTMLRecursive(decodedTagData.content).replace(
-          /\n/g,
-          ' ',
-        )
+        decodedTagData.content = unescapeHTMLRecursive(
+          decodedTagData.content,
+        ).replace(/\n/g, ' ')
       } else if (tagPlaceholder) {
         decodedTagData.content = tagSignatures[tagName].placeholder
       }
