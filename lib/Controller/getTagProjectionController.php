@@ -104,11 +104,12 @@ class getTagProjectionController extends ajaxController {
         $engine = Engine::getInstance( 1 );
         $engine->setFeatureSet( $this->featureSet );
 
-        $dateRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment );
+        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment );
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $this->source_lang, $this->target_lang, $dateRefMap );
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->source_lang, $this->target_lang, $dataRefMap );
 
         $config                  = [];
+        $config[ 'dataRefMap' ]  = $dataRefMap;
         $config[ 'source' ]      = $Filter->fromLayer2ToLayer1( $this->source );
         $config[ 'target' ]      = $Filter->fromLayer2ToLayer1( $this->target );
         $config[ 'source_lang' ] = $this->source_lang;
@@ -131,7 +132,6 @@ class getTagProjectionController extends ajaxController {
         }
 
         \Log::$fileName = $this->old_logFile;
-
     }
 
     public function logTagProjection( $msg = null ) {

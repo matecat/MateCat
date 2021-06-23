@@ -12,6 +12,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     protected $content_type = 'json';
 
     protected $_config = [
+            'dataRefMap'    => [],
             'segment'       => null,
             'translation'   => null,
             'tnote'         => null,
@@ -54,35 +55,37 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
+        $dataRefMap = isset($this->_config['dataRefMap']) ? $this->_config['dataRefMap'] : [];
+
         $result_object = null;
 
         switch ( $functionName ) {
             case 'tags_projection' :
-                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'api_key_check_auth_url':
-                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'api_key_create_user_url':
-                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
-                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
             case 'tmx_export_email_url' :
             case 'glossary_export_relative_url' :
-                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'analyze_url':
-                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'contribute_relative_url':
             case 'update_relative_url':
-                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             default:
 
@@ -833,10 +836,14 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function getTagProjection( $config ) {
 
-        $parameters           = [];
-        $parameters[ 's' ]    = $config[ 'source' ];
-        $parameters[ 't' ]    = $config[ 'target' ];
-        $parameters[ 'hint' ] = $config[ 'suggestion' ];
+        // set dataRefMap needed to instance
+        // Engines_Results_MyMemory_TagProjectionResponse class
+        $this->_config[ 'dataRefMap' ] = isset($config[ 'dataRefMap' ]) ? $config[ 'dataRefMap' ] : [];
+
+        $parameters                 = [];
+        $parameters[ 's' ]          = $config[ 'source' ];
+        $parameters[ 't' ]          = $config[ 'target' ];
+        $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
         $this->engineRecord->base_url                    .= ':10000';
         $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";

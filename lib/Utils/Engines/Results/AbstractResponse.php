@@ -25,14 +25,14 @@ abstract class Engines_Results_AbstractResponse {
      */
     protected $featureSet;
 
-    public static function getInstance( $result, FeatureSet $featureSet = null ){
+    public static function getInstance( $result, FeatureSet $featureSet = null, array $dataRefMap = []){
 
         $class = get_called_class(); // late static binding, note: php >= 5.3
 
         /**
          * @var Engines_Results_AbstractResponse $instance
          */
-        $instance = new $class( $result );
+        $instance = new $class( $result, $dataRefMap );
 
         if ( is_array( $result ) and array_key_exists( "error", $result ) ) {
             $instance->error = new Engines_Results_ErrorMatches( $result[ 'error' ] );
