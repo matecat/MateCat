@@ -7,6 +7,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
+import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 
 class SegmentFooterTabConcordance extends React.Component {
@@ -158,6 +159,11 @@ class SegmentFooterTabConcordance extends React.Component {
             </li>
             <ul className={'graysmall-details'}>
               <li>{item.last_update_date}</li>
+              <li className={'graydesc'}>
+                <span className={'bold'}>
+                  {CommonUtils.getLanguageNameFromLocale(item.target)}
+                </span>
+              </li>
               <li className={'graydesc'}>
                 Source: <span className={'bold'}>{cb}</span>
               </li>
