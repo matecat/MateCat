@@ -3,6 +3,8 @@ import {rest} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
 
+jest.setTimeout(30000)
+
 test('renders properly', async () => {
   mswServer.use(
     rest.get(
