@@ -174,8 +174,10 @@ class getSearchController extends ajaxController {
 
     /**
      * Perform a regular search
+     *
+     * @param bool $strictMode
      */
-    private function doSearch() {
+    private function doSearch($strictMode = false) {
 
         if ( !empty( $this->source ) and !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'coupled';
@@ -192,7 +194,7 @@ class getSearchController extends ajaxController {
         }
 
         try {
-            $res = $this->searchModel->search();
+            $res = $this->searchModel->search($strictMode);
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -1000, "message" => "internal error: see the log" ];
 
@@ -213,7 +215,7 @@ class getSearchController extends ajaxController {
         $search_results = [];
 
         // perform a regular search
-        $this->doSearch();
+        $this->doSearch(true);
 
         // and then hydrate the $search_results array
         foreach ( $this->result[ 'segments' ] as $segmentId ) {
