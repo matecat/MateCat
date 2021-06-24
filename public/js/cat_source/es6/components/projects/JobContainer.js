@@ -321,7 +321,7 @@ class JobContainer extends React.Component {
         onClick={this.downloadTranslation}
         ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
       >
-        <i className="icon-eye icon" /> Preview
+        <i className="icon-eye icon" /> Draft
       </a>
     )
     if (
