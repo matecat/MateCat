@@ -38,7 +38,7 @@ class ReviewExtendedCategorySelector extends React.Component {
       active: this.props.active,
       classCatName: true,
     })
-    if (this.props.category.severities.length > 5) {
+    if (this.props.category.severities.length > 6) {
       severities = this.props.category.severities.map((severity, i) => {
         return (
           <div
@@ -83,6 +83,7 @@ class ReviewExtendedCategorySelector extends React.Component {
           this.props.category.severities.length === 1
             ? severity.label
             : severity.label.substring(0, 3)
+        const sevName = severity.code ? severity.code : label
         return (
           <button
             key={'value-' + severity.label}
@@ -90,7 +91,7 @@ class ReviewExtendedCategorySelector extends React.Component {
             className={'ui ' + buttonClass + ' attached button'}
             title={severity.label}
           >
-            {label}
+            {sevName}
           </button>
         )
       })
