@@ -574,12 +574,12 @@ class SegmentQR extends React.Component {
                   </div>
                 ) : null}
 
-                {this.state.r1QaOpen ? (
+                {this.state.r1QaOpen && this.issuesR1 ? (
                   <div className="qr-issues-list" key={'issues-r1-qa'}>
                     {this.getHumanQaHtml(this.issuesR1)}
                   </div>
                 ) : null}
-                {this.state.r2QaOpen ? (
+                {this.state.r2QaOpen && this.issuesR2 ? (
                   <div className="qr-issues-list" key={'issues-r2-qa'}>
                     {this.getHumanQaHtml(this.issuesR2)}
                   </div>
