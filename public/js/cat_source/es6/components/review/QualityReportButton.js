@@ -79,7 +79,8 @@ export class QualityReportButton extends React.Component {
             <li className="item">
               <a
                 title="Open QR"
-                onClick={() => {
+                onClick={(event) => {
+                  event.stopPropagation()
                   window.open(quality_report_href, '_blank')
                 }}
               >
