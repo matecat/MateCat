@@ -96,7 +96,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                     }
                 }
 
-                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded, $this->featureSet );
+                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
         }
 
