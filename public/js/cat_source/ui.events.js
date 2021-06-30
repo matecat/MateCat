@@ -1,7 +1,7 @@
 /*
 	Component: ui.events
  */
-$.extend(UI, {
+$.extend(window.UI, {
   bindShortcuts: function () {
     $('body')
       .on(

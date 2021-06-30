@@ -1,5 +1,5 @@
 ;(function ($, undefined) {
-  $.extend(UI, {
+  $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          Tag Proj start
          */

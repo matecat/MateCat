@@ -1,11 +1,11 @@
-ReviewSimple = {
+window.ReviewSimple = {
   enabled: function () {
     return config.enableReview && config.isReview && Review.type === 'simple'
   },
   type: config.reviewType,
 }
 
-if (ReviewSimple.enabled()) {
+if (window.ReviewSimple.enabled()) {
   ;(function (Review, $, undefined) {
     /**
      * Events

@@ -2,7 +2,7 @@
  Component: ui.header
  */
 
-$.extend(UI, {
+$.extend(window.UI, {
   initHeader: function () {
     if (SearchUtils.searchEnabled)
       $('#action-search').show(100, function () {

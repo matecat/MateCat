@@ -1,13 +1,13 @@
 /*
  Component: ui.review
  */
-var Review = {
+window.Review = {
   enabled: function () {
     return config.enableReview && !!config.isReview
   },
   type: config.reviewType,
 }
-$.extend(UI, {
+$.extend(window.UI, {
   evalOpenableSegment: function (segment) {
     if (!(segment.status === 'NEW' || segment.status === 'DRAFT')) return true
 

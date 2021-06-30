@@ -1,4 +1,4 @@
-ReviewExtendedFooter = {
+window.ReviewExtendedFooter = {
   enabled: function () {
     return Review.type === 'extended-footer'
   },
