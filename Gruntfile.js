@@ -454,7 +454,6 @@ module.exports = function (grunt) {
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
-    // 'concat:app',
     'concat:common',
     'concat:analyze_new',
     'concat:manage',
@@ -478,7 +477,6 @@ module.exports = function (grunt) {
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
-    // 'concat:app',
     'concat:common',
     'concat:analyze_new',
     'concat:manage',
@@ -503,11 +501,7 @@ module.exports = function (grunt) {
    * concatenated by grunt. This avoid reworking the react components
    * when it's not needed.
    */
-  grunt.registerTask('concat:js', [
-    // 'concat:app',
-    'concat:common',
-    'replace:version',
-  ])
+  grunt.registerTask('concat:js', ['concat:common', 'replace:version'])
 
   /**
    * development
@@ -520,12 +514,7 @@ module.exports = function (grunt) {
    */
   grunt.registerTask('development', ['bundleDev:js', 'sass', 'replace:css'])
 
-  grunt.registerTask('deploy', [
-    'bundle:js',
-    // 'strip',
-    'sass',
-    'replace:css',
-  ])
+  grunt.registerTask('deploy', ['bundle:js', 'sass', 'replace:css'])
 
   grunt.registerTask('only-react', ['browserify:components'])
 }
