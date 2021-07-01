@@ -436,7 +436,7 @@ class Segment extends React.Component {
       !this.props.isReview
     )
   }
-  onClickEvent() {
+  onClickEvent = () => {
     if (
       this.state.readonly ||
       (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')
@@ -666,7 +666,6 @@ class Segment extends React.Component {
         data-split-original-id={originalId}
         data-tagmode="crunched"
         data-tagprojection={this.dataAttrTagged}
-        /* onClick={this.onClickEvent.bind(this)} */
         data-fid={this.props.segment.id_file}
         data-modified={this.props.segment.modified}
       >
@@ -757,7 +756,7 @@ class Segment extends React.Component {
             isReviewExtended={this.props.isReviewExtended}
             reviewType={this.props.reviewType}
             isReviewImproved={this.props.isReviewImproved}
-            onClick={this.onClickEvent.bind(this)}
+            onClick={this.onClickEvent}
           />
           <div
             className="timetoedit"
