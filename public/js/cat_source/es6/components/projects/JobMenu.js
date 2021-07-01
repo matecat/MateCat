@@ -6,22 +6,6 @@ class JobMenu extends React.Component {
     super(props)
   }
 
-  openSplitModal() {
-    ModalsActions.openSplitJobModal(
-      this.props.job,
-      this.props.project,
-      UI.reloadProjects,
-    )
-  }
-
-  openMergeModal() {
-    ModalsActions.openMergeModal(
-      this.props.project.toJS(),
-      this.props.job.toJS(),
-      UI.reloadProjects,
-    )
-  }
-
   getMoreLinks() {}
 
   openSecondPassUrl() {

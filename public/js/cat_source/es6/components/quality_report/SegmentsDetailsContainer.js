@@ -17,6 +17,7 @@ class SegmentsDetails extends React.Component {
       this.props.files.forEach((fileObj) => {
         let file = (
           <FileDetails
+            revisionToShow={this.props.revisionToShow}
             key={fileObj.get('id')}
             file={fileObj}
             segments={this.props.segmentsFiles.get(fileObj.get('id'))}

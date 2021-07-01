@@ -298,7 +298,7 @@ class JobContainer extends React.Component {
     ModalsActions.openSplitJobModal(
       this.props.job,
       this.props.project,
-      UI.reloadProjects,
+      ManageActions.reloadProjects,
     )
   }
 
@@ -306,7 +306,7 @@ class JobContainer extends React.Component {
     ModalsActions.openMergeModal(
       this.props.project.toJS(),
       this.props.job.toJS(),
-      UI.reloadProjects,
+      ManageActions.reloadProjects,
     )
   }
 
@@ -321,7 +321,7 @@ class JobContainer extends React.Component {
         onClick={this.downloadTranslation}
         ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
       >
-        <i className="icon-eye icon" /> Preview
+        <i className="icon-eye icon" /> Draft
       </a>
     )
     if (

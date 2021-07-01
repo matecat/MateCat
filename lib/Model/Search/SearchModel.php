@@ -127,18 +127,20 @@ class SearchModel {
     }
 
     /**
+     * @param bool $strictMode
+     *
      * @return array
      * @throws Exception
      */
-    public function search() {
+    public function search($strictMode = false) {
 
         $sql = null;
         switch ( $this->queryParams->key ) {
             case 'source':
-                $results = $this->_getQuery( $this->_loadSearchInSourceQuery() );
+                $results = $this->_getQuery( $this->_loadSearchInSourceQuery($strictMode) );
                 break;
             case 'target':
-                $results = $this->_getQuery( $this->_loadSearchInTargetQuery() );
+                $results = $this->_getQuery( $this->_loadSearchInTargetQuery($strictMode) );
                 break;
             case 'coupled':
                 $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery() ), $this->_getQuery( $this->_loadSearchInTargetQuery() ) );
@@ -329,19 +331,24 @@ class SearchModel {
     }
 
     /**
+     * @param bool $strictMode
+     *
      * @return string
      */
-    protected function _loadSearchInTargetQuery() {
+    protected function _loadSearchInTargetQuery($strictMode = false) {
 
         $this->_loadParams();
+        $password_where = ($strictMode) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "'.$this->queryParams->password.'"' : '';
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT  st.id_segment as id, st.translation as text
 			FROM segment_translations st
+			INNER JOIN jobs j ON j.id = st.id_job
 			$ste_join
-			WHERE st.id_job = {$this->queryParams->job}
+			WHERE st.id_job = {$this->queryParams->job} 
+			{$password_where}
 			$ste_where
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
@@ -352,11 +359,14 @@ class SearchModel {
     }
 
     /**
+     * @param bool $strictMode
+     *
      * @return string
      */
-    protected function _loadSearchInSourceQuery() {
+    protected function _loadSearchInSourceQuery($strictMode = false) {
 
         $this->_loadParams();
+        $password_where = ($strictMode) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "'.$this->queryParams->password.'"' : '';
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -364,9 +374,11 @@ class SearchModel {
         SELECT s.id, s.segment as text
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
+			INNER JOIN jobs j ON j.id = fj.id_job
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
             $ste_join
 			WHERE fj.id_job = {$this->queryParams->job}
+			{$password_where}
 			$ste_where
 			AND show_in_cattool = 1
 			{$this->queryParams->where_status}
