@@ -446,9 +446,8 @@ class GetContributionWorker extends AbstractWorker {
             $temp_matches = $tmEngine->get( $config );
             if ( !empty( $temp_matches ) ) {
 
-                $tms_match = $temp_matches->get_matches_as_array(2, $contributionStruct->segmentId, $_config[ 'source' ] , $_config[ 'target' ]);
-
-                \Log::doJsonLog('PIPPO: '. json_encode($tms_match));
+                $dataRefMap = (isset($contributionStruct->dataRefMap) and $contributionStruct->dataRefMap !== '') ? json_decode($contributionStruct->dataRefMap, true) : [];
+                $tms_match = $temp_matches->get_matches_as_array(2, $dataRefMap, $_config[ 'source' ] , $_config[ 'target' ]);
             }
         }
 
