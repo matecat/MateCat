@@ -489,6 +489,11 @@ let ManageActions = {
       selectedTeam,
     })
   },
+  reloadProjects: function () {
+    AppDispatcher.dispatch({
+      actionType: ManageConstants.RELOAD_PROJECTS,
+    })
+  },
 }
 
 module.exports = ManageActions
