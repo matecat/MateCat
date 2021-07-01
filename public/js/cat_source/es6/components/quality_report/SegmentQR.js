@@ -65,15 +65,8 @@ class SegmentQR extends React.Component {
       humanQaOpen:
         !this.props.secondPassReviewEnabled &&
         this.props.segment.get('issues').size > 0,
-      r1QaOpen:
-        this.props.secondPassReviewEnabled &&
-        this.issuesR1 &&
-        this.issuesR1.size > 0,
-      r2QaOpen:
-        this.props.secondPassReviewEnabled &&
-        this.issuesR2 &&
-        this.issuesR2.size > 0 &&
-        (_.isUndefined(this.issuesR1) || this.issuesR1.size === 0),
+      r1QaOpen: this.props.revisionToShow === '1',
+      r2QaOpen: this.props.revisionToShow === '2',
     }
     this.state.htmlDiff = this.initializeDiff()
     this.errorObj = {
@@ -325,6 +318,15 @@ class SegmentQR extends React.Component {
   allowHTML(string) {
     return {__html: string}
   }
+  componentDidUpdate(prevProps) {
+    if (prevProps.revisionToShow !== this.props.revisionToShow) {
+      this.setState({
+        r1QaOpen: this.props.revisionToShow === '1',
+        r2QaOpen: this.props.revisionToShow === '2',
+      })
+    }
+  }
+
   render() {
     let source = this.decodeTextAndTransformTags(this.source)
     let suggestion = this.decodeTextAndTransformTags(this.suggestion)
@@ -572,13 +574,13 @@ class SegmentQR extends React.Component {
                   </div>
                 ) : null}
 
-                {this.state.r1QaOpen ? (
-                  <div className="qr-issues-list" key={'human-qa'}>
+                {this.state.r1QaOpen && this.issuesR1 ? (
+                  <div className="qr-issues-list" key={'issues-r1-qa'}>
                     {this.getHumanQaHtml(this.issuesR1)}
                   </div>
                 ) : null}
-                {this.state.r2QaOpen ? (
-                  <div className="qr-issues-list" key={'human-qa'}>
+                {this.state.r2QaOpen && this.issuesR2 ? (
+                  <div className="qr-issues-list" key={'issues-r2-qa'}>
                     {this.getHumanQaHtml(this.issuesR2)}
                   </div>
                 ) : null}

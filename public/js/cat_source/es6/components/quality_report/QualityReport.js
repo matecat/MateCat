@@ -224,6 +224,7 @@ class QualityReport extends React.Component {
                 />
 
                 <SegmentsDetails
+                  revisionToShow={revisionToShow}
                   files={files}
                   segmentsFiles={segmentsFiles}
                   lastSegment={lastSegment}
