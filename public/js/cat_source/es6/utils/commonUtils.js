@@ -400,6 +400,9 @@ const CommonUtils = {
       sessionStorage.removeItem(key)
     }
   },
+  getLanguageNameFromLocale: function (code) {
+    return config.languages_array.find((e) => e.code === code).name
+  },
   /******************************/
 }
 
