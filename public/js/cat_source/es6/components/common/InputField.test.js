@@ -8,7 +8,7 @@ test('works properly', async () => {
   const onFieldChanged = jest.fn()
   render(<InputField onFieldChanged={onFieldChanged} />)
 
-  const elInput = document.querySelector('input')
+  const elInput = screen.getByTestId('input')
 
   expect(elInput).toBeVisible()
   expect(elInput).toHaveValue('')
@@ -49,5 +49,5 @@ test('supports type prop', () => {
   const onFieldChanged = jest.fn()
   render(<InputField onFieldChanged={onFieldChanged} type="password" />)
 
-  expect(document.querySelector('input')).toHaveAttribute('type', 'password')
+  expect(screen.getByTestId('input')).toHaveAttribute('type', 'password')
 })
