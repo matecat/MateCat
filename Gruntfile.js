@@ -144,7 +144,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/ui.review.js',
           basePath + 'cat_source/review/review_simple.js',
           basePath + 'cat_source/review_extended/review_extended.default.js',
-          basePath + 'cat_source/review_extended/review_extended.footer.js',
           basePath +
             'cat_source/review_extended/review_extended.ui_extension.js',
           basePath +
