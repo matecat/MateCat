@@ -3,7 +3,7 @@
  Created by andreamartines on 02/10/14.
  Loaded by cattool and upload page.
  */
-;(function ($, undefined) {
+;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
     var winBottom = winTop + $(window).height()
@@ -165,7 +165,7 @@
         $('#add-mt-provider-cancel').show()
       })
       $('html').on('input', '#mt-provider-details input', function () {
-        num = 0
+        let num = 0
         $('#mt-provider-details input.required').each(function () {
           if ($(this).val() == '') num++
         })
@@ -321,7 +321,7 @@
           function () {
             UI.hideAllBoxOnTables()
             if (this.files[0].size > config.maxTMXFileSize) {
-              numMb = config.maxTMXFileSize / (1024 * 1024)
+              const numMb = config.maxTMXFileSize / (1024 * 1024)
               APP.alert(
                 'File is too big.<br/>The maximuxm size allowed is ' +
                   numMb +
@@ -717,7 +717,7 @@
     },
 
     checkTMgrants: function () {
-      panel = $('.mgmt-tm tr.new')
+      const panel = $('.mgmt-tm tr.new')
       var r = $(panel).find('.r').is(':checked') ? 1 : 0
       var w = $(panel).find('.w').is(':checked') ? 1 : 0
       if (!r && !w) {
@@ -793,7 +793,7 @@
     },
     continueTMDisable: function (context) {
       var options = $.parseJSON(context)
-      el = $(
+      const el = $(
         '.mgmt-tm tr[data-key="' +
           options.key +
           '"] td.' +
@@ -1010,11 +1010,13 @@
       document.body.appendChild(iframe)
 
       window.frames['upload_iframe'].name = 'upload_iframe'
-      iframeId = document.getElementById(ifId)
+      const iframeId = document.getElementById(ifId)
       UI.UploadIframeId = iframeId
 
       // Add event...
       var eventHandler = function () {
+        let content
+
         if (iframeId.detachEvent) iframeId.detachEvent('onload', eventHandler)
         else iframeId.removeEventListener('load', eventHandler, false)
 
@@ -1479,11 +1481,10 @@
               expires: -1,
               secure: true,
             })
-            errorMsg = $('#' + iFrameID)
+            const errorMsg = $('#' + iFrameID)
               .contents()
               .find('body')
               .text()
-            errorKey = $(tr).attr('data-key')
             if (errorMsg != '') {
               tr.find('.message-glossary-export-error').show()
               if (tr.closest('table').attr('id') == 'inactivetm') {
@@ -1589,7 +1590,7 @@
       }, 200)
     },
     deleteTM: function (button) {
-      tr = $(button).parents('tr').first()
+      const tr = $(button).parents('tr').first()
       $(tr).fadeOut('normal', function () {
         $(this).remove()
       })
@@ -1640,7 +1641,7 @@
     addMTEngine: function (provider, providerName) {
       var providerData = {}
       $('.insert-tm .provider-data .provider-field').each(function () {
-        field = $(this).find('input, select').first()
+        const field = $(this).find('input, select').first()
         if (field.prop('type') === 'checkbox') {
           providerData[field.attr('data-field-name')] = field.prop('checked')
         } else {
