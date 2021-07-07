@@ -1271,7 +1271,7 @@
     },
 
     extractTMdataFromRow: function (tr) {
-      data = {
+      const data = {
         tm_key: tr.find('.privatekey').text(),
         key: this.tm_key,
         tmx_name: tr.find('.description').text(),
