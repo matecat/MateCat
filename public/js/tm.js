@@ -1890,7 +1890,7 @@
           action: 'createRandUser',
         },
         success: function (d) {
-          data = d.data
+          const data = d.data
           //put value into input field
           UI.newTmKey = data.key
           UI.copyNewTMKey(UI.newTmKey)
