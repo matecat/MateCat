@@ -10,7 +10,7 @@ $.extend(window.UI, {
         Shortcuts.cattol.events.openShortcutsModal.keystrokes[
           Shortcuts.shortCutsKeyType
         ],
-        function (e) {
+        function () {
           APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')
         },
       )
@@ -31,7 +31,7 @@ $.extend(window.UI, {
         Shortcuts.cattol.events.openSettings.keystrokes[
           Shortcuts.shortCutsKeyType
         ],
-        function (e) {
+        function () {
           UI.openLanguageResourcesPanel()
         },
       )
@@ -106,7 +106,7 @@ $.extend(window.UI, {
         },
       )
       //For shortcut arrows + ctrl in windows to move between segments
-      .on('keyup.shortcuts', null, 'ctrl', function (e) {
+      .on('keyup.shortcuts', null, 'ctrl', function () {
         SegmentActions.openSelectedSegment()
       })
       .on(
@@ -160,7 +160,7 @@ $.extend(window.UI, {
         Shortcuts.cattol.events.translate.keystrokes[
           Shortcuts.shortCutsKeyType
         ],
-        function (e) {
+        function () {
           UI.translateAndGoToNext()
         },
       )
@@ -328,7 +328,7 @@ $.extend(window.UI, {
           //console.log( $( e.currentTarget ).attr( 'href' ) );
         }
       })
-      .on('click', '#previewDropdown .originalsGDrive', function (e) {
+      .on('click', '#previewDropdown .originalsGDrive', function () {
         UI.continueDownloadWithGoogleDrive(1)
       })
       .on('click', '.alert .close', function (e) {

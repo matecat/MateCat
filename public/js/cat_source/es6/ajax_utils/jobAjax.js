@@ -24,7 +24,7 @@ window.API.JOB = {
         revision_number,
         undo: undo,
       },
-      success: function (d) {},
+      success: function () {},
     })
   },
   checkSplitRequest: function (job, project, numsplit, arrayValues) {
@@ -39,7 +39,7 @@ window.API.JOB = {
         num_split: numsplit,
         split_values: arrayValues,
       },
-      success: function (d) {},
+      success: function () {},
     })
   },
   confirmSplitRequest: function (job, project, numsplit, arrayValues) {

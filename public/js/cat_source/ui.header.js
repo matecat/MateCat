@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 /*
  Component: ui.header
  */
@@ -28,7 +30,7 @@ $.extend(window.UI, {
     this.createJobMenu()
   },
   logoutAction: function () {
-    $.post('/api/app/user/logout', function (data) {
+    $.post('/api/app/user/logout', function () {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {
