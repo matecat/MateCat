@@ -28,6 +28,11 @@ module.exports = {
         ecmaFeatures: {jsx: true},
       },
       env: {jest: true, node: true, browser: true, es6: true},
+      extends: [
+        'plugin:jest/recommended',
+        'plugin:jest-dom/recommended',
+        'plugin:testing-library/react',
+      ],
     },
 
     // grunt browserify compiled files
