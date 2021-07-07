@@ -1,6 +1,7 @@
 // This namespace was initially intended to contain all React components,
 // but I found this is not a good practice since the dot may create troubles.
 // Underscores seem to be a better convention.
+import JobMetadata from './components/header/cattol/JobMetadata'
 import {ModalWindow} from './components/modals/ModalWindow'
 
 window.MC = {}
@@ -22,7 +23,7 @@ window.SegmentActions = require('./actions/SegmentActions')
 window.CommentsActions = require('./actions/CommentsActions')
 window.ManageActions = require('./actions/ManageActions')
 
-window.SegmentStore = require('./stores/SegmentStore').default
+window.SegmentStore = require('./stores/SegmentStore')
 window.CatToolStore = require('./stores/CatToolStore')
 
 window.Header = require('./components/header/Header').default

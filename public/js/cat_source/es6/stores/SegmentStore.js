@@ -1756,4 +1756,4 @@ AppDispatcher.register(function (action) {
   }
 })
 
-export default SegmentStore
+module.exports = SegmentStore
