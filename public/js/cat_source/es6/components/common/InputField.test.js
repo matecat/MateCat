@@ -31,7 +31,7 @@ test('supports reset button', () => {
     <InputField value="something" onFieldChanged={onFieldChanged} showCancel />,
   )
 
-  const elInput = document.querySelector('input')
+  const elInput = screen.getByTestId('input')
   expect(elInput).toHaveValue('something')
 
   const elResetButton = screen.getByTestId('reset-button')
