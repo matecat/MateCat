@@ -107,15 +107,7 @@ module.exports = function (grunt) {
           basePath + 'cat_source/ui.header.js',
           basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
           basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
-
-          // basePath + 'cat_source/ui.review.js',
-          //basePath + 'cat_source/sse.js',
-          // basePath + 'cat_source/mbc.main.js',
-          //WARNING: lxq.main.js: this should always be below qa_check_glossary and
-          //qa_check_blacklist, in order for its event handlers to be excecuted last
-          // basePath + 'cat_source/lxq.main.js',
           basePath + 'cat_source/project_completion.*.js',
-
           basePath + 'cat_source/ui.review.js',
           basePath + 'cat_source/review/review_simple.js',
           basePath + 'cat_source/review_extended/review_extended.default.js',
@@ -124,9 +116,7 @@ module.exports = function (grunt) {
             'cat_source/review_extended/review_extended.ui_extension.js',
           basePath +
             'cat_source/review_extended/review_extended.common_events.js',
-
           basePath + 'cat_source/segment_filter.common_extension.js',
-
           basePath + 'cat_source/speech2text.js',
           basePath + 'tm.js',
           basePath + 'advancedOptionsTab.js',
