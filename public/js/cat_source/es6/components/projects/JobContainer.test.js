@@ -1,4 +1,4 @@
-import {render, fireEvent, waitFor} from '@testing-library/react'
+import {render, fireEvent} from '@testing-library/react'
 import React from 'react'
 import Immutable from 'immutable'
 import JobContainer from './JobContainer'
@@ -6,6 +6,7 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 
 window.Cookies = require('../../../../lib/js.cookie')
+window.config = {enable_outsource: 1}
 
 const fakeProjectsData = {
   jobWithoutActivity: {
@@ -54,8 +55,6 @@ const getFakeProperties = (fakeProperties) => {
   }
 }
 
-window.config = {enable_outsource: 1}
-
 const getProjectAnalyzeUrl = (slug, id, password) =>
   `/analyze/${slug}/${id}-${password}`
 const getTranslateUrl = (
@@ -82,7 +81,7 @@ const createTranslateUrl = (index, project, job, jobsLenght) => {
 }
 
 // -> Rendering elements
-test('Rendering elements', async () => {
+test('Rendering elements', () => {
   const {job, props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   const {container, getByTitle} = render(<JobContainer {...props} />)
 
