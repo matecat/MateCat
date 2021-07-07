@@ -6,7 +6,7 @@ window.ReviewSimple = {
 }
 
 if (window.ReviewSimple.enabled()) {
-  ;(function (Review, $, undefined) {
+  ;(function (Review, $) {
     /**
      * Events
      *
@@ -24,14 +24,14 @@ if (window.ReviewSimple.enabled()) {
       .on(
         'click',
         '.sub-editor.review .error-type input[type=radio]',
-        function (e) {
+        function () {
           $('.sub-editor.review .error-type').removeClass('error')
         },
       )
       .on('afterFormatSelection', '.editor .editarea', function () {
         UI.trackChanges()
       })
-      .on('click', '.editor .outersource .copy', function (e) {
+      .on('click', '.editor .outersource .copy', function () {
         UI.trackChanges()
       })
       .on('setCurrentSegment_success', function (e, d, id_segment) {
@@ -78,38 +78,31 @@ if (window.ReviewSimple.enabled()) {
        * @param id_segment
        */
       addOriginalTranslation: function (d, id_segment) {
-        var segment = SegmentStore.getSegmentByIdToJS(id_segment)
-        var originalTrans = d.original ? d.original : segment.translation
-        // if ( originalTrans && originalTrans !== '' ) {
-        //     setTimeout( function () {
-        //         SegmentActions.addOriginalTranslation( id_segment, null, originalTrans );
-        //     } );
-        // }
         UI.setReviewErrorData(d.error_data, $('#segment-' + id_segment))
         setTimeout(function () {
-          UI.trackChanges(xEditarea)
+          UI.trackChanges()
         }, 100)
       },
 
       setReviewErrorData: function (d, $segment) {
-        $.each(d, function (index) {
-          if (this.type == 'Typing')
+        $.each(d, function () {
+          if (this.type === 'Typing')
             $segment
               .find('.error-type input[name=t1][value=' + this.value + ']')
               .prop('checked', true)
-          if (this.type == 'Translation')
+          if (this.type === 'Translation')
             $segment
               .find('.error-type input[name=t2][value=' + this.value + ']')
               .prop('checked', true)
-          if (this.type == 'Terminology')
+          if (this.type === 'Terminology')
             $segment
               .find('.error-type input[name=t3][value=' + this.value + ']')
               .prop('checked', true)
-          if (this.type == 'Language Quality')
+          if (this.type === 'Language Quality')
             $segment
               .find('.error-type input[name=t4][value=' + this.value + ']')
               .prop('checked', true)
-          if (this.type == 'Style')
+          if (this.type === 'Style')
             $segment
               .find('.error-type input[name=t5][value=' + this.value + ']')
               .prop('checked', true)

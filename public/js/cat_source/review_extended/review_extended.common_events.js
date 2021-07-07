@@ -24,7 +24,7 @@ if (ReviewExtended.enabled()) {
   })
 
   $(document).on('header-tool:open', function (e, data) {
-    if (data.name == 'search') {
+    if (data.name === 'search') {
       SegmentActions.closeIssuesPanel()
     }
   })

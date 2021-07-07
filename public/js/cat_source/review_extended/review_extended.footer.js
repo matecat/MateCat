@@ -5,13 +5,13 @@ window.ReviewExtendedFooter = {
   type: config.reviewType,
 }
 
-if (ReviewExtendedFooter.enabled()) {
-  var originalGotoNextSegment = UI.gotoNextSegment
-  var originalRender = UI.render
+if (window.ReviewExtendedFooter.enabled()) {
+  let originalGotoNextSegment = UI.gotoNextSegment
+  let originalRender = UI.render
 
   $.extend(UI, {
     render: function (options) {
-      var promise = new $.Deferred().resolve()
+      let promise = new $.Deferred().resolve()
       originalRender.call(this, options)
       return promise
     },

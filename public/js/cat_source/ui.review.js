@@ -43,7 +43,7 @@ var alertNoTranslatedSegments = function () {
 }
 
 if (config.enableReview && config.isReview) {
-  ;(function ($, undefined) {
+  ;(function ($) {
     $.extend(UI, {
       alertNotTranslatedMessage:
         'This segment is not translated yet.<br /> Only translated segments can be revised.',
@@ -63,8 +63,6 @@ if (config.enableReview && config.isReview) {
       },
       /**
        * Each revision overwrite this function
-       * @param e
-       * @param button
        */
       clickOnApprovedButton: function () {
         return false

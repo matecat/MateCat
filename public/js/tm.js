@@ -150,14 +150,14 @@
           UI.addMTEngine(provider, providerName)
         }
       })
-      $('#add-mt-provider-cancel').click(function (e) {
+      $('#add-mt-provider-cancel').click(function () {
         $('.add-mt-engine').show()
         $('.insert-tm').addClass('hide')
         $('#mt_engine_int').val('none').trigger('change')
         $('.insert-tm').addClass('hide').removeAttr('style')
         $('#add-mt-provider-cancel').show()
       })
-      $('#add-mt-provider-cancel-int').click(function (e) {
+      $('#add-mt-provider-cancel-int').click(function () {
         $('.add-mt-engine').show()
         $('.insert-tm').addClass('hide')
         $('#mt_engine_int').val('none').trigger('change')
@@ -199,7 +199,7 @@
           e.preventDefault()
           UI.addFormUpload(this, 'glossary')
         })
-        .on('change paste', '#new-tm-key', function (event) {
+        .on('change paste', '#new-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
             UI.checkTMKey('change')
@@ -361,7 +361,7 @@
 
           UI.openExportTmx(this)
         })
-        .on('click', '.shareKey:not(.disabled)', function (e) {
+        .on('click', '.shareKey:not(.disabled)', function () {
           var tr = $(this).closest('tr')
           if (
             tr.hasClass('mymemory') ||
@@ -371,7 +371,7 @@
             return
           UI.openShareResource($(this))
         })
-        .on('mousedown', '.mgmt-tm .downloadGlossary', function (e) {
+        .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
           //Todo
           if ($(this).hasClass('disabled')) return false
           UI.downloadGlossary($(this))
@@ -1273,7 +1273,7 @@
     },
 
     extractTMdataFromRow: function (tr) {
-      const data = {
+      return {
         tm_key: tr.find('.privatekey').text(),
         key: this.tm_key,
         tmx_name: tr.find('.description').text(),
@@ -1281,7 +1281,6 @@
         r: tr.find('.lookup input').is(':checked') ? 1 : 0,
         w: tr.find('.update input').is(':checked') ? 1 : 0,
       }
-      return data
     },
 
     saveTMdata: function (closeAfter) {
@@ -1561,7 +1560,6 @@
       var tr = $(button).closest('tr')
       tr.addClass('tm-key-deleting')
       var key = tr.find('.privatekey').text()
-      var descr = tr.find('.edit-desc').data('descr')
       message = message.replace('XXX', key)
       // message = message.replace('YYY', descr);
       if (elem.attr('id') === 'activetm') {
@@ -1606,7 +1604,7 @@
           )
           // console.log('Error deleting TM!!');
         },
-        success: function (d) {
+        success: function () {
           UI.hideAllBoxOnTables()
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
@@ -1627,7 +1625,7 @@
             .text('There was an error saving your data. Please retry!')
             .show()
         },
-        success: function (d) {
+        success: function () {
           // console.log('success');
           UI.hideAllBoxOnTables()
           $('.mgmt-table-mt tr[data-id=' + this + ']').remove()
@@ -1760,7 +1758,6 @@
     activateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" checked class="temp" />')
-      var cbox = tr.find('input[type=checkbox]')
       var tbody = tr.parents('tbody')
       $(tbody).prepend(tr)
       tbody
@@ -1852,8 +1849,8 @@
           field.val(fieldContents)
 
           var fieldData = configData[fieldName]['data']
-          for (var dataKey in fieldData) {
-            field.attr('data-' + dataKey, fieldData[dataKey])
+          for (var dataKeyField in fieldData) {
+            field.attr('data-' + dataKeyField, fieldData[dataKeyField])
           }
         } else if (tagName == 'SELECT') {
           for (var optionKey in configData[fieldName]) {
@@ -2404,12 +2401,6 @@
         : button
             .closest('.share-popup-container')
             .find('.share-popup-key')
-            .text()
-      var descr = tr.length
-        ? tr.find('.edit-desc').data('descr')
-        : button
-            .closest('.share-popup-container')
-            .find('.share-popup-description')
             .text()
       var msg =
         'The resource <span style="font-weight: bold">' +
