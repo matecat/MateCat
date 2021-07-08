@@ -88,8 +88,12 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [basePath + 'cat_source/es6/components/projects/Dashboard.js'],
-        dest: buildPath + 'manage-components.js',
+        src: [
+          basePath + 'cat_source/es6/components/projects/Dashboard.js',
+          basePath + 'outsource.js',
+          basePath + 'cat_source/es6/ajax_utils/*.js',
+        ],
+        dest: buildPath + 'manage.js',
       },
       app: {
         options: {
@@ -209,13 +213,6 @@ module.exports = function (grunt) {
       semantic: {
         src: [basePath + 'lib/semantic.min.js'],
         dest: buildPath + 'semantic.js',
-      },
-      manage: {
-        src: [
-          basePath + 'outsource.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'manage.js',
       },
       common: {
         src: [
@@ -445,7 +442,6 @@ module.exports = function (grunt) {
     'concat:semantic',
     'concat:common',
     'concat:analyze_new',
-    'concat:manage',
     'concat:upload',
     'replace:version',
   ])
@@ -468,7 +464,6 @@ module.exports = function (grunt) {
     'concat:semantic',
     'concat:common',
     'concat:analyze_new',
-    'concat:manage',
     'concat:upload',
     'replace:version',
   ])
