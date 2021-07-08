@@ -205,11 +205,6 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'libs_upload.js',
       },
-
-      semantic: {
-        src: [basePath + 'lib/semantic.min.js'],
-        dest: buildPath + 'semantic.js',
-      },
       manage: {
         src: [
           basePath + 'outsource.js',
