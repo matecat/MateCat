@@ -23,19 +23,27 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
                     $currMatch        = new Engines_Results_MyMemory_Matches( $match );
                     $this->matches[ ] = $currMatch;
                 }
-
             }
-
         }
-
     }
 
-    public function get_matches_as_array( $layerNum = 2, $segmentId = null, $source = null, $target = null ) {
-        $matchesArray = array();
+    /**
+     * Get matches as array
+     *
+     * @param int   $layerNum
+     * @param array $dataRefMap
+     * @param null  $source
+     * @param null  $target
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function get_matches_as_array( $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ) {
+        $matchesArray = [];
 
         foreach ( $this->matches as $match ) {
-            $item            = $match->getMatches( $layerNum, $segmentId, $source, $target );
-            $matchesArray[ ] = $item;
+            $item            = $match->getMatches( $layerNum, $dataRefMap, $source, $target );
+            $matchesArray[]  = $item;
         }
 
         return $matchesArray;
@@ -43,7 +51,9 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
 
     /**
      * Transform one level list to multi level matches based on segment key
+     *
      * @return array
+     * @throws Exception
      */
     public function get_glossary_matches_as_array() {
         $tmp_vector = array();

@@ -12,6 +12,7 @@ class FileDetails extends React.Component {
           segment={item}
           urls={this.props.urls}
           secondPassReviewEnabled={this.props.secondPassReviewEnabled}
+          revisionToShow={this.props.revisionToShow}
         />
       )
       segments.push(segment)

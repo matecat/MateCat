@@ -1,4 +1,4 @@
-if (ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
+if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data_array, diff) {
       var fid = UI.getSegmentFileId(UI.getSegmentById(sid))

@@ -59,23 +59,18 @@ class Engines_Results_MyMemory_Matches {
     }
 
     /**
-     * @param int  $layerNum
+     * @param int   $layerNum
      *
-     * @param null $segmentId
-     * @param null $source
-     * @param null $target
+     * @param array $dataRefMap
+     * @param null  $source
+     * @param null  $target
      *
      * @return array
      * @throws Exception
      */
-    public function getMatches( $layerNum = 2, $segmentId = null, $source = null, $target = null ) {
+    public function getMatches( $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ) {
 
         $match      = [];
-        $dataRefMap = [];
-
-        if ( null !== $segmentId ) {
-            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $segmentId );
-        }
 
         if($source and $target){
             $this->source = $source;

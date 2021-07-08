@@ -9,15 +9,18 @@ const DummyComponent = () => {
   return <div>something</div>
 }
 
-test('works properly', () => {
+beforeAll(() => {
   const div = document.createElement('div')
   div.id = 'modal'
+  div.setAttribute('data-testid', 'modal')
 
   document.body.appendChild(div)
+})
 
+test('works properly', () => {
   const modalWindow = ReactDOM.render(
     <ModalWindow />,
-    document.getElementById('modal'),
+    screen.getByTestId('modal'),
   )
 
   const onClose = jest.fn()
@@ -53,14 +56,9 @@ test('works properly', () => {
 })
 
 test('works properly ModalOverlay version', () => {
-  const div = document.createElement('div')
-  div.id = 'modal'
-
-  document.body.appendChild(div)
-
   const modalWindow = ReactDOM.render(
     <ModalWindow />,
-    document.getElementById('modal'),
+    screen.getByTestId('modal'),
   )
 
   const onClose = jest.fn()
