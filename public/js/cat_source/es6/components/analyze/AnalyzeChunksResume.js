@@ -334,16 +334,11 @@ class AnalyzeChunksResume extends React.Component {
           let obj = this.props.jobsInfo[indexJob].chunks[0]
           let password = obj.jpassword
           let total_raw = obj.total_raw_word_count_print
-          let total_standard = tmpJobAnalysis
+          let standardWordCount = tmpJobAnalysis
             .get('totals')
-            .first()
+            .get(password)
             .get('standard_word_count')
-            ? tmpJobAnalysis
-                .get('totals')
-                .first()
-                .get('standard_word_count')
-                .get(1)
-            : 0
+          let total_standard = standardWordCount ? standardWordCount.get(1) : 0
 
           let chunkJob = this.props.project.get('jobs').find((job) => {
             return (
@@ -359,7 +354,11 @@ class AnalyzeChunksResume extends React.Component {
 
           this.checkPayableChanged(
             this.props.jobsInfo[indexJob].jid,
-            tmpJobAnalysis.get('totals').first().get('TOTAL_PAYABLE').get(1),
+            tmpJobAnalysis
+              .get('totals')
+              .get(password)
+              .get('TOTAL_PAYABLE')
+              .get(1),
           )
 
           return (
@@ -430,7 +429,7 @@ class AnalyzeChunksResume extends React.Component {
                         {/*<i className="icon-chart4 icon"/>*/}
                         {tmpJobAnalysis
                           .get('totals')
-                          .first()
+                          .get(password)
                           .get('TOTAL_PAYABLE')
                           .get(1)}
                       </div>
