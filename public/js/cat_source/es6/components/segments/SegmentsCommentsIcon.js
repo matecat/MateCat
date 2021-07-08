@@ -34,7 +34,8 @@ class SegmentsCommentsIcon extends React.Component {
   openComments(event) {
     event.stopPropagation()
     SegmentsActions.openSegmentComment(this.props.segment.sid)
-    SegmentsActions.openSegment(this.props.segment.sid)
+    if (!UI.isReadonlySegment(this.props.segment))
+      SegmentsActions.openSegment(this.props.segment.sid)
     localStorage.setItem(MBC.localStorageCommentsClosed, false)
   }
 
