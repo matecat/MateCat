@@ -19,7 +19,7 @@ const Speech2Text = {
         url: path,
         type: 'POST',
         data: data,
-      }).done(function (data) {
+      }).done(function () {
         UI.render()
       })
     }
@@ -39,7 +39,7 @@ const Speech2Text = {
         url: path,
         type: 'POST',
         data: data,
-      }).done(function (data) {
+      }).done(function () {
         if (!Speech2Text.initialized) {
           Speech2Text.init()
           Speech2Text.loadRecognition()
@@ -52,7 +52,7 @@ const Speech2Text = {
 
 Speech2Text.init = function () {
   Speech2Text.initialized = true
-  return (function ($, Speech2Text, undefined) {
+  return (function ($, Speech2Text) {
     $.extend(Speech2Text, {
       recognition: null,
       recognizing: false,
@@ -196,17 +196,14 @@ Speech2Text.init = function () {
         var two_line = /\n\n/g
         var one_line = /\n/g
 
-        return s.replace(two_line, '<p></p>').replace(one_line, '<br>')
+        return s.replace(two_line, '<p/>').replace(one_line, '<br>')
       },
       shouldEmptyTargetElement: function (segment) {
-        if (
+        return !(
           (segment.autopropagated_from && segment.autopropagated_from != '0') ||
           segment.suggestion_match === '100' ||
           segment.status !== 'NEW'
-        ) {
-          return false
-        }
-        return true
+        )
       },
       enableContinuousRecognizing: function () {
         Speech2Text.isToKeepRecognizing = true
@@ -227,7 +224,7 @@ Speech2Text.init = function () {
       },
 
       /**
-       * This method checks if a contribution match is to be copied insied the edit area.
+       * This method checks if a contribution match is to be copied inside the edit area.
        * If speech is active, then only contributions with match 100% are to be copied.
        *
        * @param match

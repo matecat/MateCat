@@ -3,7 +3,7 @@
  Created by andreamartines on 02/10/14.
  Loaded by cattool and upload page.
  */
-;(function ($, undefined) {
+;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
     var winBottom = winTop + $(window).height()
@@ -150,14 +150,14 @@
           UI.addMTEngine(provider, providerName)
         }
       })
-      $('#add-mt-provider-cancel').click(function (e) {
+      $('#add-mt-provider-cancel').click(function () {
         $('.add-mt-engine').show()
         $('.insert-tm').addClass('hide')
         $('#mt_engine_int').val('none').trigger('change')
         $('.insert-tm').addClass('hide').removeAttr('style')
         $('#add-mt-provider-cancel').show()
       })
-      $('#add-mt-provider-cancel-int').click(function (e) {
+      $('#add-mt-provider-cancel-int').click(function () {
         $('.add-mt-engine').show()
         $('.insert-tm').addClass('hide')
         $('#mt_engine_int').val('none').trigger('change')
@@ -165,7 +165,7 @@
         $('#add-mt-provider-cancel').show()
       })
       $('html').on('input', '#mt-provider-details input', function () {
-        num = 0
+        let num = 0
         $('#mt-provider-details input.required').each(function () {
           if ($(this).val() == '') num++
         })
@@ -199,7 +199,7 @@
           e.preventDefault()
           UI.addFormUpload(this, 'glossary')
         })
-        .on('change paste', '#new-tm-key', function (event) {
+        .on('change paste', '#new-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
             UI.checkTMKey('change')
@@ -321,7 +321,7 @@
           function () {
             UI.hideAllBoxOnTables()
             if (this.files[0].size > config.maxTMXFileSize) {
-              numMb = config.maxTMXFileSize / (1024 * 1024)
+              const numMb = config.maxTMXFileSize / (1024 * 1024)
               APP.alert(
                 'File is too big.<br/>The maximuxm size allowed is ' +
                   numMb +
@@ -361,7 +361,7 @@
 
           UI.openExportTmx(this)
         })
-        .on('click', '.shareKey:not(.disabled)', function (e) {
+        .on('click', '.shareKey:not(.disabled)', function () {
           var tr = $(this).closest('tr')
           if (
             tr.hasClass('mymemory') ||
@@ -371,7 +371,7 @@
             return
           UI.openShareResource($(this))
         })
-        .on('mousedown', '.mgmt-tm .downloadGlossary', function (e) {
+        .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
           //Todo
           if ($(this).hasClass('disabled')) return false
           UI.downloadGlossary($(this))
@@ -717,7 +717,7 @@
     },
 
     checkTMgrants: function () {
-      panel = $('.mgmt-tm tr.new')
+      const panel = $('.mgmt-tm tr.new')
       var r = $(panel).find('.r').is(':checked') ? 1 : 0
       var w = $(panel).find('.w').is(':checked') ? 1 : 0
       if (!r && !w) {
@@ -793,7 +793,7 @@
     },
     continueTMDisable: function (context) {
       var options = $.parseJSON(context)
-      el = $(
+      const el = $(
         '.mgmt-tm tr[data-key="' +
           options.key +
           '"] td.' +
@@ -1010,11 +1010,13 @@
       document.body.appendChild(iframe)
 
       window.frames['upload_iframe'].name = 'upload_iframe'
-      iframeId = document.getElementById(ifId)
+      const iframeId = document.getElementById(ifId)
       UI.UploadIframeId = iframeId
 
       // Add event...
       var eventHandler = function () {
+        let content
+
         if (iframeId.detachEvent) iframeId.detachEvent('onload', eventHandler)
         else iframeId.removeEventListener('load', eventHandler, false)
 
@@ -1271,7 +1273,7 @@
     },
 
     extractTMdataFromRow: function (tr) {
-      data = {
+      return {
         tm_key: tr.find('.privatekey').text(),
         key: this.tm_key,
         tmx_name: tr.find('.description').text(),
@@ -1279,7 +1281,6 @@
         r: tr.find('.lookup input').is(':checked') ? 1 : 0,
         w: tr.find('.update input').is(':checked') ? 1 : 0,
       }
-      return data
     },
 
     saveTMdata: function (closeAfter) {
@@ -1479,11 +1480,10 @@
               expires: -1,
               secure: true,
             })
-            errorMsg = $('#' + iFrameID)
+            const errorMsg = $('#' + iFrameID)
               .contents()
               .find('body')
               .text()
-            errorKey = $(tr).attr('data-key')
             if (errorMsg != '') {
               tr.find('.message-glossary-export-error').show()
               if (tr.closest('table').attr('id') == 'inactivetm') {
@@ -1560,7 +1560,6 @@
       var tr = $(button).closest('tr')
       tr.addClass('tm-key-deleting')
       var key = tr.find('.privatekey').text()
-      var descr = tr.find('.edit-desc').data('descr')
       message = message.replace('XXX', key)
       // message = message.replace('YYY', descr);
       if (elem.attr('id') === 'activetm') {
@@ -1589,7 +1588,7 @@
       }, 200)
     },
     deleteTM: function (button) {
-      tr = $(button).parents('tr').first()
+      const tr = $(button).parents('tr').first()
       $(tr).fadeOut('normal', function () {
         $(this).remove()
       })
@@ -1605,7 +1604,7 @@
           )
           // console.log('Error deleting TM!!');
         },
-        success: function (d) {
+        success: function () {
           UI.hideAllBoxOnTables()
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
@@ -1626,7 +1625,7 @@
             .text('There was an error saving your data. Please retry!')
             .show()
         },
-        success: function (d) {
+        success: function () {
           // console.log('success');
           UI.hideAllBoxOnTables()
           $('.mgmt-table-mt tr[data-id=' + this + ']').remove()
@@ -1640,7 +1639,7 @@
     addMTEngine: function (provider, providerName) {
       var providerData = {}
       $('.insert-tm .provider-data .provider-field').each(function () {
-        field = $(this).find('input, select').first()
+        const field = $(this).find('input, select').first()
         if (field.prop('type') === 'checkbox') {
           providerData[field.attr('data-field-name')] = field.prop('checked')
         } else {
@@ -1759,7 +1758,6 @@
     activateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" checked class="temp" />')
-      var cbox = tr.find('input[type=checkbox]')
       var tbody = tr.parents('tbody')
       $(tbody).prepend(tr)
       tbody
@@ -1851,8 +1849,8 @@
           field.val(fieldContents)
 
           var fieldData = configData[fieldName]['data']
-          for (var dataKey in fieldData) {
-            field.attr('data-' + dataKey, fieldData[dataKey])
+          for (var dataKeyField in fieldData) {
+            field.attr('data-' + dataKeyField, fieldData[dataKeyField])
           }
         } else if (tagName == 'SELECT') {
           for (var optionKey in configData[fieldName]) {
@@ -1890,7 +1888,7 @@
           action: 'createRandUser',
         },
         success: function (d) {
-          data = d.data
+          const data = d.data
           //put value into input field
           UI.newTmKey = data.key
           UI.copyNewTMKey(UI.newTmKey)
@@ -2403,12 +2401,6 @@
         : button
             .closest('.share-popup-container')
             .find('.share-popup-key')
-            .text()
-      var descr = tr.length
-        ? tr.find('.edit-desc').data('descr')
-        : button
-            .closest('.share-popup-container')
-            .find('.share-popup-description')
             .text()
       var msg =
         'The resource <span style="font-weight: bold">' +

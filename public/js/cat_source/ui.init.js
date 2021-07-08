@@ -1,7 +1,7 @@
 /*
 	Component: ui.init
  */
-$.extend(UI, {
+$.extend(window.UI, {
   render: function (options) {
     options = options || {}
     var seg = options.segmentToOpen || false

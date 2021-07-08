@@ -1,11 +1,5 @@
 const sass = require('node-sass')
 
-function s4() {
-  return Math.floor((1 + Math.random()) * 0x10000)
-    .toString(16)
-    .substring(1)
-}
-
 const basePath = 'public/js/'
 const buildPath = 'public/js/build/'
 const incPath = 'inc/'
@@ -97,6 +91,37 @@ module.exports = function (grunt) {
         src: [basePath + 'cat_source/es6/components/projects/Dashboard.js'],
         dest: buildPath + 'manage-components.js',
       },
+      app: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [
+          basePath + 'cat_source/ui.core.js',
+          basePath + 'cat_source/ui.segment.js',
+          basePath + 'cat_source/ui.init.js',
+          basePath + 'cat_source/ui.events.js',
+          basePath + 'cat_source/ui.header.js',
+          basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
+          basePath + 'cat_source/project_completion.*.js',
+          basePath + 'cat_source/ui.review.js',
+          basePath + 'cat_source/review/review_simple.js',
+          basePath + 'cat_source/review_extended/review_extended.default.js',
+          basePath +
+            'cat_source/review_extended/review_extended.ui_extension.js',
+          basePath +
+            'cat_source/review_extended/review_extended.common_events.js',
+          basePath + 'cat_source/segment_filter.common_extension.js',
+          basePath + 'cat_source/speech2text.js',
+          basePath + 'tm.js',
+          basePath + 'advancedOptionsTab.js',
+        ],
+        dest: `${buildPath}app.js`,
+      },
     },
 
     /**
@@ -109,55 +134,6 @@ module.exports = function (grunt) {
      * step, where we process es6 code, react, and import libraries.
      */
     concat: {
-      app: {
-        options: {
-          sourceMap: false,
-          sourceMapName: function () {
-            const path = buildPath + '/app.*.source-map.js'
-            const expanded = grunt.file.expand(path)
-
-            expanded.forEach(function (item) {
-              grunt.log.ok('deleting previous source map: ' + item)
-              grunt.file.delete(item, {force: true})
-            })
-
-            return buildPath + '/app.' + s4() + '.source-map.js'
-          },
-        },
-        src: [
-          basePath + 'cat_source/ui.core.js',
-          basePath + 'cat_source/ui.segment.js',
-          basePath + 'cat_source/ui.init.js',
-          basePath + 'cat_source/ui.events.js',
-          basePath + 'cat_source/ui.header.js',
-          basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
-          basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
-
-          // basePath + 'cat_source/ui.review.js',
-          //basePath + 'cat_source/sse.js',
-          // basePath + 'cat_source/mbc.main.js',
-          //WARNING: lxq.main.js: this should always be below qa_check_glossary and
-          //qa_check_blacklist, in order for its event handlers to be excecuted last
-          // basePath + 'cat_source/lxq.main.js',
-          basePath + 'cat_source/project_completion.*.js',
-
-          basePath + 'cat_source/ui.review.js',
-          basePath + 'cat_source/review/review_simple.js',
-          basePath + 'cat_source/review_extended/review_extended.default.js',
-          basePath +
-            'cat_source/review_extended/review_extended.ui_extension.js',
-          basePath +
-            'cat_source/review_extended/review_extended.common_events.js',
-
-          basePath + 'cat_source/segment_filter.common_extension.js',
-
-          basePath + 'cat_source/speech2text.js',
-          basePath + 'tm.js',
-          basePath + 'advancedOptionsTab.js',
-        ],
-        dest: buildPath + 'app.js',
-      },
-
       libs: {
         src: [
           basePath + 'lib/jquery-3.3.1.min.js',
@@ -463,10 +439,10 @@ module.exports = function (grunt) {
     'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
+    'browserify:app',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
-    'concat:app',
     'concat:common',
     'concat:analyze_new',
     'concat:manage',
@@ -486,10 +462,10 @@ module.exports = function (grunt) {
     'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
+    'browserify:app',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
-    'concat:app',
     'concat:common',
     'concat:analyze_new',
     'concat:manage',
@@ -514,11 +490,7 @@ module.exports = function (grunt) {
    * concatenated by grunt. This avoid reworking the react components
    * when it's not needed.
    */
-  grunt.registerTask('concat:js', [
-    'concat:app',
-    'concat:common',
-    'replace:version',
-  ])
+  grunt.registerTask('concat:js', ['concat:common', 'replace:version'])
 
   /**
    * development
@@ -531,12 +503,7 @@ module.exports = function (grunt) {
    */
   grunt.registerTask('development', ['bundleDev:js', 'sass', 'replace:css'])
 
-  grunt.registerTask('deploy', [
-    'bundle:js',
-    // 'strip',
-    'sass',
-    'replace:css',
-  ])
+  grunt.registerTask('deploy', ['bundle:js', 'sass', 'replace:css'])
 
   grunt.registerTask('only-react', ['browserify:components'])
 }

@@ -1,5 +1,6 @@
-;(function ($, undefined) {
-  $.extend(UI, {
+import _ from 'lodash'
+;(function ($) {
+  $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          Tag Proj start
          */
@@ -98,7 +99,7 @@
         type: 'POST',
         data: data,
         xhrFields: {withCredentials: true},
-      }).done(function (data) {
+      }).done(function () {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
@@ -124,7 +125,7 @@
         type: 'POST',
         data: data,
         xhrFields: {withCredentials: true},
-      }).done(function (data) {
+      }).done(function () {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
@@ -210,7 +211,7 @@
         }
         // If the modal is open wait the close event
         if ($(".modal[data-type='confirm']").length) {
-          $(window).on('modalClosed', function (e) {
+          $(window).on('modalClosed', function () {
             callback()
           })
         } else {

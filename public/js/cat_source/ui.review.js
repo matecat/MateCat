@@ -1,13 +1,13 @@
 /*
  Component: ui.review
  */
-var Review = {
+window.Review = {
   enabled: function () {
     return config.enableReview && !!config.isReview
   },
   type: config.reviewType,
 }
-$.extend(UI, {
+$.extend(window.UI, {
   evalOpenableSegment: function (segment) {
     if (!(segment.status === 'NEW' || segment.status === 'DRAFT')) return true
 
@@ -43,7 +43,7 @@ var alertNoTranslatedSegments = function () {
 }
 
 if (config.enableReview && config.isReview) {
-  ;(function ($, undefined) {
+  ;(function ($) {
     $.extend(UI, {
       alertNotTranslatedMessage:
         'This segment is not translated yet.<br /> Only translated segments can be revised.',
@@ -63,8 +63,6 @@ if (config.enableReview && config.isReview) {
       },
       /**
        * Each revision overwrite this function
-       * @param e
-       * @param button
        */
       clickOnApprovedButton: function () {
         return false

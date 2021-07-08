@@ -1,5 +1,5 @@
 if (SegmentFilter.enabled())
-  (function ($, UI, SF, undefined) {
+  (function ($, UI, SF) {
     var original_renderFiles = UI.renderFiles
 
     var original_gotoNextSegment = UI.gotoNextSegment

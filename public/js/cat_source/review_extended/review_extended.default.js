@@ -1,4 +1,4 @@
-ReviewExtended = {
+window.ReviewExtended = {
   enabled: function () {
     return Review.type === 'extended'
   },
@@ -9,7 +9,7 @@ ReviewExtended = {
   number: config.revisionNumber,
   getSegmentsIssues: function () {
     API.SEGMENT.getSegmentsIssues().done((data) => {
-      var versionsIssues = {}
+      let versionsIssues = {}
       _.each(data.issues, (issue) => {
         if (!versionsIssues[issue.id_segment]) {
           versionsIssues[issue.id_segment] = []
