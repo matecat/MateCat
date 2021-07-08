@@ -122,6 +122,15 @@ module.exports = function (grunt) {
         ],
         dest: `${buildPath}app.js`,
       },
+      common: {
+        src: [
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+        ],
+        dest: buildPath + 'common.js',
+      },
     },
 
     /**
@@ -216,15 +225,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/*.js',
         ],
         dest: buildPath + 'manage.js',
-      },
-      common: {
-        src: [
-          basePath + 'common.js',
-          basePath + 'user_store.js',
-          basePath + 'login.js',
-          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-        ],
-        dest: buildPath + 'common.js',
       },
       analyze_new: {
         src: [
@@ -440,10 +440,10 @@ module.exports = function (grunt) {
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
+    'browserify:common',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
-    'concat:common',
     'concat:analyze_new',
     'concat:manage',
     'concat:upload',
@@ -463,10 +463,10 @@ module.exports = function (grunt) {
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
+    'browserify:common',
     'concat:libs',
     'concat:libs_upload',
     'concat:semantic',
-    'concat:common',
     'concat:analyze_new',
     'concat:manage',
     'concat:upload',
