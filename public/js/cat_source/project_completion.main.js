@@ -5,12 +5,12 @@ var ProjectCompletion = {
 }
 
 if (ProjectCompletion.enabled()) {
-  ;(function ($, config, ProjectCompletion, UI, undefined) {
+  ;(function ($, config, ProjectCompletion, UI) {
     var sendLabel = 'Mark as complete'
     var sentLabel = 'Marked as complete'
     var sendingLabel = 'Marking'
 
-    var button, reviseNotification
+    var button
 
     $(function () {
       button = $('#markAsCompleteButton')
@@ -146,7 +146,7 @@ if (ProjectCompletion.enabled()) {
       return !config.isReview && config.job_completion_current_phase == 'revise'
     }
 
-    var messageForClickOnReadonly = function (section) {
+    var messageForClickOnReadonly = function () {
       if (UI.translateAndReadonly()) {
         return 'This job is currently under review. Segments are in read-only mode.'
       } else {
@@ -242,8 +242,8 @@ if (ProjectCompletion.enabled()) {
           '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
       }
 
-      translateWarningMessage = window.intercomErrorNotification = APP.addNotification(
-        {
+      translateWarningMessage = window.intercomErrorNotification =
+        APP.addNotification({
           autoDismiss: false,
           dismissable: true,
           position: 'tc',
@@ -251,8 +251,7 @@ if (ProjectCompletion.enabled()) {
           title: 'Warning',
           type: 'warning',
           allowHtml: true,
-        },
-      )
+        })
     }
 
     $(document).on(
@@ -285,11 +284,10 @@ if (ProjectCompletion.enabled()) {
         config.job_completion_current_phase == 'translate' &&
         config.job_marked_complete == 0
       ) {
-        var warningNotification = APP.addNotification({
+        APP.addNotification({
           type: 'warning',
           title: 'Warning',
-          text:
-            'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',
+          text: 'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',
           dismissable: false,
           autoDismiss: false,
         })

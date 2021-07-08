@@ -1,4 +1,4 @@
-if (ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
+if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data_array, diff) {
       var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
@@ -8,7 +8,7 @@ if (ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         return API.SEGMENT.sendSegmentVersionIssue(sid, data)
       })
 
-      return $.when.apply($, deferreds).done(function (response) {
+      return $.when.apply($, deferreds).done(function () {
         UI.getSegmentVersionsIssues(sid, fid)
         UI.reloadQualityReport()
       })
@@ -19,7 +19,7 @@ if (ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         id_segment,
         id_issue,
         data,
-      ).done(function (data) {
+      ).done(function () {
         var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment))
         UI.getSegmentVersionsIssues(id_segment, fid)
       })
@@ -79,7 +79,7 @@ if (ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         url: issue_path,
         type: 'DELETE',
         xhrFields: {withCredentials: true},
-      }).done(function (data) {
+      }).done(function () {
         UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
         UI.reloadQualityReport()
       })

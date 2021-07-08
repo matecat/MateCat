@@ -1,7 +1,9 @@
+import _ from 'lodash'
+
 /*
 	Component: ui.core
  */
-var UI = {
+window.UI = {
   /**
    * Open file menu in Header
    * @returns {boolean}
@@ -279,7 +281,6 @@ var UI = {
   getMoreSegments_success: function (d) {
     if (d.errors.length) this.processErrors(d.errors, 'getMoreSegments')
     var where = d.data.where
-    var section = $('section')
     if (d.data.files && _.size(d.data.files)) {
       this.renderFiles(d.data.files, where, false)
 
@@ -299,7 +300,6 @@ var UI = {
 
   getSegments: function (options) {
     var where = this.startSegmentId ? 'center' : 'after'
-    var step = this.initSegNum
     $('#outer').addClass('loading')
     var seg = options.segmentToOpen
       ? options.segmentToOpen
@@ -327,7 +327,6 @@ var UI = {
     })
   },
   getSegments_success: function (d, options) {
-    var startSegmentId
     if (d.errors.length) {
       this.processErrors(d.errors, 'getSegments')
     }
@@ -390,8 +389,7 @@ var UI = {
       this.unmountSegments()
     }
     var segments = []
-    var self = this
-    $.each(files, function (k) {
+    $.each(files, function () {
       var newFile = ''
       var articleToAdd = !$('#file').length
       if (articleToAdd) {
@@ -456,7 +454,7 @@ var UI = {
         id_job: config.id_job,
       },
       context: id_segment,
-      error: function (d) {
+      error: function () {
         OfflineUtils.failedConnection(this, 'getTranslationMismatches')
       },
       success: function (d) {
@@ -505,10 +503,7 @@ var UI = {
       d.data.not_editable.splice(sameContentIndex1, 1)
 
     var numAlt = d.data.editable.length + d.data.not_editable.length
-    var numSeg = 0
-    $.each(d.data.editable, function () {
-      numSeg += this.involved_id.length
-    })
+
     if (numAlt) {
       // UI.renderAlternatives(d);
       SegmentActions.setAlternatives(id_segment, d.data)
@@ -570,7 +565,7 @@ var UI = {
     $('#action-download .downloadTranslation a').text(label)
     $('#action-download .previewLink a').text(label)
   },
-  disableDownloadButtonForDownloadStart: function (openOriginalFiles) {
+  disableDownloadButtonForDownloadStart: function () {
     $('#action-download').addClass('disabled')
   },
 
@@ -665,7 +660,7 @@ var UI = {
     }, config.warningPollingInterval)
   },
 
-  checkWarnings: function (openingSegment) {
+  checkWarnings: function () {
     var dd = new Date()
     var ts = dd.getTime()
     var seg =
@@ -767,8 +762,7 @@ var UI = {
     if (this.version != config.build_number) {
       var notification = {
         title: 'New version of MateCat',
-        text:
-          'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+        text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
         type: 'warning',
         allowHtml: true,
         position: 'bl',
@@ -905,7 +899,7 @@ var UI = {
   },
   alreadyInSetTranslationTail: function (sid) {
     var alreadySet = false
-    $.each(UI.setTranslationTail, function (index) {
+    $.each(UI.setTranslationTail, function () {
       if (this.id_segment == sid) alreadySet = true
     })
     return alreadySet
@@ -918,7 +912,7 @@ var UI = {
   updateToSetTranslationTail: function (item) {
     SegmentActions.addClassToSegment(item.id_segment, 'setTranslationPending')
 
-    $.each(UI.setTranslationTail, function (index) {
+    $.each(UI.setTranslationTail, function () {
       if (this.id_segment == item.id_segment) {
         this.status = item.status
         this.caller = item.caller
@@ -1087,7 +1081,7 @@ var UI = {
   collectSplittedStatuses: function (sid, splittedSid, status) {
     var statuses = []
     var segments = SegmentStore.getSegmentsInSplit(sid)
-    $.each(segments, function (index) {
+    $.each(segments, function () {
       var segment = SegmentStore.getSegmentByIdToJS(this.sid)
       if (splittedSid === this.sid) {
         statuses.push(status)
@@ -1129,8 +1123,7 @@ var UI = {
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
           APP.alert({
-            msg:
-              'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+            msg: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
           })
         }
       }
@@ -1357,11 +1350,11 @@ var UI = {
     $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click()
   },
 
-  closeAllMenus: function (e, fromQA) {
+  closeAllMenus: function () {
     CatToolActions.closeSubHeader()
   },
   // overridden by plugin
-  inputEditAreaEventHandler: function (e) {
+  inputEditAreaEventHandler: function () {
     UI.currentSegment.trigger('modified')
   },
 }

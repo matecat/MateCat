@@ -30,15 +30,15 @@
      "notes":null
  }
  */
+import _ from 'lodash'
+import {EventEmitter} from 'events'
+import Immutable from 'immutable'
+import assign from 'object-assign'
 
 import AppDispatcher from './AppDispatcher'
-import {EventEmitter} from 'events'
 import SegmentConstants from '../constants/SegmentConstants'
-import assign from 'object-assign'
 import TagUtils from '../utils/tagUtils'
-import TextUtils from '../utils/textUtils'
 import SegmentUtils from '../utils/segmentUtils'
-import Immutable from 'immutable'
 import EditAreaConstants from '../constants/EditAreaConstants'
 import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
 
@@ -96,10 +96,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   removeAllSegments: function () {
     this._segments = Immutable.fromJS([])
   },
-  normalizeSplittedSegments: function (segments, fid) {
+  normalizeSplittedSegments: function (segments) {
     let newSegments = []
     let self = this
-    $.each(segments, function (index) {
+    $.each(segments, function () {
       let splittedSourceAr = this.segment.split(
         UI.splittedTranslationPlaceholder,
       )
@@ -445,7 +445,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
     return this._segments.get(index)
   },
-  lockUnlockEditArea(sid, fid) {
+  lockUnlockEditArea(sid) {
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
     let segment = this._segments.get(index)
@@ -455,7 +455,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       !lockedEditArea,
     )
   },
-  setToggleBulkOption: function (sid, fid) {
+  setToggleBulkOption: function (sid) {
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
     if (this._segments.getIn([index, 'inBulk'])) {
@@ -539,7 +539,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     })
   },
 
-  setConcordanceMatches: function (sid, matches, errors) {
+  setConcordanceMatches: function (sid, matches) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
@@ -575,7 +575,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let contributions = this._segments.get(index).get('contributions')
     const indexCont = contributions
       .get('matches')
-      .findIndex((contr, index) => contr.get('id') === matchId)
+      .findIndex((contr) => contr.get('id') === matchId)
     let matches = contributions.get('matches').splice(indexCont, 1)
     this._segments = this._segments.setIn(
       [index, 'contributions', 'matches'],
@@ -641,7 +641,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       segment.versions.find((item) => item.issues && item.issues.length > 0)
     return versionWithIssues && versionWithIssues.issues.length > 0
   },
-  openSegmentIssuePanel: function (sid) {
+  openSegmentIssuePanel: function () {
     // const index = this.getSegmentIndex(sid);
     // if ( index === -1 ) return;
     // this._segments = this._segments.setIn([index, 'openIssues'], true);
@@ -853,7 +853,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn([index, 'openSplit'], true)
   },
-  closeSegmentsSplit: function (sid) {
+  closeSegmentsSplit: function () {
     this._segments = this._segments.map((segment) =>
       segment.set('openSplit', false),
     )
@@ -927,7 +927,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
     let result,
       currentFind = false
-    this._segments.forEach((segment, key) => {
+    this._segments.forEach((segment) => {
       if (_.isUndefined(result)) {
         if (currentFind || current_sid === -1) {
           if (segment.get('readonly') === 'true') {
@@ -1029,7 +1029,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     })
   },
   getSegmentIndex(sid) {
-    return this._segments.findIndex(function (segment, index) {
+    return this._segments.findIndex(function (segment) {
       if (sid.toString().indexOf('-') === -1) {
         return parseInt(segment.get('sid')) === parseInt(sid)
       } else {
@@ -1125,7 +1125,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       plainText,
     }
   },
-  emitChange: function (event, args) {
+  emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
@@ -1158,7 +1158,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid)
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
-    case SegmentConstants.SELECT_SEGMENT:
+    case SegmentConstants.SELECT_SEGMENT: {
       let idToScroll
       if (action.direction === 'next') {
         idToScroll = SegmentStore.selectNextSegment(action.sid)
@@ -1176,6 +1176,7 @@ AppDispatcher.register(function (action) {
         )
       }
       break
+    }
     case SegmentConstants.CLOSE_SEGMENT:
       SegmentStore.closeSegments(action.sid)
       SegmentStore.emitChange(
@@ -1417,7 +1418,7 @@ AppDispatcher.register(function (action) {
       )
       SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id)
       break
-    case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
+    case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES: {
       let seg = SegmentStore.addSegmentVersions(
         action.fid,
         action.sid,
@@ -1432,6 +1433,7 @@ AppDispatcher.register(function (action) {
         action.fid,
       )
       break
+    }
     case SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES:
       _.each(action.versionsIssues, function (issues, segmentId) {
         SegmentStore.addSegmentPreloadedIssues(segmentId, issues)
@@ -1697,7 +1699,7 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
       )
       break
-    case SegmentConstants.ADD_CURRENT_SEARCH:
+    case SegmentConstants.ADD_CURRENT_SEARCH: {
       let currentSegment = SegmentStore.addCurrentSearchSegment(
         action.currentIndex,
       )
@@ -1717,6 +1719,7 @@ AppDispatcher.register(function (action) {
         )
       }
       break
+    }
     case EditAreaConstants.REPLACE_SEARCH_RESULTS:
       SegmentStore.emitChange(
         EditAreaConstants.REPLACE_SEARCH_RESULTS,
@@ -1726,7 +1729,7 @@ AppDispatcher.register(function (action) {
     case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
       SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText)
       break
-    case SegmentConstants.SET_GUESS_TAGS:
+    case SegmentConstants.SET_GUESS_TAGS: {
       SegmentStore.setTagProjectionStatus(action.enabled)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
@@ -1735,6 +1738,7 @@ AppDispatcher.register(function (action) {
       const current = SegmentStore.getCurrentSegment()
       SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid)
       break
+    }
     case EditAreaConstants.EDIT_AREA_CHANGED:
       SegmentStore.emitChange(
         EditAreaConstants.EDIT_AREA_CHANGED,
@@ -1756,4 +1760,4 @@ AppDispatcher.register(function (action) {
   }
 })
 
-module.exports = SegmentStore
+export default SegmentStore

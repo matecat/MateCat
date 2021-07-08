@@ -1,5 +1,5 @@
-if (!API) {
-  var API = {}
+if (!window.API) {
+  window.API = {}
 }
 
 API.OUTSOURCE = {

@@ -166,6 +166,7 @@ class SegmentBody extends React.Component {
       : Shortcuts.cattol.events.copySource.keystrokes.standard
     return (
       <div
+        onClick={this.props.onClick}
         className="text segment-body-content"
         ref={(body) => (this.segmentBody = body)}
       >

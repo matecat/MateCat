@@ -62,6 +62,7 @@ export default class InputField extends React.Component {
     return (
       <div className={'qr-filter-idSegment'} style={styleContainer}>
         <input
+          data-testid="input"
           style={styleInput}
           type={type}
           placeholder={this.props.placeholder}

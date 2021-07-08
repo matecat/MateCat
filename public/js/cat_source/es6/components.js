@@ -3,6 +3,7 @@
 // Underscores seem to be a better convention.
 import JobMetadata from './components/header/cattol/JobMetadata'
 import {ModalWindow} from './components/modals/ModalWindow'
+import SegmentStore from './stores/SegmentStore'
 
 window.MC = {}
 
@@ -23,7 +24,7 @@ window.SegmentActions = require('./actions/SegmentActions')
 window.CommentsActions = require('./actions/CommentsActions')
 window.ManageActions = require('./actions/ManageActions')
 
-window.SegmentStore = require('./stores/SegmentStore')
+window.SegmentStore = SegmentStore
 window.CatToolStore = require('./stores/CatToolStore')
 
 window.Header = require('./components/header/Header').default

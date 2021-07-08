@@ -12,7 +12,6 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentHeader from './SegmentHeader'
 import SegmentFooter from './SegmentFooter'
-import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues'
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel'
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
@@ -33,7 +32,6 @@ class Segment extends React.Component {
       new: 'NEW',
       rejected: 'REJECTED',
     }
-    this.reviewExtendedFooter = 'extended-footer'
 
     this.createSegmentClasses = this.createSegmentClasses.bind(this)
     this.hightlightEditarea = this.hightlightEditarea.bind(this)
@@ -436,12 +434,12 @@ class Segment extends React.Component {
       !this.props.isReview
     )
   }
-  onClickEvent(event) {
+  onClickEvent = () => {
     if (
       this.state.readonly ||
       (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')
     ) {
-      UI.handleClickOnReadOnly($(event.currentTarget).closest('section'))
+      UI.handleClickOnReadOnly($(this.section).closest('section'))
     } else if (this.props.segment.muted) {
       return
     } else if (!this.props.segment.opened) {
@@ -666,7 +664,6 @@ class Segment extends React.Component {
         data-split-original-id={originalId}
         data-tagmode="crunched"
         data-tagprojection={this.dataAttrTagged}
-        onClick={this.onClickEvent.bind(this)}
         data-fid={this.props.segment.id_file}
         data-modified={this.props.segment.modified}
       >
@@ -757,6 +754,7 @@ class Segment extends React.Component {
             isReviewExtended={this.props.isReviewExtended}
             reviewType={this.props.reviewType}
             isReviewImproved={this.props.isReviewImproved}
+            onClick={this.onClickEvent}
           />
           <div
             className="timetoedit"
@@ -768,14 +766,6 @@ class Segment extends React.Component {
             <div className="edit-distance">
               Edit Distance: {this.props.segment.edit_distance}
             </div>
-          ) : null}
-
-          {config.isReview &&
-          this.props.reviewType === this.reviewExtendedFooter ? (
-            <IssuesContainer
-              segment={this.props.segment}
-              sid={this.props.segment.sid}
-            />
           ) : null}
 
           {this.props.segment.opened ? (
@@ -803,9 +793,7 @@ class Segment extends React.Component {
           </div>
         </div>
         <div className="segment-side-container">
-          {config.comments_enabled &&
-          this.props.segment.openComments &&
-          this.props.segment.opened ? (
+          {config.comments_enabled && this.props.segment.openComments ? (
             <SegmentCommentsContainer {...this.props} />
           ) : null}
           {this.props.isReviewExtended &&
