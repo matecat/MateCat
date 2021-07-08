@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.185.2",
+            "version": "3.185.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "0e6ece3f9c4ab26bb20183c697fd36e1d55c1053"
+                "reference": "d30661623a1835ba4bb406675f865c4b40b4b425"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0e6ece3f9c4ab26bb20183c697fd36e1d55c1053",
-                "reference": "0e6ece3f9c4ab26bb20183c697fd36e1d55c1053",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d30661623a1835ba4bb406675f865c4b40b4b425",
+                "reference": "d30661623a1835ba4bb406675f865c4b40b4b425",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.185.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.185.8"
             },
-            "time": "2021-06-25T18:19:14+00:00"
+            "time": "2021-07-07T18:14:28+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -706,16 +706,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.0.8",
+            "version": "v1.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "94d7e50162816c8292f4e8f1f508477218b70aba"
+                "reference": "18afeaa2d07b4d2edfe16a1ea46ce342b2a02005"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/94d7e50162816c8292f4e8f1f508477218b70aba",
-                "reference": "94d7e50162816c8292f4e8f1f508477218b70aba",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/18afeaa2d07b4d2edfe16a1ea46ce342b2a02005",
+                "reference": "18afeaa2d07b4d2edfe16a1ea46ce342b2a02005",
                 "shasum": ""
             },
             "require": {
@@ -756,9 +756,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.0.8"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.0.9"
             },
-            "time": "2021-06-23T14:44:47+00:00"
+            "time": "2021-07-05T08:09:54+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -815,16 +815,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.67",
+            "version": "v1.0.69",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "e14ed6bffb0acc4119a1074a64516dcb21f50d16"
+                "reference": "543da183418285243ebdac4ee6026eb7e81262d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/e14ed6bffb0acc4119a1074a64516dcb21f50d16",
-                "reference": "e14ed6bffb0acc4119a1074a64516dcb21f50d16",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/543da183418285243ebdac4ee6026eb7e81262d3",
+                "reference": "543da183418285243ebdac4ee6026eb7e81262d3",
                 "shasum": ""
             },
             "require": {
@@ -860,9 +860,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.67"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.69"
             },
-            "time": "2021-06-28T12:59:53+00:00"
+            "time": "2021-07-08T12:59:46+00:00"
         },
         {
             "name": "monolog/monolog",
