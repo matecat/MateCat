@@ -1,10 +1,26 @@
-import {render, fireEvent} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
 import Immutable from 'immutable'
 import JobContainer from './JobContainer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 
+require('../../../../lib/jquery-dateFormat.min.js')
+// high order function -> $.format.date (jquery plugin) - workaround
+const formatDate = (context, fn) => {
+  return function (...args) {
+    const params = args.map((argument) =>
+      typeof argument === 'string' && /hh/i.test(argument)
+        ? argument.toUpperCase()
+        : argument,
+    )
+    return fn.apply(context, params)
+  }
+}
+$.format.date = formatDate($.format, $.format.date)
+
+require('../../../../common')
 window.Cookies = require('../../../../lib/js.cookie')
 window.config = {enable_outsource: 1}
 
@@ -31,6 +47,18 @@ const fakeProjectsData = {
       isChunk: true,
       isChunkOutsourced: false,
       activityLogUrl: '/activityLog/6/59ad778c68b1',
+    },
+  },
+  jobTranslatedOutsourced: {
+    data: JSON.parse(
+      '{"id":9,"password":"59b94d64a7ef","name":"Test","id_team":1,"id_assignee":1,"create_date":"2021-07-02 10:59:28","fast_analysis_wc":374,"standard_analysis_wc":1704,"tm_analysis_wc":"1427.09","project_slug":"test","jobs":[{"id":90,"password":"a5b852c4fe52","source":"en-US","target":"la-XN","sourceTxt":"English US","targetTxt":"Latin","job_first_segment":"58","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1625216368,"created_at":"2021-07-02T10:59:28+02:00","create_date":"2021-07-02 10:59:28","formatted_create_date":"Jul 02, 10:59","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":90,"DRAFT":362.1,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":362.1,"PROGRESS":0,"TOTAL_FORMATTED":"362","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"362","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"362","TODO":362,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":{"email":"pierluigi.dicianni@translated.net","added_by":1,"delivery_date":"2021-07-07 11:00:00","delivery_timestamp":1625648400,"source":"en-US","target":"la-XN","id_translator_profile":"1","user":{"uid":1,"first_name":"Pierluigi","last_name":"Di Cianni","email":"pierluigi.dicianni@translated.net","has_password":false}},"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"a192d66ec1f5"}],"urls":{"password":"a5b852c4fe52","translate_url":"https://dev.matecat.com/translate/Test/en-US-la-XN/90-a5b852c4fe52","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-la-XN/90-a192d66ec1f5"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=90&password=a5b852c4fe52&download_type=all&filename=4","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=90&id_file=&password=a5b852c4fe52&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/90/a5b852c4fe52/90.zip"}},{"id":91,"password":"ce560196ca5c","source":"en-US","target":"es-ES","sourceTxt":"English US","targetTxt":"Spanish","job_first_segment":"58","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1625216368,"created_at":"2021-07-02T10:59:28+02:00","create_date":"2021-07-02 10:59:28","formatted_create_date":"Jul 02, 10:59","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":91,"DRAFT":340.8,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":340.8,"PROGRESS":0,"TOTAL_FORMATTED":"341","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"341","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"341","TODO":341,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"1c0eb403b087"}],"urls":{"password":"ce560196ca5c","translate_url":"https://dev.matecat.com/translate/Test/en-US-es-ES/91-ce560196ca5c","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-es-ES/91-1c0eb403b087"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=91&password=ce560196ca5c&download_type=all&filename=4","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=91&id_file=&password=ce560196ca5c&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/91/ce560196ca5c/91.zip"}},{"id":92,"password":"25c9442ad64c","source":"en-US","target":"en-GB","sourceTxt":"English US","targetTxt":"English","job_first_segment":"58","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1625216368,"created_at":"2021-07-02T10:59:28+02:00","create_date":"2021-07-02 10:59:28","formatted_create_date":"Jul 02, 10:59","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":92,"DRAFT":362.1,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":362.1,"PROGRESS":0,"TOTAL_FORMATTED":"362","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"362","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"362","TODO":362,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"3f0a9e425baf"}],"urls":{"password":"25c9442ad64c","translate_url":"https://dev.matecat.com/translate/Test/en-US-en-GB/92-25c9442ad64c","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-en-GB/92-3f0a9e425baf"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=92&password=25c9442ad64c&download_type=all&filename=4","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=92&id_file=&password=25c9442ad64c&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/92/25c9442ad64c/92.zip"}},{"id":93,"password":"667611949406","source":"en-US","target":"mt-MT","sourceTxt":"English US","targetTxt":"Maltese","job_first_segment":"58","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1625216368,"created_at":"2021-07-02T10:59:28+02:00","create_date":"2021-07-02 10:59:28","formatted_create_date":"Jul 02, 10:59","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":93,"DRAFT":362.1,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":362.1,"PROGRESS":0,"TOTAL_FORMATTED":"362","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"362","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"362","TODO":362,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"be016cc3fd85"}],"urls":{"password":"667611949406","translate_url":"https://dev.matecat.com/translate/Test/en-US-mt-MT/93-667611949406","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-mt-MT/93-be016cc3fd85"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=93&password=667611949406&download_type=all&filename=4","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=93&id_file=&password=667611949406&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/93/667611949406/93.zip"}}],"features":"translated,mmt,translation_versions,review_extended,second_pass_review","is_cancelled":false,"is_archived":false,"remote_file_service":null,"due_date":null,"project_info":null}',
+    ),
+    props: {
+      index: 0,
+      jobsLenght: 4,
+      isChunk: false,
+      isChunkOutsourced: false,
+      activityLogUrl: '/activityLog/9/59b94d64a7ef',
     },
   },
 }
@@ -80,172 +108,178 @@ const createTranslateUrl = (index, project, job, jobsLenght) => {
   )
 }
 
-// -> Rendering elements
 test('Rendering elements', () => {
   const {job, props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
-  const {container, getByTitle} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
   // ID field
-  const idElement = getByTitle('Job Id')
-  expect(idElement.textContent).toBe(`ID: ${job.get('id')}`)
+  const idElement = screen.getByTitle('Job Id')
+  expect(idElement).toHaveTextContent(`ID: ${job.get('id')}`)
 
   // source field
-  const sourceElement = container.querySelector('.source-box')
-  expect(sourceElement.textContent).toBe(job.get('sourceTxt'))
+  const sourceElement = screen.getByText(job.get('sourceTxt'))
+  expect(sourceElement).toHaveClass('source-box')
+  expect(sourceElement).toBeInTheDocument()
 
   // target field
-  const targetElement = container.querySelector('.target-box')
-  expect(targetElement.textContent).toBe(job.get('targetTxt'))
-
-  // job payable
-  const jobPayableElement = container.querySelector('.job-payable')
+  const targetElement = screen.getByText(job.get('targetTxt'))
+  expect(targetElement).toHaveClass('target-box')
+  expect(targetElement).toBeInTheDocument()
 
   // words number
-  const wordsElement = jobPayableElement.querySelector('#words')
-  expect(wordsElement.textContent).toBe(job.get('stats').get('TOTAL_FORMATTED'))
+  expect(
+    screen.getByText(job.get('stats').get('TOTAL_FORMATTED')),
+  ).toBeInTheDocument()
+
+  // TM button
+  expect(screen.getByTestId('tm-button')).toBeInTheDocument()
 
   // assign job to translator
-  const assignJobToTranslatorElement = container.querySelector(
-    '.job-to-translator.not-assigned',
-  )
-  expect(assignJobToTranslatorElement.querySelector('a').textContent).toBe(
-    'Assign job to translator',
-  )
+  expect(screen.getByText('Assign job to translator')).toBeInTheDocument()
 
   // buy translation
-  expect(container.querySelector('.buy-translation-span').textContent).toBe(
-    'Buy Translation',
-  )
+  expect(screen.getByText('Buy Translation')).toBeInTheDocument()
 
   // open
-  expect(
-    container.querySelector('.open-translate.ui.primary.button.open')
-      .textContent,
-  ).toBe('Open')
+  expect(screen.getByText(/Open/)).toBeInTheDocument()
 
   // job menu
-  const jobMenuElement = container.querySelector(
-    '.ui.icon.top.right.pointing.dropdown.job-menu.button',
-  )
-  expect(jobMenuElement).toBeInTheDocument()
+  expect(screen.getByTestId('job-menu-button')).toBeInTheDocument()
 })
 
-// -> Check job without activity
 test('Check job without activity', () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
-  const {container} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
-  const iconElement = container
-    .querySelector('.job-activity-icons')
-    .querySelector('.ui.icon')
-  expect(iconElement).toBeNull()
+  expect(screen.getByTestId('job-activity-icons')).toBeEmptyDOMElement()
 })
 
-// -> Check job activity
 test('Check job activity', () => {
   const {props} = getFakeProperties(fakeProjectsData.jobActivity)
-  const {container} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
-  const iconElement = container
-    .querySelector('.job-activity-icons')
-    .querySelector('.ui.icon')
-  expect(iconElement).toBeValid()
+  expect(screen.getByTestId('job-activity-icons')).toBeInTheDocument()
 })
 
-// -> Job payable check analisys URL
+test('Check job without TM button', () => {
+  const {props} = getFakeProperties(fakeProjectsData.jobActivity)
+  render(<JobContainer {...props} />)
+
+  expect(screen.getByTestId('tm-container')).toBeEmptyDOMElement()
+})
+
 test('Job payable: check analisys URL', () => {
   const {project, props} = getFakeProperties(
     fakeProjectsData.jobWithoutActivity,
   )
-  const {container} = render(<JobContainer {...props} />)
-
-  // Job payable
-  const jobPayableElement = container.querySelector('.job-payable')
+  render(<JobContainer {...props} />)
 
   // analysisUrl
-  const analysisUrl = jobPayableElement.querySelector('a')
-  const aTag = document.createElement('a')
-  aTag.setAttribute(
-    'href',
-    getProjectAnalyzeUrl(
-      project.get('project_slug'),
-      project.get('id'),
-      project.get('password'),
-    ),
+  const hrefAttribute = screen.getByText('words').getAttribute('href')
+
+  const correctUrl = getProjectAnalyzeUrl(
+    project.get('project_slug'),
+    project.get('id'),
+    project.get('password'),
   )
-  expect(analysisUrl.href).toBe(aTag.href)
+  expect(hrefAttribute).toBe(correctUrl)
 })
 
-// -> TM onClick callback
 test('Check TM onClick callback', () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
-  const {container} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
   // TM function
   const tmCallback = jest.fn()
   ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, tmCallback)
 
-  fireEvent.click(container.querySelector('a.ui.icon.basic.button.tm-keys'))
+  userEvent.click(screen.getByTestId('tm-button'))
   expect(tmCallback).toHaveBeenCalled()
 
   ProjectsStore.removeListener(ManageConstants.OPEN_JOB_TM_PANEL, tmCallback)
 })
 
-// -> Assign job to translator onClick event
 test('Assign job to translator: check onClick event', () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
-  const {container} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
-  const jobNotAssignedElement = container.querySelector(
-    '.job-to-translator.not-assigned',
-  )
-  expect(jobNotAssignedElement).toBeTruthy()
+  const jobToTranslatorElement = screen.getByText('Assign job to translator')
 
-  const aTag = jobNotAssignedElement.querySelector('a')
   const onClick = jest.fn()
-  aTag.addEventListener('click', (event) => {
+  jobToTranslatorElement.addEventListener('click', (event) => {
     event.stopPropagation()
     onClick()
   })
-  fireEvent.click(aTag)
+  userEvent.click(jobToTranslatorElement)
   expect(onClick).toHaveBeenCalled()
 })
 
-// -> Buy translation: check onClick event
+test('Render elements translated outsourced', () => {
+  const {props, job} = getFakeProperties(
+    fakeProjectsData.jobTranslatedOutsourced,
+  )
+  render(<JobContainer {...props} />)
+
+  // user email
+  expect(
+    screen.getByText(job.get('translator').get('email')),
+  ).toBeInTheDocument()
+
+  // date
+  /*const gmtDate = APP.getGMTDate(
+    job.get('translator').get('delivery_timestamp') * 1000
+  );
+
+  const regexDay = new RegExp(gmtDate.day + '\b');
+  expect(screen.getByText(regexDay)).toBeInTheDocument();
+  expect(screen.getByText(gmtDate.month)).toBeInTheDocument();
+  expect(screen.getByText(gmtDate.time)).toBeInTheDocument();
+  expect(screen.getByText(`(${gmtDate.gmt})`)).toBeInTheDocument();*/
+})
+
+test('Remove translator check onClick event', () => {
+  const {props} = getFakeProperties(fakeProjectsData.jobTranslatedOutsourced)
+  render(<JobContainer {...props} />)
+
+  const buttonElement = screen.getByTestId('remove-translator-button')
+
+  const onClick = jest.fn()
+  buttonElement.addEventListener('click', (event) => {
+    event.stopPropagation()
+    onClick()
+  })
+  userEvent.click(buttonElement)
+  expect(onClick).toHaveBeenCalled()
+})
+
 test('Buy translation: check onClick event', () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
-  const {container} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
-  const buyTranslationElement = container.querySelector(
-    '.open-outsource.buy-translation.ui.button',
-  )
-  expect(buyTranslationElement).toBeTruthy()
+  const buyTranslationElement = screen.getByTestId('buy-translation-button')
 
   const onClick = jest.fn()
   buyTranslationElement.addEventListener('click', (event) => {
     event.stopPropagation()
     onClick()
   })
-  fireEvent.click(buyTranslationElement)
+  userEvent.click(buyTranslationElement)
   expect(onClick).toHaveBeenCalled()
 })
 
-// -> Check Open link
 test('Check Open link', () => {
   const {props, project, job} = getFakeProperties(
     fakeProjectsData.jobWithoutActivity,
   )
-  const {container} = render(<JobContainer {...props} />)
+  render(<JobContainer {...props} />)
 
-  const openElement = container.querySelector(
-    '.open-translate.ui.primary.button.open',
+  const openElement = screen.getByText(/Open/).getAttribute('href')
+
+  const correctUrl = createTranslateUrl(
+    props.index,
+    project,
+    job,
+    props.jobsLenght,
   )
-
-  const aTag = document.createElement('a')
-  aTag.setAttribute(
-    'href',
-    createTranslateUrl(props.index, project, job, props.jobsLenght),
-  )
-
-  expect(openElement.href).toBe(aTag.href)
+  expect(openElement).toBe(correctUrl)
 })
