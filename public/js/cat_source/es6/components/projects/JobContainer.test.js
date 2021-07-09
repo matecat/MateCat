@@ -114,18 +114,13 @@ test('Rendering elements', () => {
   render(<JobContainer {...props} />)
 
   // ID field
-  const idElement = screen.getByTitle('Job Id')
-  expect(idElement).toHaveTextContent(`ID: ${job.get('id')}`)
+  expect(screen.getByText(`ID: ${job.get('id')}`)).toBeVisible()
 
   // source field
-  const sourceElement = screen.getByText(job.get('sourceTxt'))
-  expect(sourceElement).toHaveClass('source-box')
-  expect(sourceElement).toBeInTheDocument()
+  expect(screen.getByTestId('source-label')).toBeInTheDocument()
 
   // target field
-  const targetElement = screen.getByText(job.get('targetTxt'))
-  expect(targetElement).toHaveClass('target-box')
-  expect(targetElement).toBeInTheDocument()
+  expect(screen.getByTestId('target-label')).toBeInTheDocument()
 
   // words number
   expect(

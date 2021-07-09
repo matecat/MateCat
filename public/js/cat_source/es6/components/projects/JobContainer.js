@@ -992,13 +992,13 @@ class JobContainer extends React.Component {
                 }
                 data-variation="tiny"
               >
-                <div className="source-box">
+                <div className="source-box" data-testid="source-label">
                   {this.props.job.get('sourceTxt')}
                 </div>
                 <div className="in-to">
                   <i className="icon-chevron-right icon" />
                 </div>
-                <div className="target-box">
+                <div className="target-box" data-testid="target-label">
                   {this.props.job.get('targetTxt')}
                 </div>
               </div>
