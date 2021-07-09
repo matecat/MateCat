@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import '@testing-library/jest-dom'
 import React from 'react'
 import Immutable from 'immutable'
 import JobContainer from './JobContainer'
@@ -204,14 +205,7 @@ test('Assign job to translator: check onClick event', () => {
   render(<JobContainer {...props} />)
 
   const jobToTranslatorElement = screen.getByText('Assign job to translator')
-
-  const onClick = jest.fn()
-  jobToTranslatorElement.addEventListener('click', (event) => {
-    event.stopPropagation()
-    onClick()
-  })
-  userEvent.click(jobToTranslatorElement)
-  expect(onClick).toHaveBeenCalled()
+  expect(jobToTranslatorElement).toBeEnabled()
 })
 
 test('Render elements translated outsourced', () => {
@@ -242,14 +236,7 @@ test('Remove translator check onClick event', () => {
   render(<JobContainer {...props} />)
 
   const buttonElement = screen.getByTestId('remove-translator-button')
-
-  const onClick = jest.fn()
-  buttonElement.addEventListener('click', (event) => {
-    event.stopPropagation()
-    onClick()
-  })
-  userEvent.click(buttonElement)
-  expect(onClick).toHaveBeenCalled()
+  expect(buttonElement).toBeEnabled()
 })
 
 test('Buy translation: check onClick event', () => {
@@ -257,14 +244,7 @@ test('Buy translation: check onClick event', () => {
   render(<JobContainer {...props} />)
 
   const buyTranslationElement = screen.getByTestId('buy-translation-button')
-
-  const onClick = jest.fn()
-  buyTranslationElement.addEventListener('click', (event) => {
-    event.stopPropagation()
-    onClick()
-  })
-  userEvent.click(buyTranslationElement)
-  expect(onClick).toHaveBeenCalled()
+  expect(buyTranslationElement).toBeEnabled()
 })
 
 test('Check Open link', () => {
