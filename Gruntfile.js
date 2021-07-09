@@ -88,8 +88,18 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [basePath + 'cat_source/es6/components/projects/Dashboard.js'],
-        dest: buildPath + 'manage-components.js',
+        src: [
+          basePath + 'cat_source/es6/components/projects/Dashboard.js',
+          basePath + 'outsource.js',
+          basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/outsourceAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/projectsAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
+        ],
+        dest: buildPath + 'manage.js',
       },
       app: {
         options: {
@@ -214,12 +224,6 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'libs_upload.js',
       },
-      manage: {
-        src: [
-          basePath + 'outsource.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'manage.js',
       },
       analyze_new: {
         src: [
@@ -439,7 +443,6 @@ module.exports = function (grunt) {
     'concat:libs',
     'concat:libs_upload',
     'concat:analyze_new',
-    'concat:manage',
     'concat:upload',
     'replace:version',
   ])
@@ -461,7 +464,6 @@ module.exports = function (grunt) {
     'concat:libs',
     'concat:libs_upload',
     'concat:analyze_new',
-    'concat:manage',
     'concat:upload',
     'replace:version',
   ])

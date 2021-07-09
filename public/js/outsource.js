@@ -67,7 +67,7 @@ $.extend(window.UI, {
   },
 
   shareToTranslatorNotification: function (mail, job) {
-    return (message = {
+    return {
       title: 'Job sent',
       text:
         '<div style="margin-top: 16px;">To: <a href="mailto:' +
@@ -87,7 +87,7 @@ $.extend(window.UI, {
         '<div class="target-box" style="display: inherit;">' +
         job.targetTxt +
         '</div> </div> </div></div>',
-    })
+    }
   },
 
   shareToTranslatorDateChangeNotification: function (email, oldDate, newDate) {
@@ -95,7 +95,7 @@ $.extend(window.UI, {
     oldDate = APP.getGMTDate(oldDate)
     newDate = $.format.date(newDate, 'yyyy-MM-d hh:mm a')
     newDate = APP.getGMTDate(newDate)
-    return (message = {
+    return {
       title: 'Job delivery update',
       text:
         '<div style="margin-top: 16px;"><div class="job-reference" style="display: inline-block; width: 100%;"> To: ' +
@@ -131,11 +131,11 @@ $.extend(window.UI, {
         '">' +
         email +
         '</a> </div></div>',
-    })
+    }
   },
 
   shareToTranslatorMailChangeNotification: function (mail) {
-    return (message = {
+    return {
       title:
         'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
       text:
@@ -156,7 +156,7 @@ $.extend(window.UI, {
         '<div class="target-box" style="display: inherit;">' +
         UI.currentOutsourceJob.targetTxt +
         '</div> </div> </div></div>',
-    })
+    }
   },
   showShareTranslatorError: function () {
     APP.ModalWindow.onCloseModal()
