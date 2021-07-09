@@ -530,7 +530,6 @@ body.manage {
 
                   @media only screen and (max-width: 1199px) and (min-width: 992px) {
                     width: fit-content;
-                    max-width: 190px;
                     &:hover {
                     }
                   }
@@ -978,7 +977,6 @@ body.manage {
       margin-right: 5px;
       margin-left: 15px;
       min-width: 0px;
-      max-width: 210px !important;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
