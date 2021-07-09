@@ -214,11 +214,6 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'libs_upload.js',
       },
-
-      semantic: {
-        src: [basePath + 'lib/semantic.min.js'],
-        dest: buildPath + 'semantic.js',
-      },
       manage: {
         src: [
           basePath + 'outsource.js',
@@ -443,7 +438,6 @@ module.exports = function (grunt) {
     'browserify:common',
     'concat:libs',
     'concat:libs_upload',
-    'concat:semantic',
     'concat:analyze_new',
     'concat:manage',
     'concat:upload',
@@ -466,7 +460,6 @@ module.exports = function (grunt) {
     'browserify:common',
     'concat:libs',
     'concat:libs_upload',
-    'concat:semantic',
     'concat:analyze_new',
     'concat:manage',
     'concat:upload',
