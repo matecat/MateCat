@@ -123,6 +123,13 @@ module.exports = function (grunt) {
         dest: `${buildPath}app.js`,
       },
       common: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
         src: [
           basePath + 'common.js',
           basePath + 'user_store.js',
