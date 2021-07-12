@@ -57,7 +57,7 @@ APP.createTMKey = function () {
  * ajax call to clear the uploaded files when an user refresh the home page
  * called in main.js
  */
-var clearNotCompletedUploads = function () {
+window.clearNotCompletedUploads = function () {
   $.ajax({
     async: false,
     url: config.basepath + '?action=ajaxUtils&' + new Date().getTime(),
