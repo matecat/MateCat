@@ -1,5 +1,5 @@
 APP.openOptionsPanel = function (tab, elem) {
-  elToClick = $(elem).attr('data-el-to-click') || null
+  var elToClick = $(elem).attr('data-el-to-click') || null
   UI.openLanguageResourcesPanel(tab, elToClick)
 }
 
@@ -57,7 +57,7 @@ APP.createTMKey = function () {
  * ajax call to clear the uploaded files when an user refresh the home page
  * called in main.js
  */
-clearNotCompletedUploads = function () {
+window.clearNotCompletedUploads = function () {
   $.ajax({
     async: false,
     url: config.basepath + '?action=ajaxUtils&' + new Date().getTime(),
@@ -360,12 +360,12 @@ APP.checkForDqf = function () {
     }
   })
 
-  dqfCheck.on('dqfEnable', function (e) {
+  dqfCheck.on('dqfEnable', function () {
     dqfCheck.attr('checked', true)
     dqfCheck.prop('checked', true)
   })
 
-  dqfCheck.on('dqfDisable', function (e) {
+  dqfCheck.on('dqfDisable', function () {
     dqfCheck.attr('checked', false)
     dqfCheck.prop('checked', false)
   })
@@ -444,10 +444,10 @@ $.extend(UI.UPLOAD_PAGE, {
         count: '{count} Private TMs',
         noResults: 'No TMs found.',
       },
-      onAdd: function (value, $selectedItem) {
+      onAdd: function (value) {
         self.selectTm(value)
       },
-      onRemove: function (removedValue, removedText, $removedChoice) {
+      onRemove: function (removedValue) {
         self.disableTm(removedValue)
         setTimeout(self.checkMailDropDownValueSelected, 100)
       },
@@ -511,7 +511,7 @@ $.extend(UI.UPLOAD_PAGE, {
     }
   },
 
-  selectTm: function (value, span) {
+  selectTm: function (value) {
     var tmElem = $(
       '.mgmt-table-tm #inactivetm tr.mine[data-key=' +
         value +
@@ -525,7 +525,7 @@ $.extend(UI.UPLOAD_PAGE, {
     })
   },
 
-  disableTm: function (value, span) {
+  disableTm: function (value) {
     var tmElem = $(
       '.mgmt-table-tm #activetm tr.mine[data-key=' +
         value +
@@ -647,7 +647,7 @@ $.extend(UI.UPLOAD_PAGE, {
       },
     })
 
-    $('input.uploadbtn').click(function (e) {
+    $('input.uploadbtn').click(function () {
       if (!UI.allTMUploadsCompleted()) {
         return false
       }
@@ -750,7 +750,7 @@ $.extend(UI.UPLOAD_PAGE, {
       )
     })
 
-    $('#disable_tms_engine').change(function (e) {
+    $('#disable_tms_engine').change(function () {
       if (this.checked) {
         $("input[id^='private-tm-']").prop('disabled', true)
 
@@ -763,10 +763,10 @@ $.extend(UI.UPLOAD_PAGE, {
       }
     })
 
-    $('input, select').change(function (e) {
+    $('input, select').change(function () {
       $('.error-message').hide()
     })
-    $('input').keyup(function (e) {
+    $('input').keyup(function () {
       $('.error-message').hide()
     })
   },
@@ -776,8 +776,7 @@ $.extend(UI.UPLOAD_PAGE, {
       //.template-download is present when jquery file upload is used and a file is found
       if (UI.conversionsAreToRestart()) {
         APP.confirm({
-          msg:
-            'Source language has been changed.<br/>The files will be reimported.',
+          msg: 'Source language has been changed.<br/>The files will be reimported.',
           callback: 'confirmRestartConversions',
         })
       }
@@ -786,8 +785,7 @@ $.extend(UI.UPLOAD_PAGE, {
       }
     } else if ($('.template-gdrive').length) {
       APP.confirm({
-        msg:
-          'Source language has been changed.<br/>The files will be reimported.',
+        msg: 'Source language has been changed.<br/>The files will be reimported.',
         callback: 'confirmGDriveRestartConversions',
       })
     } else {
@@ -814,7 +812,7 @@ APP.handleCreationStatus = function (id_project, password) {
         APP.postProjectCreation(data)
       }
     })
-    .fail(function (data, statusText, xhr) {
+    .fail(function (data) {
       var _data = $.parseJSON(data.responseText)
       APP.postProjectCreation(_data)
     })
@@ -892,8 +890,7 @@ APP.postProjectCreation = function (d) {
         console.log('EMPTY')
         $('body').removeClass('creating')
         APP.alert({
-          msg:
-            'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
+          msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
         })
         $('.uploadbtn')
           .attr('value', 'Analyze')
