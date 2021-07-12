@@ -465,12 +465,14 @@ class FastAnalysis extends AbstractDaemon {
 
                 list( $id_job, $job_pass ) = explode( ":", $id_job );
 
+                $segment = (new \Segments_SegmentDao())->getById($v[ 'id' ]);
+
                 $bind_values[] = (int)$id_job;
                 $bind_values[] = (int)$v[ 'id' ];
                 $bind_values[] = $v[ 'segment_hash' ];
                 $bind_values[] = $match_type;
-                $bind_values[] = (float)$eq_word;
-                $bind_values[] = (float)$standard_words;
+                $bind_values[] = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;
+                $bind_values[] = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;
 
                 $tuple_list[]  = "( ?,?,?,?,?,? )";
                 $totalSegmentsToAnalyze++;
@@ -488,8 +490,8 @@ class FastAnalysis extends AbstractDaemon {
                      */
                     $this->segments[ $k ][ 'pid' ]                 = (int)$pid;
                     $this->segments[ $k ][ 'date_insert' ]         = date_create()->format( 'Y-m-d H:i:s' );
-                    $this->segments[ $k ][ 'eq_word_count' ]       = (float)$eq_word;
-                    $this->segments[ $k ][ 'standard_word_count' ] = (float)$standard_words;
+                    $this->segments[ $k ][ 'eq_word_count' ]       = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;;
+                    $this->segments[ $k ][ 'standard_word_count' ] = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;
 
                 } elseif ( $perform_Tms_Analysis ) {
 
