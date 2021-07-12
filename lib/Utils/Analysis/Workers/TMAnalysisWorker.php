@@ -204,6 +204,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
+        $segment = (new \Segments_SegmentDao())->getById($queueElement->params->id_segment);
+
         $tm_data                             = [];
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
         $tm_data[ 'id_segment' ]             = $queueElement->params->id_segment;
@@ -211,8 +213,8 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'suggestion' ]             = $suggestion;
         $tm_data[ 'suggestions_array' ]      = $suggestion_json;
         $tm_data[ 'match_type' ]             = $new_match_type;
-        $tm_data[ 'eq_word_count' ]          = $eq_words;
-        $tm_data[ 'standard_word_count' ]    = $standard_words;
+        $tm_data[ 'eq_word_count' ]          = ($eq_words > $segment->raw_word_count) ? $segment->raw_word_count : $eq_words;
+        $tm_data[ 'standard_word_count' ]    = ($standard_words > $segment->raw_word_count) ? $segment->raw_word_count : $standard_words;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
         $tm_data[ 'serialized_errors_list' ] = $this->mergeJsonErrors( $err_json, $err_json2 );
