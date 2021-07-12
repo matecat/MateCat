@@ -1,15 +1,22 @@
-import {render, screen} from '@testing-library/react'
-// import userEvent from '@testing-library/user-event';
+import {render, screen, waitFor} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
 import JobMenu from './JobMenu'
 import Immutable from 'immutable'
+import {rest} from 'msw'
+import {mswServer} from '../../../../../mocks/mswServer'
+import ProjectsStore from '../../stores/ProjectsStore'
+import ManageActions from '../../actions/ManageActions'
+import ManageConstants from '../../constants/ManageConstants'
 
+require('../../ajax_utils/projectsAjax')
 /* require('../../../../lib/jquery-3.3.1.min.js');
 require('../../../../lib/jquery-ui.min.js');
 require('../../../../lib/semantic.min.js'); */
 
 window.config = {
   splitEnabled: 1,
+  hostpath: 'https://dev.matecat.com',
 }
 
 const fakeProjectsData = {
@@ -77,6 +84,22 @@ const fakeProjectsData = {
       reviseUrl: '/revise/test/en-US-la-XN/90-1-a192d66ec1f5#58',
     },
   },
+  jobGenerateRevise2: {
+    data: JSON.parse(
+      '{"id":11,"password":"c19166d0d09b","name":"Test","id_team":1,"id_assignee":1,"create_date":"2021-07-12 10:05:02","fast_analysis_wc":374,"standard_analysis_wc":1704,"tm_analysis_wc":"1427.09","project_slug":"test","jobs":[{"id":98,"password":"defe9aad39e3","source":"en-US","target":"la-XN","sourceTxt":"English US","targetTxt":"Latin","job_first_segment":"96","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1626077103,"created_at":"2021-07-12T10:05:03+02:00","create_date":"2021-07-12 10:05:03","formatted_create_date":"Jul 12, 10:05","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":98,"DRAFT":362.1,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":362.1,"PROGRESS":0,"TOTAL_FORMATTED":"362","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"362","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"362","TODO":362,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"25a2513040eb"}],"urls":{"password":"defe9aad39e3","translate_url":"https://dev.matecat.com/translate/Test/en-US-la-XN/98-defe9aad39e3","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-la-XN/98-25a2513040eb"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=98&password=defe9aad39e3&download_type=all&filename=6","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=98&id_file=&password=defe9aad39e3&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/98/defe9aad39e3/98.zip"}},{"id":99,"password":"278d3f0a255b","source":"en-US","target":"es-ES","sourceTxt":"English US","targetTxt":"Spanish","job_first_segment":"96","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1626077103,"created_at":"2021-07-12T10:05:03+02:00","create_date":"2021-07-12 10:05:03","formatted_create_date":"Jul 12, 10:05","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":99,"DRAFT":340.8,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":340.8,"PROGRESS":0,"TOTAL_FORMATTED":"341","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"341","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"341","TODO":341,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"7f37feb2f216"}],"urls":{"password":"278d3f0a255b","translate_url":"https://dev.matecat.com/translate/Test/en-US-es-ES/99-278d3f0a255b","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-es-ES/99-7f37feb2f216"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=99&password=278d3f0a255b&download_type=all&filename=6","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=99&id_file=&password=278d3f0a255b&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/99/278d3f0a255b/99.zip"}},{"id":100,"password":"b9d1cf9c3a04","source":"en-US","target":"en-GB","sourceTxt":"English US","targetTxt":"English","job_first_segment":"96","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1626077103,"created_at":"2021-07-12T10:05:03+02:00","create_date":"2021-07-12 10:05:03","formatted_create_date":"Jul 12, 10:05","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":100,"DRAFT":362.1,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":362.1,"PROGRESS":0,"TOTAL_FORMATTED":"362","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"362","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"362","TODO":362,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"1236458b8d2d"}],"urls":{"password":"b9d1cf9c3a04","translate_url":"https://dev.matecat.com/translate/Test/en-US-en-GB/100-b9d1cf9c3a04","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-en-GB/100-1236458b8d2d"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=100&password=b9d1cf9c3a04&download_type=all&filename=6","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=100&id_file=&password=b9d1cf9c3a04&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/100/b9d1cf9c3a04/100.zip"}},{"id":101,"password":"61b34dd4d39e","source":"en-US","target":"mt-MT","sourceTxt":"English US","targetTxt":"Maltese","job_first_segment":"96","status":"active","subject":"general","subject_printable":"General","owner":"pierluigi.dicianni@translated.net","open_threads_count":0,"create_timestamp":1626077103,"created_at":"2021-07-12T10:05:03+02:00","create_date":"2021-07-12 10:05:03","formatted_create_date":"Jul 12, 10:05","quality_overall":"excellent","pee":0,"tte":0,"private_tm_key":[{"key":"c52da4a03d6aea33f242","r":1,"w":1,"name":"Test"}],"warnings_count":0,"warning_segments":[],"stats":{"id":101,"DRAFT":362.1,"TRANSLATED":0,"APPROVED":0,"REJECTED":0,"TOTAL":362.1,"PROGRESS":0,"TOTAL_FORMATTED":"362","PROGRESS_FORMATTED":"0","APPROVED_FORMATTED":"0","REJECTED_FORMATTED":"0","DRAFT_FORMATTED":"362","TRANSLATED_FORMATTED":"0","APPROVED_PERC":0,"REJECTED_PERC":0,"DRAFT_PERC":100,"TRANSLATED_PERC":0,"PROGRESS_PERC":0,"TRANSLATED_PERC_FORMATTED":0,"DRAFT_PERC_FORMATTED":100,"APPROVED_PERC_FORMATTED":0,"REJECTED_PERC_FORMATTED":0,"PROGRESS_PERC_FORMATTED":0,"TODO_FORMATTED":"362","TODO":362,"DOWNLOAD_STATUS":"draft","revises":[{"revision_number":1,"advancement_wc":0}]},"outsource":null,"translator":null,"total_raw_wc":426,"standard_wc":426,"quality_summary":{"equivalent_class":null,"quality_overall":"excellent","errors_count":0,"revise_issues":{}},"revise_passwords":[{"revision_number":1,"password":"b878ee8583d2"}],"urls":{"password":"61b34dd4d39e","translate_url":"https://dev.matecat.com/translate/Test/en-US-mt-MT/101-61b34dd4d39e","revise_urls":[{"revision_number":1,"url":"https://dev.matecat.com/revise/Test/en-US-mt-MT/101-b878ee8583d2"}],"original_download_url":"https://dev.matecat.com/?action=downloadOriginal&id_job=101&password=61b34dd4d39e&download_type=all&filename=6","translation_download_url":"https://dev.matecat.com/?action=downloadFile&id_job=101&id_file=&password=61b34dd4d39e&download_type=all","xliff_download_url":"https://dev.matecat.com/SDLXLIFF/101/61b34dd4d39e/101.zip"}}],"features":"translated,mmt,translation_versions,review_extended,second_pass_review","is_cancelled":false,"is_archived":false,"remote_file_service":null,"due_date":null,"project_info":null}',
+    ),
+    props: {
+      isChunk: false,
+      isChunkOutsourced: false,
+      jobTMXUrl: '/TMX/98/defe9aad39e3',
+      exportXliffUrl: '/SDLXLIFF/98/defe9aad39e3/test.zip',
+      originalUrl:
+        '/?action=downloadOriginal&id_job=98 &password=defe9aad39e3&download_type=all',
+      editingLogUrl: '/editlog/98-defe9aad39e3',
+      qAReportUrl: '/revise-summary/98-defe9aad39e3',
+      reviseUrl: '/revise/test/en-US-la-XN/98-0-25a2513040eb#96',
+    },
+  },
 }
 
 const getFakeProperties = (fakeProperties) => {
@@ -109,6 +132,31 @@ const getFakeProperties = (fakeProperties) => {
       cancelJobFn: () => {},
     },
   }
+}
+
+const fakeRenderProjects = [
+  JSON.parse(`[${JSON.stringify(fakeProjectsData.jobGenerateRevise2.data)}]`),
+  JSON.parse(
+    '{"id":1,"name":"Personal","type":"personal","created_at":"2021-06-23T12:51:48+02:00","created_by":1,"members":[{"id":1,"id_team":1,"user":{"uid":1,"first_name":"Pierluigi","last_name":"Di Cianni","email":"pierluigi.dicianni@translated.net","has_password":false},"user_metadata":{"gplus_picture":"https://lh3.googleusercontent.com/a/AATXAJwhJzx7La8Z9rRvEuounsMpkH7TIwsOGT_a_xOb=s96-c"},"projects":11}],"pending_invitations":[]}',
+  ),
+  JSON.parse(
+    '[{"id":1,"name":"Personal","type":"personal","created_at":"2021-06-23T12:51:48+02:00","created_by":1,"members":[{"id":1,"id_team":1,"user":{"uid":1,"first_name":"Pierluigi","last_name":"Di Cianni","email":"pierluigi.dicianni@translated.net","has_password":false},"user_metadata":{"gplus_picture":"https://lh3.googleusercontent.com/a/AATXAJwhJzx7La8Z9rRvEuounsMpkH7TIwsOGT_a_xOb=s96-c"},"projects":11}],"pending_invitations":[]},{"id":2,"name":"Test","type":"general","created_at":"2021-07-05T15:40:56+02:00","created_by":1,"members":[{"id":2,"id_team":2,"user":{"uid":1,"first_name":"Pierluigi","last_name":"Di Cianni","email":"pierluigi.dicianni@translated.net","has_password":false},"user_metadata":{"gplus_picture":"https://lh3.googleusercontent.com/a/AATXAJwhJzx7La8Z9rRvEuounsMpkH7TIwsOGT_a_xOb=s96-c"},"projects":0}],"pending_invitations":[]}]',
+  ),
+]
+ManageActions.renderProjects(...fakeRenderProjects)
+ManageActions.storeSelectedTeam(fakeRenderProjects[1])
+
+const getRevise2Url = (project, job) => {
+  const name = project.get('name')
+  const source = job.get('source')
+  const target = job.get('target')
+  const id = job.get('id')
+  const revisePasswords = job.get('revise_passwords')
+  return `${
+    window.config.hostpath
+  }/revise2/${name}/${source}-${target}/${id}-${revisePasswords
+    .get(1)
+    .get('password')}`
 }
 
 test('Rendering elements', () => {
@@ -145,13 +193,14 @@ test('Items are enabled', () => {
   expect(screen.getByText('Cancel job')).toBeEnabled()
 })
 
-/* test('Change password dropdown menu', () => {
-    const { props } = getFakeProperties(fakeProjectsData.jobWithoutActivity);
-    render(<JobMenu {...props} />);
+// TODO: Da verificare errore sulla libreria semantic
+test.skip('Change password dropdown menu', () => {
+  const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+  render(<JobMenu {...props} />)
 
-    userEvent.click(screen.getByText('Change Password'));
-    //expect(screen.getByTestId('change-password-submenu')).toBeVisible();
-}); */
+  userEvent.click(screen.getByText('Change Password'))
+  expect(screen.getByTestId('change-password-submenu')).toBeVisible()
+})
 
 test('Check items href link', () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
@@ -194,4 +243,55 @@ test('Cancelled job: check Resume job item', () => {
   render(<JobMenu {...props} />)
 
   expect(screen.getByText('Resume job')).toBeInTheDocument()
+})
+
+test('Generate revise 2: onClick flow', async () => {
+  mswServer.use(
+    ...[
+      rest.post(
+        '/plugins/second_pass_review/project/:id/:password/reviews',
+        (req, res, ctx) => {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              chunk_review: {
+                id: 164,
+                id_job: 98,
+                review_password: '6688b6b321de',
+              },
+            }),
+          )
+        },
+      ),
+    ],
+  )
+
+  // updated props
+  const updatedData = {
+    data: {},
+    props: {...fakeProjectsData.jobGenerateRevise2.props},
+  }
+
+  const onUpdate = (projects) => {
+    updatedData.data = JSON.parse(JSON.stringify(projects.first().toJS()))
+    const {props} = getFakeProperties(updatedData)
+    render(<JobMenu {...props} />)
+
+    ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, onUpdate)
+  }
+
+  ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, onUpdate)
+
+  // first render
+  const {props} = getFakeProperties(fakeProjectsData.jobGenerateRevise2)
+  render(<JobMenu {...props} />)
+
+  userEvent.click(screen.getByText('Generate Revise 2'))
+
+  await waitFor(() => {
+    expect(screen.getByText('Revise 2')).toBeInTheDocument()
+    const href = screen.getByText('Revise 2').getAttribute('href')
+    const {project, job} = getFakeProperties(updatedData)
+    expect(href).toBe(getRevise2Url(project, job))
+  })
 })
