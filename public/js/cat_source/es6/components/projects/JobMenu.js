@@ -32,7 +32,13 @@ class JobMenu extends React.Component {
   getReviseMenuLink() {
     let reviseUrl = this.props.reviseUrl
     return (
-      <a className="item" target="_blank" href={reviseUrl} rel="noreferrer">
+      <a
+        className="item"
+        target="_blank"
+        href={reviseUrl}
+        rel="noreferrer"
+        data-testid="revise-item"
+      >
         <i className="icon-edit icon" /> Revise
       </a>
     )
@@ -137,7 +143,7 @@ class JobMenu extends React.Component {
           >
             <i className="icon-refresh icon" /> <a>Change Password</a>
             <i className="dropdown icon" />
-            <div className="menu">
+            <div className="menu" data-testid="change-password-submenu">
               <a
                 className={'item'}
                 onClick={() => this.props.changePasswordFn()}
