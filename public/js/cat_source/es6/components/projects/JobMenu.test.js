@@ -10,9 +10,6 @@ import ManageActions from '../../actions/ManageActions'
 import ManageConstants from '../../constants/ManageConstants'
 
 require('../../ajax_utils/projectsAjax')
-/* require('../../../../lib/jquery-3.3.1.min.js');
-require('../../../../lib/jquery-ui.min.js');
-require('../../../../lib/semantic.min.js'); */
 
 window.config = {
   splitEnabled: 1,
