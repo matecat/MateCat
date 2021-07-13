@@ -538,9 +538,12 @@ class ProjectContainer extends React.Component {
         <div
           className={'ui dropdown top right pointing project-team shadow-1 '}
           ref={(dropdownTeams) => (this.dropdownTeams = dropdownTeams)}
+          data-testid="team-dropdown-button"
         >
           <span className="text"></span>
-          <div className="menu">{teams}</div>
+          <div className="menu" data-testid="team-menu">
+            {teams}
+          </div>
         </div>
       )
     }
@@ -624,6 +627,7 @@ class ProjectContainer extends React.Component {
               className="right activity-log"
               title="Activity log"
               rel="noreferrer"
+              data-testid="last-action-activity"
             >
               <i>
                 {' '}
@@ -690,7 +694,11 @@ class ProjectContainer extends React.Component {
                     <div className="project-id" title="Project id">
                       {'(' + this.props.project.get('id') + ')'}
                     </div>
-                    <div className="project-name" title="Project name">
+                    <div
+                      className="project-name"
+                      title="Project name"
+                      data-testid="project-name"
+                    >
                       {this.state.projectName}
                     </div>
                     {state}
