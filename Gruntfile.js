@@ -211,7 +211,6 @@ module.exports = function (grunt) {
           basePath + 'user_store.js',
           basePath + 'login.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-          basePath + 'analyze.js',
           basePath + 'gdrive.upload.js',
           basePath + 'gdrive.picker.js',
           basePath + 'upload.js',
