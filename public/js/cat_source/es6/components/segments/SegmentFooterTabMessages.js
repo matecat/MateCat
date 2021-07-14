@@ -81,6 +81,15 @@ class SegmentFooterTabMessages extends React.Component {
         }
       })
     }
+
+    // metadata notes
+    if (this.props.metadata) {
+      for (const [index, item] of this.props.metadata.entries()) {
+        const {meta_key: label, meta_value: body} = item
+        notesHtml.push(this.getMetadataNoteTemplate({index, label, body}))
+      }
+    }
+
     if (notesHtml.length === 0) {
       let html = (
         <div className="note" key={'note-0'}>
@@ -90,6 +99,15 @@ class SegmentFooterTabMessages extends React.Component {
       notesHtml.push(html)
     }
     return notesHtml
+  }
+
+  getMetadataNoteTemplate({index = 0, label, body}) {
+    return (
+      <div className="note" key={`meta-${index}`}>
+        <span className="note-label">{label}: </span>
+        <span>{body}</span>
+      </div>
+    )
   }
 
   componentDidMount() {}
