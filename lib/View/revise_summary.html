@@ -57,13 +57,6 @@
         config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
         /*]]>*/
     </script>
-
-
-
-    <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
-
 </head>
 
 <body class="reviselog" tal:condition="not:supportedBrowser">
@@ -91,6 +84,7 @@
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
 <div metal:use-macro="common.html/footer_includes" />
+<script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 <script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
 
 <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
