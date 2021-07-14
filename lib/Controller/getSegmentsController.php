@@ -132,6 +132,8 @@ class getSegmentsController extends ajaxController {
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
             $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
 
+            $seg['metadata'] = Segments_SegmentMetadataDao::getAll($seg[ 'sid' ]);
+
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );
 
