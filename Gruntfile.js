@@ -55,20 +55,6 @@ module.exports = function (grunt) {
      * the entry point js file.
      */
     browserify: {
-      components: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [
-          basePath + 'cat_source/es6/react-libs.js',
-          basePath + 'cat_source/es6/components.js',
-        ],
-        dest: buildPath + 'cat-react.js',
-      },
       qualityReport: {
         options: {
           transform: [babelifyTransform],
@@ -179,22 +165,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
         ],
         dest: buildPath + 'analyze-build.js',
-      },
-      common: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [
-          basePath + 'common.js',
-          basePath + 'user_store.js',
-          basePath + 'login.js',
-          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-        ],
-        dest: buildPath + 'common.js',
       },
       upload: {
         options: {
