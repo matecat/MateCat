@@ -110,6 +110,12 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'cat_source/ui.core.js',
           basePath + 'cat_source/ui.segment.js',
           basePath + 'cat_source/ui.init.js',
