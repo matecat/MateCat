@@ -462,12 +462,10 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundle:js', [
-    'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
     'browserify:upload',
-    'browserify:common',
     'browserify:analyze',
     'concat:libs',
     'concat:libs_upload',
@@ -483,37 +481,15 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundleDev:js', [
-    'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
     'browserify:upload',
-    'browserify:common',
     'browserify:analyze',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
   ])
-
-  /**
-   * development:js
-   *
-   * This task includes compilation of frequently changed develpment files.
-   * This includes templates, react modules via browserify, and
-   * reconcats other javascript files.
-   * Concat also build the sourceMap. For further reload speed try to turn
-   * off sourceMap.
-   */
-  grunt.registerTask('development:js', ['browserify:components', 'concat:js'])
-
-  /**
-   * Concat js
-   * This task is specific for those javascript files which need to be
-   * concatenated by grunt. This avoid reworking the react components
-   * when it's not needed.
-   */
-  grunt.registerTask('concat:js', ['concat:common', 'replace:version'])
-
   /**
    * development
    *
@@ -526,6 +502,4 @@ module.exports = function (grunt) {
   grunt.registerTask('development', ['bundleDev:js', 'sass', 'replace:css'])
 
   grunt.registerTask('deploy', ['bundle:js', 'sass', 'replace:css'])
-
-  grunt.registerTask('only-react', ['browserify:components'])
 }
