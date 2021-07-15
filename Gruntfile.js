@@ -55,7 +55,7 @@ module.exports = function (grunt) {
      * the entry point js file.
      */
     browserify: {
-      components: {
+      qualityReport: {
         options: {
           transform: [babelifyTransform],
           browserifyOptions: {
@@ -66,18 +66,13 @@ module.exports = function (grunt) {
         src: [
           basePath + 'cat_source/es6/react-libs.js',
           basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+          basePath +
+            'cat_source/es6/components/quality_report/QualityReport.js',
         ],
-        dest: buildPath + 'cat-react.js',
-      },
-      qualityReport: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: `${basePath}cat_source/es6/components/quality_report/QualityReport.js`,
         dest: buildPath + 'qa-report.js',
       },
       manage: {
@@ -89,6 +84,12 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'cat_source/es6/components/projects/Dashboard.js',
           basePath + 'outsource.js',
           basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
@@ -110,6 +111,12 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'cat_source/ui.core.js',
           basePath + 'cat_source/ui.segment.js',
           basePath + 'cat_source/ui.init.js',
@@ -141,6 +148,12 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'analyze.js',
           basePath + 'outsource.js',
           basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
@@ -153,22 +166,6 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'analyze-build.js',
       },
-      common: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [
-          basePath + 'common.js',
-          basePath + 'user_store.js',
-          basePath + 'login.js',
-          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-        ],
-        dest: buildPath + 'common.js',
-      },
       upload: {
         options: {
           transform: [babelifyTransform],
@@ -178,6 +175,12 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'gdrive.upload.js',
           basePath + 'gdrive.picker.js',
           basePath + 'upload.js',
@@ -459,12 +462,10 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundle:js', [
-    'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
     'browserify:upload',
-    'browserify:common',
     'browserify:analyze',
     'concat:libs',
     'concat:libs_upload',
@@ -480,37 +481,15 @@ module.exports = function (grunt) {
    * like libraries.
    */
   grunt.registerTask('bundleDev:js', [
-    'browserify:components',
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
     'browserify:upload',
-    'browserify:common',
     'browserify:analyze',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
   ])
-
-  /**
-   * development:js
-   *
-   * This task includes compilation of frequently changed develpment files.
-   * This includes templates, react modules via browserify, and
-   * reconcats other javascript files.
-   * Concat also build the sourceMap. For further reload speed try to turn
-   * off sourceMap.
-   */
-  grunt.registerTask('development:js', ['browserify:components', 'concat:js'])
-
-  /**
-   * Concat js
-   * This task is specific for those javascript files which need to be
-   * concatenated by grunt. This avoid reworking the react components
-   * when it's not needed.
-   */
-  grunt.registerTask('concat:js', ['concat:common', 'replace:version'])
-
   /**
    * development
    *
@@ -523,6 +502,4 @@ module.exports = function (grunt) {
   grunt.registerTask('development', ['bundleDev:js', 'sass', 'replace:css'])
 
   grunt.registerTask('deploy', ['bundle:js', 'sass', 'replace:css'])
-
-  grunt.registerTask('only-react', ['browserify:components'])
 }
