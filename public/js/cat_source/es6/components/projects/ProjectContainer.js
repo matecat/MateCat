@@ -404,7 +404,11 @@ class ProjectContainer extends React.Component {
         chunks.push(item)
         if (job.get('id') !== next_job_id) {
           let jobList = (
-            <div className="job ui grid" key={i - 1 + '-' + job.get('id')}>
+            <div
+              className="job ui grid"
+              key={i - 1 + '-' + job.get('id')}
+              data-testid={job.get('id')}
+            >
               <div className="job-body sixteen wide column">
                 <div className="ui grid chunks">{chunks}</div>
               </div>
@@ -624,6 +628,7 @@ class ProjectContainer extends React.Component {
               className="right activity-log"
               title="Activity log"
               rel="noreferrer"
+              data-testid="last-action-activity"
             >
               <i>
                 {' '}
@@ -690,7 +695,11 @@ class ProjectContainer extends React.Component {
                     <div className="project-id" title="Project id">
                       {'(' + this.props.project.get('id') + ')'}
                     </div>
-                    <div className="project-name" title="Project name">
+                    <div
+                      className="project-name"
+                      title="Project name"
+                      data-testid="project-name"
+                    >
                       {this.state.projectName}
                     </div>
                     {state}
