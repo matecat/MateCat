@@ -114,6 +114,6 @@ var gdrive = new GDrive()
   })
 })(jQuery, gdrive)
 
-function onGDriveApiLoad() {
+window.onGDriveApiLoad = function () {
   gdrive.loadPicker()
 }

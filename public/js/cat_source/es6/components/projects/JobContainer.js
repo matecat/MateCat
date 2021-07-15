@@ -430,26 +430,6 @@ class JobContainer extends React.Component {
     )
   }
 
-  getActivityLogUrl() {
-    return (
-      '/activityLog/' +
-      this.props.project.get('project_slug') +
-      '/' +
-      this.props.project.get('id') +
-      '-' +
-      this.props.project.get('password') +
-      '?open=split&jobid=' +
-      this.props.job.get('id')
-    )
-  }
-
-  openSettings() {
-    ManageActions.openJobSettings(
-      this.props.job.toJS(),
-      this.props.project.get('project_slug'),
-    )
-  }
-
   openTMPanel() {
     ManageActions.openJobTMPanel(
       this.props.job.toJS(),
@@ -480,6 +460,7 @@ class JobContainer extends React.Component {
           data-variation="tiny"
           ref={(tooltip) => (this.tmTooltip = tooltip)}
           onClick={this.openTMPanel.bind(this)}
+          data-testid="tm-button"
         >
           <i className="icon-tm-matecat icon" />
         </a>
@@ -657,51 +638,6 @@ class JobContainer extends React.Component {
     return icon
   }
 
-  getSplitOrMergeButton(splitUrl, mergeUrl) {
-    if (this.props.isChunk) {
-      return (
-        <a
-          className="btn waves-effect merge waves-dark"
-          target="_blank"
-          href={mergeUrl}
-          rel="noreferrer"
-        >
-          <i className="large icon-compress right" />
-          Merge
-        </a>
-      )
-    } else {
-      return (
-        <a
-          className="btn waves-effect split waves-dark"
-          target="_blank"
-          href={splitUrl}
-          rel="noreferrer"
-        >
-          <i className="large icon-expand right" />
-          Split
-        </a>
-      )
-    }
-  }
-
-  getModifyDate() {
-    if (this.props.lastAction) {
-      let date = new Date(this.props.lastAction.event_date)
-      return (
-        <div>
-          <span>Modified: </span>{' '}
-          <a target="_blank" href={this.props.activityLogUrl} rel="noreferrer">
-            {' '}
-            {date.toDateString()}
-          </a>
-        </div>
-      )
-    } else {
-      return ''
-    }
-  }
-
   openOutsourceModal(showTranslatorBox, extendedView) {
     if (!this.state.openOutsource) {
       $(document).trigger('outsource-request')
@@ -721,6 +657,7 @@ class JobContainer extends React.Component {
       <a
         className="open-outsource buy-translation ui button"
         onClick={this.openOutsourceModal.bind(this, false, true)}
+        data-testid="buy-translation-button"
       >
         <span className="buy-translation-span">Buy Translation</span>
         <span>by</span>
@@ -871,30 +808,29 @@ class JobContainer extends React.Component {
   }
 
   getWarningsGroup() {
-    let icons = this.getWarningsInfo()
-    if (icons.number > 1) {
-      let QRIcon = this.getQRMenuItem()
-      let commentsIcon = this.getCommentsMenuItem()
-      let warningsIcon = this.getWarningsMenuItem()
-
-      return (
-        <div className="job-activity-icons">
-          <div
-            className="ui icon top right pointing dropdown group-activity-icon basic button"
-            ref={(button) => (this.iconsButton = button)}
-          >
-            <i className="icon-alarm icon" />
-            <div className="menu group-activity-icons transition hidden">
-              <div className="item">{QRIcon}</div>
-              <div className="item">{warningsIcon}</div>
-              <div className="item">{commentsIcon}</div>
-            </div>
+    const icons = this.getWarningsInfo()
+    const iconsBody =
+      icons.number > 1 ? (
+        <div
+          className="ui icon top right pointing dropdown group-activity-icon basic button"
+          ref={(button) => (this.iconsButton = button)}
+        >
+          <i className="icon-alarm icon" />
+          <div className="menu group-activity-icons transition hidden">
+            <div className="item">{this.getQRMenuItem()}</div>
+            <div className="item">{this.getWarningsMenuItem()}</div>
+            <div className="item">{this.getCommentsMenuItem()}</div>
           </div>
         </div>
+      ) : (
+        icons.icon
       )
-    } else {
-      return <div className="job-activity-icons">{icons.icon}</div>
-    }
+
+    return (
+      <div className="job-activity-icons" data-testid="job-activity-icons">
+        {iconsBody}
+      </div>
+    )
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -1056,13 +992,13 @@ class JobContainer extends React.Component {
                 }
                 data-variation="tiny"
               >
-                <div className="source-box">
+                <div className="source-box" data-testid="source-label">
                   {this.props.job.get('sourceTxt')}
                 </div>
                 <div className="in-to">
                   <i className="icon-chevron-right icon" />
                 </div>
-                <div className="target-box">
+                <div className="target-box" data-testid="target-label">
                   {this.props.job.get('targetTxt')}
                 </div>
               </div>
@@ -1150,7 +1086,9 @@ class JobContainer extends React.Component {
                   words
                 </a>
               </div>
-              <div className="tm-job">{tmIcon}</div>
+              <div className="tm-job" data-testid="tm-container">
+                {tmIcon}
+              </div>
               {warningIcons}
               <div className="outsource-job">
                 <div className={'translated-outsourced ' + outsourceClass}>
@@ -1158,7 +1096,11 @@ class JobContainer extends React.Component {
                   {outsourceDelivery}
                   {/*{outsourceDeliveryPrice}*/}
                   {this.props.job.get('translator') ? (
-                    <div className="item" onClick={this.removeTranslator}>
+                    <div
+                      className="item"
+                      onClick={this.removeTranslator}
+                      data-testid="remove-translator-button"
+                    >
                       <div className="ui cancel label">
                         <i className="icon-cancel3" />
                       </div>
@@ -1172,6 +1114,7 @@ class JobContainer extends React.Component {
                 className="ui icon top right pointing dropdown job-menu  button"
                 title="Job menu"
                 ref={(dropdown) => (this.dropdown = dropdown)}
+                data-testid="job-menu-button"
               >
                 <i className="icon-more_vert icon" />
                 {jobMenu}

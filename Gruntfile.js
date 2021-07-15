@@ -88,8 +88,18 @@ module.exports = function (grunt) {
           },
           watch: true,
         },
-        src: [basePath + 'cat_source/es6/components/projects/Dashboard.js'],
-        dest: buildPath + 'manage-components.js',
+        src: [
+          basePath + 'cat_source/es6/components/projects/Dashboard.js',
+          basePath + 'outsource.js',
+          basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/outsourceAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/projectsAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
+        ],
+        dest: buildPath + 'manage.js',
       },
       app: {
         options: {
@@ -121,6 +131,67 @@ module.exports = function (grunt) {
           basePath + 'advancedOptionsTab.js',
         ],
         dest: `${buildPath}app.js`,
+      },
+      analyze: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [
+          basePath + 'analyze.js',
+          basePath + 'outsource.js',
+          basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/outsourceAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/projectsAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
+        ],
+        dest: buildPath + 'analyze-build.js',
+      },
+      common: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+        ],
+        dest: buildPath + 'common.js',
+      },
+      upload: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [
+          basePath + 'gdrive.upload.js',
+          basePath + 'gdrive.picker.js',
+          basePath + 'upload.js',
+          basePath + 'new-project.js',
+          basePath + 'tm.js',
+          basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/outsourceAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/projectsAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
+        ],
+        dest: buildPath + 'upload.js',
       },
     },
 
@@ -205,46 +276,6 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'libs_upload.js',
       },
-
-      semantic: {
-        src: [basePath + 'lib/semantic.min.js'],
-        dest: buildPath + 'semantic.js',
-      },
-      manage: {
-        src: [
-          basePath + 'outsource.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'manage.js',
-      },
-      common: {
-        src: [
-          basePath + 'common.js',
-          basePath + 'user_store.js',
-          basePath + 'login.js',
-          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-        ],
-        dest: buildPath + 'common.js',
-      },
-      analyze_new: {
-        src: [
-          basePath + 'analyze.js',
-          basePath + 'outsource.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'analyze-build.js',
-      },
-      upload: {
-        src: [
-          basePath + 'gdrive.upload.js',
-          basePath + 'gdrive.picker.js',
-          basePath + 'upload.js',
-          basePath + 'new-project.js',
-          basePath + 'tm.js',
-          basePath + 'cat_source/es6/ajax_utils/*.js',
-        ],
-        dest: buildPath + 'upload.js',
-      },
     },
 
     watch: {
@@ -258,14 +289,6 @@ module.exports = function (grunt) {
           basePath + 'advancedOptionsTab.js',
         ],
         tasks: ['concat:js'],
-        options: {
-          interrupt: true,
-          livereload: true,
-        },
-      },
-      uploadjs: {
-        files: [basePath + 'new-project.js'],
-        tasks: ['concat:upload'],
         options: {
           interrupt: true,
           livereload: true,
@@ -440,13 +463,11 @@ module.exports = function (grunt) {
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
+    'browserify:upload',
+    'browserify:common',
+    'browserify:analyze',
     'concat:libs',
     'concat:libs_upload',
-    'concat:semantic',
-    'concat:common',
-    'concat:analyze_new',
-    'concat:manage',
-    'concat:upload',
     'replace:version',
   ])
 
@@ -463,13 +484,11 @@ module.exports = function (grunt) {
     'browserify:qualityReport',
     'browserify:manage',
     'browserify:app',
+    'browserify:upload',
+    'browserify:common',
+    'browserify:analyze',
     'concat:libs',
     'concat:libs_upload',
-    'concat:semantic',
-    'concat:common',
-    'concat:analyze_new',
-    'concat:manage',
-    'concat:upload',
     'replace:version',
   ])
 

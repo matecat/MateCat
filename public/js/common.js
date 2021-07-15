@@ -202,10 +202,10 @@ window.APP = {
   popup: function (conf) {
     this.closePopup()
 
-    _tpl_newPopup =
+    var _tpl_newPopup =
       '' + '<div class="modal">' + ' <div class="popup-outer"></div>' + '</div>'
 
-    _tpl_popupInner =
+    var _tpl_popupInner =
       '' +
       '<div class="popup">' +
       ' <a href="javascript:;" class="x-popup remove"></a>' +
@@ -215,15 +215,15 @@ window.APP = {
       '</p>' +
       '</div>'
 
-    _tpl_button = '' + '<a href="javascript:;" class="btn-ok">Ok</a>'
+    var _tpl_button = '' + '<a href="javascript:;" class="btn-ok">Ok</a>'
 
-    _tpl_checkbox =
+    var _tpl_checkbox =
       '' +
       '<div class="boxed">' +
       ' <input type="checkbox" id="popup-checkbox" class="confirm_checkbox"><label></label>' +
       '</div>'
 
-    _tpl_checkbox_dontshow =
+    var _tpl_checkbox_dontshow =
       '' +
       '<div class="boxed">' +
       ' <input type="checkbox" class="dont_show"><label></label>' +
@@ -431,22 +431,13 @@ window.APP = {
 
               disableOk(filled_tpl)
 
-              $('body')
-                .on('click', '#popup-checkbox', function () {
-                  if ($('#popup-checkbox').is(':checked')) {
-                    enableOk(filled_tpl)
-                  } else {
-                    disableOk(filled_tpl)
-                  }
-                })
-                .on('click', '.dont_show', function () {
-                  if ($('.dont_show').is(':checked')) {
-                    //set global variable because the popup will be destroyed on close event.
-                    dont_show = 1
-                  } else {
-                    dont_show = 0
-                  }
-                })
+              $('body').on('click', '#popup-checkbox', function () {
+                if ($('#popup-checkbox').is(':checked')) {
+                  enableOk(filled_tpl)
+                } else {
+                  disableOk(filled_tpl)
+                }
+              })
             }
             break
 
@@ -490,7 +481,7 @@ window.APP = {
         .unbind('click', APP.disableLink)
     }
 
-    newPopup = renderPopup(conf)
+    var newPopup = renderPopup(conf)
 
     $('body').append(newPopup)
   },
@@ -569,9 +560,9 @@ window.APP = {
   },
   addCommas: function (nStr) {
     nStr += ''
-    x = nStr.split('.')
-    x1 = x[0]
-    x2 = x.length > 1 ? '.' + x[1] : ''
+    var x = nStr.split('.')
+    var x1 = x[0]
+    var x2 = x.length > 1 ? '.' + x[1] : ''
     var rgx = /(\d+)(\d{3})/
     while (rgx.test(x1)) {
       x1 = x1.replace(rgx, '$1' + ',' + '$2')
@@ -812,7 +803,7 @@ window.APP = {
     //set event listner, on ready, attach an interval that check for finished download
     iFrameDownload.ready(function () {
       //create a GLOBAL setInterval so in anonymous function it can be disabled
-      downloadTimer = window.setInterval(function () {
+      var downloadTimer = window.setInterval(function () {
         //check for cookie
         var token = Cookies.get(downloadToken)
 
@@ -964,7 +955,7 @@ window.APP = {
           }
           APP.addNotification(notification)
           var props = {
-            text: tokenData.message,
+            text: cookie.message,
             successText: 'Ok',
             successCallback: function () {
               APP.ModalWindow.onCloseModal()

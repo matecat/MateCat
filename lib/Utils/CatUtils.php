@@ -31,7 +31,9 @@ class CatUtils {
     const nbspPlaceholderClass = '_A0';
     const nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
 
+    // CJK and CJ languages
     public static $cjk = [ 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 ];
+    public static $cj = [ 'zh' => 1.8, 'ja' => 2.5 ];
 
     /**
      * @param $langCode
@@ -40,6 +42,15 @@ class CatUtils {
      */
     public static function isCJK( $langCode ) {
         return array_key_exists( explode( '-', $langCode )[ 0 ], self::$cjk );
+    }
+
+    /**
+     * @param $langCode
+     *
+     * @return bool
+     */
+    public static function isCJ( $langCode ) {
+        return array_key_exists( explode( '-', $langCode )[ 0 ], self::$cj );
     }
 
     /**

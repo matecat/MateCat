@@ -562,8 +562,8 @@ class QA {
                 break;
 
             case self::ERR_BOUNDARY_TAIL:
-                // if source target is CJK we won't to add an trailing space mismatch error
-                if(false === CatUtils::isCJK($this->getSourceSegLang())){
+                // if source target is CJ we won't to add an trailing space mismatch error
+                if(false === CatUtils::isCJ($this->getSourceSegLang())){
                     $this->exceptionList[ self::INFO ][] = errObject::get( [
                             'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
                             'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
@@ -1679,8 +1679,8 @@ class QA {
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             // Append a space to target for normalization
-            // only if target is NOT a CJK language
-            if(false === CatUtils::isCJK($this->target_seg_lang)){
+            // only if target is NOT a CJ language
+            if(false === CatUtils::isCJ($this->target_seg_lang)){
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
 
@@ -1696,11 +1696,11 @@ class QA {
         // NOTE 2020-06-10
         // --------------------------------------------------
         //
-        // If source is CJK and target is NOT CJK
+        // If source is CJ and target is NOT CJ
         // and source terminates with CJKTerminateChars
         // then we add a trailing space to target
         //
-        if(CatUtils::isCJK($this->source_seg_lang) and false === CatUtils::isCJK($this->target_seg_lang)){
+        if(CatUtils::isCJ($this->source_seg_lang) and false === CatUtils::isCJ($this->target_seg_lang)){
             $lastChar = CatUtils::getLastCharacter($this->source_seg);
             if(in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
                 $this->target_seg = rtrim( $this->target_seg );
