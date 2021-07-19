@@ -49,7 +49,6 @@ const createNewEntitiesFromMap = (
     }
   })
 
-  console.log('plainText', plainText)
   //Find all brackets occurrences
   let brackets = []
   const regex = /&lt;|&gt;/gi
@@ -72,7 +71,6 @@ const createNewEntitiesFromMap = (
       return tag
     })
   }
-  console.log('offsetWithEntities after', offsetWithEntities)
   // New contentState without entities
   let plainContentState = ContentState.createFromText(plainText)
   const blocks = plainContentState.getBlockMap()
