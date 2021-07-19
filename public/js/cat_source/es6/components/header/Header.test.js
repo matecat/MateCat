@@ -163,6 +163,7 @@ test('Rendering elements', async () => {
     expect(screen.getByText('Profile')).toBeInTheDocument()
     expect(screen.getByText('Logout')).toBeInTheDocument()
     expect(screen.getByText('Logout')).toBeEnabled()
+    expect(screen.getByTestId('team-select')).toBeInTheDocument()
   })
 })
 
@@ -186,10 +187,19 @@ test.skip('Click my project from user menu', async () => {
 
 test('Click profile from user menu', async () => {
   executeMswServer()
+
+  // override getApiKey request
+  const defaultGetApiKey = window.API.USER.getApiKey
+  window.API.USER.getApiKey = () => ({
+    done: () => {},
+  })
+
   render(<Header {...props} />)
 
   await waitFor(() => {
     userEvent.click(screen.getByTestId('profile-item'))
     expect(screen.getByTestId('preferences-modal')).toBeInTheDocument()
   })
+
+  window.API.USER.getApiKey = defaultGetApiKey
 })
