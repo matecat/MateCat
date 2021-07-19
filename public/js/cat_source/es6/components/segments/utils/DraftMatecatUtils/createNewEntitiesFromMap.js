@@ -49,17 +49,16 @@ const createNewEntitiesFromMap = (
     }
   })
 
-  // Escape exceeding brackets
+  //Find all brackets occurrences
   let brackets = []
-  plainText = plainText
-    .replace(/&lt;/gi, (match, offset) => {
-      brackets.push({offset})
-      return '<'
-    })
-    .replace(/&gt;/gi, (match, offset) => {
-      brackets.push({offset})
-      return '>'
-    })
+  const regex = /&lt;|&gt;/gi
+  let result
+  while ((result = regex.exec(plainText))) {
+    brackets.push({offset: result.index})
+  }
+
+  // Escape exceeding brackets
+  plainText = plainText.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
 
   if (brackets.length > 0) {
     offsetWithEntities.map((tag) => {
@@ -72,7 +71,6 @@ const createNewEntitiesFromMap = (
       return tag
     })
   }
-
   // New contentState without entities
   let plainContentState = ContentState.createFromText(plainText)
   const blocks = plainContentState.getBlockMap()
