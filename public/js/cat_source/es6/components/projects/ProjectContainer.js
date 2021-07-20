@@ -27,6 +27,7 @@ class ProjectContainer extends React.Component {
     )
     this.dropdownUsersInitialized = false
     this.dropdownTeamsInitialized = false
+    this.lastActivityRequest
   }
 
   hideProject(project) {
@@ -256,7 +257,7 @@ class ProjectContainer extends React.Component {
 
   getLastAction() {
     let self = this
-    this.props
+    this.lastActivityRequest = this.props
       .lastActivityFn(
         this.props.project.get('id'),
         this.props.project.get('password'),
@@ -592,6 +593,7 @@ class ProjectContainer extends React.Component {
       ManageConstants.CHANGE_PROJECT_ASSIGNEE,
       this.hideProjectAfterChangeAssignee,
     )
+    this.lastActivityRequest.abort?.()
   }
 
   shouldComponentUpdate(nextProps, nextState) {

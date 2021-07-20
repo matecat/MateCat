@@ -8,6 +8,10 @@ import {mswServer} from '../../../../../mocks/mswServer'
 
 window.React = React
 window.ReactDOM = ReactDOM
+// create modal div
+const modalElement = document.createElement('div')
+modalElement.id = 'modal'
+document.body.appendChild(modalElement)
 
 require('../../components')
 require('../../../../common')
