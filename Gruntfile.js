@@ -196,6 +196,25 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'upload.js',
       },
+      xliffToTarget: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [
+          basePath + 'cat_source/es6/react-libs.js',
+          basePath + 'cat_source/es6/components.js',
+          basePath + 'common.js',
+          basePath + 'user_store.js',
+          basePath + 'login.js',
+          basePath + 'cat_source/es6/ajax_utils/userAjax.js',
+          basePath + 'upload.js',
+        ],
+        dest: buildPath + 'xliffToTarget.js',
+      },
     },
 
     /**
@@ -467,6 +486,7 @@ module.exports = function (grunt) {
     'browserify:app',
     'browserify:upload',
     'browserify:analyze',
+    'browserify:xliffToTarget',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
@@ -486,6 +506,7 @@ module.exports = function (grunt) {
     'browserify:app',
     'browserify:upload',
     'browserify:analyze',
+    'browserify:xliffToTarget',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
