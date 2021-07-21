@@ -211,12 +211,6 @@ abstract class downloadController extends controller {
                 $fName = self::forceOcrExtension( $fName );
             }
 
-            $nFinfo = AbstractFilesStorage::pathinfo_fix( $fName );
-            $_name  = $nFinfo[ 'filename' ];
-            if ( strlen( $_name ) < 3 ) {
-                $fName = substr( uniqid(), -5 ) . "_" . $fName;
-            }
-
             if ( array_key_exists( $fName, $rev_index_name ) ) {
                 $fName = uniqid() . $fName;
             }
