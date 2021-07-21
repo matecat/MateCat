@@ -143,6 +143,7 @@ class ProjectManager {
                             'segments'                     => [], //array of files_id => segments[  ]
                             'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
                             'segments_metadata'            => [], //array of segments_metadata
+                            'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
                             'translations'                 => [],
                             'notes'                        => [],
                             'context-group'                => [],
@@ -1787,6 +1788,7 @@ class ProjectManager {
         // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
         $this->projectStructure[ 'segments-original-data' ]->offsetSet( $fid, new ArrayObject( [] ) );
+        $this->projectStructure[ 'segments-meta-data' ]->offsetSet( $fid, new ArrayObject( [] ) );
 
         $xliffParser = new XliffParser();
 
@@ -1845,6 +1847,26 @@ class ProjectManager {
                             }
                         }
                     }
+
+                    //
+                    // -------------------------------------
+                    // START SEGMENTS META
+                    // -------------------------------------
+                    //
+
+                    // check if there is sizeRestriction
+                    if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ])){
+                        $metadataStruct = new Segments_SegmentMetadataStruct();
+                        $metadataStruct->meta_key = 'sizeRestriction';
+                        $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                        $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
+                    }
+
+                    //
+                    // -------------------------------------
+                    // END SEGMENTS META
+                    // -------------------------------------
+                    //
 
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
@@ -2221,6 +2243,11 @@ class ProjectManager {
                         $map
                 );
             }
+
+            /** @var  Segments_SegmentMetadataStruct $segmentMetadataStruct */
+            $segmentMetadataStruct = @$this->projectStructure[ 'segments-meta-data' ][ $fid ][ $position ];
+
+            $this->features->filter( 'saveSegmentMetadata', $id_segment, $segmentMetadataStruct );
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
                 $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
