@@ -1,6 +1,7 @@
 // This namespace was initially intended to contain all React components,
 // but I found this is not a good practice since the dot may create troubles.
 // Underscores seem to be a better convention.
+import JobMetadata from './components/header/cattol/JobMetadata'
 import {ModalWindow} from './components/modals/ModalWindow'
 import SegmentStore from './stores/SegmentStore'
 
