@@ -158,7 +158,9 @@ class Header extends React.Component {
               alt="Profile picture"
             />
             <div className="menu">
-              <div {...myProjectsItemAttributes}>My Projects</div>
+              {!this.props.showFilterProjects && (
+                <div {...myProjectsItemAttributes}>My Projects</div>
+              )}
               <div {...profileItemAttributes}>Profile</div>
               <div {...logoutItemAttributes}>Logout</div>
             </div>

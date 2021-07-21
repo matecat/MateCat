@@ -158,30 +158,10 @@ test('Rendering elements', async () => {
 
   await waitFor(() => {
     expect(screen.getByTestId('user-menu-metadata')).toBeInTheDocument()
-    expect(screen.getByText('My Projects')).toBeInTheDocument()
-    expect(screen.getByText('My Projects')).toBeEnabled()
     expect(screen.getByText('Profile')).toBeInTheDocument()
     expect(screen.getByText('Logout')).toBeInTheDocument()
     expect(screen.getByText('Logout')).toBeEnabled()
     expect(screen.getByTestId('team-select')).toBeInTheDocument()
-  })
-})
-
-test.skip('Click my project from user menu', async () => {
-  executeMswServer()
-  render(<Header {...props} />)
-
-  await waitFor(() => {
-    global.window = Object.create(window)
-    Object.defineProperty(window, 'document', {
-      value: {
-        location: {
-          href: '',
-        },
-      },
-    })
-    userEvent.click(screen.getByText('My Projects'))
-    expect(window.document.location.href).toBe('/manage')
   })
 })
 
