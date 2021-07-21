@@ -238,6 +238,7 @@ class SegmentFooter extends React.Component {
             tab_class={tab.tab_class}
             id_segment={this.props.sid}
             notes={this.props.segment.notes}
+            metadata={this.props.segment.metadata}
             context_groups={this.props.segment.context_groups}
             segmentSource={this.props.segment.segment}
             segment={this.props.segment}
