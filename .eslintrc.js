@@ -39,6 +39,7 @@ module.exports = {
     {
       files: ['**/cat_source/**/*.js'],
       parser: '@babel/eslint-parser',
+      env: {es6: true},
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: browserEcmaVersion,
