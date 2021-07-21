@@ -2,6 +2,7 @@
 /*
  Component: lxq.main
  */
+import _ from 'lodash'
 
 const LXQ = {
   enabled: function () {
@@ -241,9 +242,8 @@ const LXQ = {
 
             LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
             results.results[element.segid].forEach(function (qadata) {
-              LXQ.lexiqaData.lexiqaWarnings[element.segid][
-                qadata.errorid
-              ] = qadata
+              LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
+                qadata
 
               if (!qadata.ignored) {
                 qadata.color = LXQ.colors[qadata.category]

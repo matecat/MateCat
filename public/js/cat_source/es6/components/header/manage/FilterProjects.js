@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 import IconDown from '../../icons/IconDown'
 import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data_array, diff) {

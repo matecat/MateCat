@@ -3,6 +3,7 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import SegmentsActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'

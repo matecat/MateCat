@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import _ from 'lodash'
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
 import SegmentStore from '../../../stores/SegmentStore'
@@ -389,12 +390,8 @@ class TagEntity extends Component {
   }
 
   highlightOnWarnings = () => {
-    const {
-      getUpdatedSegmentInfo,
-      contentState,
-      entityKey,
-      isTarget,
-    } = this.props
+    const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} =
+      this.props
     const {tagMismatch, segmentOpened} = getUpdatedSegmentInfo()
     const {data: entityData} = contentState.getEntity(entityKey) || {}
 

@@ -1,3 +1,5 @@
+import React from 'react'
+import _ from 'lodash'
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import CommonUtils from '../../utils/commonUtils'
@@ -5,7 +7,6 @@ import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
-import React from 'react'
 class JobContainer extends React.Component {
   constructor(props) {
     super(props)

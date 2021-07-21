@@ -1,4 +1,4 @@
-import TextUtils from '../../../utils/textUtils'
+import _ from 'lodash'
 
 const QaCheckBlacklist = {
   enabled() {

@@ -4,6 +4,8 @@
  */
 import React from 'react'
 import Immutable from 'immutable'
+import _ from 'lodash'
+
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
@@ -85,14 +87,10 @@ class SegmentFooterMultiMatches extends React.Component {
         parseInt(this.match) < 100
       ) {
         // Clean text without tag and create tagsMap to replace tag after exec_diff
-        const {
-          text: matchDecoded,
-          tagsMap: matchTagsMap,
-        } = TagUtils.cleanTextFromTag(this.segment)
-        const {
-          text: sourceDecoded,
-          tagsMap: sourceTagsMap,
-        } = TagUtils.cleanTextFromTag(self.props.segment.segment)
+        const {text: matchDecoded, tagsMap: matchTagsMap} =
+          TagUtils.cleanTextFromTag(this.segment)
+        const {text: sourceDecoded, tagsMap: sourceTagsMap} =
+          TagUtils.cleanTextFromTag(self.props.segment.segment)
         let diff_obj = TextUtils.execDiff(matchDecoded, sourceDecoded)
 
         let totalLength = 0

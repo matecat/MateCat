@@ -33,8 +33,7 @@ APP.USER.STORE = {}
   }
 
   var upsertConnectedService = function (input_service) {
-    APP.USER.STORE.connected_services = _.map(
-      APP.USER.STORE.connected_services,
+    APP.USER.STORE.connected_services = APP.USER.STORE.connected_services.map(
       function (service) {
         if (service.id == input_service.id) {
           return input_service

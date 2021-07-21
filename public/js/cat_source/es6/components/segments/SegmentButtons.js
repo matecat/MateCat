@@ -3,6 +3,8 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
+
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'

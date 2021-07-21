@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 window.APP = null
 
 window.APP = {
