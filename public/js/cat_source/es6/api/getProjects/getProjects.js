@@ -11,7 +11,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {number | undefined} param.page
  * @param {object} param.searchFilter
  * @param {object} param.team
- * @returns {JQuery.jqXHR<object>}
+ * @returns {Promise<object>}
  */
 export const getProjects = ({
   searchFilter,
@@ -25,12 +25,15 @@ export const getProjects = ({
     ...searchFilter.filter,
   }
 
-  console.log({searchFilter, team, page})
+  const formData = new FormData()
 
-  return $.ajax({
-    data,
-    type: 'POST',
-    xhrFields: {withCredentials: true},
-    url: `${getMatecatApiDomain()}?action=getProjects`,
+  Object.keys(data).forEach((key) => {
+    formData.append(key, data[key])
   })
+
+  return fetch(`${getMatecatApiDomain()}?action=getProjects`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  }).then((res) => res.json())
 }
