@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 /**
  * Fetch the project list based on:
  *
@@ -9,8 +11,11 @@
  * @param {object} param.team
  * @returns {Promise<object>}
  */
-export const getProjects = async ({searchFilter, team, page: _page}) => {
-  const page = _page ?? searchFilter.currentPage
+export const getProjects = async ({
+  searchFilter,
+  team,
+  page = searchFilter.currentPage,
+}) => {
   const data = {
     id_team: team.id,
     page,
