@@ -144,6 +144,10 @@ window.APP = {
       checkbox_label: options['checkbox-label'],
     })
   },
+<<<<<<< HEAD
+=======
+  getRandomUrl: getMatecatApiDomain,
+>>>>>>> 50ba94442 (🚧 add getMatecatApiDomain module)
   doRequest: function (req, log) {
     var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
     var version =

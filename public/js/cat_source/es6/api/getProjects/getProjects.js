@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+
 /**
  * Fetch the project list based on:
  *
@@ -9,9 +11,9 @@ import _ from 'lodash'
  * @param {number | undefined} param.page
  * @param {object} param.searchFilter
  * @param {object} param.team
- * @returns {Promise<object>}
+ * @returns {JQuery.jqXHR<object>}
  */
-export const getProjects = async ({
+export const getProjects = ({
   searchFilter,
   team,
   page = searchFilter.currentPage,
@@ -29,6 +31,6 @@ export const getProjects = async ({
     data,
     type: 'POST',
     xhrFields: {withCredentials: true},
-    url: `${APP.getRandomUrl()}?action=getProjects`,
+    url: `${getMatecatApiDomain()}?action=getProjects`,
   })
 }
