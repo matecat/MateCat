@@ -3,6 +3,8 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
+
 import EditArea from './Editarea'
 import TagUtils from '../../utils/tagUtils'
 import CursorUtils from '../../utils/cursorUtils'

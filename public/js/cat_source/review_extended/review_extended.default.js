@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 window.ReviewExtended = {
   enabled: function () {
     return Review.type === 'extended'

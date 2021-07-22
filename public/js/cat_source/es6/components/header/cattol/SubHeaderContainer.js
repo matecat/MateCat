@@ -1,4 +1,6 @@
 import React from 'react'
+import _ from 'lodash'
+
 import CatToolConstants from '../../../constants/CatToolConstants'
 import CatToolStore from '../../../stores/CatToolStore'
 import SegmentSelectionPanel from './bulk_selection_bar/BulkSelectionBar'

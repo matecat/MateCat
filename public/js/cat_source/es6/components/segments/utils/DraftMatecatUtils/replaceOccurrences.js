@@ -1,5 +1,5 @@
-import {SelectionState, Modifier, EditorState} from 'draft-js'
 import _ from 'lodash'
+import {SelectionState, Modifier, EditorState} from 'draft-js'
 /**
  *
  * @param editorState

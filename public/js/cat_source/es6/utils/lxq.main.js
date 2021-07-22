@@ -2,6 +2,7 @@
 /*
  Component: lxq.main
  */
+import _ from 'lodash'
 
 import {getMatecatApiDomain} from './getMatecatApiDomain'
 

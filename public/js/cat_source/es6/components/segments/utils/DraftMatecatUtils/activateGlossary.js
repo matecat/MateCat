@@ -1,8 +1,8 @@
+import _ from 'lodash'
+
 import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils.js'
-import {CompositeDecorator, EditorState} from 'draft-js'
 import * as DraftMatecatConstants from './editorConstants'
-import _ from 'lodash'
 import canDecorateRange from './canDecorateRange'
 
 export const activateGlossary = (

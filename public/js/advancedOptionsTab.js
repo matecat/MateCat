@@ -1,6 +1,6 @@
 /*
- Component: Advanced Options Tab
- */
+   Component: Advanced Options Tab
+   */
 
 ;(function ($, UI) {
   $.extend(UI, {
@@ -39,7 +39,7 @@
         if (acceptedLanguagesLXQ.indexOf(config.target_rfc) === -1) {
           try {
             notAcceptedLanguages.push(
-              _.find(config.languages_array, function (e) {
+              config.languages_array.find(function (e) {
                 return e.code === config.target_rfc
               }).name,
             )
@@ -75,10 +75,10 @@
         if (config.isReview) {
           tpContainer.addClass('option-unavailable-revise')
         } else {
-          var sourceLang = _.find(config.languages_array, function (e) {
+          var sourceLang = config.languages_array.find(function (e) {
             return e.code === config.source_rfc
           })
-          var targetLang = _.find(config.languages_array, function (e) {
+          var targetLang = config.languages_array.find(function (e) {
             return e.code === config.target_rfc
           })
           sourceLang = sourceLang ? sourceLang.name : config.source_rfc

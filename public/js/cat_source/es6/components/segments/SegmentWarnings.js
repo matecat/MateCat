@@ -4,6 +4,7 @@
  */
 import React from 'react'
 import Immutable from 'immutable'
+import _ from 'lodash'
 
 class SegmentWarnings extends React.Component {
   constructor(props) {

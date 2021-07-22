@@ -3,6 +3,7 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
 import ReactDOMServer from 'react-dom/server'
 import PropTypes from 'prop-types'
 import VirtualList from 'react-tiny-virtual-list'

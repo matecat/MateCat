@@ -3,6 +3,8 @@
  * React Component for the editarea.
 
  */
+import _ from 'lodash'
+
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
 
