@@ -1,5 +1,3 @@
-import {createAjaxInterface} from '../services/ajaxInterface'
-import {getProjects} from '../services/projects'
 import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
 
 if (!window.API) {
@@ -7,12 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  /**
-   * Retrieve Projects. Passing filters is possible to retrieve projects
-   */
-  getProjects: function (team, searchFilter, page) {
-    return createAjaxInterface(getProjects(team, searchFilter, page))
-  },
   getProject: function (id) {
     return $.ajax({
       async: true,

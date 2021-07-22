@@ -5,7 +5,7 @@
  * @param {String} responseType
  * @returns {Function}
  */
-export default (url, params = {}, responseType = 'json') => {
+export const requestModule = (url, params = {}, responseType = 'json') => {
   return async () => {
     try {
       const resp = await fetch(url, {...params, responseType})
