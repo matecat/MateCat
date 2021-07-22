@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js'
+
 let SegmentFilterUtils = {
   enabled: () => config.segmentFilterEnabled,
 

@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
 
 import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
 

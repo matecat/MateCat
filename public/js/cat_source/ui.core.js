@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
 
 /*
 	Component: ui.core

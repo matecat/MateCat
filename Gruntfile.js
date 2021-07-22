@@ -241,7 +241,6 @@ module.exports = function (grunt) {
           // basePath + 'lib/rangy-selectionsaverestore.js',
           basePath + 'lib/base64.min.js',
           basePath + 'lib/moment.min.js',
-          basePath + 'lib/sprintf.min.js',
           basePath + 'lib/calendar.min.js',
           basePath + 'lib/imagesloaded.min.js',
           basePath + 'lib/jquery.atwho.min.js',
@@ -255,7 +254,6 @@ module.exports = function (grunt) {
         src: [
           basePath + 'lib/jquery-3.3.1.min.js',
           basePath + 'lib/jquery-ui.min.js',
-          basePath + 'lib/sprintf.min.js',
           basePath + 'lib/diff_match_patch.js',
           basePath + 'lib/js.cookie.js',
           basePath + 'lib/jquery.powertip.min.js',
