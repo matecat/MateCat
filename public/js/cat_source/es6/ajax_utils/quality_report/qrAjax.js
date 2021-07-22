@@ -1,3 +1,5 @@
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+
 let QUALITY_REPORT = {
   getSegmentsFiles(filter, segmentId) {
     let data = {
@@ -12,7 +14,7 @@ let QUALITY_REPORT = {
       type: 'GET',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/app/jobs/' +
         config.id_job +
         '/' +
@@ -25,7 +27,7 @@ let QUALITY_REPORT = {
     return $.ajax({
       type: 'GET',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/app/user',
+      url: getMatecatApiDomain() + 'api/app/user',
     })
   },
 
@@ -34,7 +36,7 @@ let QUALITY_REPORT = {
       type: 'GET',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v3/jobs/' +
         config.id_job +
         '/' +

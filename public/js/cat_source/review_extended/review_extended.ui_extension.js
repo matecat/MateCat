@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
+
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data_array, diff) {
@@ -68,7 +70,7 @@ if (ReviewExtended.enabled()) {
     deleteTranslationIssue: function (context) {
       var parsed = JSON.parse(context)
       var issue_path = sprintf(
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
           'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
         config.id_job,
         config.review_password,

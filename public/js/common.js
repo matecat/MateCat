@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 
 window.APP = null
 
@@ -143,18 +144,6 @@ window.APP = {
       checkbox_label: options['checkbox-label'],
     })
   },
-  getRandomUrl: function () {
-    if (config.enableMultiDomainApi) {
-      return (
-        '//' +
-        Math.floor(Math.random() * config.ajaxDomainsNumber) +
-        '.ajax.' +
-        location.host +
-        '/'
-      )
-    }
-    return config.basepath
-  },
   doRequest: function (req, log) {
     var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
     var version =
@@ -163,7 +152,7 @@ window.APP = {
         : '-v' + config.build_number
     var builtURL = req.url
       ? req.url
-      : this.getRandomUrl() +
+      : getMatecatApiDomain() +
         '?action=' +
         req.data.action +
         logTxt +

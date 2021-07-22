@@ -4,6 +4,8 @@
  */
 import _ from 'lodash'
 
+import {getMatecatApiDomain} from './getMatecatApiDomain'
+
 const LXQ = {
   enabled: function () {
     return !!config.lxq_enabled
@@ -13,7 +15,7 @@ const LXQ = {
       config.lxq_enabled = 1
       // Todo Call Service to enable Tag Lexiqa
       var path = sprintf(
-        APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
+        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
         config.id_job,
         config.password,
       )
@@ -39,7 +41,7 @@ const LXQ = {
     if (config.lxq_enabled) {
       config.lxq_enabled = 0
       var path = sprintf(
-        APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
+        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
         config.id_job,
         config.password,
       )

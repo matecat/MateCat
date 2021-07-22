@@ -1,3 +1,5 @@
+import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
+
 if (!window.API) {
   window.API = {}
 }
@@ -21,7 +23,7 @@ window.API.TEAM = {
       type: 'get',
       async: true,
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/v2/teams/' + teamId + '/members',
+      url: getMatecatApiDomain() + 'api/v2/teams/' + teamId + '/members',
     })
   },
   createTeam: function (teamName, members) {
@@ -35,7 +37,7 @@ window.API.TEAM = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/v2/teams',
+      url: getMatecatApiDomain() + 'api/v2/teams',
     })
   },
   addUserToTeam: function (team, userEmail) {
@@ -47,7 +49,7 @@ window.API.TEAM = {
       data: data,
       type: 'post',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/v2/teams/' + team.id + '/members',
+      url: getMatecatApiDomain() + 'api/v2/teams/' + team.id + '/members',
     })
   },
   removeUserFromTeam: function (team, userId) {
@@ -56,7 +58,11 @@ window.API.TEAM = {
       type: 'delete',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() + 'api/v2/teams/' + team.id + '/members/' + userId,
+        getMatecatApiDomain() +
+        'api/v2/teams/' +
+        team.id +
+        '/members/' +
+        userId,
     })
   },
   changeTeamName: function (team, newName) {
@@ -67,7 +73,7 @@ window.API.TEAM = {
       data: JSON.stringify(data),
       type: 'PUT',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/v2/teams/' + team.id,
+      url: getMatecatApiDomain() + 'api/v2/teams/' + team.id,
     })
   },
 }
