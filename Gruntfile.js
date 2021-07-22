@@ -116,6 +116,7 @@ module.exports = function (grunt) {
           basePath + 'common.js',
           basePath + 'user_store.js',
           basePath + 'login.js',
+          basePath + 'lxqlicense.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'cat_source/ui.core.js',
           basePath + 'cat_source/ui.segment.js',
