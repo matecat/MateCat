@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 

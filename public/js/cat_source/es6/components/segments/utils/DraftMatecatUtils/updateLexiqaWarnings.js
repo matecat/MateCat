@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import getEntities from './getEntities'
 import {isToReplaceForLexiqa, getTagSignature} from './tagModel'
 

@@ -1,3 +1,7 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Immutable from 'immutable'
+import _ from 'lodash'
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import TeamsActions from '../../actions/TeamsActions'
@@ -7,9 +11,6 @@ import ManageConstants from '../../constants/ManageConstants'
 import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
-import React from 'react'
-import ReactDOM from 'react-dom'
-import Immutable from 'immutable'
 class Dashboard extends React.Component {
   constructor() {
     super()

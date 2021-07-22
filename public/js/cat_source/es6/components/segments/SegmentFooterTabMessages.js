@@ -4,6 +4,8 @@
  */
 import React from 'react'
 import Immutable from 'immutable'
+import _ from 'lodash'
+
 class SegmentFooterTabMessages extends React.Component {
   constructor(props) {
     super(props)

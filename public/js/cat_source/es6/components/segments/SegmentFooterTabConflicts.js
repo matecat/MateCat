@@ -3,6 +3,7 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
 import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'

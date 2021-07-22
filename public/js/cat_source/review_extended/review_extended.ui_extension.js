@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
 
 if (ReviewExtended.enabled()) {

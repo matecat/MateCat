@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 let ModalsActions = {
   //********* Modals **************//
 

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 const QaCheckGlossary = {
   enabled() {
     return config.qa_check_glossary_enabled

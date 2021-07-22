@@ -1,4 +1,6 @@
 import React from 'react'
+import _ from 'lodash'
+
 import CattolConstants from '../../../../constants/CatToolConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolStore from '../../../../stores/CatToolStore'
@@ -112,9 +114,8 @@ class Search extends React.Component {
       _.remove(searchResults, (item) => item.id === sid)
     }
     let newResultArray = _.map(searchResults, (item) => item.id)
-    const searchObject = SearchUtils.updateSearchObjectAfterReplace(
-      newResultArray,
-    )
+    const searchObject =
+      SearchUtils.updateSearchObjectAfterReplace(newResultArray)
     this.setState({
       total: total,
       searchResults: searchObject.searchResults,
@@ -207,8 +208,7 @@ class Search extends React.Component {
     let self = this
     let props = {
       modalName: 'confirmReplace',
-      text:
-        'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
+      text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
       successText: 'Continue',
       successCallback: function () {
         SearchUtils.execReplaceAll(self.state.search).then((d) => {
@@ -348,12 +348,8 @@ class Search extends React.Component {
   }
   getResultsHtml() {
     var html = ''
-    const {
-      featuredSearchResult,
-      searchReturn,
-      occurrencesList,
-      searchResults,
-    } = this.state
+    const {featuredSearchResult, searchReturn, occurrencesList, searchResults} =
+      this.state
     const segmentIndex = _.findIndex(
       searchResults,
       (item) => item.id === occurrencesList[featuredSearchResult],

@@ -1,4 +1,6 @@
 import React, {Component} from 'react'
+import _ from 'lodash'
+
 import LXQ from '../../../utils/lxq.main'
 
 class LexiqaTooltipInfo extends Component {

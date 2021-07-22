@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 
 import Filters from './FilterSegments'
 import FileDetails from './FileDetails'

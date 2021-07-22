@@ -4,6 +4,7 @@
 
 import assign from 'object-assign'
 import {EventEmitter} from 'events'
+import _ from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'

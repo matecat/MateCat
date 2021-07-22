@@ -1,4 +1,6 @@
+import _ from 'lodash'
 import Shortcuts from '../../utils/shortcuts'
+
 class ShortCutsModal extends React.Component {
   constructor(props) {
     super(props)

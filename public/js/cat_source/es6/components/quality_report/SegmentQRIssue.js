@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {

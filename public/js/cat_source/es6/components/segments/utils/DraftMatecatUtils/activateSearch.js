@@ -1,8 +1,8 @@
+import _ from 'lodash'
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component'
 import CompoundDecorator from '../CompoundDecorator'
 import {CompositeDecorator, EditorState} from 'draft-js'
 import * as DraftMatecatConstants from './editorConstants'
-import _ from 'lodash'
 
 const activateSearch = (
   text,
