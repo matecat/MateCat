@@ -17,7 +17,6 @@ require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../ajax_utils/projectsAjax')
-window.Cookies = require('../../../../lib/js.cookie')
 window.config = {
   enable_outsource: 1,
   basepath: '/',
