@@ -257,7 +257,6 @@ module.exports = function (grunt) {
           basePath + 'lib/lodash.min.js',
           basePath + 'lib/sprintf.min.js',
           basePath + 'lib/diff_match_patch.js',
-          basePath + 'lib/js.cookie.js',
           basePath + 'lib/jquery.powertip.min.js',
 
           // The Templates plugin is included to render the upload/download listings
