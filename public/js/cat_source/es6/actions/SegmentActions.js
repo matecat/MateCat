@@ -14,6 +14,7 @@ import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils'
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
+import _ from 'lodash'
 
 const SegmentActions = {
   /********* SEGMENTS *********/

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import SegmentConstants from '../../constants/SegmentConstants'
 import CommonUtils from '../../utils/commonUtils'
 class ReviewExtendedIssue extends React.Component {

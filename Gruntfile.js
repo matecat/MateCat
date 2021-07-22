@@ -239,7 +239,6 @@ module.exports = function (grunt) {
           basePath + 'lib/diff_match_patch.js',
           basePath + 'lib/base64.min.js',
           basePath + 'lib/moment.min.js',
-          basePath + 'lib/lodash.min.js',
           basePath + 'lib/sprintf.min.js',
           basePath + 'lib/calendar.min.js',
           basePath + 'lib/imagesloaded.min.js',
@@ -254,7 +253,6 @@ module.exports = function (grunt) {
         src: [
           basePath + 'lib/jquery-3.3.1.min.js',
           basePath + 'lib/jquery-ui.min.js',
-          basePath + 'lib/lodash.min.js',
           basePath + 'lib/sprintf.min.js',
           basePath + 'lib/diff_match_patch.js',
           basePath + 'lib/jquery.powertip.min.js',

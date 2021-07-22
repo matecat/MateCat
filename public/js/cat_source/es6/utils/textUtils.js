@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
   getDiffHtml: function (source, target) {

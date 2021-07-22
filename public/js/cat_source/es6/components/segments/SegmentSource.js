@@ -4,6 +4,8 @@
  */
 import React from 'react'
 import Immutable from 'immutable'
+import _ from 'lodash'
+
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import TextUtils from '../../utils/textUtils'
@@ -148,11 +150,8 @@ class SegmentSource extends React.Component {
 
   addSearchDecorator = () => {
     let {tagRange} = this.state
-    let {
-      searchParams,
-      occurrencesInSearch,
-      currentInSearchIndex,
-    } = this.props.segment
+    let {searchParams, occurrencesInSearch, currentInSearchIndex} =
+      this.props.segment
     const textToSearch = searchParams.source ? searchParams.source : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,
@@ -235,9 +234,8 @@ class SegmentSource extends React.Component {
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
-      const lxqDecodedSource = DraftMatecatUtils.prepareTextForLexiqa(
-        editorState,
-      )
+      const lxqDecodedSource =
+        DraftMatecatUtils.prepareTextForLexiqa(editorState)
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
       SegmentActions.updateSource(
         this.props.segment.sid,
@@ -251,12 +249,8 @@ class SegmentSource extends React.Component {
 
   checkDecorators = (prevProps) => {
     let changedDecorator = false
-    const {
-      inSearch,
-      searchParams,
-      currentInSearch,
-      currentInSearchIndex,
-    } = this.props.segment
+    const {inSearch, searchParams, currentInSearch, currentInSearchIndex} =
+      this.props.segment
     const {activeDecorators: prevActiveDecorators, editorState} = this.state
     const activeDecorators = {...prevActiveDecorators}
 

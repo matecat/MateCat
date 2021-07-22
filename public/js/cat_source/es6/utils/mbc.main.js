@@ -1,6 +1,7 @@
 /*
  Component: mbc.main
  */
+import _ from 'lodash'
 import CommentsStore from '../stores/CommentsStore'
 import {getMatecatApiDomain} from './getMatecatApiDomain'
 

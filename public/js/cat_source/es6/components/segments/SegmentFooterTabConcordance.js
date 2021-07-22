@@ -1,5 +1,6 @@
 import React from 'react'
 import Cookies from 'js-cookie'
+import _ from 'lodash'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
