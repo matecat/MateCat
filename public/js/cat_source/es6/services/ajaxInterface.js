@@ -1,3 +1,3 @@
 export const promiseToAjax = (promise) => {
-  return {done: (res) => promise.then(res)}
+  return {done: (fn) => promise.then(fn)}
 }
