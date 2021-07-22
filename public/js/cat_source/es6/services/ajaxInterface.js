@@ -1,3 +1,3 @@
-export const promiseToAjax = (promise) => {
+export const createAjaxInterface = (promise) => {
   return {done: (fn) => promise.then(fn)}
 }

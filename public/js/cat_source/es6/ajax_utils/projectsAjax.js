@@ -1,4 +1,4 @@
-import {promiseToAjax} from '../services/ajaxInterface'
+import {createAjaxInterface} from '../services/ajaxInterface'
 import {getProjects} from '../services/projects'
 
 if (!window.API) {
@@ -10,7 +10,7 @@ window.API.PROJECTS = {
    * Retrieve Projects. Passing filters is possible to retrieve projects
    */
   getProjects: function (team, searchFilter, page) {
-    return promiseToAjax(getProjects(team, searchFilter, page))
+    return createAjaxInterface(getProjects(team, searchFilter, page))
   },
   getProject: function (id) {
     return $.ajax({
