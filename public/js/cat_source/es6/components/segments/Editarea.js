@@ -3,6 +3,8 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
+
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
 import SegmentStore from '../../stores/SegmentStore'

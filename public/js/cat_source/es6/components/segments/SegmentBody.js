@@ -3,6 +3,7 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
 import SegmentSource from './SegmentSource'
 import TagUtils from '../../utils/tagUtils'
 import Shortcuts from '../../utils/shortcuts'

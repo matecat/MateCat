@@ -1,4 +1,6 @@
 import _ from 'lodash'
+
+import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -86,7 +88,7 @@ import _ from 'lodash'
     enableTagProjectionInJob: function () {
       config.tag_projection_enabled = 1
       var path = sprintf(
-        APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
+        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
         config.id_job,
         config.password,
       )
@@ -112,7 +114,7 @@ import _ from 'lodash'
     disableTagProjectionInJob: function () {
       config.tag_projection_enabled = 0
       var path = sprintf(
-        APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
+        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
         config.id_job,
         config.password,
       )

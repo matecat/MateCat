@@ -1,4 +1,4 @@
-'use strict'
+import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 
 APP.USER = {}
 APP.USER.STORE = {}
@@ -10,7 +10,7 @@ APP.USER.STORE = {}
    */
   var loadUserData = function () {
     return $.ajax({
-      url: APP.getRandomUrl() + 'api/app/user',
+      url: `${getMatecatApiDomain()}api/app/user`,
       dataType: 'json',
       async: true,
       xhrFields: {withCredentials: true},
@@ -33,8 +33,7 @@ APP.USER.STORE = {}
   }
 
   var upsertConnectedService = function (input_service) {
-    APP.USER.STORE.connected_services = _.map(
-      APP.USER.STORE.connected_services,
+    APP.USER.STORE.connected_services = APP.USER.STORE.connected_services.map(
       function (service) {
         if (service.id == input_service.id) {
           return input_service

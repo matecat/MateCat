@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 const SearchHighlight = (props) => {
   let occurrence = _.find(props.occurrences, (occ) => occ.start === props.start)
   if (occurrence && occurrence.searchProgressiveIndex === props.currentIndex) {

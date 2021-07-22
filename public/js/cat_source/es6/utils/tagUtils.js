@@ -1,4 +1,5 @@
 // import SegmentStore  from '../stores/SegmentStore';
+import _ from 'lodash'
 import TextUtils from './textUtils'
 import {
   tagSignatures,
@@ -456,10 +457,8 @@ const TAGS_UTILS = {
     // Remove Tags from Main String
     const {text: mainStr} = this.cleanTextFromTag(item1)
     // Remove Tags from Alternative String
-    const {
-      text: transDecoded,
-      tagsMap: transDecodedTagsMap,
-    } = this.cleanTextFromTag(item2)
+    const {text: transDecoded, tagsMap: transDecodedTagsMap} =
+      this.cleanTextFromTag(item2)
     // Execute diff
     let diffObj = TextUtils.execDiff(mainStr, transDecoded)
     // Restore Tags

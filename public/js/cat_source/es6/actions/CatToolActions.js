@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
 import $ from 'jquery'
+import _ from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'

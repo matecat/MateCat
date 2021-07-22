@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import ReviewExtendedIssuesContainer from './ReviewExtendedIssuesContainer'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import SegmentConstants from '../../constants/SegmentConstants'

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import SegmentActions from '../../../../actions/SegmentActions'
 // import CatToolActions  from "../../../../actions/CatToolActions";
 import SegmentStore from '../../../../stores/SegmentStore'
@@ -57,8 +59,7 @@ let SearchUtils = {
       this.searchParams.status == 'all'
     ) {
       APP.alert({
-        msg:
-          'Enter text in source or target input boxes<br /> or select a status.',
+        msg: 'Enter text in source or target input boxes<br /> or select a status.',
       })
       return false
     }

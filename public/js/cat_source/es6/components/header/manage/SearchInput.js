@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 
 class SearchInput extends React.Component {
   constructor(props) {

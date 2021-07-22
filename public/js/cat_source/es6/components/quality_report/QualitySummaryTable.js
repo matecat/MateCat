@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 
 class QualitySummaryTable extends React.Component {
   constructor(props) {

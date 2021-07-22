@@ -1,5 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
+import _ from 'lodash'
 
 import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'

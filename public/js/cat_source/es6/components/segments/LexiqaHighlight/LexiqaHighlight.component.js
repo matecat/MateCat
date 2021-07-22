@@ -1,4 +1,6 @@
 import React, {Component} from 'react'
+import _ from 'lodash'
+
 import LexiqaTooltipInfo from '../TooltipInfo/LexiqaTooltipInfo.component'
 import LexiqaUtils from '../../../utils/lxq.main'
 
