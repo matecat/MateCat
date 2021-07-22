@@ -1,3 +1,6 @@
+import AjaxInterface from '../services/AjaxInterface'
+import {getProjects} from '../services/projects'
+
 if (!window.API) {
   window.API = {}
 }
@@ -7,22 +10,12 @@ window.API.PROJECTS = {
    * Retrieve Projects. Passing filters is possible to retrieve projects
    */
   getProjects: function (team, searchFilter, page) {
-    var pageNumber = page ? page : searchFilter.currentPage
-    var data = {
-      id_team: team.id,
-      page: pageNumber,
-      filter: !$.isEmptyObject(searchFilter.filter) ? 1 : 0,
+    const done = new AjaxInterface()
+    getProjects(team, searchFilter, page).then(done.action)
+
+    return {
+      done: done.callback,
     }
-
-    // Filters
-    data = $.extend(data, searchFilter.filter)
-
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=getProjects',
-    })
   },
   getProject: function (id) {
     return $.ajax({
