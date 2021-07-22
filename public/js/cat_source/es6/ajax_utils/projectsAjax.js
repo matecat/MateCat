@@ -5,27 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  /**
-   * Retrieve Projects. Passing filters is possible to retrieve projects
-   */
-  getProjects: function (team, searchFilter, page) {
-    var pageNumber = page ? page : searchFilter.currentPage
-    var data = {
-      id_team: team.id,
-      page: pageNumber,
-      filter: !$.isEmptyObject(searchFilter.filter) ? 1 : 0,
-    }
-
-    // Filters
-    data = $.extend(data, searchFilter.filter)
-
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      xhrFields: {withCredentials: true},
-      url: getMatecatApiDomain() + '?action=getProjects',
-    })
-  },
   getProject: function (id) {
     return $.ajax({
       async: true,
