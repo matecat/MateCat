@@ -1,3 +1,5 @@
+import 'whatwg-fetch'
+
 global.$ = require('./public/api/dist/lib/jquery-3.3.1.min.js')
 global.jQuery = $
 
