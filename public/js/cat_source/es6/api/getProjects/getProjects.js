@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * - the given team
  * - the given page
  *
- * @param {number | undefined} param.page
+ * @param {number} param.page
  * @param {object} param.searchFilter
  * @param {object} param.team
  * @returns {Promise<object>}
