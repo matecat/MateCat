@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
+
 /*
  Component: ui.header
  */
@@ -244,7 +246,7 @@ $.extend(window.UI, {
   },
   reloadQualityReport: function () {
     var path = sprintf(
-      APP.getRandomUrl() + 'api/app/jobs/%s/%s/quality-report',
+      getMatecatApiDomain() + 'api/app/jobs/%s/%s/quality-report',
       config.id_job,
       config.password,
     )

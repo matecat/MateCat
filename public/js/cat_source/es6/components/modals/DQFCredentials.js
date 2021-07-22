@@ -1,7 +1,9 @@
+import update from 'immutability-helper'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 class DQFCredentials extends React.Component {
   constructor(props) {
@@ -78,7 +80,7 @@ class DQFCredentials extends React.Component {
     let dqfCheck = $('.dqf-box #dqf_switch')
     return $.ajax({
       type: 'DELETE',
-      url: APP.getRandomUrl() + 'api/app/dqf/user/metadata',
+      url: getMatecatApiDomain() + 'api/app/dqf/user/metadata',
       xhrFields: {withCredentials: true},
     }).done(function (data) {
       APP.USER.STORE.metadata = data
