@@ -375,7 +375,8 @@ class downloadFileController extends downloadController {
                             $_fName = $pathinfo[ 'basename' ];
                         }
 
-                        $this->setFilename( $_fName . ".zip" );
+                        $nFinfo = AbstractFilesStorage::pathinfo_fix( $_fName );
+                        $this->setFilename( ($nFinfo['extension'] === 'zip') ? $_fName : $_fName . ".zip" );
                         $this->outputContent = self::composeZip( $output_content ); //add zip archive content here;
                         $this->setMimeType();
 

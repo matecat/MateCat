@@ -16,6 +16,7 @@
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.4.1",
     "js-base64": "^3.6.1",
+    "js-cookie": "^2.2.1",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.19",
     "moment": "^2.24.0",
@@ -59,6 +60,7 @@
     "lint-staged": ">=10",
     "msw": "^0.30.0",
     "node-sass": "^6.0.0",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "whatwg-fetch": "^3.6.2"
   }
 }
