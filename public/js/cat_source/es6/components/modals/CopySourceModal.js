@@ -1,4 +1,5 @@
 import React from 'react'
+import Cookies from 'js-cookie'
 
 class CopySourceModal extends React.Component {
   constructor(props) {

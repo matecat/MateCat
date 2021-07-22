@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
   UI.openLanguageResourcesPanel(tab, elToClick)

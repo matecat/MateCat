@@ -1,10 +1,7 @@
-/**
- * React Component .
-
- */
-import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
-
 import React from 'react'
+import Cookies from 'js-cookie'
+
+import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentTabConcordance from './SegmentFooterTabConcordance'

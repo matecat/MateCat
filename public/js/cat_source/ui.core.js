@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Cookies from 'js-cookie'
 
 /*
 	Component: ui.core
