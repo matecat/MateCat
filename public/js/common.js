@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie'
 import _ from 'lodash'
 import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 
