@@ -2,6 +2,8 @@
  Component: mbc.main
  */
 import CommentsStore from '../stores/CommentsStore'
+import {getMatecatApiDomain} from './getMatecatApiDomain'
+
 const MBC = {
   enabled: function () {
     return config.comments_enabled && !!window.EventSource
@@ -305,7 +307,10 @@ MBC.init = function () {
           type: 'get',
           xhrFields: {withCredentials: true},
           url:
-            APP.getRandomUrl() + 'api/app/teams/' + teamId + '/members/public',
+            getMatecatApiDomain() +
+            'api/app/teams/' +
+            teamId +
+            '/members/public',
         })
           .done(function (data) {
             var team = {
@@ -332,9 +337,8 @@ MBC.init = function () {
         CommentsStore.db.getCommentsCountBySegment &&
         UI.currentSegmentId === id_segment
       ) {
-        var comments_obj = CommentsStore.db.getCommentsCountBySegment(
-          id_segment,
-        )
+        var comments_obj =
+          CommentsStore.db.getCommentsCountBySegment(id_segment)
         var panelClosed =
           localStorage.getItem(MBC.localStorageCommentsClosed) === 'true'
         if (comments_obj.active > 0 && !panelClosed) {

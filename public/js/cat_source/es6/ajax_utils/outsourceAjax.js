@@ -1,3 +1,5 @@
+import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
+
 if (!window.API) {
   window.API = {}
 }
@@ -33,7 +35,7 @@ API.OUTSOURCE = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=outsourceTo',
+      url: getMatecatApiDomain() + '?action=outsourceTo',
     })
   },
 
@@ -41,7 +43,7 @@ API.OUTSOURCE = {
     return $.ajax({
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=fetchChangeRates',
+      url: getMatecatApiDomain() + '?action=fetchChangeRates',
     })
   },
 
