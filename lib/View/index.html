@@ -179,11 +179,6 @@
 
         <link href="${basepath}public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
-
-        <tal:block tal:condition="php: INIT::$LXQ_LICENSE" >
-        <script src="${lexiqaServer | null}/js/lxqlicense.js"></script>
-        </tal:block>
-
         <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
 
