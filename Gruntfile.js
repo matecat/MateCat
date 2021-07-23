@@ -1,5 +1,7 @@
 const sass = require('node-sass')
 
+const {getBabelPresets} = require('./babel.utils')
+
 const basePath = 'public/js/'
 const buildPath = 'public/js/build/'
 const incPath = 'inc/'
@@ -30,10 +32,7 @@ const cssWatchFilesUploadPage = [
 ]
 const cssWatchManage = [cssBase + 'sass/commons/*']
 
-const babelifyTransform = [
-  'babelify',
-  {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-]
+const babelifyTransform = ['babelify', getBabelPresets('browser')]
 
 module.exports = function (grunt) {
   const conf = grunt.file.read(incPath + 'version.ini')
