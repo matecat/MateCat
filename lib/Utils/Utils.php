@@ -438,6 +438,36 @@ class Utils {
         return true;
     }
 
+    /**
+     *
+     * Remove Un-Wanted Chars from string name
+     *
+     * @param (string) $string
+     *
+     * @return string
+     * @throws Exception
+     */
+    public static function fixFileName( $stringName, $directory = null, $upCount = true ) {
+        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        while ( is_file( $directory . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
+            $string = static::upCountName( $string );
+        }
+        return $string;
+    }
+
+    protected function upCountNameCallback( $matches ) {
+        $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
+        $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
+        return '_(' . $index . ')' . $ext;
+    }
+
+    protected static function upCountName( $name ) {
+        return preg_replace_callback(
+                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
+        );
+    }
+
+
     public static function isValidFileName( $fileUpName ) {
 
         if (
