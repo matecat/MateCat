@@ -236,7 +236,6 @@ module.exports = function (grunt) {
           basePath + 'lib/jquery.powertip.min.js',
           basePath + 'lib/jquery-dateFormat.min.js',
           basePath + 'lib/diff_match_patch.js',
-          basePath + 'lib/moment.min.js',
           basePath + 'lib/calendar.min.js',
           basePath + 'lib/imagesloaded.min.js',
           basePath + 'lib/jquery.atwho.min.js',
