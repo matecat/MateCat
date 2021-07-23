@@ -49,6 +49,7 @@
     "grunt-browserify": "^6.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-curl": "^2.5.1",
     "grunt-sass": "^3.1.0",
     "grunt-strip": "^0.2.1",
     "grunt-text-replace": "^0.4.0",

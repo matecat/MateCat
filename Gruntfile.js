@@ -42,6 +42,15 @@ module.exports = function (grunt) {
     .replace(/version[ ]+=[ ]+(.*?)/gi, '$1')
   grunt.log.ok('Matecat Version: ' + version)
 
+  const conf2 = grunt.file.read(incPath + 'config.ini')
+  const lxqServerMatch = conf2.match(/^LXQ_SERVER[ ]+=[ ]+.*/gim)
+  const lxqServer = lxqServerMatch
+    ? lxqServerMatch[0]
+        .replace(/LXQ_SERVER[ ]+=[ ]+(.*?)/gi, '$1')
+        .replace(/"/g, '')
+    : undefined
+  grunt.log.ok('Lexiqa Server: ' + lxqServer)
+
   grunt.initConfig({
     /**
      * Browserify
@@ -54,6 +63,9 @@ module.exports = function (grunt) {
      * All imports to be attached to window should be defined in
      * the entry point js file.
      */
+    curl: {
+      'public/js/build/lxqlicense.js': lxqServer + '/js/lxqlicense.js',
+    },
     browserify: {
       qualityReport: {
         options: {
@@ -116,7 +128,7 @@ module.exports = function (grunt) {
           basePath + 'common.js',
           basePath + 'user_store.js',
           basePath + 'login.js',
-          basePath + 'lxqlicense.js',
+          basePath + 'build/lxqlicense.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'cat_source/ui.core.js',
           basePath + 'cat_source/ui.segment.js',
@@ -464,6 +476,7 @@ module.exports = function (grunt) {
     },
   })
 
+  grunt.loadNpmTasks('grunt-curl')
   grunt.loadNpmTasks('grunt-contrib-concat')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-text-replace')
@@ -519,7 +532,19 @@ module.exports = function (grunt) {
    * Once this is done, it would be better to rely on `watch` task, to reload
    * just development bundles.
    */
-  grunt.registerTask('development', ['bundleDev:js', 'sass', 'replace:css'])
+  grunt.registerTask('development', function () {
+    var tasks = ['bundleDev:js', 'sass', 'replace:css']
+    if (lxqServer) {
+      tasks.unshift('curl')
+    }
+    grunt.task.run(tasks)
+  })
 
-  grunt.registerTask('deploy', ['bundle:js', 'sass', 'replace:css'])
+  grunt.registerTask('deploy', function () {
+    var tasks = ['bundleDev:js', 'sass', 'replace:css']
+    if (lxqServer) {
+      tasks.unshift('curl')
+    }
+    grunt.task.run(tasks)
+  })
 }
