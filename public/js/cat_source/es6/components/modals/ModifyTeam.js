@@ -413,7 +413,7 @@ class ModifyTeam extends React.Component {
       ? {paddingTop: '20px'}
       : {}
     return (
-      <div className="modify-team-modal">
+      <div className="modify-team-modal" data-testid="modify-team-modal">
         {!this.props.hideChangeName ? (
           <div className="matecat-modal-top">
             <div className="ui one column grid left aligned">

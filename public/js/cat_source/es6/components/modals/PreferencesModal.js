@@ -132,7 +132,7 @@ class PreferencesModal extends React.Component {
 
   getApiKeyHtml() {
     return (
-      <div>
+      <div data-testid="preferences-modal">
         <h2>API Key</h2>
         {this.state.credentials ? (
           this.state.confirmDelete ? (

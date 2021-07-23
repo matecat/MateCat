@@ -134,16 +134,22 @@ class TeamsSelect extends React.Component {
     let personalTeam = ''
     if (teams.size > 0 && changeTeam) {
       let items = teams.map((team) => {
+        // item dom attributes
+        const itemAttributes = {
+          className: 'item',
+          'data-value': team.get('id'),
+          'data-text': team.get('name'),
+          title: team.get('name'),
+          onClick: (e) => changeTeamHandler(e, team),
+          'data-testid': team.get('name'),
+        }
+
         let iconModal = ''
         if (team.get('type') == 'personal') {
           personalTeam = (
             <div
-              className="item"
-              data-value={team.get('id')}
-              data-text={team.get('name')}
-              title={team.get('name')}
+              {...itemAttributes}
               key={'team' + team.get('name') + team.get('id')}
-              onClick={(e) => changeTeamHandler(e, team)}
             >
               <div className={'item-info'}>
                 <span className={'text'}>{team.get('name')}</span>
@@ -158,6 +164,7 @@ class TeamsSelect extends React.Component {
             <a
               className="team-filter button show right"
               onClick={(e) => openModifyTeam(e, team)}
+              data-testid={`team-setting-icon-${team.get('name')}`}
             >
               {/*<i className="icon-settings icon"/>*/}
               <IconSettings width={17} height={17} color={'#0099CC'} />
@@ -166,12 +173,8 @@ class TeamsSelect extends React.Component {
         }
         return (
           <div
-            className="item"
-            data-value={team.get('id')}
-            data-text={team.get('name')}
-            title={team.get('name')}
+            {...itemAttributes}
             key={'team' + team.get('name') + team.get('id')}
-            onClick={(e) => changeTeamHandler(e, team)}
           >
             <div className={'item-info'}>
               <span className={'text'}>{team.get('name')}</span>
@@ -227,7 +230,7 @@ class TeamsSelect extends React.Component {
   render() {
     const {loggedUser} = this.props
     let teamsSelect = loggedUser ? this.getTeamsSelect() : ''
-    return <div>{teamsSelect}</div>
+    return <div data-testid="team-select">{teamsSelect}</div>
   }
 }
 

@@ -119,7 +119,7 @@ class CreateTeam extends React.Component {
         : 'disabled'
     var user = APP.USER.STORE.user
     return (
-      <div className="create-team-modal">
+      <div className="create-team-modal" data-testid="create-team-modal">
         <div className="matecat-modal-top">
           <div className="ui one column grid left aligned">
             <div className="column">
