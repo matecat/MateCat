@@ -45,9 +45,10 @@ module.exports = function (grunt) {
   //Lexiqa
   const conf2 = grunt.file.read(incPath + 'config.ini')
   const lxqLicense = conf2.match(/^LXQ_LICENSE[ ]+=[ ]+.*/gim)
+  let lxqServer
   if (lxqLicense) {
     const lxqServerMatch = conf2.match(/^LXQ_SERVER[ ]+=[ ]+.*/gim)
-    const lxqServer = lxqServerMatch
+    lxqServer = lxqServerMatch
       ? lxqServerMatch[0]
           .replace(/LXQ_SERVER[ ]+=[ ]+(.*?)/gi, '$1')
           .replace(/"/g, '')
