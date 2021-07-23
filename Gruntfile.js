@@ -225,6 +225,7 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'lib/fileupload/main.js',
           basePath + 'cat_source/es6/react-libs.js',
           basePath + 'cat_source/es6/components.js',
           basePath + 'common.js',
