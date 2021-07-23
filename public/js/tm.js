@@ -1,8 +1,4 @@
-/*
- Component: tm
- Created by andreamartines on 02/10/14.
- Loaded by cattool and upload page.
- */
+import Cookies from 'js-cookie'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()

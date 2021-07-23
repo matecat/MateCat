@@ -22,7 +22,6 @@ const formatDate = (context, fn) => {
 $.format.date = formatDate($.format, $.format.date)
 
 require('../../../../common')
-window.Cookies = require('../../../../lib/js.cookie')
 window.config = {enable_outsource: 1}
 
 const fakeProjectsData = {

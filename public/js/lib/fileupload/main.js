@@ -11,11 +11,12 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global $, window, document */
+import Cookies from 'js-cookie'
 
-UI = null;
+window.UI = null;
 
 
-UI = {
+window.UI = {
     init: function () {
         this.conversionBlocked = false;
         this.RTLCheckDone = false;
@@ -35,7 +36,7 @@ UI = {
     getPrintableFileSize: function ( filesizeInBytes ) {
 
         filesizeInBytes = filesizeInBytes / 1024;
-        ext = " KB";
+        var ext = " KB";
 
         if ( filesizeInBytes > 1024 ) {
             filesizeInBytes = filesizeInBytes / 1024;
@@ -525,11 +526,11 @@ $( function () {
 
 } );
 
-userLangName = function ( t, userLangCode ) {
+var userLangName = function ( t, userLangCode ) {
     return $( '#' + t + '-lang  option[value=\'' + userLangCode + '\']' ).text();
 }
 
-progressBar = function ( filerow, start, filesize ) {
+var progressBar = function ( filerow, start, filesize ) {
     var ob = $( '.ui-progressbar-value', filerow );
     if ( ob.hasClass( 'completed' ) ) return;
 
@@ -548,10 +549,10 @@ progressBar = function ( filerow, start, filesize ) {
 
 }
 
-convertFile = function ( fname, filerow, filesize, enforceConversion ) {
+var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
-    firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
+    var firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
     if ( enforceConversion === false ) {
@@ -603,7 +604,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         },
         success: function ( d ) {
 
-            falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
+            var falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
             filerow.removeClass( 'converting' );
             filerow.addClass( 'ready' );
             if ( d.code == 1 || d.code == 2 ) {
@@ -760,7 +761,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
 };
 
-testProgress = function(filerow,filesize,session,progress) {
+var testProgress = function(filerow,filesize,session,progress) {
     if(session != $(filerow).data('session')) return;
 
 	if(typeof filesize == 'undefined') filesize = 1000000;
@@ -781,7 +782,7 @@ testProgress = function(filerow,filesize,session,progress) {
     }, Math.round(stepWait*1000));
 }
 
-checkInit = function () {
+var checkInit = function () {
     setTimeout( function () {
         if ( $( 'body' ).hasClass( 'initialized' ) ) {
             UI.checkFailedConversionsNumber();
@@ -792,7 +793,7 @@ checkInit = function () {
     }, 200 );
 };
 
-checkAnalyzability = function ( who ) {
+var checkAnalyzability = function ( who ) {
 
     if ( $( '.upload-table tr:not(.failed)' ).length || $( '.gdrive-upload-table tr:not(.failed)' ).length) {
         var res = true;
@@ -822,39 +823,39 @@ checkAnalyzability = function ( who ) {
     ;
 }
 
-isValidFileExtension = function ( filename ) {
+var isValidFileExtension = function ( filename ) {
 
     console.log( 'filename: ' + filename );
-    ext = filename.split( '.' )[filename.split( '.' ).length - 1];
-    res = (!filename.match( config.allowedFileTypes )) ? false : true;
+    var ext = filename.split( '.' )[filename.split( '.' ).length - 1];
+    var res = (!filename.match( config.allowedFileTypes )) ? false : true;
 
     console.log( res );
     return res;
 }
 
-isTMXAllowed = function () {
-    filename = "test.tmx";
-    res = (!filename.match( config.allowedFileTypes )) ? false : true;
+var isTMXAllowed = function () {
+    var filename = "test.tmx";
+    var res = (!filename.match( config.allowedFileTypes )) ? false : true;
 
     console.log( "function isTMXAllowed return value: " + res );
     return res;
 }
 
-enableAnalyze = function () {
+var enableAnalyze = function () {
     $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' ).focus();
 }
 
-disableAnalyze = function () {
+var disableAnalyze = function () {
     $( '.uploadbtn' ).attr( 'disabled', 'disabled' ).addClass( 'disabled' );
 }
 
-setFileReadiness = function () {
+var setFileReadiness = function () {
     $( '.upload-table tr' ).each( function () {
         if ( !$( this ).hasClass( 'converting' ) ) $( this ).addClass( 'ready' );
     } )
 };
 
-unsupported = function () {
+var unsupported = function () {
     var jj = $( '<div/>' ).html( config.unsupportedFileTypes ).text();
     return $.parseJSON( jj );
 };
@@ -883,7 +884,7 @@ function goodbye( e ) {
     }
 }
 
-getIconClass = function ( ext ) {
+var getIconClass = function ( ext ) {
     switch ( ext ) {
         case 'doc':
         case 'dot':
