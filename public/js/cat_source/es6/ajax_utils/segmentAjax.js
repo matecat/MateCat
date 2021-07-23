@@ -1,3 +1,4 @@
+import {sprintf} from 'sprintf-js'
 import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
 
 if (!window.API) {

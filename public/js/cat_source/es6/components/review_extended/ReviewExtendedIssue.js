@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import moment from 'moment'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import CommonUtils from '../../utils/commonUtils'
