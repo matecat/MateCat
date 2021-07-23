@@ -42,14 +42,18 @@ module.exports = function (grunt) {
     .replace(/version[ ]+=[ ]+(.*?)/gi, '$1')
   grunt.log.ok('Matecat Version: ' + version)
 
+  //Lexiqa
   const conf2 = grunt.file.read(incPath + 'config.ini')
-  const lxqServerMatch = conf2.match(/^LXQ_SERVER[ ]+=[ ]+.*/gim)
-  const lxqServer = lxqServerMatch
-    ? lxqServerMatch[0]
-        .replace(/LXQ_SERVER[ ]+=[ ]+(.*?)/gi, '$1')
-        .replace(/"/g, '')
-    : undefined
-  grunt.log.ok('Lexiqa Server: ' + lxqServer)
+  const lxqLicense = conf2.match(/^LXQ_LICENSE[ ]+=[ ]+.*/gim)
+  if (lxqLicense) {
+    const lxqServerMatch = conf2.match(/^LXQ_SERVER[ ]+=[ ]+.*/gim)
+    const lxqServer = lxqServerMatch
+      ? lxqServerMatch[0]
+          .replace(/LXQ_SERVER[ ]+=[ ]+(.*?)/gi, '$1')
+          .replace(/"/g, '')
+      : undefined
+    grunt.log.ok('Lexiqa Server: ' + lxqServer)
+  }
 
   grunt.initConfig({
     /**
