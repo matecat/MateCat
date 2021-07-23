@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 const Customizations = {
   custom: {},
 
