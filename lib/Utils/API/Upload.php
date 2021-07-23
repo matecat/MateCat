@@ -253,19 +253,6 @@ class Upload {
 
     }
 
-    protected function upCountNameCallback( $matches ) {
-        $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
-        $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
-
-        return '_(' . $index . ')' . $ext;
-    }
-
-    protected static function upCountName( $name ) {
-        return preg_replace_callback(
-                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ '\Upload', 'upCountNameCallback' ], $name, 1
-        );
-    }
-
     /**
      *
      * Remove Un-Wanted Chars from string name
@@ -276,15 +263,7 @@ class Upload {
      * @throws Exception
      */
     public function fixFileName( $stringName, $upCount = true ) {
-
-        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-
-        while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
-            $string = static::upCountName( $string );
-        }
-
-        return $string;
-
+        return Utils::fixFileName( $stringName, $this->dirUpload, $upCount );
     }
 
     protected function _filesAreTooMuch( $filesToUpload ) {
