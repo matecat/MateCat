@@ -1,12 +1,5 @@
-/**
- * Created by fregini on 10/07/2017.
- */
-
-/**
- * If this file is included in CatTool it means that DQF is enabled for the project.
- */
-
-;(function (UI, undefined) {
+import {sprintf} from 'sprintf-js'
+;(function (UI) {
   var STATUS_USER_NOT_ASSIGNED = 'not_assigned'
   var STATUS_USER_NOT_MATCHING = 'not_matching'
   var STATUS_USER_NO_CREDENTIALS = 'no_credentials'
@@ -31,8 +24,7 @@
 
   function showAssignmentModal() {
     APP.confirm({
-      msg:
-        'This DQF project is not assigned yet, do you want to assign it yourself?',
+      msg: 'This DQF project is not assigned yet, do you want to assign it yourself?',
       closeOnSuccess: true,
       okTxt: 'Yes, assign this project to me',
       cancelTxt: 'No, leave it unassigned',

@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js'
+
 const Speech2Text = {
   enabled: function () {
     return !!(

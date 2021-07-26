@@ -15,9 +15,11 @@
     "immutability-helper": "^3.1.1",
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.4.1",
+    "js-base64": "^3.6.1",
+    "js-cookie": "^2.2.1",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.19",
-    "moment": "^2.24.0",
+    "moment": "^2.29.1",
     "object-assign": "^4.1.1",
     "prop-types": "^15.6.0",
     "react": "^17.0.2",
@@ -26,7 +28,8 @@
     "react-tiny-virtual-list": "^2.2.0",
     "react-transition-group": "^4.2.2",
     "react-window": "^1.8.3",
-    "showdown": "^1.9.1"
+    "showdown": "^1.9.1",
+    "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.13.14",
@@ -50,6 +53,7 @@
     "grunt-browserify": "^6.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-curl": "^2.5.1",
     "grunt-sass": "^3.1.0",
     "grunt-strip": "^0.2.1",
     "grunt-text-replace": "^0.4.0",

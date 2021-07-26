@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
+import Cookies from 'js-cookie'
 
 /*
 	Component: ui.core

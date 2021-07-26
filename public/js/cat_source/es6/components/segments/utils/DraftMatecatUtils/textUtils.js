@@ -1,5 +1,6 @@
-import {getXliffRegExpression, tagSignatures, TagStruct} from './tagModel'
-import decodeTagInfo from './decodeTagInfo'
+import {getXliffRegExpression} from './tagModel'
+import {Base64} from 'js-base64'
+
 /**
  *
  * @param segmentString

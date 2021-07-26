@@ -1,5 +1,6 @@
 // import SegmentStore  from '../stores/SegmentStore';
 import _ from 'lodash'
+import {Base64} from 'js-base64'
 import TextUtils from './textUtils'
 import {
   tagSignatures,

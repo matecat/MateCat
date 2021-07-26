@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {Base64} from 'js-base64'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
