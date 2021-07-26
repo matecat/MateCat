@@ -53,6 +53,7 @@ class SearchInput extends React.Component {
         ref={(input) => (this.textInput = input)}
         onChange={this.filterByNameDebounce.bind(this)}
         onKeyPress={this.onKeyPressEvent.bind(this)}
+        data-testid="input-search-projects"
       />
 
       /*<div className="input-field">
