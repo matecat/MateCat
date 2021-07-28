@@ -1,7 +1,3 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import Cookies from 'js-cookie'
 import _ from 'lodash'
@@ -13,6 +9,7 @@ import SegmentTabConcordance from './SegmentFooterTabConcordance'
 import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentTabRevise from './SegmentFooterTabRevise'
+
 class SegmentFooter extends React.Component {
   constructor(props) {
     super(props)
