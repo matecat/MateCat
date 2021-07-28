@@ -1,3 +1,5 @@
+import TagUtils from '../es6/utils/tagUtils'
+
 window.ReviewSimple = {
   enabled: function () {
     return config.enableReview && config.isReview && Review.type === 'simple'

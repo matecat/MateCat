@@ -22,6 +22,7 @@ import SegmentTabMessages from './components/segments/SegmentFooterTabMessages'
 import SegmentButtons from './components/segments/SegmentButtons'
 import TranslationIssuesSideButton from './components/review/TranslationIssuesSideButton'
 import QaCheckGlossary from './components/segments/utils/qaCheckGlossaryUtils'
+import TagUtils from './utils/tagUtils'
 
 window.MC = {}
 
@@ -52,7 +53,7 @@ window.TranslationIssuesSideButton = TranslationIssuesSideButton
 
 window.QaCheckGlossary = QaCheckGlossary
 
-window.TagUtils = require('./utils/tagUtils')
+window.TagUtils = TagUtils
 window.TextUtils = require('./utils/textUtils')
 window.CommonUtils = CommonUtils
 window.CursorUtils = require('./utils/cursorUtils')

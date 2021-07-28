@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import CommonUtils from './commonUtils'
+import TagUtils from './tagUtils'
 
 const SegmentUtils = {
   /**

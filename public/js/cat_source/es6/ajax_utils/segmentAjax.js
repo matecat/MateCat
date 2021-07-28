@@ -1,5 +1,7 @@
 import {sprintf} from 'sprintf-js'
+
 import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
+import TagUtils from '../utils/tagUtils'
 
 if (!window.API) {
   window.API = {}
