@@ -63,7 +63,6 @@ window.CommonUtils = CommonUtils
 window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
-window.Customizations = require('./utils/customizations')
 window.SegmentUtils = require('./utils/segmentUtils')
 window.DraftMatecatUtils = require('./components/segments/utils/DraftMatecatUtils')
 
