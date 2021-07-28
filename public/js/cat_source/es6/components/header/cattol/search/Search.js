@@ -8,6 +8,7 @@ import SearchUtils from './searchUtils'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
+import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 
 class Search extends React.Component {
   constructor(props) {

@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+
 let ModalsActions = {
   //********* Modals **************//
 

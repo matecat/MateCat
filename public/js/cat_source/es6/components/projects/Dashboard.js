@@ -15,6 +15,7 @@ import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 
 class Dashboard extends React.Component {
   constructor() {

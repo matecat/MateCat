@@ -1,3 +1,5 @@
+import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
+
 /*
  Component: ui.review
  */

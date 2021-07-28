@@ -1,4 +1,6 @@
 import Cookies from 'js-cookie'
+
+import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -2405,7 +2407,7 @@ import Cookies from 'js-cookie'
 
       var validateEmail = function (emails) {
         var re =
-          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         var result = true
         emails.split(',').forEach(function (email) {
           if (!re.test(email.trim())) result = email

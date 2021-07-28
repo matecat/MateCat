@@ -16,12 +16,10 @@ import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
+import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
-  /**
-   * @param segments
-   */
   renderSegments: function (segments, idToOpen) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.RENDER_SEGMENTS,
