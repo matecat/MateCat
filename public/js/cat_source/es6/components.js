@@ -9,6 +9,7 @@ import SegmentStore from './stores/SegmentStore'
 import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
 import AnalyzeActions from './actions/AnalyzeActions'
 import CatToolActions from './actions/CatToolActions'
+import SegmentActions from './actions/SegmentActions'
 
 window.MC = {}
 
@@ -18,8 +19,7 @@ window.SegmentFilter = SegmentFilter
 
 window.AnalyzeActions = AnalyzeActions
 window.CatToolActions = CatToolActions
-window.SegmentActions = require('./actions/SegmentActions')
-window.CommentsActions = require('./actions/CommentsActions')
+window.SegmentActions = SegmentActions
 window.ManageActions = require('./actions/ManageActions')
 
 window.SegmentStore = SegmentStore
