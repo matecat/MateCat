@@ -1,4 +1,5 @@
 import update from 'immutability-helper'
+import React from 'react'
 
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
@@ -44,7 +45,6 @@ class DQFCredentials extends React.Component {
 
   submitDQFCredentials() {
     let self = this
-    let dqfCheck = $('.dqf-box #dqf_switch')
     return $.post('/api/app/user/metadata', {
       metadata: {
         dqf_username: this.state.dqfUsername,
