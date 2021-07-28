@@ -1,10 +1,8 @@
+import React from 'react'
+
 import Shortcuts from '../../utils/shortcuts'
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   getIssueCount() {
     let issue_count = 0
     if (this.props.segment.versions && this.props.segment.versions.length > 0) {
@@ -22,10 +20,6 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
     e.stopPropagation()
     $(this.button).addClass('open')
     SegmentActions.openIssuesPanel({sid: this.props.sid}, true)
-  }
-
-  componentDidUpdate() {
-    // console.log("Update Segment translation button" + this.props.segment.sid);
   }
 
   render() {

@@ -21,6 +21,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
+import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 
 class Segment extends React.Component {
   constructor(props) {
