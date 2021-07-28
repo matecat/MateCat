@@ -1,7 +1,3 @@
-/* global LXQ */
-/*
- Component: lxq.main
- */
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
@@ -28,7 +24,7 @@ const LXQ = {
         type: 'POST',
         data: data,
         xhrFields: {withCredentials: true},
-      }).done(function (data) {
+      }).done(function () {
         if (!LXQ.initialized) {
           LXQ.init()
         } else {
@@ -54,7 +50,7 @@ const LXQ = {
         type: 'POST',
         data: data,
         xhrFields: {withCredentials: true},
-      }).done(function (data) {
+      }).done(function () {
         UI.render()
         SegmentActions.qaComponentsetLxqIssues([])
       })
@@ -118,9 +114,8 @@ const LXQ = {
       },
       function (err, result) {
         if (!err) {
-          var noVisibleErrorsFound = false,
-            source_val,
-            target_val
+          var noVisibleErrorsFound = false
+
           if (result.hasOwnProperty('qaData') && result.qaData.length > 0) {
             //highlight the segments
             // source_val = $( ".source", segment ).html();
@@ -214,8 +209,6 @@ const LXQ = {
       data: {id: LXQ.partnerid + '-' + config.id_job + '-' + config.password},
       cache: false,
       success: function (results) {
-        var errorCnt = 0,
-          ind
         if (results.errors != 0) {
           //only do something if there are errors in lexiqa server
           LXQ.lexiqaData.lexiqaWarnings = {}
@@ -318,7 +311,7 @@ LXQ.init = function () {
     LXQ.doLexiQA(data.segment, false, function () {})
   })
   /* Invoked when page loads */
-  $(document).on('getWarning:global:success', function (e, data) {
+  $(document).on('getWarning:global:success', function () {
     if (globalReceived) {
       return
     }
@@ -337,13 +330,13 @@ LXQ.init = function () {
   $(window).on('segmentsAdded', function (e, data) {
     globalReceived = false
     console.log('[LEXIQA] got segmentsAdded ')
-    _.each(data.resp, function (file, id) {
+    _.each(data.resp, function (file) {
       if (
         file.segments &&
         LXQ.hasOwnProperty('lexiqaData') &&
         LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings')
       ) {
-        _.each(file.segments, function (segment, i) {
+        _.each(file.segments, function (segment) {
           if (LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(segment.sid)) {
             // console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
             //clean up and redo powertip on any glossaries/blacklists
@@ -355,7 +348,7 @@ LXQ.init = function () {
     })
   })
 
-  return (function ($, config, window, LXQ, undefined) {
+  return (function ($, config, window, LXQ) {
     var partnerid = config.lxq_partnerid
     var colors = {
       numbers: '#D08053',
@@ -485,7 +478,7 @@ LXQ.init = function () {
       })
       var textMinHighlight = out[0].start
       var txt = new Array(textMaxHighlight - textMinHighlight + 1)
-      for (var i = 0; i < txt.length; i++) txt[i] = []
+      for (let i = 0; i < txt.length; i++) txt[i] = []
       $.each(out, function (j, range) {
         var i
         if (range.ignore != true) {
@@ -503,7 +496,7 @@ LXQ.init = function () {
       })
       var newout = []
       var curitem = null
-      for (var i = 0; i < txt.length; i++) {
+      for (let i = 0; i < txt.length; i++) {
         if (txt[i].length > 0) {
           //more than one errors - start multiple
           if (curitem == null) {
@@ -515,7 +508,7 @@ LXQ.init = function () {
             //check if the errors are the same or not..
             var areErrorsSame = true
             if (curitem.errors.length == txt[i].length) {
-              for (var j = 0; j < curitem.errors.length; j++) {
+              for (let j = 0; j < curitem.errors.length; j++) {
                 if (curitem.errors[j] != txt[i][j]) {
                   areErrorsSame = false
                   continue
@@ -849,4 +842,4 @@ $(document).ready(function () {
   }
 })
 
-module.exports = LXQ
+export default LXQ

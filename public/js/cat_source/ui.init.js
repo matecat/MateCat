@@ -2,6 +2,7 @@ import CatToolActions from './es6/actions/CatToolActions'
 import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 import CommonUtils from './es6/utils/commonUtils'
 import Customizations from './es6/utils/customizations'
+import LXQ from './es6/utils/lxq.main'
 import SegmentUtils from './es6/utils/segmentUtils'
 
 $.extend(window.UI, {
