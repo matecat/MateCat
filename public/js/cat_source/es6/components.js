@@ -17,6 +17,7 @@ import JobMetadataModal from './components/modals/JobMetadataModal'
 import SegmentBody from './components/segments/SegmentBody'
 import SegmentTarget from './components/segments/SegmentTarget'
 import SegmentFooter from './components/segments/SegmentFooter'
+import SegmentTabMatches from './components/segments/SegmentFooterTabMatches'
 
 window.MC = {}
 
@@ -40,8 +41,7 @@ window.JobMetadataModal = JobMetadataModal
 window.SegmentBody = SegmentBody
 window.SegmentTarget = SegmentTarget
 window.SegmentFooter = SegmentFooter
-window.SegmentTabMatches =
-  require('./components/segments/SegmentFooterTabMatches').default
+window.SegmentTabMatches = SegmentTabMatches
 window.SegmentTabMessages =
   require('./components/segments/SegmentFooterTabMessages').default
 window.SegmentButtons = require('./components/segments/SegmentButtons').default
