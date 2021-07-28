@@ -3,6 +3,7 @@ import React from 'react'
 
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import Header from './cat_source/es6/components/header/Header'
+import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
 
 window.UI = null
 

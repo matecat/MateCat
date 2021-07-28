@@ -27,7 +27,6 @@ window.SegmentStore = SegmentStore
 
 window.Header = Header
 window.JobMetadata = JobMetadata
-window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default
 
 window.LanguageSelector =
   require('./components/languageSelector/LanguageSelector').default
