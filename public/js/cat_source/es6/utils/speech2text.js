@@ -256,4 +256,4 @@ $(document).ready(function () {
   }
 })
 
-module.exports = Speech2Text
+export default Speech2Text
