@@ -4,6 +4,7 @@ import moment from 'moment'
 
 import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
 import CommonUtils from '../es6/utils/commonUtils'
+import OfflineUtils from '../es6/utils/offlineUtils'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {

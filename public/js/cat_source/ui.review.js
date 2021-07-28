@@ -1,8 +1,6 @@
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
+import OfflineUtils from './es6/utils/offlineUtils'
 
-/*
- Component: ui.review
- */
 window.Review = {
   enabled: function () {
     return config.enableReview && !!config.isReview

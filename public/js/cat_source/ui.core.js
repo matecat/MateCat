@@ -8,6 +8,7 @@ import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
+import OfflineUtils from './es6/utils/offlineUtils'
 
 window.UI = {
   /**

@@ -115,7 +115,7 @@ const OfflineUtils = {
       $._data($('body')[0]).events = {}
     }, 300)
 
-    $('.noConnection #checkConnection').on('click', function (e) {
+    $('.noConnection #checkConnection').on('click', function () {
       OfflineUtils.checkConnection('Click from Human Authorized')
     })
 
@@ -246,4 +246,4 @@ const OfflineUtils = {
   },
 }
 
-module.exports = OfflineUtils
+export default OfflineUtils
