@@ -1,12 +1,12 @@
 import React from 'react'
+import moment from 'moment'
+import {isUndefined} from 'lodash'
+
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
 import TeamsActions from '../../actions/TeamsActions'
-import {isUndefined} from 'lodash'
 import ManageActions from '../../actions/ManageActions'
-import ModalsActions from '../../actions/ModalsActions'
 import ProjectsStore from '../../stores/ProjectsStore'
-import moment from 'moment'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -173,10 +173,6 @@ class ProjectContainer extends React.Component {
       this.dropdownUsersInitialized = false
       this.forceUpdate()
     }
-  }
-
-  openChangeTeamModal() {
-    ModalsActions.openChangeTeamModal(this.props.project)
   }
 
   getProjectMenu(activityLogUrl) {

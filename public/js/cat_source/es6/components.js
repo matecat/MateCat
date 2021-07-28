@@ -34,9 +34,6 @@ Todo move this
  */
 window.ModalWindow = ModalWindow
 window.ConfirmMessageModal = ConfirmMessageModal
-window.CreateTeamModal = require('./components/modals/CreateTeam').default
-window.ModifyTeamModal = require('./components/modals/ModifyTeam').default
-window.ModifyTeamModal = require('./components/modals/ModifyTeam').default
 window.JobMetadataModal =
   require('./components/modals/JobMetadataModal').default
 /*****/
