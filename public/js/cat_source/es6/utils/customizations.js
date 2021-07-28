@@ -56,4 +56,4 @@ const Customizations = {
   },
 }
 
-module.exports = Customizations
+export default Customizations
