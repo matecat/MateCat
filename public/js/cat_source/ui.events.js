@@ -1,9 +1,7 @@
 import CatToolActions from './es6/actions/CatToolActions'
+import ShortCutsModal from './es6/components/modals/ShortCutsModal'
 import CommonUtils from './es6/utils/commonUtils'
 
-/*
-	Component: ui.events
- */
 $.extend(window.UI, {
   bindShortcuts: function () {
     $('body')
