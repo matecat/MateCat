@@ -25,6 +25,7 @@ import QaCheckGlossary from './components/segments/utils/qaCheckGlossaryUtils'
 import TagUtils from './utils/tagUtils'
 import TextUtils from './utils/textUtils'
 import CursorUtils from './utils/cursorUtils'
+import OfflineUtils from './utils/offlineUtils'
 
 window.MC = {}
 
@@ -59,7 +60,7 @@ window.TagUtils = TagUtils
 window.TextUtils = TextUtils
 window.CommonUtils = CommonUtils
 window.CursorUtils = CursorUtils
-window.OfflineUtils = require('./utils/offlineUtils')
+window.OfflineUtils = OfflineUtils
 window.Shortcuts = require('./utils/shortcuts')
 window.Customizations = require('./utils/customizations')
 window.SegmentUtils = require('./utils/segmentUtils')

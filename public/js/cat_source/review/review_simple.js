@@ -1,3 +1,4 @@
+import OfflineUtils from '../es6/utils/offlineUtils'
 import TagUtils from '../es6/utils/tagUtils'
 import TextUtils from '../es6/utils/textUtils'
 
