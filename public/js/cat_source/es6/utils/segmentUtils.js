@@ -63,4 +63,4 @@ const SegmentUtils = {
   },
 }
 
-module.exports = SegmentUtils
+export default SegmentUtils

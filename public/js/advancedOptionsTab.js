@@ -1,4 +1,5 @@
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
