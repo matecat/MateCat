@@ -1,7 +1,9 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
+
 import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
+import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 
 window.APP = null
 
@@ -631,7 +633,7 @@ window.APP = {
 
   getParameterByName: function (name, url) {
     if (!url) url = window.location.href
-    name = name.replace(/[\[\]]/g, '\\$&')
+    name = name.replace(/[[\]]/g, '\\$&')
     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
       results = regex.exec(url)
     if (!results) return null
@@ -742,7 +744,7 @@ window.APP = {
 
   checkEmail: function (text) {
     var re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     if (!re.test(text.trim())) {
       return false
     }
