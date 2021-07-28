@@ -4,6 +4,7 @@ import CommentsActions from '../actions/CommentsActions'
 import SegmentActions from '../actions/SegmentActions'
 import CommentsStore from '../stores/CommentsStore'
 import {getMatecatApiDomain} from './getMatecatApiDomain'
+import TextUtils from './textUtils'
 
 const MBC = {
   enabled: function () {

@@ -4,6 +4,7 @@ import {sprintf} from 'sprintf-js'
 import CommonUtils from './es6/utils/commonUtils'
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 import TagUtils from './es6/utils/tagUtils'
+import TextUtils from './es6/utils/textUtils'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
