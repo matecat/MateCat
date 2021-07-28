@@ -12,6 +12,7 @@ import CatToolActions from './actions/CatToolActions'
 import SegmentActions from './actions/SegmentActions'
 import CommonUtils from './utils/commonUtils'
 import Header from './components/header/Header'
+import ConfirmMessageModal from './components/modals/ConfirmMessageModal'
 
 window.MC = {}
 
@@ -32,8 +33,7 @@ window.JobMetadata = JobMetadata
 Todo move this
  */
 window.ModalWindow = ModalWindow
-window.ConfirmMessageModal =
-  require('./components/modals/ConfirmMessageModal').default
+window.ConfirmMessageModal = ConfirmMessageModal
 window.OutsourceModal = require('./components/modals/OutsourceModal').default
 window.SplitJobModal = require('./components/modals/SplitJob').default
 window.DQFModal = require('./components/modals/DQFModal').default
