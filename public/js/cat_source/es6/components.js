@@ -23,7 +23,6 @@ window.CatToolActions = CatToolActions
 window.SegmentActions = SegmentActions
 
 window.SegmentStore = SegmentStore
-window.CatToolStore = require('./stores/CatToolStore')
 
 window.Header = require('./components/header/Header').default
 window.JobMetadata = JobMetadata
