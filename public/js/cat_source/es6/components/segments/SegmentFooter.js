@@ -9,6 +9,7 @@ import SegmentTabConcordance from './SegmentFooterTabConcordance'
 import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentTabRevise from './SegmentFooterTabRevise'
+import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 
 class SegmentFooter extends React.Component {
   constructor(props) {
@@ -186,7 +187,7 @@ class SegmentFooter extends React.Component {
     switch (tab.code) {
       case 'tm':
         return (
-          <SegmentTabMatches
+          <SegmentFooterTabMatches
             key={'container_' + tab.code}
             code={tab.code}
             active_class={open_class}
