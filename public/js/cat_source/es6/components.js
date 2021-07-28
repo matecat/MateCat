@@ -6,12 +6,13 @@ import classnames from 'classnames'
 import JobMetadata from './components/header/cattol/JobMetadata'
 import {ModalWindow} from './components/modals/ModalWindow'
 import SegmentStore from './stores/SegmentStore'
+import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
 
 window.MC = {}
 
 window.classnames = classnames
 
-window.SegmentFilter = require('./components/header/cattol/segment_filter/segment_filter')
+window.SegmentFilter = SegmentFilter
 window.NotificationBox =
   require('./components/notificationsComponent/NotificationBox').default
 
