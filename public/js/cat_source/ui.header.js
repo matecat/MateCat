@@ -1,8 +1,12 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
+import ReactDOM from 'react-dom'
+import React from 'react'
 
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 import CatToolActions from './es6/actions/CatToolActions'
+import CommonUtils from './es6/utils/commonUtils'
+import JobMetadata from './es6/components/header/cattol/JobMetadata'
 
 $.extend(window.UI, {
   initHeader: function () {

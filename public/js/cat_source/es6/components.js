@@ -10,6 +10,7 @@ import SegmentFilter from './components/header/cattol/segment_filter/segment_fil
 import AnalyzeActions from './actions/AnalyzeActions'
 import CatToolActions from './actions/CatToolActions'
 import SegmentActions from './actions/SegmentActions'
+import CommonUtils from './utils/commonUtils'
 
 window.MC = {}
 
@@ -84,7 +85,7 @@ window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUti
 window.SearchUtils = require('./components/header/cattol/search/searchUtils')
 window.TagUtils = require('./utils/tagUtils')
 window.TextUtils = require('./utils/textUtils')
-window.CommonUtils = require('./utils/commonUtils')
+window.CommonUtils = CommonUtils
 window.CursorUtils = require('./utils/cursorUtils')
 window.OfflineUtils = require('./utils/offlineUtils')
 window.Shortcuts = require('./utils/shortcuts')

@@ -155,7 +155,7 @@ const CommonUtils = {
         SegmentActions.openSegment(this.parsedHash.segmentId)
       }
     }
-    window.onpopstate = (ev) => {
+    window.onpopstate = () => {
       if (this.parsedHash.onlyActionRemoved(window.location.hash)) {
         return
       }
@@ -345,7 +345,7 @@ const CommonUtils = {
   getFromStorage: function (key) {
     if (this.isPrivateSafari()) {
       let foundVal = 0
-      $.each(this.localStorageArray, function (index) {
+      $.each(this.localStorageArray, function () {
         if (this.key === key) foundVal = this.value
       })
       return foundVal || false
@@ -383,7 +383,7 @@ const CommonUtils = {
   getFromSessionStorage: function (key) {
     if (this.isPrivateSafari()) {
       let foundVal = 0
-      $.each(this.localStorageArray, function (index) {
+      $.each(this.localStorageArray, function () {
         if (this.key === key) foundVal = this.value
       })
       return foundVal || false
@@ -493,4 +493,4 @@ String.prototype.splice = function (idx, rem, s) {
   return this.slice(0, idx) + s + this.slice(idx + Math.abs(rem))
 }
 
-module.exports = CommonUtils
+export default CommonUtils
