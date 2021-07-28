@@ -15,6 +15,7 @@
  * dismissable      (Boolean, Default true) If show or not the button to close the notification
  * timer            (Number, Default 700) The timer to auto dismiss the notification
  */
+import React from 'react'
 
 import NotificationItem from './NotificationItem'
 
@@ -40,15 +41,11 @@ class NotificationBox extends React.Component {
   }
 
   closeNotification(uid) {
-    var notification
-    var notifications = this.state.notifications.filter(function (toCheck) {
-      if (toCheck.uid === uid) {
-        notification = toCheck
-      }
-      return toCheck.uid !== uid
-    })
+    const notifications = this.state.notifications.filter(
+      (toCheck) => toCheck.uid !== uid,
+    )
 
-    this.setState({notifications: notifications})
+    this.setState({notifications})
   }
 
   addNotification(newNotification) {
@@ -111,11 +108,6 @@ class NotificationBox extends React.Component {
       notifications: notifications,
       catVisible: catVisible,
     })
-    /*if (bottomLeftNot.length === 1) {
-            this.setState({
-                catVisible: false
-            });
-        }*/
   }
 
   render() {

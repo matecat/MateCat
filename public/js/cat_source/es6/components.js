@@ -13,8 +13,6 @@ window.MC = {}
 window.classnames = classnames
 
 window.SegmentFilter = SegmentFilter
-window.NotificationBox =
-  require('./components/notificationsComponent/NotificationBox').default
 
 window.ManageConstants = require('./constants/ManageConstants')
 
