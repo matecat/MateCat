@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie'
 
+import SegmentUtils from './segmentUtils'
+
 const Customizations = {
   custom: {},
 

@@ -1,7 +1,3 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import _ from 'lodash'
 
@@ -33,7 +29,6 @@ class SegmentButton extends React.Component {
   }
 
   clickOnApprovedButton(event, gotoNexUnapproved) {
-    let target = event.target
     setTimeout(() =>
       UI.clickOnApprovedButton(this.props.segment, gotoNexUnapproved),
     )

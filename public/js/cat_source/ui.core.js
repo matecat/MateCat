@@ -9,6 +9,7 @@ import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
+import SegmentUtils from './es6/utils/segmentUtils'
 
 window.UI = {
   /**

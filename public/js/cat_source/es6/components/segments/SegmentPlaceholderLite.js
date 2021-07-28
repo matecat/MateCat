@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
-import CompoundDecorator from './utils/CompoundDecorator'
+import {CompositeDecorator, Editor, EditorState} from 'draft-js'
+
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentUtils from '../../utils/segmentUtils'
-import {CompositeDecorator, Editor, EditorState} from 'draft-js'
 
 class SegmentPlaceholderLite extends React.Component {
   constructor(props) {
@@ -30,10 +30,7 @@ class SegmentPlaceholderLite extends React.Component {
       plainEditorStateSource,
       cleanSource,
     )
-    const {
-      editorState: editorStateSource,
-      tagRange: tagRangeSource,
-    } = contentEncodedSource
+    const {editorState: editorStateSource} = contentEncodedSource
 
     // --- Prepare Translation
     const plainEditorStateTarget = EditorState.createEmpty(decorator)
@@ -49,10 +46,7 @@ class SegmentPlaceholderLite extends React.Component {
       plainEditorStateTarget,
       cleanTranslation,
     )
-    const {
-      editorState: editorStateTarget,
-      tagRange: tagRangeTarget,
-    } = contentEncodedTarget
+    const {editorState: editorStateTarget} = contentEncodedTarget
     // --- Set Editor content
     this.state = {
       editorStateSource,
@@ -64,7 +58,6 @@ class SegmentPlaceholderLite extends React.Component {
   containerRef = null
 
   componentDidMount() {
-    const {sid} = this.props
     // Set container width as window width
     this.containerRef.style.cssText = `width:${
       window.innerWidth - 10

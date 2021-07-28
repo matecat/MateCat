@@ -1,11 +1,10 @@
-/**
- * React Component for the editarea.
- */
 import React from 'react'
 import _ from 'lodash'
+import Immutable from 'immutable'
 import ReactDOMServer from 'react-dom/server'
 import PropTypes from 'prop-types'
 import VirtualList from 'react-tiny-virtual-list'
+
 import SegmentStore from '../../stores/SegmentStore'
 import CommentsStore from '../../stores/CommentsStore'
 import CatToolStore from '../../stores/CatToolStore'
@@ -13,7 +12,6 @@ import Segment from './Segment'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
 import Speech2Text from '../../utils/speech2text'
-import Immutable from 'immutable'
 import JobMetadataModal from '../modals/JobMetadataModal'
 import CommonUtils from '../../utils/commonUtils'
 import TagUtils from '../../utils/tagUtils'
