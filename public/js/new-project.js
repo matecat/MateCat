@@ -6,6 +6,7 @@ import React from 'react'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
+import Header from './cat_source/es6/components/header/Header'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null

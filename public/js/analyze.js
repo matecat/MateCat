@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom'
 import React from 'react'
 
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
+import Header from './cat_source/es6/components/header/Header'
 
 window.UI = null
 

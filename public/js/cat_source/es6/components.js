@@ -11,6 +11,7 @@ import AnalyzeActions from './actions/AnalyzeActions'
 import CatToolActions from './actions/CatToolActions'
 import SegmentActions from './actions/SegmentActions'
 import CommonUtils from './utils/commonUtils'
+import Header from './components/header/Header'
 
 window.MC = {}
 
@@ -24,7 +25,7 @@ window.SegmentActions = SegmentActions
 
 window.SegmentStore = SegmentStore
 
-window.Header = require('./components/header/Header').default
+window.Header = Header
 window.JobMetadata = JobMetadata
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default
 
