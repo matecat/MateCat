@@ -1,3 +1,7 @@
+import React from 'react'
+
+import Header from '../header/Header'
+
 class LanguageSelectorList extends React.Component {
   constructor(props) {
     super(props)
