@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import DQFModal from '../components/modals/DQFModal'
 import OutsourceModal from '../components/modals/OutsourceModal'
 import SplitJobModal from '../components/modals/SplitJob'
 
