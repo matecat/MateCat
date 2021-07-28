@@ -32,7 +32,6 @@ window.JobMetadata = JobMetadata
 Todo move this
  */
 window.ModalWindow = ModalWindow
-window.LoginModal = require('./components/modals/LoginModal').default
 window.ForgotPasswordModal =
   require('./components/modals/ForgotPasswordModal').default
 window.RegisterModal = require('./components/modals/RegisterModal').default
