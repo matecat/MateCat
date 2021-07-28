@@ -562,4 +562,5 @@ $(document).ready(function () {
     MBC.init()
   }
 })
-module.exports = MBC
+
+export default MBC

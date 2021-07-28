@@ -1,6 +1,3 @@
-/**
- * React Component for the editarea.
- */
 import _ from 'lodash'
 import Immutable from 'immutable'
 import React from 'react'
@@ -22,6 +19,7 @@ import CatToolConstants from '../../constants/CatToolConstants'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
+import MBC from '../../utils/mbc.main'
 
 class Segment extends React.Component {
   constructor(props) {
