@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
+import CommonUtils from './es6/utils/commonUtils'
+
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 ;(function ($) {
   $.extend(window.UI, {

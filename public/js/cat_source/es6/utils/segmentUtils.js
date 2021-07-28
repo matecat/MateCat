@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import CommonUtils from './commonUtils'
+
 const SegmentUtils = {
   /**
    * Tag Projection: check if is possible to enable tag projection:

@@ -3,6 +3,7 @@ import {sprintf} from 'sprintf-js'
 import moment from 'moment'
 
 import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
+import CommonUtils from '../es6/utils/commonUtils'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {

@@ -11,6 +11,7 @@ import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
+import CommonUtils from '../utils/commonUtils'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,

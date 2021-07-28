@@ -1,4 +1,5 @@
 import CatToolActions from './es6/actions/CatToolActions'
+import CommonUtils from './es6/utils/commonUtils'
 
 $.extend(window.UI, {
   render: function (options) {
