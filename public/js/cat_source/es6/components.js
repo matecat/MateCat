@@ -14,6 +14,7 @@ import CommonUtils from './utils/commonUtils'
 import Header from './components/header/Header'
 import ConfirmMessageModal from './components/modals/ConfirmMessageModal'
 import JobMetadataModal from './components/modals/JobMetadataModal'
+import SegmentBody from './components/segments/SegmentBody'
 
 window.MC = {}
 
@@ -34,7 +35,7 @@ window.ModalWindow = ModalWindow
 window.ConfirmMessageModal = ConfirmMessageModal
 window.JobMetadataModal = JobMetadataModal
 
-window.SegmentBody = require('./components/segments/SegmentBody').default
+window.SegmentBody = SegmentBody
 window.SegmentTarget = require('./components/segments/SegmentTarget').default
 window.SegmentFooter = require('./components/segments/SegmentFooter').default
 window.SegmentTabMatches =

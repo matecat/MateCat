@@ -7,7 +7,6 @@ import React from 'react'
 
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
-
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -21,6 +20,7 @@ import Speech2Text from '../../utils/speech2text'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
+import SegmentBody from './SegmentBody'
 
 class Segment extends React.Component {
   constructor(props) {

@@ -1,16 +1,8 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import _ from 'lodash'
-import SegmentSource from './SegmentSource'
-import TagUtils from '../../utils/tagUtils'
+
 import Shortcuts from '../../utils/shortcuts'
 import {getXliffRegExpression} from './utils/DraftMatecatUtils/tagModel'
-import LXQ from '../../utils/lxq.main'
-import SegmentTarget from './SegmentTarget'
-import EditArea from './Editarea'
 import SegmentWrapper from './SegmentWrapper'
 
 class SegmentBody extends React.Component {
@@ -34,7 +26,7 @@ class SegmentBody extends React.Component {
     )
   }
 
-  checkLockTags(area) {
+  checkLockTags() {
     if (config.tagLockCustomizable || !UI.tagLockEnabled) {
       return false
     } else return this.props.segment.segment.match(/&lt;.*?&gt;/gi)
