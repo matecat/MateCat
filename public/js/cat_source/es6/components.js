@@ -21,7 +21,6 @@ window.SegmentFilter = SegmentFilter
 window.AnalyzeActions = AnalyzeActions
 window.CatToolActions = CatToolActions
 window.SegmentActions = SegmentActions
-window.ManageActions = require('./actions/ManageActions')
 
 window.SegmentStore = SegmentStore
 window.CatToolStore = require('./stores/CatToolStore')

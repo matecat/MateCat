@@ -2,6 +2,7 @@ import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
 import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
+
 let ManageActions = {
   /********* Projects *********/
 
@@ -496,4 +497,4 @@ let ManageActions = {
   },
 }
 
-module.exports = ManageActions
+export default ManageActions
