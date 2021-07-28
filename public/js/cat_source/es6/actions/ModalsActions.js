@@ -100,4 +100,4 @@ let ModalsActions = {
   },
 }
 
-module.exports = ModalsActions
+export default ModalsActions
