@@ -1,3 +1,8 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
+
 $.extend(APP, {
   setLoginEvents: function () {
     APP.ModalWindow = ReactDOM.render(
