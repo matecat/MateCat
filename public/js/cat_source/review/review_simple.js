@@ -1,4 +1,5 @@
 import TagUtils from '../es6/utils/tagUtils'
+import TextUtils from '../es6/utils/textUtils'
 
 window.ReviewSimple = {
   enabled: function () {

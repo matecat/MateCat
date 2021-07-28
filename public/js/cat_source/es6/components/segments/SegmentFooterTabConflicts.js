@@ -140,7 +140,7 @@ class SegmentFooterTabConflicts extends React.Component {
     return {__html: string}
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return (
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||

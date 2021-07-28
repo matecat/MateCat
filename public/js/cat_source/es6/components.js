@@ -23,6 +23,7 @@ import SegmentButtons from './components/segments/SegmentButtons'
 import TranslationIssuesSideButton from './components/review/TranslationIssuesSideButton'
 import QaCheckGlossary from './components/segments/utils/qaCheckGlossaryUtils'
 import TagUtils from './utils/tagUtils'
+import TextUtils from './utils/textUtils'
 
 window.MC = {}
 
@@ -54,7 +55,7 @@ window.TranslationIssuesSideButton = TranslationIssuesSideButton
 window.QaCheckGlossary = QaCheckGlossary
 
 window.TagUtils = TagUtils
-window.TextUtils = require('./utils/textUtils')
+window.TextUtils = TextUtils
 window.CommonUtils = CommonUtils
 window.CursorUtils = require('./utils/cursorUtils')
 window.OfflineUtils = require('./utils/offlineUtils')
