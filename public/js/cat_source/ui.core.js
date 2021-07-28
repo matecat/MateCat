@@ -10,6 +10,7 @@ import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentUtils from './es6/utils/segmentUtils'
+import LXQ from './es6/utils/lxq.main'
 
 window.UI = {
   /**

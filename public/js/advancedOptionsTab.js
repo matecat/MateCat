@@ -1,4 +1,5 @@
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import LXQ from './cat_source/es6/utils/lxq.main'
 import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 ;(function ($, UI) {
   $.extend(UI, {
