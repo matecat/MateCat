@@ -19,6 +19,7 @@ import SegmentTarget from './components/segments/SegmentTarget'
 import SegmentFooter from './components/segments/SegmentFooter'
 import SegmentTabMatches from './components/segments/SegmentFooterTabMatches'
 import SegmentTabMessages from './components/segments/SegmentFooterTabMessages'
+import SegmentButtons from './components/segments/SegmentButtons'
 
 window.MC = {}
 
@@ -44,7 +45,7 @@ window.SegmentTarget = SegmentTarget
 window.SegmentFooter = SegmentFooter
 window.SegmentTabMatches = SegmentTabMatches
 window.SegmentTabMessages = SegmentTabMessages
-window.SegmentButtons = require('./components/segments/SegmentButtons').default
+window.SegmentButtons = SegmentButtons
 window.TranslationIssuesSideButton =
   require('./components/review/TranslationIssuesSideButton').default
 
