@@ -10,6 +10,7 @@ import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentTabRevise from './SegmentFooterTabRevise'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
+import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 
 class SegmentFooter extends React.Component {
   constructor(props) {
@@ -231,7 +232,7 @@ class SegmentFooter extends React.Component {
         )
       case 'notes':
         return (
-          <SegmentTabMessages
+          <SegmentFooterTabMessages
             key={'container_' + tab.code}
             code={tab.code}
             active_class={open_class}

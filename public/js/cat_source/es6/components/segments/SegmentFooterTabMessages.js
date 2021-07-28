@@ -1,7 +1,3 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import Immutable from 'immutable'
 import _ from 'lodash'
@@ -120,7 +116,7 @@ class SegmentFooterTabMessages extends React.Component {
     return {__html: string}
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return (
       _.isUndefined(nextProps.notes) ||
       _.isUndefined(this.props.note) ||
