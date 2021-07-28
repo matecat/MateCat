@@ -3,6 +3,7 @@ import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
 import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
+import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 
 window.APP = null

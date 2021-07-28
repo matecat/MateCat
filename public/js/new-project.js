@@ -1,5 +1,9 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+import TeamsActions from './cat_source/es6/actions/TeamsActions'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
