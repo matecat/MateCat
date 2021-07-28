@@ -16,4 +16,4 @@ const QaCheckGlossary = {
   },
 }
 
-module.exports = QaCheckGlossary
+export default QaCheckGlossary

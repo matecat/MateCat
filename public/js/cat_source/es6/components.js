@@ -21,6 +21,7 @@ import SegmentTabMatches from './components/segments/SegmentFooterTabMatches'
 import SegmentTabMessages from './components/segments/SegmentFooterTabMessages'
 import SegmentButtons from './components/segments/SegmentButtons'
 import TranslationIssuesSideButton from './components/review/TranslationIssuesSideButton'
+import QaCheckGlossary from './components/segments/utils/qaCheckGlossaryUtils'
 
 window.MC = {}
 
@@ -49,7 +50,7 @@ window.SegmentTabMessages = SegmentTabMessages
 window.SegmentButtons = SegmentButtons
 window.TranslationIssuesSideButton = TranslationIssuesSideButton
 
-window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUtils')
+window.QaCheckGlossary = QaCheckGlossary
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils')
 window.TagUtils = require('./utils/tagUtils')
