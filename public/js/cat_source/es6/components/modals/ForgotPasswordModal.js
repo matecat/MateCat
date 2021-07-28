@@ -1,7 +1,10 @@
+import update from 'immutability-helper'
+import React from 'react'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
+
 class ForgotPasswordModal extends React.Component {
   constructor(props) {
     super(props)
@@ -43,7 +46,7 @@ class ForgotPasswordModal extends React.Component {
     this.setState({requestRunning: true})
     this.checkRedeemProject().then(
       this.sendForgotPassword()
-        .done(function (data) {
+        .done(function () {
           $('#modal').trigger('opensuccess', [
             {
               title: 'Forgot Password',
@@ -109,8 +112,8 @@ class ForgotPasswordModal extends React.Component {
     return (
       <div className="forgot-password-modal">
         <p>
-          Enter the email address associated with your account and we'll send
-          you the link to reset your password.
+          Enter the email address associated with your account and we&apos;ll
+          send you the link to reset your password.
         </p>
         <TextField
           showError={this.state.showErrors}
