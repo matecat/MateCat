@@ -26,6 +26,7 @@ import TagUtils from './utils/tagUtils'
 import TextUtils from './utils/textUtils'
 import CursorUtils from './utils/cursorUtils'
 import OfflineUtils from './utils/offlineUtils'
+import Shortcuts from './utils/shortcuts'
 
 window.MC = {}
 
@@ -61,7 +62,7 @@ window.TextUtils = TextUtils
 window.CommonUtils = CommonUtils
 window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
-window.Shortcuts = require('./utils/shortcuts')
+window.Shortcuts = Shortcuts
 window.Customizations = require('./utils/customizations')
 window.SegmentUtils = require('./utils/segmentUtils')
 window.DraftMatecatUtils = require('./components/segments/utils/DraftMatecatUtils')

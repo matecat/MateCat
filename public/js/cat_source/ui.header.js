@@ -9,6 +9,7 @@ import CommonUtils from './es6/utils/commonUtils'
 import JobMetadata from './es6/components/header/cattol/JobMetadata'
 import ShortCutsModal from './es6/components/modals/ShortCutsModal'
 import SearchUtils from './es6/components/header/cattol/search/searchUtils'
+import Shortcuts from './es6/utils/shortcuts'
 
 $.extend(window.UI, {
   initHeader: function () {
