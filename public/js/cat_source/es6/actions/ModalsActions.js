@@ -1,10 +1,9 @@
 import _ from 'lodash'
 
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import OutsourceModal from '../components/modals/OutsourceModal'
 
 let ModalsActions = {
-  //********* Modals **************//
-
   openCreateTeamModal: function () {
     APP.ModalWindow.showModalComponent(CreateTeamModal, {}, 'Create New Team')
   },

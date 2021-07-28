@@ -1,3 +1,5 @@
+import React from 'react'
+
 import OutsourceConstants from '../../constants/OutsourceConstants'
 import OutsourceStore from '../../stores/OutsourceStore'
 
@@ -129,9 +131,6 @@ class OutsourceModal extends React.Component {
       let deliveryToShow = isRevisionChecked
         ? this.chunk.r_delivery
         : this.chunk.delivery
-      let priceToShow = isRevisionChecked
-        ? parseFloat(this.chunk.r_price) + parseFloat(this.chunk.price)
-        : this.chunk.price
 
       let timeZone = this.getTimeZone()
       let dateString = this.getDateString(deliveryToShow, timeZone)
@@ -389,7 +388,7 @@ class OutsourceModal extends React.Component {
 
   render() {
     let loadingClass = this.state.outsource ? '' : 'loading'
-    let showShareToTranslator = !!!this.props.job.outource || !config.isLoggedIn
+    let showShareToTranslator = !this.props.job.outource || !config.isLoggedIn
 
     let textGuaranteedByClass = this.state.showTranslatorInfo ? 'expanded' : ''
     let pricesClass = this.state.showTranslatorInfo ? 'compress' : ''
@@ -478,6 +477,7 @@ class OutsourceModal extends React.Component {
                     href={this.props.url}
                     className="uploadbtn in-popup"
                     target="_blank"
+                    rel="noreferrer"
                   >
                     Open
                   </a>
@@ -486,6 +486,7 @@ class OutsourceModal extends React.Component {
                     href={this.props.url}
                     className="uploadbtn in-popup hide"
                     target="_blank"
+                    rel="noreferrer"
                   >
                     Open
                   </a>
@@ -976,7 +977,11 @@ class OutsourceModal extends React.Component {
                         >
                           <div className="trust_text">
                             <strong>Guaranteed by</strong>
-                            <a href="http://www.translated.net" target="_blank">
+                            <a
+                              href="http://www.translated.net"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
                               <img
                                 src="/public/img/logo_translated.png"
                                 title="visit our website"
@@ -1010,11 +1015,12 @@ class OutsourceModal extends React.Component {
 
                             {this.state.showTranslatorInfo ? (
                               <p className="trustbox2">
-                                Translated has over 15 years' experience as a
-                                translation company and offers
+                                Translated has over 15 years&apos; experience as
+                                a translation company and offers
                                 <a
                                   href="http://www.translated.net/en/frequently-asked-questions#guarantees"
                                   target="_blank"
+                                  rel="noreferrer"
                                 >
                                   {' '}
                                   two key guarantees on quality and delivery
@@ -1030,11 +1036,12 @@ class OutsourceModal extends React.Component {
                               </p>
                             ) : (
                               <p className="trustbox2 hide">
-                                Translated has over 15 years' experience as a
-                                translation company and offers
+                                Translated has over 15 years&apos; experience as
+                                a translation company and offers
                                 <a
                                   href="http://www.translated.net/en/frequently-asked-questions#guarantees"
                                   target="_blank"
+                                  rel="noreferrer"
                                 >
                                   {' '}
                                   two key guarantees on quality and delivery
