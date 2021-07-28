@@ -543,4 +543,4 @@ let SearchUtils = {
   },
 }
 
-module.exports = SearchUtils
+export default SearchUtils

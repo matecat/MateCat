@@ -1,4 +1,5 @@
 import CatToolActions from './es6/actions/CatToolActions'
+import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 import CommonUtils from './es6/utils/commonUtils'
 
 $.extend(window.UI, {

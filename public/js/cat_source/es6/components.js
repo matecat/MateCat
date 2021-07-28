@@ -52,7 +52,6 @@ window.TranslationIssuesSideButton = TranslationIssuesSideButton
 
 window.QaCheckGlossary = QaCheckGlossary
 
-window.SearchUtils = require('./components/header/cattol/search/searchUtils')
 window.TagUtils = require('./utils/tagUtils')
 window.TextUtils = require('./utils/textUtils')
 window.CommonUtils = CommonUtils
