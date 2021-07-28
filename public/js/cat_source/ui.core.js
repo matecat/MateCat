@@ -6,6 +6,7 @@ import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
 import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
+import TagUtils from './es6/utils/tagUtils'
 
 window.UI = {
   /**
