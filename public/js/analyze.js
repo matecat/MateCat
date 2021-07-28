@@ -1,3 +1,8 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+import TeamsActions from './cat_source/es6/actions/TeamsActions'
+
 window.UI = null
 
 window.UI = {
