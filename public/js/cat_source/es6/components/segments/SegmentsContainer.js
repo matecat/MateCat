@@ -1,6 +1,5 @@
 /**
  * React Component for the editarea.
-
  */
 import React from 'react'
 import _ from 'lodash'
@@ -157,7 +156,7 @@ class SegmentsContainer extends React.Component {
   getIndexToScroll() {
     let position = this.state.scrollToSelected ? 'auto' : 'start'
     if (this.state.scrollTo && this.state.segments.size > 0) {
-      const index = this.state.segments.findIndex((segment, index) => {
+      const index = this.state.segments.findIndex((segment) => {
         if (this.state.scrollTo.toString().indexOf('-') === -1) {
           return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo)
         } else {
@@ -210,7 +209,7 @@ class SegmentsContainer extends React.Component {
   getCollectionType(segment) {
     let collectionType
     if (segment.notes) {
-      segment.notes.forEach(function (item, index) {
+      segment.notes.forEach(function (item) {
         if (item.note && item.note !== '') {
           if (item.note.indexOf('Collection Name: ') !== -1) {
             let split = item.note.split(': ')
@@ -267,7 +266,7 @@ class SegmentsContainer extends React.Component {
       />
     )
     if (segment.id_file !== currentFileId) {
-      const file = !!this.state.files
+      const file = this.state.files
         ? _.find(this.state.files, (file) => file.id == segment.id_file)
         : false
       let classes = this.state.sideOpen ? 'slide-right' : ''
@@ -426,7 +425,7 @@ class SegmentsContainer extends React.Component {
       return 0
     }
 
-    const sid = segment.get('sid')
+    segment.get('sid')
 
     // --- Compute basic segment size for first render
     let height = 90
@@ -495,7 +494,7 @@ class SegmentsContainer extends React.Component {
   }
 
   recomputeListSize(idFrom) {
-    const index = this.state.segments.findIndex((segment, index) => {
+    const index = this.state.segments.findIndex((segment) => {
       return segment.get('sid') === idFrom
     })
     this.segmentsHeightsMap[idFrom]
@@ -627,7 +626,7 @@ class SegmentsContainer extends React.Component {
     console.log('React component Error', e)
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate() {
     this.lastListSize = this.state.segments.size
     if (this.state.scrollTo !== null && this.state.segments.size > 0) {
       setTimeout(() => {
@@ -657,7 +656,7 @@ class SegmentsContainer extends React.Component {
         scrollToAlignment={scrollToObject.position}
         scrollToIndex={scrollToObject.scrollTo}
         // scrollOffset={1000}
-        onScroll={(number, event) => this.onScroll()}
+        onScroll={() => this.onScroll()}
         renderItem={({index, style}) => {
           let styleCopy = Object.assign({}, style)
           if (index === 0) {
