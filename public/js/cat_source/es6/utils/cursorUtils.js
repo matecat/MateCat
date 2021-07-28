@@ -37,7 +37,7 @@ const CursorUtils = {
     if (data.end_node === 0) data.end_offset = selection.focusOffset
     else {
       data.end_offset = 0
-      for (var i = 0; i < data.end_node; i++) {
+      for (let i = 0; i < data.end_node; i++) {
         data.end_offset += nodes[i].textContent.length
       }
       data.end_offset += selection.focusOffset
@@ -48,4 +48,4 @@ const CursorUtils = {
   },
 }
 
-module.exports = CursorUtils
+export default CursorUtils
