@@ -1,3 +1,5 @@
+import CatToolActions from '../actions/CatToolActions'
+
 let SSE = {
   init: function () {
     // TODO configure this
@@ -162,7 +164,7 @@ let NOTIFICATIONS = {
 
     this.source.addEventListener(
       'error',
-      function (e) {
+      function () {
         console.error('SSE: server disconnect')
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {

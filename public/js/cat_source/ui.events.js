@@ -1,3 +1,5 @@
+import CatToolActions from './es6/actions/CatToolActions'
+
 /*
 	Component: ui.events
  */

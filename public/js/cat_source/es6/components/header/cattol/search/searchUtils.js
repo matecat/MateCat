@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 import SegmentActions from '../../../../actions/SegmentActions'
-// import CatToolActions  from "../../../../actions/CatToolActions";
+import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
 
@@ -411,10 +411,10 @@ let SearchUtils = {
     //     spanArray.push(text);
     //     return "$&";
     // });
-    text = text.replace(/>/g, function (match, index) {
+    text = text.replace(/>/g, function () {
       return GTPLACEHOLDER
     })
-    text = text.replace(/</g, function (match, index) {
+    text = text.replace(/</g, function () {
       return LTPLACEHOLDER
     })
     let tagsIntervals = []
@@ -442,12 +442,11 @@ let SearchUtils = {
     }
   },
 
-  restoreTextAfterReplace(text, tagsArray) {
+  restoreTextAfterReplace(text) {
     // text = text.replace(/(\$&)/g, function ( match, text ) {
     //     return tagsArray.shift();
     // });
     text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
-    //console.log('-- text3: ' + text);
     text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<')
     return text
   },

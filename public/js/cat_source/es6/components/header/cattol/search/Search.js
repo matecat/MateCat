@@ -7,6 +7,7 @@ import CatToolStore from '../../../../stores/CatToolStore'
 import SearchUtils from './searchUtils'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 class Search extends React.Component {
   constructor(props) {
@@ -314,7 +315,7 @@ class Search extends React.Component {
     })
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (this.props.active) {
       if (!prevProps.active) {
         if (this.sourceEl && this.state.focus) {
@@ -330,7 +331,7 @@ class Search extends React.Component {
       if (!this.dropdownInit) {
         this.dropdownInit = true
         $(this.statusDropDown).dropdown({
-          onChange: function (value, text, $selectedItem) {
+          onChange: function (value) {
             value = value === '' ? 'all' : value
             self.handleStatusChange(value)
           },

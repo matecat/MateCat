@@ -2,9 +2,8 @@ import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
 
-/*
-	Component: ui.core
- */
+import CatToolActions from './es6/actions/CatToolActions'
+
 window.UI = {
   /**
    * Open file menu in Header
@@ -220,11 +219,6 @@ window.UI = {
     }
   },
 
-  // fixHeaderHeightChange: function() {
-  //     var headerHeight = $('header .wrapper').height();
-  //     $('#outer').css('margin-top', headerHeight + 'px');
-  // },
-
   getMoreSegments: function (where) {
     if (where == 'after' && this.noMoreSegmentsAfter) {
       return
@@ -347,21 +341,6 @@ window.UI = {
         var seg = UI.firstLoad ? this.currentSegmentId : UI.startSegmentId
         SegmentActions.openSegment(seg)
       }
-
-      // if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
-      //     SegmentActions.scrollToSegment( options.segmentToOpen );
-      //     SegmentActions.openSegment(options.segmentToOpen);
-      // }
-
-      // if (options.applySearch) {
-      // 	$('mark.currSearchItem').removeClass('currSearchItem');
-      // 	SearchUtils.markSearchResults(options);
-      // 	if (SearchUtils.searchMode == 'normal') {
-      // 		$('section[id^="segment-' + options.segmentToOpen + '"] mark.searchMarker').first().addClass('currSearchItem');
-      // 	} else {
-      // 		$('section[id^="segment-' + options.segmentToOpen + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
-      // 	}
-      // }
     }
     $('#outer').removeClass('loading loadingBefore')
 

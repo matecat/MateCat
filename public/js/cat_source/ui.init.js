@@ -1,6 +1,5 @@
-/*
-	Component: ui.init
- */
+import CatToolActions from './es6/actions/CatToolActions'
+
 $.extend(window.UI, {
   render: function (options) {
     options = options || {}

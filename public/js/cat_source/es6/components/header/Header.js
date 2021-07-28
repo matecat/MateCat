@@ -1,4 +1,5 @@
 import React from 'react'
+
 import TeamSelect from './TeamsSelect'
 import ProjectInfo from './HeaderProjectInfo'
 import FilterProjects from './manage/FilterProjects'
@@ -10,6 +11,7 @@ import IconUserLogout from '../icons/IconUserLogout'
 import ActionMenu from './ActionMenu'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 class Header extends React.Component {
   constructor(props) {
