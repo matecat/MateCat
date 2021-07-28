@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import OutsourceModal from '../components/modals/OutsourceModal'
+import SplitJobModal from '../components/modals/SplitJob'
 
 let ModalsActions = {
   openCreateTeamModal: function () {
