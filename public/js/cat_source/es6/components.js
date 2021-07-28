@@ -14,8 +14,6 @@ window.classnames = classnames
 
 window.SegmentFilter = SegmentFilter
 
-window.ManageConstants = require('./constants/ManageConstants')
-
 window.AnalyzeActions = require('./actions/AnalyzeActions')
 window.TeamsActions = require('./actions/TeamsActions')
 window.ModalsActions = require('./actions/ModalsActions')

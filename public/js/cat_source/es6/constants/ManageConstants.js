@@ -1,6 +1,6 @@
 import keyMirror from 'keymirror'
 
-module.exports = keyMirror({
+export default keyMirror({
   RENDER_PROJECTS: null,
   RENDER_ALL_TEAM_PROJECTS: null,
   UPDATE_PROJECTS: null,
