@@ -16,7 +16,6 @@ window.classnames = classnames
 window.SegmentFilter = SegmentFilter
 
 window.AnalyzeActions = AnalyzeActions
-window.ModalsActions = require('./actions/ModalsActions')
 window.OutsourceActions = require('./actions/OutsourceActions')
 window.CatToolActions = require('./actions/CatToolActions')
 window.SegmentActions = require('./actions/SegmentActions')

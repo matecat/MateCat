@@ -1,7 +1,4 @@
-/*
-   Component: Advanced Options Tab
-   */
-
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
