@@ -64,5 +64,4 @@ window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
 
-window.MBC = require('./utils/mbc.main')
 window.Speech2Text = require('./utils/speech2text')
