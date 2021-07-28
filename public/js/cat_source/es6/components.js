@@ -28,9 +28,6 @@ window.SegmentStore = SegmentStore
 window.Header = Header
 window.JobMetadata = JobMetadata
 
-window.LanguageSelector =
-  require('./components/languageSelector/LanguageSelector').default
-
 // ui.render
 window.SegmentsContainer =
   require('./components/segments/SegmentsContainer').default
