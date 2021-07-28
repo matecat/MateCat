@@ -28,10 +28,6 @@ window.SegmentStore = SegmentStore
 window.Header = Header
 window.JobMetadata = JobMetadata
 
-// ui.render
-window.SegmentsContainer =
-  require('./components/segments/SegmentsContainer').default
-
 /*
 Todo move this
  */

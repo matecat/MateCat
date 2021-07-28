@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
+import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 
 window.UI = {
   /**
