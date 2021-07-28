@@ -7,6 +7,7 @@ import JobMetadata from './components/header/cattol/JobMetadata'
 import {ModalWindow} from './components/modals/ModalWindow'
 import SegmentStore from './stores/SegmentStore'
 import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
+import AnalyzeActions from './actions/AnalyzeActions'
 
 window.MC = {}
 
@@ -14,7 +15,7 @@ window.classnames = classnames
 
 window.SegmentFilter = SegmentFilter
 
-window.AnalyzeActions = require('./actions/AnalyzeActions')
+window.AnalyzeActions = AnalyzeActions
 window.TeamsActions = require('./actions/TeamsActions')
 window.ModalsActions = require('./actions/ModalsActions')
 window.OutsourceActions = require('./actions/OutsourceActions')
