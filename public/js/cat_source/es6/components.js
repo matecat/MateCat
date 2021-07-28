@@ -13,6 +13,7 @@ import SegmentActions from './actions/SegmentActions'
 import CommonUtils from './utils/commonUtils'
 import Header from './components/header/Header'
 import ConfirmMessageModal from './components/modals/ConfirmMessageModal'
+import JobMetadataModal from './components/modals/JobMetadataModal'
 
 window.MC = {}
 
@@ -29,18 +30,10 @@ window.SegmentStore = SegmentStore
 window.Header = Header
 window.JobMetadata = JobMetadata
 
-/*
-Todo move this
- */
 window.ModalWindow = ModalWindow
 window.ConfirmMessageModal = ConfirmMessageModal
-window.JobMetadataModal =
-  require('./components/modals/JobMetadataModal').default
-/*****/
+window.JobMetadataModal = JobMetadataModal
 
-/*
-Override by plugins
- */
 window.SegmentBody = require('./components/segments/SegmentBody').default
 window.SegmentTarget = require('./components/segments/SegmentTarget').default
 window.SegmentFooter = require('./components/segments/SegmentFooter').default
@@ -53,8 +46,6 @@ window.TranslationIssuesSideButton =
   require('./components/review/TranslationIssuesSideButton').default
 
 window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUtils')
-
-/******/
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils')
 window.TagUtils = require('./utils/tagUtils')
