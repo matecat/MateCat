@@ -8,6 +8,7 @@ import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
 import JobMetadata from './es6/components/header/cattol/JobMetadata'
 import ShortCutsModal from './es6/components/modals/ShortCutsModal'
+import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 
 $.extend(window.UI, {
   initHeader: function () {

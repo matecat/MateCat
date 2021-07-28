@@ -1,12 +1,10 @@
 import React from 'react'
+
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
+import SearchUtils from '../header/cattol/search/searchUtils'
 
 class SimpleEditor extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     const {isTarget, sid, text, segment} = this.props
 
