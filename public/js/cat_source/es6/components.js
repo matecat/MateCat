@@ -63,5 +63,3 @@ window.CommonUtils = CommonUtils
 window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
-
-window.Speech2Text = require('./utils/speech2text')

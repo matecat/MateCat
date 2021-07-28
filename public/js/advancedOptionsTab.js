@@ -1,6 +1,7 @@
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import LXQ from './cat_source/es6/utils/lxq.main'
 import SegmentUtils from './cat_source/es6/utils/segmentUtils'
+import Speech2Text from './cat_source/es6/utils/speech2text'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
