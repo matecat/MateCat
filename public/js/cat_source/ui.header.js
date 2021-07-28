@@ -2,10 +2,7 @@ import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
-
-/*
- Component: ui.header
- */
+import CatToolActions from './es6/actions/CatToolActions'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -14,9 +11,6 @@ $.extend(window.UI, {
         APP.fitText($('#pname-container'), $('#pname'), 25)
       })
 
-    /*if ($('#action-download').length) {
-			$('#action-download').dropdown();
-		}*/
     if ($('#action-three-dots').length) {
       $('#action-three-dots').dropdown()
     }

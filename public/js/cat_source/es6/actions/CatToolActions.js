@@ -260,4 +260,4 @@ let CatToolActions = {
   },
 }
 
-module.exports = CatToolActions
+export default CatToolActions

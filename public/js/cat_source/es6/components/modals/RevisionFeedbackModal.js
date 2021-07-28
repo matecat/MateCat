@@ -1,5 +1,7 @@
 import React from 'react'
 
+import CatToolActions from '../../actions/CatToolActions'
+
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
     super(props)

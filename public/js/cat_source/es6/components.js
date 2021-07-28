@@ -8,6 +8,7 @@ import {ModalWindow} from './components/modals/ModalWindow'
 import SegmentStore from './stores/SegmentStore'
 import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
 import AnalyzeActions from './actions/AnalyzeActions'
+import CatToolActions from './actions/CatToolActions'
 
 window.MC = {}
 
@@ -16,7 +17,7 @@ window.classnames = classnames
 window.SegmentFilter = SegmentFilter
 
 window.AnalyzeActions = AnalyzeActions
-window.CatToolActions = require('./actions/CatToolActions')
+window.CatToolActions = CatToolActions
 window.SegmentActions = require('./actions/SegmentActions')
 window.CommentsActions = require('./actions/CommentsActions')
 window.ManageActions = require('./actions/ManageActions')

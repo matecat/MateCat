@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import _ from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
@@ -14,7 +15,7 @@ import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils'
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
-import _ from 'lodash'
+import CatToolActions from './CatToolActions'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -148,7 +149,7 @@ const SegmentActions = {
       })
     }
   },
-  closeSegment: function (sid, fid) {
+  closeSegment: function () {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_SEGMENT,
     })
@@ -412,7 +413,7 @@ const SegmentActions = {
 
       if (!config.isReview) {
         var alreadyCopied = false
-        $.each(SegmentStore.consecutiveCopySourceNum, function (index) {
+        $.each(SegmentStore.consecutiveCopySourceNum, function () {
           if (this === sid) alreadyCopied = true
         })
         if (!alreadyCopied) {
@@ -724,7 +725,7 @@ const SegmentActions = {
       if (typeof segment.glossary === 'undefined') {
         //Response inside SSE Channel
         API.SEGMENT.getGlossaryForSegment(request.sid, request.text).fail(
-          function (error) {
+          function () {
             OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
           },
         )
@@ -734,7 +735,7 @@ const SegmentActions = {
 
   searchGlossary: function (sid, fid, text, fromTarget) {
     text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
-    text = text.replace(/\"/g, '')
+    text = text.replace(/"/g, '')
     API.SEGMENT.getGlossaryMatch(sid, text, fromTarget).fail(function () {
       OfflineUtils.failedConnection(0, 'glossary')
     })
@@ -758,7 +759,7 @@ const SegmentActions = {
       .fail(function () {
         OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
-      .done(function (data) {
+      .done(function () {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
@@ -798,7 +799,7 @@ const SegmentActions = {
         })
       })
   },
-  addGlossaryItemToCache: (sid, match, name) => {
+  addGlossaryItemToCache: (sid, match) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
@@ -817,7 +818,7 @@ const SegmentActions = {
       .fail(function () {
         OfflineUtils.failedConnection(0, 'updateGlossaryItem')
       })
-      .done(function (response) {
+      .done(function () {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
