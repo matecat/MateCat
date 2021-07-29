@@ -1,5 +1,6 @@
 import CatToolActions from './es6/actions/CatToolActions'
 import SearchUtils from './es6/components/header/cattol/search/searchUtils'
+import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
 import CommonUtils from './es6/utils/commonUtils'
 import Customizations from './es6/utils/customizations'
 import LXQ from './es6/utils/lxq.main'
