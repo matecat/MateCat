@@ -1,7 +1,3 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import Immutable from 'immutable'
 import _ from 'lodash'
@@ -9,6 +5,7 @@ import _ from 'lodash'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterMultiMatches extends React.Component {
   constructor(props) {

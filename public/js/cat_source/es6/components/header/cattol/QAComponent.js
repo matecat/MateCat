@@ -3,6 +3,7 @@
 
  */
 import React from 'react'
+import SegmentActions from '../../../actions/SegmentActions'
 import LXQ from '../../../utils/lxq.main'
 
 class QAComponent extends React.Component {

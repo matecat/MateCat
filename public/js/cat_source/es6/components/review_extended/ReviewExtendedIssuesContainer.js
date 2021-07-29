@@ -3,6 +3,9 @@ import _ from 'lodash'
 import ReviewExtendedIssue from './ReviewExtendedIssue'
 import WrapperLoader from '../common/WrapperLoader'
 import SegmentConstants from '../../constants/SegmentConstants'
+import SegmentActions from '../../actions/SegmentActions'
+import SegmentStore from '../../stores/SegmentStore'
+
 class ReviewExtendedIssuesContainer extends React.Component {
   constructor(props) {
     super(props)

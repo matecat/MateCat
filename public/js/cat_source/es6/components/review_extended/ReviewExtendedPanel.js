@@ -7,6 +7,8 @@ import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import SegmentConstants from '../../constants/SegmentConstants'
 import Shortcuts from '../../utils/shortcuts'
 import ShortCutsModal from '../modals/ShortCutsModal'
+import SegmentActions from '../../actions/SegmentActions'
+import SegmentStore from '../../stores/SegmentStore'
 
 class ReviewExtendedPanel extends React.Component {
   constructor(props) {

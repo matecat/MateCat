@@ -10,6 +10,8 @@ import JobMetadata from './es6/components/header/cattol/JobMetadata'
 import ShortCutsModal from './es6/components/modals/ShortCutsModal'
 import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 import Shortcuts from './es6/utils/shortcuts'
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentStore from './es6/stores/SegmentStore'
 
 $.extend(window.UI, {
   initHeader: function () {

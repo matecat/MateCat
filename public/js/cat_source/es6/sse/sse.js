@@ -1,4 +1,6 @@
 import CatToolActions from '../actions/CatToolActions'
+import SegmentActions from '../actions/SegmentActions'
+import SegmentStore from '../stores/SegmentStore'
 
 let SSE = {
   init: function () {

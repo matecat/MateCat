@@ -1,3 +1,5 @@
+import SegmentActions from '../actions/SegmentActions'
+
 const OfflineUtils = {
   offline: false,
   offlineCacheSize: 20,

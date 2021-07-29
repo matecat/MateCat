@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 
+import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 ;(function ($) {
   function isVisible($el) {

@@ -1,4 +1,5 @@
 import React from 'react'
+import SegmentActions from '../../actions/SegmentActions'
 
 import Shortcuts from '../../utils/shortcuts'
 

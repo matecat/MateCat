@@ -4,6 +4,7 @@ import _ from 'lodash'
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
 import SegmentFilterUtils from './segment_filter'
+import SegmentActions from '../../../../actions/SegmentActions'
 
 class SegmentsFilter extends React.Component {
   constructor(props) {

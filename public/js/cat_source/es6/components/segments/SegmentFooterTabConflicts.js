@@ -1,18 +1,12 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import _ from 'lodash'
 import Immutable from 'immutable'
+
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterTabConflicts extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   chooseAlternative(text) {
     SegmentActions.setFocusOnEditArea()
     SegmentActions.disableTPOnSegment(this.props.segment)

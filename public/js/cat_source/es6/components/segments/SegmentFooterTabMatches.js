@@ -7,6 +7,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import TranslationMatches from './utils/translationMatches'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterTabMatches extends React.Component {
   constructor(props) {

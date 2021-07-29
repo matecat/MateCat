@@ -3,6 +3,8 @@ import {sprintf} from 'sprintf-js'
 
 import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
+import SegmentActions from '../actions/SegmentActions'
+import SegmentStore from '../stores/SegmentStore'
 
 const CommonUtils = {
   millisecondsToTime(milli) {

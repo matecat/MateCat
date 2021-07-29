@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import SegmentActions from '../../../actions/SegmentActions'
+
 const QaCheckGlossary = {
   enabled() {
     return config.qa_check_glossary_enabled
