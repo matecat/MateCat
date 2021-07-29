@@ -189,8 +189,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks( $ttl = 0 ) {
-      $dao = new Chunks_ChunkDao( Database::obtain() );
-      return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
+        return $this->cachable( __METHOD__, $this, function () use ( $ttl ) {
+            $dao = new Chunks_ChunkDao( Database::obtain() );
+            return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
+        } );
     }
 
     public function isMarkedComplete() {
