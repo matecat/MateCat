@@ -12,6 +12,7 @@ import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 import Shortcuts from './es6/utils/shortcuts'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
+import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
 
 $.extend(window.UI, {
   initHeader: function () {
