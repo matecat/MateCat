@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
+import ReactDOM from 'react-dom'
+import React from 'react'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
