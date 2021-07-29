@@ -487,7 +487,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @throws Exception
      */
-    public function createList( Array $obj_arr ) {
+    public function createList( array $obj_arr ) {
 
         $obj_arr = array_chunk( $obj_arr, 100 );
 
@@ -721,38 +721,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
-    public function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
-
-        $isPropagationToAlreadyTranslatedAvailable = "
-        SELECT COUNT(segment_hash) AS available
-        FROM segment_translations
-        JOIN jobs ON id_job = id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-        WHERE segment_hash = (
-            SELECT segment_hash FROM segments WHERE id = :id_segment
-        )
-        AND id_job = :id_job
-        AND id_segment != :id_segment
-        AND password = :password
-        AND segment_translations.status IN( 
-          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' , 
-          '" . Constants_TranslationStatus::STATUS_APPROVED . "' 
-        )
-    ";
-
-        $bind_keys = [
-                'id_job'     => $jid,
-                'password'   => $jpassword,
-                'id_segment' => $sid
-        ];
-
-        $stm = $this->getDatabaseHandler()->getConnection()->prepare( $isPropagationToAlreadyTranslatedAvailable );
-        $stm->setFetchMode( PDO::FETCH_ASSOC );
-        $stm->execute( $bind_keys );
-
-        return $stm->fetch();
-
-    }
-
     /**
      * @param int    $jid
      * @param string $jpassword
@@ -761,9 +729,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return array
      */
     public function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
-
-        $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
 
         $jStructs = Jobs_JobDao::getById( $jid );
         $filtered = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
@@ -784,7 +749,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          * A more strict condition was added in order to check the translation mismatch
          *
          */
-        
         if ( $sid != null ) {
 
             $query = "
@@ -813,14 +777,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
                     'job_last_segment'  => end( $jStructs )->job_last_segment,
                     'job_password'      => $currentJob->password,
-                    'st_approved'       => $st_approved,
-                    'st_translated'     => $st_translated,
+                    'st_approved'       => Constants_TranslationStatus::STATUS_APPROVED,
+                    'st_translated'     => Constants_TranslationStatus::STATUS_TRANSLATED,
                     'id_job'            => $jStructs[ 0 ]->id,
                     'id_segment'        => $sid
             ];
 
         } else {
-            //TODO cache this query?
+
             /**
              * This query gets, for each hash with more than one translations available, the min id of the segments
              *
@@ -835,7 +799,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 SELECT
                 COUNT( segment_hash ) AS total_sources,
                 COUNT( DISTINCT translation ) AS translations_available,
-                IF( password = :job_password, MIN( id_segment ), NULL ) AS first_of_my_job
+                MIN( IF( password = :chunk_password AND id_segment between :chunk_first_segment AND :chunk_last_segment,  id_segment , NULL ) ) AS first_of_my_job
                     FROM segment_translations
                     JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
                     WHERE id_job = :id_job
@@ -845,12 +809,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             ";
 
             $bind_keys = [
-                    'job_first_segment' => $currentJob->job_first_segment,
-                    'job_last_segment'  => $currentJob->job_last_segment,
-                    'job_password'      => $currentJob->password,
-                    'st_approved'       => $st_approved,
-                    'st_translated'     => $st_translated,
-                    'id_job'            => $currentJob->id,
+                    'id_job'              => $currentJob->id,
+                    'job_first_segment'   => $jStructs[ 0 ]->job_first_segment,
+                    'job_last_segment'    => end( $jStructs )->job_last_segment,
+                    'chunk_first_segment' => $currentJob->job_first_segment,
+                    'chunk_last_segment'  => $currentJob->job_last_segment,
+                    'chunk_password'        => $currentJob->password,
+                    'st_approved'         => Constants_TranslationStatus::STATUS_APPROVED,
+                    'st_translated'       => Constants_TranslationStatus::STATUS_TRANSLATED,
             ];
 
         }
