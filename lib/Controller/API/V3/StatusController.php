@@ -280,7 +280,6 @@ class StatusController extends KleinController {
         }
 
         $summary                        = [];
-        $summary[ 'NAME' ]              = $this->project->name;
         $summary[ 'IN_QUEUE_BEFORE' ]   = $this->othersInQueue;
         $summary[ 'STATUS' ]            = $this->project->status_analysis;
         $summary[ 'TOTAL_SEGMENTS' ]    = count( $this->projectResultSet );
