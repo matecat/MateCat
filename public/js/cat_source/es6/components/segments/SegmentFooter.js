@@ -11,6 +11,7 @@ import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentTabRevise from './SegmentFooterTabRevise'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooter extends React.Component {
   constructor(props) {

@@ -4,6 +4,7 @@ import _ from 'lodash'
 import Shortcuts from '../../utils/shortcuts'
 import {getXliffRegExpression} from './utils/DraftMatecatUtils/tagModel'
 import SegmentWrapper from './SegmentWrapper'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentBody extends React.Component {
   constructor(props) {

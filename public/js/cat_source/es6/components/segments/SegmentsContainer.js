@@ -16,6 +16,7 @@ import JobMetadataModal from '../modals/JobMetadataModal'
 import CommonUtils from '../../utils/commonUtils'
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentsContainer extends React.Component {
   constructor(props) {

@@ -7,6 +7,8 @@ import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
+import SegmentActions from '../../../actions/SegmentActions'
+import SegmentStore from '../../../stores/SegmentStore'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {

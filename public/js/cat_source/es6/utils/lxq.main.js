@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
+import SegmentActions from '../actions/SegmentActions'
+import SegmentStore from '../stores/SegmentStore'
 import {getMatecatApiDomain} from './getMatecatApiDomain'
 
 const LXQ = {

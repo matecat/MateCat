@@ -9,6 +9,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentTarget extends React.Component {
   constructor(props) {

@@ -11,6 +11,8 @@ import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentUtils from './es6/utils/segmentUtils'
 import LXQ from './es6/utils/lxq.main'
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentStore from './es6/stores/SegmentStore'
 
 window.UI = {
   /**

@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import SegmentActions from '../es6/actions/SegmentActions'
+
 window.ReviewExtended = {
   enabled: function () {
     return Review.type === 'extended'

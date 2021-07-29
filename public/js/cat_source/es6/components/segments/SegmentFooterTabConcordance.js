@@ -8,6 +8,7 @@ import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterTabConcordance extends React.Component {
   constructor(props) {
