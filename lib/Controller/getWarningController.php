@@ -138,8 +138,6 @@ class getWarningController extends ajaxController {
             $tMismatch = ( new Segments_SegmentDao() )->getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
         } catch ( Exception $e ) {
             $this->result[ 'details' ]                = [];
-            $this->result[ 'translation_mismatches' ] = [ 'total' => 0, 'mine' => 0, 'list_in_my_job' => [] ];
-
             return;
         }
 
