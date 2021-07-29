@@ -144,6 +144,7 @@ class ProjectManager {
                             'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
                             'segments_metadata'            => [], //array of segments_metadata
                             'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
+                            'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
                             'translations'                 => [],
                             'notes'                        => [],
                             'context-group'                => [],
@@ -1788,6 +1789,7 @@ class ProjectManager {
         // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
         $this->projectStructure[ 'segments-original-data' ]->offsetSet( $fid, new ArrayObject( [] ) );
+        $this->projectStructure[ 'file-part-id' ]->offsetSet( $fid, new ArrayObject( [] ) );
         $this->projectStructure[ 'segments-meta-data' ]->offsetSet( $fid, new ArrayObject( [] ) );
 
         $xliffParser = new XliffParser();
@@ -1814,6 +1816,16 @@ class ProjectManager {
 
             if ( !array_key_exists( 'trans-units', $xliff_file ) ) {
                 continue;
+            }
+
+            // files-part
+            if(isset($xliff_file[ 'attr' ][ 'original' ])){
+                $filesPartsStruct = new \Files\FilesPartsStruct();
+                $filesPartsStruct->id_file = $fid;
+                $filesPartsStruct->key = 'original';
+                $filesPartsStruct->value = $xliff_file[ 'attr' ][ 'original' ];
+
+                $filePartsId = (new \Files\FilesPartsDao())->insert($filesPartsStruct);
             }
 
             foreach ( $xliff_file[ 'trans-units' ] as $xliff_trans_unit ) {
@@ -1976,18 +1988,19 @@ class ProjectManager {
 
                             // segment struct
                             $segStruct = new Segments_SegmentStruct( [
-                                    'id_file'                 => $fid,
-                                    'id_project'              => $this->projectStructure[ 'id_project' ],
-                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
-                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
-                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
-                                    'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
-                                    'segment_hash'            => $segmentHash,
-                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
-                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
-                                    'raw_word_count'          => $wordCount,
-                                    'show_in_cattool'         => $show_in_cattool
+                                'id_file'                 => $fid,
+                                'id_file_part'            => (isset($filePartsId)) ? $filePartsId : null,
+                                'id_project'              => $this->projectStructure[ 'id_project' ],
+                                'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
+                                'segment_hash'            => $segmentHash,
+                                'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                'raw_word_count'          => $wordCount,
+                                'show_in_cattool'         => $show_in_cattool
                             ] );
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
@@ -2071,6 +2084,7 @@ class ProjectManager {
 
                         $segStruct = new Segments_SegmentStruct( [
                                 'id_file'             => $fid,
+                                'id_file_part'        => (isset($filePartsId)) ? $filePartsId : null,
                                 'id_project'          => $this->projectStructure[ 'id_project' ],
                                 'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
                                 'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),

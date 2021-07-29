@@ -495,7 +495,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             id, 
                             internal_id, 
                             id_file,
-                            /* id_project, */ 
+                            id_file_part,
                             segment, 
                             segment_hash, 
                             raw_word_count, 
@@ -510,7 +510,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         Log::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
 
-        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 12 ), ", " ) . " )";  //set to 13 when implements id_project
+        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
 
         foreach ( $obj_arr as $i => $chunk ) {
 
@@ -522,7 +522,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 $values[] = $segStruct->id;
                 $values[] = $segStruct->internal_id;
                 $values[] = $segStruct->id_file;
-                /* $values[] = $segStruct->id_project */
+                $values[] = $segStruct->id_file_part;
                 $values[] = $segStruct->segment;
                 $values[] = $segStruct->segment_hash;
                 $values[] = $segStruct->raw_word_count;

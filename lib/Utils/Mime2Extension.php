@@ -133,6 +133,7 @@ $reference = [
         'application/json'                                                          =>
                 [
                         0 => 'json',
+                        1 => 'jsont',
                 ],
         'application/jsonml+json'                                                   =>
                 [
