@@ -34,6 +34,7 @@ class AnalysisDao {
                 j.password as jpassword,
                 st.id_segment AS sid,
                 s.id_file,
+                s.id_file_part,
                 f.filename,
                 s.raw_word_count,
                 st.suggestion_source,
@@ -45,6 +46,8 @@ class AnalysisDao {
                 p.fast_analysis_wc,
                 p.tm_analysis_wc,
                 p.standard_analysis_wc,
+                fp.tag_key,
+                fp.tag_value,
                 st.tm_analysis_status AS st_status_analysis,
                 st.locked as translated
 			FROM
@@ -57,6 +60,8 @@ class AnalysisDao {
 			  projects AS p ON p.id = j.id_project
 			JOIN
 			  files f ON s.id_file = f.id
+			LEFT JOIN 
+			    files_parts fp ON fp.id = s.id_file_part 
 			WHERE
 			  p.id = :pid
 			AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')

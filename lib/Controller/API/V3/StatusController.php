@@ -2,21 +2,31 @@
 
 namespace API\V3;
 
+use AMQHandler;
 use Analysis\AnalysisDao;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectPasswordValidator;
+use Chunks_ChunkStruct;
 use Constants_ProjectStatus;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Routes;
+use TmKeyManagement_Filter;
 use Url\JobUrlBuilder;
 
 class StatusController extends KleinController {
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     private $project;
+
+    /**
+     * @var Chunks_ChunkStruct[]
+     */
+    private $chunks;
 
     /**
      * @var array
@@ -85,7 +95,7 @@ class StatusController extends KleinController {
         }
 
         // build jobs metadata array
-        foreach ( $this->project->getChunks() as $chunk ) {
+        foreach ( $this->chunks as $chunk ) {
             try {
                 $metadata->chunks[] = $this->renderChunkMetadata( $chunk );
             } catch ( \Exception $exception ) {
@@ -106,14 +116,16 @@ class StatusController extends KleinController {
     private function fetchData( $id_project, $password ) {
 
         // get project and resultSet
-        if ( null === $this->project = \Projects_ProjectDao::findByIdAndPassword( $id_project, $password ) ) {
+        if ( null === $this->project = Projects_ProjectDao::findByIdAndPassword( $id_project, $password, 60 * 5 ) ) {
             throw new NotFoundException( 'Project not found.' );
         }
+
+        $this->chunks = $this->project->getChunks( 60 * 5 );
 
         $this->projectResultSet = AnalysisDao::getProjectStatsVolumeAnalysis( $id_project );
 
         try {
-            $amqHandler         = new \AMQHandler();
+            $amqHandler         = new AMQHandler();
             $segmentsBeforeMine = $amqHandler->getActualForQID( $this->project->id );
         } catch ( \Exception $e ) {
             $segmentsBeforeMine = null;
@@ -128,6 +140,8 @@ class StatusController extends KleinController {
      */
     private function renderProjectMetadata() {
         $projectMetaData              = new \stdClass();
+        $projectMetaData->name        = $this->project->name;
+        $projectMetaData->subject     = $this->chunks[ 0 ]->subject;
         $projectMetaData->engines     = $this->getProjectEngines();
         $projectMetaData->memory_keys = $this->getProjectMemoryKeys();
         $projectMetaData->status      = $this->getProjectStatusAnalysis();
@@ -142,8 +156,8 @@ class StatusController extends KleinController {
      */
     private function getProjectEngines() {
         return [
-                'id_tms_engine' => (int)$this->project->getChunks()[ 0 ]->id_tms,
-                'id_mt_engine'  => (int)$this->project->getChunks()[ 0 ]->id_mt_engine,
+                'id_tms_engine' => (int)$this->chunks[ 0 ]->id_tms,
+                'id_mt_engine'  => (int)$this->chunks[ 0 ]->id_mt_engine,
         ];
     }
 
@@ -153,10 +167,10 @@ class StatusController extends KleinController {
      */
     private function getProjectMemoryKeys() {
         $tmKeys  = [];
-        $jobKeys = $this->project->getChunks()[ 0 ]->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+        $jobKeys = $this->chunks[ 0 ]->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
 
         foreach ( $jobKeys as $tmKey ) {
-            $tmKeys[][ trim($tmKey->name) ] = trim($tmKey->key);
+            $tmKeys[][ trim( $tmKey->name ) ] = trim( $tmKey->key );
         }
 
         return $tmKeys;
@@ -200,7 +214,7 @@ class StatusController extends KleinController {
         foreach ( $this->projectResultSet as $segInfo ) {
 
             // $this->projectResultSet unique key with jid and password (needed for splitted jobs)
-            $key = $segInfo[ 'jid' ] ."-".$segInfo[ 'jpassword' ];
+            $key = $segInfo[ 'jid' ] . "-" . $segInfo[ 'jpassword' ];
 
             if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
                 $_total_segments_analyzed += 1;
@@ -225,17 +239,22 @@ class StatusController extends KleinController {
             // save chunks totals data in $this->chunksTotalsCache for getJobTotals() function
             $keyValue = $this->getTotalsArrayKeyName( $segInfo[ 'match_type' ] );
 
-            if ( !isset( $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ] ) ) {
-                $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
+            $fileKey = ( null !== $segInfo[ 'id_file_part' ] and '' !== $segInfo[ 'id_file_part' ]  ) ? 'id_file_part' : 'id_file';
+            $originalFile = ( null !== $segInfo[ 'tag_key' ] and $segInfo[ 'tag_key' ] === 'original'  ) ? $segInfo[ 'tag_value' ] : $segInfo[ 'filename' ];
+
+            if ( !isset( $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ] ) ) {
+                $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ] = $this->totalsInitStructure;
             }
 
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ $keyValue ]             += $words;
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'id' ]                  = (int)$segInfo[ 'id_file' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'id_file_part' ]        = ( null !== $segInfo[ 'id_file_part' ] and '' !== $segInfo[ 'id_file_part' ] ) ? (int)$segInfo[ 'id_file_part' ]  : null;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ $keyValue ]             += $words;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'ORIGINAL_FILENAME' ]   = $originalFile;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
         }
 
         if ( $_total_wc_standard_analysis == 0 and $this->project->status_analysis == Constants_ProjectStatus::STATUS_FAST_OK ) {
@@ -266,7 +285,6 @@ class StatusController extends KleinController {
         }
 
         $summary                        = [];
-        $summary[ 'NAME' ]              = $this->project->name;
         $summary[ 'IN_QUEUE_BEFORE' ]   = $this->othersInQueue;
         $summary[ 'STATUS' ]            = $this->project->status_analysis;
         $summary[ 'TOTAL_SEGMENTS' ]    = count( $this->projectResultSet );
@@ -321,7 +339,7 @@ class StatusController extends KleinController {
      * @return array
      */
     private function getProjectFiles( $chunkId, $chunkPassword ) {
-        return array_values( $this->chunksTotalsCache[ $chunkId."-".$chunkPassword ] );
+        return array_values( $this->chunksTotalsCache[ $chunkId . "-" . $chunkPassword ] );
     }
 
     /**
@@ -334,7 +352,7 @@ class StatusController extends KleinController {
 
         $totals = new \stdClass();
 
-        foreach ( $this->chunksTotalsCache[ $chunkId."-".$chunkPassword ] as $id => $chunk ) {
+        foreach ( $this->chunksTotalsCache[ $chunkId . "-" . $chunkPassword ] as $id => $chunk ) {
             foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
                 $totals->$key += $chunk[ $key ];
             }
@@ -348,7 +366,7 @@ class StatusController extends KleinController {
      * @throws \Exception
      */
     private function getAnalyzeLink() {
-        return \Routes::analyze( [
+        return Routes::analyze( [
                 'project_name' => $this->project->name,
                 'id_project'   => $this->project->id,
                 'password'     => $this->project->password,
@@ -420,7 +438,7 @@ class StatusController extends KleinController {
      */
     private function getChunkUrls( \Jobs_JobStruct $job ) {
 
-        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job);
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct( $job, [], $this->project );
 
         return $jobUrlStruct->getUrls();
     }
