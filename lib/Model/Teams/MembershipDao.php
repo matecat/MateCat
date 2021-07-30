@@ -8,6 +8,7 @@
 
 namespace Teams;
 
+use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use PDO;

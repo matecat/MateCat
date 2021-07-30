@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
+import moment from 'moment'
 
 import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
 

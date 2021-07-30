@@ -8,12 +8,13 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * - the given team
  * - the given page
  *
+ * @param {object} param
  * @param {number} param.page
  * @param {object} param.searchFilter
  * @param {object} param.team
  * @returns {Promise<object>}
  */
-export const getProjects = ({
+export const getProjects = async ({
   searchFilter,
   team,
   page = searchFilter.currentPage,
@@ -31,9 +32,11 @@ export const getProjects = ({
     formData.append(key, data[key])
   })
 
-  return fetch(`${getMatecatApiDomain()}?action=getProjects`, {
+  const res = await fetch(`${getMatecatApiDomain()}?action=getProjects`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
-  }).then((res) => res.json())
+  })
+
+  return await res.json()
 }

@@ -3,7 +3,7 @@ import React from 'react'
 import IconFilter from '../../icons/IconFilter'
 import IconTick from '../../icons/IconTick'
 
-class FilterProjects extends React.Component {
+class FilterProjectsStatus extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -49,6 +49,7 @@ class FilterProjects extends React.Component {
         className="ui top left pointing dropdown"
         title="Status Filter"
         ref={(dropdown) => (this.dropdown = dropdown)}
+        data-testid="status-filter"
       >
         <IconFilter width={36} height={36} color={'#002b5c'} />
         <div style={{textTransform: 'capitalize'}} className="text">
@@ -61,6 +62,7 @@ class FilterProjects extends React.Component {
               key={i}
               className="item"
               data-value={e}
+              data-testid={`item-${e}`}
             >
               {e}{' '}
               {e === this.currentFilter ? (
@@ -74,4 +76,4 @@ class FilterProjects extends React.Component {
   }
 }
 
-export default FilterProjects
+export default FilterProjectsStatus
