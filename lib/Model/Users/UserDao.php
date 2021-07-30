@@ -27,6 +27,20 @@ class Users_UserDao extends DataAccess_AbstractDao {
         LIMIT 1 ";
 
     /**
+     * @param Users_UserStruct $userStruct
+     *
+     * @return int|void
+     */
+    public function delete( Users_UserStruct $userStruct ) {
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare( " DELETE FROM users WHERE uid = ?");
+        $stmt->execute( [$userStruct->uid] ) ;
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * @param $uids_array
      *
      * @return Users_UserStruct[]
@@ -86,12 +100,12 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $obj->create_date = date('Y-m-d H:i:s');
 
         $stmt = $conn->prepare("INSERT INTO users " .
-            " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
-            " VALUES " .
-            " ( " .
-            " :uid, :email, :salt, :pass, :create_date, " .
-            " :first_name, :last_name, :confirmation_token " .
-            " )"
+                " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
+                " VALUES " .
+                " ( " .
+                " :uid, :email, :salt, :pass, :create_date, " .
+                " :first_name, :last_name, :confirmation_token " .
+                " )"
         );
 
         $stmt->execute( $obj->toArray( array(
@@ -99,7 +113,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
                 'salt', 'pass',
                 'create_date', 'first_name',
                 'last_name', 'confirmation_token'
-                ))
+        ))
         );
 
         $record = $this->getByUid( $conn->lastInsertId() );
@@ -231,8 +245,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
         $stmt = $this->_getStatementForCache( self::$_query_owner_by_job_id );
         return $this->_fetchObject( $stmt,
-            new Users_UserStruct(),
-            [ 'job_id' => $job_id ]
+                new Users_UserStruct(),
+                [ 'job_id' => $job_id ]
         )[ 0 ];
     }
 
@@ -241,8 +255,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
         $stmt = $this->_getStatementForCache( self::$_query_assignee_by_project_id );
         return $this->_fetchObject( $stmt,
-            new Users_UserStruct(),
-            [ 'id_project' => $project_id ]
+                new Users_UserStruct(),
+                [ 'id_project' => $project_id ]
         )[ 0 ];
 
     }
