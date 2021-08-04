@@ -1,13 +1,11 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import ReactDOM from 'react-dom'
-import Header from './Header'
 import {rest} from 'msw'
-import {mswServer} from '../../../../../mocks/mswServer'
 
-window.React = React
-window.ReactDOM = ReactDOM
+import {mswServer} from '../../../../../mocks/mswServer'
+import Header from './Header'
+
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
@@ -19,7 +17,6 @@ window.config = {
   basepath: '/',
   hostpath: 'https://dev.matecat.com',
 }
-require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')

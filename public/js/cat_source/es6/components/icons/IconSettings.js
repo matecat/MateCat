@@ -1,3 +1,5 @@
+import React from 'react'
+
 const IconSettings = ({
   width = '42',
   height = '42',

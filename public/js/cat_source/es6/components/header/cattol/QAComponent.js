@@ -1,8 +1,5 @@
-/**
- * React Component for the editarea.
-
- */
 import React from 'react'
+
 import SegmentActions from '../../../actions/SegmentActions'
 import LXQ from '../../../utils/lxq.main'
 
