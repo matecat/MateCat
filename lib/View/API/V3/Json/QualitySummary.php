@@ -14,8 +14,10 @@ use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
+use Files\FilesPartsDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
+use LQA\EntryDao;
 use Projects_ProjectStruct;
 use Revise_FeedbackDAO;
 use RevisionFactory;
@@ -131,20 +133,21 @@ class QualitySummary {
         }
 
         return [
-                'revision_number'            => $revisionNumber,
-                'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-                'model_version'              => ( $model_version ? (int)$model_version : null ),
-                'equivalent_class'           => $jStruct->getQualityInfo(),
-                'is_pass'                    => $is_pass,
-                'quality_overall'            => $quality_overall,
-                'errors_count'               => (int)$jStruct->getErrorsCount(),
-                'revise_issues'              => $reviseIssues,
-                'score'                      => floatval( $score ),
-                'categories'                 => $categories,
-                'total_issues_weight'        => (float)$total_issues_weight,
-                'total_reviewed_words_count' => (int)$total_reviewed_words_count,
-                'passfail'                   => $passfail,
-                'total_time_to_edit'         => (int)$total_tte
+            'revision_number'            => $revisionNumber,
+            'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
+            'model_version'              => ( $model_version ? (int)$model_version : null ),
+            'equivalent_class'           => $jStruct->getQualityInfo(),
+            'is_pass'                    => $is_pass,
+            'quality_overall'            => $quality_overall,
+            'errors_count'               => (int)$jStruct->getErrorsCount(),
+            'revise_issues'              => $reviseIssues,
+            'score'                      => floatval( $score ),
+            'categories'                 => $categories,
+            'total_issues_weight'        => (float)$total_issues_weight,
+            'total_reviewed_words_count' => (int)$total_reviewed_words_count,
+            'passfail'                   => $passfail,
+            'total_time_to_edit'         => (int)$total_tte,
+            'details'                    => self::getDetails($jStruct->id, $jStruct->password, $revisionNumber+1),
         ];
     }
 
@@ -206,5 +209,50 @@ class QualitySummary {
                 $passFail,
                 $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model->hash
         ];
+    }
+
+    private static function getDetails($idJob, $password, $revisionNumber) {
+
+        $details = [];
+
+        $fileParts = \Jobs_JobDao::getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+
+        foreach ($fileParts as $filePart){
+
+            $originalFileName = $filePart->filename;
+            if(null !== $filePart->id_file_part_external_reference and $filePart->tag_key === 'original'){
+                $originalFileName = $filePart->tag_value;
+            }
+
+            $issuesGroupedByIdFilePart = (new EntryDao())->getIssuesGroupedByIdFilePart($idJob, $password, $revisionNumber, $filePart->id_file_part);
+
+            $issues = [];
+            $issuesWeight = 0;
+
+            foreach ($issuesGroupedByIdFilePart as $issue){
+                $issuesWeight = $issuesWeight +  $issue->penalty_points;
+                $catCode = json_decode($issue->cat_options);
+                $issues[] = [
+                    'penalty_points' => floatval($issue->penalty_points),
+                    'category_code' => $catCode->code,
+                    'category_label' => $issue->cat_label,
+                    'severity_code' =>  substr($issue->severity_label, 0, 3),
+                    'severity_label' => $issue->severity_label,
+                ];
+            }
+
+            $details[] = [
+                    'id_file' => (int)$filePart->id_file,
+                    'id_file_part' => ($filePart->id_file_part !== null) ? (int)$filePart->id_file_part : null,
+                    'original_filename' => $originalFileName,
+                    'reviewed_words_count' => floatval($filePart->reviewed_words_count),
+                    'issues_weight' => floatval($issuesWeight),
+                    'issues_entries' => count($issuesGroupedByIdFilePart),
+                    'issues' => $issues,
+            ];
+        }
+
+        return $details;
+
     }
 }

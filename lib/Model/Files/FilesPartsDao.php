@@ -3,6 +3,7 @@
 namespace Files ;
 
 use Chunks_ChunkStruct;
+use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Files_FileStruct;
@@ -37,17 +38,17 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $idFile
+     * @param int $id
      * @param int $ttl
      *
      * @return \DataAccess_IDaoStruct
      */
-    public function getByFileId( $idFile, $ttl = 0) {
+    public function getById( $id, $ttl = 0) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $sql     = "SELECT * FROM files_parts  WHERE id_file = :id_file ";
+        $sql     = "SELECT * FROM files_parts  WHERE id = :id ";
         $stmt    = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FilesPartsStruct(), [ 'id_file' => $idFile ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id' => $id ] )[ 0 ];
     }
 }
