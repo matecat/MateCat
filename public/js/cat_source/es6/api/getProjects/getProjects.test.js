@@ -44,7 +44,8 @@ test('works properly with full filter', async () => {
   expect(data).toEqual({data: payload.data})
 })
 
-test('throws on non empty errors', () => {
+test('throws on non empty errors', async () => {
+  expect.assertions(1)
   const payload = {errors: [500, 'VERY_BAD_ERROR'], data: {fake: 'data'}}
 
   mswServer.use(
@@ -58,7 +59,7 @@ test('throws on non empty errors', () => {
     ajaxDomainsNumber: 20,
   }
 
-  return expect(getProjects({searchFilter: {}, team: {}})).rejects.toEqual(
+  await expect(getProjects({searchFilter: {}, team: {}})).rejects.toEqual(
     payload.errors,
   )
 })
