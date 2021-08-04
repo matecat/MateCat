@@ -2,7 +2,6 @@ import _ from 'lodash'
 
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import DQFModal from '../components/modals/DQFModal'
-import OutsourceModal from '../components/modals/OutsourceModal'
 import SplitJobModal from '../components/modals/SplitJob'
 import CreateTeamModal from '../components/modals/CreateTeam'
 import ModifyTeamModal from '../components/modals/ModifyTeam'
@@ -18,33 +17,6 @@ let ModalsActions = {
       hideChangeName: hideChangeName,
     }
     APP.ModalWindow.showModalComponent(ModifyTeamModal, props, 'Modify Team')
-  },
-
-  openOutsourceModal: function (
-    project,
-    job,
-    url,
-    fromManage,
-    translatorOpen,
-    showTranslatorBox,
-  ) {
-    var props = {
-      project: project,
-      job: job,
-      url: url,
-      fromManage: fromManage,
-      translatorOpen: translatorOpen,
-      showTranslatorBox: !_.isUndefined(showTranslatorBox)
-        ? showTranslatorBox
-        : true,
-    }
-    var style = {width: '970px', maxWidth: '970px'}
-    APP.ModalWindow.showModalComponent(
-      OutsourceModal,
-      props,
-      'Translate',
-      style,
-    )
   },
 
   openSplitJobModal: function (job, project, callback) {
