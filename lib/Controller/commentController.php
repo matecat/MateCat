@@ -320,6 +320,7 @@ class commentController extends ajaxController {
         $userStruct->uid = $this->user->uid;
 
         $userDao = new Users_UserDao( Database::obtain() );
+        $userDao->setCacheTTL( 60 * 10 );
         $result  = $userDao->read( $userStruct );
 
         if ( empty( $result ) ) {

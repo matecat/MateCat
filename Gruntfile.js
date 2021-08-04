@@ -305,21 +305,6 @@ module.exports = function (grunt) {
     },
 
     watch: {
-      js: {
-        files: [
-          basePath + 'cat_source/*.js',
-          basePath + 'cat_source/review/*.js',
-          basePath + 'cat_source/review_extended/*.js',
-          basePath + 'tm.js',
-          basePath + 'login.js',
-          basePath + 'advancedOptionsTab.js',
-        ],
-        tasks: ['concat:js'],
-        options: {
-          interrupt: true,
-          livereload: true,
-        },
-      },
       cssCattol: {
         files: cssWatchFiles,
         tasks: ['sass'],

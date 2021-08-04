@@ -4,6 +4,7 @@ namespace Url;
 
 use Jobs_JobStruct;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
 
 class JobUrlBuilder {
 
@@ -21,10 +22,14 @@ class JobUrlBuilder {
      *
      * @return JobUrlStruct
      */
-    public static function createFromJobStruct( Jobs_JobStruct $job, $options = [] ) {
+    public static function createFromJobStruct( Jobs_JobStruct $job, $options = [], Projects_ProjectStruct $project = null ) {
 
-        // 2. find the correlated project
-        $project = Projects_ProjectDao::findById( $job->id_project );
+        // 1. if project is passed we gain a query
+        if( $project == null ){
+            // 2. find the correlated project, if not passed
+            $project = Projects_ProjectDao::findById( $job->id_project );
+        }
+
         if ( !$project ) {
             return null;
         }
