@@ -1,5 +1,7 @@
+import _ from 'lodash'
+
 import SegmentActions from '../../../../actions/SegmentActions'
-// import CatToolActions  from "../../../../actions/CatToolActions";
+import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
 
@@ -57,8 +59,7 @@ let SearchUtils = {
       this.searchParams.status == 'all'
     ) {
       APP.alert({
-        msg:
-          'Enter text in source or target input boxes<br /> or select a status.',
+        msg: 'Enter text in source or target input boxes<br /> or select a status.',
       })
       return false
     }
@@ -410,10 +411,10 @@ let SearchUtils = {
     //     spanArray.push(text);
     //     return "$&";
     // });
-    text = text.replace(/>/g, function (match, index) {
+    text = text.replace(/>/g, function () {
       return GTPLACEHOLDER
     })
-    text = text.replace(/</g, function (match, index) {
+    text = text.replace(/</g, function () {
       return LTPLACEHOLDER
     })
     let tagsIntervals = []
@@ -441,12 +442,11 @@ let SearchUtils = {
     }
   },
 
-  restoreTextAfterReplace(text, tagsArray) {
+  restoreTextAfterReplace(text) {
     // text = text.replace(/(\$&)/g, function ( match, text ) {
     //     return tagsArray.shift();
     // });
     text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
-    //console.log('-- text3: ' + text);
     text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<')
     return text
   },
@@ -543,4 +543,4 @@ let SearchUtils = {
   },
 }
 
-module.exports = SearchUtils
+export default SearchUtils

@@ -1,8 +1,8 @@
+import _ from 'lodash'
 import LexiqaHighlight from '../../LexiqaHighlight/LexiqaHighlight.component'
 import CompoundDecorator from '../CompoundDecorator'
 import {CompositeDecorator, EditorState} from 'draft-js'
 import * as DraftMatecatConstants from './editorConstants'
-import _ from 'lodash'
 import canDecorateRange from './canDecorateRange'
 
 const activateLexiqa = (

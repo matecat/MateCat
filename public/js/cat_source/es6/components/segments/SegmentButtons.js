@@ -1,8 +1,6 @@
-/**
- * React Component .
-
- */
 import React from 'react'
+import _ from 'lodash'
+
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
@@ -31,7 +29,6 @@ class SegmentButton extends React.Component {
   }
 
   clickOnApprovedButton(event, gotoNexUnapproved) {
-    let target = event.target
     setTimeout(() =>
       UI.clickOnApprovedButton(this.props.segment, gotoNexUnapproved),
     )

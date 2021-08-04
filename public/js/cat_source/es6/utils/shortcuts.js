@@ -179,4 +179,4 @@ const Shortcuts = {
   },
 }
 
-module.exports = Shortcuts
+export default Shortcuts

@@ -1,10 +1,14 @@
 import React from 'react'
+import _ from 'lodash'
+
 import CattolConstants from '../../../../constants/CatToolConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolStore from '../../../../stores/CatToolStore'
 import SearchUtils from './searchUtils'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
+import CatToolActions from '../../../../actions/CatToolActions'
+import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 
 class Search extends React.Component {
   constructor(props) {
@@ -112,9 +116,8 @@ class Search extends React.Component {
       _.remove(searchResults, (item) => item.id === sid)
     }
     let newResultArray = _.map(searchResults, (item) => item.id)
-    const searchObject = SearchUtils.updateSearchObjectAfterReplace(
-      newResultArray,
-    )
+    const searchObject =
+      SearchUtils.updateSearchObjectAfterReplace(newResultArray)
     this.setState({
       total: total,
       searchResults: searchObject.searchResults,
@@ -207,8 +210,7 @@ class Search extends React.Component {
     let self = this
     let props = {
       modalName: 'confirmReplace',
-      text:
-        'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
+      text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
       successText: 'Continue',
       successCallback: function () {
         SearchUtils.execReplaceAll(self.state.search).then((d) => {
@@ -314,7 +316,7 @@ class Search extends React.Component {
     })
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (this.props.active) {
       if (!prevProps.active) {
         if (this.sourceEl && this.state.focus) {
@@ -330,7 +332,7 @@ class Search extends React.Component {
       if (!this.dropdownInit) {
         this.dropdownInit = true
         $(this.statusDropDown).dropdown({
-          onChange: function (value, text, $selectedItem) {
+          onChange: function (value) {
             value = value === '' ? 'all' : value
             self.handleStatusChange(value)
           },
@@ -348,12 +350,8 @@ class Search extends React.Component {
   }
   getResultsHtml() {
     var html = ''
-    const {
-      featuredSearchResult,
-      searchReturn,
-      occurrencesList,
-      searchResults,
-    } = this.state
+    const {featuredSearchResult, searchReturn, occurrencesList, searchResults} =
+      this.state
     const segmentIndex = _.findIndex(
       searchResults,
       (item) => item.id === occurrencesList[featuredSearchResult],

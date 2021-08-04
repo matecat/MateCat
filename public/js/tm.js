@@ -1,8 +1,7 @@
-/*
- Component: tm
- Created by andreamartines on 02/10/14.
- Loaded by cattool and upload page.
- */
+import Cookies from 'js-cookie'
+
+import SegmentActions from './cat_source/es6/actions/SegmentActions'
+import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -2409,7 +2408,7 @@
 
       var validateEmail = function (emails) {
         var re =
-          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         var result = true
         emails.split(',').forEach(function (email) {
           if (!re.test(email.trim())) result = email

@@ -1,8 +1,6 @@
-/**
- * React Component .
-
- */
 import React from 'react'
+import _ from 'lodash'
+
 import EditArea from './Editarea'
 import TagUtils from '../../utils/tagUtils'
 import CursorUtils from '../../utils/cursorUtils'
@@ -11,6 +9,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentTarget extends React.Component {
   constructor(props) {
@@ -132,7 +131,7 @@ class SegmentTarget extends React.Component {
       var tagCopyButton = ''
       var tagLockCustomizable
       if (
-        this.props.segment.segment.match(/\&lt;.*?\&gt;/gi) &&
+        this.props.segment.segment.match(/&lt;.*?&gt;/gi) &&
         config.tagLockCustomizable
       ) {
         tagLockCustomizable = UI.tagLockEnabled ? (
@@ -247,6 +246,7 @@ class SegmentTarget extends React.Component {
                 className="revise-qr-link"
                 title="Segment Quality Report."
                 target="_blank"
+                rel="noreferrer"
                 href={
                   '/revise-summary/' +
                   config.id_job +
@@ -324,8 +324,6 @@ class SegmentTarget extends React.Component {
       this.autoFillTagsInTarget,
     )
   }
-
-  componentDidUpdate(prevProps) {}
 
   render() {
     let buttonsDisabled = false

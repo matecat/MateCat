@@ -1,3 +1,10 @@
+import {sprintf} from 'sprintf-js'
+
+import SegmentStore from '../../../../stores/SegmentStore'
+import SegmentActions from '../../../../actions/SegmentActions'
+import CatToolActions from '../../../../actions/CatToolActions'
+import CommonUtils from '../../../../utils/commonUtils'
+
 let SegmentFilterUtils = {
   enabled: () => config.segmentFilterEnabled,
 
@@ -58,7 +65,7 @@ let SegmentFilterUtils = {
 
   initEvents: () => {
     if (SegmentFilterUtils.enabled()) {
-      $(document).on('segmentsAdded', function (e) {
+      $(document).on('segmentsAdded', function () {
         if (SegmentFilterUtils.filtering()) {
           SegmentFilterUtils.tryToFocusLastSegment()
         }
@@ -278,4 +285,4 @@ let SegmentFilterUtils = {
   },
 }
 
-module.exports = SegmentFilterUtils
+export default SegmentFilterUtils

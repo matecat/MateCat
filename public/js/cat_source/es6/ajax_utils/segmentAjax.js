@@ -1,3 +1,9 @@
+import {sprintf} from 'sprintf-js'
+
+import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
+import TagUtils from '../utils/tagUtils'
+import TextUtils from '../utils/textUtils'
+
 if (!window.API) {
   window.API = {}
 }
@@ -33,13 +39,13 @@ API.SEGMENT = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=setTranslation',
+      url: getMatecatApiDomain() + '?action=setTranslation',
     })
   },
 
   getSegmentsIssues: function (idSegment) {
     var path = sprintf(
-      APP.getRandomUrl() + 'api/v2/jobs/%s/%s/translation-issues',
+      getMatecatApiDomain() + 'api/v2/jobs/%s/%s/translation-issues',
       config.id_job,
       config.password,
       idSegment,
@@ -53,7 +59,7 @@ API.SEGMENT = {
 
   getSegmentVersionsIssues: function (idSegment) {
     var path = sprintf(
-      APP.getRandomUrl() +
+      getMatecatApiDomain() +
         'api/v2/jobs/%s/%s/revise/segments/%s/translation-versions',
       config.id_job,
       config.password,
@@ -68,7 +74,8 @@ API.SEGMENT = {
 
   sendSegmentVersionIssue: function (idSegment, data) {
     var path = sprintf(
-      APP.getRandomUrl() + 'api/v2/jobs/%s/%s/segments/%s/translation-issues',
+      getMatecatApiDomain() +
+        'api/v2/jobs/%s/%s/segments/%s/translation-issues',
       config.id_job,
       config.review_password,
       idSegment,
@@ -84,7 +91,7 @@ API.SEGMENT = {
 
   sendSegmentVersionIssueComment: function (idSegment, idIssue, data) {
     var replies_path = sprintf(
-      APP.getRandomUrl() +
+      getMatecatApiDomain() +
         'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
       config.id_job,
       config.password,
@@ -115,7 +122,7 @@ API.SEGMENT = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=glossary',
+      url: getMatecatApiDomain() + '?action=glossary',
     })
   },
 
@@ -137,7 +144,7 @@ API.SEGMENT = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=glossary',
+      url: getMatecatApiDomain() + '?action=glossary',
     })
   },
   // Parameter id must be an array because if it is done after a set the elements can be more than one
@@ -156,7 +163,7 @@ API.SEGMENT = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=glossary',
+      url: getMatecatApiDomain() + '?action=glossary',
     })
   },
 
@@ -175,7 +182,7 @@ API.SEGMENT = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=glossary',
+      url: getMatecatApiDomain() + '?action=glossary',
     })
   },
 
@@ -205,7 +212,7 @@ API.SEGMENT = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=glossary',
+      url: getMatecatApiDomain() + '?action=glossary',
     })
   },
   approveSegments: function (segments) {
@@ -221,7 +228,7 @@ API.SEGMENT = {
       type: 'post',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v2/jobs/' +
         config.id_job +
         '/' +
@@ -242,7 +249,7 @@ API.SEGMENT = {
       type: 'post',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v2/jobs/' +
         config.id_job +
         '/' +
@@ -263,7 +270,7 @@ API.SEGMENT = {
       data: data,
       type: 'post',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=setSegmentSplit',
+      url: getMatecatApiDomain() + '?action=setSegmentSplit',
     })
   },
 
@@ -286,7 +293,7 @@ API.SEGMENT = {
       data: data,
       type: 'post',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=getContribution',
+      url: getMatecatApiDomain() + '?action=getContribution',
     })
   },
 
@@ -325,7 +332,7 @@ API.SEGMENT = {
       data: data,
       type: 'post',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=getContribution',
+      url: getMatecatApiDomain() + '?action=getContribution',
     })
   },
 }

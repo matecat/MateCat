@@ -68,4 +68,4 @@ let TeamsActions = {
   },
 }
 
-module.exports = TeamsActions
+export default TeamsActions

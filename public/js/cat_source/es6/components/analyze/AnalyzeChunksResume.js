@@ -1,7 +1,9 @@
 import React from 'react'
+import _ from 'lodash'
 
 import AnalyzeActions from '../../actions/AnalyzeActions'
 import OutsourceContainer from '../outsource/OutsourceContainer'
+import ModalsActions from '../../actions/ModalsActions'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {

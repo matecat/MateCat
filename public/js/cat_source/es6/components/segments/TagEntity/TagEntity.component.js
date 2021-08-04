@@ -1,10 +1,13 @@
 import React, {Component} from 'react'
+import _ from 'lodash'
+
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import EditAreaConstants from '../../../constants/EditAreaConstants'
 import SegmentActions from '../../../actions/SegmentActions'
+import SearchUtils from '../../header/cattol/search/searchUtils'
 
 class TagEntity extends Component {
   constructor(props) {
@@ -148,29 +151,11 @@ class TagEntity extends Component {
     this.setState({shouldTooltipOnHover})
   }
 
-  shouldComponentUpdate(nextProps, nextState, nextContext) {
-    const searchChange =
-      this.state.searchParams.active !== nextState.searchParams.active ||
-      (nextState.searchParams.active &&
-        nextState.searchParams.currentInSearchIndex !==
-          this.state.searchParams.currentInSearchIndex)
-    const entityChanged = this.props.entityKey !== nextProps.entityKey
-    const styleChanged = this.state.tagStyle !== nextState.tagStyle
-    const warningChanged =
-      this.state.tagWarningStyle !== nextState.tagWarningStyle
-    const tooltipChanged =
-      this.state.showTooltip !== nextState.showTooltip ||
-      this.state.shouldTooltipOnHover !== nextState.shouldTooltipOnHover
-    const childrenChange =
-      nextProps.children[0].props.selection &&
-      nextProps.children[0].props.selection.equals(
-        this.props.children[0].props.selection,
-      )
-    // return entityChanged || styleChanged || warningChanged || tooltipChanged || searchChange || childrenChange;
+  shouldComponentUpdate() {
     return true
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (prevProps.entitykey !== this.props.entityKey) {
       const textSpanDisplayed =
         this.tagRef && this.tagRef.querySelector('span[data-text="true"]')
@@ -211,16 +196,8 @@ class TagEntity extends Component {
   }
 
   render() {
-    const {
-      children,
-      entityKey,
-      blockKey,
-      start,
-      end,
-      contentState,
-      getUpdatedSegmentInfo,
-      isTarget,
-    } = this.props
+    const {children, entityKey, contentState, getUpdatedSegmentInfo} =
+      this.props
     const {
       tagStyle,
       tagWarningStyle,
@@ -234,11 +211,10 @@ class TagEntity extends Component {
       this.props.entityKey === this.state.entityKey
         ? tagStyle
         : this.selectCorrectStyle()
-    const {sid, openSplit} = getUpdatedSegmentInfo()
+    const {openSplit} = getUpdatedSegmentInfo()
 
     const {
-      type: entityType,
-      data: {id: entityId, placeholder: entityPlaceholder, name: entityName},
+      data: {id: entityId, placeholder: entityPlaceholder},
     } = contentState.getEntity(entityKey)
     const decoratedText = Array.isArray(children)
       ? children[0].props.text
@@ -334,7 +310,7 @@ class TagEntity extends Component {
     }
   }
 
-  updateTagWarningStyle = (sid, isTarget) => {
+  updateTagWarningStyle = () => {
     const {tagWarningStyle: prevTagWarningStyle} = this.state
     const tagWarningStyle = this.highlightOnWarnings()
     if (prevTagWarningStyle !== tagWarningStyle) {
@@ -347,20 +323,8 @@ class TagEntity extends Component {
     clickedTagText = null,
     focused = false,
   ) => {
-    const {
-      entityKey,
-      contentState,
-      getUpdatedSegmentInfo,
-      isRTL,
-      isTarget,
-      start,
-      end,
-      blockKey,
-    } = this.props
-    const {
-      currentSelection: {anchorOffset, focusOffset, anchorKey, hasFocus},
-      segmentOpened,
-    } = getUpdatedSegmentInfo()
+    const {entityKey, contentState, getUpdatedSegmentInfo, isRTL} = this.props
+    const {segmentOpened} = getUpdatedSegmentInfo()
     const {
       data: {id: entityId, placeholder: entityPlaceholder, name: entityName},
     } = contentState.getEntity(entityKey)
@@ -389,12 +353,8 @@ class TagEntity extends Component {
   }
 
   highlightOnWarnings = () => {
-    const {
-      getUpdatedSegmentInfo,
-      contentState,
-      entityKey,
-      isTarget,
-    } = this.props
+    const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} =
+      this.props
     const {tagMismatch, segmentOpened} = getUpdatedSegmentInfo()
     const {data: entityData} = contentState.getEntity(entityKey) || {}
 

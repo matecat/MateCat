@@ -1,35 +1,17 @@
+import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
+
 if (!window.API) {
   window.API = {}
 }
 
 window.API.PROJECTS = {
-  /**
-   * Retrieve Projects. Passing filters is possible to retrieve projects
-   */
-  getProjects: function (team, searchFilter, page) {
-    var pageNumber = page ? page : searchFilter.currentPage
-    var data = {
-      id_team: team.id,
-      page: pageNumber,
-      filter: !$.isEmptyObject(searchFilter.filter) ? 1 : 0,
-    }
-
-    // Filters
-    data = $.extend(data, searchFilter.filter)
-
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=getProjects',
-    })
-  },
   getProject: function (id) {
     return $.ajax({
       async: true,
       type: 'get',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/v2/projects/' + id + '/' + config.password,
+      url:
+        getMatecatApiDomain() + 'api/v2/projects/' + id + '/' + config.password,
     })
   },
   /**
@@ -53,7 +35,7 @@ window.API.PROJECTS = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=changeJobsStatus',
+      url: getMatecatApiDomain() + '?action=changeJobsStatus',
     })
   },
 
@@ -63,7 +45,7 @@ window.API.PROJECTS = {
       type: 'get',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v2/activity/project/' +
         id +
         '/' +
@@ -81,7 +63,11 @@ window.API.PROJECTS = {
       type: 'PUT',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() + 'api/v2/teams/' + idOrg + '/projects/' + idProject,
+        getMatecatApiDomain() +
+        'api/v2/teams/' +
+        idOrg +
+        '/projects/' +
+        idProject,
     })
   },
   changeProjectAssignee: function (idOrg, idProject, newUserId) {
@@ -95,7 +81,11 @@ window.API.PROJECTS = {
       type: 'put',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() + 'api/v2/teams/' + idOrg + '/projects/' + idProject,
+        getMatecatApiDomain() +
+        'api/v2/teams/' +
+        idOrg +
+        '/projects/' +
+        idProject,
     })
   },
 
@@ -108,7 +98,7 @@ window.API.PROJECTS = {
       type: 'PUT',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v2/teams/' +
         project.id_team +
         '/projects/' +
@@ -126,7 +116,7 @@ window.API.PROJECTS = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=getVolumeAnalysis',
+      url: getMatecatApiDomain() + '?action=getVolumeAnalysis',
     })
   },
   getJobVolumeAnalysis: function () {
@@ -140,7 +130,7 @@ window.API.PROJECTS = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + '?action=getVolumeAnalysis',
+      url: getMatecatApiDomain() + '?action=getVolumeAnalysis',
     })
   },
   getCompletionStatus: function () {
@@ -155,7 +145,7 @@ window.API.PROJECTS = {
       type: 'GET',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v2/projects/' +
         pid +
         '/' +

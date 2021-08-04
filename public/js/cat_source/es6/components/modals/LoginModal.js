@@ -1,8 +1,11 @@
 import PropTypes from 'prop-types'
+import update from 'immutability-helper'
+import _ from 'lodash'
+import React from 'react'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -90,7 +93,7 @@ class LoginModal extends React.Component {
     this.setState({requestRunning: true})
     this.checkRedeemProject().then(
       this.sendLoginData()
-        .done(function (data) {
+        .done(function () {
           if (self.props.goToManage) {
             window.location = '/manage/'
           } else {

@@ -1,3 +1,13 @@
+import Cookies from 'js-cookie'
+import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
+
+import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
+import TeamsActions from './cat_source/es6/actions/TeamsActions'
+import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
+import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
+import MBC from './cat_source/es6/utils/mbc.main'
+
 window.APP = null
 
 window.APP = {
@@ -141,18 +151,6 @@ window.APP = {
       checkbox_label: options['checkbox-label'],
     })
   },
-  getRandomUrl: function () {
-    if (config.enableMultiDomainApi) {
-      return (
-        '//' +
-        Math.floor(Math.random() * config.ajaxDomainsNumber) +
-        '.ajax.' +
-        location.host +
-        '/'
-      )
-    }
-    return config.basepath
-  },
   doRequest: function (req, log) {
     var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
     var version =
@@ -161,7 +159,7 @@ window.APP = {
         : '-v' + config.build_number
     var builtURL = req.url
       ? req.url
-      : this.getRandomUrl() +
+      : getMatecatApiDomain() +
         '?action=' +
         req.data.action +
         logTxt +
@@ -638,7 +636,7 @@ window.APP = {
 
   getParameterByName: function (name, url) {
     if (!url) url = window.location.href
-    name = name.replace(/[\[\]]/g, '\\$&')
+    name = name.replace(/[[\]]/g, '\\$&')
     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
       results = regex.exec(url)
     if (!results) return null
@@ -749,7 +747,7 @@ window.APP = {
 
   checkEmail: function (text) {
     var re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     if (!re.test(text.trim())) {
       return false
     }

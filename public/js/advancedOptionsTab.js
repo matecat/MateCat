@@ -1,7 +1,7 @@
-/*
- Component: Advanced Options Tab
- */
-
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import LXQ from './cat_source/es6/utils/lxq.main'
+import SegmentUtils from './cat_source/es6/utils/segmentUtils'
+import Speech2Text from './cat_source/es6/utils/speech2text'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -39,7 +39,7 @@
         if (acceptedLanguagesLXQ.indexOf(config.target_rfc) === -1) {
           try {
             notAcceptedLanguages.push(
-              _.find(config.languages_array, function (e) {
+              config.languages_array.find(function (e) {
                 return e.code === config.target_rfc
               }).name,
             )
@@ -75,10 +75,10 @@
         if (config.isReview) {
           tpContainer.addClass('option-unavailable-revise')
         } else {
-          var sourceLang = _.find(config.languages_array, function (e) {
+          var sourceLang = config.languages_array.find(function (e) {
             return e.code === config.source_rfc
           })
-          var targetLang = _.find(config.languages_array, function (e) {
+          var targetLang = config.languages_array.find(function (e) {
             return e.code === config.target_rfc
           })
           sourceLang = sourceLang ? sourceLang.name : config.source_rfc

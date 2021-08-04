@@ -1,10 +1,8 @@
-/**
- * React Component for the warnings.
-
- */
 import React from 'react'
+import _ from 'lodash'
+
 import CommentsStore from '../../stores/CommentsStore'
-import SegmentsActions from '../../actions/SegmentActions'
+import SegmentActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import MBC from '../../utils/mbc.main'
 import Shortcuts from '../../utils/shortcuts'
@@ -33,14 +31,10 @@ class SegmentsCommentsIcon extends React.Component {
 
   openComments(event) {
     event.stopPropagation()
-    SegmentsActions.openSegmentComment(this.props.segment.sid)
+    SegmentActions.openSegmentComment(this.props.segment.sid)
     if (!UI.isReadonlySegment(this.props.segment))
-      SegmentsActions.openSegment(this.props.segment.sid)
+      SegmentActions.openSegment(this.props.segment.sid)
     localStorage.setItem(MBC.localStorageCommentsClosed, false)
-  }
-
-  componentDidUpdate() {
-    // const comments = CommentsStore.getCommentsBySegment(this.props.segment.sid);
   }
 
   componentDidMount() {

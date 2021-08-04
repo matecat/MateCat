@@ -1,4 +1,5 @@
 import React from 'react'
+
 import TeamSelect from './TeamsSelect'
 import ProjectInfo from './HeaderProjectInfo'
 import FilterProjects from './manage/FilterProjects'
@@ -10,6 +11,7 @@ import IconUserLogout from '../icons/IconUserLogout'
 import ActionMenu from './ActionMenu'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 class Header extends React.Component {
   constructor(props) {
@@ -65,7 +67,7 @@ class Header extends React.Component {
     dropdownProfile.dropdown()
   }
 
-  logoutUser() {
+  logoutUser = () => {
     $.post('/api/app/user/logout', function () {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
@@ -118,12 +120,38 @@ class Header extends React.Component {
 
   getUserIcon = () => {
     if (this.state.loggedUser) {
+      // dom elements attributes declarations
+      const dropdownAttributes = {
+        className: 'ui dropdown',
+        ref: (dropdownProfile) => (this.dropdownProfile = dropdownProfile),
+        id: 'profile-menu',
+        'data-testid': 'user-menu',
+      }
+      const profileItemAttributes = {
+        className: 'item',
+        'data-value': 'profile',
+        id: 'profile-item',
+        onClick: this.openPreferencesModal,
+        'data-testid': 'profile-item',
+      }
+      const logoutItemAttributes = {
+        className: 'item',
+        'data-value': 'logout',
+        id: 'logout-item',
+        onClick: this.logoutUser,
+        'data-testid': 'logout-item',
+      }
+      const myProjectsItemAttributes = {
+        className: 'item',
+        'data-value': 'Manage',
+        id: 'manage-item',
+        onClick: this.openManage,
+      }
+
       if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
         return (
           <div
-            className={'ui dropdown'}
-            ref={(dropdownProfile) => (this.dropdownProfile = dropdownProfile)}
-            id={'profile-menu'}
+            {...{...dropdownAttributes, 'data-testid': 'user-menu-metadata'}}
           >
             <img
               className="ui mini circular image ui-user-top-image"
@@ -132,43 +160,18 @@ class Header extends React.Component {
               alt="Profile picture"
             />
             <div className="menu">
-              <div
-                className="item"
-                data-value="Manage"
-                id="manage-item"
-                onClick={this.openManage.bind(this)}
-              >
-                My Projects
-              </div>
-              <div
-                className="item"
-                data-value="profile"
-                id="profile-item"
-                onClick={this.openPreferencesModal.bind(this)}
-              >
-                Profile
-              </div>
-              <div
-                className="item"
-                data-value="logout"
-                id="logout-item"
-                onClick={this.logoutUser.bind(this)}
-              >
-                Logout
-              </div>
+              {!this.props.showFilterProjects && (
+                <div {...myProjectsItemAttributes}>My Projects</div>
+              )}
+              <div {...profileItemAttributes}>Profile</div>
+              <div {...logoutItemAttributes}>Logout</div>
             </div>
           </div>
         )
       }
 
       return (
-        <div
-          className={'ui dropdown'}
-          ref={(dropdownProfile) => {
-            this.dropdownProfile = dropdownProfile
-          }}
-          id={'profile-menu'}
-        >
+        <div {...dropdownAttributes}>
           <div
             className="ui user circular image ui-user-top-image"
             title="Personal settings"
@@ -176,30 +179,9 @@ class Header extends React.Component {
             {config.userShortName}
           </div>
           <div className="menu">
-            <div
-              className="item"
-              data-value="Manage"
-              id="manage-item"
-              onClick={this.openManage.bind(this)}
-            >
-              My Projects
-            </div>
-            <div
-              className="item"
-              data-value="profile"
-              id="profile-item"
-              onClick={this.openPreferencesModal.bind(this)}
-            >
-              Profile
-            </div>
-            <div
-              className="item"
-              data-value="logout"
-              id="logout-item"
-              onClick={this.logoutUser.bind(this)}
-            >
-              Logout
-            </div>
+            <div {...myProjectsItemAttributes}>My Projects</div>
+            <div {...profileItemAttributes}>Profile</div>
+            <div {...logoutItemAttributes}>Logout</div>
           </div>
         </div>
       )
@@ -311,7 +293,7 @@ class Header extends React.Component {
       <section className="nav-mc-bar ui grid">
         <nav className="sixteen wide column navigation">
           <div className="ui grid">
-            <div className="three wide column">
+            <div className="three wide column" data-testid="logo">
               <a href="/" className="logo" />
             </div>
             {componentToShow}

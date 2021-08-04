@@ -1,3 +1,13 @@
+import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
+import moment from 'moment'
+
+import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
+import CommonUtils from '../es6/utils/commonUtils'
+import OfflineUtils from '../es6/utils/offlineUtils'
+import SegmentActions from '../es6/actions/SegmentActions'
+import SegmentStore from '../es6/stores/SegmentStore'
+
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data_array, diff) {
@@ -66,7 +76,7 @@ if (ReviewExtended.enabled()) {
     deleteTranslationIssue: function (context) {
       var parsed = JSON.parse(context)
       var issue_path = sprintf(
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
           'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
         config.id_job,
         config.review_password,

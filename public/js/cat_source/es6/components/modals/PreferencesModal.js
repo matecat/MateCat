@@ -1,5 +1,6 @@
-import DQFCredentials from './DQFCredentials'
+import React from 'react'
 
+import DQFCredentials from './DQFCredentials'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 
@@ -132,7 +133,7 @@ class PreferencesModal extends React.Component {
 
   getApiKeyHtml() {
     return (
-      <div>
+      <div data-testid="preferences-modal">
         <h2>API Key</h2>
         {this.state.credentials ? (
           this.state.confirmDelete ? (

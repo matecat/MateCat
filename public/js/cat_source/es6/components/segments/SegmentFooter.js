@@ -1,16 +1,18 @@
-/**
- * React Component .
-
- */
-import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
-
 import React from 'react'
+import Cookies from 'js-cookie'
+import _ from 'lodash'
+
+import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentTabConcordance from './SegmentFooterTabConcordance'
 import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentTabRevise from './SegmentFooterTabRevise'
+import SegmentFooterTabMatches from './SegmentFooterTabMatches'
+import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import SegmentActions from '../../actions/SegmentActions'
+
 class SegmentFooter extends React.Component {
   constructor(props) {
     super(props)
@@ -187,7 +189,7 @@ class SegmentFooter extends React.Component {
     switch (tab.code) {
       case 'tm':
         return (
-          <SegmentTabMatches
+          <SegmentFooterTabMatches
             key={'container_' + tab.code}
             code={tab.code}
             active_class={open_class}
@@ -231,7 +233,7 @@ class SegmentFooter extends React.Component {
         )
       case 'notes':
         return (
-          <SegmentTabMessages
+          <SegmentFooterTabMessages
             key={'container_' + tab.code}
             code={tab.code}
             active_class={open_class}

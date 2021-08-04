@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 import IconDown from '../../icons/IconDown'
 import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'
@@ -197,47 +198,8 @@ class FilterProjects extends React.Component {
           <div className="menu">{members}</div>
         </div>
       )
-      /*result = <div className="users-filter" title="Filter project by members">
-
-                        <div className="assigned-list">
-                            <p>Projects of: </p>
-                        </div>
-
-                        <div className="list-team">
-                            <div className="ui dropdown top right pointing users-projects"
-                                 ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                                <div className="text">
-                                    <div className="ui all label">ALL</div>
-                                  All Members
-                                </div>
-                                <i className="dropdown icon"/>
-                                <div className="menu">
-                                    <div className="ui icon search input">
-                                        <i className="icon-search icon"/>
-                                        <input type="text" name="UserName" placeholder="Search by name." />
-                                    </div>
-                                    <div className="scrolling menu">
-                                    {members}
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>;*/
     }
     return result
-  }
-
-  getCurrentStatusLabel() {
-    switch (this.state.currentStatus) {
-      case 'active':
-        return <div className="active">Active:</div>
-      case 'archived':
-        return <div className="archived">Archived:</div>
-      case 'cancelled':
-        return <div className="cancelled">Cancelled:</div>
-    }
   }
 
   shouldComponentUpdate(nextProps) {

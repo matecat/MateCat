@@ -1,15 +1,22 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Immutable from 'immutable'
+import _ from 'lodash'
+
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import TeamsActions from '../../actions/TeamsActions'
+import ModalsActions from '../../actions/ModalsActions'
+import CatToolActions from '../../actions/CatToolActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
-import React from 'react'
-import ReactDOM from 'react-dom'
-import Immutable from 'immutable'
+import {getProjects} from '../../api/getProjects'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
+
 class Dashboard extends React.Component {
   constructor() {
     super()
@@ -37,31 +44,30 @@ class Dashboard extends React.Component {
       this.getTeamStructure(selectedTeam).done(() => {
         TeamsActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
-        API.PROJECTS.getProjects(selectedTeam, this.Search).done((response) => {
-          if (
-            typeof response.errors != 'undefined' &&
-            response.errors.length &&
-            response.errors[0].code === 401
-          ) {
-            //Not Logged or not in the team
-            window.location.reload()
-          } else if (
-            typeof response.errors != 'undefined' &&
-            response.errors.length &&
-            response.errors[0].code === 404
-          ) {
-            this.selectPersonalTeam()
-          } else if (
-            typeof response.errors != 'undefined' &&
-            response.errors.length
-          ) {
-            window.location = '/'
-          } else {
-            this.setState({showProjects: true})
-            ManageActions.renderProjects(response.data, selectedTeam, teams)
-            ManageActions.storeSelectedTeam(selectedTeam)
-          }
-        })
+        getProjects({team: selectedTeam, searchFilter: this.Search}).then(
+          (res) => {
+            if (
+              typeof res.errors != 'undefined' &&
+              res.errors.length &&
+              res.errors[0].code === 401
+            ) {
+              //Not Logged or not in the team
+              window.location.reload()
+            } else if (
+              typeof res.errors != 'undefined' &&
+              res.errors.length &&
+              res.errors[0].code === 404
+            ) {
+              this.selectPersonalTeam()
+            } else if (typeof res.errors != 'undefined' && res.errors.length) {
+              window.location = '/'
+            } else {
+              this.setState({showProjects: true})
+              ManageActions.renderProjects(res.data, selectedTeam, teams)
+              ManageActions.storeSelectedTeam(selectedTeam)
+            }
+          },
+        )
       })
       setTimeout(function () {
         CatToolActions.showHeaderTooltip()
@@ -80,27 +86,24 @@ class Dashboard extends React.Component {
     this.Search.filter = {}
     this.Search.currentPage = 1
 
-    API.PROJECTS.getProjects(selectedTeam, this.Search).done((response) => {
+    getProjects({team: selectedTeam, searchFilter: this.Search}).then((res) => {
       if (
-        typeof response.errors != 'undefined' &&
-        response.errors.length &&
-        response.errors[0].code === 401
+        typeof res.errors != 'undefined' &&
+        res.errors.length &&
+        res.errors[0].code === 401
       ) {
         //Not Logged or not in the team
         window.location.reload()
       } else if (
-        typeof response.errors != 'undefined' &&
-        response.errors.length &&
-        response.errors[0].code === 404
+        typeof res.errors != 'undefined' &&
+        res.errors.length &&
+        res.errors[0].code === 404
       ) {
         this.selectPersonalTeam()
-      } else if (
-        typeof response.errors != 'undefined' &&
-        response.errors.length
-      ) {
+      } else if (typeof res.errors != 'undefined' && res.errors.length) {
         window.location = '/'
       } else {
-        ManageActions.renderProjects(response.data, selectedTeam, teams)
+        ManageActions.renderProjects(res.data, selectedTeam, teams)
         ManageActions.storeSelectedTeam(selectedTeam)
       }
     })
@@ -129,47 +132,48 @@ class Dashboard extends React.Component {
 
   renderMoreProjects = () => {
     this.Search.currentPage = this.Search.currentPage + 1
-    API.PROJECTS.getProjects(this.state.selectedTeam, this.Search).done(
-      (response) => {
-        const projects = response.data
-        if (projects.length > 0) {
-          ManageActions.renderMoreProjects(projects)
-        } else {
-          ManageActions.noMoreProjects()
-        }
-      },
-    )
+
+    getProjects({
+      team: this.state.selectedTeam,
+      searchFilter: this.Search,
+    }).then((res) => {
+      const projects = res.data
+
+      if (projects.length > 0) {
+        ManageActions.renderMoreProjects(projects)
+      } else {
+        ManageActions.noMoreProjects()
+      }
+    })
   }
 
   refreshProjects = () => {
     if (this.Search.currentPage === 1) {
       const {selectedTeam} = this.state
-      API.PROJECTS.getProjects(this.state.selectedTeam, this.Search).done(
-        (response) => {
-          if (
-            typeof response.errors != 'undefined' &&
-            response.errors.length &&
-            response.errors[0].code === 401
-          ) {
-            //Not Logged or not in the team
-            window.location.reload()
-          } else if (
-            typeof response.errors != 'undefined' &&
-            response.errors.length &&
-            response.errors[0].code === 404
-          ) {
-            this.selectPersonalTeam()
-          } else if (
-            typeof response.errors != 'undefined' &&
-            response.errors.length
-          ) {
-            window.location = '/'
-          } else if (selectedTeam.id === this.state.selectedTeam.id) {
-            const projects = response.data
-            ManageActions.updateProjects(projects)
-          }
-        },
-      )
+      getProjects({
+        team: this.state.selectedTeam,
+        searchFilter: this.Search,
+      }).then((res) => {
+        if (
+          typeof res.errors != 'undefined' &&
+          res.errors.length &&
+          res.errors[0].code === 401
+        ) {
+          //Not Logged or not in the team
+          window.location.reload()
+        } else if (
+          typeof res.errors != 'undefined' &&
+          res.errors.length &&
+          res.errors[0].code === 404
+        ) {
+          this.selectPersonalTeam()
+        } else if (typeof res.errors != 'undefined' && res.errors.length) {
+          window.location = '/'
+        } else if (selectedTeam.id === this.state.selectedTeam.id) {
+          const projects = res.data
+          ManageActions.updateProjects(projects)
+        }
+      })
     } else {
       //Todo: refactoring with prommises
       let total_projects = []
@@ -180,10 +184,14 @@ class Dashboard extends React.Component {
       }
       for (let i = 1; i <= this.Search.currentPage; i++) {
         requests.push(
-          API.PROJECTS.getProjects(this.state.selectedTeam, this.Search, i),
+          getProjects({
+            team: this.state.selectedTeam,
+            searchFilter: this.Search,
+            page: i,
+          }),
         )
       }
-      $.when.apply(this, requests).done(function () {
+      Promise.all(requests).then(function () {
         let results = requests.length > 1 ? arguments : [arguments]
         for (let i = 0; i < results.length; i++) {
           onDone(results[i][0])
@@ -313,18 +321,21 @@ class Dashboard extends React.Component {
     if (!_.isEmpty(this.Search.filter)) {
       this.Search.currentPage = 1
     }
-    API.PROJECTS.getProjects(this.state.selectedTeam, this.Search).done(
-      (response) => {
-        const projects = response.data
-        ManageActions.renderProjects(
-          projects,
-          this.state.selectedTeam,
-          this.state.teams,
-          false,
-          true,
-        )
-      },
-    )
+
+    getProjects({
+      team: this.state.selectedTeam,
+      searchFilter: this.Search,
+    }).then((res) => {
+      const projects = res.data
+
+      ManageActions.renderProjects(
+        projects,
+        this.state.selectedTeam,
+        this.state.teams,
+        false,
+        true,
+      )
+    })
   }
 
   //********* Modals **************//

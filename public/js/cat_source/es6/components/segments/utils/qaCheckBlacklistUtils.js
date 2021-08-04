@@ -1,4 +1,6 @@
-import TextUtils from '../../../utils/textUtils'
+import _ from 'lodash'
+
+import SegmentActions from '../../../actions/SegmentActions'
 
 const QaCheckBlacklist = {
   enabled() {

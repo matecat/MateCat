@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 
 class SearchInput extends React.Component {
   constructor(props) {
@@ -52,6 +53,7 @@ class SearchInput extends React.Component {
         ref={(input) => (this.textInput = input)}
         onChange={this.filterByNameDebounce.bind(this)}
         onKeyPress={this.onKeyPressEvent.bind(this)}
+        data-testid="input-search-projects"
       />
 
       /*<div className="input-field">

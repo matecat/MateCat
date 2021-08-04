@@ -1,4 +1,6 @@
 import React from 'react'
+import Cookies from 'js-cookie'
+
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AssignToTranslator from './AssignToTranslator'

@@ -1,3 +1,6 @@
+import _ from 'lodash'
+import {Base64} from 'js-base64'
+
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
   getDiffHtml: function (source, target) {
@@ -316,13 +319,13 @@ const TEXT_UTILS = {
       if (this[0] === -1) {
         rootElem = $(document.createElement('div'))
         newElem = $.parseHTML('<span class="deleted"/>')
-        $(newElem).text(TextUtils.htmlDecode(text[1]))
+        $(newElem).text(TEXT_UTILS.htmlDecode(text[1]))
         rootElem.append(newElem)
         diffTxt += $(rootElem).html()
       } else if (text[0] === 1) {
         rootElem = $(document.createElement('div'))
         newElem = $.parseHTML('<span class="added"/>')
-        $(newElem).text(TextUtils.htmlDecode(text[1]))
+        $(newElem).text(TEXT_UTILS.htmlDecode(text[1]))
         rootElem.append(newElem)
         diffTxt += $(rootElem).html()
       } else {
@@ -378,7 +381,7 @@ const TEXT_UTILS = {
   },
   replaceUrl: function (textToReplace) {
     let regExpUrl =
-      /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gim
+      /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gim
     return textToReplace.replace(regExpUrl, function (match, text) {
       let href =
         text[text.length - 1] === '.'
@@ -388,4 +391,5 @@ const TEXT_UTILS = {
     })
   },
 }
-module.exports = TEXT_UTILS
+
+export default TEXT_UTILS

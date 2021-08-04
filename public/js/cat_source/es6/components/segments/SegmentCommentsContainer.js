@@ -3,10 +3,12 @@
 
  */
 import React from 'react'
+import _ from 'lodash'
+
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
-import SegmentsActions from '../../actions/SegmentActions'
+import SegmentActions from '../../actions/SegmentActions'
 import MBC from '../../utils/mbc.main'
 
 class SegmentCommentsContainer extends React.Component {
@@ -29,7 +31,7 @@ class SegmentCommentsContainer extends React.Component {
   closeComments(e) {
     e.preventDefault()
     e.stopPropagation()
-    SegmentsActions.closeSegmentComment(this.props.segment.sid)
+    SegmentActions.closeSegmentComment(this.props.segment.sid)
     localStorage.setItem(MBC.localStorageCommentsClosed, true)
   }
 

@@ -4,6 +4,7 @@ import classnames from 'classnames'
 import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 /**
  * @NOTE because the state of this component is manipulated

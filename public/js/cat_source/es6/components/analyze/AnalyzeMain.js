@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AnalyzeConstants from '../../constants/AnalyzeConstants'

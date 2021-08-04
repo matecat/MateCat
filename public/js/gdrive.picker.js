@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js'
+
 var GDrive = function () {
   'use strict'
 

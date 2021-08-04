@@ -1,12 +1,11 @@
-import CompoundDecorator from '../CompoundDecorator'
-import {CompositeDecorator, EditorState} from 'draft-js'
-import * as DraftMatecatConstants from './editorConstants'
 import _ from 'lodash'
+
+import * as DraftMatecatConstants from './editorConstants'
 import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils'
 
 const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
-  const generateGlossaryDecorator = (regex, sid) => {
+  const generateGlossaryDecorator = (regex) => {
     return {
       name: DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
       strategy: (contentBlock, callback) => {

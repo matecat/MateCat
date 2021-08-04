@@ -195,30 +195,25 @@ abstract class downloadController extends controller {
             $outputFile = tempnam( "/tmp", "zipmatecat" );
         }
 
-        $zip = new ZipArchive();
-        $zip->open( $outputFile, ZipArchive::OVERWRITE );
+        $zip = new \ZipArchive();
+        $zip->open( $outputFile, \ZipArchive::OVERWRITE );
 
         $rev_index_name = [];
+        $rev_index_duplicate_count = [];
 
         foreach ( $output_content as $f ) {
 
-            //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§#]/u', "_", $f->output_filename );
-            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
-            $fName = str_replace( '_.', ".", $fName );
+            $fName = $f->output_filename ;
 
             if ( $isOriginalFile != true ) {
                 $fName = self::forceOcrExtension( $fName );
             }
 
-            $nFinfo = AbstractFilesStorage::pathinfo_fix( $fName );
-            $_name  = $nFinfo[ 'filename' ];
-            if ( strlen( $_name ) < 3 ) {
-                $fName = substr( uniqid(), -5 ) . "_" . $fName;
-            }
-
+            // avoid collisions
             if ( array_key_exists( $fName, $rev_index_name ) ) {
-                $fName = uniqid() . $fName;
+                $rev_index_duplicate_count[ $fName ] = isset($rev_index_duplicate_count[ $fName ]) ? $rev_index_duplicate_count[ $fName ] + 1 : 1;
+
+                $fName = $fName . "(".$rev_index_duplicate_count[ $fName ].")";
             }
 
             $rev_index_name[ $fName ] = $fName;

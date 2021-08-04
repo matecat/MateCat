@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js'
+
 var ProjectCompletion = {
   enabled: function () {
     return config.project_completion_feature_enabled

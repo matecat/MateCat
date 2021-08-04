@@ -1,3 +1,8 @@
+import {sprintf} from 'sprintf-js'
+
+import SegmentActions from '../actions/SegmentActions'
+import SegmentStore from '../stores/SegmentStore'
+
 const Speech2Text = {
   enabled: function () {
     return !!(
@@ -254,4 +259,4 @@ $(document).ready(function () {
   }
 })
 
-module.exports = Speech2Text
+export default Speech2Text

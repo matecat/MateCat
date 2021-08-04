@@ -1,39 +1,35 @@
-/**
- * React Component for the editarea.
-
- */
 import React from 'react'
-import SegmentConstants from '../../constants/SegmentConstants'
-import EditAreaConstants from '../../constants/EditAreaConstants'
-import SegmentStore from '../../stores/SegmentStore'
+import _ from 'lodash'
 import Immutable from 'immutable'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import {
   Modifier,
   Editor,
   EditorState,
   getDefaultKeyBinding,
   KeyBindingUtil,
-  ContentState,
   CompositeDecorator,
-  convertToRaw,
 } from 'draft-js'
+
+import SegmentConstants from '../../constants/SegmentConstants'
+import EditAreaConstants from '../../constants/EditAreaConstants'
+import SegmentStore from '../../stores/SegmentStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
-import CompoundDecorator from './utils/CompoundDecorator'
 import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
-const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
-  KeyBindingUtil
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
+
+const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
+  KeyBindingUtil
 
 const editorSync = {
   editorFocused: true,
@@ -134,7 +130,7 @@ class Editarea extends React.Component {
   }
 
   addSearchDecorator = () => {
-    let {editorState, tagRange} = this.state
+    let {tagRange} = this.state
     let {searchParams, occurrencesInSearch, currentInSearchIndex} =
       this.props.segment
     const textToSearch = searchParams.target ? searchParams.target : ''
@@ -153,7 +149,6 @@ class Editarea extends React.Component {
   }
 
   addQaBlacklistGlossaryDecorator = () => {
-    let {editorState} = this.state
     let {qaBlacklistGlossary, sid} = this.props.segment
     const newDecorator = DraftMatecatUtils.activateQaCheckBlacklist(
       qaBlacklistGlossary,
@@ -169,7 +164,7 @@ class Editarea extends React.Component {
 
   addLexiqaDecorator = () => {
     let {editorState} = this.state
-    let {lexiqa, sid, lxqDecodedTranslation, targetTagMap} = this.props.segment
+    let {lexiqa, sid, lxqDecodedTranslation} = this.props.segment
     // pass decoded translation with tags like <g id='1'>
     let ranges = LexiqaUtils.getRanges(
       _.cloneDeep(lexiqa.target),
@@ -294,7 +289,6 @@ class Editarea extends React.Component {
   checkDecorators = (prevProps) => {
     let changedDecorator = false
     const {inSearch} = this.props.segment
-    const sid = this.props.segment.sid
     const {activeDecorators: prevActiveDecorators, editorState} = this.state
     const activeDecorators = {...prevActiveDecorators}
 
@@ -451,11 +445,7 @@ class Editarea extends React.Component {
     )
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {}
-
-  // getSnapshotBeforeUpdate(prevProps) {}
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (!prevProps.segment.opened && this.props.segment.opened) {
       const newEditorState = EditorState.moveFocusToEnd(this.state.editorState)
       this.setState({editorState: newEditorState})
@@ -668,7 +658,7 @@ class Editarea extends React.Component {
     } = this.props
 
     switch (command) {
-      case 'toggle-tag-menu':
+      case 'toggle-tag-menu': {
         const tagSuggestions = {
           missingTags: missingTagsInTarget,
           sourceTags: sourceTagMap,
@@ -677,6 +667,7 @@ class Editarea extends React.Component {
           openPopover(tagSuggestions, getEditorRelativeSelectionOffset())
         }
         return 'handled'
+      }
       case 'close-tag-menu':
         closePopover()
         return 'handled'
@@ -862,7 +853,7 @@ class Editarea extends React.Component {
       editorState: prevEditorState,
       activeDecorators,
     } = this.state
-    const {closePopover, updateTagsInEditorDebounced} = this
+    const {closePopover} = this
 
     const contentChanged =
       editorState.getCurrentContent().getPlainText() !==
@@ -898,7 +889,7 @@ class Editarea extends React.Component {
         editorState.getSelection().set('hasFocus', true),
       )
       this.setState(
-        (prevState) => ({
+        () => ({
           activeDecorators: newActiveDecorators,
           editorState: editorState,
         }),
@@ -910,7 +901,7 @@ class Editarea extends React.Component {
       )
     } else {
       this.setState(
-        (prevState) => ({
+        () => ({
           editorState: editorState,
         }),
         () => {
@@ -1067,7 +1058,7 @@ class Editarea extends React.Component {
 
   // Methods for TagMenu ---- END
 
-  onPaste = (text, html) => {
+  onPaste = () => {
     const {editorState} = this.state
     const internalClipboard = this.editor.getClipboard()
     if (internalClipboard) {
@@ -1085,7 +1076,7 @@ class Editarea extends React.Component {
     }
   }
 
-  pasteFragment = (text, html) => {
+  pasteFragment = (text) => {
     const {editorState} = this.state
     const {fragment: clipboardFragment, plainText: clipboardPlainText} =
       SegmentStore.getFragmentFromClipboard()
@@ -1173,15 +1164,15 @@ class Editarea extends React.Component {
     }
   }
 
-  onDragEvent = (e) => {
+  onDragEvent = () => {
     editorSync.draggingFromEditArea = true
   }
 
-  onDragEnd = (e) => {
+  onDragEnd = () => {
     editorSync.draggingFromEditArea = false
   }
 
-  handleDrop = (selection, dataTransfer, isInternal) => {
+  handleDrop = (selection, dataTransfer) => {
     let {editorState} = this.state
     const text = dataTransfer.getText()
 
@@ -1279,10 +1270,9 @@ class Editarea extends React.Component {
         return 'not-handled'
       }
     }
-    return 'not-handled'
   }
 
-  onEntityClick = (start, end, id, text) => {
+  onEntityClick = (start, end) => {
     const {editorState} = this.state
     // Use _latestEditorState
     try {
@@ -1433,7 +1423,7 @@ class Editarea extends React.Component {
   }
 }
 
-function getEntityStrategy(mutability, callback) {
+function getEntityStrategy(mutability) {
   return function (contentBlock, callback, contentState) {
     contentBlock.findEntityRanges((character) => {
       const entityKey = character.getEntity()

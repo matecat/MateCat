@@ -3,6 +3,7 @@
 
  */
 import React from 'react'
+import SegmentActions from '../../../actions/SegmentActions'
 import LXQ from '../../../utils/lxq.main'
 
 class QAComponent extends React.Component {
@@ -273,11 +274,13 @@ class QAComponent extends React.Component {
                   <a
                     href={config.lexiqaServer + '/documentation.html'}
                     target="_blank"
+                    rel="noreferrer"
                   >
                     Guide
                   </a>
                   <a
                     target="_blank"
+                    rel="noreferrer"
                     alt="Read the full QA report"
                     href={
                       config.lexiqaServer +

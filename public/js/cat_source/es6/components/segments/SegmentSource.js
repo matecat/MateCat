@@ -1,24 +1,19 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import Immutable from 'immutable'
+import _ from 'lodash'
+import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
+
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
-import TextUtils from '../../utils/textUtils'
 import Shortcuts from '../../utils/shortcuts'
-import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import SegmentConstants from '../../constants/SegmentConstants'
-import CompoundDecorator from './utils/CompoundDecorator'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
-import TagUtils from '../../utils/tagUtils'
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
 
 class SegmentSource extends React.Component {
@@ -148,11 +143,8 @@ class SegmentSource extends React.Component {
 
   addSearchDecorator = () => {
     let {tagRange} = this.state
-    let {
-      searchParams,
-      occurrencesInSearch,
-      currentInSearchIndex,
-    } = this.props.segment
+    let {searchParams, occurrencesInSearch, currentInSearchIndex} =
+      this.props.segment
     const textToSearch = searchParams.source ? searchParams.source : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,
@@ -235,9 +227,8 @@ class SegmentSource extends React.Component {
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
-      const lxqDecodedSource = DraftMatecatUtils.prepareTextForLexiqa(
-        editorState,
-      )
+      const lxqDecodedSource =
+        DraftMatecatUtils.prepareTextForLexiqa(editorState)
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
       SegmentActions.updateSource(
         this.props.segment.sid,
@@ -251,12 +242,8 @@ class SegmentSource extends React.Component {
 
   checkDecorators = (prevProps) => {
     let changedDecorator = false
-    const {
-      inSearch,
-      searchParams,
-      currentInSearch,
-      currentInSearchIndex,
-    } = this.props.segment
+    const {inSearch, searchParams, currentInSearch, currentInSearchIndex} =
+      this.props.segment
     const {activeDecorators: prevActiveDecorators, editorState} = this.state
     const activeDecorators = {...prevActiveDecorators}
 
@@ -459,7 +446,6 @@ class SegmentSource extends React.Component {
   }
 
   onChange = (editorState) => {
-    const {editorState: prevEditorState} = this.state
     const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
     if (!entityKey) {
       setTimeout(() => {
@@ -548,7 +534,7 @@ class SegmentSource extends React.Component {
             </a>
             <a
               className={`ui primary button done btn-ok pull-right ${
-                !!this.splitPoint ? '' : 'disabled'
+                this.splitPoint ? '' : 'disabled'
               }`}
               onClick={() => splitSegmentNew()}
             >
@@ -647,7 +633,7 @@ class SegmentSource extends React.Component {
     })
   }
 
-  onEntityClick = (start, end, id, text) => {
+  onEntityClick = (start, end) => {
     const {editorState} = this.state
     const {segment} = this.props
     const {isSplitPoint} = this
@@ -768,7 +754,7 @@ class SegmentSource extends React.Component {
   }
 }
 
-function getEntityStrategy(mutability, callback) {
+function getEntityStrategy(mutability) {
   return function (contentBlock, callback, contentState) {
     contentBlock.findEntityRanges((character) => {
       const entityKey = character.getEntity()

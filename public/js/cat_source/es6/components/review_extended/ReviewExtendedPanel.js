@@ -1,7 +1,14 @@
+import _ from 'lodash'
+import React from 'react'
+import classnames from 'classnames'
+
 import ReviewExtendedIssuesContainer from './ReviewExtendedIssuesContainer'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import SegmentConstants from '../../constants/SegmentConstants'
 import Shortcuts from '../../utils/shortcuts'
+import ShortCutsModal from '../modals/ShortCutsModal'
+import SegmentActions from '../../actions/SegmentActions'
+import SegmentStore from '../../stores/SegmentStore'
 
 class ReviewExtendedPanel extends React.Component {
   constructor(props) {
@@ -75,7 +82,7 @@ class ReviewExtendedPanel extends React.Component {
     SegmentActions.closeSegmentIssuePanel(this.props.segment.sid)
   }
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props) {
     return {
       versionNumber: props.segment.versions[0]
         ? props.segment.versions[0].version_number

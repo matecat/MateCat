@@ -1,3 +1,5 @@
+import {getMatecatApiDomain} from '../utils/getMatecatApiDomain'
+
 if (!window.API) {
   window.API = {}
 }
@@ -79,7 +81,7 @@ window.API.JOB = {
       type: 'POST',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v2/jobs/' +
         job.id +
         '/' +
@@ -93,7 +95,12 @@ window.API.JOB = {
       type: 'GET',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() + 'api/v3/jobs/' + idJob + '/' + password + '/files',
+        getMatecatApiDomain() +
+        'api/v3/jobs/' +
+        idJob +
+        '/' +
+        password +
+        '/files',
     })
   },
   retrieveStatistics: function (idJob, password) {
@@ -102,7 +109,7 @@ window.API.JOB = {
       type: 'GET',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/app/jobs/' +
         idJob +
         '/' +
@@ -122,7 +129,7 @@ window.API.JOB = {
       data: data,
       type: 'POST',
       xhrFields: {withCredentials: true},
-      url: APP.getRandomUrl() + 'api/v3/feedback',
+      url: getMatecatApiDomain() + 'api/v3/feedback',
     })
   },
 
@@ -132,7 +139,7 @@ window.API.JOB = {
       type: 'GET',
       xhrFields: {withCredentials: true},
       url:
-        APP.getRandomUrl() +
+        getMatecatApiDomain() +
         'api/v3/jobs/' +
         idJob +
         '/' +

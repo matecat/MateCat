@@ -1,6 +1,13 @@
-let ModalsActions = {
-  //********* Modals **************//
+import _ from 'lodash'
 
+import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import DQFModal from '../components/modals/DQFModal'
+import OutsourceModal from '../components/modals/OutsourceModal'
+import SplitJobModal from '../components/modals/SplitJob'
+import CreateTeamModal from '../components/modals/CreateTeam'
+import ModifyTeamModal from '../components/modals/ModifyTeam'
+
+let ModalsActions = {
   openCreateTeamModal: function () {
     APP.ModalWindow.showModalComponent(CreateTeamModal, {}, 'Create New Team')
   },
@@ -11,15 +18,6 @@ let ModalsActions = {
       hideChangeName: hideChangeName,
     }
     APP.ModalWindow.showModalComponent(ModifyTeamModal, props, 'Modify Team')
-  },
-
-  openChangeTeamModal: function (teams, project, teamId) {
-    var props = {
-      teams: teams,
-      project: project,
-      selectedTeam: teamId,
-    }
-    APP.ModalWindow.showModalComponent(ChangeTeamModal, props, 'Move project')
   },
 
   openOutsourceModal: function (
@@ -98,4 +96,4 @@ let ModalsActions = {
   },
 }
 
-module.exports = ModalsActions
+export default ModalsActions

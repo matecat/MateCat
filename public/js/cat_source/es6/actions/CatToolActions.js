@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
 import $ from 'jquery'
+import _ from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
@@ -10,6 +11,8 @@ import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
+import CommonUtils from '../utils/commonUtils'
+import CatToolStore from '../stores/CatToolStore'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -259,4 +262,4 @@ let CatToolActions = {
   },
 }
 
-module.exports = CatToolActions
+export default CatToolActions

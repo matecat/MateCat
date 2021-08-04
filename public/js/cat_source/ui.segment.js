@@ -1,4 +1,14 @@
 import _ from 'lodash'
+import {sprintf} from 'sprintf-js'
+
+import CommonUtils from './es6/utils/commonUtils'
+import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
+import OfflineUtils from './es6/utils/offlineUtils'
+import TagUtils from './es6/utils/tagUtils'
+import TextUtils from './es6/utils/textUtils'
+import DraftMatecatUtils from './es6/components/segments/utils/DraftMatecatUtils'
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentStore from './es6/stores/SegmentStore'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -86,7 +96,7 @@ import _ from 'lodash'
     enableTagProjectionInJob: function () {
       config.tag_projection_enabled = 1
       var path = sprintf(
-        APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
+        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
         config.id_job,
         config.password,
       )
@@ -112,7 +122,7 @@ import _ from 'lodash'
     disableTagProjectionInJob: function () {
       config.tag_projection_enabled = 0
       var path = sprintf(
-        APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
+        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
         config.id_job,
         config.password,
       )

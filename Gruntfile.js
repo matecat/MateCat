@@ -1,5 +1,7 @@
 const sass = require('node-sass')
 
+const {getBabelPresets} = require('./babel.utils')
+
 const basePath = 'public/js/'
 const buildPath = 'public/js/build/'
 const incPath = 'inc/'
@@ -30,10 +32,7 @@ const cssWatchFilesUploadPage = [
 ]
 const cssWatchManage = [cssBase + 'sass/commons/*']
 
-const babelifyTransform = [
-  'babelify',
-  {presets: ['@babel/preset-react', ['@babel/preset-env']]},
-]
+const babelifyTransform = ['babelify', getBabelPresets('browser')]
 
 module.exports = function (grunt) {
   const conf = grunt.file.read(incPath + 'version.ini')
@@ -41,6 +40,20 @@ module.exports = function (grunt) {
     .match(/version[ ]+=[ ]+.*/gi)[0]
     .replace(/version[ ]+=[ ]+(.*?)/gi, '$1')
   grunt.log.ok('Matecat Version: ' + version)
+
+  //Lexiqa
+  const conf2 = grunt.file.read(incPath + 'config.ini')
+  const lxqLicense = conf2.match(/^LXQ_LICENSE[ ]+=[ ]+.*/gim)
+  let lxqServer
+  if (lxqLicense) {
+    const lxqServerMatch = conf2.match(/^LXQ_SERVER[ ]+=[ ]+.*/gim)
+    lxqServer = lxqServerMatch
+      ? lxqServerMatch[0]
+          .replace(/LXQ_SERVER[ ]+=[ ]+(.*?)/gi, '$1')
+          .replace(/"/g, '')
+      : undefined
+    grunt.log.ok('Lexiqa Server: ' + lxqServer)
+  }
 
   grunt.initConfig({
     /**
@@ -54,6 +67,9 @@ module.exports = function (grunt) {
      * All imports to be attached to window should be defined in
      * the entry point js file.
      */
+    curl: {
+      'public/js/build/lxqlicense.js': lxqServer + '/js/lxqlicense.js',
+    },
     browserify: {
       qualityReport: {
         options: {
@@ -116,6 +132,7 @@ module.exports = function (grunt) {
           basePath + 'common.js',
           basePath + 'user_store.js',
           basePath + 'login.js',
+          basePath + 'build/lxqlicense.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
           basePath + 'cat_source/ui.core.js',
           basePath + 'cat_source/ui.segment.js',
@@ -175,6 +192,7 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'lib/fileupload/main.js',
           basePath + 'cat_source/es6/react-libs.js',
           basePath + 'cat_source/es6/components.js',
           basePath + 'common.js',
@@ -205,6 +223,7 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
+          basePath + 'lib/fileupload/main.js',
           basePath + 'cat_source/es6/react-libs.js',
           basePath + 'cat_source/es6/components.js',
           basePath + 'common.js',
@@ -232,19 +251,10 @@ module.exports = function (grunt) {
           basePath + 'lib/jquery-3.3.1.min.js',
           basePath + 'lib/jquery-ui.min.js',
           basePath + 'lib/jquery.hotkeys.min.js',
-          basePath + 'lib/js.cookie.js',
           basePath + 'lib/jquery.powertip.min.js',
           basePath + 'lib/jquery-dateFormat.min.js',
-          // basePath + 'lib/handlebars.runtime-v4.0.5.js',
           basePath + 'lib/diff_match_patch.js',
-          // basePath + 'lib/rangy-core.js',
-          // basePath + 'lib/rangy-selectionsaverestore.js',
-          basePath + 'lib/base64.min.js',
-          basePath + 'lib/moment.min.js',
-          basePath + 'lib/lodash.min.js',
-          basePath + 'lib/sprintf.min.js',
           basePath + 'lib/calendar.min.js',
-          basePath + 'lib/imagesloaded.min.js',
           basePath + 'lib/jquery.atwho.min.js',
           basePath + 'lib/jquery.caret.min.js',
           basePath + 'lib/semantic.min.js',
@@ -256,10 +266,7 @@ module.exports = function (grunt) {
         src: [
           basePath + 'lib/jquery-3.3.1.min.js',
           basePath + 'lib/jquery-ui.min.js',
-          basePath + 'lib/lodash.min.js',
-          basePath + 'lib/sprintf.min.js',
           basePath + 'lib/diff_match_patch.js',
-          basePath + 'lib/js.cookie.js',
           basePath + 'lib/jquery.powertip.min.js',
 
           // The Templates plugin is included to render the upload/download listings
@@ -291,9 +298,6 @@ module.exports = function (grunt) {
 
           // The localization script
           basePath + 'lib/fileupload/locale.js',
-
-          // The main application script
-          basePath + 'lib/fileupload/main.js',
           basePath + 'lib/semantic.min.js',
         ],
         dest: buildPath + 'libs_upload.js',
@@ -465,6 +469,7 @@ module.exports = function (grunt) {
     },
   })
 
+  grunt.loadNpmTasks('grunt-curl')
   grunt.loadNpmTasks('grunt-contrib-concat')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-text-replace')
@@ -520,7 +525,19 @@ module.exports = function (grunt) {
    * Once this is done, it would be better to rely on `watch` task, to reload
    * just development bundles.
    */
-  grunt.registerTask('development', ['bundleDev:js', 'sass', 'replace:css'])
+  grunt.registerTask('development', function () {
+    var tasks = ['bundleDev:js', 'sass', 'replace:css']
+    if (lxqServer) {
+      tasks.unshift('curl')
+    }
+    grunt.task.run(tasks)
+  })
 
-  grunt.registerTask('deploy', ['bundle:js', 'sass', 'replace:css'])
+  grunt.registerTask('deploy', function () {
+    var tasks = ['bundleDev:js', 'sass', 'replace:css']
+    if (lxqServer) {
+      tasks.unshift('curl')
+    }
+    grunt.task.run(tasks)
+  })
 }

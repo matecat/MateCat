@@ -1,7 +1,9 @@
+import React from 'react'
+import update from 'immutability-helper'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
 
 class ResetPasswordModal extends React.Component {
   constructor(props) {
@@ -41,7 +43,7 @@ class ResetPasswordModal extends React.Component {
     this.setState({requestRunning: true})
 
     this.sendResetPassword()
-      .done(function (data) {
+      .done(function () {
         $('#modal').trigger('opensuccess', [
           {
             title: 'Reset Password',

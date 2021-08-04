@@ -1,7 +1,11 @@
-/*
- Component: mbc.main
- */
+import _ from 'lodash'
+
+import CommentsActions from '../actions/CommentsActions'
+import SegmentActions from '../actions/SegmentActions'
 import CommentsStore from '../stores/CommentsStore'
+import {getMatecatApiDomain} from './getMatecatApiDomain'
+import TextUtils from './textUtils'
+
 const MBC = {
   enabled: function () {
     return config.comments_enabled && !!window.EventSource
@@ -9,7 +13,7 @@ const MBC = {
 }
 
 MBC.init = function () {
-  return (function ($, config, window, MBC, undefined) {
+  return (function ($, config, window, MBC) {
     MBC.const = {
       get commentAction() {
         return 'comment'
@@ -24,7 +28,6 @@ MBC.init = function () {
     var loggedUserName = null
     var customUserName = null
     var lastCommentHash = null
-    var commentsLoaded = false
     var tpls = MBC.const.tpls
 
     var initConstants = function () {
@@ -51,14 +54,6 @@ MBC.init = function () {
       if (count > 0) {
         $('#mbc-history').append(`<span class='badge'>${count}</span>`)
       }
-    }
-    var limitNum = function (num) {
-      if (Number(num) > 99) return '+99'
-      else return num
-    }
-
-    var buildFirstCommentHeader = function () {
-      return $(tpls.firstCommentWrap)
     }
 
     var popLastCommentHash = function () {
@@ -94,7 +89,6 @@ MBC.init = function () {
           .find('.mbc-comment-username')
           .text(TextUtils.htmlDecode(data.full_name))
       } else {
-        var root = $(tpls.showComment)
         root
           .find('.mbc-comment-username')
           .text(TextUtils.htmlDecode(data.full_name))
@@ -135,7 +129,6 @@ MBC.init = function () {
 
     var renderHistoryWithComments = function () {
       var root = $(tpls.historyHasComments)
-      var count = 1
       var comment
 
       for (var i in CommentsStore.db.history) {
@@ -305,7 +298,10 @@ MBC.init = function () {
           type: 'get',
           xhrFields: {withCredentials: true},
           url:
-            APP.getRandomUrl() + 'api/app/teams/' + teamId + '/members/public',
+            getMatecatApiDomain() +
+            'api/app/teams/' +
+            teamId +
+            '/members/public',
         })
           .done(function (data) {
             var team = {
@@ -318,7 +314,7 @@ MBC.init = function () {
 
             CommentsActions.updateTeamUsers(MBC.teamUsers)
           })
-          .fail(function (response) {
+          .fail(function () {
             MBC.teamUsers = []
           })
       } else {
@@ -332,9 +328,8 @@ MBC.init = function () {
         CommentsStore.db.getCommentsCountBySegment &&
         UI.currentSegmentId === id_segment
       ) {
-        var comments_obj = CommentsStore.db.getCommentsCountBySegment(
-          id_segment,
-        )
+        var comments_obj =
+          CommentsStore.db.getCommentsCountBySegment(id_segment)
         var panelClosed =
           localStorage.getItem(MBC.localStorageCommentsClosed) === 'true'
         if (comments_obj.active > 0 && !panelClosed) {
@@ -467,14 +462,14 @@ MBC.init = function () {
       $('#mbc-history').removeClass('open')
     })
 
-    $(window).on('segmentsAdded', function (e) {
+    $(window).on('segmentsAdded', function () {
       loadCommentData(function (resp) {
         resetDatabase(resp)
         refreshElements()
       })
     })
 
-    $(document).on('getSegments_success', function (e) {
+    $(document).on('getSegments_success', function () {
       loadCommentData(function (resp) {
         MBC.commentsLoaded = true
         resetDatabase(resp)
@@ -482,7 +477,7 @@ MBC.init = function () {
       })
     })
 
-    $(document).on('mbc:ready', function (ev) {
+    $(document).on('mbc:ready', function () {
       $('#mbc-history').remove()
       $('.action-menu #action-filter').before($(tpls.historyIcon))
       $('#mbc-history').append(
@@ -511,7 +506,7 @@ MBC.init = function () {
       SegmentActions.scrollToSegment(sid, SegmentActions.openSegmentComment)
     })
 
-    $(document).on('click', '#action-search', function (e) {
+    $(document).on('click', '#action-search', function () {
       $('.mbc-history-balloon-outer').removeClass('mbc-visible')
       $('#mbc-history').removeClass('open')
     })
@@ -532,7 +527,7 @@ MBC.init = function () {
       setTimeout(refreshBadgeHeaderIcon)
     })
 
-    $(document).on('mbc:comment:saved', function (ev, data) {
+    $(document).on('mbc:comment:saved', function () {
       //Update Header icon
       updateHistoryWithLoadedSegments()
       setTimeout(refreshBadgeHeaderIcon)
@@ -567,4 +562,5 @@ $(document).ready(function () {
     MBC.init()
   }
 })
-module.exports = MBC
+
+export default MBC

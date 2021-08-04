@@ -1,4 +1,5 @@
 import React from 'react'
+import Cookies from 'js-cookie'
 
 import GMTSelect from './GMTSelect'
 
@@ -23,7 +24,7 @@ class AssignToTranslator extends React.Component {
 
     let email = this.email.value
 
-    OutsourceActions.sendJobToTranslator(
+    UI.sendJobToTranslator(
       email,
       date,
       this.state.timezone,
