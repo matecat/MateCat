@@ -38,5 +38,15 @@ export const getProjects = async ({
     body: formData,
   })
 
-  return await res.json()
+  if (!res.ok) {
+    return Promise.reject(res)
+  }
+
+  const {errors, ...resData} = await res.json()
+
+  if (errors != null && errors.length > 0) {
+    return Promise.reject(errors)
+  }
+
+  return resData
 }
