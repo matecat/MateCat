@@ -5,15 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  getProject: function (id) {
-    return $.ajax({
-      async: true,
-      type: 'get',
-      xhrFields: {withCredentials: true},
-      url:
-        getMatecatApiDomain() + 'api/v2/projects/' + id + '/' + config.password,
-    })
-  },
   /**
    *
    * @param type Job or Project: obj, prj

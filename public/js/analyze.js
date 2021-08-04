@@ -1,3 +1,5 @@
+import {getProject} from './cat_source/es6/api/getProject'
+
 window.UI = null
 
 window.UI = {
@@ -47,7 +49,7 @@ window.UI = {
     if (config.jobAnalysis) {
       API.PROJECTS.getJobVolumeAnalysis().done(function (response) {
         self.parseVolumeAnalysisData(response)
-        API.PROJECTS.getProject(config.id_project).done(function (response) {
+        getProject(config.id_project).then(function (response) {
           UI.currentOutsourceProject = response.project
           self.renderAnalysisPage()
         })
@@ -56,7 +58,7 @@ window.UI = {
     } else {
       API.PROJECTS.getVolumeAnalysis().done(function (response) {
         self.parseVolumeAnalysisData(response)
-        API.PROJECTS.getProject(config.id_project).done(function (response) {
+        getProject(config.id_project).then(function (response) {
           UI.currentOutsourceProject = response.project
           self.renderAnalysisPage()
         })
@@ -84,9 +86,7 @@ window.UI = {
             response.data.summary.STATUS === 'DONE' ||
             response.data.summary.STATUS === 'NOT_TO_ANALYZE'
           ) {
-            API.PROJECTS.getProject(config.id_project).done(function (
-              response,
-            ) {
+            getProject(config.id_project).then(function (response) {
               if (response.project) {
                 UI.currentOutsourceProject = response.project
                 AnalyzeActions.updateProject(UI.currentOutsourceProject)
