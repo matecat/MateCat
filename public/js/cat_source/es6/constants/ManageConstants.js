@@ -20,7 +20,6 @@ export default keyMirror({
   //MODALS
   OPEN_CREATE_TEAM_MODAL: null,
   OPEN_MODIFY_TEAM_MODAL: null,
-  OPEN_CHANGE_TEAM_MODAL: null,
   OPEN_INFO_TEAMS_POPUP: null,
   //TEAMS
   REMOVE_TEAM: null,

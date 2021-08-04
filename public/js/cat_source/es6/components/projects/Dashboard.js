@@ -419,10 +419,6 @@ class Dashboard extends React.Component {
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    TeamsStore.addListener(
-      ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-      this.openChangeTeamModal,
-    )
     TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
@@ -459,10 +455,6 @@ class Dashboard extends React.Component {
     TeamsStore.removeListener(
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
-    )
-    TeamsStore.removeListener(
-      ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-      this.openChangeTeamModal,
     )
     TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
