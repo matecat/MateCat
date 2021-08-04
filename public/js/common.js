@@ -147,14 +147,12 @@ window.APP = {
     })
   },
   doRequest: function (req, log) {
-    var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
-    var version =
-      typeof config.build_number == 'undefined'
-        ? ''
-        : '-v' + config.build_number
-    var builtURL = req.url
-      ? req.url
-      : getMatecatApiDomain() +
+    const logTxt = !log ? '' : `&type=${log}`
+    const version =
+      config.build_number == null ? '' : `-v${config.build_number}`
+    const builtURL =
+      req.url ||
+      getMatecatApiDomain() +
         '?action=' +
         req.data.action +
         logTxt +
@@ -165,23 +163,18 @@ window.APP = {
         (typeof req.data.id_segment != 'undefined'
           ? ',sid=' + req.data.id_segment
           : '')
-    var reqType = req.type ? req.type : 'POST'
-    var setup = {
+    const setup = {
       url: builtURL,
-
       data: req.data,
-      type: reqType,
+      type: req.type || 'POST',
       dataType: 'json',
       xhrFields: {withCredentials: true},
-      //TODO set timeout longer than server curl for TM/MT
+      success: req.success,
+      complete: req.complete,
+      context: req.context,
+      error: req.error,
+      beforeSend: req.beforeSend,
     }
-
-    // Callbacks
-    if (typeof req.success === 'function') setup.success = req.success
-    if (typeof req.complete === 'function') setup.complete = req.complete
-    if (typeof req.context != 'undefined') setup.context = req.context
-    if (typeof req.error === 'function') setup.error = req.error
-    if (typeof req.beforeSend === 'function') setup.beforeSend = req.beforeSend
 
     return $.ajax(setup)
   },
