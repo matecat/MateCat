@@ -1,19 +1,17 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import Immutable from 'immutable'
+import {rest} from 'msw'
+
 import TeamsSelect from './TeamsSelect'
 import TeamsActions from '../../actions/TeamsActions'
 import ModalsActions from '../../actions/ModalsActions'
 import TeamsStore from '../../stores/TeamsStore'
 import TeamConstants from '../../constants/TeamConstants'
 import ManageConstants from '../../constants/ManageConstants'
-import {rest} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 
-window.React = React
-window.ReactDOM = ReactDOM
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
