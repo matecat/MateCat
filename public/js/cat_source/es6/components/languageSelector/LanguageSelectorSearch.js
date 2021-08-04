@@ -95,7 +95,7 @@ class LanguageSelectorSearch extends React.Component {
   }
 }
 
-Header.defaultProps = {
+LanguageSelectorSearch.defaultProps = {
   selectedLanguages: false,
   languagesList: true,
   querySearch: true,

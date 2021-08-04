@@ -193,7 +193,7 @@ class LanguageSelectorList extends React.Component {
   }
 }
 
-Header.defaultProps = {
+LanguageSelectorList.defaultProps = {
   selectedLanguages: false,
   languagesList: true,
   onToggleLanguage: true,

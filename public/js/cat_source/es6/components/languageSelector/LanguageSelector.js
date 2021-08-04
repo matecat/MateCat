@@ -214,7 +214,7 @@ class LanguageSelector extends React.Component {
   }
 }
 
-Header.defaultProps = {
+LanguageSelector.defaultProps = {
   selectedLanguagesFromDropdown: false,
   fromLanguage: true,
   languagesList: true,
