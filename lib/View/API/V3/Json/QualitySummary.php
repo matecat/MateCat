@@ -233,6 +233,8 @@ class QualitySummary {
                 $issuesWeight = $issuesWeight +  $issue->penalty_points;
                 $catCode = json_decode($issue->cat_options);
                 $issues[] = [
+                    'segment_id' => (int)$issue->segment_id,
+                    'content_id' => $issue->content_id,
                     'penalty_points' => floatval($issue->penalty_points),
                     'category_code' => $catCode->code,
                     'category_label' => $issue->cat_label,

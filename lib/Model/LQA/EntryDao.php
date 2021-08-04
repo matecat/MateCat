@@ -331,6 +331,8 @@ class EntryDao extends \DataAccess_AbstractDao {
         $thisDao = new self();
         $conn    = \Database::obtain()->getConnection();
         $sql     = "SELECT
+                s.internal_id as content_id,
+                s.id as segment_id,
                 e.severity as severity_label,
                 penalty_points,
                 severities,
