@@ -7,7 +7,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} [password=window.config.password]
  * @returns {Promise<object>}
  */
-export const getProject = async (id, password = window.config.password) => {
+export const getProject = async (id, password = config.password) => {
   const response = await fetch(
     `${getMatecatApiDomain()}api/v2/projects/${id}/${password}`,
     {
