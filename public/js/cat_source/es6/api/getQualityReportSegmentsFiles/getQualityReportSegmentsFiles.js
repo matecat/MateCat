@@ -1,5 +1,4 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-import {objToQueryString} from '../../utils/objToQueryString'
 export const getQualityReportSegmentsFiles = async (filter, segmentId) => {
   let data = {
     ref_segment: segmentId,
@@ -27,4 +26,26 @@ export const getQualityReportSegmentsFiles = async (filter, segmentId) => {
   }
 
   return restData
+}
+
+const objToQueryString = (obj) => {
+  const keyValuePairs = []
+  for (const key in obj) {
+    if (obj[key] && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+      for (const subKey in obj[key]) {
+        if (obj[key][subKey]) {
+          keyValuePairs.push(
+            encodeURIComponent(`${key}[${subKey}]`) +
+              '=' +
+              encodeURIComponent(obj[key][subKey]),
+          )
+        }
+      }
+    } else if (obj[key]) {
+      keyValuePairs.push(
+        encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]),
+      )
+    }
+  }
+  return keyValuePairs.join('&')
 }
