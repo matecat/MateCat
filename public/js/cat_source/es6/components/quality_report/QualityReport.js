@@ -8,7 +8,7 @@ import QRActions from '../../actions/QualityReportActions'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
 import Header from '../header/Header'
-import QRApi from '../../ajax_utils/quality_report/qrAjax'
+import {getUserData} from '../../api/getUserData'
 
 class QualityReport extends React.Component {
   constructor(props) {
@@ -257,7 +257,7 @@ export default QualityReport
 let headerMountPoint = $('header')[0]
 
 if (config.isLoggedIn) {
-  QRApi.getUserData().done(function (data) {
+  getUserData().then(function (data) {
     ReactDOM.render(
       React.createElement(Header, {
         showJobInfo: true,
