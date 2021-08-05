@@ -1,6 +1,7 @@
 import keyMirror from 'keymirror'
 
 export default keyMirror({
+  RENDER_SEGMENTS: null,
   RENDER_TEAMS: null,
   ADD_SEGMENTS_QR: null,
   RENDER_REPORT: null,
