@@ -1315,4 +1315,6 @@ test('renders properly', async () => {
     expect(screen.getByText('QR Job summary')).toBeVisible()
   })
   ReactDOM.unmountComponentAtNode(document.getElementById(content.id))
+  ReactDOM.unmountComponentAtNode(document.getElementById(modal.id))
+  ReactDOM.unmountComponentAtNode(document.getElementsByTagName('header')[0])
 })
