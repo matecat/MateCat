@@ -7,13 +7,13 @@ export const getUserData = async () => {
   })
 
   if (!res.ok) {
-    throw Error(res)
+    return Promise.reject(res)
   }
 
   const {errors, ...restData} = await res.json()
 
   if (errors) {
-    return Promise.reject(res)
+    return Promise.reject(errors)
   }
 
   return restData
