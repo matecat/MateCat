@@ -1314,7 +1314,7 @@ test('renders properly', async () => {
   await waitFor(() => {
     expect(screen.getByText('QR Job summary')).toBeVisible()
   })
-  ReactDOM.unmountComponentAtNode(document.getElementById(content.id))
-  ReactDOM.unmountComponentAtNode(document.getElementById(modal.id))
-  ReactDOM.unmountComponentAtNode(document.getElementsByTagName('header')[0])
+  ReactDOM.unmountComponentAtNode(modal)
+  ReactDOM.unmountComponentAtNode(content)
+  ReactDOM.unmountComponentAtNode(header)
 })
