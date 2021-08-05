@@ -93,7 +93,10 @@ class QualityReport extends React.Component {
   }
 
   componentDidMount() {
-    QRStore.addListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles)
+    QRStore.addListener(
+      QRConstants.RENDER_SEGMENTS_QR,
+      this.renderSegmentsFiles,
+    )
     QRStore.addListener(QRConstants.RENDER_REPORT, this.renderJobInfo)
     QRStore.addListener(QRConstants.NO_MORE_SEGMENTS, this.noMoreSegments)
     setTimeout(this.initDropDown.bind(this), 100)
@@ -101,7 +104,7 @@ class QualityReport extends React.Component {
   }
   componentWillUnmount() {
     QRStore.removeListener(
-      QRConstants.RENDER_SEGMENTS,
+      QRConstants.RENDER_SEGMENTS_QR,
       this.renderSegmentsFiles,
     )
     QRStore.removeListener(QRConstants.RENDER_REPORT, this.renderJobInfo)

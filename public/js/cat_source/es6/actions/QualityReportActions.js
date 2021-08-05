@@ -7,7 +7,7 @@ let QualityReportActions = {
     getQualityReportSegmentsFiles(data).then(function (response) {
       if (response.segments) {
         AppDispatcher.dispatch({
-          actionType: QRConstants.RENDER_SEGMENTS,
+          actionType: QRConstants.RENDER_SEGMENTS_QR,
           files: response,
         })
       }
@@ -41,7 +41,7 @@ let QualityReportActions = {
     getQualityReportSegmentsFiles(filter, segmentId).then(function (response) {
       if (response.segments) {
         AppDispatcher.dispatch({
-          actionType: QRConstants.RENDER_SEGMENTS,
+          actionType: QRConstants.RENDER_SEGMENTS_QR,
           files: response,
         })
       }
