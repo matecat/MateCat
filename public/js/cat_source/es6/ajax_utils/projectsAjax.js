@@ -5,31 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  /**
-   *
-   * @param type Job or Project: obj, prj
-   * @param object
-   * @param status
-   */
-  changeJobsOrProjectStatus: function (type, object, status) {
-    var id = object.id
-    var password = object.password
-
-    var data = {
-      new_status: status,
-      res: type, //Project or Job:
-      id: id, // Job or Project Id
-      password: password, // Job or Project Password
-    }
-
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      xhrFields: {withCredentials: true},
-      url: getMatecatApiDomain() + '?action=changeJobsStatus',
-    })
-  },
-
   getLastProjectActivityLogAction: function (id, pass) {
     return $.ajax({
       async: true,

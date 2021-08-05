@@ -2,6 +2,7 @@ import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
 import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
+import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
 let ManageActions = {
   /********* Projects *********/
 
@@ -70,29 +71,25 @@ let ManageActions = {
   },
 
   updateStatusProject: function (project, status) {
-    API.PROJECTS.changeJobsOrProjectStatus('prj', project.toJS(), status).done(
-      function () {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.HIDE_PROJECT,
-          project: project,
-        })
-        setTimeout(function () {
-          ManageActions.removeProject(project)
-        }, 1000)
-      },
-    )
+    changeJobsOrProjectStatus('prj', project.toJS(), status).then(function () {
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.HIDE_PROJECT,
+        project: project,
+      })
+      setTimeout(function () {
+        ManageActions.removeProject(project)
+      }, 1000)
+    })
   },
 
   changeJobStatus: function (project, job, status) {
-    API.PROJECTS.changeJobsOrProjectStatus('job', job.toJS(), status).done(
-      function () {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.REMOVE_JOB,
-          project: project,
-          job: job,
-        })
-      },
-    )
+    changeJobsOrProjectStatus('job', job.toJS(), status).then(function () {
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.REMOVE_JOB,
+        project: project,
+        job: job,
+      })
+    })
   },
 
   changeJobPassword: function (
