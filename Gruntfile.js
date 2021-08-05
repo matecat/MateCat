@@ -114,7 +114,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
           basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
         ],
         dest: buildPath + 'manage.js',
       },
@@ -179,7 +178,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
           basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
         ],
         dest: buildPath + 'analyze-build.js',
       },
@@ -210,7 +208,6 @@ module.exports = function (grunt) {
           basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
           basePath + 'cat_source/es6/ajax_utils/teamAjax.js',
           basePath + 'cat_source/es6/ajax_utils/userAjax.js',
-          basePath + 'cat_source/es6/ajax_utils/quality_report/qrAjax.js',
         ],
         dest: buildPath + 'upload.js',
       },
@@ -305,21 +302,6 @@ module.exports = function (grunt) {
     },
 
     watch: {
-      js: {
-        files: [
-          basePath + 'cat_source/*.js',
-          basePath + 'cat_source/review/*.js',
-          basePath + 'cat_source/review_extended/*.js',
-          basePath + 'tm.js',
-          basePath + 'login.js',
-          basePath + 'advancedOptionsTab.js',
-        ],
-        tasks: ['concat:js'],
-        options: {
-          interrupt: true,
-          livereload: true,
-        },
-      },
       cssCattol: {
         files: cssWatchFiles,
         tasks: ['sass'],
