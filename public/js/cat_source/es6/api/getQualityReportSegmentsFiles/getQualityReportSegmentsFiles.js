@@ -13,7 +13,6 @@ export const getQualityReportSegmentsFiles = async (filter, segmentId) => {
   }/quality-report/segments?${objToQueryString(data)}`
 
   const res = await fetch(url, {
-    method: 'GET',
     credentials: 'include',
   })
 

@@ -1,7 +1,7 @@
 import AppDispatcher from '../stores/AppDispatcher'
-import QRApi from '../ajax_utils/quality_report/qrAjax'
 import QRConstants from '../constants/QualityReportConstants'
 import {getQualityReportSegmentsFiles} from '../api/getQualityReportSegmentsFiles'
+import {getQualityReportInfo} from '../api/getQualityReportInfo'
 let QualityReportActions = {
   loadInitialAjaxData(data) {
     getQualityReportSegmentsFiles(data).then(function (response) {
@@ -12,7 +12,7 @@ let QualityReportActions = {
         })
       }
     })
-    QRApi.getQRinfo().done(function (response) {
+    getQualityReportInfo().then(function (response) {
       if (response.job) {
         AppDispatcher.dispatch({
           actionType: QRConstants.RENDER_REPORT,
