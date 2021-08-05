@@ -5,6 +5,7 @@ import _ from 'lodash'
 
 import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
+import {getOutsourceQuote} from '../../api/getOutsourceQuote'
 
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -63,7 +64,7 @@ class OutsourceVendor extends React.Component {
     let fixedDelivery = delivery ? delivery : ''
     let timezoneToShow = this.state.timezone
     let currency = this.getCurrentCurrency()
-    API.OUTSOURCE.getOutsourceQuote(
+    getOutsourceQuote(
       this.props.project.get('id'),
       this.props.project.get('password'),
       this.props.job.get('id'),
@@ -72,7 +73,7 @@ class OutsourceVendor extends React.Component {
       typeOfService,
       timezoneToShow,
       currency,
-    ).done(function (quoteData) {
+    ).then(function (quoteData) {
       if (quoteData.data && quoteData.data.length > 0) {
         if (
           quoteData.data[0][0].quote_available !== '1' &&
