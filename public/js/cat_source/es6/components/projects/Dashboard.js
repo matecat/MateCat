@@ -41,30 +41,27 @@ class Dashboard extends React.Component {
       this.getTeamStructure(selectedTeam).done(() => {
         TeamsActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
-        getProjects({team: selectedTeam, searchFilter: this.Search}).then(
-          (res) => {
-            if (
-              typeof res.errors != 'undefined' &&
-              res.errors.length &&
-              res.errors[0].code === 401
-            ) {
-              //Not Logged or not in the team
+
+        getProjects({team: selectedTeam, searchFilter: this.Search})
+          .then((res) => {
+            this.setState({showProjects: true})
+            ManageActions.renderProjects(res.data, selectedTeam, teams)
+            ManageActions.storeSelectedTeam(selectedTeam)
+          })
+          .catch((err) => {
+            if (err[0].code == 401) {
+              // Not Logged or not in the team
               window.location.reload()
-            } else if (
-              typeof res.errors != 'undefined' &&
-              res.errors.length &&
-              res.errors[0].code === 404
-            ) {
-              this.selectPersonalTeam()
-            } else if (typeof res.errors != 'undefined' && res.errors.length) {
-              window.location = '/'
-            } else {
-              this.setState({showProjects: true})
-              ManageActions.renderProjects(res.data, selectedTeam, teams)
-              ManageActions.storeSelectedTeam(selectedTeam)
+              return
             }
-          },
-        )
+
+            if (err[0].code == 404) {
+              this.selectPersonalTeam()
+              return
+            }
+
+            window.location = '/'
+          })
       })
       setTimeout(function () {
         CatToolActions.showHeaderTooltip()
@@ -83,27 +80,26 @@ class Dashboard extends React.Component {
     this.Search.filter = {}
     this.Search.currentPage = 1
 
-    getProjects({team: selectedTeam, searchFilter: this.Search}).then((res) => {
-      if (
-        typeof res.errors != 'undefined' &&
-        res.errors.length &&
-        res.errors[0].code === 401
-      ) {
-        //Not Logged or not in the team
-        window.location.reload()
-      } else if (
-        typeof res.errors != 'undefined' &&
-        res.errors.length &&
-        res.errors[0].code === 404
-      ) {
-        this.selectPersonalTeam()
-      } else if (typeof res.errors != 'undefined' && res.errors.length) {
-        window.location = '/'
-      } else {
+    getProjects({team: selectedTeam, searchFilter: this.Search})
+      .then((res) => {
         ManageActions.renderProjects(res.data, selectedTeam, teams)
         ManageActions.storeSelectedTeam(selectedTeam)
-      }
-    })
+      })
+      .catch((err) => {
+        if (err[0].code == 401) {
+          // Not Logged or not in the team
+          window.location.reload()
+          return
+        }
+
+        if (err[0].code == 404) {
+          // Not Logged or not in the team
+          this.selectPersonalTeam()
+          return
+        }
+
+        window.location = '/'
+      })
   }
 
   getTeamStructure = (team) => {
@@ -150,29 +146,28 @@ class Dashboard extends React.Component {
       getProjects({
         team: this.state.selectedTeam,
         searchFilter: this.Search,
-      }).then((res) => {
-        if (
-          typeof res.errors != 'undefined' &&
-          res.errors.length &&
-          res.errors[0].code === 401
-        ) {
-          //Not Logged or not in the team
-          window.location.reload()
-        } else if (
-          typeof res.errors != 'undefined' &&
-          res.errors.length &&
-          res.errors[0].code === 404
-        ) {
-          this.selectPersonalTeam()
-        } else if (typeof res.errors != 'undefined' && res.errors.length) {
-          window.location = '/'
-        } else if (selectedTeam.id === this.state.selectedTeam.id) {
-          const projects = res.data
-          ManageActions.updateProjects(projects)
-        }
       })
+        .then((res) => {
+          if (selectedTeam.id === this.state.selectedTeam.id) {
+            const projects = res.data
+            ManageActions.updateProjects(projects)
+          }
+        })
+        .catch((err) => {
+          if (err[0].code == 401) {
+            //Not Logged or not in the team
+            window.location.reload()
+            return
+          }
+
+          if (err[0].code == 404) {
+            this.selectPersonalTeam()
+            return
+          }
+
+          window.location = '/'
+        })
     } else {
-      //Todo: refactoring with prommises
       let total_projects = []
       let requests = []
       let onDone = (response) => {
@@ -188,11 +183,8 @@ class Dashboard extends React.Component {
           }),
         )
       }
-      Promise.all(requests).then(function () {
-        let results = requests.length > 1 ? arguments : [arguments]
-        for (let i = 0; i < results.length; i++) {
-          onDone(results[i][0])
-        }
+      Promise.all(requests).then((responses) => {
+        responses.forEach(onDone)
         ManageActions.updateProjects(total_projects)
       })
     }
