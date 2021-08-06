@@ -75,7 +75,7 @@ const getIndividualPropFromArray = (array) => {
  */
 const flattenObjectProps = (obj) => {
   const arraysOfProps = getArraysOfNestedProps(obj)
-  return arraysOfProps.map((prop) => getIndividualPropFromArray(prop))
+  return arraysOfProps.map(getIndividualPropFromArray)
 }
 
 /**
@@ -110,7 +110,8 @@ const getQueryStringFromProps = (props) => {
             prop2: {
                 prop3: {
                     value: 'result'
-                }
+                },
+                color: yellow
             }
         },
         color: 'green'
