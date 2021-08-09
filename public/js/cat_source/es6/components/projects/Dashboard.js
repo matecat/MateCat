@@ -470,7 +470,6 @@ class Dashboard extends React.Component {
         this.state.teams &&
         this.state.showProjects ? (
           <ProjectsContainer
-            getLastActivity={API.PROJECTS.getLastProjectActivityLogAction}
             changeJobPasswordFn={API.JOB.changeJobPassword}
             downloadTranslationFn={this.downloadTranslation}
             teams={Immutable.fromJS(this.state.teams)}

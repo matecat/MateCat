@@ -7,6 +7,7 @@ import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import moment from 'moment'
+import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -27,7 +28,7 @@ class ProjectContainer extends React.Component {
     )
     this.dropdownUsersInitialized = false
     this.dropdownTeamsInitialized = false
-    this.lastActivityRequest
+    this.lastActivityController
   }
 
   hideProject(project) {
@@ -257,18 +258,20 @@ class ProjectContainer extends React.Component {
 
   getLastAction() {
     let self = this
-    this.lastActivityRequest = this.props
-      .lastActivityFn(
-        this.props.project.get('id'),
-        this.props.project.get('password'),
-      )
-      .done(function (data) {
-        let lastAction = data.activity[0] ? data.activity[0] : null
-        self.setState({
-          lastAction: lastAction,
-          jobsActions: data.activity,
-        })
+    this.lastActivityController = new AbortController()
+    getLastProjectActivityLogAction(
+      {
+        id: this.props.project.get('id'),
+        password: this.props.project.get('password'),
+      },
+      this.lastActivityController,
+    ).then(function (data) {
+      let lastAction = data.activity[0] ? data.activity[0] : null
+      self.setState({
+        lastAction: lastAction,
+        jobsActions: data.activity,
       })
+    })
   }
 
   getLastJobAction(idJob) {
@@ -593,7 +596,7 @@ class ProjectContainer extends React.Component {
       ManageConstants.CHANGE_PROJECT_ASSIGNEE,
       this.hideProjectAfterChangeAssignee,
     )
-    this.lastActivityRequest.abort?.()
+    this.lastActivityController.abort?.()
   }
 
   shouldComponentUpdate(nextProps, nextState) {
