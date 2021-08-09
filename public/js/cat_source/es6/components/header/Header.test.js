@@ -13,6 +13,8 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
+afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
+
 window.config = {
   isLoggedIn: 1,
   userShortName: 'PD',

@@ -13,6 +13,8 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
+afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
+
 require('../../components')
 require('../../../../common')
 require('../../../../login')
