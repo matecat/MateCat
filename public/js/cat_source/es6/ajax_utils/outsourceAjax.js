@@ -5,14 +5,6 @@ if (!window.API) {
 }
 
 API.OUTSOURCE = {
-  fetchChangeRates() {
-    return $.ajax({
-      type: 'POST',
-      xhrFields: {withCredentials: true},
-      url: getMatecatApiDomain() + '?action=fetchChangeRates',
-    })
-  },
-
   getCountTranslators(source, target) {
     var data = {
       action: 'getCountTranslators',

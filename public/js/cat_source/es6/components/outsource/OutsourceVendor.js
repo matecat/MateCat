@@ -6,6 +6,7 @@ import _ from 'lodash'
 import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
 import {getOutsourceQuote} from '../../api/getOutsourceQuote'
+import {getChangeRates} from '../../api/getChangeRates'
 
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -35,7 +36,7 @@ class OutsourceVendor extends React.Component {
       this.getOutsourceQuote()
     }
 
-    this.getChangeRates()
+    this.retrieveChangeRates()
 
     this.currencies = {
       EUR: {symbol: '€', name: 'Euro (EUR)'},
@@ -169,7 +170,7 @@ class OutsourceVendor extends React.Component {
     })
   }
 
-  getChangeRates() {
+  retrieveChangeRates() {
     let self = this
     let changeRates = Cookies.get('matecat_changeRates')
     if (
@@ -177,7 +178,7 @@ class OutsourceVendor extends React.Component {
       _.isNull(changeRates) ||
       changeRates === 'null'
     ) {
-      API.OUTSOURCE.fetchChangeRates().done(function (response) {
+      getChangeRates().then(function (response) {
         var rates = $.parseJSON(response.data)
         if (!_.isUndefined(rates) && !_.isNull(changeRates)) {
           self.setState({
