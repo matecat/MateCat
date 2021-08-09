@@ -5,21 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  getLastProjectActivityLogAction: function (id, pass) {
-    return $.ajax({
-      async: true,
-      type: 'get',
-      xhrFields: {withCredentials: true},
-      url:
-        getMatecatApiDomain() +
-        'api/v2/activity/project/' +
-        id +
-        '/' +
-        pass +
-        '/last',
-    })
-  },
-
   changeProjectName: function (idOrg, idProject, newName) {
     var data = {
       name: newName,
