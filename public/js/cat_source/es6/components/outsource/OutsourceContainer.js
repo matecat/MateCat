@@ -31,12 +31,6 @@ class OutsourceContainer extends React.Component {
     if (config.enable_outsource) {
       let self = this
       self.translatorsNumber = null
-      // API.OUTSOURCE.getCountTranslators(this.props.job.get('sourceTxt'), this.props.job.get('targetTxt'))
-      //     .done(function ( data ) {
-      //         self.translatorsNumber = data;
-      //     }).fail(function ( data ) {
-      //         self.translatorsNumber = null;
-      // });
     }
   }
 
