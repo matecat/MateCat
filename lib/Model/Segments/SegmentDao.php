@@ -11,6 +11,33 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     const ISSUE_CATEGORY_ALL = 'all';
 
+    protected static $queryForGlobalMismatches = " SELECT id_segment, id_job , segment_hash, translation 
+                         FROM segment_translations 
+                         WHERE id_job = :id_job
+                         AND segment_translations.status IN( :st_translated, :st_approved )";
+
+    protected static $queryForLocalMismatches = "
+                SELECT
+                translation,
+                jobs.source as source,
+                jobs.target as target,
+                COUNT( distinct id_segment ) as TOT,
+                GROUP_CONCAT( distinct id_segment ) AS involved_id,
+                IF( password = :job_password AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
+                    FROM segment_translations
+                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
+                    WHERE segment_hash = (
+                        SELECT segment_hash FROM segments WHERE id = :id_segment
+                    )
+                    AND segment_translations.status IN( :st_translated , :st_approved )
+                    AND id_job = :id_job
+                    AND id_segment != :id_segment
+                    AND translation != (
+                        SELECT translation FROM segment_translations where id_segment = :id_segment and id_job=:id_job
+                    )
+                    GROUP BY translation, id_job
+            ";
+
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
@@ -722,6 +749,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
+        $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
+        return $this->_destroyObjectCache( $stmt, [
+                'id_job'        => $job->id,
+                'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+        ] );
+    }
     /**
      * @param int    $jid
      * @param string $jpassword
@@ -752,29 +787,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          */
         if ( $sid != null ) {
 
-            $query = "
-                SELECT
-                translation,
-                jobs.source as source,
-                jobs.target as target,
-                COUNT( distinct id_segment ) as TOT,
-                GROUP_CONCAT( distinct id_segment ) AS involved_id,
-                IF( password = :job_password AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
-                    FROM segment_translations
-                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
-                    WHERE segment_hash = (
-                        SELECT segment_hash FROM segments WHERE id = :id_segment
-                    )
-                    AND segment_translations.status IN( :st_translated , :st_approved )
-                    AND id_job = :id_job
-                    AND id_segment != :id_segment
-                    AND translation != (
-                        SELECT translation FROM segment_translations where id_segment = :id_segment and id_job=:id_job
-                    )
-                    GROUP BY translation, id_job
-            ";
+            $stmt = $this->_getStatementForCache( self::$queryForLocalMismatches );
 
-            $stmt = $this->_getStatementForCache( $query );
             return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
                             'job_last_segment'  => end( $jStructs )->job_last_segment,
@@ -805,13 +819,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
              *                    HAVING translations_available > 1
              *            ";
              */
-
-            $query = " SELECT id_segment, id_job , segment_hash, translation 
-                         FROM segment_translations 
-                         WHERE id_job = :id_job
-                         AND segment_translations.status IN( :st_translated, :st_approved )";
-
-            $stmt = $this->_getStatementForCache( $query );
+            $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
             $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'id_job'        => $currentJob->id,
                             'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
@@ -827,45 +835,49 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             unset( $list );
 
 
-            $twin_segments          = [];
-            $duplicated_counter = [];
+            $twin_segments             = [];
+            $reverse_translation_index = [];
             foreach ( $jStructs as $job ) {
 
                 for ( $i = $job->job_first_segment; $i <= $job->job_last_segment; $i++ ) { // iterate only the job contained segments to avoid O( N^2 )
 
-                    $group_hash = $segment_list[ $i ][ 'segment_hash' ] . $job->id . $job->password;
-
-                    $twin_segments[ $group_hash ][ 'total_sources' ] += 1;
-
-                    if ( !isset( $duplicated_counter[ $group_hash ] ) ) {
-                        $duplicated_counter[ $group_hash ] = [];
-                    } else {
-                        $duplicated_counter[ $group_hash ][] = true; //$segment_list[ $i ][ 'translation' ];
+                    // segment_translations do not hold all the segments if they are not translatable, skip
+                    if ( !isset( $segment_list[ $i ] ) ) {
+                        continue;
                     }
 
-                    if ( $job[ 'password' ] == $currentJob->password && empty( $twin_segments[ $group_hash ][ 'first_of_my_job' ] ) ) {
-                        $twin_segments[ $group_hash ][ 'first_of_my_job' ] = $i;
+                    $segment_hash = $segment_list[ $i ][ 'segment_hash' ];
+                    $translation  = $segment_list[ $i ][ 'translation' ];
+                    $unique_key   = md5( $translation . $segment_hash );
+
+                    $twin_segments[ $segment_hash ][ 'total_sources' ] += 1;
+
+                    // array_unique : the translation related to a specific segment_hash
+                    if ( !isset( $reverse_translation_index[ $unique_key ] ) ) {
+                        $twin_segments[ $segment_hash ][ 'translations' ][] = $translation;
+                    }
+
+                    $reverse_translation_index[ $unique_key ] = $segment_hash;
+
+                    if ( $job->password == $currentJob->password && !isset( $twin_segments[ $segment_hash ][ 'first_of_my_job' ] ) ) {
+                        $twin_segments[ $segment_hash ][ 'first_of_my_job' ] = $i;
                     }
 
                 }
 
             }
 
+            unset( $reverse_translation_index );
             unset( $segment_list );
 
-            $twin_segments = array_filter( $twin_segments, function ( $item ) {
-                return $item[ 'total_sources' ] > 1 && isset( $item[ 'first_of_my_job' ] ) && !empty( $item[ 'first_of_my_job' ] );
-            } );
-
-            foreach ( $twin_segments as $hash => $element ) {
-                if ( isset( $duplicated_counter[ $hash ] ) && count( $duplicated_counter[ $hash ] ) > 1 ) {
-                    $twin_segments[ $hash ][ 'translations_available' ] = count( $duplicated_counter[ $hash ] );
+            foreach ( $twin_segments as $segment_hash => $element ) {
+                if ( $element[ 'total_sources' ] > 1 && count( $element[ 'translations' ] ) > 1 && isset( $element[ 'first_of_my_job' ] ) ) {
+                    $twin_segments[ $segment_hash ][ 'translations_available' ] = count( $element[ 'translations' ] );
+                    unset( $twin_segments[ $segment_hash ][ 'translations' ] ); // free memory
                 } else {
-                    unset( $twin_segments[ $hash ] );
+                    unset( $twin_segments[ $segment_hash ] ); // remove unwanted segments
                 }
             }
-
-            unset( $duplicated_counter );
 
             return array_values( $twin_segments );
 
