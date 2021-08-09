@@ -1,6 +1,6 @@
 /**
  * Convert object nested properties into arrays
- * 
+ *
  * input: {
         prop1: {
             prop2: {
@@ -15,7 +15,7 @@
         ["prop1", "prop2", "prop3", "value", "result"]
         ["color", "green"]
     ]
- * 
+ *
  * @param {object} obj
  * @returns {Array}
  */
@@ -79,15 +79,25 @@ const flattenObjectProps = (obj) => {
 }
 
 /**
+ * Return object of nested properties flatten
+ *
+ * @param {object} obj
+ * @returns {object}
+ */
+const flattenObject = (obj) => {
+  return flattenObjectProps(obj).reduce((acc, curr) => ({...acc, ...curr}), {})
+}
+
+/**
  * Return query string from properties without nested properties
- * 
+ *
  * input: {
         action: 'login',
         token: 'AC42364'
     }
 
     output: ?action=login&token=AC42364
- * 
+ *
  * @param {object} props
  * @returns {string}
  */
@@ -104,7 +114,7 @@ const getQueryStringFromProps = (props) => {
 
 /**
  * Return query string from properties nested
- * 
+ *
  * input: {
         prop1: {
             prop2: {
@@ -118,7 +128,7 @@ const getQueryStringFromProps = (props) => {
     }
 
     output: ?prop1[prop2][prop3][value]=result&prop1[prop2][color]=yellow&color=green (encoded)
- * 
+ *
  * @param {object} props
  * @returns {string}
  */
@@ -136,4 +146,5 @@ export {
   flattenObjectProps,
   getQueryStringFromProps,
   getQueryStringFromNestedProps,
+  flattenObject,
 }

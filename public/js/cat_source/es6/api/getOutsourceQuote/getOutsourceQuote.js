@@ -1,5 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
+import {flattenObject} from '../../utils/queryString'
 /**
  * Fetch the specific project
  *
@@ -23,7 +23,7 @@ export const getOutsourceQuote = async (
   timezone,
   currency,
 ) => {
-  const data = {
+  const data = flattenObject({
     action: 'outsourceTo',
     pid: idProject,
     currency: currency,
@@ -37,8 +37,7 @@ export const getOutsourceQuote = async (
         jpassword: jpassword,
       },
     ],
-  }
-
+  })
   const formData = new FormData()
 
   Object.keys(data).forEach((key) => {
@@ -53,7 +52,6 @@ export const getOutsourceQuote = async (
   if (!response.ok) return Promise.reject(response)
 
   const {errors, ...restData} = await response.json()
-  if (errors) return Promise.reject(errors)
-
+  if (errors && errors.length > 0) return Promise.reject(errors)
   return restData
 }
