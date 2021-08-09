@@ -4,6 +4,7 @@ import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
 import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
 import {changeProjectName} from '../api/changeProjectName'
+import {changeProjectAssignee} from '../api/changeProjectAssignee'
 let ManageActions = {
   /********* Projects *********/
 
@@ -171,10 +172,9 @@ let ManageActions = {
   },
 
   changeProjectAssignee: function (team, project, user) {
-    const uid = user ? user.get('uid') : -1
-
-    API.PROJECTS.changeProjectAssignee(team.get('id'), project.get('id'), uid)
-      .done(function () {
+    const uid = user ? user.get('uid') : null
+    changeProjectAssignee(team.get('id'), project.get('id'), uid)
+      .then(function () {
         AppDispatcher.dispatch({
           actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
           project: project,
@@ -189,7 +189,7 @@ let ManageActions = {
           })
         })
       })
-      .fail(function () {
+      .catch(function () {
         ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
           actionType: ManageConstants.RELOAD_PROJECTS,

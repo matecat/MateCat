@@ -73,26 +73,18 @@ class ProjectContainer extends React.Component {
   }
 
   initDropdowns() {
-    let self = this
     if (this.dropdownUsers && !this.dropdownUsersInitialized) {
       if (this.props.project.get('id_assignee')) {
         $(this.dropdownUsers).dropdown(
           'set selected',
           this.props.project.get('id_assignee'),
         )
-        this.dropdownUsers.classList.remove('project-not-assigned')
-        this.dropdownUsers.classList.add('project-assignee')
-        this.dropdownUsers.classList.add('shadow-1')
-      } else {
-        $(this.dropdownUsers).dropdown('set selected', -1)
-        this.dropdownUsers.classList.remove('project-assignee')
-        this.dropdownUsers.classList.remove('shadow-1')
-        this.dropdownUsers.classList.add('project-not-assigned')
       }
       $(this.dropdownUsers).dropdown({
         fullTextSearch: 'exact',
-        onChange: function (value) {
-          self.changeUser(value)
+        onChange: (value) => {
+          this.changeUser(value)
+          if (value !== '-1') this.setStyleUserDropDown(true)
         },
       })
       if (this.projectTeam.get('type') == 'personal') {
@@ -102,6 +94,10 @@ class ProjectContainer extends React.Component {
       }
       this.dropdownUsersInitialized = true
     }
+
+    if (this.dropdownUsers)
+      this.setStyleUserDropDown(!!this.props.project.get('id_assignee'))
+
     if (this.dropdownTeams && !this.dropdownTeamsInitialized) {
       $(this.dropdownTeams).dropdown(
         'set selected',
@@ -109,11 +105,24 @@ class ProjectContainer extends React.Component {
       )
       $(this.dropdownTeams).dropdown({
         fullTextSearch: 'exact',
-        onChange: function (value) {
-          self.changeTeam(value)
+        onChange: (value) => {
+          this.changeTeam(value)
         },
       })
       this.dropdownTeamsInitialized = true
+    }
+  }
+
+  setStyleUserDropDown(hasAssigned) {
+    if (hasAssigned) {
+      this.dropdownUsers.classList.remove('project-not-assigned')
+      this.dropdownUsers.classList.add('project-assignee')
+      this.dropdownUsers.classList.add('shadow-1')
+    } else {
+      $(this.dropdownUsers).dropdown('set selected', -1)
+      this.dropdownUsers.classList.remove('project-assignee')
+      this.dropdownUsers.classList.remove('shadow-1')
+      this.dropdownUsers.classList.add('project-not-assigned')
     }
   }
 
@@ -137,16 +146,13 @@ class ProjectContainer extends React.Component {
   }
 
   changeUser(value) {
-    let user, idUser
+    let user
+    const idUser = parseInt(value)
     let team = this.projectTeam
-    if (value === '-1') {
-      user = -1
-      idUser = -1
-      $(this.dropdownUsers).dropdown('hide')
-    } else {
+    if (idUser !== -1) {
       let newUser = team.get('members').find(function (member) {
         let user = member.get('user')
-        if (user.get('uid') === parseInt(value)) {
+        if (user.get('uid') === idUser) {
           return true
         }
       })
@@ -154,7 +160,6 @@ class ProjectContainer extends React.Component {
         return
       }
       user = newUser.get('user')
-      idUser = user.get('uid')
     }
     if (
       (!this.props.project.get('id_assignee') && idUser !== -1) ||

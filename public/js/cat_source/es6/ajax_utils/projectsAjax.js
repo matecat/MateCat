@@ -5,25 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  changeProjectAssignee: function (idOrg, idProject, newUserId) {
-    //Pass null to unassign a Project
-    var idAssignee = newUserId == '-1' ? null : newUserId
-    var data = {
-      id_assignee: idAssignee,
-    }
-    return $.ajax({
-      data: JSON.stringify(data),
-      type: 'put',
-      xhrFields: {withCredentials: true},
-      url:
-        getMatecatApiDomain() +
-        'api/v2/teams/' +
-        idOrg +
-        '/projects/' +
-        idProject,
-    })
-  },
-
   changeProjectTeam: function (newTeamId, project) {
     var data = {
       id_team: newTeamId,
