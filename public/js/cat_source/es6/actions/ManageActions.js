@@ -3,6 +3,7 @@ import ManageConstants from '../constants/ManageConstants'
 import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
 import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
+import {changeProjectName} from '../api/changeProjectName'
 let ManageActions = {
   /********* Projects *********/
 
@@ -197,17 +198,15 @@ let ManageActions = {
   },
 
   changeProjectName: function (team, project, newName) {
-    API.PROJECTS.changeProjectName(
-      team.get('id'),
-      project.get('id'),
-      newName,
-    ).done(function (response) {
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.CHANGE_PROJECT_NAME,
-        project: project,
-        newProject: response.project,
-      })
-    })
+    changeProjectName(team.get('id'), project.get('id'), newName).then(
+      function (response) {
+        AppDispatcher.dispatch({
+          actionType: ManageConstants.CHANGE_PROJECT_NAME,
+          project: project,
+          newProject: response.project,
+        })
+      },
+    )
   },
 
   changeProjectTeam: function (teamId, project) {
