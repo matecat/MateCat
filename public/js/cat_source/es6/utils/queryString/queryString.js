@@ -52,7 +52,7 @@ const getArraysOfNestedProps = (obj) => {
 
 /**
  * Convert array of properties into an object property
- * with the square brackets separator
+ * with square brackets separator
  *
  * input: ["prop1", "prop2", "prop3", "value", "result"]
  * output: {prop1[prop2][prop3][value]: "result"}
@@ -119,8 +119,8 @@ const getQueryStringFromProps = (props) => {
 
     output: ?prop1[prop2][prop3][value]=result&prop1[prop2][color]=yellow&color=green (encoded)
  * 
- * @param {any} props
- * @returns {any}
+ * @param {object} props
+ * @returns {string}
  */
 const getQueryStringFromNestedProps = (props) => {
   const flattenProps = flattenObjectProps(props)
