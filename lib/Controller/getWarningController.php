@@ -135,9 +135,10 @@ class getWarningController extends ajaxController {
 
         try {
             $result    = WarningDao::getWarningsByJobIdAndPassword( $this->__postInput->id_job, $this->__postInput->password );
-            $tMismatch = ( new Segments_SegmentDao() )->getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
+            $tMismatch = ( new Segments_SegmentDao() )->setCacheTTL( 10 * 60 /* 10 minutes cache */ )->getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
         } catch ( Exception $e ) {
-            $this->result[ 'details' ]                = [];
+            $this->result[ 'details' ] = [];
+
             return;
         }
 

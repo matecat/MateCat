@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended\ReviewUtils;
 use Segments\SegmentUIStruct;
 
@@ -730,7 +731,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      */
     public function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 
-        $jStructs = Jobs_JobDao::getById( $jid );
+        $jStructs = Jobs_JobDao::getById( $jid, $this->cacheTTL );
         $filtered = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
             return $item->password == $jpassword;
         } );
@@ -773,20 +774,103 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     GROUP BY translation, id_job
             ";
 
-            $bind_keys = [
-                    'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
-                    'job_last_segment'  => end( $jStructs )->job_last_segment,
-                    'job_password'      => $currentJob->password,
-                    'st_approved'       => Constants_TranslationStatus::STATUS_APPROVED,
-                    'st_translated'     => Constants_TranslationStatus::STATUS_TRANSLATED,
-                    'id_job'            => $jStructs[ 0 ]->id,
-                    'id_segment'        => $sid
-            ];
+            $stmt = $this->_getStatementForCache( $query );
+            return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
+                            'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
+                            'job_last_segment'  => end( $jStructs )->job_last_segment,
+                            'job_password'      => $currentJob->password,
+                            'st_approved'       => Constants_TranslationStatus::STATUS_APPROVED,
+                            'st_translated'     => Constants_TranslationStatus::STATUS_TRANSLATED,
+                            'id_job'            => $jStructs[ 0 ]->id,
+                            'id_segment'        => $sid
+                    ]
+            );
 
         } else {
 
+            /*
+             * This block of code make the same of this query, but it is ~10 times faster for jobs that are split in a big number of chunks.
+             * From 10s to 1,5s
+             *
+             *            $query = "
+             *                SELECT
+             *                COUNT( segment_hash ) AS total_sources,
+             *                COUNT( DISTINCT translation ) AS translations_available,
+             *                MIN( IF( password = :chunk_password AND id_segment between :chunk_first_segment AND :chunk_last_segment,  id_segment , NULL ) ) AS first_of_my_job
+             *                    FROM segment_translations
+             *                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
+             *                    WHERE id_job = :id_job
+             *                    AND segment_translations.status IN( :st_translated , :st_approved )
+             *                    GROUP BY segment_hash, CONCAT( id_job, '-', password )
+             *                    HAVING translations_available > 1
+             *            ";
+             */
+
+            $query = " SELECT id_segment, id_job , segment_hash, translation 
+                         FROM segment_translations 
+                         WHERE id_job = :id_job
+                         AND segment_translations.status IN( :st_translated, :st_approved )";
+
+            $stmt = $this->_getStatementForCache( $query );
+            $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
+                            'id_job'        => $currentJob->id,
+                            'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                            'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                    ]
+            );
+
+            // create a specific array with segment id as key
+            $segment_list = [];
+            array_walk( $list, function ( $element ) use ( &$segment_list ) {
+                $segment_list[ $element[ 'id_segment' ] ] = $element;
+            } );
+            unset( $list );
+
+
+            $twin_segments          = [];
+            $duplicated_counter = [];
+            foreach ( $jStructs as $job ) {
+
+                for ( $i = $job->job_first_segment; $i <= $job->job_last_segment; $i++ ) { // iterate only the job contained segments to avoid O( N^2 )
+
+                    $group_hash = $segment_list[ $i ][ 'segment_hash' ] . $job->id . $job->password;
+
+                    $twin_segments[ $group_hash ][ 'total_sources' ] += 1;
+
+                    if ( !isset( $duplicated_counter[ $group_hash ] ) ) {
+                        $duplicated_counter[ $group_hash ] = [];
+                    } else {
+                        $duplicated_counter[ $group_hash ][] = true; //$segment_list[ $i ][ 'translation' ];
+                    }
+
+                    if ( $job[ 'password' ] == $currentJob->password && empty( $twin_segments[ $group_hash ][ 'first_of_my_job' ] ) ) {
+                        $twin_segments[ $group_hash ][ 'first_of_my_job' ] = $i;
+                    }
+
+                }
+
+            }
+
+            unset( $segment_list );
+
+            $twin_segments = array_filter( $twin_segments, function ( $item ) {
+                return $item[ 'total_sources' ] > 1 && isset( $item[ 'first_of_my_job' ] ) && !empty( $item[ 'first_of_my_job' ] );
+            } );
+
+            foreach ( $twin_segments as $hash => $element ) {
+                if ( isset( $duplicated_counter[ $hash ] ) && count( $duplicated_counter[ $hash ] ) > 1 ) {
+                    $twin_segments[ $hash ][ 'translations_available' ] = count( $duplicated_counter[ $hash ] );
+                } else {
+                    unset( $twin_segments[ $hash ] );
+                }
+            }
+
+            unset( $duplicated_counter );
+
+            return array_values( $twin_segments );
+
             /**
-             * This query gets, for each hash with more than one translations available, the min id of the segments
+             * This query gets, for each hash with more than one translation available, the min id of the segments
              *
              * If we want also to check for mismatches against approved translations also,
              * we have to add the APPROVED status condition.
@@ -795,37 +879,31 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
              * ( Ca. 4X -> 0.01/0.02s for a job with 55k segments on a dev environment )
              *
              */
-            $query = "
-                SELECT
-                COUNT( segment_hash ) AS total_sources,
-                COUNT( DISTINCT translation ) AS translations_available,
-                MIN( IF( password = :chunk_password AND id_segment between :chunk_first_segment AND :chunk_last_segment,  id_segment , NULL ) ) AS first_of_my_job
-                    FROM segment_translations
-                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
-                    WHERE id_job = :id_job
-                    AND segment_translations.status IN( :st_translated , :st_approved )
-                    GROUP BY segment_hash, CONCAT( id_job, '-', password )
-                    HAVING translations_available > 1
-            ";
-
-            $bind_keys = [
-                    'id_job'              => $currentJob->id,
-                    'job_first_segment'   => $jStructs[ 0 ]->job_first_segment,
-                    'job_last_segment'    => end( $jStructs )->job_last_segment,
-                    'chunk_first_segment' => $currentJob->job_first_segment,
-                    'chunk_last_segment'  => $currentJob->job_last_segment,
-                    'chunk_password'        => $currentJob->password,
-                    'st_approved'         => Constants_TranslationStatus::STATUS_APPROVED,
-                    'st_translated'       => Constants_TranslationStatus::STATUS_TRANSLATED,
-            ];
+//            $query = "
+//                SELECT
+//                COUNT( segment_hash ) AS total_sources,
+//                COUNT( DISTINCT translation ) AS translations_available,
+//                MIN( IF( password = :chunk_password AND id_segment between :chunk_first_segment AND :chunk_last_segment,  id_segment , NULL ) ) AS first_of_my_job
+//                    FROM segment_translations
+//                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
+//                    WHERE id_job = :id_job
+//                    AND segment_translations.status IN( :st_translated , :st_approved )
+//                    GROUP BY segment_hash, CONCAT( id_job, '-', password )
+//                    HAVING translations_available > 1
+//            ";
+//
+//            $bind_keys = [
+//                    'id_job'              => $currentJob->id,
+//                    'job_first_segment'   => $jStructs[ 0 ]->job_first_segment,
+//                    'job_last_segment'    => end( $jStructs )->job_last_segment,
+//                    'chunk_first_segment' => $currentJob->job_first_segment,
+//                    'chunk_last_segment'  => $currentJob->job_last_segment,
+//                    'chunk_password'      => $currentJob->password,
+//                    'st_approved'         => Constants_TranslationStatus::STATUS_APPROVED,
+//                    'st_translated'       => Constants_TranslationStatus::STATUS_TRANSLATED,
+//            ];
 
         }
-
-        $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
-        $stm->setFetchMode( PDO::FETCH_ASSOC );
-        $stm->execute( $bind_keys );
-
-        return $stm->fetchAll();
 
     }
 
