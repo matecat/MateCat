@@ -11,7 +11,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     protected static $primary_keys         = [ 'id' ];
 
     protected static $_sql_project_data = "
-            SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,
+            SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject, j.status_owner,
     
                    SUM(s.raw_word_count) AS file_raw_word_count,
                    SUM(st.eq_word_count) AS file_eq_word_count,
@@ -23,7 +23,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                    p.standard_analysis_wc
     
                        FROM projects p
-                       INNER JOIN jobs j ON p.id=j.id_project
+                       INNER JOIN jobs j ON p.id=j.id_project AND j.status_owner <> 'deleted'
                        INNER JOIN files f ON p.id=f.id_project
                        INNER JOIN segments s ON s.id_file=f.id
                        LEFT JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
