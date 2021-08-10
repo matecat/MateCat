@@ -80,7 +80,7 @@ class analyzeController extends viewController {
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $pass );
 
             if ( $this->chunk->status_owner === Constants_JobStatus::STATUS_DELETED ) {
-                $this->project_not_found = $this->project->password != $pass;
+                $this->project_not_found = true;
             }
 
             parent::makeTemplate( $this->job_analysis_html );
