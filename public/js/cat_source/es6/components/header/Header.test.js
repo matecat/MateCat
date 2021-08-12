@@ -1,6 +1,7 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
+import ReactDOM from 'react-dom'
 import {rest} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
