@@ -124,6 +124,11 @@ class catController extends viewController {
             return;
         }
 
+        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_DELETED ) {
+            $this->job_not_found = true;
+            return;
+        }
+
         /*
          * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
          * because the query to check "Utils::getArchivableJobs($this->jid)" should be

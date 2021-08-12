@@ -20,7 +20,7 @@ $.extend(window.UI, {
   },
 })
 
-var alertNotTranslatedYet = function (sid) {
+window.alertNotTranslatedYet = function (sid) {
   APP.confirm({
     name: 'confirmNotYetTranslated',
     cancelTxt: 'Close',
@@ -31,7 +31,7 @@ var alertNotTranslatedYet = function (sid) {
   })
 }
 
-var alertNoTranslatedSegments = function () {
+window.alertNoTranslatedSegments = function () {
   var props = {
     text: 'There are no translated segments to revise in this job.',
     successText: 'Ok',

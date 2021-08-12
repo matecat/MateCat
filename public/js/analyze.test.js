@@ -1,5 +1,6 @@
 import {screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {rest} from 'msw'
+import {unmountComponentAtNode} from 'react-dom'
 
 import {mswServer} from '../mocks/mswServer'
 
@@ -278,4 +279,8 @@ test('renders properly', async () => {
   ).toBeVisible()
 
   expect(screen.getByRole('heading', {name: 'Show Details'})).toBeVisible()
+
+  unmountComponentAtNode(elHeader)
+  unmountComponentAtNode(elAnalyzeContainer)
+  unmountComponentAtNode(elModal)
 })

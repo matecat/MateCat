@@ -11,6 +11,9 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
+
+afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
+
 require('../../../../common')
 require('../../../../login')
 require('../../ajax_utils/projectsAjax')
