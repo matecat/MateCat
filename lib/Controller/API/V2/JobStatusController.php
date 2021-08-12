@@ -18,12 +18,7 @@ use Translations_SegmentTranslationDao;
 use WorkerClient;
 
 
-class JobStatusController extends KleinController {
-
-    /**
-     * @var \Chunks_ChunkStruct
-     */
-    private $chunk;
+class JobStatusController extends BaseChunkController {
 
     /**
      * @var Projects_ProjectStruct
@@ -42,6 +37,9 @@ class JobStatusController extends KleinController {
     }
 
     public function changeSegmentsStatus() {
+
+        $this->return404IfTheJobWasDeleted();
+
         $segments_id = $this->sanitizeSegmentIDs( $this->request->segments_id );
         $status      = strtoupper( $this->request->status );
         $source_page = null ;

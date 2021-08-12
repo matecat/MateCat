@@ -2,12 +2,13 @@
 
 namespace API\V3;
 
+use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use Jobs\MetadataDao;
 use LQA\ChunkReviewDao;
 
-class MetaDataController extends KleinController {
+class MetaDataController extends BaseChunkController {
 
     public function index() {
 
@@ -24,32 +25,15 @@ class MetaDataController extends KleinController {
             throw new NotFoundException( 'Job not found.' );
         }
 
+        $this->chunk = $job;
+        $this->return404IfTheJobWasDeleted();
+
         $metadata = new \stdClass();
         $metadata->project = $this->getProjectInfo( $job->getProject() );
         $metadata->job = $this->getJobMetaData( $job );
         $metadata->files = $this->getJobFilesMetaData( $job );
 
         $this->response->json( $metadata );
-    }
-
-    /**
-     * @param $id_job
-     * @param $password
-     *
-     * @return \Chunks_ChunkStruct|\DataAccess_IDaoStruct|\Jobs_JobStruct
-     */
-    private function getJob( $id_job, $password ) {
-
-        $job = \Jobs_JobDao::getByIdAndPassword( $id_job, $password );
-
-        if ( null === $job ) {
-            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
-            if ( $chunkReview ) {
-                $job = $chunkReview->getChunk();
-            }
-        }
-
-        return $job;
     }
 
     /**

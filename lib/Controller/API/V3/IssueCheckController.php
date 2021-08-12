@@ -2,10 +2,12 @@
 
 namespace API\V3;
 
+use API\V2\BaseChunkController;
+use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use Translations_SegmentTranslationDao;
 
-class IssueCheckController extends KleinController {
+class IssueCheckController extends BaseChunkController {
 
     public function segments() {
 
@@ -19,6 +21,16 @@ class IssueCheckController extends KleinController {
         $id_job      = $this->request->param( 'id_job' );
         $password    = $this->request->param( 'password' );
         $source_page = $this->request->param( 'source_page', 2 );
+
+        // find a job
+        $job = $this->getJob( $id_job, $password );
+
+        if ( null === $job ) {
+            throw new NotFoundException( 'Job not found.' );
+        }
+
+        $this->chunk = $job;
+        $this->return404IfTheJobWasDeleted();
 
         $modifiedSegments = (new Translations_SegmentTranslationDao())
                 ->setCacheTTL( 60 * 5 )

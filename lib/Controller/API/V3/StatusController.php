@@ -9,6 +9,7 @@ use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use Chunks_ChunkStruct;
+use Constants_JobStatus;
 use Constants_ProjectStatus;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -97,10 +98,25 @@ class StatusController extends KleinController {
         // build jobs metadata array
         foreach ( $this->chunks as $chunk ) {
             try {
-                $metadata->chunks[] = $this->renderChunkMetadata( $chunk );
+                if($chunk->status_owner !== Constants_JobStatus::STATUS_DELETED){
+                    $metadata->chunks[] = $this->renderChunkMetadata( $chunk );
+                }
             } catch ( \Exception $exception ) {
                 throw new NotFoundException( 'Error during rendering of job with id ' . $chunk->id );
             }
+        }
+
+        // return 404 if there are no chunks
+        // (or they were deleted)
+        if(empty($metadata->chunks)){
+            $this->response->status()->setCode( 404 );
+            $this->response->json( [
+                'errors' => [
+                    'code' => 0,
+                    'message' => 'No project found.'
+                ]
+            ] );
+            exit();
         }
 
         $this->response->json( $metadata );

@@ -23,6 +23,24 @@ class UrlsController extends KleinController {
 
         $this->featureSet->loadForProject( $this->validator->getProject() );
 
+        // @TODO is correct here?
+        $jobCheck = 0;
+        foreach ($this->validator->getProject()->getJobs() as $job){
+            if (!$job->wasDeleted()) {
+                $jobCheck++;
+            }
+        }
+
+        if($jobCheck === 0){
+            $this->response->json( [
+                'errors' => [
+                        'code' => 0,
+                        'message' => 'No project found.'
+                ]
+            ] );
+            exit();
+        }
+
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */

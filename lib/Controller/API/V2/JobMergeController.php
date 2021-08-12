@@ -46,7 +46,7 @@ class JobMergeController extends KleinController {
 
         $this->job = \Jobs_JobDao::getById( $this->request->id_job )[0];
 
-        if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id ) {
+        if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id || $this->job->wasDeleted() ) {
             throw new \Exceptions\NotFoundException();
         }
     }
@@ -66,7 +66,7 @@ class JobMergeController extends KleinController {
         $found = false;
         $jid   = $this->job->id;
         $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
-            return $jobStruct->id == $jid;
+            return $jobStruct->id == $jid and !$jobStruct->wasDeleted(); // exclude deleted jobs
         } );
 
         if ( empty( $jobToMerge ) ) {

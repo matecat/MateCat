@@ -8,7 +8,7 @@ use API\V2\Validators\SegmentValidator;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 
 
-class SegmentVersion extends KleinController {
+class SegmentVersion extends BaseChunkController {
 
     protected function afterConstruct() {
         $this->appendValidator( new JobPasswordValidator( $this ) );
@@ -23,6 +23,9 @@ class SegmentVersion extends KleinController {
         );
 
         $chunk = \Chunks_ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+
+        $this->chunk = $chunk;
+        $this->return404IfTheJobWasDeleted();
 
         $formatted = new JsonFormatter( $chunk, $results );
 

@@ -3,6 +3,7 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
+use API\V2\BaseChunkController;
 use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
@@ -11,7 +12,7 @@ use Features\SegmentFilter\Model\FilterDefinition;
 use Features\SegmentFilter\Model\SegmentFilterModel;
 
 
-class FilterController extends KleinController {
+class FilterController extends BaseChunkController {
 
     /**
      * @var ChunkPasswordValidator
@@ -19,11 +20,6 @@ class FilterController extends KleinController {
     protected $validator;
 
     private $model ;
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    private $chunk ;
 
     /**
      * @var FilterDefinition
@@ -41,6 +37,9 @@ class FilterController extends KleinController {
     }
 
     public function index() {
+
+        $this->return404IfTheJobWasDeleted();
+
        // TODO: validate the input filter
         $this->model = new SegmentFilterModel( $this->chunk, $this->filter );
 

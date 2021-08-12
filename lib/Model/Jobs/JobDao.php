@@ -217,13 +217,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                         WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
                         AND j.id = :id_job
                         AND j.password = :password
+                        AND j.owner_status != :deleted
                         GROUP BY s.id
                     WITH ROLLUP"
         );
 
         return $this
                 ->setCacheTTL( $ttl )
-                ->_fetchObject( $stmt, new LoudArray(), [ 'id_job' => $id, 'password' => $password ] );
+                ->_fetchObject( $stmt, new LoudArray(), [ 'id_job' => $id, 'password' => $password, 'deleted' => Constants_JobStatus::STATUS_DELETED ] );
 
     }
 

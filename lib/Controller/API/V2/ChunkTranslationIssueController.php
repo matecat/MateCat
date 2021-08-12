@@ -12,7 +12,7 @@ use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 
-class ChunkTranslationIssueController extends KleinController {
+class ChunkTranslationIssueController extends BaseChunkController {
 
     /**
      * @var Chunks_ChunkStruct
@@ -30,6 +30,8 @@ class ChunkTranslationIssueController extends KleinController {
     }
 
     public function index() {
+
+        $this->return404IfTheJobWasDeleted();
 
         // find all issues by chunk and return the json representation.
         $result = \LQA\EntryDao::findAllByChunk( $this->chunk );

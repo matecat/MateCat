@@ -67,6 +67,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/options', 'POST', 'API\V2\ChunkOptionsController', 'update' );
 
 
+    route( '/delete', 'POST', 'API\V2\ChunkController', 'delete' );
     route( '/cancel', 'POST', 'API\V2\ChunkController', 'cancel' );
     route( '/archive', 'POST', 'API\V2\ChunkController', 'archive' );
     route( '/active', 'POST', 'API\V2\ChunkController', 'active' );
