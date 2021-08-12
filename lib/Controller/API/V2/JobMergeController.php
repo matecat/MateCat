@@ -63,9 +63,8 @@ class JobMergeController extends KleinController {
      */
     protected function checkMergeAccess( array $jobList ) {
 
-        $found = false;
         $jid   = $this->job->id;
-        $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
+        $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( $jid ) {
             return $jobStruct->id == $jid and !$jobStruct->wasDeleted(); // exclude deleted jobs
         } );
 

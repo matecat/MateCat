@@ -1453,7 +1453,6 @@ class ProjectManager {
             throw new Exception( "Requested words per chunk available only for Matecat PRO version", -4 );
         }
 
-        // @TODO exlude deleted jobs
         $rows = ( new Jobs_JobDao() )->getSplitData( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
 
         if ( empty( $rows ) ) {
