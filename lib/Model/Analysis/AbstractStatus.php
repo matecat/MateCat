@@ -198,9 +198,9 @@ abstract class Analysis_AbstractStatus {
 
             //SUM WITH PREVIOUS ( Accumulator )
             //take note of payable words for job/file combination
-            $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] += $segInfo[ 'eq_word_count' ];
-            $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
-            $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] += $segInfo[ 'raw_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] ) ? ($total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] + $segInfo[ 'eq_word_count' ]) : $segInfo[ 'eq_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] ) ? ($total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] + $segInfo[ 'standard_word_count' ]) : $segInfo[ 'standard_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] ) ? ($total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] + $segInfo[ 'raw_word_count' ]) : $segInfo[ 'raw_word_count' ];
 
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
