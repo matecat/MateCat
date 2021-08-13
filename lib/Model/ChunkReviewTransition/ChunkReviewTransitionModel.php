@@ -19,12 +19,12 @@ class ChunkReviewTransitionModel {
     /**
      * @var \LQA\ChunkReviewStruct[]
      */
-    private $chunk_reviews;
+    private $chunk_reviews = [];
 
     /**
      * @var \LQA\EntryWithCategoryStruct[]
      */
-    private $issues_to_delete;
+    private $issues_to_delete = [];
 
     /**
      * ChunkReviewTransitionDao_ChunkReviewTransitionModel constructor.

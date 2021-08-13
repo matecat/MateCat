@@ -64,19 +64,25 @@ class Analysis_AnalysisModel {
      *
      */
     private function loadReferenceFiles() {
-        $zip = new ZipArchive();
-        $zip->open( $this->getProject()->getFirstOriginalZipPath() );
 
-        $this->reference_files = array();
-        $folder                = ZipArchiveExtended::REFERENCE_FOLDER;
+        if( !empty( $this->getProject()->getFirstOriginalZipPath() ) ){
 
-        for ( $i = 0; $i < $zip->numFiles; $i++ ) {
-            if ( preg_match( "/$folder\/(\w+)/", $zip->getNameIndex( $i ) ) ) {
-                $path = preg_replace( "/$folder\/(\w+)/", '${1}', $zip->getNameIndex( $i ) );
+            $zip = new ZipArchive();
+            $zip->open( $this->getProject()->getFirstOriginalZipPath() );
 
-                $this->reference_files[] = array( 'index' => $i, 'name' => $path );
+            $this->reference_files = array();
+            $folder                = ZipArchiveExtended::REFERENCE_FOLDER;
+
+            for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+                if ( preg_match( "/$folder\/(\w+)/", $zip->getNameIndex( $i ) ) ) {
+                    $path = preg_replace( "/$folder\/(\w+)/", '${1}', $zip->getNameIndex( $i ) );
+
+                    $this->reference_files[] = array( 'index' => $i, 'name' => $path );
+                }
             }
+
         }
+
     }
 
     /**
