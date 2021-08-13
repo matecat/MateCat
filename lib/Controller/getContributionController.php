@@ -168,10 +168,17 @@ class getContributionController extends ajaxController {
 
         $Filter = MateCatFilter::getInstance( $featureSet, $source, $target, [] );
 
-        $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
-        $this->text           = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
-        $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+        if($segmentsList->id_before){
+            $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        }
 
+        if($segmentsList->id_segment){
+            $this->text           = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
+        }
+
+        if($segmentsList->id_after){
+            $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+        }
 
     }
 

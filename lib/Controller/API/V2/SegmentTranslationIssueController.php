@@ -135,7 +135,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'comment'     => $this->request->message,
                 'id_qa_entry' => $this->validator->issue->id,
                 'source_page' => $this->request->source_page,
-                'uid'         => $this->user->uid
+                'uid'         => ($this->user) ? $this->user->uid : null
         ];
 
         $dao = new EntryCommentDao();
