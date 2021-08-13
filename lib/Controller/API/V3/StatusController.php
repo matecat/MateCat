@@ -349,6 +349,9 @@ class StatusController extends KleinController {
 
         foreach ( $this->chunksTotalsCache[ $chunkId . "-" . $chunkPassword ] as $id => $chunk ) {
             foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
+                if ( !isset( $totals->$key ) ) {
+                    $totals->$key = 0;
+                }
                 $totals->$key += $chunk[ $key ];
             }
         }

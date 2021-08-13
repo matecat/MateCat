@@ -850,6 +850,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     $translation  = $segment_list[ $i ][ 'translation' ];
                     $unique_key   = md5( $translation . $segment_hash );
 
+                    if( !isset( $twin_segments[ $segment_hash ] ) ){
+                        $twin_segments[ $segment_hash ] = [];
+                    }
                     $twin_segments[ $segment_hash ][ 'total_sources' ] += 1;
 
                     // array_unique : the translation related to a specific segment_hash

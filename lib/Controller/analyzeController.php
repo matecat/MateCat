@@ -35,36 +35,36 @@ class analyzeController extends viewController {
     /**
      * @var Projects_ProjectStruct
      */
-    public $project ;
+    public $project;
 
     /**
      * @var Chunks_ChunkStruct
      */
-    private $chunk ;
+    private $chunk;
 
     /**
      * @var bool
      */
     private $project_not_found = false;
 
-    protected $analyze_html = "analyze.html";
-    protected $job_analysis_html = "jobAnalysis.html" ;
+    protected $analyze_html      = "analyze.html";
+    protected $job_analysis_html = "jobAnalysis.html";
 
-    protected $page_type ;
+    protected $page_type;
 
     public function __construct() {
 
         parent::sessionStart();
         parent::__construct( false );
 
-        $filterArgs = array(
-                'pid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'password' => array(
+        $filterArgs = [
+                'pid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password' => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
-        );
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ]
+        ];
 
         $postInput = filter_input_array( INPUT_GET, $filterArgs );
 
@@ -75,18 +75,30 @@ class analyzeController extends viewController {
         $this->project = Projects_ProjectDao::findById( $this->pid, 60 * 60 );
 
         if ( !empty( $this->jid ) ) {
-            // we are looking for a chunk
-            $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->jid, $pass);
 
-            parent::makeTemplate( $this->job_analysis_html  );
+            // we are looking for a chunk
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $pass );
+
+            if ( $this->chunk->status_owner === Constants_JobStatus::STATUS_DELETED ) {
+                $this->project_not_found = true;
+            }
+
+            parent::makeTemplate( $this->job_analysis_html );
             $this->jpassword = $pass;
             $this->ppassword = $this->project->password;
             $this->page_type = 'job_analysis';
 
         } else {
-            $this->project_not_found = $this->project->password != $pass;
 
-            parent::makeTemplate( $this->analyze_html  );
+            $chunks = ( new Chunks_ChunkDao )->getByProjectID( $this->project->id );
+
+            $notDeleted = array_filter( $chunks, function( $element ){
+                return $element->status_owner != Constants_JobStatus::STATUS_DELETED;
+            } );
+
+            $this->project_not_found = $this->project->password != $pass || empty( $notDeleted );
+
+            parent::makeTemplate( $this->analyze_html );
             $this->jid       = null;
             $this->jpassword = null;
             $this->ppassword = $pass;
@@ -103,13 +115,14 @@ class analyzeController extends viewController {
     public function doAction() {
 
         if ( $this->project_not_found ) {
-            $this->render404() ;
-            return ;
+            $this->render404();
+
+            return;
         }
 
-        $this->featureSet->run('beginDoAction', $this, array(
-                'project' => $this->project,  'page_type' => $this->page_type
-        ));
+        $this->featureSet->run( 'beginDoAction', $this, [
+                'project' => $this->project, 'page_type' => $this->page_type
+        ] );
 
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();
@@ -122,14 +135,15 @@ class analyzeController extends viewController {
         $activity->uid        = $this->user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
-        
+
     }
 
     public function setTemplateVars() {
 
-        if( $this->project_not_found ){
+        if ( $this->project_not_found ) {
             parent::makeTemplate( 'project_not_found.html' );
-            $this->template->support_mail    = INIT::$SUPPORT_MAIL;
+            $this->template->support_mail = INIT::$SUPPORT_MAIL;
+
             return;
         }
 
@@ -137,11 +151,11 @@ class analyzeController extends viewController {
             $this->template->project_password = $this->ppassword;
         } else {
             $this->template->project_password = $this->ppassword;
-            $this->template->job_password =     $this->jpassword;
+            $this->template->job_password     = $this->jpassword;
             $this->template->jid              = $this->jid;
         }
 
-        $this->template->outsource_service_login    = $this->_outsource_login_API ;
+        $this->template->outsource_service_login = $this->_outsource_login_API;
 
         $this->__evalModalBoxForLogin();
 
@@ -166,8 +180,8 @@ class analyzeController extends viewController {
 
     private function __evalModalBoxForLogin() {
         if (
-            !$this->isLoggedIn() &&
-            isset( $_SESSION[ 'last_created_pid' ] ) && $_SESSION['last_created_pid'] == $this->project->id
+                !$this->isLoggedIn() &&
+                isset( $_SESSION[ 'last_created_pid' ] ) && $_SESSION[ 'last_created_pid' ] == $this->project->id
         ) {
             $this->template->showModalBoxLogin = true;
         } else {
