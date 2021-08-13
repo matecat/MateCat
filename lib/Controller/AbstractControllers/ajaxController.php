@@ -80,6 +80,11 @@ abstract class ajaxController extends controller {
      */
     public function finalize() {
         $toJson = json_encode( $this->result );
+
+        if (!ob_get_status())  {
+            ob_start();
+        }
+
         echo $toJson;
 
         $this->logPageCall();

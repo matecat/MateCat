@@ -428,9 +428,9 @@ class createProjectController extends ajaxController {
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
         $metadata[ 'proprietary' ]     = [
-                [ 'proprietary' ]            => $info[ 'proprietary' ],
-                [ 'proprietary_name' ]       => $info[ 'proprietary_name' ],
-                [ 'proprietary_short_name' ] => $info[ 'proprietary_short_name' ],
+             'proprietary'             => $info[ 'proprietary' ],
+             'proprietary_name'        => $info[ 'proprietary_name' ],
+             'proprietary_short_name'  => $info[ 'proprietary_short_name' ],
         ];
 
         return $metadata;
