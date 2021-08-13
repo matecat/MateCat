@@ -751,12 +751,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
         $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
+
         return $this->_destroyObjectCache( $stmt, [
                 'id_job'        => $job->id,
                 'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
                 'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
         ] );
     }
+
     /**
      * @param int    $jid
      * @param string $jpassword
@@ -850,9 +852,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     $translation  = $segment_list[ $i ][ 'translation' ];
                     $unique_key   = md5( $translation . $segment_hash );
 
-                    if( !isset( $twin_segments[ $segment_hash ] ) ){
-                        $twin_segments[ $segment_hash ] = [];
+                    if ( !isset( $twin_segments[ $segment_hash ] ) ) {
+                        $twin_segments[ $segment_hash ] = [
+                                'total_sources'          => 0,
+                                'translations'           => [],
+                                'first_of_my_job'        => null,
+                                'translations_available' => 0
+                        ];
                     }
+
                     $twin_segments[ $segment_hash ][ 'total_sources' ] += 1;
 
                     // array_unique : the translation related to a specific segment_hash
