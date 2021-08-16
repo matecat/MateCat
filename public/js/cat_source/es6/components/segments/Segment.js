@@ -443,7 +443,8 @@ class Segment extends React.Component {
       return
     } else if (!this.props.segment.opened) {
       this.openSegment()
-      SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid)
+      if (this.checkIfCanOpenSegment())
+        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid)
     }
   }
 
