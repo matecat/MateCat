@@ -24,7 +24,7 @@ class AssignToTranslator extends React.Component {
 
     let email = this.email.value
 
-    OutsourceActions.sendJobToTranslator(
+    UI.sendJobToTranslator(
       email,
       date,
       this.state.timezone,

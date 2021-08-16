@@ -1,3 +1,5 @@
+import React from 'react'
+
 const IconTick = ({width = '42', height = '42', style, color = '#000000'}) => {
   return (
     <svg

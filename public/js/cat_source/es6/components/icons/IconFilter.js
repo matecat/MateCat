@@ -1,3 +1,5 @@
+import React from 'react'
+
 const IconFilter = ({
   width = '42',
   height = '42',

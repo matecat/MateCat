@@ -24,7 +24,10 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
     })
     this._segmentsFiles = Immutable.fromJS(segmentsFiles)
     this._files = Immutable.fromJS(files)
-    this._lastSegment = segmentsData._links.last_segment_id
+    this._lastSegment =
+      segmentsData.segments.length > 0
+        ? segmentsData._links.last_segment_id
+        : undefined
   },
 
   storeJobInfo: function (job) {

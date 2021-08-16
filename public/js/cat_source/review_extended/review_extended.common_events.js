@@ -2,6 +2,8 @@
     Common events used in translation and revise page when Review Extended is active
  */
 
+import SegmentActions from '../es6/actions/SegmentActions'
+
 if (ReviewExtended.enabled()) {
   $(document).on('files:appended', function () {
     ReviewExtended.getSegmentsIssues()

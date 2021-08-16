@@ -1,3 +1,7 @@
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
+import SegmentStore from './es6/stores/SegmentStore'
+
 if (SegmentFilter.enabled())
   (function ($, UI, SF) {
     var original_renderFiles = UI.renderFiles

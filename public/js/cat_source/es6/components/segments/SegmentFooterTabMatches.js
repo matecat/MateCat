@@ -1,15 +1,13 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import _ from 'lodash'
+import Immutable from 'immutable'
+
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
-import Immutable from 'immutable'
 import TranslationMatches from './utils/translationMatches'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterTabMatches extends React.Component {
   constructor(props) {
@@ -28,7 +26,7 @@ class SegmentFooterTabMatches extends React.Component {
     var self = this
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.id_segment);
-    $.each(matches, function (index) {
+    $.each(matches, function () {
       if (
         _.isUndefined(this.segment) ||
         this.segment === '' ||
@@ -122,8 +120,6 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   suggestionDblClick(match, index) {
-    var self = this
-    var ulDataItem = '.editor .tab.matches ul[data-item='
     setTimeout(() => {
       SegmentActions.setFocusOnEditArea()
       SegmentActions.disableTPOnSegment(this.props.segment)
@@ -135,7 +131,7 @@ class SegmentFooterTabMatches extends React.Component {
     }, 200)
   }
 
-  deleteSuggestion(match, index) {
+  deleteSuggestion(match) {
     var source = TextUtils.htmlDecode(match.segment)
     var target = TextUtils.htmlDecode(match.translation)
     target = TextUtils.view2rawxliff(target)
@@ -190,7 +186,7 @@ class SegmentFooterTabMatches extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return (
       ((!_.isUndefined(nextProps.segment.contributions) ||
         !_.isUndefined(this.props.segment.contributions)) &&
@@ -296,9 +292,8 @@ class SegmentFooterTabMatches extends React.Component {
       this.props.segment.contributions.error &&
       this.props.segment.contributions.errors.length > 0
     ) {
-      this.props.segment.contributions.errors.forEach((error, index) => {
+      this.props.segment.contributions.errors.forEach((error) => {
         let toAdd = false,
-          percentClass = '',
           messageClass,
           imgClass,
           messageTypeText
@@ -306,7 +301,6 @@ class SegmentFooterTabMatches extends React.Component {
         switch (error.code) {
           case '-2001':
             toAdd = true
-            percentClass = 'per-red'
             messageClass = 'error'
             imgClass = 'error-img'
             messageTypeText = 'Error: '

@@ -1,8 +1,12 @@
 import _ from 'lodash'
 import moment from 'moment'
+import React from 'react'
 
+import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'
+import SegmentStore from '../../stores/SegmentStore'
 import CommonUtils from '../../utils/commonUtils'
+
 class ReviewExtendedIssue extends React.Component {
   constructor(props) {
     super(props)

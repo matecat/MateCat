@@ -1292,8 +1292,6 @@ test('renders properly', async () => {
 
   require('../../../../common')
   require('../../../../login')
-  require('../../react-libs')
-  require('../../components')
 
   const header = document.createElement('header')
 

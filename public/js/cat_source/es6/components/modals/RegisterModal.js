@@ -1,7 +1,9 @@
+import update from 'immutability-helper'
+import React from 'react'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
 
 class RegisterModal extends React.Component {
   constructor(props) {
@@ -46,7 +48,7 @@ class RegisterModal extends React.Component {
     this.setState({requestRunning: true})
     this.checkRedeemProject().then(
       this.sendRegisterData()
-        .done(function (data) {
+        .done(function () {
           $('#modal').trigger('confirmregister', [
             {emailAddress: self.state.emailAddress},
           ])
@@ -143,7 +145,11 @@ class RegisterModal extends React.Component {
         />
         <p className="condition-google">
           By clicking you accept{' '}
-          <a href="https://site.matecat.com/terms/" target="_blank">
+          <a
+            href="https://site.matecat.com/terms/"
+            rel="noreferrer"
+            target="_blank"
+          >
             terms and conditions
           </a>
         </p>
@@ -220,6 +226,7 @@ class RegisterModal extends React.Component {
               href="https://site.matecat.com/terms/"
               style={this.checkStyle}
               target="_blank"
+              rel="noreferrer"
             >
               terms and conditions
             </a>

@@ -1,7 +1,3 @@
-/*
- * Analyze Store
- */
-
 import assign from 'object-assign'
 import {EventEmitter} from 'events'
 import _ from 'lodash'
@@ -122,4 +118,4 @@ AppDispatcher.register(function (action) {
   }
 })
 
-module.exports = CatToolStore
+export default CatToolStore

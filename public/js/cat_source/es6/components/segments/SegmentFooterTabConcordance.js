@@ -8,6 +8,7 @@ import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterTabConcordance extends React.Component {
   constructor(props) {
@@ -75,7 +76,6 @@ class SegmentFooterTabConcordance extends React.Component {
 
   getConcordance(query, type) {
     //type 0 = source, 1 = target
-    let self = this
     API.SEGMENT.getConcordance(query, type).fail(function () {
       OfflineUtils.failedConnection(this, 'getConcordance')
     })
@@ -83,10 +83,6 @@ class SegmentFooterTabConcordance extends React.Component {
       loading: true,
       results: [],
     })
-  }
-
-  allowHTML(string) {
-    return {__html: string}
   }
 
   renderConcordances(sid, data) {
@@ -127,13 +123,13 @@ class SegmentFooterTabConcordance extends React.Component {
 
         let leftTxt = item.segment
         leftTxt = TagUtils.decodePlaceholdersToTextSimple(leftTxt)
-        leftTxt = leftTxt.replace(/\#\{/gi, '<mark>')
-        leftTxt = leftTxt.replace(/\}\#/gi, '</mark>')
+        leftTxt = leftTxt.replace(/#\{/gi, '<mark>')
+        leftTxt = leftTxt.replace(/\}#/gi, '</mark>')
 
         let rightTxt = item.translation
         rightTxt = TagUtils.decodePlaceholdersToTextSimple(rightTxt)
-        rightTxt = rightTxt.replace(/\#\{/gi, '<mark>')
-        rightTxt = rightTxt.replace(/\}\#/gi, '</mark>')
+        rightTxt = rightTxt.replace(/#\{/gi, '<mark>')
+        rightTxt = rightTxt.replace(/\}#/gi, '</mark>')
 
         let element = (
           <ul
@@ -304,7 +300,7 @@ class SegmentFooterTabConcordance extends React.Component {
     if (this.state.noResults) {
       results = (
         <ul className={'graysmall message prime'}>
-          <li>Can't find any matches. Check the language combination.</li>
+          <li>Can&apos;t find any matches. Check the language combination.</li>
         </ul>
       )
     }

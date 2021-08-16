@@ -1,6 +1,7 @@
-// import SegmentStore  from '../stores/SegmentStore';
 import _ from 'lodash'
 import {Base64} from 'js-base64'
+
+// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils'
 import {
   tagSignatures,
@@ -120,12 +121,12 @@ const TAGS_UTILS = {
 
   // Replace old function transformTextForLockTags
   decodeHtmlInTag: function (tx, isRTL = false) {
-    let brTx1 = `<_plh_ contenteditable=\"false\" class=\"tag small ${
+    let brTx1 = `<_plh_ contenteditable="false" class="tag small ${
       isRTL ? 'tag-close' : 'tag-open'
-    }\">$1</_plh_>`
-    let brTx2 = `<span contenteditable=\"false\" class=\"tag small ${
+    }">$1</_plh_>`
+    let brTx2 = `<span contenteditable="false" class="tag small ${
       isRTL ? 'tag-open' : 'tag-close'
-    }\">$1</span>`
+    }">$1</span>`
     let brTx3 =
       '<_plh_ contenteditable="false" class="tag small tag-selfclosed">$1</_plh_>'
     let brTxPlPh1 =
@@ -158,10 +159,10 @@ const TAGS_UTILS = {
       .replace(/(&lt;\s*\/\s*(ph)\s*&gt;)/gi, brTxPlPh12)
 
     tx = tx.replace(
-      /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi,
+      /(<span contenteditable="false" class="[^"]*">)(:?<span contenteditable="false" class="[^"]*">)(.*?)(<\/span>){2}/gi,
       '$1$3</span>',
     )
-    tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, '</span> ')
+    tx = tx.replace(/(<\/span>)$(\s){0,}/gi, '</span> ')
     tx = this.transformTagsWithHtmlAttributeGeneral(tx)
     return tx
   },
@@ -464,7 +465,7 @@ const TAGS_UTILS = {
     let diffObj = TextUtils.execDiff(mainStr, transDecoded)
     // Restore Tags
     let totalLength = 0
-    diffObj.forEach((diffItem, index) => {
+    diffObj.forEach((diffItem) => {
       if (diffItem[0] <= 0) {
         let includedTags = []
         let newTotalLength = totalLength + diffItem[1].length
@@ -506,4 +507,4 @@ const TAGS_UTILS = {
     return diffObj
   },
 }
-module.exports = TAGS_UTILS
+export default TAGS_UTILS

@@ -1,4 +1,6 @@
 import React from 'react'
+
+import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 
@@ -76,14 +78,14 @@ class BulkSelectionBar extends React.Component {
     })
     if (this.props.isReview) {
       SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
-        (response) => {
+        () => {
           this.onClickBack()
           UI.reloadQualityReport()
         },
       )
     } else {
       SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
-        (response) => {
+        () => {
           this.onClickBack()
         },
       )
