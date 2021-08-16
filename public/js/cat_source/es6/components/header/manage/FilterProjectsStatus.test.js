@@ -1,10 +1,7 @@
 import {render, screen} from '@testing-library/react'
-import FilterProjectsStatus from './FilterProjectsStatus'
 import React from 'react'
-import ReactDOM from 'react-dom'
 
-window.React = React
-window.ReactDOM = ReactDOM
+import FilterProjectsStatus from './FilterProjectsStatus'
 
 test('Rendering elements', () => {
   render(<FilterProjectsStatus filterFunction={() => {}} />)

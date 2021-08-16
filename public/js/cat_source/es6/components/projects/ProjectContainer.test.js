@@ -4,18 +4,17 @@ import ReactDOM from 'react-dom'
 import ProjectContainer from './ProjectContainer'
 import Immutable from 'immutable'
 import {rest} from 'msw'
+
 import {mswServer} from '../../../../../mocks/mswServer'
 
-window.React = React
-window.ReactDOM = ReactDOM
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
+
 afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
 
-require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../ajax_utils/projectsAjax')

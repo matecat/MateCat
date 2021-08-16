@@ -1,3 +1,9 @@
+import SegmentActions from '../es6/actions/SegmentActions'
+import SegmentStore from '../es6/stores/SegmentStore'
+import OfflineUtils from '../es6/utils/offlineUtils'
+import TagUtils from '../es6/utils/tagUtils'
+import TextUtils from '../es6/utils/textUtils'
+
 window.ReviewSimple = {
   enabled: function () {
     return config.enableReview && config.isReview && Review.type === 'simple'

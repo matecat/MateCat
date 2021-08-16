@@ -1,3 +1,10 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+import TeamsActions from './cat_source/es6/actions/TeamsActions'
+import Header from './cat_source/es6/components/header/Header'
+import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
+import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
 import {getProject} from './cat_source/es6/api/getProject'
 
 window.UI = null

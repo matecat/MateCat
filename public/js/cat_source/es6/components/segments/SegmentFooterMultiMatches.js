@@ -1,7 +1,3 @@
-/**
- * React Component .
-
- */
 import React from 'react'
 import Immutable from 'immutable'
 import _ from 'lodash'
@@ -9,6 +5,7 @@ import _ from 'lodash'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentFooterMultiMatches extends React.Component {
   constructor(props) {
@@ -34,7 +31,7 @@ class SegmentFooterMultiMatches extends React.Component {
     var self = this
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.id_segment);
-    $.each(matches, function (index) {
+    $.each(matches, function () {
       if (
         _.isUndefined(this.segment) ||
         this.segment === '' ||
@@ -89,13 +86,14 @@ class SegmentFooterMultiMatches extends React.Component {
         // Clean text without tag and create tagsMap to replace tag after exec_diff
         const {text: matchDecoded, tagsMap: matchTagsMap} =
           TagUtils.cleanTextFromTag(this.segment)
-        const {text: sourceDecoded, tagsMap: sourceTagsMap} =
-          TagUtils.cleanTextFromTag(self.props.segment.segment)
+        const {text: sourceDecoded} = TagUtils.cleanTextFromTag(
+          self.props.segment.segment,
+        )
         let diff_obj = TextUtils.execDiff(matchDecoded, sourceDecoded)
 
         let totalLength = 0
         // --- Replace all mapped tags back inside the string
-        diff_obj.forEach((diffItem, index) => {
+        diff_obj.forEach((diffItem) => {
           if (diffItem[0] <= 0) {
             let includedTags = []
             let newTotalLength = totalLength + diffItem[1].length
@@ -174,7 +172,7 @@ class SegmentFooterMultiMatches extends React.Component {
     )
   }
 
-  suggestionDblClick(match, index) {
+  suggestionDblClick(match) {
     SegmentActions.setFocusOnEditArea()
     SegmentActions.disableTPOnSegment(this.props.segment)
     setTimeout(() => {
@@ -197,7 +195,7 @@ class SegmentFooterMultiMatches extends React.Component {
     return {__html: string}
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return (
       ((!_.isUndefined(nextProps.segment.cl_contributions) ||
         !_.isUndefined(this.props.segment.cl_contributions)) &&

@@ -1,5 +1,7 @@
 import _ from 'lodash'
 
+import SegmentActions from '../../../actions/SegmentActions'
+
 const QaCheckBlacklist = {
   enabled() {
     return config.qa_check_blacklist_enabled

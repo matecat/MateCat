@@ -1,3 +1,5 @@
+import React from 'react'
+
 class SplitJobModal extends React.Component {
   constructor(props) {
     super(props)
@@ -248,7 +250,6 @@ class SplitJobModal extends React.Component {
       checkSplit && checkSplit.difference < 0
         ? 'Words remaining'
         : 'Words exceeding'
-    let errorSplitDisableClass = checkSplit ? 'disabled' : ''
     let totalWords = Math.round(this.state.total)
 
     return (
