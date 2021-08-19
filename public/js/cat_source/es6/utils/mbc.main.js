@@ -83,12 +83,14 @@ MBC.init = function () {
     }
 
     var populateCommentTemplate = function (data) {
+      var root
       if (Number(data.message_type) === types.resolve) {
-        var root = $(tpls.showResolve)
+        root = $(tpls.showResolve)
         root
           .find('.mbc-comment-username')
           .text(TextUtils.htmlDecode(data.full_name))
       } else {
+        root = $(tpls.showComment)
         root
           .find('.mbc-comment-username')
           .text(TextUtils.htmlDecode(data.full_name))
