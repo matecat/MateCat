@@ -254,11 +254,13 @@ let CatToolActions = {
       actionType: CattolConstants.UPDATE_QR,
       qr: qr,
     })
-    window.quality_report_btn_component.setState({
-      is_pass: review.is_pass,
-      score: review.score,
-      feedback: review.feedback,
-    })
+    if (review) {
+      window.quality_report_btn_component.setState({
+        is_pass: review.is_pass,
+        score: review.score,
+        feedback: review.feedback,
+      })
+    }
   },
 }
 
