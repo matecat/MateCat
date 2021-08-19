@@ -138,10 +138,11 @@ class Features {
 
         $instance = static::getInstance();
 
-        $baseClass = $instance->PLUGIN_CLASSES[ $feature->feature_code ];
         if( !isset( $instance->PLUGIN_CLASSES[ $feature->feature_code ] ) ){
             //try default auto loading for internal plugins
             $baseClass = '\\Features\\' . Utils::underscoreToCamelCase( $feature->feature_code );
+        } else {
+            $baseClass = $instance->PLUGIN_CLASSES[ $feature->feature_code ];
         }
 
         //convention for decorators

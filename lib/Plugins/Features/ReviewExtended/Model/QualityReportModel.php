@@ -228,8 +228,8 @@ class QualityReportModel {
                 $this->structureNestComment( $record );
             }
 
-            if ( $record[ 'warning_scope' ] != null ) {
-                $this->structureNestQaChecks( $record );
+            if ( isset( $record[ 'warning_scope' ] ) && $record[ 'warning_scope' ] != null ) {
+                $this->structureNestQaChecks( $record ); // ache serve sto coso?
             }
 
             $current_file_id    = $record[ 'file_id' ];
