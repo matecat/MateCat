@@ -19,13 +19,16 @@ class UserMetadata {
      * @return array
      */
     public static function renderMetadataCollection( $collection ) {
-        $out = array() ;
+
+        $out = [];
 
         $returnable = array('gplus_picture');
 
-        foreach( $collection as $metadata ) {
-            if ( in_array($metadata->key, $returnable ) ) {
-                $out[ $metadata->key ] = $metadata->value ;
+        if(is_array($collection) and !empty($collection)){
+            foreach( $collection as $metadata ) {
+                if ( in_array($metadata->key, $returnable ) ) {
+                    $out[ $metadata->key ] = $metadata->value ;
+                }
             }
         }
 
