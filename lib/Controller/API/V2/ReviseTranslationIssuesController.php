@@ -13,6 +13,7 @@ use API\V2\Json\SegmentVersion;
 use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\SegmentTranslation;
 use Features\TranslationVersions\Model\TranslationVersionDao;
+use Jobs_JobStruct;
 
 class ReviseTranslationIssuesController extends BaseChunkController {
 
@@ -40,4 +41,10 @@ class ReviseTranslationIssuesController extends BaseChunkController {
         $this->response->json( [ 'versions' => $version_formatter->render() ] );
     }
 
+    /**
+     * @param Jobs_JobStruct $chunk
+     */
+    public function setChunk(Jobs_JobStruct $chunk) {
+        $this->chunk = $chunk;
+    }
 }
