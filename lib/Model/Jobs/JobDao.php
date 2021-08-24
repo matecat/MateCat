@@ -217,7 +217,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                         WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
                         AND j.id = :id_job
                         AND j.password = :password
-                        AND j.owner_status != :deleted
+                        AND j.status_owner != :deleted
                         GROUP BY s.id
                     WITH ROLLUP"
         );
