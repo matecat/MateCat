@@ -1,5 +1,4 @@
-import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
-
+import {getUserData} from './cat_source/es6/api/getUserData'
 APP.USER = {}
 APP.USER.STORE = {}
 ;(function (APP, $) {
@@ -8,15 +7,11 @@ APP.USER.STORE = {}
    *
    * @returns {*|{type}|nothing}
    */
-  var loadUserData = function () {
-    return $.ajax({
-      url: `${getMatecatApiDomain()}api/app/user`,
-      dataType: 'json',
-      async: true,
-      xhrFields: {withCredentials: true},
-    }).done(function (data) {
+  var loadUserData = async function () {
+    return getUserData().then(function (data) {
       APP.USER.STORE = data
-      $(document).trigger('userDataLoaded')
+      $(document).trigger('userDataLoaded', data)
+      return data
     })
   }
 

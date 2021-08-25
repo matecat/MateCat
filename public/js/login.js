@@ -158,7 +158,7 @@ $.extend(APP, {
         break
       case 'profile':
         // TODO: optimized this, establish a list of events to happen after user data is loaded
-        APP.USER.loadUserData().done(function () {
+        APP.USER.loadUserData().then(function () {
           modal$.trigger('openpreferences')
         })
         break

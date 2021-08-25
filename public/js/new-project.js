@@ -8,6 +8,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import Header from './cat_source/es6/components/header/Header'
 import LanguageSelector from './cat_source/es6/components/languageSelector/LanguageSelector'
+import TeamsStore from './cat_source/es6/stores/TeamsStore'
+import TeamConstants from './cat_source/es6/constants/TeamConstants'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -410,7 +412,6 @@ $.extend(UI.UPLOAD_PAGE, {
 
   render: function () {
     var headerMountPoint = $('header')[0]
-    var self = this
     if (config.isLoggedIn) {
       ReactDOM.render(
         React.createElement(Header, {
@@ -421,13 +422,10 @@ $.extend(UI.UPLOAD_PAGE, {
         }),
         headerMountPoint,
       )
-      API.TEAM.getAllTeams().done(function (data) {
-        self.teams = data.teams
-        self.initDropdowns()
-        TeamsActions.renderTeams(self.teams)
-        self.selectedTeam = APP.getLastTeamSelected(self.teams)
-        TeamsActions.selectTeam(self.selectedTeam)
+      TeamsStore.addListener(TeamConstants.UPDATE_USER, () => {
+        this.initDropdowns()
       })
+
       setTimeout(function () {
         CatToolActions.showHeaderTooltip()
       }, 2000)
