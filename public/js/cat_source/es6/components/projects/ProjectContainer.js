@@ -7,7 +7,6 @@ import JobContainer from './JobContainer'
 import TeamsActions from '../../actions/TeamsActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
-import moment from 'moment'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
 
 class ProjectContainer extends React.Component {
