@@ -5,6 +5,7 @@ import TeamsStore from '../stores/TeamsStore'
 import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
 import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
+import {changeProjectTeam} from '../api/changeProjectTeam'
 let ManageActions = {
   /********* Projects *********/
 
@@ -73,7 +74,7 @@ let ManageActions = {
   },
 
   updateStatusProject: function (project, status) {
-    changeJobsOrProjectStatus('prj', project.toJS(), status).then(function () {
+    changeJobsOrProjectStatus('prj', project.toJS(), status).then(() => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.HIDE_PROJECT,
         project: project,
@@ -85,7 +86,7 @@ let ManageActions = {
   },
 
   changeJobStatus: function (project, job, status) {
-    changeJobsOrProjectStatus('job', job.toJS(), status).then(function () {
+    changeJobsOrProjectStatus('job', job.toJS(), status).then(() => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.REMOVE_JOB,
         project: project,
@@ -174,7 +175,7 @@ let ManageActions = {
   changeProjectAssignee: function (team, project, user) {
     const uid = user ? user.get('uid') : null
     changeProjectAssignee(team.get('id'), project.get('id'), uid)
-      .then(function () {
+      .then(() => {
         AppDispatcher.dispatch({
           actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
           project: project,
@@ -189,7 +190,7 @@ let ManageActions = {
           })
         })
       })
-      .catch(function () {
+      .catch(() => {
         ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
           actionType: ManageConstants.RELOAD_PROJECTS,
@@ -199,7 +200,7 @@ let ManageActions = {
 
   changeProjectName: function (team, project, newName) {
     changeProjectName(team.get('id'), project.get('id'), newName).then(
-      function (response) {
+      (response) => {
         AppDispatcher.dispatch({
           actionType: ManageConstants.CHANGE_PROJECT_NAME,
           project: project,
@@ -210,8 +211,8 @@ let ManageActions = {
   },
 
   changeProjectTeam: function (teamId, project) {
-    API.PROJECTS.changeProjectTeam(teamId, project.toJS())
-      .done(function () {
+    changeProjectTeam(teamId, project.toJS())
+      .then(() => {
         var team = TeamsStore.teams.find(function (team) {
           return team.get('id') == teamId
         })
@@ -280,7 +281,7 @@ let ManageActions = {
           })
         }
       })
-      .fail(function () {
+      .catch(() => {
         ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
           actionType: ManageConstants.RELOAD_PROJECTS,

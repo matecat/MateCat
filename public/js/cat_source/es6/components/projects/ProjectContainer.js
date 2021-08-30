@@ -270,7 +270,7 @@ class ProjectContainer extends React.Component {
         password: this.props.project.get('password'),
       },
       this.lastActivityController,
-    ).then(function (data) {
+    ).then((data) => {
       let lastAction = data.activity[0] ? data.activity[0] : null
       self.setState({
         lastAction: lastAction,

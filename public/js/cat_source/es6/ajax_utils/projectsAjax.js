@@ -5,36 +5,6 @@ if (!window.API) {
 }
 
 window.API.PROJECTS = {
-  changeProjectTeam: function (newTeamId, project) {
-    var data = {
-      id_team: newTeamId,
-    }
-    return $.ajax({
-      data: JSON.stringify(data),
-      type: 'PUT',
-      xhrFields: {withCredentials: true},
-      url:
-        getMatecatApiDomain() +
-        'api/v2/teams/' +
-        project.id_team +
-        '/projects/' +
-        project.id,
-    })
-  },
-  getVolumeAnalysis: function () {
-    var pid = config.id_project
-    var ppassword = config.password
-    var data = {
-      pid: pid,
-      ppassword: ppassword,
-    }
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      xhrFields: {withCredentials: true},
-      url: getMatecatApiDomain() + '?action=getVolumeAnalysis',
-    })
-  },
   getJobVolumeAnalysis: function () {
     var pid = config.id_project
     var jpassword = config.jpassword
@@ -47,26 +17,6 @@ window.API.PROJECTS = {
       type: 'POST',
       xhrFields: {withCredentials: true},
       url: getMatecatApiDomain() + '?action=getVolumeAnalysis',
-    })
-  },
-  getCompletionStatus: function () {
-    var pid = config.id_project
-    var jpassword = config.password
-    var data = {
-      pid: pid,
-      jpassword: jpassword,
-    }
-    return $.ajax({
-      data: data,
-      type: 'GET',
-      xhrFields: {withCredentials: true},
-      url:
-        getMatecatApiDomain() +
-        'api/v2/projects/' +
-        pid +
-        '/' +
-        jpassword +
-        '/completion_status',
     })
   },
 
