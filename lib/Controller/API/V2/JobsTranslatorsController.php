@@ -27,6 +27,11 @@ class JobsTranslatorsController extends KleinController {
      */
     protected $jStruct;
 
+    /**
+     * @var Jobs_JobStruct
+     */
+    private $chunk;
+
     public function add(){
 
         $this->params = filter_var_array( $this->params, [
@@ -115,4 +120,13 @@ class JobsTranslatorsController extends KleinController {
         $this->appendValidator( $validJob );
     }
 
+    /**
+     * To maintain compatibility with JobPasswordValidator
+     * (line 36)
+     *
+     * @param Jobs_JobStruct $jobs_JobStruct
+     */
+    public function setChunk(\Jobs_JobStruct $jobs_JobStruct) {
+        $this->chunk = $jobs_JobStruct;
+    }
 }

@@ -37,7 +37,7 @@ class JobMergeController extends KleinController {
         $pManager->mergeALL( $pStruct, $jobStructs );
 
         $this->response->code(200);
-
+        $this->response->json( [ 'success' => true ] );
     }
 
     protected function validateRequest() {

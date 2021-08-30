@@ -68,6 +68,11 @@ class FilterController extends BaseChunkController {
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );
             $get = $Controller->getRequest()->paramsGet();
+
+            if(!isset($get['filter'])){
+                throw new ValidationError('Filter is null. You must call this endpoint adding `filter[]` to query string. (Example: ?filter[status]=NEW)');
+            }
+
             $this->filter = new FilterDefinition( $get['filter'] );
             if (! $this->filter->isValid() ) {
                 throw new ValidationError('Filter is invalid');
