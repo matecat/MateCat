@@ -1,3 +1,5 @@
+import ManageActions from './cat_source/es6/actions/ManageActions'
+
 if (!window.UI) {
   window.UI = {}
 }

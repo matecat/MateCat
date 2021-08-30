@@ -1,6 +1,11 @@
-/*
-	Component: ui.events
- */
+import CatToolActions from './es6/actions/CatToolActions'
+import SegmentActions from './es6/actions/SegmentActions'
+import SearchUtils from './es6/components/header/cattol/search/searchUtils'
+import ShortCutsModal from './es6/components/modals/ShortCutsModal'
+import SegmentStore from './es6/stores/SegmentStore'
+import CommonUtils from './es6/utils/commonUtils'
+import Shortcuts from './es6/utils/shortcuts'
+
 $.extend(window.UI, {
   bindShortcuts: function () {
     $('body')

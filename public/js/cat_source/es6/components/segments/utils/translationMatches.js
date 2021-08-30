@@ -1,4 +1,5 @@
 import _ from 'lodash'
+
 import TagUtils from '../../../utils/tagUtils'
 import TextUtils from '../../../utils/textUtils'
 import SegmentUtils from '../../../utils/segmentUtils'
@@ -6,6 +7,8 @@ import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
+import SegmentActions from '../../../actions/SegmentActions'
+import SegmentStore from '../../../stores/SegmentStore'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -113,9 +116,8 @@ let TranslationMatches = {
 
     if (currentSegment.ice_locked === '1' && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
-      var deferred = new jQuery.Deferred()
+      const deferred = new jQuery.Deferred()
       return deferred.resolve()
-      return
     }
 
     /* If the segment just translated is equal or similar (Levenshtein distance) to the
@@ -244,7 +246,7 @@ let TranslationMatches = {
     )
   },
 
-  setDeleteSuggestion: function (source, target, id, sid) {
+  setDeleteSuggestion: function (source, target, id) {
     return APP.doRequest({
       data: {
         action: 'deleteContribution',
@@ -266,7 +268,7 @@ let TranslationMatches = {
       },
     })
   },
-  setDeleteSuggestion_success: function (d, idMatch, sid) {
+  setDeleteSuggestion_success: function (d) {
     if (d.errors.length) UI.processErrors(d.errors, 'setDeleteSuggestion')
   },
   getPercentuageClass: function (match) {

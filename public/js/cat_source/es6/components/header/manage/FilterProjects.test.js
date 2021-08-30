@@ -1,18 +1,15 @@
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import Immutable from 'immutable'
+import {rest} from 'msw'
+
 import FilterProjects from './FilterProjects'
 import ProjectsStore from '../../../stores/ProjectsStore'
 import ManageConstants from '../../../constants/ManageConstants'
 import ManageActions from '../../../actions/ManageActions'
 import {getProjects} from '../../../api/getProjects'
-import {rest} from 'msw'
 import {mswServer} from '../../../../../../mocks/mswServer'
-
-window.React = React
-window.ReactDOM = ReactDOM
 
 window.config = {
   enableMultiDomainApi: false,

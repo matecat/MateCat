@@ -6,6 +6,8 @@ import _ from 'lodash'
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import TeamsActions from '../../actions/TeamsActions'
+import ModalsActions from '../../actions/ModalsActions'
+import CatToolActions from '../../actions/CatToolActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageConstants from '../../constants/ManageConstants'
@@ -13,6 +15,7 @@ import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -408,10 +411,6 @@ class Dashboard extends React.Component {
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    TeamsStore.addListener(
-      ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-      this.openChangeTeamModal,
-    )
     TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
@@ -448,10 +447,6 @@ class Dashboard extends React.Component {
     TeamsStore.removeListener(
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
-    )
-    TeamsStore.removeListener(
-      ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-      this.openChangeTeamModal,
     )
     TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }

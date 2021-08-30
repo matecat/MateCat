@@ -749,6 +749,7 @@ class ProjectManager {
                     if ( $e->getCode() == -1 && count( $totalFilesStructure ) > 1 && $exceptionsFound < count( $totalFilesStructure ) ) {
                         $this->_log( "No text to translate in the file {$e->getMessage()}." );
                         $exceptionsFound += 1;
+                        unset( $totalFilesStructure[ $fid ] );
                         continue;
                     } else {
                         throw $e;
@@ -2203,6 +2204,10 @@ class ProjectManager {
     }
 
     protected function _storeSegments( $fid ) {
+
+        if ( count( $this->projectStructure[ 'segments' ][ $fid ] ) == 0 ) {
+            return;
+        }
 
         $this->_log( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );

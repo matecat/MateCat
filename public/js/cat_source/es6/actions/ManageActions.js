@@ -493,4 +493,4 @@ let ManageActions = {
   },
 }
 
-module.exports = ManageActions
+export default ManageActions

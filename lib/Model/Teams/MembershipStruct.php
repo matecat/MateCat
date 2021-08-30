@@ -13,26 +13,26 @@ use DataAccess_IDaoStruct;
 
 class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
-    public $id ;
+    public $id;
     public $id_team;
-    public $uid ;
-    public $is_admin ;
+    public $uid;
+    public $is_admin;
 
     /**
      * @var \Users_UserStruct
      */
-    private $user ;
+    private $user;
 
     /**
      * @var TeamStruct
      */
-    private $team ;
+    private $team;
 
 
     /**
      * @var
      */
-    private $user_metadata ;
+    private $user_metadata = [];
 
     /**
      * @var int
@@ -40,26 +40,29 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     private $projects = 0;
 
     public function setUser( \Users_UserStruct $user ) {
-        $this->user = $user ;
+        $this->user = $user;
     }
 
-
-    public function setUserMetadata($user_metadata) {
-        $this->user_metadata = $user_metadata ;
+    public function setUserMetadata( $user_metadata ) {
+        if ( $user_metadata == null ) {
+            $user_metadata = [];
+        }
+        $this->user_metadata = $user_metadata;
     }
 
     public function getUserMetadata() {
-        return $this->user_metadata ;
+        return $this->user_metadata;
     }
 
     /**
      * @return \Users_UserStruct|null
      */
-    public function getUser( ) {
-        if ( is_null($this->user) ) {
-            $this->user = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 *24  )->getByUid( $this->uid );
+    public function getUser() {
+        if ( is_null( $this->user ) ) {
+            $this->user = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->uid );
         }
-        return $this->user ;
+
+        return $this->user;
     }
 
     /**
@@ -67,8 +70,9 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      */
     public function getTeam() {
         if ( is_null( $this->team ) ) {
-            $this->team = ( new TeamDao() )->setCacheTTL( 60 * 60 *24  )->findById( $this->id_team ) ;
+            $this->team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->id_team );
         }
+
         return $this->team;
     }
 

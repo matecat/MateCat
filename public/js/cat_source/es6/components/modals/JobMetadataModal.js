@@ -1,6 +1,8 @@
+import showdown from 'showdown'
+import React from 'react'
+
 import CommonUtils from '../../utils/commonUtils'
 import TextUtils from '../../utils/textUtils'
-import showdown from 'showdown'
 
 class JobMetadataModal extends React.Component {
   constructor(props) {

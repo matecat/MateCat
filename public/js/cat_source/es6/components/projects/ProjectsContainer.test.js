@@ -1,20 +1,17 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import Immutable from 'immutable'
+import {rest} from 'msw'
+
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
-import {rest} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 
-window.React = React
-window.ReactDOM = ReactDOM
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
-require('../../components')
 require('../../../../common')
 require('../../../../login')
 window.config = {

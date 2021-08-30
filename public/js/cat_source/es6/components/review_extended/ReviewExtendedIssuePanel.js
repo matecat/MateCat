@@ -1,5 +1,6 @@
 import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
 import CommonUtils from '../../utils/commonUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class ReviewExtendedIssuePanel extends React.Component {
   constructor(props) {
@@ -224,8 +225,9 @@ class ReviewExtendedIssuePanel extends React.Component {
   }
   getNextSeverityIndex(direction) {
     let idx = this.state.severityIndex
-    let length = this.issueCategoriesFlat[this.state.categorySelectedIndex]
-      .severities.length
+    let length =
+      this.issueCategoriesFlat[this.state.categorySelectedIndex].severities
+        .length
     switch (direction) {
       case 'next':
         return (idx + 1) % length

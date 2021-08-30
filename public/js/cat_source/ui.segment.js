@@ -1,7 +1,14 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
+import CommonUtils from './es6/utils/commonUtils'
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
+import OfflineUtils from './es6/utils/offlineUtils'
+import TagUtils from './es6/utils/tagUtils'
+import TextUtils from './es6/utils/textUtils'
+import DraftMatecatUtils from './es6/components/segments/utils/DraftMatecatUtils'
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentStore from './es6/stores/SegmentStore'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

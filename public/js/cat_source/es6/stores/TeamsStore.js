@@ -135,9 +135,6 @@ AppDispatcher.register(function (action) {
         action.hideChangeName,
       )
       break
-    case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
-      TeamsStore.emitChange(action.actionType, TeamsStore.teams, action.project)
-      break
     case ManageConstants.OPEN_INFO_TEAMS_POPUP:
       TeamsStore.emitChange(action.actionType)
       break

@@ -1,11 +1,18 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
+import ReactDOM from 'react-dom'
+import React from 'react'
 
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
-
-/*
- Component: ui.header
- */
+import CatToolActions from './es6/actions/CatToolActions'
+import CommonUtils from './es6/utils/commonUtils'
+import JobMetadata from './es6/components/header/cattol/JobMetadata'
+import ShortCutsModal from './es6/components/modals/ShortCutsModal'
+import SearchUtils from './es6/components/header/cattol/search/searchUtils'
+import Shortcuts from './es6/utils/shortcuts'
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentStore from './es6/stores/SegmentStore'
+import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -14,9 +21,6 @@ $.extend(window.UI, {
         APP.fitText($('#pname-container'), $('#pname'), 25)
       })
 
-    /*if ($('#action-download').length) {
-			$('#action-download').dropdown();
-		}*/
     if ($('#action-three-dots').length) {
       $('#action-three-dots').dropdown()
     }

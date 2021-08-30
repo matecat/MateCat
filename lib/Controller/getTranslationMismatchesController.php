@@ -50,8 +50,8 @@ class getTranslationMismatchesController extends ajaxController {
 
         $this->parseIDSegment();
 
-        $sDao = new Segments_SegmentDao();
-        $Translation_mismatches = $sDao->getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
+        $sDao                   = new Segments_SegmentDao();
+        $Translation_mismatches = $sDao->setCacheTTL( 1 * 60 /* 1 minutes cache */ )->getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
 
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = ( new SegmentTranslationMismatches( $Translation_mismatches, count( $Translation_mismatches ), $this->featureSet ) )->render();

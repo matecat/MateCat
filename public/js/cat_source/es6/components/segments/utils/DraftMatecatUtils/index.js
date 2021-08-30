@@ -1,5 +1,3 @@
-'use strict'
-
 import getEntities from './getEntities'
 import matchTag from './matchTag'
 import encodeContent from './encodeContent'
@@ -22,7 +20,6 @@ import {
   decodeTagsToPlainText,
   formatText,
 } from './textUtils'
-
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
 import updateEntityData from './updateEntityData'
@@ -100,4 +97,4 @@ const DraftMatecatUtils = {
   prepareTextForLexiqa,
 }
 
-module.exports = DraftMatecatUtils
+export default DraftMatecatUtils

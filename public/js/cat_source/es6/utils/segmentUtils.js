@@ -1,5 +1,9 @@
 import _ from 'lodash'
 
+import CommonUtils from './commonUtils'
+import TagUtils from './tagUtils'
+import SegmentStore from '../stores/SegmentStore'
+
 const SegmentUtils = {
   /**
    * Tag Projection: check if is possible to enable tag projection:
@@ -60,4 +64,4 @@ const SegmentUtils = {
   },
 }
 
-module.exports = SegmentUtils
+export default SegmentUtils

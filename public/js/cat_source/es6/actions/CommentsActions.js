@@ -1,6 +1,7 @@
 import AppDispatcher from '../stores/AppDispatcher'
 import CommentsConstants from '../constants/CommentsConstants'
 import MBC from '../utils/mbc.main'
+
 const CommentsActions = {
   storeComments: function (comments, user) {
     AppDispatcher.dispatch({
@@ -60,4 +61,4 @@ const CommentsActions = {
   },
 }
 
-module.exports = CommentsActions
+export default CommentsActions

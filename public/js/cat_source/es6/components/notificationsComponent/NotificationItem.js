@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types'
+import React from 'react'
 
 class NotificationItem extends React.Component {
   constructor(props) {
@@ -16,9 +17,6 @@ class NotificationItem extends React.Component {
   }
 
   dismissNotification() {
-    /*if (!this.props.autoDismiss) {
-            return;
-        }*/
     this.hideNotification()
   }
 

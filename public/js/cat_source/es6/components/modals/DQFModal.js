@@ -1,4 +1,7 @@
+import React from 'react'
+
 import DQFCredentials from './DQFCredentials'
+
 class DQFModal extends React.Component {
   constructor(props) {
     super(props)
