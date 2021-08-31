@@ -30,7 +30,6 @@ require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')
-require('../../../es6/ajax_utils/userAjax')
 require('../../../es6/ajax_utils/teamAjax')
 
 const fakeTeamsData = {

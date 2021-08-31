@@ -3,6 +3,9 @@ import React from 'react'
 import DQFCredentials from './DQFCredentials'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
+import {getUserApiKey} from '../../api/getUserApiKey'
+import {createUserApiKey} from '../../api/createUserApiKey'
+import {deleteUserApiKey} from '../../api/deleteUserApiKey'
 
 class PreferencesModal extends React.Component {
   constructor(props) {
@@ -13,13 +16,21 @@ class PreferencesModal extends React.Component {
       credentials: null,
     }
 
-    API.USER.getApiKey().done((response) => {
-      this.setState({
-        credentials: response,
-        credentialsCreated: false,
-        credentialsCopied: false,
+    getUserApiKey()
+      .then((response) => {
+        this.setState({
+          credentials: response,
+          credentialsCreated: false,
+          credentialsCopied: false,
+        })
       })
-    })
+      .catch(() => {
+        this.setState({
+          credentials: null,
+          credentialsCreated: false,
+          credentialsCopied: false,
+        })
+      })
   }
 
   openResetPassword() {
@@ -91,7 +102,7 @@ class PreferencesModal extends React.Component {
   }
 
   generateKey() {
-    API.USER.createApiKey().done((response) => {
+    createUserApiKey().then((response) => {
       this.setState({
         credentials: response,
         credentialsCreated: true,
@@ -106,7 +117,7 @@ class PreferencesModal extends React.Component {
   }
 
   deleteKey() {
-    API.USER.deleteApiKey().done((response) => {
+    deleteUserApiKey().then(() => {
       this.setState({
         credentials: null,
         credentialsCreated: false,
