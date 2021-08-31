@@ -8,14 +8,14 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const changeProjectTeam = async (newTeamId, project) => {
-  const dataParams = {
+  const dataParams = JSON.stringify({
     id_team: newTeamId,
-  }
-
-  const formData = new FormData()
-  Object.keys(dataParams).forEach((key) => {
-    formData.append(key, dataParams[key])
   })
+
+  // const formData = new FormData()
+  // Object.keys(dataParams).forEach((key) => {
+  //   formData.append(key, dataParams[key])
+  // })
 
   const {id, id_team} = project
 
@@ -24,7 +24,7 @@ export const changeProjectTeam = async (newTeamId, project) => {
     {
       method: 'PUT',
       credentials: 'include',
-      body: formData,
+      body: dataParams,
     },
   )
 
