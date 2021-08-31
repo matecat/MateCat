@@ -40,10 +40,7 @@ class ProjectContainer extends React.Component {
   hideProjectAfterChangeAssignee = (project, user) => {
     if (this.props.project.get('id') === project.get('id')) {
       const {selectedUser, team} = this.props
-      let uid
-      if (user !== -1) {
-        uid = user.get('uid')
-      }
+      const uid = user ? user.get('uid') : -1
       if (
         (uid !== selectedUser &&
           selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
