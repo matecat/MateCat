@@ -109,7 +109,6 @@ test('renders properly', async () => {
   require('../../../../login')
   require('../../../../cat_source/es6/ajax_utils/teamAjax')
   require('../../../../cat_source/es6/ajax_utils/projectsAjax')
-  require('../../../../cat_source/es6/ajax_utils/jobAjax')
 
   {
     const elHeader = document.createElement('header')

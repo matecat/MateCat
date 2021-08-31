@@ -389,7 +389,6 @@ class ProjectContainer extends React.Component {
             index={index}
             project={self.props.project}
             jobsLenght={jobsLength}
-            changeJobPasswordFn={self.props.changeJobPasswordFn}
             changeStatusFn={self.props.changeStatusFn}
             downloadTranslationFn={self.props.downloadTranslationFn}
             isChunk={isChunk}

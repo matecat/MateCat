@@ -13,6 +13,8 @@ import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
+import {getJobStatistics} from '../api/getJobStatistics'
+import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -155,9 +157,7 @@ let CatToolActions = {
     )
   },
   updateFooterStatistics: function () {
-    API.JOB.retrieveStatistics(config.id_job, config.password).done(function (
-      data,
-    ) {
+    getJobStatistics(config.id_job, config.password).then(function (data) {
       if (data.stats) {
         CatToolActions.setProgress(data.stats)
         UI.setDownloadStatus(data.stats)
@@ -238,7 +238,7 @@ let CatToolActions = {
     )
   },
   sendRevisionFeedback: function (text) {
-    return API.JOB.sendRevisionFeedback(
+    return sendRevisionFeedback(
       config.id_job,
       config.revisionNumber,
       config.review_password,
