@@ -6,6 +6,7 @@ import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
 import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
 import {changeProjectTeam} from '../api/changeProjectTeam'
+import {getSecondPassReview} from '../api/getSecondPassReview'
 let ManageActions = {
   /********* Projects *********/
 
@@ -335,12 +336,12 @@ let ManageActions = {
     idJob,
     passwordJob,
   ) {
-    return API.PROJECTS.getSecondPassReview(
+    return getSecondPassReview(
       idProject,
       passwordProject,
       idJob,
       passwordJob,
-    ).then(function (data) {
+    ).then((data) => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.ADD_SECOND_PASS,
         idProject: idProject,

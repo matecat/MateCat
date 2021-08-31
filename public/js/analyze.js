@@ -7,6 +7,7 @@ import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
 import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
 import {getProject} from './cat_source/es6/api/getProject'
 import {getVolumeAnalysis} from './cat_source/es6/api/getVolumeAnalysis'
+import {getJobVolumeAnalysis} from './cat_source/es6/api/getJobVolumeAnalysis'
 
 window.UI = null
 
@@ -55,7 +56,7 @@ window.UI = {
   getProjectVolumeAnalysisData: function () {
     var self = this
     if (config.jobAnalysis) {
-      API.PROJECTS.getJobVolumeAnalysis().done(function (response) {
+      getJobVolumeAnalysis().then((response) => {
         self.parseVolumeAnalysisData(response)
         getProject(config.id_project).then((response) => {
           UI.currentOutsourceProject = response.project
