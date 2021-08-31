@@ -52,7 +52,7 @@ class ProjectContainer extends React.Component {
         setTimeout(() => {
           ManageActions.removeProject(this.props.project)
         }, 1000)
-        let name = user.toJS
+        let name = user?.toJS
           ? user.get('first_name') + ' ' + user.get('last_name')
           : 'Not assigned'
         let notification = {
