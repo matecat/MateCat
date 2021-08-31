@@ -49,7 +49,7 @@ class PreferencesModal extends React.Component {
       }
       var interval = setInterval(function () {
         if (newWindow.closed) {
-          APP.USER.loadUserData().done(function () {
+          APP.USER.loadUserData().then(function () {
             var service = APP.USER.getDefaultConnectedService()
             if (service) {
               self.setState({

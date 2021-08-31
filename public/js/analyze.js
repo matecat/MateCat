@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom'
 import React from 'react'
 
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
+import TeamsStore from './cat_source/es6/stores/TeamsStore'
 import Header from './cat_source/es6/components/header/Header'
 import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
 import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
@@ -17,7 +18,6 @@ window.UI = {
     UI.render()
   },
   render: function () {
-    var self = this
     var headerMountPoint = $('header')[0]
     ReactDOM.render(
       React.createElement(Header, {
@@ -25,7 +25,7 @@ window.UI = {
         showSubHeader: false,
         showModals: false,
         changeTeam: false,
-        user: APP.USER.STORE,
+        user: TeamsStore.getUser(),
       }),
       headerMountPoint,
     )
@@ -37,13 +37,6 @@ window.UI = {
       }),
       analyzeMountPoint,
     )
-
-    API.TEAM.getAllTeams().done(function (data) {
-      self.teams = data.teams
-      TeamsActions.renderTeams(self.teams)
-      self.selectedTeam = APP.getLastTeamSelected(self.teams)
-      TeamsActions.selectTeam(self.selectedTeam)
-    })
 
     this.getProjectVolumeAnalysisData()
   },

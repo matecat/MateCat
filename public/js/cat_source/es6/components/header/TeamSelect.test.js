@@ -30,8 +30,6 @@ require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')
-require('../../../es6/ajax_utils/teamAjax')
-
 const fakeTeamsData = {
   threeTeams: {
     data: JSON.parse(
@@ -221,12 +219,6 @@ test('Rendering elements', () => {
 test('Click create new team check flow', async () => {
   executeMswServer()
 
-  // override loadUserData request
-  const defaultLoadUserData = window.APP.USER.loadUserData
-  window.APP.USER.loadUserData = () => ({
-    done: (fn) => fn(),
-  })
-
   const {props} = getFakeProperties(fakeTeamsData.threeTeams)
   render(<TeamsSelect {...props} />)
 
@@ -237,8 +229,6 @@ test('Click create new team check flow', async () => {
   await waitFor(() => {
     expect(screen.getByTestId('create-team-modal')).toBeInTheDocument()
   })
-
-  window.APP.USER.loadUserData = defaultLoadUserData()
 })
 
 test('Click on change team', async () => {

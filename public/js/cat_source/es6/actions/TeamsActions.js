@@ -1,5 +1,7 @@
 import AppDispatcher from '../stores/AppDispatcher'
 import TeamConstants from '../constants/TeamConstants'
+import {getUserData} from '../api/getUserData'
+import {getTeamMembers} from '../api/getTeamMembers'
 
 let TeamsActions = {
   updateUser: function (user) {
@@ -18,7 +20,7 @@ let TeamsActions = {
   },
 
   updateTeam: function (team) {
-    API.TEAM.getTeamMembers(team.id).then(function (data) {
+    getTeamMembers(team.id).then(function (data) {
       team.members = data.members
       team.pending_invitations = data.pending_invitations
       AppDispatcher.dispatch({
@@ -36,7 +38,7 @@ let TeamsActions = {
   },
 
   getAllTeams: function () {
-    API.TEAM.getAllTeams(true).done(function (data) {
+    getUserData().then(function (data) {
       AppDispatcher.dispatch({
         actionType: TeamConstants.RENDER_TEAMS,
         teams: data.teams,
