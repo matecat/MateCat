@@ -23,7 +23,6 @@ window.config = {
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')
-require('../../../es6/ajax_utils/userAjax')
 
 const props = {
   fromLanguage: true,
@@ -168,18 +167,10 @@ test('Rendering elements', async () => {
 test('Click profile from user menu', async () => {
   executeMswServer()
 
-  // override getApiKey request
-  const defaultGetApiKey = window.API.USER.getApiKey
-  window.API.USER.getApiKey = () => ({
-    done: () => {},
-  })
-
   render(<Header {...props} />)
 
   await waitFor(() => {
     userEvent.click(screen.getByTestId('profile-item'))
     expect(screen.getByTestId('preferences-modal')).toBeInTheDocument()
   })
-
-  window.API.USER.getApiKey = defaultGetApiKey
 })

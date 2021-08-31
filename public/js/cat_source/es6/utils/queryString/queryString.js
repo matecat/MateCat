@@ -27,15 +27,14 @@ const getArraysOfNestedProps = (obj) => {
   const recursive = (obj, path = []) => {
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
     for (const key of keys) {
-      const copyPath = [...path, typeof key === 'symbol' ? '' : key]
+      const copyPath = [...path, key]
       const prop = obj[key]
       if (typeof prop === 'object' && prop) {
         recursive(
           !Array.isArray(prop)
             ? prop
             : prop.reduce((acc, cur, index) => {
-                const keyName = typeof cur === 'object' ? index : Symbol()
-                return {...acc, [keyName]: cur}
+                return {...acc, [index]: cur}
               }, {}),
           copyPath,
         )

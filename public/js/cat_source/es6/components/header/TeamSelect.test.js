@@ -30,8 +30,6 @@ require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')
-require('../../../es6/ajax_utils/userAjax')
-
 const fakeTeamsData = {
   threeTeams: {
     data: JSON.parse(
