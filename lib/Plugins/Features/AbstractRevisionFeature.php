@@ -238,15 +238,25 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         $chunksStructArray = \Jobs_JobDao::getById( $id_job, 0, new Chunks_ChunkStruct() );
 
+
+
+
+
         $reviews = [];
         foreach ( $previousRevisionRecords as $review ) {
-            $reviews = array_merge( $reviews, $this->createQaChunkReviewRecords( $chunksStructArray, $project,
-                    [
-                            'first_record_password' => $review->review_password,
-                            'source_page'           => $review->source_page
-                    ]
-            )
-            );
+
+            // check if $review belongs to a deleted job
+            $chunk = \Jobs_JobDao::getByIdAndPassword( $review->id_job, $review->password );
+
+            if(!$chunk->wasDeleted()){
+                $reviews = array_merge( $reviews, $this->createQaChunkReviewRecords( $chunksStructArray, $project,
+                        [
+                                'first_record_password' => $review->review_password,
+                                'source_page'           => $review->source_page
+                        ]
+                    )
+                );
+            }
         }
 
         foreach ( $reviews as $review ) {

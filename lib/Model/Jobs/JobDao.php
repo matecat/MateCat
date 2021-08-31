@@ -13,7 +13,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     protected static $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
 
-    protected static $_sql_get_jobs_by_project = "SELECT * FROM jobs WHERE id_project = ? ORDER BY id, job_first_segment ASC;";
+    protected static $_sql_get_jobs_by_project = "SELECT * FROM jobs WHERE id_project = ? AND status_owner != ? ORDER BY id, job_first_segment ASC;";
 
     protected static $_sql_get_by_segment_translation = "select * from jobs where id = :id_job AND jobs.job_first_segment <= :id_segment AND jobs.job_last_segment >= :id_segment ";
 
@@ -151,7 +151,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
 
-        return $this->_destroyObjectCache( $stmt, [ $project_id ] );
+        return $this->_destroyObjectCache( $stmt, [ $project_id, \Constants_JobStatus::STATUS_DELETED ] );
     }
 
     /**
@@ -171,7 +171,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             $fetchObject = new Jobs_JobStruct();
         }
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_project ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_project, \Constants_JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -244,9 +244,9 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT * FROM jobs WHERE id = ? ORDER BY job_first_segment" );
+        $stmt    = $conn->prepare( "SELECT * FROM jobs WHERE id = ? AND status_owner != ? ORDER BY job_first_segment" );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_job ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_job, \Constants_JobStatus::STATUS_DELETED ] );
 
     }
 
