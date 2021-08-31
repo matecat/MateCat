@@ -1,13 +1,13 @@
 import ManageActions from './cat_source/es6/actions/ManageActions'
-
+import {addJobTranslator} from './cat_source/es6/api/addJobTranslator'
 if (!window.UI) {
   window.UI = {}
 }
 
 $.extend(window.UI, {
   sendJobToTranslator: function (email, date, timezone, job, project) {
-    API.JOB.sendTranslatorRequest(email, date, timezone, job)
-      .done(function (data) {
+    addJobTranslator(email, date, timezone, job)
+      .then(function (data) {
         APP.ModalWindow.onCloseModal()
         if (data.job) {
           UI.checkShareToTranslatorResponse(data, email, date, job, project)
@@ -15,7 +15,7 @@ $.extend(window.UI, {
           UI.showShareTranslatorError()
         }
       })
-      .fail(function () {
+      .catch(function () {
         UI.showShareTranslatorError()
       })
   },

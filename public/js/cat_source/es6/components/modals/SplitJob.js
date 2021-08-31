@@ -1,4 +1,6 @@
 import React from 'react'
+import {checkSplitRequest} from '../../api/checkSplitRequest'
+import {confirmSplitRequest} from '../../api/confirmSplitRequest'
 
 class SplitJobModal extends React.Component {
   constructor(props) {
@@ -16,52 +18,61 @@ class SplitJobModal extends React.Component {
     this.getSplitData()
   }
   getSplitData() {
-    let self = this
-    API.JOB.checkSplitRequest(
+    checkSplitRequest(
       this.props.job.toJS(),
       this.props.project.toJS(),
       this.state.numSplit,
       this.state.wordsArray,
-    ).done(function (d) {
-      let arrayChunks = []
-      if (d.data && d.data.chunks) {
-        //Set total: if eq_word_count is 0 take the raw
-        let total
-        if (!!d.data.eq_word_count && Math.round(d.data.eq_word_count) !== 0) {
-          total = d.data.eq_word_count
-        } else {
-          total = d.data.raw_word_count
-        }
-
-        d.data.chunks.forEach(function (item, index) {
-          if (typeof d.data.chunks[index] === 'undefined') {
-            arrayChunks[index] = 0
+    )
+      .then((d) => {
+        let arrayChunks = []
+        if (d.data && d.data.chunks) {
+          //Set total: if eq_word_count is 0 take the raw
+          let total
+          if (
+            !!d.data.eq_word_count &&
+            Math.round(d.data.eq_word_count) !== 0
+          ) {
+            total = d.data.eq_word_count
           } else {
-            if (d.data.chunks[index].eq_word_count === 0) {
-              arrayChunks[index] = parseInt(d.data.chunks[index].raw_word_count)
-            } else {
-              arrayChunks[index] = parseInt(d.data.chunks[index].eq_word_count)
-            }
+            total = d.data.raw_word_count
           }
-        })
-        self.setState({
-          wordsArray: arrayChunks,
-          total: total,
-          showStartLoader: false,
-          splitChecked: true,
-          showLoader: false,
-        })
-      }
-      if (typeof d.errors !== 'undefined' && d.errors.length) {
-        self.errorMsg = d.errors[0].message
-        self.setState({
-          showError: true,
-          showLoader: false,
-          showStartLoader: false,
-          splitChecked: false,
-        })
-      }
-    })
+
+          d.data.chunks.forEach(function (item, index) {
+            if (typeof d.data.chunks[index] === 'undefined') {
+              arrayChunks[index] = 0
+            } else {
+              if (d.data.chunks[index].eq_word_count === 0) {
+                arrayChunks[index] = parseInt(
+                  d.data.chunks[index].raw_word_count,
+                )
+              } else {
+                arrayChunks[index] = parseInt(
+                  d.data.chunks[index].eq_word_count,
+                )
+              }
+            }
+          })
+          this.setState({
+            wordsArray: arrayChunks,
+            total: total,
+            showStartLoader: false,
+            splitChecked: true,
+            showLoader: false,
+          })
+        }
+      })
+      .catch((errors) => {
+        if (errors !== 'undefined' && errors.length) {
+          this.errorMsg = errors[0].message
+          this.setState({
+            showError: true,
+            showLoader: false,
+            showStartLoader: false,
+            splitChecked: false,
+          })
+        }
+      })
   }
 
   closeModal() {
@@ -122,45 +133,50 @@ class SplitJobModal extends React.Component {
   }
 
   checkSplitJob() {
-    let self = this
     this.setState({
       showLoader: true,
     })
-    API.JOB.checkSplitRequest(
+    checkSplitRequest(
       this.props.job.toJS(),
       this.props.project.toJS(),
       this.state.numSplit,
       this.state.wordsArray,
-    ).done(function (d) {
-      let arrayChunks = []
-      if (d.data && d.data.chunks) {
-        d.data.chunks.forEach(function (item, index) {
-          if (typeof d.data.chunks[index] == 'undefined') {
-            arrayChunks[index] = 0
-          } else {
-            if (d.data.chunks[index].eq_word_count === 0) {
-              arrayChunks[index] = parseInt(d.data.chunks[index].raw_word_count)
+    )
+      .then((d) => {
+        let arrayChunks = []
+        if (d.data && d.data.chunks) {
+          d.data.chunks.forEach(function (item, index) {
+            if (typeof d.data.chunks[index] == 'undefined') {
+              arrayChunks[index] = 0
             } else {
-              arrayChunks[index] = parseInt(d.data.chunks[index].eq_word_count)
+              if (d.data.chunks[index].eq_word_count === 0) {
+                arrayChunks[index] = parseInt(
+                  d.data.chunks[index].raw_word_count,
+                )
+              } else {
+                arrayChunks[index] = parseInt(
+                  d.data.chunks[index].eq_word_count,
+                )
+              }
             }
-          }
-        })
-      }
-      if (typeof d.errors != 'undefined' && d.errors.length) {
-        self.errorMsg = d.errors[0].message
-        self.setState({
-          showError: true,
+          })
+        }
+        this.setState({
+          wordsArray: arrayChunks,
+          splitChecked: true,
           showLoader: false,
-          splitChecked: false,
         })
-        return
-      }
-      self.setState({
-        wordsArray: arrayChunks,
-        splitChecked: true,
-        showLoader: false,
       })
-    })
+      .catch((errors) => {
+        if (typeof errors != 'undefined' && errors.length) {
+          this.errorMsg = errors[0].message
+          this.setState({
+            showError: true,
+            showLoader: false,
+            splitChecked: false,
+          })
+        }
+      })
   }
 
   confirmSplitJob() {
@@ -172,25 +188,28 @@ class SplitJobModal extends React.Component {
       return item > 0
     })
 
-    API.JOB.confirmSplitRequest(
+    confirmSplitRequest(
       this.props.job.toJS(),
       this.props.project.toJS(),
       array.length,
       array,
-    ).done(function (d) {
-      if (d.data && d.data.chunks) {
-        self.props.callback()
-        APP.ModalWindow.onCloseModal()
-      }
-      if (typeof d.errors != 'undefined' && d.errors.length) {
-        self.errorMsg = d.errors[0].message
-        self.setState({
-          showError: true,
-          showLoader: false,
-          splitChecked: false,
-        })
-      }
-    })
+    )
+      .then(function (d) {
+        if (d.data && d.data.chunks) {
+          self.props.callback()
+          APP.ModalWindow.onCloseModal()
+        }
+      })
+      .catch((errors) => {
+        if (typeof errors != 'undefined' && errors.length) {
+          self.errorMsg = errors[0].message
+          self.setState({
+            showError: true,
+            showLoader: false,
+            splitChecked: false,
+          })
+        }
+      })
   }
 
   getJobParts() {

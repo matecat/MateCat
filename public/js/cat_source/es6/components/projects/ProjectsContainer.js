@@ -232,7 +232,6 @@ class ProjectsContainer extends React.Component {
       <ProjectContainer
         key={project.get('id')}
         project={project}
-        changeJobPasswordFn={this.props.changeJobPasswordFn}
         downloadTranslationFn={this.props.downloadTranslationFn}
         team={this.state.team}
         teams={this.state.teams}

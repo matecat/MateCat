@@ -7,6 +7,13 @@ import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
 import {changeProjectTeam} from '../api/changeProjectTeam'
 import {getSecondPassReview} from '../api/getSecondPassReview'
+import {getUserData} from '../api/getUserData'
+import {getTeamMembers} from '../api/getTeamMembers'
+import {createTeam} from '../api/createTeam'
+import {addUserTeam} from '../api/addUserTeam'
+import {removeTeamUser} from '../api/removeTeamUser'
+import {updateTeamName} from '../api/updateTeamName'
+
 let ManageActions = {
   /********* Projects *********/
 
@@ -182,7 +189,7 @@ let ManageActions = {
           project: project,
           user: user,
         })
-        API.TEAM.getTeamMembers(team.get('id')).done(function (data) {
+        getTeamMembers(team.get('id')).then(function (data) {
           team = team.set('members', data.members)
           team = team.set('pending_invitations', data.pending_invitations)
           AppDispatcher.dispatch({
@@ -220,7 +227,7 @@ let ManageActions = {
         team = team.toJS()
         const selectedTeam = TeamsStore.getSelectedTeam()
         if (selectedTeam.type == 'personal' && team.type !== 'personal') {
-          API.TEAM.getTeamMembers(teamId).then(function (data) {
+          getTeamMembers(teamId).then(function (data) {
             team.members = data.members
             team.pending_invitations = data.pending_invitations
             AppDispatcher.dispatch({
@@ -265,7 +272,7 @@ let ManageActions = {
             timer: 3000,
           }
           APP.addNotification(notification)
-          API.TEAM.getTeamMembers(selectedTeam.id).then(function (data) {
+          getTeamMembers(selectedTeam.id).then(function (data) {
             selectedTeam.members = data.members
             selectedTeam.pending_invitations = data.pending_invitations
             AppDispatcher.dispatch({
@@ -356,7 +363,7 @@ let ManageActions = {
   /********* Modals *********/
 
   openModifyTeamModal: function (team) {
-    API.TEAM.getTeamMembers(team.id).then(function (data) {
+    getTeamMembers(team.id).then(function (data) {
       team.members = data.members
       team.pending_invitations = data.pending_invitations
       AppDispatcher.dispatch({
@@ -368,7 +375,7 @@ let ManageActions = {
   },
 
   openAddTeamMemberModal: function (team) {
-    API.TEAM.getTeamMembers(team.id).then(function (data) {
+    getTeamMembers(team.id).then(function (data) {
       team.members = data.members
       team.pending_invitations = data.pending_invitations
       AppDispatcher.dispatch({
@@ -393,7 +400,7 @@ let ManageActions = {
    * @param members
    */
   createTeam: function (teamName, members) {
-    API.TEAM.createTeam(teamName, members).done((response) => {
+    createTeam(teamName, members).then((response) => {
       let team = response.team
       this.showReloadSpinner()
       APP.setTeamInStorage(team.id)
@@ -411,7 +418,7 @@ let ManageActions = {
   changeTeam: function (team) {
     this.showReloadSpinner()
     APP.setTeamInStorage(team.id)
-    API.TEAM.getTeamMembers(team.id).then(function (data) {
+    getTeamMembers(team.id).then(function (data) {
       let selectedTeam = team
       selectedTeam.members = data.members
       selectedTeam.pending_invitations = data.pending_invitations
@@ -427,7 +434,7 @@ let ManageActions = {
   },
 
   addUserToTeam: function (team, userEmail) {
-    API.TEAM.addUserToTeam(team.toJS(), userEmail).done(function (data) {
+    addUserTeam(team.toJS(), userEmail).then(function (data) {
       AppDispatcher.dispatch({
         actionType: ManageConstants.UPDATE_TEAM_MEMBERS,
         team: team,
@@ -440,12 +447,12 @@ let ManageActions = {
   removeUserFromTeam: function (team, user) {
     var self = this
     var userId = user.get('uid')
-    API.TEAM.removeUserFromTeam(team.toJS(), userId).done(function (data) {
+    removeTeamUser(team.toJS(), userId).then(function (data) {
       if (userId === APP.USER.STORE.user.uid) {
         const selectedTeam = TeamsStore.getSelectedTeam()
 
         if (selectedTeam.id === team.get('id')) {
-          API.TEAM.getAllTeams(true).done(function (data) {
+          getUserData().then(function (data) {
             AppDispatcher.dispatch({
               actionType: TeamConstants.RENDER_TEAMS,
               teams: data.teams,
@@ -473,7 +480,7 @@ let ManageActions = {
   },
 
   changeTeamName: function (team, newName) {
-    API.TEAM.changeTeamName(team, newName).done(function (data) {
+    updateTeamName(team, newName).then(function (data) {
       AppDispatcher.dispatch({
         actionType: ManageConstants.UPDATE_TEAM_NAME,
         oldTeam: team,

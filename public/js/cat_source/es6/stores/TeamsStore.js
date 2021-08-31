@@ -12,10 +12,8 @@ import Immutable from 'immutable'
 EventEmitter.prototype.setMaxListeners(0)
 
 let TeamsStore = assign({}, EventEmitter.prototype, {
-  teams: [],
+  teams: Immutable.fromJS([]),
   selectedTeam: {},
-  users: [],
-
   user: null,
 
   updateAll: function (teams) {
@@ -66,6 +64,14 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
 
   getSelectedTeam: function () {
     return this.selectedTeam
+  },
+
+  getAllTeams: function () {
+    return this.teams.toJS()
+  },
+
+  getUser: function () {
+    return this.user
   },
 
   emitChange: function () {
