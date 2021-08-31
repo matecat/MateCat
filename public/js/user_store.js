@@ -7,12 +7,12 @@ APP.USER.STORE = {}
    *
    * @returns {*|{type}|nothing}
    */
-  var loadUserData = () =>
-    getUserData().then(function (data) {
+  var loadUserData = () => {
+    return getUserData().then(function (data) {
       APP.USER.STORE = data
       $(document).trigger('userDataLoaded', data)
       return data
-    )
+    })
   }
 
   function getDefaultConnectedService() {
