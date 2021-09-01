@@ -7,6 +7,7 @@ import CommonUtils from '../es6/utils/commonUtils'
 import OfflineUtils from '../es6/utils/offlineUtils'
 import SegmentActions from '../es6/actions/SegmentActions'
 import SegmentStore from '../es6/stores/SegmentStore'
+import {getSegmentVersionsIssues} from '../es6/api/getSegmentVersionsIssues'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
@@ -54,7 +55,7 @@ if (ReviewExtended.enabled()) {
     },
 
     getSegmentVersionsIssues: function (segmentId, fileId) {
-      API.SEGMENT.getSegmentVersionsIssues(segmentId).done(function (response) {
+      getSegmentVersionsIssues(segmentId).then((response) => {
         UI.addIssuesToSegment(fileId, segmentId, response.versions)
       })
     },

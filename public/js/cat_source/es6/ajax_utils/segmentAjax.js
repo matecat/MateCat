@@ -43,35 +43,6 @@ API.SEGMENT = {
     })
   },
 
-  getSegmentsIssues: function (idSegment) {
-    var path = sprintf(
-      getMatecatApiDomain() + 'api/v2/jobs/%s/%s/translation-issues',
-      config.id_job,
-      config.password,
-      idSegment,
-    )
-    return $.ajax({
-      type: 'get',
-      xhrFields: {withCredentials: true},
-      url: path,
-    })
-  },
-
-  getSegmentVersionsIssues: function (idSegment) {
-    var path = sprintf(
-      getMatecatApiDomain() +
-        'api/v2/jobs/%s/%s/revise/segments/%s/translation-versions',
-      config.id_job,
-      config.password,
-      idSegment,
-    )
-    return $.ajax({
-      type: 'get',
-      xhrFields: {withCredentials: true},
-      url: path,
-    })
-  },
-
   sendSegmentVersionIssue: function (idSegment, data) {
     var path = sprintf(
       getMatecatApiDomain() +
