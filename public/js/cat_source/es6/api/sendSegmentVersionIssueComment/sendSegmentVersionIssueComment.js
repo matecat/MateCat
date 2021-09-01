@@ -1,33 +1,30 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Send type of issue of segment
+ * Send a comment for a specific issue
  *
  * @param {string} idSegment
- * @param {Object} issueDetails
+ * @param {string} idIssue
+ * @param {Object} paramsToSend
  * @param {string} [idJob=config.id_job]
- * @param {string} [reviewPassword=config.review_password]
- * @param {number} [revisionNumber=config.revisionNumber]
+ * @param {string} [password=config.password]
  * @returns {Promise<object>}
  */
-export const sendSegmentVersionIssue = async (
+export const sendSegmentVersionIssueComment = async (
   idSegment,
-  issueDetails,
+  idIssue,
+  paramsToSend,
   idJob = config.id_job,
-  reviewPassword = config.review_password,
-  revisionNumber = config.revisionNumber,
+  password = config.password,
 ) => {
-  const dataParams = {
-    ...issueDetails,
-    revision_number: revisionNumber,
-  }
+  const dataParams = {...paramsToSend}
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues`,
+    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${password}/segments/${idSegment}/translation-issues/${idIssue}/comments`,
     {
       method: 'POST',
       credentials: 'include',

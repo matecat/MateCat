@@ -17,6 +17,11 @@ import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
+import {getGlossaryMatch} from '../api/getGlossaryMatch'
+import {deleteGlossaryItem} from '../api/deleteGlossaryItem'
+import {addGlossaryItem} from '../api/addGlossaryItem'
+import {updateGlossaryItem} from '../api/updateGlossaryItem'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -722,11 +727,9 @@ const SegmentActions = {
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
       if (typeof segment.glossary === 'undefined') {
         //Response inside SSE Channel
-        API.SEGMENT.getGlossaryForSegment(request.sid, request.text).fail(
-          function () {
-            OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
-          },
-        )
+        getGlossaryForSegment(request.sid, request.text).catch(() => {
+          OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
+        })
       }
     }
   },
@@ -734,7 +737,7 @@ const SegmentActions = {
   searchGlossary: function (sid, fid, text, fromTarget) {
     text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
     text = text.replace(/"/g, '')
-    API.SEGMENT.getGlossaryMatch(sid, text, fromTarget).fail(function () {
+    getGlossaryMatch(sid, text, fromTarget).catch(() => {
       OfflineUtils.failedConnection(0, 'glossary')
     })
   },
@@ -748,22 +751,17 @@ const SegmentActions = {
   },
 
   deleteGlossaryItem: function (match, sid) {
-    return API.SEGMENT.deleteGlossaryItem(
-      sid,
-      match.segment,
-      match.target,
-      match.id,
-    )
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
-      })
-      .done(function () {
+    deleteGlossaryItem(sid, match.segment, match.target, match.id)
+      .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: 'A glossary item has been deleted',
         })
         SegmentActions.deleteGlossaryFromCache(sid, match)
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
   },
 
@@ -777,24 +775,28 @@ const SegmentActions = {
 
   addGlossaryItem: function (source, target, comment, sid) {
     source = TextUtils.htmlEncode(source)
-    return API.SEGMENT.addGlossaryItem(sid, source, target, comment)
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'addGlossaryItem')
-      })
-      .done(function (response) {
-        let msg
-        if (response.data.created_tm_key) {
-          msg = 'A Private TM Key has been created for this job'
-        } else {
-          msg = response.errors.length
-            ? response.errors[0].message
-            : 'A glossary item has been added'
-        }
+    addGlossaryItem(sid, source, target, comment)
+      .then((response) => {
+        const msg = response.data.created_tm_key
+          ? 'A Private TM Key has been created for this job'
+          : 'A glossary item has been added'
+
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: msg,
         })
+      })
+      .catch((errors) => {
+        if (errors.length > 0) {
+          AppDispatcher.dispatch({
+            actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+            sid: sid,
+            message: errors[0].message,
+          })
+        } else {
+          OfflineUtils.failedConnection(0, 'addGlossaryItem')
+        }
       })
   },
   addGlossaryItemToCache: (sid, match) => {
@@ -805,7 +807,7 @@ const SegmentActions = {
     })
   },
   updateGlossaryItem: function (match, newTranslation, newComment, sid) {
-    return API.SEGMENT.updateGlossaryItem(
+    updateGlossaryItem(
       match.id,
       match.segment,
       match.translation,
@@ -813,15 +815,15 @@ const SegmentActions = {
       newComment,
       sid,
     )
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
-      })
-      .done(function () {
+      .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: 'A glossary item has been updated',
         })
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
       })
   },
 
