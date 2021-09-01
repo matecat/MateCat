@@ -16,8 +16,8 @@ window.APP = {
     this.setLoginEvents()
     if (config.isLoggedIn) {
       var self = this
-      APP.USER.loadUserData().done(function () {
-        TeamsActions.updateUser(APP.USER.STORE)
+      APP.USER.loadUserData().then((data) => {
+        TeamsActions.updateUser(data)
         self.setTeamNameInMenu()
         self.setUserImage()
       })
@@ -987,7 +987,7 @@ window.APP = {
       $('.user-menu-container .organization-name').text(team.name) //??
     } else {
       var self = this
-      APP.USER.loadUserData().done(function () {
+      APP.USER.loadUserData().then(function () {
         self.setTeamNameInMenu.bind(self)
       })
     }

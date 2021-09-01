@@ -148,7 +148,7 @@ class Header extends React.Component {
         onClick: this.openManage,
       }
 
-      if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
+      if (this.state.user?.metadata && this.state.user.metadata.gplus_picture) {
         return (
           <div
             {...{...dropdownAttributes, 'data-testid': 'user-menu-metadata'}}

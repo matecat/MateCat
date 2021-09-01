@@ -39,7 +39,10 @@ class ProjectContainer extends React.Component {
   hideProjectAfterChangeAssignee = (project, user) => {
     if (this.props.project.get('id') === project.get('id')) {
       const {selectedUser, team} = this.props
-      const uid = user ? user.get('uid') : -1
+      let uid
+      if (user !== -1) {
+        uid = user.get('uid')
+      }
       if (
         (uid !== selectedUser &&
           selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
@@ -389,7 +392,6 @@ class ProjectContainer extends React.Component {
             index={index}
             project={self.props.project}
             jobsLenght={jobsLength}
-            changeJobPasswordFn={self.props.changeJobPasswordFn}
             changeStatusFn={self.props.changeStatusFn}
             downloadTranslationFn={self.props.downloadTranslationFn}
             isChunk={isChunk}

@@ -1,10 +1,9 @@
-import _ from 'lodash'
-
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import DQFModal from '../components/modals/DQFModal'
 import SplitJobModal from '../components/modals/SplitJob'
 import CreateTeamModal from '../components/modals/CreateTeam'
 import ModifyTeamModal from '../components/modals/ModifyTeam'
+import {mergeJobChunks} from '../api/mergeJobChunks'
 
 let ModalsActions = {
   openCreateTeamModal: function () {
@@ -35,7 +34,7 @@ let ModalsActions = {
         'This operation cannot be canceled.',
       successText: 'Continue',
       successCallback: function () {
-        API.JOB.confirmMerge(project, job).done(function () {
+        mergeJobChunks(project, job).then(function () {
           if (successCallback) {
             successCallback.call()
           }

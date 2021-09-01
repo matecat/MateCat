@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom'
 import React from 'react'
 
 import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
+import {getJobFileInfo} from './es6/api/getJobFileInfo'
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
 import JobMetadata from './es6/components/header/cattol/JobMetadata'
@@ -13,6 +14,7 @@ import Shortcuts from './es6/utils/shortcuts'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
+import {getJobMetadata} from './es6/api/getJobMetadata'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -162,9 +164,7 @@ $.extend(window.UI, {
     }
   },
   createJobMenu: function () {
-    API.JOB.getJobFilesInfo(config.id_job, config.password).done(function (
-      response,
-    ) {
+    getJobFileInfo(config.id_job, config.password).then((response) => {
       CatToolActions.storeFilesInfo(response)
       var menu =
         '<nav id="jobMenu" class="topMenu">' +
@@ -213,7 +213,7 @@ $.extend(window.UI, {
       if (segment) {
         UI.updateJobMenu(segment)
       }
-      API.JOB.getJobMetadata(config.id_job, config.password).done(function (
+      getJobMetadata(config.id_job, config.password).then(function (
         jobMetadata,
       ) {
         var fileInstructions = response.files.find(
