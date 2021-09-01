@@ -98,14 +98,19 @@ class Project {
             }
 
             foreach ( $jobs as $job ) {
-                /**
-                 * @var $jobJSON Job
-                 */
-                $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
-                $jobStatuses[] = $job->status_owner;
+
+                if(!$job->wasDeleted()){
+                    /**
+                     * @var $jobJSON Job
+                     */
+                    $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                    $jobStatuses[] = $job->status_owner;
+                }
             }
 
         }
+
+        // @TODO if $jobJSONs is empty ( == no jobs) throw an exception????
 
         $metadataDao = new \Projects_MetadataDao();
         $projectInfo = $metadataDao->get((int)$project->id,'project_info');

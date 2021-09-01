@@ -15,7 +15,7 @@ use Jobs_JobDao;
 use Translations_SegmentTranslationDao;
 use Utils;
 
-class ChunkController extends KleinController {
+class ChunkController extends BaseChunkController {
 
     /**
      * @var Chunks_ChunkStruct
@@ -43,19 +43,33 @@ class ChunkController extends KleinController {
         $format->setUser( $this->user );
         $format->setCalledFromApi( true );
 
+        $this->return404IfTheJobWasDeleted();
+
         $this->response->json( $format->renderOne($this->chunk) );
 
     }
 
+    public function delete() {
+        $this->return404IfTheJobWasDeleted();
+
+        return $this->changeStatus( \Constants_JobStatus::STATUS_DELETED );
+    }
+
     public function cancel() {
+        $this->return404IfTheJobWasDeleted();
+
         return $this->changeStatus( \Constants_JobStatus::STATUS_CANCELLED );
     }
 
     public function archive() {
+        $this->return404IfTheJobWasDeleted();
+
         return $this->changeStatus( \Constants_JobStatus::STATUS_ARCHIVED );
     }
 
     public function active() {
+        $this->return404IfTheJobWasDeleted();
+
         return $this->changeStatus( \Constants_JobStatus::STATUS_ACTIVE );
     }
 

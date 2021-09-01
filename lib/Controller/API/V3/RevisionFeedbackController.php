@@ -2,13 +2,15 @@
 
 namespace API\V3;
 
+use API\V2\BaseChunkController;
+use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 use Revise_FeedbackDAO;
 use Revise_FeedbackStruct;
 
-class RevisionFeedbackController extends KleinController {
+class RevisionFeedbackController extends BaseChunkController {
 
     /**
      * @var Chunks_ChunkStruct
@@ -34,6 +36,16 @@ class RevisionFeedbackController extends KleinController {
         $feedbackStruct->password = $this->request->param( 'password' );
         $feedbackStruct->revision_number = $this->request->param( 'revision_number' );
         $feedbackStruct->feedback = $this->request->param( 'feedback' );
+
+        // check if job exists and it is not deleted
+        $job = $this->getJob( $feedbackStruct->id_job, $feedbackStruct->password );
+
+        if ( null === $job ) {
+            throw new NotFoundException( 'Job not found.' );
+        }
+
+        $this->chunk = $job;
+        $this->return404IfTheJobWasDeleted();
 
         $rows = (new Revise_FeedbackDAO())->insertOrUpdate($feedbackStruct);
         $status = ($rows > 0) ? 'ok' : 'ko';

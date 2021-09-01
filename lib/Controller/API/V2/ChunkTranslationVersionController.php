@@ -14,7 +14,7 @@ use Chunks_ChunkStruct;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 
 
-class ChunkTranslationVersionController extends KleinController {
+class ChunkTranslationVersionController extends BaseChunkController {
 
     /**
      * @var Chunks_ChunkStruct
@@ -33,6 +33,8 @@ class ChunkTranslationVersionController extends KleinController {
     }
 
     public function index() {
+
+        $this->return404IfTheJobWasDeleted();
 
         $results = TranslationVersionDao::getVersionsForChunk( $this->chunk );
 

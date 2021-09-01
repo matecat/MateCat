@@ -10,6 +10,7 @@
 namespace API\V2;
 
 
+use API\V2\Exceptions\NotFoundException;
 use API\V2\Json\JobTranslator;
 use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\LoginValidator;
@@ -26,6 +27,11 @@ class JobsTranslatorsController extends KleinController {
      */
     protected $jStruct;
 
+    /**
+     * @var Jobs_JobStruct
+     */
+    private $chunk;
+
     public function add(){
 
         $this->params = filter_var_array( $this->params, [
@@ -41,6 +47,10 @@ class JobsTranslatorsController extends KleinController {
 
         if( empty( $this->params[ 'email' ] ) ){
             throw new InvalidArgumentException( "Wrong parameter :email ", 400 );
+        }
+
+        if($this->jStruct->wasDeleted()){
+            throw new NotFoundException('No job found.');
         }
 
         $TranslatorsModel = new TranslatorsModel( $this->jStruct );
@@ -80,6 +90,10 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
         }
 
+        if($this->jStruct->wasDeleted()){
+            throw new NotFoundException('No job found.');
+        }
+
         //do not show outsourced translators
         $outsourceInfo = $this->jStruct->getOutsource();
         $tStruct       = $this->jStruct->getTranslator();
@@ -106,4 +120,13 @@ class JobsTranslatorsController extends KleinController {
         $this->appendValidator( $validJob );
     }
 
+    /**
+     * To maintain compatibility with JobPasswordValidator
+     * (line 36)
+     *
+     * @param Jobs_JobStruct $jobs_JobStruct
+     */
+    public function setChunk(\Jobs_JobStruct $jobs_JobStruct) {
+        $this->chunk = $jobs_JobStruct;
+    }
 }

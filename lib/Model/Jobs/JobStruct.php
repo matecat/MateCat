@@ -333,4 +333,10 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         return $lastUpdate < $oneMonthAgo && !$this->isCanceled() ;
     }
 
+    /**
+     * @return bool
+     */
+    public function wasDeleted() {
+        return $this->status_owner === Constants_JobStatus::STATUS_DELETED;
+    }
 }
