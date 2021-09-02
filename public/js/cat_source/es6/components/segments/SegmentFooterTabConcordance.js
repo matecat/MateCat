@@ -9,6 +9,7 @@ import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import {getConcordance} from '../../api/getConcordance'
 
 class SegmentFooterTabConcordance extends React.Component {
   constructor(props) {
@@ -76,7 +77,7 @@ class SegmentFooterTabConcordance extends React.Component {
 
   getConcordance(query, type) {
     //type 0 = source, 1 = target
-    API.SEGMENT.getConcordance(query, type).fail(function () {
+    getConcordance(query, type).catch(() => {
       OfflineUtils.failedConnection(this, 'getConcordance')
     })
     this.setState({

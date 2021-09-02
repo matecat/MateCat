@@ -1,45 +1,47 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Set segment to translation on review extended issue panel
+ * Get contributions - NOTE: actually this ajax request
+ * is dispatch from APP.doRequest.
  *
- * @param {Object} segment
+ * @param {string} idSegment
+ * @param {string} target
  * @param {string} [idJob=config.id_job]
  * @param {string} [password=config.password]
- * @param {number} [revisionNumber=config.revisionNumber]
+ * @param {string} [idTranslator=config.id_translator]
+ * @param {string} [idClient=config.id_client]
  * @param {string} [currentPassword=config.currentPassword]
  * @returns {Promise<object>}
  */
-export const setTranslation = async (
-  segment,
+export const getContributions = async (
+  idSegment,
+  target,
   idJob = config.id_job,
   password = config.password,
-  revisionNumber = config.revisionNumber,
+  idTranslator = config.id_translator,
+  idClient = config.id_client,
   currentPassword = config.currentPassword,
 ) => {
-  const {sid, translation, status, segment: segmentDetails} = segment
-
-  const contextBefore = UI.getContextBefore(sid)
-  const idBefore = UI.getIdBefore(sid)
-  const contextAfter = UI.getContextAfter(sid)
-  const idAfter = UI.getIdAfter(sid)
-  const translationToSend = TagUtils.prepareTextToSend(translation)
-  const time_to_edit = new Date() - UI.editStart
+  const contextBefore = UI.getContextBefore(idSegment)
+  const idBefore = UI.getIdBefore(idSegment)
+  const contextAfter = UI.getContextAfter(idSegment)
+  const idAfter = UI.getIdAfter(idSegment)
+  const txt = TagUtils.prepareTextToSend(target)
 
   const dataParams = {
-    id_segment: sid,
+    action: 'getContribution',
+    password: password,
+    is_concordance: 0,
+    id_segment: idSegment,
+    text: txt,
     id_job: idJob,
-    password,
-    status,
-    translation: translationToSend,
-    segment: segmentDetails,
-    propagate: false,
+    num_results: UI.numContributionMatchesResults,
+    id_translator: idTranslator,
     context_before: contextBefore,
     id_before: idBefore,
     context_after: contextAfter,
     id_after: idAfter,
-    time_to_edit: time_to_edit,
-    revision_number: revisionNumber,
+    id_client: idClient,
     current_password: currentPassword,
   }
   const formData = new FormData()
@@ -48,7 +50,7 @@ export const setTranslation = async (
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=setTranslation`,
+    `${getMatecatApiDomain()}?action=getContribution`,
     {
       method: 'POST',
       credentials: 'include',

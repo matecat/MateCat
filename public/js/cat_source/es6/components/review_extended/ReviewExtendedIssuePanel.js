@@ -1,6 +1,7 @@
 import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
 import CommonUtils from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import {setTranslation} from '../../api/setTranslation'
 
 class ReviewExtendedIssuePanel extends React.Component {
   constructor(props) {
@@ -65,20 +66,19 @@ class ReviewExtendedIssuePanel extends React.Component {
     }
 
     const segment = this.props.segment
-
     if (
       segment.status.toLowerCase() !== 'approved' ||
       segment.revision_number !== ReviewExtended.number
     ) {
       segment.status = 'approved'
-      API.SEGMENT.setTranslation(segment)
-        .done((response) => {
+      setTranslation(segment)
+        .then((response) => {
           issue.version = response.translation.version_number
           SegmentActions.setStatus(segment.sid, segment.id_file, segment.status)
           SegmentActions.addClassToSegment(segment.sid, 'modified')
           deferredSubmit()
         })
-        .fail(this.handleFail.bind(this))
+        .catch(this.handleFail.bind(this))
     } else {
       deferredSubmit()
     }

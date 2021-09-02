@@ -22,6 +22,9 @@ import {getGlossaryMatch} from '../api/getGlossaryMatch'
 import {deleteGlossaryItem} from '../api/deleteGlossaryItem'
 import {addGlossaryItem} from '../api/addGlossaryItem'
 import {updateGlossaryItem} from '../api/updateGlossaryItem'
+import {approveSegments} from '../api/approveSegments'
+import {translateSegments} from '../api/translateSegments'
+import {splitSegment} from '../api/splitSegment'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -42,26 +45,17 @@ const SegmentActions = {
     })
   },
   splitSegment: function (sid, text) {
-    API.SEGMENT.splitSegment(sid, text)
-      .done(function (response) {
-        if (response.errors.length) {
-          var notification = {
-            title: 'Error',
-            text: d.errors[0].message,
-            type: 'error',
-          }
-          APP.addNotification(notification)
-        } else {
-          UI.unmountSegments()
-          UI.render({
-            segmentToOpen: sid.split('-')[0],
-          })
-        }
+    splitSegment(sid, text)
+      .then(() => {
+        UI.unmountSegments()
+        UI.render({
+          segmentToOpen: sid.split('-')[0],
+        })
       })
-      .fail(function (d) {
+      .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: d.errors[0].message,
+          text: errors[0].message,
           type: 'error',
         }
         APP.addNotification(notification)
@@ -1032,10 +1026,12 @@ const SegmentActions = {
         return this.approveFilteredSegments(todoArray)
       })
     } else {
-      return API.SEGMENT.approveSegments(segmentsArray).then((response) => {
+      const promise = approveSegments(segmentsArray)
+      promise.then((response) => {
         this.checkUnchangebleSegments(response, segmentsArray, 'APPROVED')
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
+      return promise
     }
   },
   translateFilteredSegments: function (segmentsArray) {
@@ -1046,10 +1042,12 @@ const SegmentActions = {
         return this.translateFilteredSegments(todoArray)
       })
     } else {
-      return API.SEGMENT.translateSegments(segmentsArray).then((response) => {
+      const promise = translateSegments(segmentsArray)
+      promise.then((response) => {
         this.checkUnchangebleSegments(response, segmentsArray, 'TRANSLATED')
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
+      return promise
     }
   },
   checkUnchangebleSegments: function (response, status) {
