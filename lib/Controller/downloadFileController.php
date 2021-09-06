@@ -191,20 +191,25 @@ class downloadFileController extends downloadController {
 
                 $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
 
-                // instantiate parser
-                $xsp = new \Matecat\XliffParser\XliffParser();
+                // if data is empty copy the original file in the outputPath
+                if(empty($data)){
+                    copy( $xliffFilePath, $outputPath );
+                } else {
+                    // instantiate parser
+                    $xsp = new \Matecat\XliffParser\XliffParser();
 
-                // instantiateXliffReplacerCallback
-                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
+                    // instantiateXliffReplacerCallback
+                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
 
-                // run xliff replacer
-                Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $setSourceInTarget = $this->download_type === 'omegat';
-                $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $setSourceInTarget, $xliffReplacerCallback );
+                    // run xliff replacer
+                    Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
+                    $setSourceInTarget = $this->download_type === 'omegat';
+                    $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
-                //free memory
-                unset( $xsp );
-                unset( $data );
+                    //free memory
+                    unset( $xsp );
+                    unset( $data );
+                }
 
                 $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
                 $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
