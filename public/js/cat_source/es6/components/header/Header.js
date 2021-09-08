@@ -12,6 +12,7 @@ import ActionMenu from './ActionMenu'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
 import CatToolActions from '../../actions/CatToolActions'
+import {logoutUser as logoutUserApi} from '../../api/logoutUser'
 
 class Header extends React.Component {
   constructor(props) {
@@ -68,7 +69,7 @@ class Header extends React.Component {
   }
 
   logoutUser = () => {
-    $.post('/api/app/user/logout', function () {
+    logoutUserApi().then(() => {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {

@@ -6,6 +6,7 @@ import React from 'react'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
+import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -117,11 +118,9 @@ class LoginModal extends React.Component {
 
   checkRedeemProject() {
     if (this.props.redeemMessage) {
-      return $.post('/api/app/user/redeem_project')
+      return checkRedeemProjectApi()
     } else {
-      let deferred = $.Deferred()
-      deferred.resolve()
-      return deferred.promise()
+      return Promise.resolve()
     }
   }
 
