@@ -989,7 +989,8 @@ class setTranslationController extends ajaxController {
         $this->featureSet->filter(
                 'filterContributionStructOnSetTranslation',
                 $contributionStruct,
-                $this->project
+                $this->project,
+                $this->segment
         );
 
         /** TODO Remove , is only for debug purposes */
