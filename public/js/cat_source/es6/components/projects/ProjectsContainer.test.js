@@ -14,7 +14,6 @@ document.body.appendChild(modalElement)
 
 require('../../../../common')
 require('../../../../login')
-require('../../ajax_utils/projectsAjax')
 window.config = {
   enable_outsource: 1,
   basepath: '/',
@@ -51,7 +50,6 @@ const getFakeProperties = (fakeProperties) => {
       ...props,
       team,
       teams,
-      getLastActivity: window.API.PROJECTS.getLastProjectActivityLogAction,
       downloadTranslationFn: () => {},
       changeJobPasswordFn: () => {},
     },

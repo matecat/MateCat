@@ -4,7 +4,7 @@ import {getQualityReportSegmentsFiles} from '../api/getQualityReportSegmentsFile
 import {getQualityReportInfo} from '../api/getQualityReportInfo'
 let QualityReportActions = {
   loadInitialAjaxData(data) {
-    getQualityReportSegmentsFiles(data).then(function (response) {
+    getQualityReportSegmentsFiles(data).then((response) => {
       if (response.segments) {
         AppDispatcher.dispatch({
           actionType: QRConstants.RENDER_SEGMENTS_QR,
@@ -12,7 +12,7 @@ let QualityReportActions = {
         })
       }
     })
-    getQualityReportInfo().then(function (response) {
+    getQualityReportInfo().then((response) => {
       if (response.job) {
         AppDispatcher.dispatch({
           actionType: QRConstants.RENDER_REPORT,
@@ -23,7 +23,7 @@ let QualityReportActions = {
   },
 
   getMoreQRSegments(filter, segmentId) {
-    getQualityReportSegmentsFiles(filter, segmentId).then(function (response) {
+    getQualityReportSegmentsFiles(filter, segmentId).then((response) => {
       if (response.segments && response.segments.length > 0) {
         AppDispatcher.dispatch({
           actionType: QRConstants.ADD_SEGMENTS_QR,
@@ -38,7 +38,7 @@ let QualityReportActions = {
   },
 
   filterSegments(filter, segmentId) {
-    getQualityReportSegmentsFiles(filter, segmentId).then(function (response) {
+    getQualityReportSegmentsFiles(filter, segmentId).then((response) => {
       if (response.segments) {
         AppDispatcher.dispatch({
           actionType: QRConstants.RENDER_SEGMENTS_QR,

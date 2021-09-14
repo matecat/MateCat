@@ -2,6 +2,11 @@ import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
 import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
+import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
+import {changeProjectName} from '../api/changeProjectName'
+import {changeProjectAssignee} from '../api/changeProjectAssignee'
+import {changeProjectTeam} from '../api/changeProjectTeam'
+import {getSecondPassReview} from '../api/getSecondPassReview'
 import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 import {createTeam} from '../api/createTeam'
@@ -77,29 +82,25 @@ let ManageActions = {
   },
 
   updateStatusProject: function (project, status) {
-    API.PROJECTS.changeJobsOrProjectStatus('prj', project.toJS(), status).done(
-      function () {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.HIDE_PROJECT,
-          project: project,
-        })
-        setTimeout(function () {
-          ManageActions.removeProject(project)
-        }, 1000)
-      },
-    )
+    changeJobsOrProjectStatus('prj', project.toJS(), status).then(() => {
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.HIDE_PROJECT,
+        project: project,
+      })
+      setTimeout(function () {
+        ManageActions.removeProject(project)
+      }, 1000)
+    })
   },
 
   changeJobStatus: function (project, job, status) {
-    API.PROJECTS.changeJobsOrProjectStatus('job', job.toJS(), status).done(
-      function () {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.REMOVE_JOB,
-          project: project,
-          job: job,
-        })
-      },
-    )
+    changeJobsOrProjectStatus('job', job.toJS(), status).then(() => {
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.REMOVE_JOB,
+        project: project,
+        job: job,
+      })
+    })
   },
 
   changeJobPassword: function (
@@ -180,13 +181,9 @@ let ManageActions = {
   },
 
   changeProjectAssignee: function (team, project, user) {
-    let uid = -1
-    if (user !== -1) {
-      uid = user.get('uid')
-    }
-
-    API.PROJECTS.changeProjectAssignee(team.get('id'), project.get('id'), uid)
-      .done(function () {
+    const uid = user ? user.get('uid') : null
+    changeProjectAssignee(team.get('id'), project.get('id'), uid)
+      .then(() => {
         AppDispatcher.dispatch({
           actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
           project: project,
@@ -201,7 +198,7 @@ let ManageActions = {
           })
         })
       })
-      .fail(function () {
+      .catch(() => {
         ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
           actionType: ManageConstants.RELOAD_PROJECTS,
@@ -210,22 +207,20 @@ let ManageActions = {
   },
 
   changeProjectName: function (team, project, newName) {
-    API.PROJECTS.changeProjectName(
-      team.get('id'),
-      project.get('id'),
-      newName,
-    ).done(function (response) {
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.CHANGE_PROJECT_NAME,
-        project: project,
-        newProject: response.project,
-      })
-    })
+    changeProjectName(team.get('id'), project.get('id'), newName).then(
+      (response) => {
+        AppDispatcher.dispatch({
+          actionType: ManageConstants.CHANGE_PROJECT_NAME,
+          project: project,
+          newProject: response.project,
+        })
+      },
+    )
   },
 
   changeProjectTeam: function (teamId, project) {
-    API.PROJECTS.changeProjectTeam(teamId, project.toJS())
-      .done(function () {
+    changeProjectTeam(teamId, project.toJS())
+      .then(() => {
         var team = TeamsStore.teams.find(function (team) {
           return team.get('id') == teamId
         })
@@ -294,7 +289,7 @@ let ManageActions = {
           })
         }
       })
-      .fail(function () {
+      .catch(() => {
         ManageActions.showNotificationProjectsChanged()
         AppDispatcher.dispatch({
           actionType: ManageConstants.RELOAD_PROJECTS,
@@ -348,12 +343,12 @@ let ManageActions = {
     idJob,
     passwordJob,
   ) {
-    return API.PROJECTS.getSecondPassReview(
+    return getSecondPassReview(
       idProject,
       passwordProject,
       idJob,
       passwordJob,
-    ).then(function (data) {
+    ).then((data) => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.ADD_SECOND_PASS,
         idProject: idProject,

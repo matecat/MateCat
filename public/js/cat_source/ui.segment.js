@@ -375,10 +375,6 @@ import SegmentStore from './es6/stores/SegmentStore'
 
       SegmentActions.registerTab('glossary', true, false)
       SegmentActions.registerTab('alternatives', false, false)
-      // SegmentActions.registerTab('messages', false, false);
-      if (ReviewSimple.enabled()) {
-        UI.registerReviseTab()
-      }
     },
     translateAndGoToNext: function () {
       var segment = SegmentStore.getCurrentSegment()

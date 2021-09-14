@@ -17,7 +17,6 @@ afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
 
 require('../../../../common')
 require('../../../../login')
-require('../../ajax_utils/projectsAjax')
 window.config = {
   enable_outsource: 1,
   basepath: '/',
@@ -55,7 +54,6 @@ const getFakeProperties = (fakeProperties) => {
       project,
       team,
       teams,
-      lastActivityFn: window.API.PROJECTS.getLastProjectActivityLogAction,
       downloadTranslationFn: () => {},
       changeJobPasswordFn: () => {},
     },
