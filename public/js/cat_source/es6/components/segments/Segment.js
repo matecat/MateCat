@@ -784,13 +784,15 @@ class Segment extends React.Component {
             <SegmentsCommentsIcon {...this.props} />
           ) : null}
 
-          <div
-            data-mount="translation-issues-button"
-            className="translation-issues-button"
-            data-sid={this.props.segment.sid}
-          >
-            {translationIssues}
-          </div>
+          {this.props.isReviewExtended && (
+            <div
+              data-mount="translation-issues-button"
+              className="translation-issues-button"
+              data-sid={this.props.segment.sid}
+            >
+              {translationIssues}
+            </div>
+          )}
         </div>
         <div className="segment-side-container">
           {config.comments_enabled && this.props.segment.openComments ? (

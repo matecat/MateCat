@@ -8,7 +8,6 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentTabConcordance from './SegmentFooterTabConcordance'
 import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
-import SegmentTabRevise from './SegmentFooterTabRevise'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 import SegmentActions from '../../actions/SegmentActions'
@@ -92,15 +91,6 @@ class SegmentFooter extends React.Component {
         visible: !!(
           UI.crossLanguageSettings && UI.crossLanguageSettings.primary
         ),
-        open: false,
-        elements: [],
-      },
-      review: {
-        label: 'Revise',
-        code: 'review',
-        tab_class: 'review',
-        enabled: false,
-        visible: false,
         open: false,
         elements: [],
       },
@@ -254,18 +244,6 @@ class SegmentFooter extends React.Component {
             active_class={open_class}
             tab_class={tab.tab_class}
             id_segment={this.props.sid}
-            segment={this.props.segment}
-          />
-        )
-      case 'review':
-        return (
-          <SegmentTabRevise
-            key={'container_' + tab.code}
-            code={tab.code}
-            active_class={open_class}
-            tab_class={tab.tab_class}
-            id_segment={this.props.sid}
-            translation={this.props.segment.translation}
             segment={this.props.segment}
           />
         )
