@@ -10,7 +10,9 @@ namespace Features\ReviewExtended\Controller\API;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\BaseChunkController;
 use Chunks_ChunkStruct;
+use Constants_JobStatus;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
@@ -20,12 +22,7 @@ use INIT;
 use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
 
-class QualityReportController extends KleinController {
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
+class QualityReportController extends BaseChunkController {
 
     /**
      * @var Projects_ProjectStruct
@@ -46,6 +43,8 @@ class QualityReportController extends KleinController {
     protected $model;
 
     public function show() {
+
+        $this->return404IfTheJobWasDeleted();
         $this->model = new QualityReportModel( $this->chunk );
         $this->model->setDateFormat( 'c' );
 
@@ -55,6 +54,8 @@ class QualityReportController extends KleinController {
     }
 
     public function segments() {
+        $this->return404IfTheJobWasDeleted();
+
         return $this->renderSegments();
     }
 

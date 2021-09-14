@@ -1,6 +1,7 @@
 import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
 import CommonUtils from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import {setTranslation} from '../../api/setTranslation'
 
 class ReviewExtendedIssuePanel extends React.Component {
   constructor(props) {
@@ -24,51 +25,34 @@ class ReviewExtendedIssuePanel extends React.Component {
     this.setState({
       submitDisabled: true,
     })
-    let data = []
-    let deferred = $.Deferred()
-    let issue = {
+
+    const {selection} = this.props
+
+    const issue = {
       id_category: category.id,
       severity: severity,
       version: this.props.segmentVersion,
+      ...(selection
+        ? {
+            target_text: selection.selected_string,
+            start_node: selection.start_node,
+            start_offset: selection.start_offset,
+            send_node: selection.end_node,
+            end_offset: selection.end_offset,
+          }
+        : {
+            start_node: 0,
+            start_offset: 0,
+            send_node: 0,
+            end_offset: 0,
+          }),
     }
 
-    if (this.props.selection) {
-      issue.target_text = this.props.selection.selected_string
-      issue.start_node = this.props.selection.start_node
-      issue.start_offset = this.props.selection.start_offset
-      issue.send_node = this.props.selection.end_node
-      issue.end_offset = this.props.selection.end_offset
-    } else {
-      issue.start_node = 0
-      issue.start_offset = 0
-      issue.send_node = 0
-      issue.end_offset = 0
-    }
-
-    let segment = this.props.segment
-    if (
-      segment.status.toLowerCase() !== 'approved' ||
-      segment.revision_number !== ReviewExtended.number
-    ) {
-      segment.status = 'approved'
-      API.SEGMENT.setTranslation(segment)
-        .done((response) => {
-          issue.version = response.translation.version_number
-          SegmentActions.setStatus(segment.sid, segment.id_file, segment.status)
-          SegmentActions.addClassToSegment(segment.sid, 'modified')
-          deferred.resolve()
-        })
-        .fail(this.handleFail.bind(this))
-    } else {
-      deferred.resolve()
-    }
-    data.push(issue)
-
-    deferred.then(() => {
+    const deferredSubmit = () => {
       SegmentActions.setStatus(segment.sid, segment.fid, segment.status)
       UI.currentSegment.data('modified', false)
-      SegmentActions.submitIssue(this.props.sid, data)
-        .done((data) => {
+      SegmentActions.submitIssue(this.props.sid, issue)
+        .then((data) => {
           this.setState({
             submitDisabled: false,
           })
@@ -78,8 +62,26 @@ class ReviewExtendedIssuePanel extends React.Component {
             SegmentActions.issueAdded(this.props.sid, data.issue.id)
           })
         })
-        .fail((response) => this.handleFail(response.responseJSON))
-    })
+        .catch((response) => this.handleFail(response.responseJSON))
+    }
+
+    const segment = this.props.segment
+    if (
+      segment.status.toLowerCase() !== 'approved' ||
+      segment.revision_number !== ReviewExtended.number
+    ) {
+      segment.status = 'approved'
+      setTranslation(segment)
+        .then((response) => {
+          issue.version = response.translation.version_number
+          SegmentActions.setStatus(segment.sid, segment.id_file, segment.status)
+          SegmentActions.addClassToSegment(segment.sid, 'modified')
+          deferredSubmit()
+        })
+        .catch(this.handleFail.bind(this))
+    } else {
+      deferredSubmit()
+    }
   }
 
   handleFail(response) {

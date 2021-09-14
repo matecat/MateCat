@@ -52,7 +52,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/revise/segments/[:id_segment]/translation-versions', 'GET', '\API\V2\ReviseTranslationIssuesController', 'index' );
 
     route( '/segments/[:id_segment]/translation-versions', 'GET', '\API\V2\SegmentVersion', 'index' );
-    route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', 'API_V2_SegmentVersion', 'detail' );
+    route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', '\API\V2\SegmentVersion', 'detail' );
 
     route( '/segments/[:id_segment]/translation-issues', 'POST', 'API\V2\SegmentTranslationIssueController', 'create' );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]', 'DELETE', 'API\V2\SegmentTranslationIssueController', 'delete' );
@@ -67,6 +67,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/options', 'POST', 'API\V2\ChunkOptionsController', 'update' );
 
 
+    //route( '/delete', 'POST', 'API\V2\ChunkController', 'delete' );
     route( '/cancel', 'POST', 'API\V2\ChunkController', 'cancel' );
     route( '/archive', 'POST', 'API\V2\ChunkController', 'archive' );
     route( '/active', 'POST', 'API\V2\ChunkController', 'active' );

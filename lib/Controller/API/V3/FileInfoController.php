@@ -8,6 +8,7 @@
 
 namespace API\V3;
 
+use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
@@ -16,17 +17,12 @@ use Files\FilesInfoUtility;
 use Projects_ProjectStruct;
 
 
-class FileInfoController extends KleinController {
+class FileInfoController extends BaseChunkController {
 
     /**
      * @var Projects_ProjectStruct
      */
     protected $project;
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
 
     protected function afterConstruct() {
         $Validator = new ChunkPasswordValidator( $this );
@@ -48,6 +44,9 @@ class FileInfoController extends KleinController {
     }
 
     public function getInfo() {
+
+        $this->return404IfTheJobWasDeleted();
+
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
         $this->response->json( $filesInfoUtility->getInfo() );
     }
@@ -56,6 +55,8 @@ class FileInfoController extends KleinController {
      * @throws NotFoundException
      */
     public function getInstructions() {
+
+        $this->return404IfTheJobWasDeleted();
 
         $id_file          = $this->request->param( 'id_file' );
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
@@ -69,6 +70,8 @@ class FileInfoController extends KleinController {
     }
 
     public function setInstructions() {
+
+        $this->return404IfTheJobWasDeleted();
 
         $id_file          = $this->request->param( 'id_file' );
         $instructions     = $this->request->param( 'instructions' );

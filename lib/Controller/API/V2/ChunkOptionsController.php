@@ -6,12 +6,7 @@ namespace API\V2;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 
-class ChunkOptionsController extends KleinController {
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
+class ChunkOptionsController extends BaseChunkController {
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -24,6 +19,9 @@ class ChunkOptionsController extends KleinController {
     }
 
     public function update() {
+
+        $this->return404IfTheJobWasDeleted();
+
         $chunk_options_model = new \ChunkOptionsModel( $this->chunk ) ;
         
         $chunk_options_model->setOptions( $this->filteredParams() ) ;

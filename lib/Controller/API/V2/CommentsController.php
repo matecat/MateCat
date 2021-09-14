@@ -14,7 +14,7 @@ use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 use Comments_CommentDao;
 
-class CommentsController extends KleinController {
+class CommentsController extends BaseChunkController {
 
     /**
      * @var Chunks_ChunkStruct
@@ -33,6 +33,8 @@ class CommentsController extends KleinController {
     }
 
     public function index() {
+
+        $this->return404IfTheJobWasDeleted();
 
         $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, array(
             'from_id' => $this->request->param( 'from_id' )
