@@ -91,26 +91,28 @@ class SecondPassReview extends BaseFeature {
         $lastFile  = end( $data[ 'files' ] );
         $firstSid  = $firstFile[ 'segments' ][ 0 ][ 'sid' ];
 
-        $lastSegment = end( $lastFile[ 'segments' ] );
-        $lastSid     = $lastSegment[ 'sid' ];
+        if( isset($lastFile[ 'segments' ]) and is_array($lastFile[ 'segments' ]) ) {
+            $lastSegment = end( $lastFile[ 'segments' ] );
+            $lastSid     = $lastSegment[ 'sid' ];
 
-        $segment_translation_events = ( new SegmentTranslationEventDao() )->getLatestEventsInSegmentInterval(
-                $chunk->id, $firstSid, $lastSid );
+            $segment_translation_events = ( new SegmentTranslationEventDao() )->getLatestEventsInSegmentInterval(
+                    $chunk->id, $firstSid, $lastSid );
 
-        $by_id_segment = [];
-        foreach ( $segment_translation_events as $record ) {
-            $by_id_segment[ $record->id_segment ] = $record;
-        }
+            $by_id_segment = [];
+            foreach ( $segment_translation_events as $record ) {
+                $by_id_segment[ $record->id_segment ] = $record;
+            }
 
-        foreach ( $data[ 'files' ] as $file => $content ) {
-            foreach ( $content[ 'segments' ] as $key => $segment ) {
+            foreach ( $data[ 'files' ] as $file => $content ) {
+                foreach ( $content[ 'segments' ] as $key => $segment ) {
 
-                if(isset( $by_id_segment[ $segment[ 'sid' ] ] )){
-                    $data [ 'files' ] [ $file ] [ 'segments' ] [ $key ] [ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
-                            $by_id_segment[ $segment[ 'sid' ] ]->source_page
-                    );
+                    if(isset( $by_id_segment[ $segment[ 'sid' ] ] )){
+                        $data [ 'files' ] [ $file ] [ 'segments' ] [ $key ] [ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
+                                $by_id_segment[ $segment[ 'sid' ] ]->source_page
+                        );
+                    }
+
                 }
-
             }
         }
 
