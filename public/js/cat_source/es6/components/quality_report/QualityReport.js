@@ -260,7 +260,7 @@ export default QualityReport
 let headerMountPoint = $('header')[0]
 
 if (config.isLoggedIn) {
-  getUserData().then(function (data) {
+  getUserData().then((data) => {
     ReactDOM.render(
       React.createElement(Header, {
         showJobInfo: true,

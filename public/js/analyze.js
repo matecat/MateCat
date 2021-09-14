@@ -7,6 +7,8 @@ import Header from './cat_source/es6/components/header/Header'
 import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
 import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
 import {getProject} from './cat_source/es6/api/getProject'
+import {getVolumeAnalysis} from './cat_source/es6/api/getVolumeAnalysis'
+import {getJobVolumeAnalysis} from './cat_source/es6/api/getJobVolumeAnalysis'
 
 window.UI = null
 
@@ -47,18 +49,18 @@ window.UI = {
   getProjectVolumeAnalysisData: function () {
     var self = this
     if (config.jobAnalysis) {
-      API.PROJECTS.getJobVolumeAnalysis().done(function (response) {
+      getJobVolumeAnalysis().then((response) => {
         self.parseVolumeAnalysisData(response)
-        getProject(config.id_project).then(function (response) {
+        getProject(config.id_project).then((response) => {
           UI.currentOutsourceProject = response.project
           self.renderAnalysisPage()
         })
         self.pollData(response)
       })
     } else {
-      API.PROJECTS.getVolumeAnalysis().done(function (response) {
+      getVolumeAnalysis().then((response) => {
         self.parseVolumeAnalysisData(response)
-        getProject(config.id_project).then(function (response) {
+        getProject(config.id_project).then((response) => {
           UI.currentOutsourceProject = response.project
           self.renderAnalysisPage()
         })
@@ -79,14 +81,14 @@ window.UI = {
       }
 
       setTimeout(function () {
-        API.PROJECTS.getVolumeAnalysis().done(function (response) {
+        getVolumeAnalysis().then((response) => {
           UI.volumeAnalysis = response.data
           AnalyzeActions.updateVolumeAnalysis(UI.volumeAnalysis)
           if (
             response.data.summary.STATUS === 'DONE' ||
             response.data.summary.STATUS === 'NOT_TO_ANALYZE'
           ) {
-            getProject(config.id_project).then(function (response) {
+            getProject(config.id_project).then((response) => {
               if (response.project) {
                 UI.currentOutsourceProject = response.project
                 AnalyzeActions.updateProject(UI.currentOutsourceProject)
