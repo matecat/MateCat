@@ -946,8 +946,8 @@ const SegmentActions = {
     })
   },
 
-  submitIssue: function (sid, data, diff) {
-    return UI.submitIssues(sid, data, diff)
+  submitIssue: function (sid, data) {
+    return UI.submitIssues(sid, data)
   },
 
   issueAdded: function (sid, issueId) {

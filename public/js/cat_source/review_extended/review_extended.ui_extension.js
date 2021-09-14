@@ -13,12 +13,11 @@ import {sendSegmentVersionIssueComment} from '../es6/api/sendSegmentVersionIssue
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
-    submitIssue: function (sid, data, diff) {
+    submitIssue: function (sid, data) {
       var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
 
       const promise = sendSegmentVersionIssue(sid, {
         ...data,
-        diff,
       })
       promise.then(() => {
         UI.getSegmentVersionsIssues(sid, fid)
@@ -46,8 +45,8 @@ if (ReviewExtended.enabled()) {
       return promise
     },
 
-    submitIssues: function (sid, data, diff) {
-      return ReviewExtended.submitIssue(sid, data, diff)
+    submitIssues: function (sid, data) {
+      return ReviewExtended.submitIssue(sid, data)
     },
 
     getSegmentVersionsIssuesHandler(sid) {
