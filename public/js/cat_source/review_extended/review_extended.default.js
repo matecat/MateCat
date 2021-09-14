@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import SegmentActions from '../es6/actions/SegmentActions'
+import {getSegmentsIssues} from '../es6/api/getSegmentsIssues'
 
 window.ReviewExtended = {
   enabled: function () {
@@ -12,7 +13,7 @@ window.ReviewExtended = {
     'issuePanelClosed-' + config.id_job + config.password,
   number: config.revisionNumber,
   getSegmentsIssues: function () {
-    API.SEGMENT.getSegmentsIssues().done((data) => {
+    getSegmentsIssues().then((data) => {
       let versionsIssues = {}
       _.each(data.issues, (issue) => {
         if (!versionsIssues[issue.id_segment]) {
