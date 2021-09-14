@@ -7,8 +7,8 @@
  */
 namespace Files;
 
+use DataAccess_IDaoStruct;
 use Database;
-use Files\MetadataStruct as Files_MetadataStruct;
 
 class MetadataDao extends \DataAccess_AbstractDao {
     const TABLE = 'file_metadata' ;
@@ -17,7 +17,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param $id_project
      * @param $id_file
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
     public function getByJobIdProjectAndIdFile( $id_project, $id_file ) {
         $stmt = $this->_getStatementForCache(
@@ -26,7 +26,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 " AND id_file = :id_file "
         );
 
-        $result = $this->_fetchObject( $stmt, new Files_MetadataStruct(), array(
+        $result = $this->_fetchObject( $stmt, new MetadataStruct(), array(
                 'id_project' => $id_project,
                 'id_file' => $id_file,
         ) );
@@ -34,7 +34,15 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return @$result;
     }
 
+    /**
+     * @param $id_project
+     * @param $id_file
+     * @param $key
+     *
+     * @return MetadataStruct
+     */
     public function get($id_project, $id_file,  $key ) {
+
         $stmt = $this->_getStatementForCache(
                 "SELECT * FROM ".self::TABLE." WHERE " .
                 " id_project = :id_project " .
@@ -42,13 +50,11 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 " AND `key` = :key "
         );
 
-        $result = $this->_fetchObject( $stmt, new Files_MetadataStruct(), array(
+        return @$this->_fetchObject( $stmt, new MetadataStruct(), [
                 'id_project' => $id_project,
                 'id_file' => $id_file,
                 'key' => $key
-        ) );
-
-        return @$result[0];
+        ] )[ 0 ];
 
     }
 
