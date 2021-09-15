@@ -9,8 +9,6 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import ManageActions from '../../actions/ManageActions'
 import ManageConstants from '../../constants/ManageConstants'
 
-require('../../ajax_utils/projectsAjax')
-
 window.config = {
   splitEnabled: 1,
   hostpath: 'https://dev.matecat.com',

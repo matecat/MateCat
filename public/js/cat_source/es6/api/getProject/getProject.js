@@ -4,7 +4,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * Fetch the specific project
  *
  * @param {string} id
- * @param {string} [password=window.config.password]
+ * @param {string} [password=config.password]
  * @returns {Promise<object>}
  */
 export const getProject = async (id, password = config.password) => {

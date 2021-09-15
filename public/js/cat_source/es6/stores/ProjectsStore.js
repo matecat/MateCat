@@ -111,7 +111,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
   changeProjectAssignee: function (project, user) {
     let uid
-    if (user !== -1) {
+    if (user) {
       uid = user.get('uid')
     }
     var projectOld = this.projects.find(function (prj) {

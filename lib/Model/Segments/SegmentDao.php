@@ -186,7 +186,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 new Segments_SegmentStruct(),
                 $id_list
         );
-        $reverse_id_list = array_flip( $id_list );
+
+        $reverse_id_list = @array_flip( $id_list );
         foreach ( $res as $element ) {
             $id_list[ $reverse_id_list[ $element->id ] ] = $element;
         }
