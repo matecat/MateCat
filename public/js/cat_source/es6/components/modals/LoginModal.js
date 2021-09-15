@@ -7,6 +7,7 @@ import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
+import {loginUser} from '../../api/loginUser'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -94,20 +95,15 @@ class LoginModal extends React.Component {
     this.setState({requestRunning: true})
     this.checkRedeemProject().then(
       this.sendLoginData()
-        .done(function () {
+        .then(() => {
           if (self.props.goToManage) {
             window.location = '/manage/'
           } else {
             window.location.reload()
           }
         })
-        .fail(function (response) {
-          let text
-          if (response.responseText.length) {
-            text = JSON.parse(response.responseText)
-          } else {
-            text = 'Login failed.'
-          }
+        .catch(() => {
+          const text = 'Login failed.'
           self.setState({
             generalError: text,
             requestRunning: false,
@@ -125,10 +121,7 @@ class LoginModal extends React.Component {
   }
 
   sendLoginData() {
-    return $.post('/api/app/user/login', {
-      email: this.state.emailAddress,
-      password: this.state.password,
-    })
+    return loginUser(this.state.emailAddress, this.state.password)
   }
 
   errorFor(field) {
