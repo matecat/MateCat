@@ -1,6 +1,7 @@
 import React from 'react'
 import {checkSplitRequest} from '../../api/checkSplitRequest'
 import {confirmSplitRequest} from '../../api/confirmSplitRequest'
+import CommonUtils from '../../utils/commonUtils'
 
 class SplitJobModal extends React.Component {
   constructor(props) {
@@ -357,7 +358,7 @@ class SplitJobModal extends React.Component {
                 <p className="error-count current">
                   Current count:{' '}
                   <span className="curr-w">
-                    {APP.addCommas(checkSplit.sum)}
+                    {CommonUtils.addCommas(checkSplit.sum)}
                   </span>
                 </p>
               ) : (
@@ -368,7 +369,7 @@ class SplitJobModal extends React.Component {
                 <p className="error-count">
                   <span className="txt">{errorLabel}</span>:{' '}
                   <span className="diff-w">
-                    {APP.addCommas(Math.abs(checkSplit.difference))}
+                    {CommonUtils.addCommas(Math.abs(checkSplit.difference))}
                   </span>
                 </p>
               ) : (
