@@ -345,7 +345,8 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
             }
 
-            $results[ $k ][ 'filename' ]  = trim( $results[ $k ][ 'filename' ] );
+            // this line creates a bug, if the file contains a space at the beginning, we can't download it anymore
+            // $results[ $k ][ 'filename' ]  = trim( $results[ $k ][ 'filename' ] );
             $results[ $k ][ 'mime_type' ] = trim( $results[ $k ][ 'mime_type' ] );
 
         }
