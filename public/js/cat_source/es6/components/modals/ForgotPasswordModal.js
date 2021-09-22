@@ -4,6 +4,8 @@ import React from 'react'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
+import {forgotPassword} from '../../api/forgotPassword'
+import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 
 class ForgotPasswordModal extends React.Component {
   constructor(props) {
@@ -46,7 +48,7 @@ class ForgotPasswordModal extends React.Component {
     this.setState({requestRunning: true})
     this.checkRedeemProject().then(
       this.sendForgotPassword()
-        .done(function () {
+        .then(() => {
           $('#modal').trigger('opensuccess', [
             {
               title: 'Forgot Password',
@@ -57,7 +59,7 @@ class ForgotPasswordModal extends React.Component {
             },
           ])
         })
-        .fail(function (response) {
+        .catch((response) => {
           var data = JSON.parse(response.responseText)
           var text
           if (data) {
@@ -75,19 +77,15 @@ class ForgotPasswordModal extends React.Component {
   }
 
   sendForgotPassword() {
-    return $.post('/api/app/user/forgot_password', {
-      email: this.state.emailAddress,
-      wanted_url: window.location.href,
-    })
+    return forgotPassword(this.state.emailAddress, window.location.href)
   }
 
   checkRedeemProject() {
+    checkRedeemProjectApi()
     if (this.props.redeemMessage) {
-      return $.post('/api/app/user/redeem_project')
+      return checkRedeemProjectApi()
     } else {
-      var deferred = $.Deferred()
-      deferred.resolve()
-      return deferred.promise()
+      return Promise.resolve()
     }
   }
 

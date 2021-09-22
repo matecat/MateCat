@@ -4,6 +4,8 @@ import React from 'react'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
+import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
+import {registerUser} from '../../api/registerUser'
 
 class RegisterModal extends React.Component {
   constructor(props) {
@@ -48,14 +50,14 @@ class RegisterModal extends React.Component {
     this.setState({requestRunning: true})
     this.checkRedeemProject().then(
       this.sendRegisterData()
-        .done(function () {
+        .then(() => {
           $('#modal').trigger('confirmregister', [
             {emailAddress: self.state.emailAddress},
           ])
         })
-        .fail(function (response) {
+        .catch((response) => {
           var generalErrorText
-          if (response.responseText.length) {
+          if (response.responseText) {
             var data = JSON.parse(response.responseText)
             generalErrorText = data.error.message
           } else {
@@ -101,25 +103,21 @@ class RegisterModal extends React.Component {
   }
 
   sendRegisterData() {
-    return $.post('/api/app/user', {
-      user: {
-        first_name: this.state.name,
-        last_name: this.state.surname,
-        email: this.state.emailAddress,
-        password: this.state.password,
-        password_confirmation: this.state.password,
-        wanted_url: window.location.href,
-      },
+    return registerUser({
+      firstname: this.state.name,
+      surname: this.state.surname,
+      email: this.state.emailAddress,
+      password: this.state.password,
+      passwordConfirmation: this.state.password,
+      wantedUrl: window.location.href,
     })
   }
 
   checkRedeemProject() {
     if (this.props.redeemMessage) {
-      return $.post('/api/app/user/redeem_project')
+      return checkRedeemProjectApi()
     } else {
-      var deferred = $.Deferred()
-      deferred.resolve()
-      return deferred.promise()
+      return Promise.resolve()
     }
   }
 

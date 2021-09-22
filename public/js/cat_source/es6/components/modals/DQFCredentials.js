@@ -5,6 +5,10 @@ import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {
+  clearDqfCredentials as clearDqfCredentialsApi,
+  submitDqfCredentials as submitDqfCredentialsApi,
+} from '../../api/dqfCredentials'
 
 class DQFCredentials extends React.Component {
   constructor(props) {
@@ -45,13 +49,8 @@ class DQFCredentials extends React.Component {
 
   submitDQFCredentials() {
     let self = this
-    return $.post('/api/app/user/metadata', {
-      metadata: {
-        dqf_username: this.state.dqfUsername,
-        dqf_password: this.state.dqfPassword,
-      },
-    })
-      .done(function (data) {
+    submitDqfCredentialsApi(this.state.dqfUsername, this.state.dqfPassword)
+      .then((data) => {
         if (data) {
           APP.USER.STORE.metadata = data
 
@@ -68,7 +67,7 @@ class DQFCredentials extends React.Component {
           })
         }
       })
-      .fail(function () {
+      .catch(() => {
         self.setState({
           dqfError: 'Invalid credentials',
         })
@@ -78,11 +77,7 @@ class DQFCredentials extends React.Component {
   clearDQFCredentials() {
     let self = this
     let dqfCheck = $('.dqf-box #dqf_switch')
-    return $.ajax({
-      type: 'DELETE',
-      url: getMatecatApiDomain() + 'api/app/dqf/user/metadata',
-      xhrFields: {withCredentials: true},
-    }).done(function (data) {
+    clearDqfCredentialsApi().then((data) => {
       APP.USER.STORE.metadata = data
       dqfCheck.trigger('dqfDisable')
       if (self.saveButton) {

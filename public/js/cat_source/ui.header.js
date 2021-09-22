@@ -15,6 +15,7 @@ import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
 import {getJobMetadata} from './es6/api/getJobMetadata'
+import {logoutUser} from './es6/api/logoutUser'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -39,7 +40,7 @@ $.extend(window.UI, {
     this.createJobMenu()
   },
   logoutAction: function () {
-    $.post('/api/app/user/logout', function () {
+    logoutUser().then(() => {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {

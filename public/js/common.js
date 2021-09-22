@@ -7,6 +7,7 @@ import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import MBC from './cat_source/es6/utils/mbc.main'
+import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 
 window.APP = null
 
@@ -930,18 +931,18 @@ window.APP = {
     }
     var downloadToken =
       new Date().getTime() + '_' + parseInt(Math.random(0, 1) * 10000000)
-    $.ajax({
-      cache: false,
-      url: APP.downloadFileURL(openOriginalFiles, jobId, pass, downloadToken),
-      dataType: 'json',
-    })
-      .done(driveUpdateDone)
-      .always(function () {
+
+    downloadFileGDrive(openOriginalFiles, jobId, pass, downloadToken)
+      .then((data) => {
+        driveUpdateDone(data)
         if (callback) {
           callback()
         }
       })
-      .fail(function () {
+      .catch(() => {
+        if (callback) {
+          callback()
+        }
         var cookie = Cookies.get(downloadToken)
         if (cookie) {
           var notification = {
