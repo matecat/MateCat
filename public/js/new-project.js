@@ -10,6 +10,8 @@ import Header from './cat_source/es6/components/header/Header'
 import LanguageSelector from './cat_source/es6/components/languageSelector/LanguageSelector'
 import TeamsStore from './cat_source/es6/stores/TeamsStore'
 import TeamConstants from './cat_source/es6/constants/TeamConstants'
+import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
+import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -71,13 +73,7 @@ APP.createTMKey = function () {
  * called in main.js
  */
 window.clearNotCompletedUploads = function () {
-  $.ajax({
-    async: false,
-    url: config.basepath + '?action=ajaxUtils&' + new Date().getTime(),
-    data: {exec: 'clearNotCompletedUploads'},
-    type: 'POST',
-    dataType: 'json',
-  })
+  clearNotCompletedUploadsApi()
 }
 
 APP.changeTargetLang = function (lang) {
@@ -810,20 +806,16 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 })
 APP.handleCreationStatus = function (id_project, password) {
-  $.ajax({
-    url: '/api/v2/projects/' + id_project + '/' + password + '/creation_status',
-    type: 'GET',
-  })
-    .done(function (data, statusText, xhr) {
-      if (data.status == 202 || xhr.status == 202) {
+  projectCreationStatus(id_project, password)
+    .then(({data, status}) => {
+      if (data.status == 202 || status == 202) {
         setTimeout(APP.handleCreationStatus, 1000, id_project, password)
       } else {
         APP.postProjectCreation(data)
       }
     })
-    .fail(function (data) {
-      var _data = $.parseJSON(data.responseText)
-      APP.postProjectCreation(_data)
+    .catch(({statusText}) => {
+      APP.postProjectCreation(statusText)
     })
 }
 

@@ -6,6 +6,8 @@ import * as FormRules from '../common/formRules'
 import {getUserApiKey} from '../../api/getUserApiKey'
 import {createUserApiKey} from '../../api/createUserApiKey'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
+import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
+import {logoutUser as logoutUserApi} from '../../api/logoutUser'
 
 class PreferencesModal extends React.Component {
   constructor(props) {
@@ -64,7 +66,7 @@ class PreferencesModal extends React.Component {
       }, 600)
     } else {
       if (APP.USER.STORE.connected_services.length) {
-        this.disableGDrive().done(function (data) {
+        this.disableGDrive().then((data) => {
           APP.USER.upsertConnectedService(data.connected_service)
           self.setState({
             service: APP.USER.getDefaultConnectedService(),
@@ -75,13 +77,11 @@ class PreferencesModal extends React.Component {
   }
 
   disableGDrive() {
-    return $.post('/api/app/connected_services/' + this.state.service.id, {
-      disabled: true,
-    })
+    return connectedServicesGDrive(this.state.service.id)
   }
 
   logoutUser() {
-    $.post('/api/app/user/logout', function (data) {
+    logoutUserApi().then(() => {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {
