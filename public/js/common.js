@@ -6,7 +6,6 @@ import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
-import MBC from './cat_source/es6/utils/mbc.main'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 
 window.APP = null
@@ -134,23 +133,6 @@ window.APP = {
       closeOnSuccess: options.closeOnSuccess || false,
     })
     return APP.confirmValue // TODO: this return value is clearly meaningless
-  },
-  confirmAndCheckbox: function (options) {
-    this.waitingConfirm = true
-    this.popup({
-      type: options.type || 'confirm_checkbox',
-      name: options.name,
-      onConfirm: options.callback,
-      caller: options.caller,
-      onCancel: options.onCancel,
-      title: options.title || 'Confirmation required',
-      cancelTxt: options.cancelTxt,
-      okTxt: options.okTxt,
-      content: options.msg,
-      context: options.context,
-      closeOnSuccess: options.closeOnSuccess || false,
-      checkbox_label: options['checkbox-label'],
-    })
   },
   doRequest: function (req, log) {
     var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
@@ -549,54 +531,7 @@ window.APP = {
     }
     return false
   },
-  objectSize: function (obj) {
-    var size = 0,
-      key
-    for (key in obj) {
-      if (obj.hasOwnProperty(key)) size++
-    }
-    return size
-  },
-  addCommas: function (nStr) {
-    nStr += ''
-    var x = nStr.split('.')
-    var x1 = x[0]
-    var x2 = x.length > 1 ? '.' + x[1] : ''
-    var rgx = /(\d+)(\d{3})/
-    while (rgx.test(x1)) {
-      x1 = x1.replace(rgx, '$1' + ',' + '$2')
-    }
-    return x1 + x2
-  },
-  numberWithCommas: function (x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  },
-  zerofill: function (i, l, s) {
-    var o = i.toString()
-    if (!s) {
-      s = '0'
-    }
-    while (o.length < l) {
-      o = s + o
-    }
-    return o
-  },
-  addDomObserver: function (element, callback) {
-    if (_.isUndefined(element)) return
-    MutationObserver = window.MutationObserver || window.WebKitMutationObserver
 
-    var observer = new MutationObserver(function () {
-      // fired when a mutation occurs
-      callback.call()
-    })
-    // define what element should be observed by the observer
-    // and what types of mutations trigger the callback
-    observer.observe(element, {
-      childList: true,
-      characterData: false,
-      attributes: false,
-    })
-  },
   /**
    * Function to add notifications to the interface
    * notification object with the following properties
@@ -634,58 +569,7 @@ window.APP = {
       APP.notificationBox.removeAllNotifications()
     }
   },
-
-  getParameterByName: function (name, url) {
-    if (!url) url = window.location.href
-    name = name.replace(/[[\]]/g, '\\$&')
-    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url)
-    if (!results) return null
-    if (!results[2]) return ''
-    return decodeURIComponent(results[2].replace(/\+/g, ' '))
-  },
-  removeParam: function (parameter) {
-    var url = document.location.href
-    var urlparts = url.split('?')
-
-    if (urlparts.length >= 2) {
-      var urlBase = urlparts.shift()
-      var queryString = urlparts.join('?')
-
-      var prefix = encodeURIComponent(parameter) + '='
-      var pars = queryString.split(/[&;]/g)
-      for (var i = pars.length; i-- > 0; )
-        if (pars[i].lastIndexOf(prefix, 0) !== -1) pars.splice(i, 1)
-      url = urlBase + '?' + pars.join('&')
-      window.history.pushState('', document.title, url) // added this line to push the new url directly to url bar .
-    }
-    return url
-  },
-  getCursorPosition: function (editableDiv) {
-    var caretPos = 0,
-      sel,
-      range
-    if (window.getSelection) {
-      sel = window.getSelection()
-      if (sel.rangeCount) {
-        range = sel.getRangeAt(0)
-        if (range.commonAncestorContainer == editableDiv) {
-          caretPos = range.endOffset
-        }
-      }
-    } else if (document.selection && document.selection.createRange) {
-      range = document.selection.createRange()
-      if (range.parentElement() == editableDiv) {
-        var tempEl = document.createElement('span')
-        editableDiv.insertBefore(tempEl, editableDiv.firstChild)
-        var tempRange = range.duplicate()
-        tempRange.moveToElementText(tempEl)
-        tempRange.setEndPoint('EndToEnd', range)
-        caretPos = tempRange.text.length
-      }
-    }
-    return caretPos
-  },
+  /*************************************************************************************************************/
 
   evalFlashMessagesForNotificationBox: function () {
     if (config.flash_messages && Object.keys(config.flash_messages).length) {
@@ -1100,55 +984,8 @@ window.APP = {
       expiration.toUTCString() +
       '; path=/'
   },
-
-  checkQueryParams: function () {
-    var action = APP.getParameterByName('action')
-    var interval
-    if (action) {
-      switch (action) {
-        case 'download':
-          interval = setTimeout(function () {
-            $('#downloadProject').trigger('click')
-            clearInterval(interval)
-          }, 300)
-          APP.removeParam('action')
-          break
-        case 'openComments':
-          if (MBC.enabled()) {
-            interval = setInterval(function () {
-              if ($('.mbc-history-balloon-outer')) {
-                $('.mbc-history-balloon-outer').addClass('mbc-visible')
-                $('#mbc-history').addClass('open')
-                clearInterval(interval)
-              }
-            }, 500)
-          }
-          APP.removeParam('action')
-          break
-        case 'warnings':
-          interval = setInterval(function () {
-            if ($('#notifbox.warningbox')) {
-              $('#point2seg').trigger('mousedown')
-              clearInterval(interval)
-            }
-          }, 500)
-          APP.removeParam('action')
-          break
-      }
-    }
-  },
 }
 
 $(document).ready(function () {
   APP.init()
-})
-
-$.extend($.expr[':'], {
-  containsNC: function (elem, i, match) {
-    return (
-      (elem.textContent || elem.innerText || '')
-        .toLowerCase()
-        .indexOf((match[3] || '').toLowerCase()) >= 0
-    )
-  },
 })

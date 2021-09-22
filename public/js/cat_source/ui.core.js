@@ -515,8 +515,12 @@ window.UI = {
     if (config.time_to_edit_enabled) {
       var editSec = $('.timetoedit .edit-sec', $segment)
       var editMin = $('.timetoedit .edit-min', $segment)
-      editMin.text(APP.zerofill(editedTime[0], 2))
-      editSec.text(APP.zerofill(editedTime[1], 2))
+      editMin.text(
+        editedTime[0].length > 1 ? editedTime[0] : '0' + editedTime[0],
+      )
+      editSec.text(
+        editedTime[1].length > 1 ? editedTime[1] : '0' + editedTime[1],
+      )
     }
     tte.data('raw-time-to-edit', this.totalTime)
   },

@@ -408,6 +408,45 @@ const CommonUtils = {
   getLanguageNameFromLocale: function (code) {
     return config.languages_array.find((e) => e.code === code).name
   },
+  addCommas: function (nStr) {
+    nStr += ''
+    var x = nStr.split('.')
+    var x1 = x[0]
+    var x2 = x.length > 1 ? '.' + x[1] : ''
+    var rgx = /(\d+)(\d{3})/
+    while (rgx.test(x1)) {
+      x1 = x1.replace(rgx, '$1' + ',' + '$2')
+    }
+    return x1 + x2
+  },
+
+  getParameterByName: function (name, url) {
+    if (!url) url = window.location.href
+    name = name.replace(/[[\]]/g, '\\$&')
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url)
+    if (!results) return null
+    if (!results[2]) return ''
+    return decodeURIComponent(results[2].replace(/\+/g, ' '))
+  },
+  removeParam: function (parameter) {
+    var url = document.location.href
+    var urlparts = url.split('?')
+
+    if (urlparts.length >= 2) {
+      var urlBase = urlparts.shift()
+      var queryString = urlparts.join('?')
+
+      var prefix = encodeURIComponent(parameter) + '='
+      var pars = queryString.split(/[&;]/g)
+      for (var i = pars.length; i-- > 0; )
+        if (pars[i].lastIndexOf(prefix, 0) !== -1) pars.splice(i, 1)
+      url = urlBase + '?' + pars.join('&')
+      window.history.pushState('', document.title, url) // added this line to push the new url directly to url bar .
+    }
+    return url
+  },
+
   /******************************/
 }
 
