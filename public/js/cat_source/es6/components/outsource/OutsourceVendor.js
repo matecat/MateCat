@@ -409,6 +409,10 @@ class OutsourceVendor extends React.Component {
     )
   }
 
+  numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
   getExtendedView() {
     let checkboxDisabledClass = this.state.outsourceConfirmed ? 'disabled' : ''
     let delivery = this.getDeliveryDate()
@@ -509,7 +513,7 @@ class OutsourceVendor extends React.Component {
                   {/*<div className="not-payable">{this.props.standardWC} words</div>*/}
                   {/*) : (null)}*/}
                   <div className="payable">
-                    {APP.numberWithCommas(this.state.chunkQuote.get('words'))}{' '}
+                    {this.numberWithCommas(this.state.chunkQuote.get('words'))}{' '}
                     words
                   </div>
                 </div>

@@ -1,4 +1,5 @@
 import React from 'react'
+import {resendEmailConfirmation} from '../../api/resendEmailConfirmation'
 
 class ConfirmRegister extends React.Component {
   constructor(props) {
@@ -10,9 +11,7 @@ class ConfirmRegister extends React.Component {
 
   resendEmail() {
     var self = this
-    $.post('/api/app/user/resend_email_confirm', {
-      email: this.props.emailAddress,
-    }).done(function () {
+    resendEmailConfirmation(this.props.emailAddress).then(() => {
       self.setState({
         resend: true,
       })
