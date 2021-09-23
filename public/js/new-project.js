@@ -814,8 +814,8 @@ APP.handleCreationStatus = function (id_project, password) {
         APP.postProjectCreation(data)
       }
     })
-    .catch(({statusText}) => {
-      APP.postProjectCreation(statusText)
+    .catch((errors) => {
+      APP.postProjectCreation({errors})
     })
 }
 

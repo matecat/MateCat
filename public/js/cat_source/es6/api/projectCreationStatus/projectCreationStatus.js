@@ -14,9 +14,6 @@ export const projectCreationStatus = async (idProject, password) => {
       credentials: 'include',
     },
   )
-
-  if (!response.ok) return Promise.reject(response)
-
   const {errors, ...data} = await response.json()
   if (errors && errors.length > 0) return Promise.reject(errors)
   const {status} = response
