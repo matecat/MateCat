@@ -25,7 +25,7 @@ export const addGlossaryItem = async (
     exec: 'set',
     segment: source,
     translation: target,
-    comment: comment,
+    comment: comment ? comment : '',
     id_job: idJob,
     password: password,
     id_client: idClient,
