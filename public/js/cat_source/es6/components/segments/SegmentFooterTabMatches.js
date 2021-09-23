@@ -156,8 +156,19 @@ class SegmentFooterTabMatches extends React.Component {
             {match.cb}
           </span>
         </li>
+        {this.getMatchInfoMetadata(match)}
       </ul>
     )
+  }
+
+  /**
+   * Get others match info metadata, function overrided inside plugin
+   *
+   * @param {object} match
+   * @returns {object}
+   */
+  getMatchInfoMetadata() {
+    return ''
   }
 
   componentDidMount() {
