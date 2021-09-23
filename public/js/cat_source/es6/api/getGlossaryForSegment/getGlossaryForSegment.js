@@ -23,7 +23,7 @@ export const getGlossaryForSegment = async (
     exec: 'get',
     segment: source,
     automatic: true,
-    translation: null,
+    // translation: null,
     id_job: idJob,
     password: password,
     current_password: currentPassword,
