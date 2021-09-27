@@ -9,6 +9,7 @@ import TextUtils from './es6/utils/textUtils'
 import DraftMatecatUtils from './es6/components/segments/utils/DraftMatecatUtils'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
+import {enableOrDisableTagProjectionJob} from './es6/api/enableOrDisableTagProjectionJob'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -95,21 +96,7 @@ import SegmentStore from './es6/stores/SegmentStore'
      */
     enableTagProjectionInJob: function () {
       config.tag_projection_enabled = 1
-      var path = sprintf(
-        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
-        config.id_job,
-        config.password,
-      )
-      var data = {
-        tag_projection: true,
-      }
-      SegmentActions.changeTagProjectionStatus(true)
-      $.ajax({
-        url: path,
-        type: 'POST',
-        data: data,
-        xhrFields: {withCredentials: true},
-      }).done(function () {
+      enableOrDisableTagProjectionJob(true).then(() => {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
@@ -121,21 +108,7 @@ import SegmentStore from './es6/stores/SegmentStore'
      */
     disableTagProjectionInJob: function () {
       config.tag_projection_enabled = 0
-      var path = sprintf(
-        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
-        config.id_job,
-        config.password,
-      )
-      var data = {
-        tag_projection: false,
-      }
-      SegmentActions.changeTagProjectionStatus(false)
-      $.ajax({
-        url: path,
-        type: 'POST',
-        data: data,
-        xhrFields: {withCredentials: true},
-      }).done(function () {
+      enableOrDisableTagProjectionJob(false).then(() => {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
