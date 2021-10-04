@@ -2,11 +2,11 @@ import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
 import SegmentActions from '../actions/SegmentActions'
-import {enableOrDisableTagLexica} from '../api/enableOrDisableTagLexica'
+import {toggleTagLexica} from '../api/toggleTagLexica'
 import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarnings'
 import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
-import {getMatecatApiDomain} from './getMatecatApiDomain'
+import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 
 const LXQ = {
   enabled: function () {
@@ -15,7 +15,7 @@ const LXQ = {
   enable: function () {
     if (!config.lxq_enabled) {
       config.lxq_enabled = 1
-      enableOrDisableTagLexica(true).then(() => {
+      toggleTagLexica(true).then(() => {
         if (!LXQ.initialized) {
           LXQ.init()
         } else {
@@ -28,7 +28,7 @@ const LXQ = {
   disable: function () {
     if (config.lxq_enabled) {
       config.lxq_enabled = 0
-      enableOrDisableTagLexica(false).then(() => {
+      toggleTagLexica(false).then(() => {
         UI.render()
         SegmentActions.qaComponentsetLxqIssues([])
       })
@@ -779,19 +779,11 @@ LXQ.init = function () {
     }
 
     var initPopup = function () {
-      $.ajax({
-        type: 'GET',
-        url: config.lexiqaServer + '/tooltipwarnings',
-        success: function (result) {
-          warningMessages = result
-          modulesNoHighlight = []
-          $.each(result, function (key, el) {
-            if (key[key.length - 1] === 'g') modulesNoHighlight.push(key)
-          })
-        },
-        error: function (result) {
-          // console.err(result);
-        },
+      lexiqaTooltipwarnings().then((data) => {
+        warningMessages = data
+        modulesNoHighlight = Object.entries(data)
+          .filter(([key]) => key[key.length - 1] === 'g')
+          .map(([key]) => key)
       })
     }
     // Interfaces

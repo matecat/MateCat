@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} [password=config.password]
  * @returns {Promise<object>}
  */
-export const enableOrDisableTagProjectionJob = async (
+export const toggleTagProjectionJob = async (
   enabled,
   idJob = config.id_job,
   password = config.password,

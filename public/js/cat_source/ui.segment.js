@@ -9,7 +9,7 @@ import TextUtils from './es6/utils/textUtils'
 import DraftMatecatUtils from './es6/components/segments/utils/DraftMatecatUtils'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
-import {enableOrDisableTagProjectionJob} from './es6/api/enableOrDisableTagProjectionJob'
+import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -96,7 +96,7 @@ import {enableOrDisableTagProjectionJob} from './es6/api/enableOrDisableTagProje
      */
     enableTagProjectionInJob: function () {
       config.tag_projection_enabled = 1
-      enableOrDisableTagProjectionJob(true).then(() => {
+      toggleTagProjectionJob(true).then(() => {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
@@ -108,7 +108,7 @@ import {enableOrDisableTagProjectionJob} from './es6/api/enableOrDisableTagProje
      */
     disableTagProjectionInJob: function () {
       config.tag_projection_enabled = 0
-      enableOrDisableTagProjectionJob(false).then(() => {
+      toggleTagProjectionJob(false).then(() => {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
