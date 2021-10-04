@@ -8,6 +8,7 @@
 
 namespace Teams;
 
+use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use PDO;
@@ -150,7 +151,10 @@ class MembershipDao extends \DataAccess_AbstractDao {
 
             foreach( $members as $member ){
                 $member->setUser( $users[ $member->uid ] );
-                $member->setUserMetadata( $metadata[ $member->uid ] );
+
+                if( isset($metadata[ $member->uid ]) and is_array($metadata[ $member->uid ])){
+                    $member->setUserMetadata( $metadata[ $member->uid ] );
+                }
             }
 
         }

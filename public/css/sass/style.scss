@@ -4379,68 +4379,12 @@ body.reviselog .breadcrumbs #pname {
   box-shadow: inset 0 0 1px 1px #888;
 }
 
-.sub-editor.review .error-type {
-  width: 45.6%;
-  padding: 0 1%;
-  margin: 0 0 2% 0;
-  float: left;
-  border: 3px solid #fff;
-}
-
-.sub-editor.review .error-type.error tbody {
-  border: 2px solid red !important;
-}
-
-.sub-editor.review .error-type.error h3 {
-  color: red !important;
-}
-
-.track-changes {
-  float: right;
-  width: 45%;
-  margin-right: 2.9%;
-  margin-top: 2px;
-}
-
-.error-type h3,
-.track-changes h3 {
-  margin: 20px 0 0 1px;
-  text-align: left;
-}
-
-.track-changes p {
-  width: 100%;
-  line-height: 27px;
-  margin: 36px auto 17px auto;
-  min-height: 70px;
-  text-align: left;
-  height: 96% !important;
-  padding: 5px;
-  font-size: 18px;
-  cursor: default !important;
-  background: #efefef;
-  border-radius: 2px;
-  border: 1px solid #727272;
-  box-shadow: 0 1px 2px #dfdfdf;
-  -webkit-box-shadow: 0 1px 2px #dfdfdf;
-  -webkit-touch-callout: none;
-  /*-webkit-user-select: none;*/
-  /*-khtml-user-select: none;*/
-  /*-moz-user-select: none;*/
-  /*-ms-user-select: none;*/
-  /*user-select: none;*/
-  word-wrap: break-word;
-  word-break: normal;
-}
-
-.sub-editor.review .track-changes .deleted,
 .suggestion_source .deleted,
 .suggestion_source del {
   background: #ffc7ca;
   text-decoration: line-through;
 }
 
-.sub-editor.review .track-changes .added,
 .suggestion_source .added,
 .suggestion_source ins {
   background: #b0ffb3;

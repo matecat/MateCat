@@ -69,7 +69,9 @@ abstract class ajaxController extends controller {
 
         $__postInput   = (object)filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->received_password = $__postInput->current_password;
+        if( isset( $__postInput->current_password) ){
+            $this->received_password = $__postInput->current_password;
+        }
     }
 
     /**
@@ -78,6 +80,11 @@ abstract class ajaxController extends controller {
      */
     public function finalize() {
         $toJson = json_encode( $this->result );
+
+        if (!ob_get_status())  {
+            ob_start();
+        }
+
         echo $toJson;
 
         $this->logPageCall();

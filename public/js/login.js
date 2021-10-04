@@ -1,3 +1,15 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
+import ConfirmRegister from './cat_source/es6/components/modals/ConfirmRegister'
+import ModalWindow from './cat_source/es6/components/modals/ModalWindow'
+import PreferencesModal from './cat_source/es6/components/modals/PreferencesModal'
+import ResetPasswordModal from './cat_source/es6/components/modals/ResetPasswordModal'
+import ForgotPasswordModal from './cat_source/es6/components/modals/ForgotPasswordModal'
+import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
+import LoginModal from './cat_source/es6/components/modals/LoginModal'
+
 $.extend(APP, {
   setLoginEvents: function () {
     APP.ModalWindow = ReactDOM.render(
@@ -146,7 +158,7 @@ $.extend(APP, {
         break
       case 'profile':
         // TODO: optimized this, establish a list of events to happen after user data is loaded
-        APP.USER.loadUserData().done(function () {
+        APP.USER.loadUserData().then(function () {
           modal$.trigger('openpreferences')
         })
         break

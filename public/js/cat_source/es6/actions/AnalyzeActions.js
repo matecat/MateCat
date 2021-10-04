@@ -30,4 +30,4 @@ let AnalyzeActions = {
   },
 }
 
-module.exports = AnalyzeActions
+export default AnalyzeActions

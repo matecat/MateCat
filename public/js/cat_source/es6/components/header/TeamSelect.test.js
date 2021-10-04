@@ -3,21 +3,22 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Immutable from 'immutable'
+import {rest} from 'msw'
+
 import TeamsSelect from './TeamsSelect'
 import TeamsActions from '../../actions/TeamsActions'
 import ModalsActions from '../../actions/ModalsActions'
 import TeamsStore from '../../stores/TeamsStore'
 import TeamConstants from '../../constants/TeamConstants'
 import ManageConstants from '../../constants/ManageConstants'
-import {rest} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 
-window.React = React
-window.ReactDOM = ReactDOM
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
+
+afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
 
 window.config = {
   isLoggedIn: 1,
@@ -29,9 +30,6 @@ require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')
-require('../../../es6/ajax_utils/userAjax')
-require('../../../es6/ajax_utils/teamAjax')
-
 const fakeTeamsData = {
   threeTeams: {
     data: JSON.parse(
@@ -221,12 +219,6 @@ test('Rendering elements', () => {
 test('Click create new team check flow', async () => {
   executeMswServer()
 
-  // override loadUserData request
-  const defaultLoadUserData = window.APP.USER.loadUserData
-  window.APP.USER.loadUserData = () => ({
-    done: (fn) => fn(),
-  })
-
   const {props} = getFakeProperties(fakeTeamsData.threeTeams)
   render(<TeamsSelect {...props} />)
 
@@ -237,8 +229,6 @@ test('Click create new team check flow', async () => {
   await waitFor(() => {
     expect(screen.getByTestId('create-team-modal')).toBeInTheDocument()
   })
-
-  window.APP.USER.loadUserData = defaultLoadUserData()
 })
 
 test('Click on change team', async () => {

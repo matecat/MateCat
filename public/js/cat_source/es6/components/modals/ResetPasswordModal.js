@@ -1,7 +1,10 @@
+import React from 'react'
+import update from 'immutability-helper'
+
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import update from 'immutability-helper'
+import {resetPasswordUser} from '../../api/resetPasswordUser'
 
 class ResetPasswordModal extends React.Component {
   constructor(props) {
@@ -41,7 +44,7 @@ class ResetPasswordModal extends React.Component {
     this.setState({requestRunning: true})
 
     this.sendResetPassword()
-      .done(function (data) {
+      .then(() => {
         $('#modal').trigger('opensuccess', [
           {
             title: 'Reset Password',
@@ -49,14 +52,11 @@ class ResetPasswordModal extends React.Component {
           },
         ])
       })
-      .fail(function (response) {
-        var text
-        if (response.responseText.length) {
-          text = JSON.parse(response.responseText)
-        } else {
-          text =
-            'There was a problem saving the data, please try again later or contact support.'
-        }
+      .catch((response) => {
+        const text = !response.statusText
+          ? 'There was a problem saving the data, please try again later or contact support.'
+          : response.statusText
+
         self.setState({
           generalError: text,
           requestRunning: false,
@@ -65,10 +65,7 @@ class ResetPasswordModal extends React.Component {
   }
 
   sendResetPassword() {
-    return $.post('/api/app/user/password', {
-      password: this.state.password1,
-      password_confirmation: this.state.password2,
-    })
+    return resetPasswordUser(this.state.password1, this.state.password2)
   }
 
   errorFor(field) {

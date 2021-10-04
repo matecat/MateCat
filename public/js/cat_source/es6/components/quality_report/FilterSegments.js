@@ -48,7 +48,7 @@ class FilterSegments extends React.Component {
   }
 
   filterSelectChanged(type, value) {
-    let filter = jQuery.extend({}, this.state.filter)
+    let filter = {...this.state.filter}
     filter[type] = value
     if (type === 'status' && value === 'APPROVED-2') {
       filter.revision_number = 2
@@ -67,7 +67,7 @@ class FilterSegments extends React.Component {
   }
 
   resetStatusFilter() {
-    let filter = jQuery.extend({}, this.state.filter)
+    let filter = {...this.state.filter}
     filter.status = ''
     filter.revision_number = null
     $(this.statusDropdown).dropdown('restore defaults')
@@ -79,7 +79,7 @@ class FilterSegments extends React.Component {
     })
   }
   resetCategoryFilter() {
-    let filter = jQuery.extend({}, this.state.filter)
+    let filter = {...this.state.filter}
     filter.issue_category = null
     $(this.categoryDropdown).dropdown('restore defaults')
     this.setState({
@@ -91,7 +91,7 @@ class FilterSegments extends React.Component {
   }
 
   resetSeverityFilter() {
-    let filter = jQuery.extend({}, this.state.filter)
+    let filter = {...this.state.filter}
     filter.severity = null
     $(this.severityDropdown).dropdown('restore defaults')
     this.setState({
@@ -106,7 +106,7 @@ class FilterSegments extends React.Component {
     if (value && value !== '') {
       this.filterSelectChanged('id_segment', value)
     } else {
-      let filter = [...this.state.filter]
+      let filter = {...this.state.filter}
       filter.id_segment = null
       this.setState({
         filter: filter,

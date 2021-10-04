@@ -1,14 +1,9 @@
-/**
-/**
- * React Component for the editarea.
-
- */
 import _ from 'lodash'
+import Immutable from 'immutable'
+import React from 'react'
 
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
-
-import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -21,8 +16,10 @@ import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
-
-import Immutable from 'immutable'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
+import SegmentBody from './SegmentBody'
+import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
+import MBC from '../../utils/mbc.main'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -220,7 +217,7 @@ class Segment extends React.Component {
        *  The segment must know about his classes
        */
       let classes = this.state.segment_classes.slice()
-      if (!!classes.indexOf('modified')) {
+      if (classes.indexOf('modified')) {
         classes.push('modified')
         this.setState({
           segment_classes: classes,
@@ -446,7 +443,8 @@ class Segment extends React.Component {
       return
     } else if (!this.props.segment.opened) {
       this.openSegment()
-      SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid)
+      if (this.checkIfCanOpenSegment())
+        SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid)
     }
   }
 
@@ -589,7 +587,7 @@ class Segment extends React.Component {
     )
   }
 
-  getSnapshotBeforeUpdate(prevProps, prevState) {
+  getSnapshotBeforeUpdate(prevProps) {
     if (!prevProps.segment.opened && this.props.segment.opened) {
       this.timeoutScroll = setTimeout(() => {
         SegmentActions.scrollToSegment(this.props.segment.sid)
@@ -786,13 +784,15 @@ class Segment extends React.Component {
             <SegmentsCommentsIcon {...this.props} />
           ) : null}
 
-          <div
-            data-mount="translation-issues-button"
-            className="translation-issues-button"
-            data-sid={this.props.segment.sid}
-          >
-            {translationIssues}
-          </div>
+          {this.props.isReviewExtended && (
+            <div
+              data-mount="translation-issues-button"
+              className="translation-issues-button"
+              data-sid={this.props.segment.sid}
+            >
+              {translationIssues}
+            </div>
+          )}
         </div>
         <div className="segment-side-container">
           {config.comments_enabled && this.props.segment.openComments ? (

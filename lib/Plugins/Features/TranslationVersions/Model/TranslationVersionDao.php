@@ -95,22 +95,29 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $id_segment
+     * @param      $id_job
+     * @param      $id_segment
+     *
+     * @param null $version_number
      *
      * @return TranslationVersionStruct[]
      */
-    public static function getVersionsForTranslation( $id_job, $id_segment ) {
+    public static function getVersionsForTranslation( $id_job, $id_segment, $version_number = null ) {
         $sql = "SELECT * FROM segment_translation_versions " .
-                " WHERE id_job = :id_job AND id_segment = :id_segment " .
-                " ORDER BY creation_date DESC ";
+                " WHERE id_job = :id_job AND id_segment = :id_segment ";
+        $params = [ 'id_job' => $id_job, 'id_segment' => $id_segment ];
+
+        if($version_number !== null){
+            $sql .= ' AND version_number = :version_number';
+            $params['version_number'] = $version_number;
+        }
+
+        $sql .= " ORDER BY creation_date DESC ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $stmt->execute(
-                [ 'id_job' => $id_job, 'id_segment' => $id_segment ]
-        );
+        $stmt->execute($params);
 
         $stmt->setFetchMode(
                 PDO::FETCH_CLASS,

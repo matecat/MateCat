@@ -430,14 +430,6 @@ class INIT {
      */
     public static $MAX_FILENAME_LENGTH = 210;
 
-    public static $PLUGIN_LOAD_PATHS = [];
-
-    /**
-     * @deprecated use AUTOLOAD_PLUGINS
-     * @var array
-     */
-    public static $MANDATORY_PLUGINS = [];
-
     public static $AUTOLOAD_PLUGINS = [];
 
     /**

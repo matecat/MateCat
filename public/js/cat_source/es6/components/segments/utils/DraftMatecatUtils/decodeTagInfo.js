@@ -1,5 +1,6 @@
 import {tagSignatures} from './tagModel'
 import {getIdAttributeRegEx, unescapeHTMLRecursive} from './textUtils'
+import {Base64} from 'js-base64'
 
 /**
  *
@@ -30,7 +31,7 @@ const decodeTagInfo = (tag) => {
       const contentMatch = placeholderRegex.exec(tagEncodedText)
       if (contentMatch && contentMatch.length > 1) {
         decodedTagData.content = decodeNeeded
-          ? atob(contentMatch[1])
+          ? Base64.decode(contentMatch[1])
           : contentMatch[1]
         decodedTagData.content = unescapeHTMLRecursive(
           decodedTagData.content,

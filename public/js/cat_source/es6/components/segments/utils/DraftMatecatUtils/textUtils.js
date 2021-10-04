@@ -1,6 +1,8 @@
 import {getXliffRegExpression} from './tagModel'
 import {Base64} from 'js-base64'
 
+import TagUtils from '../../../../utils/tagUtils'
+
 /**
  *
  * @param segmentString
@@ -38,11 +40,10 @@ export const unescapeHTML = (escapedHTML) => {
 }
 
 export const unescapeHTMLRecursive = (escapedHTML) => {
-  let matchArray
   const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
 
   try {
-    while ((matchArray = regex.exec(escapedHTML)) !== null) {
+    while (regex.exec(escapedHTML) !== null) {
       escapedHTML = unescapeHTML(escapedHTML)
     }
   } catch (e) {
@@ -75,6 +76,13 @@ export const decodeTagsToPlainText = (text) => {
   if (text) {
     // Match G - temporary until backend put IDs in closing tags </g>
     decoded = TagUtils.matchTag(text)
+    // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)
+    decoded = decoded.replace(
+      /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
+      (match, text) => {
+        return text
+      },
+    )
     // Match PH
     decoded = decoded.replace(
       /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
@@ -86,13 +94,7 @@ export const decodeTagsToPlainText = (text) => {
         }
       },
     )
-    // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)
-    decoded = decoded.replace(
-      /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-      (match, text) => {
-        return text
-      },
-    )
+
     // Convert placeholder (nbsp, tab, lineFeed, carriageReturn)
     decoded = TagUtils.decodePlaceholdersToPlainText(decoded)
     return decoded

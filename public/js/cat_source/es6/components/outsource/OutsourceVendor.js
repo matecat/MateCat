@@ -5,6 +5,8 @@ import _ from 'lodash'
 
 import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
+import {getOutsourceQuote} from '../../api/getOutsourceQuote'
+import {getChangeRates} from '../../api/getChangeRates'
 
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -34,7 +36,7 @@ class OutsourceVendor extends React.Component {
       this.getOutsourceQuote()
     }
 
-    this.getChangeRates()
+    this.retrieveChangeRates()
 
     this.currencies = {
       EUR: {symbol: '€', name: 'Euro (EUR)'},
@@ -63,7 +65,7 @@ class OutsourceVendor extends React.Component {
     let fixedDelivery = delivery ? delivery : ''
     let timezoneToShow = this.state.timezone
     let currency = this.getCurrentCurrency()
-    API.OUTSOURCE.getOutsourceQuote(
+    getOutsourceQuote(
       this.props.project.get('id'),
       this.props.project.get('password'),
       this.props.job.get('id'),
@@ -72,7 +74,7 @@ class OutsourceVendor extends React.Component {
       typeOfService,
       timezoneToShow,
       currency,
-    ).done(function (quoteData) {
+    ).then(function (quoteData) {
       if (quoteData.data && quoteData.data.length > 0) {
         if (
           quoteData.data[0][0].quote_available !== '1' &&
@@ -168,7 +170,7 @@ class OutsourceVendor extends React.Component {
     })
   }
 
-  getChangeRates() {
+  retrieveChangeRates() {
     let self = this
     let changeRates = Cookies.get('matecat_changeRates')
     if (
@@ -176,7 +178,7 @@ class OutsourceVendor extends React.Component {
       _.isNull(changeRates) ||
       changeRates === 'null'
     ) {
-      API.OUTSOURCE.fetchChangeRates().done(function (response) {
+      getChangeRates().then(function (response) {
         var rates = $.parseJSON(response.data)
         if (!_.isUndefined(rates) && !_.isNull(changeRates)) {
           self.setState({
@@ -407,6 +409,10 @@ class OutsourceVendor extends React.Component {
     )
   }
 
+  numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
   getExtendedView() {
     let checkboxDisabledClass = this.state.outsourceConfirmed ? 'disabled' : ''
     let delivery = this.getDeliveryDate()
@@ -507,7 +513,7 @@ class OutsourceVendor extends React.Component {
                   {/*<div className="not-payable">{this.props.standardWC} words</div>*/}
                   {/*) : (null)}*/}
                   <div className="payable">
-                    {APP.numberWithCommas(this.state.chunkQuote.get('words'))}{' '}
+                    {this.numberWithCommas(this.state.chunkQuote.get('words'))}{' '}
                     words
                   </div>
                 </div>

@@ -2,16 +2,17 @@ import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Header from './Header'
 import {rest} from 'msw'
-import {mswServer} from '../../../../../mocks/mswServer'
 
-window.React = React
-window.ReactDOM = ReactDOM
+import {mswServer} from '../../../../../mocks/mswServer'
+import Header from './Header'
+
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
+
+afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
 
 window.config = {
   isLoggedIn: 1,
@@ -19,11 +20,9 @@ window.config = {
   basepath: '/',
   hostpath: 'https://dev.matecat.com',
 }
-require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')
-require('../../../es6/ajax_utils/userAjax')
 
 const props = {
   fromLanguage: true,
@@ -168,18 +167,10 @@ test('Rendering elements', async () => {
 test('Click profile from user menu', async () => {
   executeMswServer()
 
-  // override getApiKey request
-  const defaultGetApiKey = window.API.USER.getApiKey
-  window.API.USER.getApiKey = () => ({
-    done: () => {},
-  })
-
   render(<Header {...props} />)
 
   await waitFor(() => {
     userEvent.click(screen.getByTestId('profile-item'))
     expect(screen.getByTestId('preferences-modal')).toBeInTheDocument()
   })
-
-  window.API.USER.getApiKey = defaultGetApiKey
 })

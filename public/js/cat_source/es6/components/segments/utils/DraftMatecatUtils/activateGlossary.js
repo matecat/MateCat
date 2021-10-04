@@ -58,7 +58,7 @@ export const activateGlossary = (
     }
   }
 
-  const createGlossaryRegex = (glossaryObj, text) => {
+  const createGlossaryRegex = (glossaryObj) => {
     let re
     try {
       const matches = _.map(glossaryObj, (elem) =>

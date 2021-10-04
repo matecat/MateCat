@@ -24,7 +24,10 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
     })
     this._segmentsFiles = Immutable.fromJS(segmentsFiles)
     this._files = Immutable.fromJS(files)
-    this._lastSegment = segmentsData._links.last_segment_id
+    this._lastSegment =
+      segmentsData.segments.length > 0
+        ? segmentsData._links.last_segment_id
+        : undefined
   },
 
   storeJobInfo: function (job) {
@@ -61,7 +64,7 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
   switch (action.actionType) {
-    case QRConstants.RENDER_SEGMENTS:
+    case QRConstants.RENDER_SEGMENTS_QR:
       QualityReportStore.storeSegments(action.files)
       QualityReportStore.emitChange(
         action.actionType,
@@ -73,7 +76,7 @@ AppDispatcher.register(function (action) {
     case QRConstants.ADD_SEGMENTS_QR:
       QualityReportStore.addSegments(action.files)
       QualityReportStore.emitChange(
-        QRConstants.RENDER_SEGMENTS,
+        QRConstants.RENDER_SEGMENTS_QR,
         QualityReportStore._segmentsFiles,
         QualityReportStore._files,
         QualityReportStore._lastSegment,

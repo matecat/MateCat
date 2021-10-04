@@ -1,4 +1,7 @@
 import Cookies from 'js-cookie'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
+import SegmentActions from './cat_source/es6/actions/SegmentActions'
+import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -514,7 +517,7 @@ import Cookies from 'js-cookie'
       $('#activetm tr.mine .activate input').trigger('click')
     },
     checkOpenTabFromParameters: function () {
-      var keyParam = APP.getParameterByName('openTab')
+      var keyParam = CommonUtils.getParameterByName('openTab')
       if (keyParam) {
         window.history.pushState(
           '',
@@ -532,7 +535,7 @@ import Cookies from 'js-cookie'
       }
     },
     checkCreateTmKeyFromQueryString: function () {
-      var keyParam = APP.getParameterByName('private_tm_key')
+      var keyParam = CommonUtils.getParameterByName('private_tm_key')
       if (keyParam) {
         //Check if present and enable it
         var keyActive = UI.checkTMKeyIsActive(keyParam)
@@ -1404,9 +1407,9 @@ import Cookies from 'js-cookie'
     filterInactiveTM: function (txt) {
       $('#inactivetm tbody tr').removeClass('found')
       $(
-        '#inactivetm tbody td.privatekey:containsNC("' +
+        '#inactivetm tbody td.privatekey:contains("' +
           txt +
-          '"), #inactivetm tbody td.description:containsNC("' +
+          '"), #inactivetm tbody td.description:contains("' +
           txt +
           '")',
       )
@@ -2405,7 +2408,7 @@ import Cookies from 'js-cookie'
 
       var validateEmail = function (emails) {
         var re =
-          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         var result = true
         emails.split(',').forEach(function (email) {
           if (!re.test(email.trim())) result = email

@@ -1,8 +1,11 @@
-import _ from 'lodash'
+import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import DQFModal from '../components/modals/DQFModal'
+import SplitJobModal from '../components/modals/SplitJob'
+import CreateTeamModal from '../components/modals/CreateTeam'
+import ModifyTeamModal from '../components/modals/ModifyTeam'
+import {mergeJobChunks} from '../api/mergeJobChunks'
 
 let ModalsActions = {
-  //********* Modals **************//
-
   openCreateTeamModal: function () {
     APP.ModalWindow.showModalComponent(CreateTeamModal, {}, 'Create New Team')
   },
@@ -13,42 +16,6 @@ let ModalsActions = {
       hideChangeName: hideChangeName,
     }
     APP.ModalWindow.showModalComponent(ModifyTeamModal, props, 'Modify Team')
-  },
-
-  openChangeTeamModal: function (teams, project, teamId) {
-    var props = {
-      teams: teams,
-      project: project,
-      selectedTeam: teamId,
-    }
-    APP.ModalWindow.showModalComponent(ChangeTeamModal, props, 'Move project')
-  },
-
-  openOutsourceModal: function (
-    project,
-    job,
-    url,
-    fromManage,
-    translatorOpen,
-    showTranslatorBox,
-  ) {
-    var props = {
-      project: project,
-      job: job,
-      url: url,
-      fromManage: fromManage,
-      translatorOpen: translatorOpen,
-      showTranslatorBox: !_.isUndefined(showTranslatorBox)
-        ? showTranslatorBox
-        : true,
-    }
-    var style = {width: '970px', maxWidth: '970px'}
-    APP.ModalWindow.showModalComponent(
-      OutsourceModal,
-      props,
-      'Translate',
-      style,
-    )
   },
 
   openSplitJobModal: function (job, project, callback) {
@@ -67,7 +34,7 @@ let ModalsActions = {
         'This operation cannot be canceled.',
       successText: 'Continue',
       successCallback: function () {
-        API.JOB.confirmMerge(project, job).done(function () {
+        mergeJobChunks(project, job).then(function () {
           if (successCallback) {
             successCallback.call()
           }
@@ -100,4 +67,4 @@ let ModalsActions = {
   },
 }
 
-module.exports = ModalsActions
+export default ModalsActions

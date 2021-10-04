@@ -74,19 +74,15 @@ class QAGlobalWarning extends QAWarning {
 
         }
 
-        $result = [ 'total' => count( $this->translationMismatches ), 'mine' => 0, 'list_in_my_job' => [] ];
         foreach ( $this->translationMismatches as $row ) {
 
             if ( !empty( $row[ 'first_of_my_job' ] ) ) {
-                $result[ 'mine' ]++;
-                $result[ 'list_in_my_job' ][] = $row[ 'first_of_my_job' ];
                 $this->structure[ QA::WARNING ][ 'Categories' ][ 'MISMATCH' ][] = $row[ 'first_of_my_job' ];
             }
 
         }
-        $out['details'] = $this->structure;
 
-        $out[ 'translation_mismatches' ] = $result;
+        $out['details'] = $this->structure;
 
         return $out;
 

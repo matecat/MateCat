@@ -1,5 +1,6 @@
 import {screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {rest} from 'msw'
+import {unmountComponentAtNode} from 'react-dom'
 
 import {mswServer} from '../mocks/mswServer'
 
@@ -247,10 +248,6 @@ test('renders properly', async () => {
   require('./common')
   require('./user_store')
   require('./login')
-  require('./cat_source/es6/react-libs')
-  require('./cat_source/es6/components')
-  require('./cat_source/es6/ajax_utils/teamAjax')
-  require('./cat_source/es6/ajax_utils/projectsAjax')
 
   const elHeader = document.createElement('header')
   const elAnalyzeContainer = document.createElement('div')
@@ -280,4 +277,8 @@ test('renders properly', async () => {
   ).toBeVisible()
 
   expect(screen.getByRole('heading', {name: 'Show Details'})).toBeVisible()
+
+  unmountComponentAtNode(elHeader)
+  unmountComponentAtNode(elAnalyzeContainer)
+  unmountComponentAtNode(elModal)
 })

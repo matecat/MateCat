@@ -1,10 +1,7 @@
 import PropTypes from 'prop-types'
+import React from 'react'
 
 class ConfirmMessageModal extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   allowHTML(string) {
     return {__html: string}
   }

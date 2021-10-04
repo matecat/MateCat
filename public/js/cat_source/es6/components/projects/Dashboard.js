@@ -6,6 +6,8 @@ import _ from 'lodash'
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import TeamsActions from '../../actions/TeamsActions'
+import ModalsActions from '../../actions/ModalsActions'
+import CatToolActions from '../../actions/CatToolActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageConstants from '../../constants/ManageConstants'
@@ -13,6 +15,9 @@ import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
+import {getUserData} from '../../api/getUserData'
+import {getTeamMembers} from '../../api/getTeamMembers'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -30,7 +35,7 @@ class Dashboard extends React.Component {
       selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
 
-    API.TEAM.getAllTeams().done((data) => {
+    getUserData().then((data) => {
       TeamsActions.renderTeams(data.teams)
       const selectedTeam = APP.getLastTeamSelected(data.teams)
       const teams = data.teams
@@ -38,33 +43,30 @@ class Dashboard extends React.Component {
         teams: teams,
         selectedTeam: selectedTeam,
       })
-      this.getTeamStructure(selectedTeam).done(() => {
+      this.getTeamStructure(selectedTeam).then(() => {
         TeamsActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
-        getProjects({team: selectedTeam, searchFilter: this.Search}).then(
-          (res) => {
-            if (
-              typeof res.errors != 'undefined' &&
-              res.errors.length &&
-              res.errors[0].code === 401
-            ) {
-              //Not Logged or not in the team
+
+        getProjects({team: selectedTeam, searchFilter: this.Search})
+          .then((res) => {
+            this.setState({showProjects: true})
+            ManageActions.renderProjects(res.data, selectedTeam, teams)
+            ManageActions.storeSelectedTeam(selectedTeam)
+          })
+          .catch((err) => {
+            if (err[0].code == 401) {
+              // Not Logged or not in the team
               window.location.reload()
-            } else if (
-              typeof res.errors != 'undefined' &&
-              res.errors.length &&
-              res.errors[0].code === 404
-            ) {
-              this.selectPersonalTeam()
-            } else if (typeof res.errors != 'undefined' && res.errors.length) {
-              window.location = '/'
-            } else {
-              this.setState({showProjects: true})
-              ManageActions.renderProjects(res.data, selectedTeam, teams)
-              ManageActions.storeSelectedTeam(selectedTeam)
+              return
             }
-          },
-        )
+
+            if (err[0].code == 404) {
+              this.selectPersonalTeam()
+              return
+            }
+
+            window.location = '/'
+          })
       })
       setTimeout(function () {
         CatToolActions.showHeaderTooltip()
@@ -72,42 +74,49 @@ class Dashboard extends React.Component {
     })
   }
 
+  updateTeams = (teams) => {
+    this.setState({
+      teams: teams.toJS(),
+    })
+  }
+
   updateProjects = (id) => {
     if (id === this.state.selectedTeam.id) return
     const {teams} = this.state
     const selectedTeam = teams.find((t) => t.id === id)
-    this.setState({
-      selectedTeam: selectedTeam,
-      selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
-    })
-    this.Search.filter = {}
-    this.Search.currentPage = 1
+    if (selectedTeam) {
+      this.setState({
+        selectedTeam: selectedTeam,
+        selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
+      })
+      this.Search.filter = {}
+      this.Search.currentPage = 1
 
-    getProjects({team: selectedTeam, searchFilter: this.Search}).then((res) => {
-      if (
-        typeof res.errors != 'undefined' &&
-        res.errors.length &&
-        res.errors[0].code === 401
-      ) {
-        //Not Logged or not in the team
-        window.location.reload()
-      } else if (
-        typeof res.errors != 'undefined' &&
-        res.errors.length &&
-        res.errors[0].code === 404
-      ) {
-        this.selectPersonalTeam()
-      } else if (typeof res.errors != 'undefined' && res.errors.length) {
-        window.location = '/'
-      } else {
-        ManageActions.renderProjects(res.data, selectedTeam, teams)
-        ManageActions.storeSelectedTeam(selectedTeam)
-      }
-    })
+      getProjects({team: selectedTeam, searchFilter: this.Search})
+        .then((res) => {
+          ManageActions.renderProjects(res.data, selectedTeam, teams)
+          ManageActions.storeSelectedTeam(selectedTeam)
+        })
+        .catch((err) => {
+          if (err[0].code == 401) {
+            // Not Logged or not in the team
+            window.location.reload()
+            return
+          }
+
+          if (err[0].code == 404) {
+            // Not Logged or not in the team
+            this.selectPersonalTeam()
+            return
+          }
+
+          window.location = '/'
+        })
+    }
   }
 
   getTeamStructure = (team) => {
-    return API.TEAM.getTeamMembers(team.id).then((data) => {
+    return getTeamMembers(team.id).then((data) => {
       team.members = data.members
       team.pending_invitations = data.pending_invitations
       this.setState({team})
@@ -150,29 +159,28 @@ class Dashboard extends React.Component {
       getProjects({
         team: this.state.selectedTeam,
         searchFilter: this.Search,
-      }).then((res) => {
-        if (
-          typeof res.errors != 'undefined' &&
-          res.errors.length &&
-          res.errors[0].code === 401
-        ) {
-          //Not Logged or not in the team
-          window.location.reload()
-        } else if (
-          typeof res.errors != 'undefined' &&
-          res.errors.length &&
-          res.errors[0].code === 404
-        ) {
-          this.selectPersonalTeam()
-        } else if (typeof res.errors != 'undefined' && res.errors.length) {
-          window.location = '/'
-        } else if (selectedTeam.id === this.state.selectedTeam.id) {
-          const projects = res.data
-          ManageActions.updateProjects(projects)
-        }
       })
+        .then((res) => {
+          if (selectedTeam.id === this.state.selectedTeam.id) {
+            const projects = res.data
+            ManageActions.updateProjects(projects)
+          }
+        })
+        .catch((err) => {
+          if (err[0].code == 401) {
+            //Not Logged or not in the team
+            window.location.reload()
+            return
+          }
+
+          if (err[0].code == 404) {
+            this.selectPersonalTeam()
+            return
+          }
+
+          window.location = '/'
+        })
     } else {
-      //Todo: refactoring with prommises
       let total_projects = []
       let requests = []
       let onDone = (response) => {
@@ -188,15 +196,12 @@ class Dashboard extends React.Component {
           }),
         )
       }
-      Promise.all(requests).then(function () {
-        let results = requests.length > 1 ? arguments : [arguments]
-        for (let i = 0; i < results.length; i++) {
-          onDone(results[i][0])
-        }
+      Promise.all(requests).then((responses) => {
+        responses.forEach(onDone)
         ManageActions.updateProjects(total_projects)
       })
     }
-    API.TEAM.getAllTeams(true).done((data) => {
+    getUserData().then((data) => {
       this.setState({teams: data.teams})
       TeamsActions.updateTeams(data.teams)
     })
@@ -416,10 +421,7 @@ class Dashboard extends React.Component {
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    TeamsStore.addListener(
-      ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-      this.openChangeTeamModal,
-    )
+    TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
     TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
@@ -457,10 +459,7 @@ class Dashboard extends React.Component {
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    TeamsStore.removeListener(
-      ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-      this.openChangeTeamModal,
-    )
+    TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
     TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
@@ -478,8 +477,6 @@ class Dashboard extends React.Component {
         this.state.teams &&
         this.state.showProjects ? (
           <ProjectsContainer
-            getLastActivity={API.PROJECTS.getLastProjectActivityLogAction}
-            changeJobPasswordFn={API.JOB.changeJobPassword}
             downloadTranslationFn={this.downloadTranslation}
             teams={Immutable.fromJS(this.state.teams)}
             team={Immutable.fromJS(this.state.selectedTeam)}

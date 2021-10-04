@@ -1,8 +1,8 @@
 import _ from 'lodash'
+
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component'
-import CompoundDecorator from '../CompoundDecorator'
-import {CompositeDecorator, EditorState} from 'draft-js'
 import * as DraftMatecatConstants from './editorConstants'
+import SearchUtils from '../../../header/cattol/search/searchUtils'
 
 const activateSearch = (
   text,
@@ -59,19 +59,6 @@ const activateSearch = (
       handleTagInside(start, end, contentBlock, callback)
       index++
     }
-  }
-
-  const isTag = (start, tagRange) => {
-    let indexToAdd = 0
-    //Note: The list of tags contains the indexes calculated with the ph tags in the text, while the list of occurrences does not.
-    let tag = tagRange.find((item) => {
-      let isTag =
-        start + indexToAdd >= item.offset &&
-        start + indexToAdd <= item.offset + item.data.placeholder.length
-      indexToAdd += item.length - item.data.placeholder.length
-      return isTag
-    })
-    return !!tag
   }
 
   const hasEntity = (charPosition, contentBlock) => {

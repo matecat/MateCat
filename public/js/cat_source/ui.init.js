@@ -1,6 +1,11 @@
-/*
-	Component: ui.init
- */
+import CatToolActions from './es6/actions/CatToolActions'
+import SearchUtils from './es6/components/header/cattol/search/searchUtils'
+import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
+import CommonUtils from './es6/utils/commonUtils'
+import Customizations from './es6/utils/customizations'
+import LXQ from './es6/utils/lxq.main'
+import SegmentUtils from './es6/utils/segmentUtils'
+
 $.extend(window.UI, {
   render: function (options) {
     options = options || {}
@@ -71,10 +76,6 @@ $.extend(window.UI, {
     UI.firstLoad = true
     UI.body = $('body')
     UI.checkCrossLanguageSettings()
-    // If some icon is added on the top header menu, the file name is resized
-    APP.addDomObserver($('.header-menu')[0], function () {
-      APP.fitText($('#pname-container'), $('#pname'), 25)
-    })
     CommonUtils.setBrowserHistoryBehavior()
     $('article').each(function () {
       APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30)
@@ -138,7 +139,7 @@ $.extend(window.UI, {
 
     // SET EVENTS
     this.setEvents()
-    APP.checkQueryParams()
+    this.checkQueryParams()
 
     UI.firstLoad = false
   },
@@ -158,6 +159,42 @@ $.extend(window.UI, {
       }
       this.startSegmentId =
         hash && hash != '' ? hash : config.last_opened_segment
+    }
+  },
+  checkQueryParams: function () {
+    var action = CommonUtils.getParameterByName('action')
+    var interval
+    if (action) {
+      switch (action) {
+        case 'download':
+          interval = setTimeout(function () {
+            $('#downloadProject').trigger('click')
+            clearInterval(interval)
+          }, 300)
+          CommonUtils.removeParam('action')
+          break
+        case 'openComments':
+          if (MBC.enabled()) {
+            interval = setInterval(function () {
+              if ($('.mbc-history-balloon-outer')) {
+                $('.mbc-history-balloon-outer').addClass('mbc-visible')
+                $('#mbc-history').addClass('open')
+                clearInterval(interval)
+              }
+            }, 500)
+          }
+          CommonUtils.removeParam('action')
+          break
+        case 'warnings':
+          interval = setInterval(function () {
+            if ($('#notifbox.warningbox')) {
+              $('#point2seg').trigger('mousedown')
+              clearInterval(interval)
+            }
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+      }
     }
   },
 })

@@ -374,7 +374,11 @@ class Mmt extends BaseFeature {
 
             //retrieve OWNER MMT License
             $uStruct        = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $projectStruct->id_customer );
-            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+
+            $ownerMmtEngineMetaData = null;
+            if(isset($uStruct->uid)){
+                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+            }
 
             try {
 

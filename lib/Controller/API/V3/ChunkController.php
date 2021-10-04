@@ -8,18 +8,15 @@
 
 namespace API\V3;
 
+use API\V2\BaseChunkController;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V3\Json\Chunk;
 use Chunks_ChunkStruct;
+use Constants_JobStatus;
 use Projects_ProjectStruct;
 
-class ChunkController extends KleinController {
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
+class ChunkController extends BaseChunkController {
 
     /**
      * @var Projects_ProjectStruct
@@ -75,6 +72,8 @@ class ChunkController extends KleinController {
         $format->setUser( $this->user );
         $format->setCalledFromApi( true );
 
+        $this->return404IfTheJobWasDeleted();
+
         $this->response->json( $format->renderOne($this->chunk) );
 
     }
@@ -86,6 +85,7 @@ class ChunkController extends KleinController {
             $this->setProject( $Validator->getChunk()->getProject() );
             $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
+
         $this->appendValidator( $Validator );
     }
 

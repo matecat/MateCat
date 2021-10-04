@@ -1,4 +1,7 @@
+import React from 'react'
 import TagsInput from 'react-tagsinput'
+
+import Header from '../header/Header'
 
 class LanguageSelectorSearch extends React.Component {
   constructor(props) {
@@ -29,7 +32,7 @@ class LanguageSelectorSearch extends React.Component {
     }
   }
 
-  handleChange = (tags) => {
+  handleChange = () => {
     const {onDeleteLanguage, selectedLanguages} = this.props
     const {highlightDelete} = this.state
 
@@ -69,15 +72,8 @@ class LanguageSelectorSearch extends React.Component {
     const {removeLanguageWithIconTag} = this
     const {highlightDelete} = this.state
     const {selectedLanguages} = this.props
-    let {
-      tag,
-      key,
-      disabled,
-      onRemove,
-      classNameRemove,
-      getTagDisplayValue,
-      ...other
-    } = props
+    let {tag, key, disabled, classNameRemove, getTagDisplayValue, ...other} =
+      props
     const highlight =
       highlightDelete && key + 1 === selectedLanguages.length
         ? 'highlightDelete'
@@ -88,7 +84,7 @@ class LanguageSelectorSearch extends React.Component {
         {!disabled && (
           <a
             className={classNameRemove}
-            onClick={(e) => removeLanguageWithIconTag(key)}
+            onClick={() => removeLanguageWithIconTag(key)}
           >
             {' '}
             &times;
@@ -99,7 +95,7 @@ class LanguageSelectorSearch extends React.Component {
   }
 }
 
-Header.defaultProps = {
+LanguageSelectorSearch.defaultProps = {
   selectedLanguages: false,
   languagesList: true,
   querySearch: true,

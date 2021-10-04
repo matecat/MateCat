@@ -1,3 +1,15 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+
+import TeamsActions from './cat_source/es6/actions/TeamsActions'
+import TeamsStore from './cat_source/es6/stores/TeamsStore'
+import Header from './cat_source/es6/components/header/Header'
+import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
+import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
+import {getProject} from './cat_source/es6/api/getProject'
+import {getVolumeAnalysis} from './cat_source/es6/api/getVolumeAnalysis'
+import {getJobVolumeAnalysis} from './cat_source/es6/api/getJobVolumeAnalysis'
+
 window.UI = null
 
 window.UI = {
@@ -8,7 +20,6 @@ window.UI = {
     UI.render()
   },
   render: function () {
-    var self = this
     var headerMountPoint = $('header')[0]
     ReactDOM.render(
       React.createElement(Header, {
@@ -16,7 +27,7 @@ window.UI = {
         showSubHeader: false,
         showModals: false,
         changeTeam: false,
-        user: APP.USER.STORE,
+        user: TeamsStore.getUser(),
       }),
       headerMountPoint,
     )
@@ -29,13 +40,6 @@ window.UI = {
       analyzeMountPoint,
     )
 
-    API.TEAM.getAllTeams().done(function (data) {
-      self.teams = data.teams
-      TeamsActions.renderTeams(self.teams)
-      self.selectedTeam = APP.getLastTeamSelected(self.teams)
-      TeamsActions.selectTeam(self.selectedTeam)
-    })
-
     this.getProjectVolumeAnalysisData()
   },
   reloadAnalysis: function () {
@@ -45,18 +49,18 @@ window.UI = {
   getProjectVolumeAnalysisData: function () {
     var self = this
     if (config.jobAnalysis) {
-      API.PROJECTS.getJobVolumeAnalysis().done(function (response) {
+      getJobVolumeAnalysis().then((response) => {
         self.parseVolumeAnalysisData(response)
-        API.PROJECTS.getProject(config.id_project).done(function (response) {
+        getProject(config.id_project).then((response) => {
           UI.currentOutsourceProject = response.project
           self.renderAnalysisPage()
         })
         self.pollData(response)
       })
     } else {
-      API.PROJECTS.getVolumeAnalysis().done(function (response) {
+      getVolumeAnalysis().then((response) => {
         self.parseVolumeAnalysisData(response)
-        API.PROJECTS.getProject(config.id_project).done(function (response) {
+        getProject(config.id_project).then((response) => {
           UI.currentOutsourceProject = response.project
           self.renderAnalysisPage()
         })
@@ -77,16 +81,14 @@ window.UI = {
       }
 
       setTimeout(function () {
-        API.PROJECTS.getVolumeAnalysis().done(function (response) {
+        getVolumeAnalysis().then((response) => {
           UI.volumeAnalysis = response.data
           AnalyzeActions.updateVolumeAnalysis(UI.volumeAnalysis)
           if (
             response.data.summary.STATUS === 'DONE' ||
             response.data.summary.STATUS === 'NOT_TO_ANALYZE'
           ) {
-            API.PROJECTS.getProject(config.id_project).done(function (
-              response,
-            ) {
+            getProject(config.id_project).then((response) => {
               if (response.project) {
                 UI.currentOutsourceProject = response.project
                 AnalyzeActions.updateProject(UI.currentOutsourceProject)

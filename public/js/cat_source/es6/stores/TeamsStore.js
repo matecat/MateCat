@@ -12,10 +12,8 @@ import Immutable from 'immutable'
 EventEmitter.prototype.setMaxListeners(0)
 
 let TeamsStore = assign({}, EventEmitter.prototype, {
-  teams: [],
+  teams: Immutable.fromJS([]),
   selectedTeam: {},
-  users: [],
-
   user: null,
 
   updateAll: function (teams) {
@@ -66,6 +64,14 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
 
   getSelectedTeam: function () {
     return this.selectedTeam
+  },
+
+  getAllTeams: function () {
+    return this.teams.toJS()
+  },
+
+  getUser: function () {
+    return this.user
   },
 
   emitChange: function () {
@@ -134,9 +140,6 @@ AppDispatcher.register(function (action) {
         Immutable.fromJS(action.team),
         action.hideChangeName,
       )
-      break
-    case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
-      TeamsStore.emitChange(action.actionType, TeamsStore.teams, action.project)
       break
     case ManageConstants.OPEN_INFO_TEAMS_POPUP:
       TeamsStore.emitChange(action.actionType)

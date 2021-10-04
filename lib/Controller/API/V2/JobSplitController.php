@@ -71,7 +71,7 @@ class JobSplitController extends KleinController {
         $found      = false;
         $jid        = $this->job->id;
         $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
-            return $jobStruct->id == $jid;
+            return $jobStruct->id == $jid and !$jobStruct->wasDeleted(); // exclude every deleted job from merge
         } );
 
         if ( empty( $jobToMerge ) ) {

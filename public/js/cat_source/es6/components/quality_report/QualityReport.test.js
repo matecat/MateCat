@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom'
 import {screen, waitFor} from '@testing-library/react'
 import {rest} from 'msw'
 
@@ -1291,22 +1292,18 @@ test('renders properly', async () => {
 
   require('../../../../common')
   require('../../../../login')
-  require('../../react-libs')
-  require('../../components')
 
-  {
-    const header = document.createElement('header')
+  const header = document.createElement('header')
 
-    const content = document.createElement('div')
-    content.id = 'qr-root'
+  const content = document.createElement('div')
+  content.id = 'qr-root'
 
-    const modal = document.createElement('div')
-    modal.id = 'modal'
+  const modal = document.createElement('div')
+  modal.id = 'modal'
 
-    document.body.appendChild(header)
-    document.body.appendChild(content)
-    document.body.appendChild(modal)
-  }
+  document.body.appendChild(header)
+  document.body.appendChild(content)
+  document.body.appendChild(modal)
 
   await import('./QualityReport')
 
@@ -1315,4 +1312,7 @@ test('renders properly', async () => {
   await waitFor(() => {
     expect(screen.getByText('QR Job summary')).toBeVisible()
   })
+  ReactDOM.unmountComponentAtNode(modal)
+  ReactDOM.unmountComponentAtNode(content)
+  ReactDOM.unmountComponentAtNode(header)
 })

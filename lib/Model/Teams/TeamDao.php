@@ -41,6 +41,21 @@ class TeamDao extends \DataAccess_AbstractDao {
     ";
 
     /**
+     * Delete a team
+     *
+     * @param TeamStruct $teamStruct
+     *
+     * @return int|void
+     */
+    public function delete( TeamStruct $teamStruct ) {
+        $sql  = " DELETE FROM teams WHERE id = ? ";
+        $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $sql );
+        $stmt->execute( array( $teamStruct->id ) );
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * @param $id
      *
      * @return \DataAccess_IDaoStruct|\DataAccess_IDaoStruct[]|TeamStruct

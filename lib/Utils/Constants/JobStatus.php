@@ -4,7 +4,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 21/08/14
  * Time: 19.08
- * 
+ *
  */
 
 class Constants_JobStatus {
@@ -20,6 +20,7 @@ class Constants_JobStatus {
     const STATUS_ACTIVE    = 'active';
     const STATUS_ARCHIVED  = 'archived';
     const STATUS_CANCELLED = 'cancelled';
+    const STATUS_DELETED   = 'deleted';
 
     public static $ALLOWED_STATUSES = [
             self::STATUS_ACTIVE,
@@ -27,7 +28,7 @@ class Constants_JobStatus {
             self::STATUS_CANCELLED
     ];
 
-    public static function isAllowedStatus( $status ){
+    public static function isAllowedStatus( $status ) {
         return in_array( strtolower( $status ), self::$ALLOWED_STATUSES );
     }
 

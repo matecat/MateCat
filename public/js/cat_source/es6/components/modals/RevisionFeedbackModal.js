@@ -1,5 +1,7 @@
 import React from 'react'
 
+import CatToolActions from '../../actions/CatToolActions'
+
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
     super(props)
@@ -15,7 +17,7 @@ class RevisionFeedbackModal extends React.Component {
       sending: true,
     })
     CatToolActions.sendRevisionFeedback(this.state.feedback)
-      .done(() => {
+      .then(() => {
         UI.reloadQualityReport()
         APP.ModalWindow.onCloseModal()
         var notification = {
@@ -25,7 +27,7 @@ class RevisionFeedbackModal extends React.Component {
         }
         APP.addNotification(notification)
       })
-      .fail(() => {
+      .catch(() => {
         var notification = {
           title: 'Feedback not sent',
           text: 'An error occurred while sending feedback please try again or contact support.',

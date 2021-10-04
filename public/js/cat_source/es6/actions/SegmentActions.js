@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import _ from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
@@ -14,13 +15,19 @@ import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils'
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
-import _ from 'lodash'
+import CatToolActions from './CatToolActions'
+import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
+import {getGlossaryMatch} from '../api/getGlossaryMatch'
+import {deleteGlossaryItem} from '../api/deleteGlossaryItem'
+import {addGlossaryItem} from '../api/addGlossaryItem'
+import {updateGlossaryItem} from '../api/updateGlossaryItem'
+import {approveSegments} from '../api/approveSegments'
+import {translateSegments} from '../api/translateSegments'
+import {splitSegment} from '../api/splitSegment'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
-  /**
-   * @param segments
-   */
   renderSegments: function (segments, idToOpen) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.RENDER_SEGMENTS,
@@ -38,26 +45,17 @@ const SegmentActions = {
     })
   },
   splitSegment: function (sid, text) {
-    API.SEGMENT.splitSegment(sid, text)
-      .done(function (response) {
-        if (response.errors.length) {
-          var notification = {
-            title: 'Error',
-            text: d.errors[0].message,
-            type: 'error',
-          }
-          APP.addNotification(notification)
-        } else {
-          UI.unmountSegments()
-          UI.render({
-            segmentToOpen: sid.split('-')[0],
-          })
-        }
+    splitSegment(sid, text)
+      .then(() => {
+        UI.unmountSegments()
+        UI.render({
+          segmentToOpen: sid.split('-')[0],
+        })
       })
-      .fail(function (d) {
+      .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: d.errors[0].message,
+          text: errors[0].message,
           type: 'error',
         }
         APP.addNotification(notification)
@@ -148,7 +146,7 @@ const SegmentActions = {
       })
     }
   },
-  closeSegment: function (sid, fid) {
+  closeSegment: function () {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_SEGMENT,
     })
@@ -412,7 +410,7 @@ const SegmentActions = {
 
       if (!config.isReview) {
         var alreadyCopied = false
-        $.each(SegmentStore.consecutiveCopySourceNum, function (index) {
+        $.each(SegmentStore.consecutiveCopySourceNum, function () {
           if (this === sid) alreadyCopied = true
         })
         if (!alreadyCopied) {
@@ -723,19 +721,17 @@ const SegmentActions = {
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
       if (typeof segment.glossary === 'undefined') {
         //Response inside SSE Channel
-        API.SEGMENT.getGlossaryForSegment(request.sid, request.text).fail(
-          function (error) {
-            OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
-          },
-        )
+        getGlossaryForSegment(request.sid, request.text).catch(() => {
+          OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
+        })
       }
     }
   },
 
   searchGlossary: function (sid, fid, text, fromTarget) {
     text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
-    text = text.replace(/\"/g, '')
-    API.SEGMENT.getGlossaryMatch(sid, text, fromTarget).fail(function () {
+    text = text.replace(/"/g, '')
+    getGlossaryMatch(sid, text, fromTarget).catch(() => {
       OfflineUtils.failedConnection(0, 'glossary')
     })
   },
@@ -749,22 +745,17 @@ const SegmentActions = {
   },
 
   deleteGlossaryItem: function (match, sid) {
-    return API.SEGMENT.deleteGlossaryItem(
-      sid,
-      match.segment,
-      match.target,
-      match.id,
-    )
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
-      })
-      .done(function (data) {
+    deleteGlossaryItem(sid, match.segment, match.target, match.id)
+      .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: 'A glossary item has been deleted',
         })
         SegmentActions.deleteGlossaryFromCache(sid, match)
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
   },
 
@@ -778,27 +769,31 @@ const SegmentActions = {
 
   addGlossaryItem: function (source, target, comment, sid) {
     source = TextUtils.htmlEncode(source)
-    return API.SEGMENT.addGlossaryItem(sid, source, target, comment)
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'addGlossaryItem')
-      })
-      .done(function (response) {
-        let msg
-        if (response.data.created_tm_key) {
-          msg = 'A Private TM Key has been created for this job'
-        } else {
-          msg = response.errors.length
-            ? response.errors[0].message
-            : 'A glossary item has been added'
-        }
+    addGlossaryItem(sid, source, target, comment)
+      .then((response) => {
+        const msg = response.data.created_tm_key
+          ? 'A Private TM Key has been created for this job'
+          : 'A glossary item has been added'
+
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: msg,
         })
       })
+      .catch((errors) => {
+        if (errors.length > 0) {
+          AppDispatcher.dispatch({
+            actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+            sid: sid,
+            message: errors[0].message,
+          })
+        } else {
+          OfflineUtils.failedConnection(0, 'addGlossaryItem')
+        }
+      })
   },
-  addGlossaryItemToCache: (sid, match, name) => {
+  addGlossaryItemToCache: (sid, match) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
@@ -806,7 +801,7 @@ const SegmentActions = {
     })
   },
   updateGlossaryItem: function (match, newTranslation, newComment, sid) {
-    return API.SEGMENT.updateGlossaryItem(
+    updateGlossaryItem(
       match.id,
       match.segment,
       match.translation,
@@ -814,15 +809,15 @@ const SegmentActions = {
       newComment,
       sid,
     )
-      .fail(function () {
-        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
-      })
-      .done(function (response) {
+      .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: 'A glossary item has been updated',
         })
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
       })
   },
 
@@ -951,8 +946,8 @@ const SegmentActions = {
     })
   },
 
-  submitIssue: function (sid, data, diff) {
-    return UI.submitIssues(sid, data, diff)
+  submitIssue: function (sid, data) {
+    return UI.submitIssues(sid, data)
   },
 
   issueAdded: function (sid, issueId) {
@@ -1031,10 +1026,12 @@ const SegmentActions = {
         return this.approveFilteredSegments(todoArray)
       })
     } else {
-      return API.SEGMENT.approveSegments(segmentsArray).then((response) => {
+      const promise = approveSegments(segmentsArray)
+      promise.then((response) => {
         this.checkUnchangebleSegments(response, segmentsArray, 'APPROVED')
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
+      return promise
     }
   },
   translateFilteredSegments: function (segmentsArray) {
@@ -1045,10 +1042,12 @@ const SegmentActions = {
         return this.translateFilteredSegments(todoArray)
       })
     } else {
-      return API.SEGMENT.translateSegments(segmentsArray).then((response) => {
+      const promise = translateSegments(segmentsArray)
+      promise.then((response) => {
         this.checkUnchangebleSegments(response, segmentsArray, 'TRANSLATED')
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
+      return promise
     }
   },
   checkUnchangebleSegments: function (response, status) {
@@ -1205,4 +1204,4 @@ const SegmentActions = {
   },
 }
 
-module.exports = SegmentActions
+export default SegmentActions

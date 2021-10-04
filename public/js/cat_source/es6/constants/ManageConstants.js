@@ -1,6 +1,6 @@
 import keyMirror from 'keymirror'
 
-module.exports = keyMirror({
+export default keyMirror({
   RENDER_PROJECTS: null,
   RENDER_ALL_TEAM_PROJECTS: null,
   UPDATE_PROJECTS: null,
@@ -20,7 +20,6 @@ module.exports = keyMirror({
   //MODALS
   OPEN_CREATE_TEAM_MODAL: null,
   OPEN_MODIFY_TEAM_MODAL: null,
-  OPEN_CHANGE_TEAM_MODAL: null,
   OPEN_INFO_TEAMS_POPUP: null,
   //TEAMS
   REMOVE_TEAM: null,

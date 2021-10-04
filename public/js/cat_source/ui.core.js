@@ -1,10 +1,21 @@
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
+import ReactDOM from 'react-dom'
+import React from 'react'
 
-/*
-	Component: ui.core
- */
+import CatToolActions from './es6/actions/CatToolActions'
+import CommonUtils from './es6/utils/commonUtils'
+import SegmentsContainer from './es6/components/segments/SegmentsContainer'
+import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
+import TagUtils from './es6/utils/tagUtils'
+import TextUtils from './es6/utils/textUtils'
+import OfflineUtils from './es6/utils/offlineUtils'
+import SegmentUtils from './es6/utils/segmentUtils'
+import LXQ from './es6/utils/lxq.main'
+import SegmentActions from './es6/actions/SegmentActions'
+import SegmentStore from './es6/stores/SegmentStore'
+
 window.UI = {
   /**
    * Open file menu in Header
@@ -220,11 +231,6 @@ window.UI = {
     }
   },
 
-  // fixHeaderHeightChange: function() {
-  //     var headerHeight = $('header .wrapper').height();
-  //     $('#outer').css('margin-top', headerHeight + 'px');
-  // },
-
   getMoreSegments: function (where) {
     if (where == 'after' && this.noMoreSegmentsAfter) {
       return
@@ -347,21 +353,6 @@ window.UI = {
         var seg = UI.firstLoad ? this.currentSegmentId : UI.startSegmentId
         SegmentActions.openSegment(seg)
       }
-
-      // if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
-      //     SegmentActions.scrollToSegment( options.segmentToOpen );
-      //     SegmentActions.openSegment(options.segmentToOpen);
-      // }
-
-      // if (options.applySearch) {
-      // 	$('mark.currSearchItem').removeClass('currSearchItem');
-      // 	SearchUtils.markSearchResults(options);
-      // 	if (SearchUtils.searchMode == 'normal') {
-      // 		$('section[id^="segment-' + options.segmentToOpen + '"] mark.searchMarker').first().addClass('currSearchItem');
-      // 	} else {
-      // 		$('section[id^="segment-' + options.segmentToOpen + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
-      // 	}
-      // }
     }
     $('#outer').removeClass('loading loadingBefore')
 
@@ -524,8 +515,12 @@ window.UI = {
     if (config.time_to_edit_enabled) {
       var editSec = $('.timetoedit .edit-sec', $segment)
       var editMin = $('.timetoedit .edit-min', $segment)
-      editMin.text(APP.zerofill(editedTime[0], 2))
-      editSec.text(APP.zerofill(editedTime[1], 2))
+      editMin.text(
+        editedTime[0].length > 1 ? editedTime[0] : '0' + editedTime[0],
+      )
+      editSec.text(
+        editedTime[1].length > 1 ? editedTime[1] : '0' + editedTime[1],
+      )
     }
     tte.data('raw-time-to-edit', this.totalTime)
   },

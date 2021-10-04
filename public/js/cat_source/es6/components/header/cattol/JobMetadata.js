@@ -1,5 +1,8 @@
+import React from 'react'
+
 import JobMetadataModal from '../../modals/JobMetadataModal'
 import SegmentStore from '../../../stores/SegmentStore'
+
 class JobMetadata extends React.Component {
   constructor(props) {
     super(props)

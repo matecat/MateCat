@@ -1,6 +1,7 @@
-/*
- Component: ui.review
- */
+import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
+import OfflineUtils from './es6/utils/offlineUtils'
+import SegmentActions from './es6/actions/SegmentActions'
+
 window.Review = {
   enabled: function () {
     return config.enableReview && !!config.isReview
@@ -20,7 +21,7 @@ $.extend(window.UI, {
   },
 })
 
-var alertNotTranslatedYet = function (sid) {
+window.alertNotTranslatedYet = function (sid) {
   APP.confirm({
     name: 'confirmNotYetTranslated',
     cancelTxt: 'Close',
@@ -31,7 +32,7 @@ var alertNotTranslatedYet = function (sid) {
   })
 }
 
-var alertNoTranslatedSegments = function () {
+window.alertNoTranslatedSegments = function () {
   var props = {
     text: 'There are no translated segments to revise in this job.',
     successText: 'Ok',
@@ -64,8 +65,18 @@ if (config.enableReview && config.isReview) {
       /**
        * Each revision overwrite this function
        */
-      clickOnApprovedButton: function () {
-        return false
+      clickOnApprovedButton: function (segment, goToNextNotApproved) {
+        var sid = segment.sid
+        SegmentActions.removeClassToSegment(sid, 'modified')
+        var afterApproveFn = function () {
+          if (goToNextNotApproved) {
+            UI.openNextTranslated()
+          } else {
+            UI.gotoNextSegment(sid)
+          }
+        }
+
+        UI.changeStatus(segment, 'approved', afterApproveFn) // this does < setTranslation
       },
     })
   })(jQuery)

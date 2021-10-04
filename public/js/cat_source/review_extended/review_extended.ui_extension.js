@@ -3,32 +3,37 @@ import {sprintf} from 'sprintf-js'
 import moment from 'moment'
 
 import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
+import CommonUtils from '../es6/utils/commonUtils'
+import OfflineUtils from '../es6/utils/offlineUtils'
+import SegmentActions from '../es6/actions/SegmentActions'
+import SegmentStore from '../es6/stores/SegmentStore'
+import {getSegmentVersionsIssues} from '../es6/api/getSegmentVersionsIssues'
+import {sendSegmentVersionIssue} from '../es6/api/sendSegmentVersionIssue'
+import {sendSegmentVersionIssueComment} from '../es6/api/sendSegmentVersionIssueComment'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
-    submitIssue: function (sid, data_array, diff) {
+    submitIssue: function (sid, data) {
       var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
 
-      var deferreds = _.map(data_array, function (data) {
-        data.diff = diff
-        return API.SEGMENT.sendSegmentVersionIssue(sid, data)
+      const promise = sendSegmentVersionIssue(sid, {
+        ...data,
       })
-
-      return $.when.apply($, deferreds).done(function () {
+      promise.then(() => {
         UI.getSegmentVersionsIssues(sid, fid)
         UI.reloadQualityReport()
       })
+
+      return promise
     },
 
     submitComment: function (id_segment, id_issue, data) {
-      return API.SEGMENT.sendSegmentVersionIssueComment(
-        id_segment,
-        id_issue,
-        data,
-      ).done(function () {
+      const promise = sendSegmentVersionIssueComment(id_segment, id_issue, data)
+      promise.then(() => {
         var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment))
         UI.getSegmentVersionsIssues(id_segment, fid)
       })
+      return promise
     },
   })
 
@@ -40,8 +45,8 @@ if (ReviewExtended.enabled()) {
       return promise
     },
 
-    submitIssues: function (sid, data, diff) {
-      return ReviewExtended.submitIssue(sid, data, diff)
+    submitIssues: function (sid, data) {
+      return ReviewExtended.submitIssue(sid, data)
     },
 
     getSegmentVersionsIssuesHandler(sid) {
@@ -50,7 +55,7 @@ if (ReviewExtended.enabled()) {
     },
 
     getSegmentVersionsIssues: function (segmentId, fileId) {
-      API.SEGMENT.getSegmentVersionsIssues(segmentId).done(function (response) {
+      getSegmentVersionsIssues(segmentId).then((response) => {
         UI.addIssuesToSegment(fileId, segmentId, response.versions)
       })
     },

@@ -88,7 +88,7 @@ class setTranslationController extends ajaxController {
                 'password'                => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'current_password'                => [
+                'current_password'        => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'propagate'               => [
@@ -119,10 +119,10 @@ class setTranslationController extends ajaxController {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job             = $this->__postInput[ 'id_job' ];
-        $this->password           = $this->__postInput[ 'password' ];
-        $this->received_password  = $this->__postInput[ 'current_password' ];
-        $this->revisionNumber     = $this->__postInput[ 'revision_number' ];
+        $this->id_job            = $this->__postInput[ 'id_job' ];
+        $this->password          = $this->__postInput[ 'password' ];
+        $this->received_password = $this->__postInput[ 'current_password' ];
+        $this->revisionNumber    = $this->__postInput[ 'revision_number' ];
 
         /*
          * set by the client, mandatory
@@ -198,7 +198,7 @@ class setTranslationController extends ajaxController {
             $featureSet->loadForProject( $this->project );
 
             /** @var MateCatFilter filter */
-            $this->filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target,  Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
+            $this->filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
@@ -282,8 +282,13 @@ class setTranslationController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $this->context_before = $this->filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
-        $this->context_after  = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+        if ( isset( $segmentsList->id_before->segment ) ) {
+            $this->context_before = $this->filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        }
+
+        if ( isset( $segmentsList->id_after->segment ) ) {
+            $this->context_after = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+        }
     }
 
     /**
@@ -323,7 +328,7 @@ class setTranslationController extends ajaxController {
         }
 
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
-        $pipeline->addLast( new SprintfToPH($this->chunk->source, $this->chunk->target) );
+        $pipeline->addLast( new SprintfToPH( $this->chunk->source, $this->chunk->target ) );
 
         $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
         $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
@@ -338,9 +343,9 @@ class setTranslationController extends ajaxController {
             $err_json    = $check->getWarningsJSON();
             $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );
         } else {
-            $err_json    = '';
+            $err_json         = '';
             $targetNormalized = $check->getTrgNormalized();
-            $translation = $this->filter->fromLayer1ToLayer0( $targetNormalized );
+            $translation      = $this->filter->fromLayer1ToLayer0( $targetNormalized );
         }
 
         //PATCH TO FIX BOM INSERTIONS
@@ -508,7 +513,7 @@ class setTranslationController extends ajaxController {
 
                 /** @var Translations_SegmentTranslationStruct[] $propagatedNotIce */
                 $propagatedNotIce = @$propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'not_ice' ][ 'object' ];
-                if(isset($propagatedNotIce)){
+                if ( isset( $propagatedNotIce ) ) {
                     foreach ( $propagatedNotIce as $item ) {
                         $counter->setOldStatus( $item->status );
                         $counter->setNewStatus( $this->status );
@@ -518,7 +523,7 @@ class setTranslationController extends ajaxController {
 
                 /** @var Translations_SegmentTranslationStruct[] $propagatedIce */
                 $propagatedIce = @$propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'ice' ][ 'object' ];
-                if(isset($propagatedIce)){
+                if ( isset( $propagatedIce ) ) {
                     foreach ( $propagatedIce as $item ) {
                         $counter->setOldStatus( $item->status );
                         $counter->setNewStatus( $this->status );
@@ -636,7 +641,7 @@ class setTranslationController extends ajaxController {
             $this->featureSet->run( 'setTranslationCommitted', [
                     'translation'      => $new_translation,
                     'old_translation'  => $old_translation,
-                    'propagated_ids'   => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ],
+                    'propagated_ids'   => isset( $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ) ? $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] : null,
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
@@ -651,7 +656,7 @@ class setTranslationController extends ajaxController {
             $this->result = $this->featureSet->filter( 'filterSetTranslationResult', $this->result, [
                     'translation'     => $new_translation,
                     'old_translation' => $old_translation,
-                    'propagated_ids'  => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ],
+                    'propagated_ids'  => isset( $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ) ? $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] : null,
                     'chunk'           => $this->chunk,
                     'segment'         => $this->segment
             ] );
@@ -791,7 +796,7 @@ class setTranslationController extends ajaxController {
     }
 
     //TODO: put this method into Job model and use Segnent object
-    private function updateJobPEE( Array $old_translation, Array $new_translation ) {
+    private function updateJobPEE( array $old_translation, array $new_translation ) {
 
         $segmentRawWordCount = $this->segment->raw_word_count;
         $segment             = new EditLog_EditLogSegmentClientStruct(
@@ -984,7 +989,8 @@ class setTranslationController extends ajaxController {
         $this->featureSet->filter(
                 'filterContributionStructOnSetTranslation',
                 $contributionStruct,
-                $this->project
+                $this->project,
+                $this->segment
         );
 
         /** TODO Remove , is only for debug purposes */

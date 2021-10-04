@@ -33,6 +33,8 @@ class JobPasswordValidator extends Base {
         $this->jStruct->password = $this->controller->params[ 'password' ];
         $this->jStruct           = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
 
+        $this->controller->setChunk( $this->jStruct );
+
     }
 
     /**

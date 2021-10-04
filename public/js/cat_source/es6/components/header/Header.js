@@ -1,4 +1,5 @@
 import React from 'react'
+
 import TeamSelect from './TeamsSelect'
 import ProjectInfo from './HeaderProjectInfo'
 import FilterProjects from './manage/FilterProjects'
@@ -10,6 +11,8 @@ import IconUserLogout from '../icons/IconUserLogout'
 import ActionMenu from './ActionMenu'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
+import CatToolActions from '../../actions/CatToolActions'
+import {logoutUser as logoutUserApi} from '../../api/logoutUser'
 
 class Header extends React.Component {
   constructor(props) {
@@ -66,7 +69,7 @@ class Header extends React.Component {
   }
 
   logoutUser = () => {
-    $.post('/api/app/user/logout', function () {
+    logoutUserApi().then(() => {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
       } else {
@@ -146,7 +149,7 @@ class Header extends React.Component {
         onClick: this.openManage,
       }
 
-      if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
+      if (this.state.user?.metadata && this.state.user.metadata.gplus_picture) {
         return (
           <div
             {...{...dropdownAttributes, 'data-testid': 'user-menu-metadata'}}
