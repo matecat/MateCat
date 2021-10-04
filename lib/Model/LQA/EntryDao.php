@@ -339,7 +339,7 @@ class EntryDao extends \DataAccess_AbstractDao {
                 options as cat_options,
                 label as cat_label
             FROM
-                matecat.qa_entries e
+                qa_entries e
                     JOIN
                 segments s ON s.id = e.id_segment
                     JOIN
