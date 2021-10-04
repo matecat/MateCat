@@ -2,6 +2,7 @@
 
 namespace LQA;
 
+use DataAccess\ShapelessConcreteStruct;
 use Utils;
 
 class EntryDao extends \DataAccess_AbstractDao {
@@ -316,4 +317,55 @@ class EntryDao extends \DataAccess_AbstractDao {
         return $this->findById( $opts[ 'id' ] );
     }
 
+    /**
+     * @param      $id_job
+     * @param      $password
+     * @param      $revisionNumber
+     * @param null $idFilePart
+     * @param int  $ttl
+     *
+     * @return \DataAccess_IDaoStruct[]
+     */
+    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0) {
+
+        $thisDao = new self();
+        $conn    = \Database::obtain()->getConnection();
+        $sql     = "SELECT
+                s.internal_id as content_id,
+                s.id as segment_id,
+                e.severity as severity_label,
+                penalty_points,
+                severities,
+                options as cat_options,
+                label as cat_label
+            FROM
+                qa_entries e
+                    JOIN
+                segments s ON s.id = e.id_segment
+                    JOIN
+                jobs j ON j.id = e.id_job
+                JOIN
+                qa_categories c ON e.id_category = c.id
+            
+                WHERE
+                    e.id_job = :id_job
+                    AND j.password = :password
+                    AND e.source_page = :revisionNumber
+                    AND e.deleted_at IS NULL";
+
+        $params = [
+            'id_job'   => $id_job,
+            'password' => $password,
+            'revisionNumber' => $revisionNumber
+        ];
+
+        if($idFilePart){
+            $sql .= " AND id_file_part = :id_file_part";
+            $params['id_file_part'] = $idFilePart;
+        }
+
+        $stmt = $conn->prepare( $sql );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+    }
 }

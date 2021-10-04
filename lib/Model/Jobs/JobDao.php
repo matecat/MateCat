@@ -738,4 +738,53 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         ] )[ 0 ];
 
     }
+
+    /**
+     * Get reviewed_words_count grouped by file parts
+     *
+     * @param int    $id_job
+     * @param string $password
+     * @param int    $revisionNumber
+     * @param int    $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getReviewedWordsCountGroupedByFileParts ($id_job, $password, $revisionNumber, $ttl = 0) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $query = "SELECT 
+                f.filename,
+                s.id_file_part,
+                s.id_file,
+                SUM(raw_word_count) as reviewed_words_count,
+                fp.id as id_file_part_external_reference,
+                fp.tag_key,
+                fp.tag_value
+            FROM
+                segment_translation_events se
+                    JOIN
+                segments s ON se.id_segment = s.id
+                    JOIN
+                jobs j ON j.id = se.id_job
+                    JOIN
+                files f ON f.id = s.id_file
+                    LEFT JOIN
+                files_parts fp ON fp.id = s.id_file_part
+            WHERE
+                se.id_job = :id_job
+                AND j.password = :password
+                AND se.final_revision = 1
+                AND se.source_page = :revisionNumber
+            GROUP BY s.id_file_part;
+        ";
+
+        $stmt = $conn->prepare($query  );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $id_job,
+            'password' => $password,
+            'revisionNumber' => $revisionNumber
+        ] );
+    }
 }

@@ -255,17 +255,22 @@ class StatusController extends KleinController {
             // save chunks totals data in $this->chunksTotalsCache for getJobTotals() function
             $keyValue = $this->getTotalsArrayKeyName( $segInfo[ 'match_type' ] );
 
-            if ( !isset( $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ] ) ) {
-                $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
+            $fileKey = ( null !== $segInfo[ 'id_file_part' ] and '' !== $segInfo[ 'id_file_part' ]  ) ? 'id_file_part' : 'id_file';
+            $originalFile = ( null !== $segInfo[ 'tag_key' ] and $segInfo[ 'tag_key' ] === 'original'  ) ? $segInfo[ 'tag_value' ] : $segInfo[ 'filename' ];
+
+            if ( !isset( $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ] ) ) {
+                $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ] = $this->totalsInitStructure;
             }
 
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ $keyValue ]             += $words;
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $key ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'id' ]                  = (int)$segInfo[ 'id_file' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'id_file_part' ]        = ( null !== $segInfo[ 'id_file_part' ] and '' !== $segInfo[ 'id_file_part' ] ) ? (int)$segInfo[ 'id_file_part' ]  : null;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ $keyValue ]             += $words;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'ORIGINAL_FILENAME' ]   = $originalFile;
+            $this->chunksTotalsCache[ $key ][ $segInfo[ $fileKey ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
         }
 
         if ( $_total_wc_standard_analysis == 0 and $this->project->status_analysis == Constants_ProjectStatus::STATUS_FAST_OK ) {
