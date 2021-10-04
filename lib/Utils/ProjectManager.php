@@ -761,7 +761,7 @@ class ProjectManager {
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
             if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
-                throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
+                throw new Exception( "MateCat is unable to create your project. Please contact us at " . \INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
             $featureSet->run( "beforeInsertSegments", $this->projectStructure,
