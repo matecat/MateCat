@@ -489,6 +489,7 @@ class FastAnalysis extends AbstractDaemon {
                      * id_job will be taken from languages ( 80415:fr-FR,80416:it-IT )
                      */
                     $this->segments[ $k ][ 'pid' ]                 = (int)$pid;
+                    $this->segments[ $k ][ 'ppassword' ]           = $projectStruct->password;
                     $this->segments[ $k ][ 'date_insert' ]         = date_create()->format( 'Y-m-d H:i:s' );
                     $this->segments[ $k ][ 'eq_word_count' ]       = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;;
                     $this->segments[ $k ][ 'standard_word_count' ] = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;

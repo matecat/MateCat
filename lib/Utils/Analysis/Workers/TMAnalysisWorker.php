@@ -246,7 +246,7 @@ class TMAnalysisWorker extends AbstractWorker {
         //set redis cache
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
-        $this->_tryToCloseProject( $queueElement->params->pid );
+        $this->_tryToCloseProject( $queueElement->params );
 
 
         $this->featureSet->run( 'postTMSegmentAnalyzed', [
@@ -810,7 +810,9 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws \Predis\Connection\ConnectionException
      * @throws \ReflectionException
      */
-    protected function _tryToCloseProject( $_project_id ) {
+    protected function _tryToCloseProject( $_params ) {
+
+        $_project_id = $_params->pid;
 
         $project_totals                       = [];
         $project_totals[ 'project_segments' ] = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $_project_id );
@@ -892,6 +894,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
             Projects_ProjectDao::destroyCacheById( $_project_id );
+            Projects_ProjectDao::destroyCacheByIdAndPassword( $_project_id, $_params->ppassword );
 
         }
 
@@ -923,7 +926,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $this->_incrementAnalyzedCount( $elementQueue->params->pid, $elementQueue->params->raw_word_count, $elementQueue->params->raw_word_count );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $elementQueue->params->pid );
-        $this->_tryToCloseProject( $elementQueue->params->pid );
+        $this->_tryToCloseProject( $elementQueue->params );
 
     }
 

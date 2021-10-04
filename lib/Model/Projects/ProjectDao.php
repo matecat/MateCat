@@ -36,6 +36,8 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                        ORDER BY j.id,j.create_date, j.job_first_segment
 		";
 
+    protected static $_sql_get_by_id_and_password = "SELECT * FROM projects WHERE id = :id AND password = :password ";
+
     /**
      * @var string
      */
@@ -333,7 +335,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT * FROM projects WHERE id = :id AND password = :password " );
+        $stmt    = $conn->prepare( self::$_sql_get_by_id_and_password );
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id, 'password' => $password ] )[ 0 ];
 
         if ( !$fetched ) {
@@ -341,6 +343,14 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         }
 
         return $fetched;
+    }
+
+    static function destroyCacheByIdAndPassword( $id, $password ) {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( self::$_sql_get_by_id_and_password );
+
+        return $thisDao->_destroyObjectCache( $stmt, [ 'id' => $id, 'password' => $password ] );
     }
 
     /**
