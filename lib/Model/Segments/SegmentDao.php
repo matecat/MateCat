@@ -182,7 +182,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
         $stmt  = $this->_getStatementForCache( $query );
         /** @var $res Segments_SegmentStruct[] */
-        $res             = $this->_fetchObject( $stmt,
+        $res = $this->_fetchObject( $stmt,
                 new Segments_SegmentStruct(),
                 $id_list
         );
@@ -775,6 +775,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         } );
 
         $currentJob = array_pop( $filtered );
+
+        if ( empty( $currentJob ) || empty( $currentJob->id ) ) {
+            return [];
+        }
 
         /**
          * Get all the available translations for this segment id,
