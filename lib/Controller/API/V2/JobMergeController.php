@@ -7,6 +7,7 @@
  */
 
 namespace API\V2;
+use Analysis\AnalysisDao;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;
@@ -29,8 +30,9 @@ class JobMergeController extends KleinController {
 
         $pStruct = $pManager->getProjectStructure();
         $pStruct['id_customer'] = $this->validator->getProject()->id_customer ;
-
         $pStruct[ 'job_to_merge' ] = $this->job->id;
+
+        ( new AnalysisDao())->destroyCacheByProjectId( $this->validator->getProject()->id );
 
         $jobStructs = $this->checkMergeAccess( $this->validator->getProject()->getJobs() );
 

@@ -8,6 +8,7 @@
 
 namespace API\V2;
 
+use Analysis\AnalysisDao;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;
@@ -47,7 +48,9 @@ class JobSplitController extends KleinController {
     }
 
     public function apply() {
+
         $pStruct = $this->getSplitData();
+        ( new AnalysisDao())->destroyCacheByProjectId( $this->project_struct->id );
         $this->pManager->applySplit( $pStruct );
         $this->response->json( [ 'data' => $pStruct[ 'split_result' ] ] );
     }

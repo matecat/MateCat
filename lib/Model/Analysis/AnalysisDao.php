@@ -20,17 +20,7 @@ use PDOException;
 class AnalysisDao extends DataAccess_AbstractDao {
 
 
-    /**
-     *
-     * REALLY HEAVY
-     *
-     * @param $pid
-     *
-     * @return array|int|mixed
-     */
-    public static function getProjectStatsVolumeAnalysis( $pid, $ttl = 0 ) {
-
-        $query = "
+    protected static $_sql_get_project_Stats_volume_analysis = "
         SELECT
                 st.id_job AS jid,
                 j.password as jpassword,
@@ -72,20 +62,42 @@ class AnalysisDao extends DataAccess_AbstractDao {
 			ORDER BY j.id, j.job_last_segment
 			";
 
+    /**
+     *
+     * REALLY HEAVY
+     *
+     * @param $pid
+     *
+     * @return array|int|mixed
+     */
+    public static function getProjectStatsVolumeAnalysis( $pid, $ttl = 0 ) {
+
         $db = Database::obtain();
         try {
             $thisDao = new self();
-            $stmt = $db->getConnection()->prepare( $query );
+            $stmt = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
             $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'pid' => $pid ] );
 
             $stmt->closeCursor();
-        } catch ( PDOException $e ) {
+        } catch ( \PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
             return $e->getCode() * -1;
         }
 
 
         return $results;
+    }
+
+    /**
+     * @param $project_id
+     *
+     * @return bool|int
+     */
+    public function destroyCacheByProjectId( $project_id ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
+
+        return $this->_destroyObjectCache( $stmt, [ 'pid' => $project_id ] );
     }
 
 }
