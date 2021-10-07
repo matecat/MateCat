@@ -17,8 +17,9 @@ class JobUrlBuilder {
      *
      * Returns null in case of wrong parameters
      *
-     * @param Jobs_JobStruct $job
-     * @param array          $options
+     * @param Jobs_JobStruct              $job
+     * @param array                       $options
+     * @param Projects_ProjectStruct|null $project
      *
      * @return JobUrlStruct
      */

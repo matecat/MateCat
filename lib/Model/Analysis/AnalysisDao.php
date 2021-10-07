@@ -10,12 +10,14 @@
 namespace Analysis;
 
 
+use DataAccess\ShapelessConcreteStruct;
+use DataAccess_AbstractDao;
 use Database;
 use Log;
 use PDO;
 use PDOException;
 
-class AnalysisDao {
+class AnalysisDao extends DataAccess_AbstractDao {
 
 
     /**
@@ -26,7 +28,7 @@ class AnalysisDao {
      *
      * @return array|int|mixed
      */
-    public static function getProjectStatsVolumeAnalysis( $pid ) {
+    public static function getProjectStatsVolumeAnalysis( $pid, $ttl = 0 ) {
 
         $query = "
         SELECT
@@ -72,15 +74,17 @@ class AnalysisDao {
 
         $db = Database::obtain();
         try {
+            $thisDao = new self();
             $stmt = $db->getConnection()->prepare( $query );
-            $stmt->setFetchMode( PDO::FETCH_ASSOC );
-            $stmt->execute( [ 'pid' => $pid ] );
-            $results = $stmt->fetchAll();
+            $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'pid' => $pid ] );
+
             $stmt->closeCursor();
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
             return $e->getCode() * -1;
         }
+
+
         return $results;
     }
 
