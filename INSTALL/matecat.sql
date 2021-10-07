@@ -780,7 +780,8 @@ CREATE TABLE `qa_entries` (
   `source_page` int(11) NOT NULL,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `job_and_segment` (`id_job`,`id_segment`)
+  KEY `job_and_segment` (`id_job`,`id_segment`),
+  KEY `id_segment_idx` ( `id_segment` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
