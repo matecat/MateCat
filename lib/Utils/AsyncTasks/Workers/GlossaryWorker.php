@@ -138,6 +138,7 @@ class GlossaryWorker extends AbstractWorker {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $user->uid, $userRole );
 
+        unset( $config[ 'id_user' ] );
         if ( count( $tm_keys ) ) {
             $config[ 'id_user' ] = [];
             foreach ( $tm_keys as $tm_key ) {
