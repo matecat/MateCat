@@ -17,7 +17,7 @@ export const cleanSegmentString = (segmentString) => {
 }
 
 export const getIdAttributeRegEx = () => {
-  return /id="(\w+)"/g
+  return /id="(-?\w+)"/g
 }
 
 /**
