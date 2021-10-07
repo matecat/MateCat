@@ -25,14 +25,14 @@ class JobMergeController extends KleinController {
 
     public function merge() {
 
+        ( new AnalysisDao())->destroyCacheByProjectId( $this->validator->getProject()->id );
+
         $pManager = new ProjectManager();
         $pManager->setProjectAndReLoadFeatures( $this->validator->getProject() );
 
         $pStruct = $pManager->getProjectStructure();
         $pStruct['id_customer'] = $this->validator->getProject()->id_customer ;
         $pStruct[ 'job_to_merge' ] = $this->job->id;
-
-        ( new AnalysisDao())->destroyCacheByProjectId( $this->validator->getProject()->id );
 
         $jobStructs = $this->checkMergeAccess( $this->validator->getProject()->getJobs() );
 
