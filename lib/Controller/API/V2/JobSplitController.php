@@ -43,9 +43,6 @@ class JobSplitController extends KleinController {
     }
 
     public function check() {
-
-        ( new AnalysisDao())->destroyCacheByProjectId( $this->project_struct->id );
-
         $pStruct = $this->getSplitData();
         $this->response->json( [ 'data' => $pStruct[ 'split_result' ] ] );
     }
