@@ -59,7 +59,7 @@ class TeamsProjectsController extends KleinController {
 
         $projectsList = ( new Project( $projectsList ) )->render();
 
-        $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 0 );
+        $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
         $total_pages = $this->getTotalPages( $step, $totals );
 
         if ( $totals == 0 ) {
