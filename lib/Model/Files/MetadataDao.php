@@ -15,19 +15,20 @@ class MetadataDao extends \DataAccess_AbstractDao {
     const TABLE = 'file_metadata';
 
     /**
-     * @param $id_project
-     * @param $id_file
+     * @param     $id_project
+     * @param     $id_file
+     * @param int $ttl
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public function getByJobIdProjectAndIdFile( $id_project, $id_file ) {
+    public function getByJobIdProjectAndIdFile( $id_project, $id_file, $ttl = 0 ) {
         $stmt = $this->_getStatementForCache(
                 "SELECT * FROM " . self::TABLE . " WHERE " .
                 " id_project = :id_project " .
                 " AND id_file = :id_file "
         );
 
-        $result = $this->_fetchObject( $stmt, new MetadataStruct(), [
+        $result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
                 'id_project' => $id_project,
                 'id_file'    => $id_file,
         ] );
@@ -36,13 +37,15 @@ class MetadataDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_project
-     * @param $id_file
-     * @param $key
+     * @param     $id_project
+     * @param     $id_file
+     * @param     $key
+     *
+     * @param int $ttl
      *
      * @return MetadataStruct
      */
-    public function get( $id_project, $id_file, $key ) {
+    public function get( $id_project, $id_file, $key, $ttl = 0 ) {
 
         $stmt = $this->_getStatementForCache(
                 "SELECT * FROM " . self::TABLE . " WHERE " .
@@ -51,7 +54,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 " AND `key` = :key "
         );
 
-        return @$this->_fetchObject( $stmt, new MetadataStruct(), [
+        return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
                 'id_project' => $id_project,
                 'id_file'    => $id_file,
                 'key'        => $key
