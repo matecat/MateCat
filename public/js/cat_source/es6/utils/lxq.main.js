@@ -15,7 +15,7 @@ const LXQ = {
   enable: function () {
     if (!config.lxq_enabled) {
       config.lxq_enabled = 1
-      toggleTagLexica(true).then(() => {
+      toggleTagLexica({enabled: true}).then(() => {
         if (!LXQ.initialized) {
           LXQ.init()
         } else {
@@ -28,7 +28,7 @@ const LXQ = {
   disable: function () {
     if (config.lxq_enabled) {
       config.lxq_enabled = 0
-      toggleTagLexica(false).then(() => {
+      toggleTagLexica({enabled: false}).then(() => {
         UI.render()
         SegmentActions.qaComponentsetLxqIssues([])
       })
@@ -181,7 +181,7 @@ const LXQ = {
     }
     //FOTD
     LXQ.lexiqaData.lexiqaFetching = true
-    getLexiqaWarningsApi(LXQ.partnerid).then((results) => {
+    getLexiqaWarningsApi({partnerId: LXQ.partnerid}).then((results) => {
       if (results.errors != 0) {
         //only do something if there are errors in lexiqa server
         LXQ.lexiqaData.lexiqaWarnings = {}
@@ -726,7 +726,7 @@ LXQ.init = function () {
         },
       })
 
-      // lexiqaIgnoreError(errorid);
+      // lexiqaIgnoreError({errorid});
     }
 
     var getVisibleWarningsCountForSegment = function (segment) {

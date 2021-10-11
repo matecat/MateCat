@@ -3,16 +3,17 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Enable or disable tag projection inside job
  *
- * @param {boolean} enabled
- * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
+ * @param {Object} options
+ * @param {boolean} options.enabled
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
  * @returns {Promise<object>}
  */
-export const toggleTagProjectionJob = async (
+export const toggleTagProjectionJob = async ({
   enabled,
   idJob = config.id_job,
   password = config.password,
-) => {
+}) => {
   const dataParams = {
     tag_projection: enabled,
   }

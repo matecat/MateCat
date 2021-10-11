@@ -3,18 +3,19 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Delete segment issue
  *
- * @param {string} idSegment
- * @param {string} idIssue
- * @param {string} [idJob=config.id_job]
- * @param {string} [reviewPassword=config.review_password]
+ * @param {Object} options
+ * @param {string} options.idSegment
+ * @param {string} options.idIssue
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.reviewPassword=config.review_password]
  * @returns {Promise<object>}
  */
-export const deleteSegmentIssue = async (
+export const deleteSegmentIssue = async ({
   idSegment,
   idIssue,
   idJob = config.id_job,
   reviewPassword = config.review_password,
-) => {
+} = {}) => {
   const response = await fetch(
     `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues/${idIssue}`,
     {

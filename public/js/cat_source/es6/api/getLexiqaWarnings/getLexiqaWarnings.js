@@ -1,18 +1,19 @@
 /**
  * Return lexiqa warnings
  *
- * @param {string} partnerId
- * @param {string} [lexiqaDomain=config.lexiqaServer]
- * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
+ * @param {Object} options
+ * @param {string} options.partnerId
+ * @param {string} [options.lexiqaDomain=config.lexiqaServer]
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
  * @returns {Promise<object>}
  */
-export const getLexiqaWarnings = async (
+export const getLexiqaWarnings = async ({
   partnerId,
   lexiqaDomain = config.lexiqaServer,
   idJob = config.id_job,
   password = config.password,
-) => {
+}) => {
   const response = await fetch(
     `${lexiqaDomain}/matecaterrors?id=${partnerId}-${idJob}-${password}`,
   )

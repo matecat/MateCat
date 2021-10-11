@@ -3,14 +3,15 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Reload quality report
  *
- * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
+ * @param {Object} options
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
  * @returns {Promise<object>}
  */
-export const reloadQualityReport = async (
+export const reloadQualityReport = async ({
   idJob = config.id_job,
   password = config.password,
-) => {
+} = {}) => {
   const response = await fetch(
     `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/quality-report`,
     {

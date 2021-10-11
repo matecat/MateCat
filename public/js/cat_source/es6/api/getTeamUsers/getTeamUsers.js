@@ -3,10 +3,11 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Get team users list
  *
- * @param {number} teamId
+ * @param {Object} options
+ * @param {number} options.teamId
  * @returns {Promise<object>}
  */
-export const getTeamUsers = async (teamId) => {
+export const getTeamUsers = async ({teamId}) => {
   const response = await fetch(
     `${getMatecatApiDomain()}api/app/teams/${teamId}/members/public`,
     {

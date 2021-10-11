@@ -80,7 +80,10 @@ if (ReviewExtended.enabled()) {
       var issue_id = parsed.id_issue
       var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment))
 
-      deleteSegmentIssueApi(parsed.id_segment, parsed.id_issue).then(() => {
+      deleteSegmentIssueApi({
+        idSegment: parsed.id_segment,
+        idIssue: parsed.id_issue,
+      }).then(() => {
         UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
         UI.reloadQualityReport()
       })

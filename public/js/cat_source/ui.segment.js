@@ -96,7 +96,7 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
      */
     enableTagProjectionInJob: function () {
       config.tag_projection_enabled = 1
-      toggleTagProjectionJob(true).then(() => {
+      toggleTagProjectionJob({enabled: true}).then(() => {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
@@ -108,7 +108,7 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
      */
     disableTagProjectionInJob: function () {
       config.tag_projection_enabled = 0
-      toggleTagProjectionJob(false).then(() => {
+      toggleTagProjectionJob({enabled: false}).then(() => {
         // UI.render({
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });

@@ -13,7 +13,7 @@ const Speech2Text = {
   disable: function () {
     if (config.speech2text_enabled) {
       config.speech2text_enabled = 0
-      toggleSpeechToText(false).then(() => {
+      toggleSpeechToText({enabled: false}).then(() => {
         UI.render()
       })
     }
@@ -21,7 +21,7 @@ const Speech2Text = {
   enable: function () {
     if (!config.speech2text_enabled) {
       config.speech2text_enabled = 1
-      toggleSpeechToText(true).then(() => {
+      toggleSpeechToText({enabled: true}).then(() => {
         if (!Speech2Text.initialized) {
           Speech2Text.init()
           Speech2Text.loadRecognition()

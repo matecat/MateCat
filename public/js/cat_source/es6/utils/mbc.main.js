@@ -296,7 +296,7 @@ MBC.init = function () {
     var getTeamUsers = function () {
       var teamId = config.id_team
       if (teamId) {
-        const promise = getTeamUsersApi(teamId)
+        const promise = getTeamUsersApi({teamId})
         promise
           .then((data) => {
             var team = {

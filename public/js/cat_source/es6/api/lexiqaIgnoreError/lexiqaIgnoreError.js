@@ -2,14 +2,15 @@ import {flattenObject} from '../../utils/queryString'
 /**
  * Send ignore error to Lexiqa server
  *
- * @param {string} errorId
- * @param {string} [lexiqaDomain=config.lexiqaServer]
+ * @param {Object} options
+ * @param {string} options.errorId
+ * @param {string} [options.lexiqaDomain=config.lexiqaServer]
  * @returns {Promise<object>}
  */
-export const lexiqaIgnoreError = async (
+export const lexiqaIgnoreError = async ({
   errorId,
   lexiqaDomain = config.lexiqaServer,
-) => {
+}) => {
   const dataParams = flattenObject({
     data: {
       errorid: errorId,

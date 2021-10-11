@@ -1,12 +1,13 @@
 /**
  * Return leqixa warnings
  *
- * @param {string} [lexiqaDomain=config.lexiqaServer]
+ * @param {Object} options
+ * @param {string} [options.lexiqaDomain=config.lexiqaServer]
  * @returns {Promise<object>}
  */
-export const lexiqaTooltipwarnings = async (
+export const lexiqaTooltipwarnings = async ({
   lexiqaDomain = config.lexiqaServer,
-) => {
+} = {}) => {
   const response = await fetch(`${lexiqaDomain}/tooltipwarnings`)
 
   if (!response.ok) return Promise.reject(response)
