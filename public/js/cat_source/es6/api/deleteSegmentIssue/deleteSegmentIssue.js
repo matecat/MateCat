@@ -15,7 +15,7 @@ export const deleteSegmentIssue = async ({
   idIssue,
   idJob = config.id_job,
   reviewPassword = config.review_password,
-} = {}) => {
+}) => {
   const response = await fetch(
     `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues/${idIssue}`,
     {
