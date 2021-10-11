@@ -40,19 +40,19 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         return $this->id . '-' . $this->password ;
     }
 
-    public function getQualityOverall() {
+    public function getQualityOverall(array $chunkReviews = []) {
 
         $project = $this->getProject();
         $featureSet = $project->getFeaturesSet();
 
-        return CatUtils::getQualityOverallFromJobStruct( $this, $project, $featureSet ) ;
+        return CatUtils::getQualityOverallFromJobStruct( $this, $project, $featureSet, $chunkReviews ) ;
     }
 
-    public function getQualityInfo(){
+    public function getQualityInfo(array $chunkReviews = []){
         $project = $this->getProject();
         $featureSet = $project->getFeaturesSet();
 
-        $qClass = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $this, $featureSet );
+        $qClass = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $this, $featureSet, $chunkReviews );
 
         if ( 'LQA\ChunkReviewStruct' === get_class( $qClass ) ) {
             return null ;

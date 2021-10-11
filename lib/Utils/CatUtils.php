@@ -689,12 +689,13 @@ class CatUtils {
      *
      * @param Projects_ProjectStruct $project
      * @param FeatureSet             $featureSet
+     * @param array                  $chunkReviews
      *
      * @return string
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
-        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $featureSet );
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet, array $chunkReviews = [] ) {
+        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $featureSet, $chunkReviews );
         $result = null;
 
         if ( $featureSet->hasRevisionFeature() ) {
@@ -716,8 +717,8 @@ class CatUtils {
 
     /**
      * @param Jobs_JobStruct $job
-     *
      * @param FeatureSet     $featureSet
+     * @param array          $chunkReviews
      *
      * @return array|\LQA\ChunkReviewStruct|null
      * @throws ReflectionException
@@ -725,11 +726,13 @@ class CatUtils {
      * @deprecated this method should only return values for legacy revision, it should not return ChunkReviewStruct nor
      *             it should make use of $featureSet to determine the revision type, use `getQualityOverallFromJobStruct`.
      */
-    public static function getQualityInfoOrChunkReviewStructFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
+    public static function getQualityInfoOrChunkReviewStructFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet, array $chunkReviews = [] ) {
 
         $result = null;
         if ( $featureSet->hasRevisionFeature() ) {
-            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
+            // we can pass $chunkReviews by reference
+            // avoiding duplicate queries
+            $result = ($chunkReviews) ? $chunkReviews[0] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
         } else {
             $result = self::getQualityInfoFromJobStruct( $job, $featureSet );
         }
