@@ -157,7 +157,8 @@ class Job {
             }
         }
 
-        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
+        // Added 5 minutes cache here
+        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
 
         $result = [
                 'id'                    => (int)$chunk->id,
@@ -176,7 +177,7 @@ class Job {
                 'created_at'            => Utils::api_timestamp( $chunk->create_date ),
                 'create_date'           => $chunk->create_date,
                 'formatted_create_date' => ManageUtils::formatJobDate( $chunk->create_date ),
-                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $project, $featureSet ),
+                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $project, $featureSet, $chunkReviews ),
                 'pee'                   => $chunk->getPeeForTranslatedSegments(),
                 'tte'                   => (int)( (int)$chunk->total_time_to_edit / 1000 ),
                 'private_tm_key'        => $this->getKeyList( $chunk ),
@@ -188,8 +189,8 @@ class Job {
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
                 'standard_wc'           => (float)$chunk->standard_analysis_wc,
                 'quality_summary'       => [
-                        'equivalent_class' => $chunk->getQualityInfo(),
-                        'quality_overall'  => $chunk->getQualityOverall(),
+                        'equivalent_class' => $chunk->getQualityInfo($chunkReviews),
+                        'quality_overall'  => $chunk->getQualityOverall($chunkReviews),
                         'errors_count'     => (int)$chunk->getErrorsCount(),
                         'revise_issues'    => $reviseIssues
                 ],
