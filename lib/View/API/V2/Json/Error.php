@@ -10,6 +10,8 @@
 namespace API\V2\Json;
 
 
+use Exception;
+
 class Error {
 
     private $data;
@@ -31,7 +33,7 @@ class Error {
 
         foreach ( $data as $error ) {
 
-            if ( $error instanceof \Exception ) {
+            if ( $error instanceof Exception ) {
                 $code   = $error->getCode();
                 $output = $error->getMessage();
             } else {

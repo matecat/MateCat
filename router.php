@@ -3,6 +3,7 @@
 use API\V2\Exceptions\AuthenticationError;
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Exceptions\ExternalServiceException;
+use API\V2\Exceptions\UnprocessableException;
 use API\V2\Exceptions\ValidationError;
 use API\V2\Json\Error;
 use Exceptions\NotFoundException;
@@ -51,6 +52,9 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
     } catch ( NotFoundException $e ) {
         \Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
         $klein->response()->code( 404 );
+        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+    } catch( UnprocessableException $e ){
+        $klein->response()->code( 422 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( ExternalServiceException $e ) {
         $klein->response()->code( 503 );
