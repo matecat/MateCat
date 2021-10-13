@@ -1,3 +1,5 @@
+import {getQueryStringFromProps} from '../../utils/queryString'
+
 /**
  * Return leqixa warnings
  *
@@ -8,7 +10,9 @@
 export const lexiqaTooltipwarnings = async ({
   lexiqaDomain = config.lexiqaServer,
 } = {}) => {
-  const response = await fetch(`${lexiqaDomain}/tooltipwarnings`)
+  const response = await fetch(
+    `${lexiqaDomain}/tooltipwarnings${getQueryStringFromProps(pluginOptions)}`,
+  )
 
   if (!response.ok) return Promise.reject(response)
 
@@ -17,3 +21,5 @@ export const lexiqaTooltipwarnings = async ({
 
   return data
 }
+
+export const pluginOptions = {}
