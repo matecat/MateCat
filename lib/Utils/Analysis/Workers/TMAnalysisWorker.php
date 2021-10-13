@@ -9,6 +9,7 @@
 
 namespace Analysis\Workers;
 
+use Analysis\AnalysisDao;
 use Analysis\Queue\RedisKeys;
 use Constants\Ices;
 use Database;
@@ -139,7 +140,7 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
         $filter     = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target, [] );
         $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
 
@@ -204,7 +205,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
-        $segment = (new \Segments_SegmentDao())->getById($queueElement->params->id_segment);
+        $segment = ( new \Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
 
         $tm_data                             = [];
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
@@ -213,8 +214,8 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'suggestion' ]             = $suggestion;
         $tm_data[ 'suggestions_array' ]      = $suggestion_json;
         $tm_data[ 'match_type' ]             = $new_match_type;
-        $tm_data[ 'eq_word_count' ]          = ($eq_words > $segment->raw_word_count) ? $segment->raw_word_count : $eq_words;
-        $tm_data[ 'standard_word_count' ]    = ($standard_words > $segment->raw_word_count) ? $segment->raw_word_count : $standard_words;
+        $tm_data[ 'eq_word_count' ]          = ( $eq_words > $segment->raw_word_count ) ? $segment->raw_word_count : $eq_words;
+        $tm_data[ 'standard_word_count' ]    = ( $standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : $standard_words;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
         $tm_data[ 'serialized_errors_list' ] = $this->mergeJsonErrors( $err_json, $err_json2 );
@@ -895,6 +896,7 @@ class TMAnalysisWorker extends AbstractWorker {
             ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
             Projects_ProjectDao::destroyCacheById( $_project_id );
             Projects_ProjectDao::destroyCacheByIdAndPassword( $_project_id, $_params->ppassword );
+            AnalysisDao::destroyCacheByProjectId( $_project_id );
 
         }
 
