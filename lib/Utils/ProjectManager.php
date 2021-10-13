@@ -1659,7 +1659,7 @@ class ProjectManager {
 
         $projectStruct = $jobToSplit->getProject( 60 * 10 );
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
-        ( new AnalysisDao())->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+        AnalysisDao::destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
@@ -1766,7 +1766,7 @@ class ProjectManager {
         $this->dbHandler->getConnection()->commit();
 
         $jobDao->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
-        ( new AnalysisDao())->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+        AnalysisDao::destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
         $projectStruct = $jobStructs[ 0 ]->getProject( 60 * 10 );
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
