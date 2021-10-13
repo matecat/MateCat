@@ -659,6 +659,16 @@ LXQ.init = function () {
             error: errorList[j],
           })
         }
+        if (!isSource) {
+          let warningData = LXQ.lexiqaData.lexiqaWarnings[sid]
+          $.each(warningData.suggestions, function (i, suggest) {
+            messages.push({
+              msg: suggest,
+              error: errorList[j],
+              type: 'suggestion',
+            })
+          })
+        }
       })
       return messages
     }

@@ -12,18 +12,33 @@ class LexiqaTooltipInfo extends Component {
     let messages = this.props.messages
     let html = []
     _.each(messages, (message, i) => {
-      html.push(
-        <div className="tooltip-error-container" key={i}>
-          <span className="tooltip-error-category">{message.msg}</span>
-          <div
-            className="tooltip-error-ignore"
-            onClick={() => this.ignoreError(message)}
-          >
-            <span className="icon-cancel-circle" />
-            <span className="tooltip-error-ignore-text">Ignore</span>
-          </div>
-        </div>,
-      )
+      if (message.type === 'styleguide') {
+        html.push(
+          <div className="tooltip-error-container" key={i}>
+            <span className="tooltip-error-category">{message.msg}</span>
+            <div
+              className="tooltip-error-ignore"
+              // onClick={() => this.replaceWord(message)}
+            >
+              <span className="some-other-icon-for-suggest" />
+              <span className="tooltip-error-ignore-text">Replace</span>
+            </div>
+          </div>,
+        )
+      } else {
+        html.push(
+          <div className="tooltip-error-container" key={i}>
+            <span className="tooltip-error-category">{message.msg}</span>
+            <div
+              className="tooltip-error-ignore"
+              onClick={() => this.ignoreError(message)}
+            >
+              <span className="icon-cancel-circle" />
+              <span className="tooltip-error-ignore-text">Ignore</span>
+            </div>
+          </div>,
+        )
+      }
     })
     return html
   }
