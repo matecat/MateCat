@@ -29,7 +29,7 @@ class ProjectCreationStatusController extends KleinController {
             $response = [];
             $response[] = new Exception( "ID project is not a valid integer", -1 );
 
-            $this->response->code( 500 );
+            $this->response->code( 400 );
             $this->response->json( ( new Error( (object)$response ) )->render() );
             exit();
         }
