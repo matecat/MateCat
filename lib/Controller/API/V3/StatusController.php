@@ -81,12 +81,39 @@ class StatusController extends KleinController {
      */
     public function index() {
 
+        $noJobsFoundErrorMsg = 'The project doesn\'t have any jobs.';
+
         // params
         $id_project = $this->request->param( 'id_project' );
         $password   = $this->request->param( 'password' );
 
         // fetch data
         $this->fetchData( $id_project, $password );
+
+        // return 404 if there are no chunks
+        // (or they were deleted)
+        $chunksCount = 0;
+
+        if(!empty($this->chunks)){
+            foreach ($this->chunks as $chunk){
+                if($chunk->status_owner !== Constants_JobStatus::STATUS_DELETED){
+                    $chunksCount++;
+                }
+            }
+        }
+
+        if($chunksCount === 0 ){
+            $this->response->status()->setCode( 404 );
+            $this->response->json( [
+                'errors' => [
+                    [
+                            'code' => 0,
+                            'message' => $noJobsFoundErrorMsg
+                    ]
+                ]
+            ] );
+            exit();
+        }
 
         // build project metadata
         try {
@@ -104,19 +131,6 @@ class StatusController extends KleinController {
             } catch ( \Exception $exception ) {
                 throw new NotFoundException( 'Error during rendering of job with id ' . $chunk->id );
             }
-        }
-
-        // return 404 if there are no chunks
-        // (or they were deleted)
-        if(empty($metadata->chunks)){
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
-                'errors' => [
-                    'code' => 0,
-                    'message' => 'No project found.'
-                ]
-            ] );
-            exit();
         }
 
         $this->response->json( $metadata );
