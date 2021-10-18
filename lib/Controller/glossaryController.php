@@ -54,7 +54,7 @@ class glossaryController extends ajaxController {
                 'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'newtranslation'   => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'comment'          => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id'               => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY ],
+                'id'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
         ];
@@ -246,6 +246,8 @@ class glossaryController extends ajaxController {
 
     /**
      * @param $config
+     *
+     * @throws ReflectionException
      */
     protected function _delete( $config ) {
 

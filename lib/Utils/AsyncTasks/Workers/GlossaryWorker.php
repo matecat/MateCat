@@ -82,10 +82,11 @@ class GlossaryWorker extends AbstractWorker {
 
         //prepare the error report
         $set_code = [];
-        //delete all id from the keys
-        foreach ( $id_matches as $id_match ) {
+
+        //delete id from the keys
+        if($id_matches !== null){
             $config[ 'id_user' ] = $keys_hashes;
-            $config[ 'id' ]      = $id_match;
+            $config[ 'id' ]      = $id_matches;
             $TMS_RESULT          = $_TMS->delete( $config );
             $set_code[]          = $TMS_RESULT;
         }
