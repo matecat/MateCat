@@ -384,6 +384,8 @@ class GlossaryWorker extends AbstractWorker {
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
 
+        $config['id_match'] = $payload['id_segment'];
+
         $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
         $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
 
@@ -403,6 +405,7 @@ class GlossaryWorker extends AbstractWorker {
             /**
              * @var $tm_key TmKeyManagement_TmKeyStruct
              */
+
             foreach ( $tm_keys as $tm_key ) {
                 $config[ 'id_user' ] = $tm_key->key;
                 $TMS_RESULT          = $_TMS->updateGlossary( $config );
