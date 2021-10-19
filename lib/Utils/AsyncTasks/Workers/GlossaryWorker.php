@@ -85,10 +85,11 @@ class GlossaryWorker extends AbstractWorker {
 
         //delete id from the keys
         if($id_matches !== null){
-            $config[ 'id_user' ] = $keys_hashes;
-            $config[ 'id' ]      = $id_matches;
-            $TMS_RESULT          = $_TMS->delete( $config );
-            $set_code[]          = $TMS_RESULT;
+            $config[ 'id_user' ]  = $keys_hashes;
+            $config[ 'id_match' ] = $id_matches;
+
+            $TMS_RESULT           = $_TMS->delete( $config );
+            $set_code[]           = $TMS_RESULT;
         }
 
         $set_successful = true;
