@@ -14,7 +14,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} [idClient=config.id_client]
  * @returns {Promise<object>}
  */
-export const updateGlossaryItem = async (
+export const updateGlossaryItem = async ({
   idSegment,
   idItem,
   source,
@@ -24,7 +24,7 @@ export const updateGlossaryItem = async (
   idJob = config.id_job,
   password = config.password,
   idClient = config.id_client,
-) => {
+}) => {
   const dataParams = {
     exec: 'update',
     segment: source,
