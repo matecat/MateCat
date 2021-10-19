@@ -3,15 +3,16 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Update glossary item
  *
- * @param {string} idSegment
- * @param {string} idItem
- * @param {string} source
- * @param {string} target
- * @param {string} newTranslation
- * @param {string} comment
- * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
- * @param {string} [idClient=config.id_client]
+ * @param {Object} options
+ * @param {string} options.idSegment
+ * @param {string} options.idItem
+ * @param {string} options.source
+ * @param {string} options.target
+ * @param {string} options.newTranslation
+ * @param {string} options.comment
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
+ * @param {string} [options.idClient=config.id_client]
  * @returns {Promise<object>}
  */
 export const updateGlossaryItem = async ({
