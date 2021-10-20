@@ -326,6 +326,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'snote' ]    = $_config[ 'tnote' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
+        $parameters[ 'id' ]       = $_config[ 'id_match' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {

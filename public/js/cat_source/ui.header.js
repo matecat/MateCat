@@ -16,6 +16,7 @@ import SegmentStore from './es6/stores/SegmentStore'
 import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
 import {getJobMetadata} from './es6/api/getJobMetadata'
 import {logoutUser} from './es6/api/logoutUser'
+import {reloadQualityReport} from './es6/api/reloadQualityReport'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -251,16 +252,7 @@ $.extend(window.UI, {
     }
   },
   reloadQualityReport: function () {
-    var path = sprintf(
-      getMatecatApiDomain() + 'api/app/jobs/%s/%s/quality-report',
-      config.id_job,
-      config.password,
-    )
-    $.ajax({
-      type: 'GET',
-      xhrFields: {withCredentials: true},
-      url: path,
-    }).done(function (data) {
+    reloadQualityReport().then((data) => {
       CatToolActions.updateQualityReport(data['quality-report'])
     })
   },

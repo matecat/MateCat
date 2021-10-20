@@ -54,7 +54,7 @@ class glossaryController extends ajaxController {
                 'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'newtranslation'   => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'comment'          => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id'               => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY ],
+                'id'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
         ];
@@ -125,6 +125,11 @@ class glossaryController extends ajaxController {
                 $config[ 'newtranslation' ] = $this->newtranslation;
             }
 
+            if ( $this->translation && $this->segment ) {
+                $config[ 'translation' ]     = $this->translation;
+                $config[ 'segment' ] = $this->segment;
+            }
+
             switch ( $this->exec ) {
 
                 case 'get':
@@ -158,6 +163,8 @@ class glossaryController extends ajaxController {
 
     /**
      * @param $config
+     *
+     * @throws ReflectionException
      */
     protected function _get( $config ) {
 
@@ -188,6 +195,8 @@ class glossaryController extends ajaxController {
 
     /**
      * @param $config
+     *
+     * @throws ReflectionException
      */
     protected function _set( $config ) {
 
@@ -198,18 +207,18 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'set',
                 'payload' => [
-                        'id_segment'     => $this->id_segment,
-                        'id_client'      => $this->id_client,
-                        'tm_keys'        => $this->jobData[ 'tm_keys' ],
-                        'userRole'       => $this->userRole,
-                        'user'           => $this->user->toArray(),
-                        'featuresString' => $this->projectFeaturesString,
-                        'jobData'        => $this->jobData->toArray(),
-                        'tmProps'        => $this->jobData->getTMProps(),
-                        'config'         => $config,
-                        'id_job'         => $this->id_job,
-                        'password'       => $this->password,
-                        'userIsLogged'   => $this->userIsLogged,
+                    'id_segment'     => $this->id_segment,
+                    'id_client'      => $this->id_client,
+                    'tm_keys'        => $this->jobData[ 'tm_keys' ],
+                    'userRole'       => $this->userRole,
+                    'user'           => $this->user->toArray(),
+                    'featuresString' => $this->projectFeaturesString,
+                    'jobData'        => $this->jobData->toArray(),
+                    'tmProps'        => $this->jobData->getTMProps(),
+                    'config'         => $config,
+                    'id_job'         => $this->id_job,
+                    'password'       => $this->password,
+                    'userIsLogged'   => $this->userIsLogged,
                 ],
         ];
 
@@ -218,6 +227,8 @@ class glossaryController extends ajaxController {
 
     /**
      * @param $config
+     *
+     * @throws ReflectionException
      */
     protected function _update( $config ) {
 
@@ -226,19 +237,19 @@ class glossaryController extends ajaxController {
         }
 
         $params = [
-                'action'  => 'update',
-                'payload' => [
-                        'id_segment'     => $this->id_segment,
-                        'id_client'      => $this->id_client,
-                        'tm_keys'        => $this->jobData[ 'tm_keys' ],
-                        'userRole'       => $this->userRole,
-                        'user'           => $this->user->toArray(),
-                        'featuresString' => $this->projectFeaturesString,
-                        'featureSet'     => $this->featureSet,
-                        'jobData'        => $this->jobData->toArray(),
-                        'tmProps'        => $this->jobData->getTMProps(),
-                        'config'         => $config,
-                ],
+            'action'  => 'update',
+            'payload' => [
+                'id_segment'     => $this->id_segment,
+                'id_client'      => $this->id_client,
+                'tm_keys'        => $this->jobData[ 'tm_keys' ],
+                'userRole'       => $this->userRole,
+                'user'           => $this->user->toArray(),
+                'featuresString' => $this->projectFeaturesString,
+                'featureSet'     => $this->featureSet,
+                'jobData'        => $this->jobData->toArray(),
+                'tmProps'        => $this->jobData->getTMProps(),
+                'config'         => $config,
+            ],
         ];
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
@@ -246,6 +257,8 @@ class glossaryController extends ajaxController {
 
     /**
      * @param $config
+     *
+     * @throws ReflectionException
      */
     protected function _delete( $config ) {
 
