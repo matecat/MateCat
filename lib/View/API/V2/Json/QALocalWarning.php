@@ -50,7 +50,7 @@ class QALocalWarning extends QAWarning {
                 ]
         ];
 
-        $exceptionList = $this->QA->getEexeptionList();
+        $exceptionList = $this->QA->getExceptionList();
 
         $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
         $issues_detail[ QA::WARNING ] = $exceptionList[ QA::WARNING ];
