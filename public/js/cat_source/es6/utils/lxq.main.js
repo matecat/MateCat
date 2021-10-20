@@ -2,8 +2,11 @@ import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 
 import SegmentActions from '../actions/SegmentActions'
+import {toggleTagLexica} from '../api/toggleTagLexica'
+import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarnings'
+import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
-import {getMatecatApiDomain} from './getMatecatApiDomain'
+import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 
 const LXQ = {
   enabled: function () {
@@ -12,21 +15,7 @@ const LXQ = {
   enable: function () {
     if (!config.lxq_enabled) {
       config.lxq_enabled = 1
-      // Todo Call Service to enable Tag Lexiqa
-      var path = sprintf(
-        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
-        config.id_job,
-        config.password,
-      )
-      var data = {
-        lexiqa: true,
-      }
-      $.ajax({
-        url: path,
-        type: 'POST',
-        data: data,
-        xhrFields: {withCredentials: true},
-      }).done(function () {
+      toggleTagLexica({enabled: true}).then(() => {
         if (!LXQ.initialized) {
           LXQ.init()
         } else {
@@ -39,20 +28,7 @@ const LXQ = {
   disable: function () {
     if (config.lxq_enabled) {
       config.lxq_enabled = 0
-      var path = sprintf(
-        getMatecatApiDomain() + 'api/v2/jobs/%s/%s/options',
-        config.id_job,
-        config.password,
-      )
-      var data = {
-        lexiqa: false,
-      }
-      $.ajax({
-        url: path,
-        type: 'POST',
-        data: data,
-        xhrFields: {withCredentials: true},
-      }).done(function () {
+      toggleTagLexica({enabled: false}).then(() => {
         UI.render()
         SegmentActions.qaComponentsetLxqIssues([])
       })
@@ -205,75 +181,69 @@ const LXQ = {
     }
     //FOTD
     LXQ.lexiqaData.lexiqaFetching = true
-    $.ajax({
-      type: 'GET',
-      url: config.lexiqaServer + '/matecaterrors',
-      data: {id: LXQ.partnerid + '-' + config.id_job + '-' + config.password},
-      cache: false,
-      success: function (results) {
-        if (results.errors != 0) {
-          //only do something if there are errors in lexiqa server
-          LXQ.lexiqaData.lexiqaWarnings = {}
+    getLexiqaWarningsApi({partnerId: LXQ.partnerid}).then((results) => {
+      if (results.errors != 0) {
+        //only do something if there are errors in lexiqa server
+        LXQ.lexiqaData.lexiqaWarnings = {}
 
-          results.segments.forEach(function (element) {
-            LXQ.lexiqaData.segments.push(element.segid)
-            if (element.errornum === 0) {
-              return
-            }
+        results.segments.forEach(function (element) {
+          LXQ.lexiqaData.segments.push(element.segid)
+          if (element.errornum === 0) {
+            return
+          }
 
-            //highlight the respective segments here
-            var highlights = {}
-            var errorsMap = {
-              numbers: [],
-              punctuation: [],
-              spaces: [],
-              urls: [],
-              spelling: [],
-              specialchardetect: [],
-              mspolicheck: [],
-              glossary: [],
-              blacklist: [],
-            }
+          //highlight the respective segments here
+          var highlights = {}
+          var errorsMap = {
+            numbers: [],
+            punctuation: [],
+            spaces: [],
+            urls: [],
+            spelling: [],
+            specialchardetect: [],
+            mspolicheck: [],
+            glossary: [],
+            blacklist: [],
+          }
 
-            let seg = SegmentStore.getSegmentByIdToJS(element.segid)
-            if (!seg) return
+          let seg = SegmentStore.getSegmentByIdToJS(element.segid)
+          if (!seg) return
 
-            LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
-            results.results[element.segid].forEach(function (qadata) {
-              LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
-                qadata
+          LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
+          results.results[element.segid].forEach(function (qadata) {
+            LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
+              qadata
 
-              if (!qadata.ignored) {
-                qadata.color = LXQ.colors[qadata.category]
-                if (qadata.insource) {
-                  highlights.source = highlights.source
-                    ? highlights.source
-                    : _.cloneDeep(errorsMap)
-                  highlights.source[qadata.category].push(qadata)
-                } else {
-                  highlights.target = highlights.target
-                    ? highlights.target
-                    : _.cloneDeep(errorsMap)
-                  highlights.target[qadata.category].push(qadata)
-                }
+            if (!qadata.ignored) {
+              qadata.color = LXQ.colors[qadata.category]
+              if (qadata.insource) {
+                highlights.source = highlights.source
+                  ? highlights.source
+                  : _.cloneDeep(errorsMap)
+                highlights.source[qadata.category].push(qadata)
+              } else {
+                highlights.target = highlights.target
+                  ? highlights.target
+                  : _.cloneDeep(errorsMap)
+                highlights.target[qadata.category].push(qadata)
               }
-            })
-            if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
-              LXQ.removeSegmentWarning(element.segid)
             }
-            SegmentActions.addLexiqaHighlight(element.segid, highlights)
           })
+          if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
+            LXQ.removeSegmentWarning(element.segid)
+          }
+          SegmentActions.addLexiqaHighlight(element.segid, highlights)
+        })
 
-          LXQ.updateWarningsUI()
-        }
+        LXQ.updateWarningsUI()
+      }
 
-        if (LXQ.enabled()) {
-          LXQ.doQAallSegments()
-          //LXQ.refreshElements();
-        }
-        LXQ.lexiqaData.lexiqaFetching = false
-        if (callback) callback()
-      },
+      if (LXQ.enabled()) {
+        LXQ.doQAallSegments()
+        //LXQ.refreshElements();
+      }
+      LXQ.lexiqaData.lexiqaFetching = false
+      if (callback) callback()
     })
   },
   updateWarningsUI: function () {
@@ -755,6 +725,8 @@ LXQ.init = function () {
           // console.log('postIgnoreError success: '+result);
         },
       })
+
+      // lexiqaIgnoreError({errorid});
     }
 
     var getVisibleWarningsCountForSegment = function (segment) {
@@ -807,19 +779,11 @@ LXQ.init = function () {
     }
 
     var initPopup = function () {
-      $.ajax({
-        type: 'GET',
-        url: config.lexiqaServer + '/tooltipwarnings',
-        success: function (result) {
-          warningMessages = result
-          modulesNoHighlight = []
-          $.each(result, function (key, el) {
-            if (key[key.length - 1] === 'g') modulesNoHighlight.push(key)
-          })
-        },
-        error: function (result) {
-          // console.err(result);
-        },
+      lexiqaTooltipwarnings().then((data) => {
+        warningMessages = data
+        modulesNoHighlight = Object.entries(data)
+          .filter(([key]) => key[key.length - 1] === 'g')
+          .map(([key]) => key)
       })
     }
     // Interfaces

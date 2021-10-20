@@ -10,6 +10,7 @@ import SegmentStore from '../es6/stores/SegmentStore'
 import {getSegmentVersionsIssues} from '../es6/api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssue} from '../es6/api/sendSegmentVersionIssue'
 import {sendSegmentVersionIssueComment} from '../es6/api/sendSegmentVersionIssueComment'
+import {deleteSegmentIssue as deleteSegmentIssueApi} from '../es6/api/deleteSegmentIssue'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
@@ -76,21 +77,13 @@ if (ReviewExtended.enabled()) {
      */
     deleteTranslationIssue: function (context) {
       var parsed = JSON.parse(context)
-      var issue_path = sprintf(
-        getMatecatApiDomain() +
-          'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
-        config.id_job,
-        config.review_password,
-        parseInt(parsed.id_segment),
-        parsed.id_issue,
-      )
       var issue_id = parsed.id_issue
       var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment))
-      $.ajax({
-        url: issue_path,
-        type: 'DELETE',
-        xhrFields: {withCredentials: true},
-      }).done(function () {
+
+      deleteSegmentIssueApi({
+        idSegment: parsed.id_segment,
+        idIssue: parsed.id_issue,
+      }).then(() => {
         UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
         UI.reloadQualityReport()
       })

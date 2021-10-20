@@ -5,6 +5,7 @@ import SegmentActions from '../actions/SegmentActions'
 import CommentsStore from '../stores/CommentsStore'
 import {getMatecatApiDomain} from './getMatecatApiDomain'
 import TextUtils from './textUtils'
+import {getTeamUsers as getTeamUsersApi} from '../api/getTeamUsers'
 
 const MBC = {
   enabled: function () {
@@ -295,33 +296,26 @@ MBC.init = function () {
     var getTeamUsers = function () {
       var teamId = config.id_team
       if (teamId) {
-        return $.ajax({
-          async: true,
-          type: 'get',
-          xhrFields: {withCredentials: true},
-          url:
-            getMatecatApiDomain() +
-            'api/app/teams/' +
-            teamId +
-            '/members/public',
-        })
-          .done(function (data) {
+        const promise = getTeamUsersApi({teamId})
+        promise
+          .then((data) => {
             var team = {
               uid: 'team',
               first_name: 'Team',
               last_name: '',
             }
-            MBC.teamUsers = data
+            MBC.teamUsers = [...data]
             MBC.teamUsers.unshift(team)
 
             CommentsActions.updateTeamUsers(MBC.teamUsers)
           })
-          .fail(function () {
+          .catch(() => {
             MBC.teamUsers = []
           })
+        return promise
       } else {
         MBC.teamUsers = []
-        return $.Deferred().resolve()
+        return Promise.resolve()
       }
     }
 
