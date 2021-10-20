@@ -772,6 +772,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       )
     }
   },
+  addLexiqaStyleGuideMessages(sid, styleGuideMessages) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn(
+      [index, 'styleGuideMessages'],
+      styleGuideMessages,
+    )
+  },
   updateGlobalWarnings: function (warnings) {
     Object.keys(warnings).map((key) => {
       Object.keys(warnings[key].Categories).map((key2) => {
@@ -1666,6 +1674,16 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.ADD_LXQ_HIGHLIGHT:
       SegmentStore.addLexiqaHighlight(action.sid, action.matches, action.type)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      break
+    case SegmentConstants.ADD_LXQ_STYLE_GUIDE_MESSAGES:
+      SegmentStore.addLexiqaStyleGuideMessages(
+        action.sid,
+        action.styleGuideMessages,
+      )
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,

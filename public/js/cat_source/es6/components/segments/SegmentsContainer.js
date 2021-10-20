@@ -89,7 +89,6 @@ class SegmentsContainer extends React.Component {
   renderSegments(segments) {
     // VirtualList.prototype.animateScroll = false;
     // Update previous last segment height inside segmentsHeightsMap
-
     if (this.state.segments.size !== segments.size) {
       const oldLastSegment = this.getSegmentByIndex(
         this.state.segments.size - 1,
@@ -243,7 +242,6 @@ class SegmentsContainer extends React.Component {
 
   getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
     let isReviewExtended = !!this.props.isReviewExtended
-
     let item = (
       <Segment
         key={segment.sid}

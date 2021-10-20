@@ -365,6 +365,13 @@ const SegmentActions = {
       type: type,
     })
   },
+  addLexiqaStyleGuideMessages: function (sid, styleGuideMessages) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ADD_LXQ_STYLE_GUIDE_MESSAGES,
+      sid,
+      styleGuideMessages,
+    })
+  },
   selectNextSegmentDebounced: _.debounce(() => {
     SegmentActions.selectNextSegment()
   }, 100),
