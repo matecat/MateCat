@@ -76,20 +76,6 @@ section.opened svg.micBgSpeechReceiving {
   display: block;
 }
 
-section.opened {
-  ul.buttons {
-    margin-top: -13px;
-  }
-
-  .toolbar {
-    /* Tied to speech2text removal */
-    /* margin-left: 20px; */
-    float: left;
-    margin-top: 3px;
-    width: 65%;
-  }
-}
-
 $tlbr-btn-bg: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
 $tlbr-btn-bg-act: -webkit-linear-gradient(top, #eee, #e0e0e0);
 

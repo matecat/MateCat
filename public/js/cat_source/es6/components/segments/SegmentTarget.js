@@ -379,7 +379,13 @@ class SegmentTarget extends React.Component {
                   : ``
               }`}
             >
-              {charactersCounter}
+              <span className={'segment-counter-current'}>
+                {charactersCounter}
+              </span>
+              /
+              <span className={'segment-counter-limit'}>
+                {charactersCounterLimit}
+              </span>
             </div>
           )}
         {this.props.segment.warnings ? (
