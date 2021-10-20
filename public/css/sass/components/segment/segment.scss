@@ -187,3 +187,17 @@ section {
 .projectbar.slide-right {
   width: 70%;
 }
+
+.segment-counter {
+  display: inline-block;
+  position: relative;
+  float: right;
+  padding: 4px;
+  margin-top: -14px;
+  margin-right: 20px;
+  line-height: 16px;
+  color: $notification-warning;
+  &.segment-counter-limit-error {
+    color: $notification-error;
+  }
+}
