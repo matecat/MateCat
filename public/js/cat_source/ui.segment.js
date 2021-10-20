@@ -101,6 +101,7 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
         // UI.checkWarnings(false);
+        SegmentActions.changeTagProjectionStatus(true)
       })
     },
     /**
@@ -113,6 +114,7 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
         //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
         // });
         // UI.checkWarnings(false);
+        SegmentActions.changeTagProjectionStatus(false)
       })
     },
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
