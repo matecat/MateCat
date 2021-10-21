@@ -399,6 +399,15 @@ class MultiCurlHandler {
         return array_filter( $map );  // <- remove null array entries
     }
 
+    /**
+     * @param $tokenHash
+     *
+     * @return int
+     */
+    public function getStatusCode( $tokenHash ) {
+        return (int)$this->multi_curl_info[ $tokenHash ][ 'http_code' ];
+    }
+
     public function clear(){
         $this->multiCurlCloseAll();
         $this->curl_headers_requests = [];
@@ -428,4 +437,4 @@ class MultiCurlHandler {
         return $record;
     }
 
-} 
+}
