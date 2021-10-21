@@ -8,6 +8,7 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   CompositeDecorator,
+  SelectionState,
 } from 'draft-js'
 
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -23,6 +24,7 @@ import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
+import transformLexiqaPoints from './utils/DraftMatecatUtils/transformLexiqaPoints'
 import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
@@ -179,6 +181,7 @@ class Editarea extends React.Component {
         sid,
         false,
         this.getUpdatedSegmentInfo,
+        this.replaceWordAt,
       )
       _.remove(
         this.decoratorsStructure,
@@ -461,6 +464,27 @@ class Editarea extends React.Component {
     ) {
       this.checkDecorators(prevProps)
     }
+  }
+
+  replaceWordAt = ({newWord, start, end}) => {
+    const startIndex = start
+    const endIndex = end
+    const selection = this.state.editorState.getSelection().merge({
+      anchorOffset: startIndex,
+      focusOffset: endIndex,
+    })
+    const contentState = Modifier.replaceText(
+      this.state.editorState.getCurrentContent(),
+      selection,
+      newWord,
+    )
+    const updatedState = EditorState.push(this.state.editorState, contentState)
+    this.setState({editorState: updatedState}, () => {
+      // Reactivate decorators
+      this.updateTranslationDebounced()
+      // Stop composition mode
+      this.onCompositionStopDebounced()
+    })
   }
 
   render() {

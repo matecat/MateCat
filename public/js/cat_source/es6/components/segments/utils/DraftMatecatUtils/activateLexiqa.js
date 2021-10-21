@@ -11,6 +11,7 @@ const activateLexiqa = (
   sid,
   isSource,
   getUpdatedSegmentInfo,
+  replaceWordAt,
 ) => {
   const generateLexiqaDecorator = (warnings, sid, isSource, decoratorName) => {
     return {
@@ -35,6 +36,7 @@ const activateLexiqa = (
         sid,
         isSource,
         getUpdatedSegmentInfo,
+        replaceWordAt,
       },
     }
   }
