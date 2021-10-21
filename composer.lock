@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.198.7",
+            "version": "3.199.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "40197a954c9f49557a1b0d49e2a9bd6f7bf6adfc"
+                "reference": "2233d15e5d434b0a259eaacae5a86b3ba19945cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/40197a954c9f49557a1b0d49e2a9bd6f7bf6adfc",
-                "reference": "40197a954c9f49557a1b0d49e2a9bd6f7bf6adfc",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2233d15e5d434b0a259eaacae5a86b3ba19945cd",
+                "reference": "2233d15e5d434b0a259eaacae5a86b3ba19945cd",
                 "shasum": ""
             },
             "require": {
@@ -77,7 +77,7 @@
                 "ext-simplexml": "*",
                 "guzzlehttp/guzzle": "^5.3.3|^6.2.1|^7.0",
                 "guzzlehttp/promises": "^1.4.0",
-                "guzzlehttp/psr7": "^1.7.0",
+                "guzzlehttp/psr7": "^1.7.0|^2.0",
                 "mtdowling/jmespath.php": "^2.6",
                 "php": ">=5.5"
             },
@@ -143,9 +143,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.198.7"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.199.0"
             },
-            "time": "2021-10-18T18:17:12+00:00"
+            "time": "2021-10-20T18:14:51+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -929,16 +929,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.85",
+            "version": "v1.0.86",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "784a8d331639b12396316a0350cef7e48314ba73"
+                "reference": "4a57f9a75acbc982f2a3c9d9e050f475d1170e70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/784a8d331639b12396316a0350cef7e48314ba73",
-                "reference": "784a8d331639b12396316a0350cef7e48314ba73",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/4a57f9a75acbc982f2a3c9d9e050f475d1170e70",
+                "reference": "4a57f9a75acbc982f2a3c9d9e050f475d1170e70",
                 "shasum": ""
             },
             "require": {
@@ -974,9 +974,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.85"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.86"
             },
-            "time": "2021-10-19T08:07:56+00:00"
+            "time": "2021-10-21T11:08:12+00:00"
         },
         {
             "name": "monolog/monolog",
