@@ -369,7 +369,7 @@ class QA {
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',
 
-            3000 => 'Size limit exceeded',
+            3000 => 'Characters limit exceeded',
     ];
 
     protected $_tipMap = [
@@ -381,7 +381,7 @@ class QA {
          */
             29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
-            3000 => 'You reached the maximum allowed size of this string.',
+            3000 => 'Maximum characters limit exceeded.',
 
     ];
 
