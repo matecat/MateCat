@@ -381,9 +381,7 @@ class QA {
          */
             29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
-
-
-            3000 => 'You reached the maximum size of a text ',
+            3000 => 'You reached the maximum allowed size of this string.',
 
     ];
 
@@ -1559,6 +1557,7 @@ class QA {
 
         $this->_checkTagMismatch();
         $this->_checkBxAndExInsideG();
+        $this->_checkSizeRestriction();
 
         // all checks completed
         return $this->getErrors();

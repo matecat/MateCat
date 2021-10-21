@@ -337,6 +337,7 @@ class setTranslationController extends ajaxController {
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
+        $check->setIdSegment( $this->id_segment );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {

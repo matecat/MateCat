@@ -157,11 +157,7 @@ class getWarningController extends ajaxController {
     /**
      * Performs a check on single segment
      *
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws Exception
      */
     private function __segmentWarningsCall() {
 
@@ -198,10 +194,10 @@ class getWarningController extends ajaxController {
         $data = [];
 
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                'src_content' => $this->__postInput->src_content,
-                'trg_content' => $this->__postInput->trg_content,
-                'project'     => $this->project,
-                'chunk'       => $this->chunk
+            'src_content' => $this->__postInput->src_content,
+            'trg_content' => $this->__postInput->trg_content,
+            'project'     => $this->project,
+            'chunk'       => $this->chunk
         ] );
 
         $this->result[ 'data' ] = $data;
