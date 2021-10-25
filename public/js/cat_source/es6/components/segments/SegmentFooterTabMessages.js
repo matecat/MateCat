@@ -111,7 +111,7 @@ class SegmentFooterTabMessages extends React.Component {
 
   getStyleGuideMessages(messages) {
     return (
-      <div className="note" key="style-guide">
+      <div className="note note-style-guide" key="style-guide">
         <span className="note-label">Style guide: </span>
         <ul>
           {messages.map((style, index) => (
