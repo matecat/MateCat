@@ -2,6 +2,13 @@ import Cookies from 'js-cookie'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
+import {ajaxUtils} from './cat_source/es6/api/ajaxUtils'
+import {createNewTmKey} from './cat_source/es6/api/createNewTmKey'
+import {updateTmKey} from './cat_source/es6/api/updateTmKey'
+import {deleteTmKey} from './cat_source/es6/api/deleteTmKey'
+import {getInfoTmKey} from './cat_source/es6/api/getInfoTmKey'
+import {shareTmKey} from './cat_source/es6/api/shareTmKey'
+import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -209,10 +216,8 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           var descKey = $('#new-tm-description').val()
 
           if (config.isLoggedIn) {
-            UI.saveTMkey(keyValue, descKey).done(function (data) {
-              if (data.errors.length === 0) {
-                UI.checkTMKey('key')
-              }
+            UI.saveTMkey(keyValue, descKey).then(() => {
+              UI.checkTMKey('key')
             })
           } else {
             UI.checkTMKey('key')
@@ -638,36 +643,28 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         return false
       }
 
-      return APP.doRequest({
-        data: {
-          action: 'ajaxUtils',
-          exec: 'checkTMKey',
-          tm_key: keyValue,
-        },
-        context: operation,
-        error: function () {
-          console.log('checkTMKey error!!')
-        },
-        success: function (d) {
-          if (d.success === true) {
-            UI.removeErrorOnKeyInput()
-            if (this == 'key') {
-              UI.addTMKeyToList(false)
-              UI.clearTMUploadPanel()
-            }
-          } else {
-            UI.showErrorOnKeyInput(
-              'The key is not valid. <a class="active-tm-key-link">Restore generated key</a>',
-            )
-            setTimeout(function () {
-              $('.active-tm-key-link').off('click')
-              $('.active-tm-key-link').on('click', function () {
-                UI.openAddNewTm()
-                UI.removeErrorOnKeyInput()
-              })
-            }, 500)
+      ajaxUtils({
+        exec: 'checkTMKey',
+        tmKey: keyValue,
+      }).then((data) => {
+        if (data.success === true) {
+          UI.removeErrorOnKeyInput()
+          if (operation == 'key') {
+            UI.addTMKeyToList(false)
+            UI.clearTMUploadPanel()
           }
-        },
+        } else {
+          UI.showErrorOnKeyInput(
+            'The key is not valid. <a class="active-tm-key-link">Restore generated key</a>',
+          )
+          setTimeout(function () {
+            $('.active-tm-key-link').off('click')
+            $('.active-tm-key-link').on('click', function () {
+              UI.openAddNewTm()
+              UI.removeErrorOnKeyInput()
+            })
+          }, 500)
+        }
       })
     },
     checkTMKeyIsActive: function (key) {
@@ -878,7 +875,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       this.initTmxTooltips()
     },
     checkKeyIsShared: function (key) {
-      UI.getUserSharedKey(key).done(function (response) {
+      UI.getUserSharedKey(key).then((response) => {
         var users = response.data
         if (users.length > 1) {
           $('tr.mine[data-key=' + key + '] .icon-owner')
@@ -1329,64 +1326,47 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       if (old_descr === new_descr) {
         return
       }
-      APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'update',
-          key: tr.find('.privatekey').text(),
-          description: new_descr,
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your description. Please retry!',
-          )
-          // APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
-          $('.popup-tm').removeClass('saving')
-        },
-        success: function (d) {
+
+      updateTmKey({
+        key: tr.find('.privatekey').text(),
+        description: new_descr,
+      })
+        .then(() => {
           tr.find('.edit-desc').data('descr', new_descr)
           $('.popup-tm').removeClass('saving')
-          if (d.errors.length) {
-            UI.showErrorOnActiveTMTable(d.errors[0].message)
-            // APP.showMessage({msg: d.errors[0].message});
-          } else {
-            UI.hideAllBoxOnTables()
-          }
-        },
-      })
+          UI.hideAllBoxOnTables()
+        })
+        .catch((errors) => {
+          UI.showErrorOnActiveTMTable(errors[0].message)
+        })
     },
     saveTMkey: function (key, desc) {
       delete UI.newTmKey
       if (desc.length == 0) {
         desc = 'Private TM and Glossary'
       }
-      return APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'newKey',
-          key: key,
-          description: desc,
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your data. Please retry!',
-          )
-          $('.popup-tm').removeClass('saving')
-        },
-        success: function (d) {
+
+      const promise = createNewTmKey({
+        key: key,
+        description: desc,
+      })
+
+      promise
+        .then(() => {
           $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
-          if (d.errors.length) {
-            setTimeout(function () {
-              if (d.errors[0].code === '23000') {
-                UI.showErrorOnActiveTMTable('The key you entered is invalid.')
-              } else {
-                UI.showErrorOnActiveTMTable(d.errors[0].message)
-              }
-            }, 200)
-          }
-        },
-      })
+        })
+        .catch((errors) => {
+          setTimeout(function () {
+            if (errors[0].code === '23000') {
+              UI.showErrorOnActiveTMTable('The key you entered is invalid.')
+            } else {
+              UI.showErrorOnActiveTMTable(errors[0].message)
+            }
+          }, 200)
+        })
+
+      return promise
     },
 
     closeTMPanel: function () {
@@ -1591,25 +1571,21 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       $(tr).fadeOut('normal', function () {
         $(this).remove()
       })
-      APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'delete',
-          key: tr.find('.privatekey').text(),
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your data. Please retry!',
-          )
-          // console.log('Error deleting TM!!');
-        },
-        success: function () {
+
+      deleteTmKey({
+        key: tr.find('.privatekey').text(),
+      })
+        .then(() => {
           UI.hideAllBoxOnTables()
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
           }, 500)
-        },
-      })
+        })
+        .catch(() => {
+          UI.showErrorOnActiveTMTable(
+            'There was an error saving your data. Please retry!',
+          )
+        })
     },
     deleteMT: function (id) {
       APP.doRequest({
@@ -1882,17 +1858,12 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         return false
       }
       //call API
-      APP.doRequest({
-        data: {
-          action: 'createRandUser',
-        },
-        success: function (d) {
-          const data = d.data
-          //put value into input field
-          UI.newTmKey = data.key
-          UI.copyNewTMKey(UI.newTmKey)
-          return false
-        },
+      tmCreateRandUser().then((response) => {
+        const {data} = response
+        console.log(data)
+        //put value into input field
+        UI.newTmKey = data.key
+        UI.copyNewTMKey(UI.newTmKey)
       })
     },
     copyNewTMKey: function (key) {
@@ -1930,23 +1901,19 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       $(elem).parents('tr').find('.download-tmx-container').slideToggle()
     },
     getUserSharedKey: function (keyValue) {
-      return APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'info',
-          key: keyValue,
-        },
-        error: function () {
-          console.log('getUserSharedKey error')
-        },
-        success: function (d) {
-          if (d.success !== true) {
-            UI.showErrorOnActiveTMTable(
-              'Error retrieving the information, try again',
-            )
-          }
-        },
+      const promise = getInfoTmKey({
+        key: keyValue,
       })
+
+      promise.then((data) => {
+        if (data.success !== true) {
+          UI.showErrorOnActiveTMTable(
+            'Error retrieving the information, try again',
+          )
+        }
+      })
+
+      return promise
     },
     openShareResource: function (elem) {
       var tr = $(elem).parents('tr')
@@ -1964,7 +1931,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
 
       var key = tr.find('.privatekey').text()
       if (key.indexOf('*') > -1) return
-      this.getUserSharedKey(key).done(function (response) {
+      this.getUserSharedKey(key).then((response) => {
         if (response.success !== true) return
 
         var users = response.data
@@ -2447,9 +2414,9 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         return
       }
 
-      UI.shareKeyByEmail(emails, key).done(function (response) {
-        UI.hideAllBoxOnTables()
-        if (response.errors.length === 0) {
+      UI.shareKeyByEmail(emails, key)
+        .then(() => {
+          UI.hideAllBoxOnTables()
           if (button.hasClass('share-button-popup')) {
             APP.closePopup()
             UI.showSuccessOnActiveTMTable(msg)
@@ -2472,8 +2439,9 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           setTimeout(function () {
             UI.hideAllBoxOnTables()
           }, 4000)
-        } else {
-          var errorMsg = response.errors[0].message
+        })
+        .catch((errors) => {
+          var errorMsg = errors[0].message
           if (button.hasClass('share-button-popup')) {
             $('.share-popup-input-result').text(errorMsg)
             $('.share-popup-container-input-email').addClass('error')
@@ -2485,27 +2453,25 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
             }
             tr.find('.message-share-tmx-input-email').addClass('error')
           }
-        }
-      })
+        })
     },
     /**
      * Share a key to one or more email, separated by comma
      * @param container
      */
     shareKeyByEmail: function (emails, key) {
-      return APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'share',
-          key: key,
-          emails: emails,
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was a problem sharing the key, try again or contact the support.',
-          )
-        },
+      const promise = shareTmKey({
+        key: key,
+        emails: emails,
       })
+
+      promise.catch(() => {
+        UI.showErrorOnActiveTMTable(
+          'There was a problem sharing the key, try again or contact the support.',
+        )
+      })
+
+      return promise
     },
 
     storeMultiMatchLangs: function () {
