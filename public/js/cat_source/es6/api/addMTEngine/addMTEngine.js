@@ -1,18 +1,21 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Tm ajax utils
+ * Create new one MT engine
  *
  * @param {Object} options
- * @param {string} options.exec
- * @param {string} options.tmKey
+ * @param {string} options.name
+ * @param {string} options.provider
+ * @param {string} options.dataMt
  * @returns {Promise<object>}
  */
-export const ajaxUtils = async ({exec, tmKey}) => {
+export const addMTEngine = async ({name, provider, dataMt}) => {
   const paramsData = {
-    action: 'ajaxUtils',
-    exec,
-    tm_key: tmKey,
+    action: 'engine',
+    exec: 'add',
+    name,
+    provider,
+    data: dataMt,
   }
   const formData = new FormData()
 

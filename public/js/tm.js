@@ -2,13 +2,17 @@ import Cookies from 'js-cookie'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
-import {ajaxUtils} from './cat_source/es6/api/ajaxUtils'
+import {checkTMKey} from './cat_source/es6/api/checkTMKey'
 import {createNewTmKey} from './cat_source/es6/api/createNewTmKey'
 import {updateTmKey} from './cat_source/es6/api/updateTmKey'
 import {deleteTmKey} from './cat_source/es6/api/deleteTmKey'
 import {getInfoTmKey} from './cat_source/es6/api/getInfoTmKey'
 import {shareTmKey} from './cat_source/es6/api/shareTmKey'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
+import {updateJobKeys} from './cat_source/es6/api/updateJobKeys'
+import {addMTEngine as addMTEngineApi} from './cat_source/es6/api/addMTEngine'
+import {deleteMTEngine} from './cat_source/es6/api/deleteMTEngine'
+import {downloadTMX as downloadTMXApi} from './cat_source/es6/api/downloadTMX'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -643,8 +647,7 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
         return false
       }
 
-      ajaxUtils({
-        exec: 'checkTMKey',
+      checkTMKey({
         tmKey: keyValue,
       }).then((data) => {
         if (data.success === true) {
@@ -1290,33 +1293,20 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
       var getPublicMatches = $('#activetm')
         .find('tr.mymemory .lookup input')
         .is(':checked')
-      APP.doRequest({
-        data: {
-          action: 'updateJobKeys',
-          job_id: config.job_id,
-          job_pass: config.password,
-          get_public_matches: getPublicMatches,
-          data: data,
-          current_password: config.currentPassword,
-        },
-        error: function () {
+
+      updateJobKeys({
+        getPublicMatches,
+        dataTm: data,
+      })
+        .then(() => {
+          $('.popup-tm').removeClass('saving')
+          UI.hideAllBoxOnTables()
+        })
+        .catch(() => {
           UI.showErrorOnActiveTMTable(
             'There was an error saving your data. Please retry!',
           )
-          $('.popup-tm').removeClass('saving')
-        },
-        success: function (d) {
-          $('.popup-tm').removeClass('saving')
-          if (d.errors.length) {
-            UI.showErrorOnActiveTMTable(
-              'There was an error saving your data. Please retry!',
-            )
-            // APP.showMessage({msg: d.errors[0].message});
-          } else {
-            UI.hideAllBoxOnTables()
-          }
-        },
-      })
+        })
     },
     saveTMdescription: function (field) {
       if (!config.isLoggedIn) return
@@ -1400,23 +1390,10 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
       var tm_key = $('.privatekey', tm).text().trim()
       var tm_name = $('.description', tm).text().trim()
 
-      var id_job
-      var password
-
-      if (typeof config.id_job !== 'undefined') {
-        id_job = config.id_job
-        password = config.password
-      }
-
-      return APP.doRequest({
-        data: {
-          action: 'downloadTMX',
-          tm_key: tm_key,
-          tm_name: tm_name,
-          id_job: id_job,
-          password: password,
-          email: email,
-        },
+      return downloadTMXApi({
+        key: tm_key,
+        name: tm_name,
+        email,
       })
     },
     downloadGlossary: function (elem) {
@@ -1588,27 +1565,21 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
         })
     },
     deleteMT: function (id) {
-      APP.doRequest({
-        data: {
-          action: 'engine',
-          exec: 'delete',
-          id: id,
-        },
-        context: id,
-        error: function () {
+      deleteMTEngine({
+        id,
+      })
+        .then(({data}) => {
+          UI.hideAllBoxOnTables()
+          $('.mgmt-table-mt tr[data-id=' + data.id + ']').remove()
+          $('#mt_engine option[value=' + data.id + ']').remove()
+          if (!$('#mt_engine option[selected=selected]').length)
+            $('#mt_engine option[value=0]').attr('selected', 'selected')
+        })
+        .catch(() => {
           $('.mgmt-table-mt .tm-error-message')
             .text('There was an error saving your data. Please retry!')
             .show()
-        },
-        success: function () {
-          // console.log('success');
-          UI.hideAllBoxOnTables()
-          $('.mgmt-table-mt tr[data-id=' + this + ']').remove()
-          $('#mt_engine option[value=' + this + ']').remove()
-          if (!$('#mt_engine option[selected=selected]').length)
-            $('#mt_engine option[value=0]').attr('selected', 'selected')
-        },
-      })
+        })
     },
 
     addMTEngine: function (provider, providerName) {
@@ -1623,66 +1594,63 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
       })
 
       var name = $('#new-engine-name').val()
-      var data = {
-        action: 'engine',
-        exec: 'add',
-        name: name,
-        provider: provider,
-        data: JSON.stringify(providerData),
-      }
-      var context = data
-      context.providerName = providerName
 
-      APP.doRequest({
-        data: data,
-        context: context,
-        error: function () {
-          console.log('error')
-        },
-        success: function (d) {
-          if (d.errors.length) {
-            console.log('error')
-            if (d.errors[0].code !== undefined) {
-              $('#mt-provider-details .mt-error-key')
-                .text(d.errors[0].message)
-                .show()
-            } else {
-              $('#mt-provider-details .mt-error-key')
-                .text('API key not valid')
-                .show()
-            }
-          } else {
-            if (d.data.config && Object.keys(d.data.config).length) {
-              UI.renderMTConfig(provider, d.name, d.data.config)
-            } else {
-              console.log('success')
-              UI.renderNewMT(this, d.data)
-              if (!APP.isCattool) {
-                UI.activateMT(
-                  $(
-                    'table.mgmt-mt tr[data-id=' +
-                      d.data.id +
-                      '] .enable-mt input',
-                  ),
-                )
-                $('#mt_engine').append(
-                  '<option value="' +
-                    d.data.id +
-                    '">' +
-                    d.data.name +
-                    '</option>',
-                )
-                $('#mt_engine option:selected').removeAttr('selected')
-                $('#mt_engine option[value="' + d.data.id + '"]').attr(
-                  'selected',
-                  'selected',
-                )
-              }
-              $('#mt_engine_int').val('none').trigger('change')
-            }
-          }
-        },
+      const props = {
+        name,
+        provider,
+        data: JSON.stringify(providerData),
+        providerName,
+      }
+
+      addMTEngineApi({
+        name: props.name,
+        provider: props.provider,
+        dataMt: props.data,
       })
+        .then((response) => {
+          if (
+            response.data.config &&
+            Object.keys(response.data.config).length
+          ) {
+            UI.renderMTConfig(provider, response.name, response.data.config)
+          } else {
+            console.log('success')
+            UI.renderNewMT(props, response.data)
+            if (!APP.isCattool) {
+              UI.activateMT(
+                $(
+                  'table.mgmt-mt tr[data-id=' +
+                    response.data.id +
+                    '] .enable-mt input',
+                ),
+              )
+              $('#mt_engine').append(
+                '<option value="' +
+                  response.data.id +
+                  '">' +
+                  response.data.name +
+                  '</option>',
+              )
+              $('#mt_engine option:selected').removeAttr('selected')
+              $('#mt_engine option[value="' + response.data.id + '"]').attr(
+                'selected',
+                'selected',
+              )
+            }
+            $('#mt_engine_int').val('none').trigger('change')
+          }
+        })
+        .catch((errors) => {
+          if (errors[0].code !== undefined) {
+            $('#mt-provider-details .mt-error-key')
+              .text(errors[0].message)
+              .show()
+          } else {
+            $('#mt-provider-details .mt-error-key')
+              .text('API key not valid')
+              .show()
+          }
+        })
     },
     renderNewMT: function (data, serverResponse) {
       var newTR =
@@ -2099,8 +2067,8 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
       line
         .find('.export-tmx-button, .canceladd-export-tmx')
         .addClass('disabled')
-      UI.downloadTM(line, email).done(function (response) {
-        if (response.errors.length == 0 && !response.data.error) {
+      UI.downloadTM(line, email)
+        .then((response) => {
           var time = Math.round(response.data.estimatedTime / 60)
           time = time > 0 ? time : 1
           successText = successText.replace('%XX%', time)
@@ -2120,7 +2088,8 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
               UI.closeExportTmx(line)
             }, 5000)
           }, 3000)
-        } else {
+        })
+        .catch(() => {
           setTimeout(function () {
             line.find('.uploadloader').hide()
             line.find('.export-tmx-button').hide()
@@ -2130,8 +2099,7 @@ import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
             UI.showErrorMessage(line, 'We got an error, please contact support')
             line.find('.download-tmx-container').addClass('tm-error')
           }, 2000)
-        }
-      })
+        })
     },
     closeExportTmx: function (elem) {
       $(elem)
