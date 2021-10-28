@@ -192,8 +192,6 @@ const OfflineUtils = {
       var operation = this.operation
       if (operation === 'getSegments') {
         UI[operation]()
-      } else if (operation === 'setRevision') {
-        UI[operation](args)
       } else if (operation === 'getMoreSegments') {
         UI.loadingMore = false
         UI[operation](args)

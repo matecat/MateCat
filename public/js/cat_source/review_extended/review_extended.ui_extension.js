@@ -170,19 +170,6 @@ if (ReviewExtended.enabled()) {
         )
       }
     },
-    setRevision: function (data) {
-      APP.doRequest({
-        data: data,
-        error: function () {
-          OfflineUtils.failedConnection(data, 'setRevision')
-        },
-        success: function (d) {
-          window.quality_report_btn_component.setState({
-            vote: d.data.overall_quality_class,
-          })
-        },
-      })
-    },
 
     getSegmentRevisionIssues(segment, revisionNumber) {
       let issues = []
