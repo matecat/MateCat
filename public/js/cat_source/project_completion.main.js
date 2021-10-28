@@ -1,4 +1,5 @@
 import {sprintf} from 'sprintf-js'
+import {setChunkComplete} from './es6/api/setChunkComplete'
 
 var ProjectCompletion = {
   enabled: function () {
@@ -40,31 +41,18 @@ if (ProjectCompletion.enabled()) {
     }
 
     var markAsCompleteSubmit = function () {
-      var data = {
+      previousButtonState = button.val()
+      button.val(sendingLabel)
+
+      setChunkComplete({
         action: 'Features_ProjectCompletion_SetChunkCompleted',
         id_job: config.id_job,
         password: config.password,
         current_password: config.currentPassword,
-      }
-
-      previousButtonState = button.val()
-      button.val(sendingLabel)
-
-      var request = APP.doRequest({
-        data: data,
       })
+        .then(function (data) {
+          // check for errors in 200 response.
 
-      request.done(function (data) {
-        // check for errors in 200 response.
-        if (data.errors.length > 0) {
-          APP.alert({
-            msg:
-              'An error occurred while marking this job as complete. Please contact support at ' +
-              '<a href="support@matecat.com">support@matecat.com</a>.',
-          })
-          console.log(data.errors)
-          revertButtonState()
-        } else {
           disableButtonToSentState()
 
           config.job_completion_current_phase = config.isReview
@@ -74,8 +62,16 @@ if (ProjectCompletion.enabled()) {
           config.last_completion_event_id = data.data.event.id
 
           UI.render(false)
-        }
-      })
+        })
+        .catch((errors) => {
+          APP.alert({
+            msg:
+              'An error occurred while marking this job as complete. Please contact support at ' +
+              '<a href="support@matecat.com">support@matecat.com</a>.',
+          })
+          console.log(errors)
+          revertButtonState()
+        })
     }
 
     var evalSendButtonStatus = function (stats) {
