@@ -8,6 +8,7 @@ import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
 import {getTagProjection} from './es6/api/getTagProjection'
+import {setCurrentSegment} from './es6/api/setCurrentSegment'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -223,31 +224,24 @@ import {getTagProjection} from './es6/api/getTagProjection'
       return status
     },
     setCurrentSegment: function () {
-      var reqArguments = arguments
       var id_segment = this.currentSegmentId
       CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString())
-      APP.doRequest({
-        data: {
-          action: 'setCurrentSegment',
-          password: config.password,
-          revision_number: config.revisionNumber,
-          id_segment: id_segment.toString(),
-          id_job: config.id_job,
-        },
-        context: [reqArguments, id_segment],
-        error: function () {
-          OfflineUtils.failedConnection(this[0], 'setCurrentSegment')
-        },
-        success: function (d) {
-          UI.setCurrentSegment_success(this[1], d)
-        },
-      })
+      const requestData = {
+        action: 'setCurrentSegment',
+        password: config.password,
+        revision_number: config.revisionNumber,
+        id_segment: id_segment.toString(),
+        id_job: config.id_job,
+      }
+      setCurrentSegment(requestData)
+        .then((data) => {
+          UI.setCurrentSegment_success(id_segment, data)
+        })
+        .catch(() => {
+          OfflineUtils.failedConnection(requestData, 'setCurrentSegment')
+        })
     },
     setCurrentSegment_success: function (id_segment, d) {
-      if (d.errors.length) {
-        this.processErrors(d.errors, 'setCurrentSegment')
-      }
-
       this.nextUntranslatedSegmentIdByServer = d.nextSegmentId
       SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId)
 
