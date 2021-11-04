@@ -13,6 +13,8 @@ import {updateJobKeys} from './cat_source/es6/api/updateJobKeys'
 import {addMTEngine as addMTEngineApi} from './cat_source/es6/api/addMTEngine'
 import {deleteMTEngine} from './cat_source/es6/api/deleteMTEngine'
 import {downloadTMX as downloadTMXApi} from './cat_source/es6/api/downloadTMX'
+import {loadTMX} from './cat_source/es6/api/loadTMX'
+import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -1149,78 +1151,56 @@ import {downloadTMX as downloadTMXApi} from './cat_source/es6/api/downloadTMX'
       }, 1000)
     },
     pollForUploadProgress: function (Key, fileName, TRcaller, type) {
-      var glossaryUrl =
-        '/api/v2/glossaries/import/status/' + Key + '/' + fileName
-      var urlReq, data, typeReq
-      if (type === 'glossary') {
-        urlReq = glossaryUrl
-        data = {}
-        typeReq = 'GET'
-      } else {
-        data = {
-          action: 'loadTMX',
-          exec: 'uploadStatus',
-          tm_key: Key,
-          name: fileName,
-        }
-        typeReq = 'POST'
-      }
-      APP.doRequest({
-        url: urlReq,
-        data: data,
-        type: typeReq,
-        context: [Key, fileName, true, TRcaller],
-        error: function () {
-          var TDcaller = this[3]
-          UI.showErrorUpload($(TDcaller))
+      const promise =
+        type === 'glossary'
+          ? loadGlossaryFile({key: Key, name: fileName})
+          : loadTMX({key: Key, name: fileName})
+      promise
+        .then((response) => {
+          var TDcaller = TRcaller
+          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
+          UI.showStartUpload($(TDcaller))
+
+          if (response.data.total == null) {
+            setTimeout(function () {
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+            }, 1000)
+          } else {
+            if (response.data.completed) {
+              var tr = $(TDcaller).parents('tr')
+              UI.showSuccessUpload(tr)
+
+              if (!tr.find('td.description .edit-desc').text()) {
+                tr.find('td.description .edit-desc').text(fileName)
+              }
+
+              setTimeout(function () {
+                $(TDcaller).slideToggle(function () {
+                  this.remove()
+                })
+              }, 3000)
+
+              UI.UploadIframeId.remove()
+
+              return false
+            }
+            var progress =
+              (parseInt(response.data.done) / parseInt(response.data.total)) *
+              100
+            $(TDcaller)
+              .find('.progress .inner')
+              .css('width', progress + '%')
+            setTimeout(function () {
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+            }, 1000)
+          }
+        })
+        .catch((errors) => {
+          var TDcaller = TRcaller
+          UI.showErrorUpload($(TDcaller), errors[0].message)
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.UploadIframeId.remove()
-        },
-        success: function (d) {
-          var TDcaller = this[3]
-          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
-          if (d.errors.length) {
-            UI.showErrorUpload($(TDcaller), d.errors[0].message)
-
-            UI.UploadIframeId.remove()
-          } else {
-            UI.showStartUpload($(TDcaller))
-
-            if (d.data.total == null) {
-              setTimeout(function () {
-                UI.pollForUploadProgress(Key, fileName, TDcaller, type)
-              }, 1000)
-            } else {
-              if (d.data.completed) {
-                var tr = $(TDcaller).parents('tr')
-                UI.showSuccessUpload(tr)
-
-                if (!tr.find('td.description .edit-desc').text()) {
-                  tr.find('td.description .edit-desc').text(fileName)
-                }
-
-                setTimeout(function () {
-                  $(TDcaller).slideToggle(function () {
-                    this.remove()
-                  })
-                }, 3000)
-
-                UI.UploadIframeId.remove()
-
-                return false
-              }
-              var progress =
-                (parseInt(d.data.done) / parseInt(d.data.total)) * 100
-              $(TDcaller)
-                .find('.progress .inner')
-                .css('width', progress + '%')
-              setTimeout(function () {
-                UI.pollForUploadProgress(Key, fileName, TDcaller, type)
-              }, 1000)
-            }
-          }
-        },
-      })
+        })
     },
 
     allTMUploadsCompleted: function () {
