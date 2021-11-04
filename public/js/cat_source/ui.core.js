@@ -15,6 +15,7 @@ import SegmentUtils from './es6/utils/segmentUtils'
 import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
+import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 
 window.UI = {
   /**
@@ -439,25 +440,38 @@ window.UI = {
   },
 
   getTranslationMismatches: function (id_segment) {
-    APP.doRequest({
-      data: {
-        action: 'getTranslationMismatches',
-        password: config.password,
-        id_segment: id_segment.toString(),
-        id_job: config.id_job,
-      },
-      context: id_segment,
-      error: function () {
-        OfflineUtils.failedConnection(this, 'getTranslationMismatches')
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          UI.processErrors(d.errors, 'setTranslation')
-        } else {
-          UI.detectTranslationAlternatives(d, id_segment)
-        }
-      },
+    getTranslationMismatches({
+      password: config.password,
+      id_segment: id_segment.toString(),
+      id_job: config.id_job,
     })
+      .then((data) => {
+        UI.detectTranslationAlternatives(data, id_segment)
+      })
+      .catch((errors) => {
+        if (errors.length) {
+          UI.processErrors(errors, 'setTranslation')
+        } else {
+          OfflineUtils.failedConnection(id_segment, 'getTranslationMismatches')
+        }
+      })
+    // APP.doRequest({
+    //   data: {
+    //     action: 'getTranslationMismatches',
+    //     password: config.password,
+    //     id_segment: id_segment.toString(),
+    //     id_job: config.id_job,
+    //   },
+    //   context: id_segment,
+    //   error: function () {},
+    //   success: function (d) {
+    //     if (d.errors.length) {
+    //       UI.processErrors(d.errors, 'setTranslation')
+    //     } else {
+    //       UI.detectTranslationAlternatives(d, id_segment)
+    //     }
+    //   },
+    // })
   },
 
   detectTranslationAlternatives: function (d, id_segment) {
