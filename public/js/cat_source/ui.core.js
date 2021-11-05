@@ -17,6 +17,7 @@ import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
+import {getLocalWarnings} from './es6/api/getLocalWarnings'
 
 window.UI = {
   /**
@@ -753,40 +754,34 @@ window.UI = {
     const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
     const trg_content = TagUtils.prepareTextToSend(segment.translation)
 
-    APP.doRequest(
-      {
-        data: {
-          action: 'getWarning',
-          id: segment.sid,
-          token: token,
-          id_job: config.id_job,
-          password: config.password,
-          src_content: src_content,
-          trg_content: trg_content,
-          segment_status: segment_status,
-        },
-        error: function () {
-          OfflineUtils.failedConnection(0, 'getWarning')
-        },
-        success: function (d) {
-          if (UI.editAreaEditing) return
-          if (d.details && d.details.id_segment) {
-            SegmentActions.setSegmentWarnings(
-              d.details.id_segment,
-              d.details.issues_info,
-              d.details.tag_mismatch,
-            )
-          } else {
-            SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
-          }
-          $(document).trigger('getWarning:local:success', {
-            resp: d,
-            segment: segment,
-          })
-        },
-      },
-      'local',
-    )
+    getLocalWarnings({
+      id: segment.sid,
+      token: token,
+      id_job: config.id_job,
+      password: config.password,
+      src_content: src_content,
+      trg_content: trg_content,
+      segment_status: segment_status,
+    })
+      .then((data) => {
+        if (UI.editAreaEditing) return
+        if (data.details && data.details.id_segment) {
+          SegmentActions.setSegmentWarnings(
+            data.details.id_segment,
+            data.details.issues_info,
+            data.details.tag_mismatch,
+          )
+        } else {
+          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
+        }
+        $(document).trigger('getWarning:local:success', {
+          resp: data,
+          segment: segment,
+        })
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
 
   translationIsToSave: function (segment) {
