@@ -16,6 +16,7 @@ import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
+import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 
 window.UI = {
   /**
@@ -455,41 +456,9 @@ window.UI = {
           OfflineUtils.failedConnection(id_segment, 'getTranslationMismatches')
         }
       })
-    // APP.doRequest({
-    //   data: {
-    //     action: 'getTranslationMismatches',
-    //     password: config.password,
-    //     id_segment: id_segment.toString(),
-    //     id_job: config.id_job,
-    //   },
-    //   context: id_segment,
-    //   error: function () {},
-    //   success: function (d) {
-    //     if (d.errors.length) {
-    //       UI.processErrors(d.errors, 'setTranslation')
-    //     } else {
-    //       UI.detectTranslationAlternatives(d, id_segment)
-    //     }
-    //   },
-    // })
   },
 
   detectTranslationAlternatives: function (d, id_segment) {
-    /**
-     *
-     * the three rows below are commented because business logic has changed, now auto-propagation info
-     * is sent as response in getMoreSegments and added as data in the "section" Tag and
-     * rendered/prepared in renderFiles/createHeader
-     * and managed in propagateTranslation
-     *
-     * TODO
-     * I leave them here but they should be removed
-     *
-     * @see renderFiles
-     * @see createHeader
-     * @see propagateTranslation
-     *
-     */
     var sameContentIndex = -1
     var segmentObj = SegmentStore.getSegmentByIdToJS(id_segment)
     $.each(d.data.editable, function (ind) {
@@ -672,20 +641,6 @@ window.UI = {
   },
 
   checkWarnings: function () {
-    var dd = new Date()
-    var ts = dd.getTime()
-    var seg =
-      typeof this.currentSegmentId == 'undefined'
-        ? this.startSegmentId
-        : this.currentSegmentId
-    var token = seg + '-' + ts.toString()
-    var dataMix = {
-      action: 'getWarning',
-      id_job: config.id_job,
-      password: config.password,
-      token: token,
-    }
-
     // var mock = {
     //     ERRORS: {
     //         categories: {
@@ -704,14 +659,8 @@ window.UI = {
     //         }
     //     }
     // };
-
-    APP.doRequest({
-      data: dataMix,
-      error: function () {
-        UI.warningStopped = true
-        OfflineUtils.failedConnection(0, 'getWarning')
-      },
-      success: function (data) {
+    getGlobalWarnings({id_job: config.id_job, password: config.password})
+      .then((data) => {
         //console.log('check warnings success');
         UI.startWarning()
 
@@ -734,8 +683,11 @@ window.UI = {
         $(document).trigger('getWarning:global:success', {resp: data})
 
         SegmentActions.updateGlossaryData(data.data)
-      },
-    })
+      })
+      .catch((errors) => {
+        UI.warningStopped = true
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
   displayMessage: function (messages) {
     var self = this
