@@ -18,6 +18,7 @@ import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {getLocalWarnings} from './es6/api/getLocalWarnings'
+import {getSegments} from './es6/api/getSegments'
 
 window.UI = {
   /**
@@ -271,26 +272,23 @@ window.UI = {
       $('#outer').addClass('loading')
     }
 
-    APP.doRequest({
-      data: {
-        action: 'getSegments',
-        jid: config.id_job,
-        password: config.password,
-        step: UI.moreSegNum,
-        segment: segId,
-        where: where,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(where, 'getMoreSegments')
-      },
-      success: function (d) {
-        $(document).trigger('segments:load', d.data)
-        UI.getMoreSegments_success(d)
-      },
+    getSegments({
+      jid: config.id_job,
+      password: config.password,
+      step: UI.moreSegNum,
+      segment: segId,
+      where: where,
     })
+      .then((data) => {
+        $(document).trigger('segments:load', data.data)
+        UI.getMoreSegments_success(data)
+      })
+      .catch((errors) => {
+        if (errors.length) this.processErrors(errors, 'getMoreSegments')
+        OfflineUtils.failedConnection(where, 'getMoreSegments')
+      })
   },
   getMoreSegments_success: function (d) {
-    if (d.errors.length) this.processErrors(d.errors, 'getMoreSegments')
     var where = d.data.where
     if (d.data.files && _.size(d.data.files)) {
       this.renderFiles(d.data.files, where, false)
@@ -299,11 +297,11 @@ window.UI = {
     }
 
     if (
-      d.data.files.length === 0 ||
+      Object.keys(d.data.files).length === 0 ||
       SegmentStore.getLastSegmentId() === config.last_job_segment
     ) {
-      if (where == 'after') this.noMoreSegmentsAfter = true
-      if (where == 'before') this.noMoreSegmentsBefore = true
+      if (where === 'after') this.noMoreSegmentsAfter = true
+      if (where === 'before') this.noMoreSegmentsBefore = true
     }
     $('#outer').removeClass('loading loadingBefore')
     this.loadingMore = false
@@ -316,32 +314,27 @@ window.UI = {
       ? options.segmentToOpen
       : this.startSegmentId
 
-    return APP.doRequest({
-      data: {
-        action: 'getSegments',
-        jid: config.id_job,
-        password: config.password,
-        step: 40,
-        // step: step,
-        segment: seg,
-        where: where,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(0, 'getSegments')
-      },
-      success: function (d) {
-        $(document).trigger('segments:load', d.data)
+    getSegments({
+      jid: config.id_job,
+      password: config.password,
+      step: 40,
+      segment: seg,
+      where: where,
+    })
+      .then((data) => {
+        $(document).trigger('segments:load', data.data)
 
         if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
-        UI.getSegments_success(d, options)
-      },
-    })
+        UI.getSegments_success(data, options)
+      })
+      .catch((errors) => {
+        if (errors.length) {
+          this.processErrors(errors, 'getSegments')
+        }
+        OfflineUtils.failedConnection(0, 'getSegments')
+      })
   },
   getSegments_success: function (d, options) {
-    if (d.errors.length) {
-      this.processErrors(d.errors, 'getSegments')
-    }
-
     var where = d.data.where
 
     if (!this.startSegmentId) {
