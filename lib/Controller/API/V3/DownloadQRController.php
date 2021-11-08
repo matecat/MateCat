@@ -50,10 +50,10 @@ class DownloadQRController extends BaseChunkController {
         if(!in_array($this->format, $this->allowedFormats)){
             $this->response->status()->setCode( 403 );
             $this->response->json( [
-                'errors' => [
-                    'code' => 0,
-                    'message' => 'Invalid format. Allowed formats are ['.implode($this->allowedFormats, ', ').']'
-                ]
+                    'errors' => [
+                            'code' => 0,
+                            'message' => 'Invalid format. Allowed formats are ['.implode($this->allowedFormats, ', ').']'
+                    ]
             ] );
             exit();
         }
@@ -147,107 +147,223 @@ class DownloadQRController extends BaseChunkController {
     {
         $segments  = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
+        $data = [];
+        /** @var \QualityReport_QualityReportSegmentStruct $segment */
+        foreach ($segments as $segment){
+
+            $issuesCritical = 0;
+            $issuesEnhancement = 0;
+            $issuesMajor = 0;
+            $issuesMinor = 0;
+            $issuesNeutral = 0;
+            $issuesNone = 0;
+            $issuesRepetition = 0;
+
+            foreach ($segment->issues as $issue){
+                switch ($issue->issue_severity) {
+                    case "Critical":
+                        $issuesCritical++;
+                        break;
+
+                    case "Enhancement":
+                        $issuesEnhancement++;
+                        break;
+
+                    case "Major":
+                        $issuesMajor++;
+                        break;
+
+                    case "Minor":
+                        $issuesMinor++;
+                        break;
+
+                    case "Neutral":
+                        $issuesNeutral++;
+                        break;
+
+                    case "None":
+                        $issuesNone++;
+                        break;
+
+                    case "Repetition":
+                        $issuesRepetition++;
+                        break;
+                }
+            }
+
+            $data[] = [
+                $segment->sid,
+                $segment->target,
+                $segment->segment,
+                $segment->segment_hash,
+                $segment->raw_word_count,
+                $segment->translation,
+                $segment->version,
+                $segment->ice_locked,
+                $segment->status,
+                $segment->time_to_edit,
+                $segment->filename,
+                $segment->id_file,
+                $segment->warning,
+                $segment->suggestion_match,
+                $segment->suggestion_source,
+                $segment->suggestion,
+                $segment->edit_distance,
+                $segment->locked,
+                $segment->match_type,
+                $segment->pee,
+                $segment->ice_modified,
+                $segment->secs_per_word,
+                $segment->parsed_time_to_edit[0].":".$segment->parsed_time_to_edit[1].":".$segment->parsed_time_to_edit[2].".".$segment->parsed_time_to_edit[3],
+                $segment->last_translation,
+                (!empty($segment->last_revisions)) ? json_encode($segment->last_revisions) : '',
+                $segment->pee_translation_revise,
+                $segment->pee_translation_suggestion,
+                $segment->version_number,
+                $segment->source_page,
+                $segment->is_pre_translated,
+                $issuesCritical,
+                $issuesEnhancement,
+                $issuesMajor,
+                $issuesMinor,
+                $issuesNeutral,
+                $issuesNone,
+                $issuesRepetition,
+            ];
+        }
+
         if($this->format === 'json'){
-            return json_encode($segments, JSON_PRETTY_PRINT);
+            return $this->createJsonFile($data);
         }
 
         if($this->format === 'csv'){
-
-            $headings = [
-                "sid",
-                "target",
-                "segment",
-                "segment_hash",
-                "raw_word_count",
-                "translation",
-                "version",
-                "ice_locked",
-                "status",
-                "time_to_edit",
-                "filename",
-                "id_file",
-                "warning",
-                "suggestion_match",
-                "suggestion_source",
-                "suggestion",
-                "edit_distance",
-                "locked",
-                "match_type",
-                "warnings",
-                "pee",
-                "ice_modified",
-                "secs_per_word",
-                "parsed_time_to_edit",
-                "comments",
-                "issues",
-                "last_translation",
-                "last_revisions",
-                "pee_translation_revise",
-                "pee_translation_suggestion",
-                "version_number",
-                "source_page",
-                "is_pre_translated",
-                "dataRefMap",
-            ];
-
-            $data[] = $headings;
-
-            /** @var \QualityReport_QualityReportSegmentStruct $segment */
-            foreach ($segments as $segment){
-                $data[] = [
-                    $segment->sid,
-                    $segment->target,
-                    $segment->segment,
-                    $segment->segment_hash,
-                    $segment->raw_word_count,
-                    $segment->translation,
-                    $segment->version,
-                    $segment->ice_locked,
-                    $segment->status,
-                    $segment->time_to_edit,
-                    $segment->filename,
-                    $segment->id_file,
-                    $segment->warning,
-                    $segment->suggestion_match,
-                    $segment->suggestion_source,
-                    $segment->suggestion,
-                    $segment->edit_distance,
-                    $segment->locked,
-                    $segment->match_type,
-                    json_encode($segment->warnings),
-                    $segment->pee,
-                    $segment->ice_modified,
-                    $segment->secs_per_word,
-                    json_encode($segment->parsed_time_to_edit),
-                    json_encode($segment->comments),
-                    json_encode($segment->issues),
-                    $segment->last_translation,
-                    (!empty($segment->last_revisions)) ? json_encode($segment->last_revisions) : '',
-                    $segment->pee_translation_revise,
-                    $segment->pee_translation_suggestion,
-                    $segment->version_number,
-                    $segment->source_page,
-                    $segment->is_pre_translated,
-                    json_encode($segment->dataRefMap),
-                ];
-            }
-
-            $tmpFilePath = tempnam("/tmp", '');
-
-            $fp = fopen( $tmpFilePath, 'w' );
-            foreach ( $data as $fields ) {
-                if ( !fputcsv( $fp, $fields ) ) {
-                    return false;
-                }
-            }
-            fclose( $fp );
-
-            $fileContent = file_get_contents($tmpFilePath);
-
-            unlink($tmpFilePath);
-
-            return $fileContent;
+            return $this->createCSVFile($data);
         }
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return bool|false|string
+     */
+    private function createCSVFile(array $data){
+
+        $headings = [
+            "sid",
+            "target",
+            "segment",
+            "segment_hash",
+            "raw_word_count",
+            "translation",
+            "version",
+            "ice_locked",
+            "status",
+            "time_to_edit",
+            "filename",
+            "id_file",
+            "warning",
+            "suggestion_match",
+            "suggestion_source",
+            "suggestion",
+            "edit_distance",
+            "locked",
+            "match_type",
+            "pee",
+            "ice_modified",
+            "secs_per_word",
+            "parsed_time_to_edit",
+            "last_translation",
+            "last_revisions",
+            "pee_translation_revise",
+            "pee_translation_suggestion",
+            "version_number",
+            "source_page",
+            "is_pre_translated",
+            "issues_critical",
+            "issues_enhancement",
+            "issues_major",
+            "issues_minor",
+            "issues_neutral",
+            "issues_none",
+            "issues_repetition",
+        ];
+
+        $csvData = [];
+        $csvData[] = $headings;
+
+        foreach ($data as $datum){
+            $csvData[] = $datum;
+        }
+
+        $tmpFilePath = tempnam("/tmp", '');
+
+        $fp = fopen( $tmpFilePath, 'w' );
+        foreach ( $csvData as $fields ) {
+            if ( !fputcsv( $fp, $fields ) ) {
+                return false;
+            }
+        }
+        fclose( $fp );
+
+        $fileContent = file_get_contents($tmpFilePath);
+        unlink($tmpFilePath);
+
+        return $fileContent;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return false|string
+     */
+    private function createJsonFile(array $data){
+
+        $jsonData = [];
+
+        foreach ($data as $datum){
+            $jsonData[] = [
+                "sid" => $datum[0],
+                "target" => $datum[1],
+                "segment" => $datum[2],
+                "segment_hash" => $datum[3],
+                "raw_word_count" => $datum[4],
+                "translation" => $datum[5],
+                "version" => $datum[6],
+                "ice_locked" => $datum[7],
+                "status" => $datum[8],
+                "time_to_edit" => $datum[9],
+                "filename" => $datum[10],
+                "id_file" => $datum[11],
+                "warning" => $datum[12],
+                "suggestion_match" => $datum[13],
+                "suggestion_source" => $datum[14],
+                "suggestion" => $datum[15],
+                "edit_distance" => $datum[16],
+                "locked" => $datum[17],
+                "match_type" => $datum[18],
+                "pee" => $datum[19],
+                "ice_modified" => $datum[20],
+                "secs_per_word" => $datum[21],
+                "parsed_time_to_edit" => $datum[22],
+                "last_translation" => $datum[23],
+                "last_revisions" => $datum[24],
+                "pee_translation_revise" => $datum[25],
+                "pee_translation_suggestion" => $datum[26],
+                "version_number" => $datum[27],
+                "source_page" => $datum[28],
+                "is_pre_translated" => $datum[29],
+                "issues_critical" => $datum[30],
+                "issues_enhancement" => $datum[31],
+                "issues_major" => $datum[32],
+                "issues_minor" => $datum[33],
+                "issues_neutral" => $datum[34],
+                "issues_none" => $datum[35],
+                "issues_repetition" => $datum[36],
+            ];
+        }
+
+
+        return json_encode($jsonData, JSON_PRETTY_PRINT);
     }
 
     /**
