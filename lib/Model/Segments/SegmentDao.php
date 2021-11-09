@@ -98,11 +98,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $password
      * @param $id_segment
+     * @param $ttl (default 86400 = 24 hours)
      *
-     * @return \Segments_SegmentStruct
+     * @return \Segments_SegmentStruct|\DataAccess_IDaoStruct
      */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment ) {
-        $conn = $this->database->getConnection();
+    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, $ttl = 86400  ) {
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -112,17 +112,17 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 " AND segments.id_file = f.id " .
                 " AND segments.id = :id_segment ";
 
-        $stmt = $conn->prepare( $query );
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( $query );
 
-        $stmt->execute( [
-                'id_job'     => $id_job,
-                'password'   => $password,
-                'id_segment' => $id_segment
+        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [
+            'id_job'     => $id_job,
+            'password'   => $password,
+            'id_segment' => $id_segment
         ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
-
-        return $stmt->fetch();
+        return isset($fetched[0]) ? $fetched[0] : null;
     }
 
     /**
