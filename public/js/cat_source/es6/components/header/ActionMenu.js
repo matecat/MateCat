@@ -2,7 +2,7 @@ import React from 'react'
 import _ from 'lodash'
 
 import Icon3Dots from '../icons/Icon3Dots'
-import {exportCsv} from '../../api/exportCsv'
+import {exportQualityReport} from '../../api/exportQualityReport'
 
 class ActionMenu extends React.Component {
   componentDidMount() {
@@ -46,7 +46,7 @@ class ActionMenu extends React.Component {
   }
 
   handlerExportCsv = () => {
-    exportCsv()
+    exportQualityReport()
       .then((blob) => {
         const file = window.URL.createObjectURL(blob)
         window.open(file, '_blank')

@@ -6,15 +6,18 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {Object} options
  * @param {string} [idJob=config.id_job]
  * @param {string} [password=config.password]
+ * @param {string} [format='csv']
  * @returns {Promise<object>}
  */
-export const exportCsv = async ({
+export const exportQualityReport = async ({
   idJob = config.id_job,
   password = config.password,
+  format = 'csv',
 } = {}) => {
   const dataParams = {
     jid: idJob,
     password,
+    format,
   }
   const formData = new FormData()
 
