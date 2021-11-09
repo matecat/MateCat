@@ -28,6 +28,7 @@ import CursorUtils from './utils/cursorUtils'
 import OfflineUtils from './utils/offlineUtils'
 import Shortcuts from './utils/shortcuts'
 import SegmentFooterTabMatches from './components/segments/SegmentFooterTabMatches'
+import {pluginOptions as lexiqaTooltipWarningPluginOptions} from './api/lexiqaTooltipwarnings'
 
 window.MC = {}
 
@@ -66,3 +67,5 @@ window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
 
 window.SegmentFooterTabMatches = SegmentFooterTabMatches
+
+window.lexiqaTooltipWarningPluginOptions = lexiqaTooltipWarningPluginOptions

@@ -10,6 +10,7 @@ class SegmentFooterTabMessages extends React.Component {
   }
 
   getNotes() {
+    console.log(this.props.segment.styleGuideMessages)
     let notesHtml = []
     let self = this
     if (this.props.notes) {
@@ -104,6 +105,19 @@ class SegmentFooterTabMessages extends React.Component {
       <div className="note" key={`meta-${index}`}>
         <span className="note-label">{label}: </span>
         <span>{body}</span>
+      </div>
+    )
+  }
+
+  getStyleGuideMessages(messages) {
+    return (
+      <div className="note note-style-guide" key="style-guide">
+        <span className="note-label">Style guide: </span>
+        <ul>
+          {messages.map((style, index) => (
+            <li key={index}>{style}</li>
+          ))}
+        </ul>
       </div>
     )
   }
