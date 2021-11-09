@@ -4834,7 +4834,8 @@ header {
         border: solid 1px #cdd4de;
 
         .item {
-          a {
+          a,
+          > span {
             display: block;
             border-radius: 2px;
             padding: 8px !important;
@@ -4848,6 +4849,11 @@ header {
               background-color: transparent !important;
               font-weight: normal !important;
             }
+          }
+
+          > span {
+            display: block;
+            width: 100%;
           }
 
           padding: 0 !important;
