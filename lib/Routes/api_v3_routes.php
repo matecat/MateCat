@@ -26,3 +26,4 @@ $klein->with( '/api/v3/teams', function () {
 route( '/api/v3/word-count/raw', 'POST', '\API\V3\CountWordController', 'rawWords' );
 route( '/api/v3/jobs/[:id_job]/[:password]/[:source_page]/issue-report/segments', 'GET', '\API\V3\IssueCheckController', 'segments' );
 route( '/api/v3/feedback', 'POST', '\API\V3\RevisionFeedbackController', 'feedback' );
+route( '/api/v3/qr/download', 'POST', '\API\V3\DownloadQRController', 'download' );

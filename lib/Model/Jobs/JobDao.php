@@ -615,10 +615,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     /**
      * @param Jobs_JobStruct $chunkStruct
+     * @param int            $ttl
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function getFirstSegmentOfFilesInJob( Jobs_JobStruct $chunkStruct ) {
+    public static function getFirstSegmentOfFilesInJob( Jobs_JobStruct $chunkStruct, $ttl = 0  ) {
 
         $thisDao = new self();
         $thisDao->getDatabaseHandler();
@@ -643,7 +644,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->setCacheTTL($ttl)->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job' => $chunkStruct->id
         ] );
     }

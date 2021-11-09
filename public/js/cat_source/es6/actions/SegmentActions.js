@@ -1202,6 +1202,13 @@ const SegmentActions = {
       isTarget,
     })
   },
+  setSegmentCharacterLimit: (sid, limit) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      sid,
+      limit,
+    })
+  },
 }
 
 export default SegmentActions

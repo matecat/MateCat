@@ -1870,13 +1870,15 @@ class ProjectManager {
                     // -------------------------------------
                     //
 
+                    $metadataStruct = new Segments_SegmentMetadataStruct();
+
                     // check if there is sizeRestriction
                     if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ])){
-                        $metadataStruct = new Segments_SegmentMetadataStruct();
                         $metadataStruct->meta_key = 'sizeRestriction';
                         $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
-                        $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
                     }
+
+                    $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
 
                     //
                     // -------------------------------------
@@ -2269,7 +2271,9 @@ class ProjectManager {
             /** @var  Segments_SegmentMetadataStruct $segmentMetadataStruct */
             $segmentMetadataStruct = @$this->projectStructure[ 'segments-meta-data' ][ $fid ][ $position ];
 
-            $this->features->filter( 'saveSegmentMetadata', $id_segment, $segmentMetadataStruct );
+            if(isset($segmentMetadataStruct) and !empty($segmentMetadataStruct)){
+                $this->features->filter( 'saveSegmentMetadata', $id_segment, $segmentMetadataStruct );
+            }
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
                 $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
