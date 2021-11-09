@@ -122,7 +122,6 @@
 .ui.next-repetition {
   border: 1px solid #797979;
   position: relative;
-  top: -6px;
   padding: 9px 12px 8px !important;
 }
 
@@ -130,7 +129,6 @@
 .ui.next-review-repetition {
   border: 1px solid #797979;
   position: relative;
-  top: -6px;
   padding: 9px 12px 8px !important;
   background: $approvedGreen !important;
   &.revise-button-2 {

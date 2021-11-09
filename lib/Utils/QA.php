@@ -3,6 +3,7 @@
 use BxExG\Mapper;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
+use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * Class errObject
@@ -122,6 +123,12 @@ class QA {
      * @var FeatureSet
      */
     protected $featureSet;
+
+    /**
+     * ID of segment (optional)
+     * @var int
+     */
+    protected $id_segment;
 
     /**
      * RAW Source string segment for comparison
@@ -255,6 +262,8 @@ class QA {
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
     const SMART_COUNT_MISMATCH = 2001;
 
+    const ERR_SIZE_RESTRICTION = 3000;
+
     /**
      * Human Readable error map.
      * Created accordingly with Error constants
@@ -359,6 +368,8 @@ class QA {
 
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',
+
+            3000 => 'Characters limit exceeded',
     ];
 
     protected $_tipMap = [
@@ -369,7 +380,8 @@ class QA {
          *  3 =>  'bad target xml',
          */
             29   => "Should be < g ... > ... < /g >",
-            1000 => "Press 'alt + t' shortcut to add tags or delete extra tags."
+            1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
+            3000 => 'Maximum characters limit exceeded.',
 
     ];
 
@@ -533,6 +545,14 @@ class QA {
                 ] );
                 break;
 
+            case self::ERR_SIZE_RESTRICTION:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
+                        'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
+                ] );
+                break;
+
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
@@ -666,7 +686,7 @@ class QA {
     /**
      * @return array
      */
-    public function getEexeptionList() {
+    public function getExceptionList() {
         return $this->exceptionList;
     }
 
@@ -982,6 +1002,13 @@ class QA {
         }
 
         return $seg;
+    }
+
+    /**
+     * @param int $id_segment
+     */
+    public function setIdSegment( $id_segment ) {
+        $this->id_segment = $id_segment;
     }
 
     /**
@@ -1507,6 +1534,7 @@ class QA {
         $this->_checkTagPositions();
         $this->_checkNewLineConsistency();
         $this->_checkSymbolConsistency();
+        $this->_checkSizeRestriction();
 
         // all checks completed
         return $this->getErrors();
@@ -1529,6 +1557,7 @@ class QA {
 
         $this->_checkTagMismatch();
         $this->_checkBxAndExInsideG();
+        $this->_checkSizeRestriction();
 
         // all checks completed
         return $this->getErrors();
@@ -2307,6 +2336,18 @@ class QA {
 
         for ( $i = 0; $i < abs( $nrOfNewLinesInSource - $nrOfNewLinesInTarget ); $i++ ) {
             $this->_addError( self::ERR_NEWLINE_MISMATCH );
+        }
+    }
+
+    protected function _checkSizeRestriction()
+    {
+        // check size restriction
+        if($this->id_segment){
+            $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, [] );
+            $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $Filter->fromLayer1ToLayer2( $this->getTargetSeg() ) );
+            if(false === $check){
+                $this->_addError( self::ERR_SIZE_RESTRICTION  );
+            }
         }
     }
 
