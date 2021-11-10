@@ -2343,7 +2343,7 @@ class QA {
     {
         // check size restriction
         if($this->id_segment){
-            $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, [] );
+            $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
             $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $Filter->fromLayer1ToLayer2( $this->getTargetSeg() ) );
             if(false === $check){
                 $this->_addError( self::ERR_SIZE_RESTRICTION  );
