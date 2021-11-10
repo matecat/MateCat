@@ -7,7 +7,21 @@ div.segment-notes ul.graysmall li span.note-label {
 }
 
 .segments-notes-container {
-  float: left;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-rows: max-content;
+  gap: 16px;
+  width: 100%;
+  align-items: center;
+  position: relative;
+  padding: 16px;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
 }
 .segments-preview-footer {
   display: inline-block;
@@ -21,12 +35,10 @@ div.segment-notes ul.graysmall li span.note-label {
 }
 
 .segment-notes-container {
-  display: inline-block;
-  max-width: 95%;
+  max-width: 100%;
   box-sizing: border-box;
   vertical-align: top;
   text-align: left;
-  float: left;
 }
 
 .segments-preview-container {
@@ -58,7 +70,7 @@ div.segment-notes ul.graysmall li span.note-label {
 .segments-notes-container div.note,
 .segments-notes-container div.context-group {
   text-align: left;
-  padding: 12px 20px;
+  //padding: 12px 20px;
   color: #666;
   list-style: none;
   font-size: 16px;
