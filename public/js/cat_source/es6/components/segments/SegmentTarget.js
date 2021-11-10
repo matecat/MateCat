@@ -16,8 +16,20 @@ class SegmentTarget extends React.Component {
     super(props)
     this.state = {
       showFormatMenu: false,
+      charactersCounter: 0,
+      charactersCounterEnabled: false,
+      charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
+  }
+
+  enableCharacterCounterLimit = (sid, limit, enable = true) => {
+    if (sid === this.props.segment.sid) {
+      this.setState({
+        charactersCounterLimit: limit,
+        charactersCounterEnabled: enable,
+      })
+    }
   }
 
   onClickEvent(event) {
@@ -81,10 +93,11 @@ class SegmentTarget extends React.Component {
     }
     return issues
   }
+
   getTargetArea(translation) {
     const {segment} = this.props
     const {showFormatMenu} = this.state
-    const {toggleFormatMenu} = this
+    const {toggleFormatMenu, updateCounter} = this
 
     var textAreaContainer = ''
     let issues = this.getAllIssues()
@@ -229,6 +242,7 @@ class SegmentTarget extends React.Component {
             locked={this.props.locked}
             readonly={this.props.readonly}
             toggleFormatMenu={toggleFormatMenu}
+            updateCounter={updateCounter}
           />
           {s2tMicro}
           <div className="toolbar">
@@ -316,6 +330,10 @@ class SegmentTarget extends React.Component {
       SegmentConstants.FILL_TAGS_IN_TARGET,
       this.autoFillTagsInTarget,
     )
+    SegmentStore.addListener(
+      SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      this.enableCharacterCounterLimit,
+    )
   }
 
   componentWillUnmount() {
@@ -323,9 +341,18 @@ class SegmentTarget extends React.Component {
       SegmentConstants.FILL_TAGS_IN_TARGET,
       this.autoFillTagsInTarget,
     )
+    SegmentStore.removeListener(
+      SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      this.enableCharacterCounterLimit,
+    )
   }
 
   render() {
+    const {
+      charactersCounter,
+      charactersCounterEnabled,
+      charactersCounterLimit,
+    } = this.state
     let buttonsDisabled = false
     let translation = this.props.segment.translation
 
@@ -343,14 +370,35 @@ class SegmentTarget extends React.Component {
         <p className="warnings" />
 
         <SegmentButtons disabled={buttonsDisabled} {...this.props} />
-
+        {charactersCounterEnabled &&
+          charactersCounter > charactersCounterLimit - 20 && (
+            <div
+              className={`segment-counter ${
+                charactersCounter > charactersCounterLimit
+                  ? `segment-counter-limit-error`
+                  : ``
+              }`}
+            >
+              <span className={'segment-counter-current'}>
+                {charactersCounter}
+              </span>
+              /
+              <span className={'segment-counter-limit'}>
+                {charactersCounterLimit}
+              </span>
+            </div>
+          )}
         {this.props.segment.warnings ? (
           <SegmentWarnings warnings={this.props.segment.warnings} />
         ) : null}
       </div>
     )
   }
-
+  updateCounter = (value) => {
+    this.setState({
+      charactersCounter: value,
+    })
+  }
   toggleFormatMenu = (show) => {
     // Show/Hide Edit Toolbar
     this.setState({

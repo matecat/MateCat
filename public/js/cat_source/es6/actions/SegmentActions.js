@@ -801,14 +801,14 @@ const SegmentActions = {
     })
   },
   updateGlossaryItem: function (match, newTranslation, newComment, sid) {
-    updateGlossaryItem(
-      match.id,
-      match.segment,
-      match.translation,
+    updateGlossaryItem({
+      idItem: match.id,
+      source: match.segment,
+      target: match.translation,
       newTranslation,
-      newComment,
-      sid,
-    )
+      comment: newComment,
+      idSegment: sid,
+    })
       .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
@@ -1200,6 +1200,13 @@ const SegmentActions = {
       tagPlaceholder,
       entityKey,
       isTarget,
+    })
+  },
+  setSegmentCharacterLimit: (sid, limit) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      sid,
+      limit,
     })
   },
 }

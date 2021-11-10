@@ -36,11 +36,11 @@ class FilesInfoUtility {
      */
     public function getInfo() {
 
-        $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
+        $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
         $metadataDao = new Files_MetadataDao;
         foreach ( $fileInfo as &$file ) {
             $metadata = [];
-            foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file ) as $metadatum ) {
+            foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
                 $metadata[ $metadatum->key ] = $metadatum->value;
             }
 
@@ -58,7 +58,7 @@ class FilesInfoUtility {
     public function getInstructions($id_file) {
         if(\Files_FileDao::isFileInProject($id_file, $this->project->id)){
             $metadataDao = new Files_MetadataDao;
-            $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions' );
+            $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 );
 
             if(!$instructions){
                 return null;
@@ -80,7 +80,7 @@ class FilesInfoUtility {
 
         if(\Files_FileDao::isFileInProject($id_file, $this->project->id)){
             $metadataDao = new Files_MetadataDao;
-            if($metadataDao->get( $this->project->id, $id_file, 'instructions' )){
+            if($metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 )){
                 $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
             } else {
                 $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );

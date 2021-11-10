@@ -63,7 +63,7 @@ class MetaDataController extends BaseChunkController {
         $metadata = new \stdClass();
         $jobMetaDataDao = new MetadataDao();
 
-        foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password ) as $metadatum ) {
+        foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
             $key = $metadatum->key;
             $metadata->$key = $metadatum->value;
         }
@@ -83,7 +83,7 @@ class MetaDataController extends BaseChunkController {
 
         foreach ( $job->getFiles() as $file ) {
             $metadatum = new \stdClass();
-            foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id ) as $meta ) {
+            foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
                 $key = $meta->key;
                 $metadatum->$key = $meta->value;
             }

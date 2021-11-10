@@ -8,17 +8,19 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
      * @param int $id_segment
      * @param int $ttl
      *
+     * NOTE: 604800 sec = 1 week
+     *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function getAll($id_segment, $ttl = 86400){
+    public static function getAll($id_segment, $ttl = 604800){
 
         $thisDao = new self();
         $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_metadata WHERE id_segment = ? " );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
-                new Segments_SegmentMetadataStruct(),
-                [ $id_segment ]
+            new Segments_SegmentMetadataStruct(),
+            [ $id_segment ]
         );
     }
 
@@ -29,24 +31,22 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
      * @param string $key
      * @param int $ttl
      *
+     * NOTE: 604800 sec = 1 week
+     *
      * @return DataAccess_IDaoStruct|null
      */
-    public static function get($id_segment, $key, $ttl = 86400){
+    public static function get($id_segment, $key, $ttl = 604800){
 
         $thisDao = new self();
         $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_metadata WHERE id_segment = ? and meta_key = ? " );
 
         $data = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
-                new Segments_SegmentMetadataStruct(),
-                [ $id_segment, $key ]
+            new Segments_SegmentMetadataStruct(),
+            [ $id_segment, $key ]
         );
 
-        if(isset($data[0])){
-            return $data[0];
-        }
-
-        return null;
+        return (isset($data[0])) ? $data[0] : null;
     }
 
     /**

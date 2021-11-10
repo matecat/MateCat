@@ -49,7 +49,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * @inheritDoc
      */
-    public function thereAreErrors( $segment, $translation, array $dataRefMap = [] ) {
+    public function thereAreErrors( $segmentId, $segment, $translation, array $dataRefMap = [] ) {
 
         $segment     = $this->filter->fromLayer0ToLayer1( $segment );
         $translation = $this->filter->fromLayer0ToLayer1( $translation );
@@ -75,6 +75,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         $check->setFeatureSet( $this->featureSet );
         $check->setTargetSegLang( $this->targetLang );
         $check->setSourceSegLang( $this->sourceLang );
+        $check->setIdSegment( $segmentId );
         $check->performTagCheckOnly();
 
         return $check->thereAreErrors();

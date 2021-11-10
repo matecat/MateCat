@@ -27,6 +27,7 @@ import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
+import TagUtils from '../../utils/tagUtils'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -95,6 +96,11 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
       },
     }
+    const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
+      DraftMatecatUtils.cleanSegmentString(translation),
+    )
+    this.props.updateCounter(cleanTagsTranslation.length)
+
     this.updateTranslationDebounced = _.debounce(
       this.updateTranslationInStore,
       100,
@@ -207,6 +213,10 @@ class Editarea extends React.Component {
         newContentState,
         'insert-fragment',
       )
+      const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.cleanSegmentString(translation),
+      )
+      this.props.updateCounter(cleanTagsTranslation.length)
       this.setState(
         {
           editorState: newEditorState,
@@ -281,6 +291,10 @@ class Editarea extends React.Component {
         missingTags,
         lxqDecodedTranslation,
       )
+      const cleanTranslation = TagUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.cleanSegmentString(decodedSegment),
+      )
+      this.props.updateCounter(cleanTranslation.length)
       // console.log('updatingTranslationInStore');
       UI.registerQACheck()
     }

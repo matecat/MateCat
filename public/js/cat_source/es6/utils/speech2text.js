@@ -1,6 +1,7 @@
 import {sprintf} from 'sprintf-js'
 
 import SegmentActions from '../actions/SegmentActions'
+import {toggleSpeechToText} from '../api/toggleSpeechToText'
 import SegmentStore from '../stores/SegmentStore'
 
 const Speech2Text = {
@@ -12,19 +13,7 @@ const Speech2Text = {
   disable: function () {
     if (config.speech2text_enabled) {
       config.speech2text_enabled = 0
-      var path = sprintf(
-        '/api/v2/jobs/%s/%s/options',
-        config.id_job,
-        config.password,
-      )
-      var data = {
-        speech2text: false,
-      }
-      $.ajax({
-        url: path,
-        type: 'POST',
-        data: data,
-      }).done(function () {
+      toggleSpeechToText({enabled: false}).then(() => {
         UI.render()
       })
     }
@@ -32,19 +21,7 @@ const Speech2Text = {
   enable: function () {
     if (!config.speech2text_enabled) {
       config.speech2text_enabled = 1
-      var path = sprintf(
-        '/api/v2/jobs/%s/%s/options',
-        config.id_job,
-        config.password,
-      )
-      var data = {
-        speech2text: true,
-      }
-      $.ajax({
-        url: path,
-        type: 'POST',
-        data: data,
-      }).done(function () {
+      toggleSpeechToText({enabled: true}).then(() => {
         if (!Speech2Text.initialized) {
           Speech2Text.init()
           Speech2Text.loadRecognition()

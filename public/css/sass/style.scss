@@ -947,17 +947,15 @@ article .approved {
 }
 
 .buttons p {
-  margin: 2px 0 0 5px;
   font-size: 11px;
   font-weight: normal;
   color: #666;
   display: none;
-  text-align: center;
-}
-
-.buttons a + p {
-  padding-top: 5px;
-  margin-left: 0px;
+  position: absolute;
+  top: calc(50% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
 }
 
 .buttons li:hover p {
@@ -1030,7 +1028,6 @@ article .approved:active {
   padding: 5px 2px 3px 2px;
   border-radius: 2px;
   font-size: 18px;
-  margin: -6px 25px -7px 25px;
   color: #fff !important;
   user-select: none;
 }
@@ -2196,7 +2193,15 @@ section.editor.slide-right .sid {
 .editor .textarea-container {
   position: relative;
   width: 100%;
-  float: right !important; /*padding-bottom:5px;*/
+  margin-bottom: 16px;
+}
+
+section.opened {
+  .toolbar {
+    float: left;
+    margin-top: 16px;
+    width: 40%;
+  }
 }
 
 .editarea,
@@ -2292,7 +2297,7 @@ body.archived section .status-container a.status:hover {
 .editor .editarea {
   width: 100%;
   font-size: 18px;
-  margin: 2px 0 10px -11px;
+  margin: 2px 0 0px -11px;
   word-break: normal;
   line-height: 25px;
   outline: none;
@@ -4593,9 +4598,10 @@ section .segment-side-buttons {
 
 .buttons li {
   text-align: center;
-  height: 35px;
   vertical-align: -webkit-baseline-middle;
   display: inline-block;
+  position: relative;
+  margin-left: 16px;
 }
 
 input#markAsCompleteButton[disabled] {

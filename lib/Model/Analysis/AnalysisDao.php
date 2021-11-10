@@ -93,11 +93,11 @@ class AnalysisDao extends DataAccess_AbstractDao {
      *
      * @return bool|int
      */
-    public function destroyCacheByProjectId( $project_id ) {
+    public static function destroyCacheByProjectId( $project_id ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
-
-        return $this->_destroyObjectCache( $stmt, [ 'pid' => $project_id ] );
+        $thisDao = new static();
+        return $thisDao->_destroyObjectCache( $stmt, [ 'pid' => $project_id ] );
     }
 
 }
