@@ -47,9 +47,14 @@ class ActionMenu extends React.Component {
 
   handlerExportCsv = () => {
     exportQualityReport()
-      .then((blob) => {
-        const file = window.URL.createObjectURL(blob)
-        window.open(file, '_blank')
+      .then(({blob, filename}) => {
+        const aTag = document.createElement('a')
+        const blobURL = URL.createObjectURL(blob)
+        aTag.download = filename
+        aTag.href = blobURL
+        document.body.appendChild(aTag)
+        aTag.click()
+        document.body.removeChild(aTag)
       })
       .catch((errors) => {
         const notification = {
