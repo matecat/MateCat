@@ -38,14 +38,7 @@ if (ReviewExtended.enabled()) {
     },
   })
 
-  var originalRender = UI.render
   $.extend(UI, {
-    render: function (options) {
-      var promise = new $.Deferred().resolve()
-      originalRender.call(this, options)
-      return promise
-    },
-
     submitIssues: function (sid, data) {
       return ReviewExtended.submitIssue(sid, data)
     },

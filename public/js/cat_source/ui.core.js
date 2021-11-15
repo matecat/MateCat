@@ -314,7 +314,7 @@ window.UI = {
       ? options.segmentToOpen
       : this.startSegmentId
 
-    getSegments({
+    return getSegments({
       jid: config.id_job,
       password: config.password,
       step: 40,
