@@ -158,9 +158,24 @@ class DownloadQRController extends BaseChunkController {
             $issuesNeutral = 0;
             $issuesNone = 0;
             $issuesRepetition = 0;
+            $issuesPreferentialEdit = 0;
+            $issuesContextMajor = 0;
+            $issuesContextMinor = 0;
 
             foreach ($segment->issues as $issue){
                 switch ($issue->issue_severity) {
+                    case "Context Major":
+                        $issuesContextMajor++;
+                        break;
+
+                    case "Context Minor":
+                        $issuesContextMinor++;
+                        break;
+
+                    case "Preferential edit":
+                        $issuesPreferentialEdit++;
+                        break;
+
                     case "Critical":
                         $issuesCritical++;
                         break;
@@ -229,6 +244,9 @@ class DownloadQRController extends BaseChunkController {
                     $issuesNeutral,
                     $issuesNone,
                     $issuesRepetition,
+                    $issuesPreferentialEdit,
+                    $issuesContextMajor,
+                    $issuesContextMinor,
             ];
         }
 
@@ -286,6 +304,9 @@ class DownloadQRController extends BaseChunkController {
                 "issues_neutral",
                 "issues_none",
                 "issues_repetition",
+                "issues_preferential_edit",
+                "issues_context_major",
+                "issues_context_minor",
         ];
 
         $csvData = [];
@@ -359,6 +380,9 @@ class DownloadQRController extends BaseChunkController {
                     "issues_neutral" => $datum[34],
                     "issues_none" => $datum[35],
                     "issues_repetition" => $datum[36],
+                    "issues_preferential_edit" => $datum[37],
+                    "issues_context_major" => $datum[38],
+                    "issues_context_minor" => $datum[39],
             ];
         }
 
@@ -392,6 +416,8 @@ class DownloadQRController extends BaseChunkController {
     private function downloadFile($mimeType, $filename, $filePath) {
 
         $outputContent = file_get_contents($filePath);
+
+
 
         ob_get_contents();
         ob_get_clean();
