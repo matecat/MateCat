@@ -25,6 +25,7 @@ import {updateGlossaryItem} from '../api/updateGlossaryItem'
 import {approveSegments} from '../api/approveSegments'
 import {translateSegments} from '../api/translateSegments'
 import {splitSegment} from '../api/splitSegment'
+import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -448,43 +449,29 @@ const SegmentActions = {
     UI.unmountSegments() //TODO
     $('#outer').addClass('loading')
 
-    APP.doRequest({
-      data: {
-        action: 'copyAllSource2Target',
-        id_job: config.id_job,
-        pass: config.password,
-        revision_number: config.revisionNumber,
-      },
-      error: function () {
-        var notification = {
+    copyAllSourceToTarget()
+      .then(() => {
+        UI.unmountSegments()
+        UI.render({
+          segmentToOpen: UI.currentSegmentId,
+        })
+      })
+      .catch((errors) => {
+        APP.closePopup()
+        const notification = {
           title: 'Error',
           text: 'Error copying all sources to target. Try again!',
           type: 'error',
           position: 'bl',
-        }
-        APP.addNotification(notification)
-        UI.render({
-          segmentToOpen: UI.currentSegmentId,
-        })
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          APP.closePopup()
-          var notification = {
+          ...(errors[0]?.message && {
             title: 'Error',
-            text: d.errors[0].message,
+            text: errors[0].message,
             type: 'error',
             position: 'bl',
-          }
-          APP.addNotification(notification)
-        } else {
-          UI.unmountSegments()
-          UI.render({
-            segmentToOpen: UI.currentSegmentId,
-          })
+          }),
         }
-      },
-    })
+        APP.addNotification(notification)
+      })
   },
   abortCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []

@@ -4,6 +4,7 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
+import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -89,7 +90,20 @@ let SearchUtils = {
     UI.body.addClass('searchActive')
     let makeSearchFn = () => {
       let dd = new Date()
-      APP.doRequest({
+
+      searchTermIntoSegments({
+        token: dd.getTime(),
+        source,
+        target,
+        status: this.searchParams.status,
+        matchcase: this.searchParams['match-case'],
+        exactmatch: this.searchParams['exact-match'],
+        replace,
+      }).then((data) => {
+        SearchUtils.execFind_success(data)
+      })
+
+      /* APP.doRequest({
         data: {
           action: 'getSearch',
           function: 'find',
@@ -107,7 +121,7 @@ let SearchUtils = {
         success: function (d) {
           SearchUtils.execFind_success(d)
         },
-      })
+      }) */
     }
     //Save the current segment to not lose the translation
     try {
