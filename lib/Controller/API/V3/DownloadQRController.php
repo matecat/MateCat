@@ -97,18 +97,32 @@ class DownloadQRController extends BaseChunkController {
      */
     private function composeFilesContentArray( \Chunks_ChunkStruct $chunk) {
 
-        $files = [];
+        $data = [];
 
         $qrSegmentModel = new QualityReportSegmentModel( $chunk );
 
         $ids = [];
         $this->buildArrayOfSegmentIds($qrSegmentModel, $this->segmentsPerFile,0, $ids);
 
+        // merge all data here
         foreach ( $ids as $segments_ids ) {
-            $files[] = $this->buildFileContentFromArrayOfSegmentIds($qrSegmentModel, $segments_ids);
+            $data = array_merge($data, $this->buildFileContentFromArrayOfSegmentIds($qrSegmentModel, $segments_ids));
         }
 
-        return  $files;
+        // compose a unique file
+        if($this->format === 'json'){
+            $uniqueFile = $this->createJsonFile($data);
+        }
+
+        if($this->format === 'csv'){
+            $uniqueFile = $this->createCSVFile($data);
+        }
+
+        if(!isset($uniqueFile)){
+            throw new \Exception('Merging files for download failed.');
+        }
+
+        return [$uniqueFile];
     }
 
     /**
@@ -140,7 +154,7 @@ class DownloadQRController extends BaseChunkController {
      * @param QualityReportSegmentModel $qrSegmentModel
      * @param                           $segments_ids
      *
-     * @return false|string
+     * @return array
      * @throws \Exception
      */
     private function buildFileContentFromArrayOfSegmentIds(QualityReportSegmentModel $qrSegmentModel, $segments_ids)
@@ -250,13 +264,7 @@ class DownloadQRController extends BaseChunkController {
             ];
         }
 
-        if($this->format === 'json'){
-            return $this->createJsonFile($data);
-        }
-
-        if($this->format === 'csv'){
-            return $this->createCSVFile($data);
-        }
+        return $data;
     }
 
     /**
@@ -386,7 +394,6 @@ class DownloadQRController extends BaseChunkController {
             ];
         }
 
-
         return json_encode($jsonData, JSON_PRETTY_PRINT);
     }
 
@@ -399,7 +406,7 @@ class DownloadQRController extends BaseChunkController {
 
         if ($zip->open($filename, \ZipArchive::CREATE)) {
             foreach ($files as $index => $fileContent){
-                $zip->addFromString( "file__".($index+1)."." . $this->format, $fileContent);
+                $zip->addFromString( "qr_file__".($index+1)."." . $this->format, $fileContent);
             }
 
             $zip->close();
@@ -416,8 +423,6 @@ class DownloadQRController extends BaseChunkController {
     private function downloadFile($mimeType, $filename, $filePath) {
 
         $outputContent = file_get_contents($filePath);
-
-
 
         ob_get_contents();
         ob_get_clean();
