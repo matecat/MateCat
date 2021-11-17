@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Features\QaCheckBlacklist\Worker ;
 
 use Features\QaCheckBlacklist;

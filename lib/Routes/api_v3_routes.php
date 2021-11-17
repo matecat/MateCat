@@ -29,6 +29,6 @@ route( '/api/v3/feedback', 'POST', '\API\V3\RevisionFeedbackController', 'feedba
 route( '/api/v3/qr/download', 'POST', '\API\V3\DownloadQRController', 'download' );
 
 $klein->with( '/api/v3/blacklist', function () {
-    route( '/upload', 'GET', '\API\V3\BlacklistController', 'upload' );
+    route( '/upload', 'POST', '\API\V3\BlacklistController', 'upload' );
 } );
 
