@@ -48,20 +48,6 @@ if (config.enableReview && config.isReview) {
     $.extend(UI, {
       alertNotTranslatedMessage:
         'This segment is not translated yet.<br /> Only translated segments can be revised.',
-
-      setRevision: function (data) {
-        APP.doRequest({
-          data: data,
-          error: function () {
-            OfflineUtils.failedConnection(data, 'setRevision')
-          },
-          success: function (d) {
-            window.quality_report_btn_component.setState({
-              vote: d.data.overall_quality_class,
-            })
-          },
-        })
-      },
       /**
        * Each revision overwrite this function
        */

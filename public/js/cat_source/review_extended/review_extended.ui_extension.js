@@ -38,14 +38,7 @@ if (ReviewExtended.enabled()) {
     },
   })
 
-  var originalRender = UI.render
   $.extend(UI, {
-    render: function (options) {
-      var promise = new $.Deferred().resolve()
-      originalRender.call(this, options)
-      return promise
-    },
-
     submitIssues: function (sid, data) {
       return ReviewExtended.submitIssue(sid, data)
     },
@@ -169,19 +162,6 @@ if (ReviewExtended.enabled()) {
           }),
         )
       }
-    },
-    setRevision: function (data) {
-      APP.doRequest({
-        data: data,
-        error: function () {
-          OfflineUtils.failedConnection(data, 'setRevision')
-        },
-        success: function (d) {
-          window.quality_report_btn_component.setState({
-            vote: d.data.overall_quality_class,
-          })
-        },
-      })
     },
 
     getSegmentRevisionIssues(segment, revisionNumber) {

@@ -1,8 +1,5 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
-
 import CommonUtils from './es6/utils/commonUtils'
-import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 import OfflineUtils from './es6/utils/offlineUtils'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
@@ -10,6 +7,8 @@ import DraftMatecatUtils from './es6/components/segments/utils/DraftMatecatUtils
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
+import {getTagProjection} from './es6/api/getTagProjection'
+import {setCurrentSegment} from './es6/api/setCurrentSegment'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -18,39 +17,36 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
 
     startSegmentTagProjection: function (sid) {
       UI.getSegmentTagsProjection(sid)
-        .done(function (response) {
-          if (
-            response.errors &&
-            (response.errors.length > 0 || !_.isUndefined(response.errors.code))
-          ) {
-            UI.processErrors(response.errors, 'getTagProjection')
+        .then(function (response) {
+          // Set as Tagged and restore source with taggedText
+          SegmentActions.setSegmentAsTagged(sid)
+          // Unescape HTML
+          let unescapedTranslation = DraftMatecatUtils.unescapeHTMLLeaveTags(
+            response.data.translation,
+          )
+          // Update target area
+          SegmentActions.copyTagProjectionInCurrentSegment(
+            sid,
+            unescapedTranslation,
+          )
+          // TODO: Autofill target based on Source Map, rewrite
+          //SegmentActions.autoFillTagsInTarget(sid);
+        })
+        .catch((errors) => {
+          if (errors && (errors.length > 0 || !_.isUndefined(errors.code))) {
+            UI.processErrors(errors, 'getTagProjection')
             SegmentActions.disableTPOnSegment()
             // Set as Tagged and restore source with taggedText
             SegmentActions.setSegmentAsTagged(sid)
             // Add missing tag at the end of the string
             SegmentActions.autoFillTagsInTarget(sid)
           } else {
-            // Set as Tagged and restore source with taggedText
             SegmentActions.setSegmentAsTagged(sid)
-            // Unescape HTML
-            let unescapedTranslation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-              response.data.translation,
-            )
-            // Update target area
-            SegmentActions.copyTagProjectionInCurrentSegment(
-              sid,
-              unescapedTranslation,
-            )
-            // TODO: Autofill target based on Source Map, rewrite
-            //SegmentActions.autoFillTagsInTarget(sid);
+            SegmentActions.autoFillTagsInTarget(sid)
+            OfflineUtils.startOfflineMode()
           }
         })
-        .fail(function () {
-          SegmentActions.setSegmentAsTagged(sid)
-          SegmentActions.autoFillTagsInTarget(sid)
-          OfflineUtils.startOfflineMode()
-        })
-        .always(function () {
+        .finally(function () {
           UI.registerQACheck()
         })
     },
@@ -76,18 +72,16 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
       }
 
       var target = segmentObj.translation
-      return APP.doRequest({
-        data: {
-          action: 'getTagProjection',
-          password: config.password,
-          id_job: config.id_job,
-          source: source,
-          target: target,
-          source_lang: config.source_rfc,
-          target_lang: config.target_rfc,
-          suggestion: suggestion,
-          id_segment: sid,
-        },
+      return getTagProjection({
+        action: 'getTagProjection',
+        password: config.password,
+        id_job: config.id_job,
+        source: source,
+        target: target,
+        source_lang: config.source_rfc,
+        target_lang: config.target_rfc,
+        suggestion: suggestion,
+        id_segment: sid,
       })
     },
 
@@ -230,31 +224,24 @@ import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
       return status
     },
     setCurrentSegment: function () {
-      var reqArguments = arguments
       var id_segment = this.currentSegmentId
       CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString())
-      APP.doRequest({
-        data: {
-          action: 'setCurrentSegment',
-          password: config.password,
-          revision_number: config.revisionNumber,
-          id_segment: id_segment.toString(),
-          id_job: config.id_job,
-        },
-        context: [reqArguments, id_segment],
-        error: function () {
-          OfflineUtils.failedConnection(this[0], 'setCurrentSegment')
-        },
-        success: function (d) {
-          UI.setCurrentSegment_success(this[1], d)
-        },
-      })
+      const requestData = {
+        action: 'setCurrentSegment',
+        password: config.password,
+        revision_number: config.revisionNumber,
+        id_segment: id_segment.toString(),
+        id_job: config.id_job,
+      }
+      setCurrentSegment(requestData)
+        .then((data) => {
+          UI.setCurrentSegment_success(id_segment, data)
+        })
+        .catch(() => {
+          OfflineUtils.failedConnection(requestData, 'setCurrentSegment')
+        })
     },
     setCurrentSegment_success: function (id_segment, d) {
-      if (d.errors.length) {
-        this.processErrors(d.errors, 'setCurrentSegment')
-      }
-
       this.nextUntranslatedSegmentIdByServer = d.nextSegmentId
       SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId)
 
