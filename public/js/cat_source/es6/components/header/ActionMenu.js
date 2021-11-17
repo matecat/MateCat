@@ -38,7 +38,7 @@ class ActionMenu extends React.Component {
             <a href={jobUrls.translate_url}>Translate</a>
           </li>
           <li className="item" title="Export CSV" data-value="export-csv">
-            <span onClick={this.handlerExportCsv}>Export CSV</span>
+            <span onClick={this.handlerExportCsv}>Download QA Report CSV</span>
           </li>
         </ul>
       </div>
