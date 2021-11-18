@@ -28,15 +28,18 @@ abstract class AbstractBlacklist {
 
     protected abstract function getContent( $file_path );
 
+    protected abstract function deleteOriginalFile ( $file_path ); // ???? Va cancellato???
+
     /**
      * Ensure cache in Redis
      */
-    public function ensureCached() {
+    private function ensureCached() {
         $redis   = new \Predis\Client( \INIT::$REDIS_SERVERS );
         $key     = $this->getJobCacheKey();
 
         if ( !$redis->exists( $key ) ) {
             $content = static::getContent( $this->file_path );
+
             $splitted = explode( PHP_EOL, $content );
             foreach ( $splitted as $token ) {
                 $token = trim( $token );
@@ -59,8 +62,8 @@ abstract class AbstractBlacklist {
         $redis           = new \Predis\Client( \INIT::$REDIS_SERVERS );
         $blacklist_rows = $redis->smembers( $this->getJobCacheKey() ) ;
 
-        $counter = array()  ;
-        
+        $counter = [];
+
         foreach($blacklist_rows as $blacklist_item) {
             $blacklist_item = trim( $blacklist_item ) ; 
             

@@ -3,6 +3,8 @@
 namespace Features\QaCheckBlacklist\Worker ;
 
 use Features\QaCheckBlacklist;
+use Features\QaCheckBlacklist\AbstractBlacklist;
+use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -52,9 +54,7 @@ class BlacklistWorker extends AbstractWorker {
             return ;
         }
 
-        $job = \Jobs_JobDao::getById( $params['id_job'] )[0];
-
-        $blacklist = new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
+        $blacklist = $this->getAbstractBlacklist($params);
 
         $this->matches = $blacklist->getMatches( $params['translation'] ) ;
 
@@ -63,6 +63,23 @@ class BlacklistWorker extends AbstractWorker {
         if ( !empty( $this->queueElement->params['propagated_ids']) ) {
             $this->_propagateWarnings( ) ;
         }
+    }
+
+    /**
+     * @param $params
+     *
+     * @return AbstractBlacklist
+     * @throws \Exception
+     */
+    private function getAbstractBlacklist($params)
+    {
+        $job = \Jobs_JobDao::getById( $params['id_job'] )[0];
+
+        if(isset($params['textFilePath'])){
+            return new BlacklistFromTextFile( $params['textFilePath'],  $job->id ) ;
+        }
+
+        return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
     }
 
     protected function _propagateWarnings()  {

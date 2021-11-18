@@ -63,25 +63,40 @@ class BlacklistController extends KleinController {
             $this->returnError('File type MUST be text/plain');
         }
 
+        // more validation???
+
         // project has_blacklist?
         $dao = new \Projects_MetadataDao() ;
         $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $chunk->id_project,  'has_blacklist' ) ;
 
-        if(false === $has_blacklist){ // if is null?????
+        if(! $has_blacklist){
             $this->returnError('Project has not set a blacklist');
+        }
+
+        // upload file
+        try {
+            $upload = new \Upload();
+            $uploadedFiles = $upload->uploadFiles([$this->file['name'] => $this->file]);
+        } catch (\Exception $exception){
+            $this->returnError($exception->getMessage());
+        }
+
+        $uploadedFile = null;
+        foreach ($uploadedFiles as $file){
+            $uploadedFile =  $file;
         }
 
         // enqueue TranslationCheck
         foreach ($chunk->getTranslations() as $index => $segmentTranslation){
 
             $queue_element = [
-                    'id_segment'          => $segmentTranslation->id_segment,
-                    'id_job'              => $segmentTranslation->id_job,
-                    'id_project'          => $chunk->id_project,
-                    'segment'             => $chunk->getSegments()[$index]->segment,
-                    'translation'         => $segmentTranslation->translation,
-                    'textFile'            => file_get_contents($this->file['tmp_name']),
-                    'recheck_translation' => false
+                'id_segment'          => $segmentTranslation->id_segment,
+                'id_job'              => $segmentTranslation->id_job,
+                'id_project'          => $chunk->id_project,
+                'segment'             => $chunk->getSegments()[$index]->segment,
+                'translation'         => $segmentTranslation->translation,
+                'textFilePath'        => $uploadedFile->file_path,
+                'recheck_translation' => false
             ];
 
             try {
@@ -97,8 +112,8 @@ class BlacklistController extends KleinController {
         }
 
         $this->response->json( [
-                'success' => true,
-                'message' => 'The blacklist file was passed to the queue handler.'
+            'success' => true,
+            'message' => 'The blacklist file was passed to the queue handler.'
         ] ) ;
     }
 
