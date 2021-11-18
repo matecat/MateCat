@@ -642,15 +642,13 @@ const SegmentActions = {
     })
   },
   deleteContribution: function (source, target, matchId, sid) {
-    TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).done(
-      (data) => {
-        if (data.errors.length === 0) {
-          AppDispatcher.dispatch({
-            actionType: SegmentConstants.DELETE_CONTRIBUTION,
-            sid: sid,
-            matchId: matchId,
-          })
-        }
+    TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
+      () => {
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.DELETE_CONTRIBUTION,
+          sid: sid,
+          matchId: matchId,
+        })
       },
     )
   },
