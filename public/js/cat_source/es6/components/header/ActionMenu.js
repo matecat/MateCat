@@ -51,7 +51,15 @@ class ActionMenu extends React.Component {
             title="Export CSV"
             data-value="export-csv"
           >
-            <span onClick={this.handlerExportCsv}>Download QA Report CSV</span>
+            <span
+              onClick={
+                !this.state.isExportCsvDisabled
+                  ? this.handlerExportCsv
+                  : () => {}
+              }
+            >
+              Download QA Report CSV
+            </span>
           </li>
         </ul>
       </div>
@@ -59,6 +67,7 @@ class ActionMenu extends React.Component {
   }
 
   handlerExportCsv = () => {
+    console.log('download csv')
     this.setState({
       isExportCsvDisabled: true,
     })
