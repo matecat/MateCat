@@ -5,6 +5,13 @@ import Icon3Dots from '../icons/Icon3Dots'
 import {exportQualityReport} from '../../api/exportQualityReport'
 
 class ActionMenu extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isExportCsvDisabled: false,
+    }
+  }
+
   componentDidMount() {
     this.initDropdowns()
   }
@@ -37,7 +44,13 @@ class ActionMenu extends React.Component {
           <li className="item" title="Translate" data-value="translate">
             <a href={jobUrls.translate_url}>Translate</a>
           </li>
-          <li className="item" title="Export CSV" data-value="export-csv">
+          <li
+            className={`item${
+              this.state.isExportCsvDisabled ? ' disabled' : ''
+            }`}
+            title="Export CSV"
+            data-value="export-csv"
+          >
             <span onClick={this.handlerExportCsv}>Download QA Report CSV</span>
           </li>
         </ul>
@@ -46,6 +59,9 @@ class ActionMenu extends React.Component {
   }
 
   handlerExportCsv = () => {
+    this.setState({
+      isExportCsvDisabled: true,
+    })
     exportQualityReport()
       .then(({blob, filename}) => {
         const aTag = document.createElement('a')
@@ -64,6 +80,11 @@ class ActionMenu extends React.Component {
         }
         APP.addNotification(notification)
       })
+      .finally(() =>
+        this.setState({
+          isExportCsvDisabled: false,
+        }),
+      )
   }
 
   render = () => {

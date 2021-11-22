@@ -4841,7 +4841,7 @@ header {
             padding: 8px !important;
             font-size: 16px;
             color: #000000;
-            &:hover {
+            &:not(.disabled):hover {
               background-color: $light-gray;
               color: $light-blue;
             }
@@ -4858,6 +4858,12 @@ header {
 
           padding: 0 !important;
           border-radius: 3px;
+
+          .disabled {
+            > span {
+              color: lightgray;
+            }
+          }
         }
 
         .active.item {
