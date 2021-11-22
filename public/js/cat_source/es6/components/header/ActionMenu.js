@@ -67,7 +67,6 @@ class ActionMenu extends React.Component {
   }
 
   handlerExportCsv = () => {
-    console.log('download csv')
     this.setState({
       isExportCsvDisabled: true,
     })

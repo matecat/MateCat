@@ -30,7 +30,6 @@ export const exportQualityReport = async ({
     body: formData,
   })
   if (!response.ok) return Promise.reject(response)
-  console.log(response.headers.get('Content-Disposition'))
   const blob = await response.blob()
   const temp = response.headers.get('Content-Disposition').split('filename')[1]
   return {
