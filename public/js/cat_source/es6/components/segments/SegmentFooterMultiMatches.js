@@ -256,7 +256,7 @@ class SegmentFooterMultiMatches extends React.Component {
       this.props.segment.cl_contributions.matches &&
       this.props.segment.cl_contributions.matches.length === 0
     ) {
-      if (config.mt_enabled && !config.id_translator) {
+      if (config.mt_enabled) {
         matches.push(
           <ul key={0} className="graysmall message">
             <li>

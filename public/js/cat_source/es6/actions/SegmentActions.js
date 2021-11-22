@@ -158,7 +158,6 @@ const SegmentActions = {
         id_segment: segment.sid,
         status:
           segment.status.toLowerCase() === 'new' ? 'draft' : segment.status,
-        caller: 'autosave',
       })
     } else {
       var deferred = $.Deferred()

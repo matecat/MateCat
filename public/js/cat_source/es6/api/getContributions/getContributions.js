@@ -18,7 +18,6 @@ export const getContributions = async (
   target,
   idJob = config.id_job,
   password = config.password,
-  idTranslator = config.id_translator,
   idClient = config.id_client,
   currentPassword = config.currentPassword,
 ) => {
@@ -36,7 +35,6 @@ export const getContributions = async (
     text: txt,
     id_job: idJob,
     num_results: UI.numContributionMatchesResults,
-    id_translator: idTranslator,
     context_before: contextBefore,
     id_before: idBefore,
     context_after: contextAfter,

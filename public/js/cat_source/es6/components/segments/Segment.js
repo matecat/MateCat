@@ -659,7 +659,6 @@ class Segment extends React.Component {
         data-hash={this.props.segment.segment_hash}
         data-autopropagated={this.state.autopropagated}
         data-propagable={autoPropagable}
-        data-version={this.props.segment.version}
         data-split-group={split_group}
         data-split-original-id={originalId}
         data-tagmode="crunched"
