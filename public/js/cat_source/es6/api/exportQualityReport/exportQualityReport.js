@@ -24,7 +24,7 @@ export const exportQualityReport = async ({
   Object.keys(dataParams).forEach((key) => {
     formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}api/v3/qr/download`, {
+  const response = await fetch(`${window.origin}/api/v3/qr/download`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
