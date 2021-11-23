@@ -83,7 +83,7 @@ $.extend(window.UI, {
 
     var initialRenderPromise = UI.render()
 
-    initialRenderPromise.done(function () {
+    initialRenderPromise.then(function () {
       if (
         SegmentFilter.enabled() &&
         SegmentFilter.getStoredState().reactState
