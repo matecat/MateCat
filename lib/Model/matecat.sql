@@ -276,15 +276,28 @@ DROP TABLE IF EXISTS `file_metadata`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `file_metadata` (
-                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                 `id_project` bigint(20) NOT NULL,
-                                 `id_file` bigint(20) NOT NULL,
-                                 `key` varchar(255) NOT NULL,
-                                 `value` text NOT NULL,
-                                 PRIMARY KEY (`id`),
-                                 KEY `id_file_idx` (`id_file`),
-                                 KEY `id_project_idx` (`id_project`)
+                                     `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                     `id_project` bigint(20) NOT NULL,
+                                     `id_file` bigint(20) NOT NULL,
+                                     `key` varchar(255) NOT NULL,
+                                     `value` text NOT NULL,
+                                     PRIMARY KEY (`id`),
+                                     KEY `id_file_idx` (`id_file`),
+                                     KEY `id_project_idx` (`id_project`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `files_parts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `files_parts` (
+                                    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                    `id_file` bigint(20) NOT NULL,
+                                    `tag_key` varchar(45) NOT NULL,
+                                    `tag_value` varchar(255) NOT NULL,
+                                    PRIMARY KEY (`id`),
+                                    KEY `id_file_idx` (`id_file`) USING BTREE
+                                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
