@@ -439,4 +439,43 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     public static function isOnS3(){
         return (\INIT::$FILE_STORAGE_METHOD === 's3');
     }
+
+    /**
+     **********************************************************************************************
+     * 5. BLACKLIST FILES
+     **********************************************************************************************
+     */
+
+    /**
+     * @param $filePath
+     * @param $jid
+     * @param $password
+     *
+     * @return mixed|void
+     * @throws \Exception
+     */
+    public function saveBlacklistFile($filePath, $jid, $password) {
+
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+
+        if ( $isFsOnS3 ) {
+            $blacklistPath = 'glossary' . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password . DIRECTORY_SEPARATOR . 'blacklist.txt';
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            $s3Client->uploadItem( [
+                'bucket' => static::$FILES_STORAGE_BUCKET,
+                'key'    => $blacklistPath,
+                'source' => $filePath
+            ] );
+        } else {
+            $blacklistPath = \INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password;
+            if(!is_dir($blacklistPath)){
+                mkdir($blacklistPath, 0755, true);
+            }
+
+            $storedBytes = file_put_contents( $blacklistPath . DIRECTORY_SEPARATOR . "blacklist.txt", file_get_contents( $filePath ) );
+            if ( $storedBytes === false ) {
+                throw new \Exception( 'Failed to save blacklist file on disk.', -14 );
+            }
+        }
+    }
 }

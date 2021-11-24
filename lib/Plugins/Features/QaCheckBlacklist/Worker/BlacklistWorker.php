@@ -6,6 +6,9 @@ use Features\QaCheckBlacklist;
 use Features\QaCheckBlacklist\AbstractBlacklist;
 use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
+use Features\QaCheckBlacklist\Utils\BlacklistUtils;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\S3FilesStorage;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -73,13 +76,9 @@ class BlacklistWorker extends AbstractWorker {
      */
     private function getAbstractBlacklist($params)
     {
-        $job = \Jobs_JobDao::getById( $params['id_job'] )[0];
+        $job = (isset($params['from_upload']) and isset($params['job_password'])) ? \Jobs_JobDao::getByIdAndPassword( $params['id_job'], $params['job_password'] ) : \Jobs_JobDao::getById( $params['id_job'] )[0];
 
-        if(isset($params['textFilePath'])){
-            return new BlacklistFromTextFile( $params['textFilePath'],  $job->id ) ;
-        }
-
-        return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
+        return BlacklistUtils::getAbstractBlacklist($job) ;
     }
 
     protected function _propagateWarnings()  {

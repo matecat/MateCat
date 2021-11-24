@@ -217,4 +217,19 @@ interface IFilesStorage {
      * @throws \Exception
      */
     public function transferFiles($source, $destination);
+
+    /**
+     **********************************************************************************************
+     * 7. BLACKLIST FILE
+     **********************************************************************************************
+     */
+
+    /**
+     * @param $filePath
+     * @param $jid
+     * @param $password
+     *
+     * @return mixed
+     */
+    public function saveBlacklistFile($filePath, $jid, $password);
 }

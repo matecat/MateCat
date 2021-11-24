@@ -9,7 +9,11 @@
 namespace Features;
 
 use AMQHandler;
+use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
+use Features\QaCheckBlacklist\Utils\BlacklistUtils;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\S3FilesStorage;
 use Projects\ProjectModel;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
@@ -67,19 +71,22 @@ class QaCheckBlacklist extends BaseFeature {
         /** @var $chunk \Chunks_ChunkStruct */
         $chunk = $params[ 'chunk' ];
 
-        $queue_element = array(
-                'id_segment'          => $translation['id_segment'],
-                'id_job'              => $translation['id_job'],
-                'id_project'          => $chunk->id_project,
-                'segment'             => $segment['segment'],
-                'translation'         => $translation['translation'],
-                'recheck_translation' => true,
-                'propagated_ids'      => $params['propagated_ids']
-        ) ;
+        $queue_element = [
+            'id_segment'          => $translation['id_segment'],
+            'id_job'              => $translation['id_job'],
+            'job_password'        => $chunk->password,
+            'id_project'          => $chunk->id_project,
+            'segment'             => $segment['segment'],
+            'translation'         => $translation['translation'],
+            'recheck_translation' => true,
+            'from_upload'         => BlacklistUtils::checkIfExists($chunk->id, $chunk->password),
+            'propagated_ids'      => $params['propagated_ids']
+        ] ;
 
         self::enqueueTranslationCheck( $queue_element ) ;
-
     }
+
+
 
     public function filterGlobalWarnings( $result, $params ) {
         /**
@@ -124,7 +131,7 @@ class QaCheckBlacklist extends BaseFeature {
          */
         $chunk =$params['chunk'] ;
 
-        $blacklist = new BlacklistFromZip( $project->getFirstOriginalZipPath(),  $chunk->id ) ;
+        $blacklist = BlacklistUtils::getAbstractBlacklist($chunk);
 
         $data['blacklist'] = array(
                 'matches' => $blacklist->getMatches( $target )

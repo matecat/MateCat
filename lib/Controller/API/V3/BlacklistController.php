@@ -14,12 +14,12 @@ use CatUtils;
 use Features\QaCheckBlacklist;
 use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
+use Features\QaCheckBlacklist\Utils\BlacklistUtils;
+use FilesStorage\FilesStorageFactory;
 use Langs_Languages;
 
 
 class BlacklistController extends KleinController {
-
-    const FILE_SIZE_MAX = 2097152;
 
     /**
      * @var int
@@ -54,7 +54,7 @@ class BlacklistController extends KleinController {
         }
 
         // validate file size
-        if($this->file['size'] > self::FILE_SIZE_MAX){
+        if($this->file['size'] > \INIT::$BLACKLIST_FILE_SIZE_MAX){
             $this->returnError('Filesize limit is 2Mb');
         }
 
@@ -75,15 +75,9 @@ class BlacklistController extends KleinController {
 
         // upload file
         try {
-            $upload = new \Upload();
-            $uploadedFiles = $upload->uploadFiles([$this->file['name'] => $this->file]);
+            BlacklistUtils::save($this->file['tmp_name'], $chunk->id, $chunk->password);
         } catch (\Exception $exception){
             $this->returnError($exception->getMessage());
-        }
-
-        $uploadedFile = null;
-        foreach ($uploadedFiles as $file){
-            $uploadedFile =  $file;
         }
 
         // enqueue TranslationCheck
@@ -92,10 +86,11 @@ class BlacklistController extends KleinController {
             $queue_element = [
                 'id_segment'          => $segmentTranslation->id_segment,
                 'id_job'              => $segmentTranslation->id_job,
+                'job_password'        => $chunk->password,
                 'id_project'          => $chunk->id_project,
                 'segment'             => $chunk->getSegments()[$index]->segment,
                 'translation'         => $segmentTranslation->translation,
-                'textFilePath'        => $uploadedFile->file_path,
+                'from_upload'         => true,
                 'recheck_translation' => false
             ];
 

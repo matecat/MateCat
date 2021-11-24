@@ -69,6 +69,7 @@ class Bootstrap {
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
         INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
         INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
+        INIT::$BLACKLIST_REPOSITORY            = INIT::$STORAGE_DIR . "/files_storage/blacklist";
         INIT::$ANALYSIS_FILES_REPOSITORY       = INIT::$STORAGE_DIR . "/files_storage/fastAnalysis";
         INIT::$QUEUE_PROJECT_REPOSITORY        = INIT::$STORAGE_DIR . "/files_storage/queueProjects";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";

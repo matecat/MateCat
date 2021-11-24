@@ -48,6 +48,7 @@ class INIT {
     public static $QUEUE_CREDENTIALS;
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
+    public static $BLACKLIST_FILE_SIZE_MAX = 2097152;
 
 
     /**
@@ -79,6 +80,7 @@ class INIT {
     public static $FILES_REPOSITORY;
     public static $CACHE_REPOSITORY;
     public static $ZIP_REPOSITORY;
+    public static $BLACKLIST_REPOSITORY;
     public static $ANALYSIS_FILES_REPOSITORY;
     public static $QUEUE_PROJECT_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;

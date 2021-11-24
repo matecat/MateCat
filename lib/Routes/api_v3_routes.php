@@ -28,7 +28,7 @@ route( '/api/v3/jobs/[:id_job]/[:password]/[:source_page]/issue-report/segments'
 route( '/api/v3/feedback', 'POST', '\API\V3\RevisionFeedbackController', 'feedback' );
 route( '/api/v3/qr/download', 'POST', '\API\V3\DownloadQRController', 'download' );
 
-$klein->with( '/api/v3/blacklist', function () {
-    route( '/upload', 'POST', '\API\V3\BlacklistController', 'upload' );
+$klein->with( '/api/v3/glossary', function () {
+    route( '/blacklist/upload', 'POST', '\API\V3\BlacklistController', 'upload' );
 } );
 
