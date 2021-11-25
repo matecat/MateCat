@@ -1,32 +1,34 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Get contributions - NOTE: actually this ajax request
- * is dispatch from APP.doRequest.
+ * Get contributions
  *
- * @param {string} idSegment
- * @param {string} target
- * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
- * @param {string} [idTranslator=config.id_translator]
- * @param {string} [idClient=config.id_client]
- * @param {string} [currentPassword=config.currentPassword]
+ * @param {Object} options
+ * @param {string} options.idSegment
+ * @param {string} options.target
+ * @param {Array} options.crossLanguages
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
+ * @param {string} [options.idTranslator=config.id_translator]
+ * @param {string} [options.idClient=config.id_client]
+ * @param {string} [options.currentPassword=config.currentPassword]
  * @returns {Promise<object>}
  */
-export const getContributions = async (
+export const getContributions = async ({
   idSegment,
   target,
+  crossLanguages,
   idJob = config.id_job,
   password = config.password,
   idTranslator = config.id_translator,
   idClient = config.id_client,
   currentPassword = config.currentPassword,
-) => {
+}) => {
   const contextBefore = UI.getContextBefore(idSegment)
   const idBefore = UI.getIdBefore(idSegment)
   const contextAfter = UI.getContextAfter(idSegment)
   const idAfter = UI.getIdAfter(idSegment)
-  const txt = TagUtils.prepareTextToSend(target)
+  const txt = TextUtils.view2rawxliff(TagUtils.prepareTextToSend(target))
 
   const dataParams = {
     action: 'getContribution',
@@ -37,17 +39,18 @@ export const getContributions = async (
     id_job: idJob,
     num_results: UI.numContributionMatchesResults,
     id_translator: idTranslator,
-    context_before: contextBefore,
-    id_before: idBefore,
+    context_before: contextBefore ? contextBefore : '',
+    id_before: idBefore ? idBefore : '',
     context_after: contextAfter,
     id_after: idAfter,
     id_client: idClient,
+    cross_language: crossLanguages,
     current_password: currentPassword,
   }
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
-    formData.append(key, dataParams[key])
+    if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
   const response = await fetch(
     `${getMatecatApiDomain()}?action=getContribution`,

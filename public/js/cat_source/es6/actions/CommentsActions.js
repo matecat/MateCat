@@ -11,33 +11,26 @@ const CommentsActions = {
     })
   },
   sendComment: function (text, sid) {
-    return MBC.submitComment(text, sid).done((resp) => {
-      if (resp.errors.length) {
-        // showGenericWarning();
-      } else {
+    return MBC.submitComment(text, sid).then((resp) => {
+      AppDispatcher.dispatch({
+        actionType: CommentsConstants.ADD_COMMENT,
+        comment: resp.data.entries[0],
+        sid: sid,
+      })
+      $(document).trigger('mbc:comment:saved', resp.data.entries[0])
+      return resp
+    })
+  },
+  resolveThread: function (sid) {
+    MBC.resolveThread(sid)
+      .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
           comment: resp.data.entries[0],
           sid: sid,
         })
-        $(document).trigger('mbc:comment:saved', resp.data.entries[0])
-      }
-    })
-  },
-  resolveThread: function (sid) {
-    MBC.resolveThread(sid)
-      .done((resp) => {
-        if (resp.errors.length) {
-          // showGenericWarning();
-        } else {
-          AppDispatcher.dispatch({
-            actionType: CommentsConstants.ADD_COMMENT,
-            comment: resp.data.entries[0],
-            sid: sid,
-          })
-        }
       })
-      .fail(() => {
+      .catch(() => {
         // showGenericWarning();
       })
   },

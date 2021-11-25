@@ -39,10 +39,10 @@ class SegmentCommentsContainer extends React.Component {
     let text = $(this.commentInput).html()
     if (this.commentInput.textContent.trim().length > 0) {
       CommentsActions.sendComment(text, this.props.segment.original_sid)
-        .fail(() => {
+        .catch(() => {
           this.setState({sendCommentError: true})
         })
-        .done(() => {
+        .then(() => {
           this.setState({sendCommentError: false})
           setTimeout(() => (this.commentInput.textContent = ''))
         })
@@ -151,7 +151,7 @@ class SegmentCommentsContainer extends React.Component {
             <div className="mbc-resolved-comment" key={'comment-' + i}>
               <span className="mbc-comment-resolved-label">
                 <span className="mbc-comment-username mbc-comment-resolvedby">
-                  {comment.full_name}
+                  {`${comment.full_name} `}
                 </span>
                 <span className="">marked as resolved</span>
               </span>

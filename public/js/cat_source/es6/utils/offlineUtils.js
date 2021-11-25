@@ -1,4 +1,5 @@
 import SegmentActions from '../actions/SegmentActions'
+import {checkConnectionPing} from '../api/checkConnectionPing'
 
 const OfflineUtils = {
   offline: false,
@@ -139,19 +140,8 @@ const OfflineUtils = {
     console.log(message)
     console.log('check connection')
 
-    APP.doRequest({
-      data: {
-        action: 'ajaxUtils',
-        exec: 'ping',
-      },
-      error: function () {
-        /**
-         * do Nothing there are already a thread running
-         * @see UI.startOfflineMode
-         * @see UI.endOfflineMode
-         */
-      },
-      success: () => {
+    checkConnectionPing()
+      .then(() => {
         console.log('check connection success')
         //check status completed
         if (!this.restoringAbortedOperations) {
@@ -164,8 +154,14 @@ const OfflineUtils = {
           //reset counter
           this.offlineCacheRemaining = this.offlineCacheSize
         }
-      },
-    })
+      })
+      .catch(() => {
+        /**
+         * do Nothing there are already a thread running
+         * @see UI.startOfflineMode
+         * @see UI.endOfflineMode
+         */
+      })
   },
 
   /**
