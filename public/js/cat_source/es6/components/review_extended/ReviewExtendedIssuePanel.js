@@ -62,7 +62,7 @@ class ReviewExtendedIssuePanel extends React.Component {
             SegmentActions.issueAdded(this.props.sid, data.issue.id)
           })
         })
-        .catch((response) => this.handleFail(response.responseJSON))
+        .catch(this.handleFail.bind(this))
     }
 
     const segment = this.props.segment
@@ -84,7 +84,7 @@ class ReviewExtendedIssuePanel extends React.Component {
     }
   }
 
-  handleFail(errors) {
+  handleFail({errors}) {
     if (errors && errors[0].code === -2000) {
       UI.processErrors(errors, 'createIssue')
     } else {
