@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.199.2",
+            "version": "3.204.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "edc87cdd32545eb443b2b11070cbcdc29ecc8d95"
+                "reference": "1f690db4dfd66d0c729f4f8db12431bb047b4900"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/edc87cdd32545eb443b2b11070cbcdc29ecc8d95",
-                "reference": "edc87cdd32545eb443b2b11070cbcdc29ecc8d95",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/1f690db4dfd66d0c729f4f8db12431bb047b4900",
+                "reference": "1f690db4dfd66d0c729f4f8db12431bb047b4900",
                 "shasum": ""
             },
             "require": {
@@ -143,9 +143,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.199.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.204.5"
             },
-            "time": "2021-10-22T18:14:43+00:00"
+            "time": "2021-11-24T19:13:34+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -212,16 +212,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v5.4.0",
+            "version": "v5.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "d2113d9b2e0e349796e72d2a63cf9319100382d2"
+                "reference": "83b609028194aa042ea33b5af2d41a7427de80e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/d2113d9b2e0e349796e72d2a63cf9319100382d2",
-                "reference": "d2113d9b2e0e349796e72d2a63cf9319100382d2",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/83b609028194aa042ea33b5af2d41a7427de80e6",
+                "reference": "83b609028194aa042ea33b5af2d41a7427de80e6",
                 "shasum": ""
             },
             "require": {
@@ -263,9 +263,9 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v5.4.0"
+                "source": "https://github.com/firebase/php-jwt/tree/v5.5.1"
             },
-            "time": "2021-06-23T19:00:23+00:00"
+            "time": "2021-11-08T20:18:51+00:00"
         },
         {
             "name": "google/apiclient",
@@ -929,16 +929,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.87",
+            "version": "v1.0.88",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "36e8c97dee9aac54bf42f2bc26381e49fafdf9c0"
+                "reference": "61d8f882646f7625dcd0fec86d14b5ad346725f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/36e8c97dee9aac54bf42f2bc26381e49fafdf9c0",
-                "reference": "36e8c97dee9aac54bf42f2bc26381e49fafdf9c0",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/61d8f882646f7625dcd0fec86d14b5ad346725f8",
+                "reference": "61d8f882646f7625dcd0fec86d14b5ad346725f8",
                 "shasum": ""
             },
             "require": {
@@ -974,9 +974,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.87"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.88"
             },
-            "time": "2021-10-22T09:02:52+00:00"
+            "time": "2021-11-25T16:31:52+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -1244,16 +1244,16 @@
         },
         {
             "name": "phpmailer/phpmailer",
-            "version": "v6.5.1",
+            "version": "v6.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "dd803df5ad7492e1b40637f7ebd258fee5ca7355"
+                "reference": "baeb7cde6b60b1286912690ab0693c7789a31e71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/dd803df5ad7492e1b40637f7ebd258fee5ca7355",
-                "reference": "dd803df5ad7492e1b40637f7ebd258fee5ca7355",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/baeb7cde6b60b1286912690ab0693c7789a31e71",
+                "reference": "baeb7cde6b60b1286912690ab0693c7789a31e71",
                 "shasum": ""
             },
             "require": {
@@ -1310,7 +1310,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.5.1"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.5.3"
             },
             "funding": [
                 {
@@ -1318,7 +1318,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-08-18T09:14:16+00:00"
+            "time": "2021-11-25T16:34:11+00:00"
         },
         {
             "name": "phpoffice/phpexcel",
@@ -1389,16 +1389,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.10",
+            "version": "3.0.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "62fcc5a94ac83b1506f52d7558d828617fac9187"
+                "reference": "6e794226a35159eb06f355efe59a0075a16551dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/62fcc5a94ac83b1506f52d7558d828617fac9187",
-                "reference": "62fcc5a94ac83b1506f52d7558d828617fac9187",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/6e794226a35159eb06f355efe59a0075a16551dd",
+                "reference": "6e794226a35159eb06f355efe59a0075a16551dd",
                 "shasum": ""
             },
             "require": {
@@ -1480,7 +1480,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.10"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.11"
             },
             "funding": [
                 {
@@ -1496,7 +1496,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-08-16T04:24:45+00:00"
+            "time": "2021-10-27T03:01:46+00:00"
         },
         {
             "name": "phptal/phptal",
