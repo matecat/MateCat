@@ -5,6 +5,7 @@ import WrapperLoader from '../common/WrapperLoader'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
+import SegmentUtils from '../../utils/segmentUtils'
 
 class ReviewExtendedIssuesContainer extends React.Component {
   constructor(props) {
@@ -262,8 +263,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
             key={item.id}
             changeVisibility={this.changeVisibility.bind(this)}
             actions={
-              this.props.segment.ice_locked == 0 ||
-              (this.props.segment.ice_locked == 1 &&
+              !SegmentUtils.isIceSegment(this.props.segment) ||
+              (SegmentUtils.isIceSegment(this.props.segment) &&
                 this.props.segment.unlocked)
             }
           />,
@@ -279,8 +280,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
             key={item.id}
             changeVisibility={this.changeVisibility.bind(this)}
             actions={
-              this.props.segment.ice_locked == 0 ||
-              (this.props.segment.ice_locked == 1 &&
+              !SegmentUtils.isIceSegment(this.props.segment) ||
+              (SegmentUtils.isIceSegment(this.props.segment) &&
                 this.props.segment.unlocked)
             }
           />,
