@@ -75,7 +75,8 @@ class BlacklistController extends KleinController {
 
         // upload file
         try {
-            BlacklistUtils::save($this->file['tmp_name'], $chunk->id, $chunk->password);
+            $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+            $blacklistUtils->save($this->file['tmp_name'], $chunk->id, $chunk->password);
         } catch (\Exception $exception){
             $this->returnError($exception->getMessage());
         }

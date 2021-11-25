@@ -77,8 +77,9 @@ class BlacklistWorker extends AbstractWorker {
     private function getAbstractBlacklist($params)
     {
         $job = (isset($params['from_upload']) and isset($params['job_password'])) ? \Jobs_JobDao::getByIdAndPassword( $params['id_job'], $params['job_password'] ) : \Jobs_JobDao::getById( $params['id_job'] )[0];
+        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
 
-        return BlacklistUtils::getAbstractBlacklist($job) ;
+        return $blacklistUtils->getAbstractBlacklist($job) ;
     }
 
     protected function _propagateWarnings()  {

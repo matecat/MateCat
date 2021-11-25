@@ -71,6 +71,8 @@ class QaCheckBlacklist extends BaseFeature {
         /** @var $chunk \Chunks_ChunkStruct */
         $chunk = $params[ 'chunk' ];
 
+        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+
         $queue_element = [
             'id_segment'          => $translation['id_segment'],
             'id_job'              => $translation['id_job'],
@@ -79,7 +81,7 @@ class QaCheckBlacklist extends BaseFeature {
             'segment'             => $segment['segment'],
             'translation'         => $translation['translation'],
             'recheck_translation' => true,
-            'from_upload'         => BlacklistUtils::checkIfExists($chunk->id, $chunk->password),
+            'from_upload'         => $blacklistUtils->checkIfExists($chunk->id, $chunk->password),
             'propagated_ids'      => $params['propagated_ids']
         ] ;
 
