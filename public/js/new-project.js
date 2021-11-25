@@ -12,6 +12,8 @@ import TeamsStore from './cat_source/es6/stores/TeamsStore'
 import TeamConstants from './cat_source/es6/constants/TeamConstants'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
+import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
+import {createProject} from './cat_source/es6/api/createProject'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -28,44 +30,34 @@ APP.createTMKey = function () {
   APP.pendingCreateTMkey = true
 
   //call API
-  return APP.doRequest({
-    data: {
-      action: 'createRandUser',
-    },
-    success: function (d) {
-      /*$( '#private-tm-key' ).val( d.data.key );
-            $( '#private-tm-user' ).val( d.data.id );
-            $( '#private-tm-pass' ).val( d.data.pass );
-            $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
-      APP.pendingCreateTMkey = false
-      $('tr.template-download.fade.ready ').each(function (
-        key,
-        fileUploadedRow,
+  const promise = tmCreateRandUser()
+  promise.then(({data}) => {
+    APP.pendingCreateTMkey = false
+    $('tr.template-download.fade.ready ').each(function (key, fileUploadedRow) {
+      if (
+        $('.mgmt-panel #activetm tbody tr.mine').length &&
+        $('.mgmt-panel #activetm tbody tr.mine .update input').is(':checked')
+      )
+        return false
+      var _fileName = $(fileUploadedRow).find('.name').text()
+      if (
+        _fileName.split('.').pop().toLowerCase() == 'tmx' ||
+        _fileName.split('.').pop().toLowerCase() == 'g'
       ) {
-        if (
-          $('.mgmt-panel #activetm tbody tr.mine').length &&
-          $('.mgmt-panel #activetm tbody tr.mine .update input').is(':checked')
-        )
-          return false
-        var _fileName = $(fileUploadedRow).find('.name').text()
-        if (
-          _fileName.split('.').pop().toLowerCase() == 'tmx' ||
-          _fileName.split('.').pop().toLowerCase() == 'g'
-        ) {
-          UI.appendNewTmKeyToPanel({
-            r: 1,
-            w: 1,
-            desc: _fileName,
-            TMKey: d.data.key,
-          })
-          UI.setDropDown()
-          return true
-        }
-      })
+        UI.appendNewTmKeyToPanel({
+          r: 1,
+          w: 1,
+          desc: _fileName,
+          TMKey: data.key,
+        })
+        UI.setDropDown()
+        return true
+      }
+    })
 
-      return false
-    },
+    return false
   })
+  return promise
 }
 
 /**
@@ -659,37 +651,28 @@ $.extend(UI.UPLOAD_PAGE, {
 
       $('body').addClass('creating')
 
-      APP.doRequest({
-        data: APP.getCreateProjectParams(),
-        url: config.basepath + '?action=createProject', //Sometime is necessary to forcibly disable random url call!! :D
-        beforeSend: function () {
-          $('.error-message').hide()
-          $('.uploadbtn')
-            .attr('value', 'Analyzing...')
-            .attr('disabled', 'disabled')
-            .addClass('disabled')
-        },
-        success: function (d) {
-          if (typeof d.errors != 'undefined' && d.errors.length) {
-            var message = this.message
-            if (d.errors.length > 0) {
-              var error = d.errors[0]
-              if (error.code === -230) {
-                //Not a valid S3 object name
-                message =
-                  'Sorry, file name too long. Try shortening it and try again.'
-              }
-            }
-            //normal error management
-            $('.error-message').find('p').text(message)
-            $('.error-message').show()
-            $('.uploadbtn').attr('value', 'Analyze')
-            $('body').removeClass('creating')
-          } else {
-            APP.handleCreationStatus(d.data.id_project, d.data.password)
-          }
-        },
-      })
+      $('.error-message').hide()
+      $('.uploadbtn')
+        .attr('value', 'Analyzing...')
+        .attr('disabled', 'disabled')
+        .addClass('disabled')
+
+      createProject(APP.getCreateProjectParams())
+        .then(({data}) => {
+          APP.handleCreationStatus(data.id_project, data.password)
+        })
+        .catch((errors) => {
+          $('.error-message')
+            .find('p')
+            .text(
+              errors[0].code === -230
+                ? 'Sorry, file name too long. Try shortening it and try again.'
+                : errors[0].message,
+            )
+          $('.error-message').show()
+          $('.uploadbtn').attr('value', 'Analyze')
+          $('body').removeClass('creating')
+        })
     })
 
     $('.upload-table').on('click', 'a.skip_link', function () {
