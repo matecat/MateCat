@@ -65,7 +65,7 @@ class BlacklistUtils
 
         $this->ensureCached($keyOnCache, $checkIfExists);
 
-        return $keyOnCache;
+        return $checkIfExists;
     }
 
     /**
@@ -116,11 +116,9 @@ class BlacklistUtils
      * @param $content
      */
     private function ensureCached($key, $content) {
-        $redis   = new \Predis\Client( \INIT::$REDIS_SERVERS );
-
-        if ( !$redis->exists( $key ) ) {
-            $redis->set( $key, $content );
-            $redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
+        if ( !$this->redis->exists( $key ) ) {
+            $this->redis->set( $key, $content );
+            $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
         }
     }
 }
