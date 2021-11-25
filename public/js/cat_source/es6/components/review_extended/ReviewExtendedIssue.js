@@ -150,12 +150,12 @@ class ReviewExtendedIssue extends React.Component {
     this.setState({sendDisabled: true})
 
     SegmentActions.submitComment(this.props.sid, this.props.issue.id, data)
-      .done(function () {
+      .then(function () {
         self.setState({
           comment_text: '',
         })
       })
-      .fail(this.handleFail)
+      .catch(this.handleFail)
   }
 
   handleFail() {
