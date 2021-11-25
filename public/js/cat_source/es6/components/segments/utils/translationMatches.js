@@ -168,6 +168,7 @@ let TranslationMatches = {
       console.log('SSE: ID_CLIENT not found')
       return $.Deferred().resolve()
     }
+
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,

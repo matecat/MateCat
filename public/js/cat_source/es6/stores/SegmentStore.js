@@ -149,7 +149,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             decodedTranslation: DraftMatecatUtils.unescapeHTML(
               DraftMatecatUtils.decodeTagsToPlainText(translation),
             ),
-            version: segment.version,
             warning: '0',
             warnings: {},
             tagged: !self.hasSegmentTagProjectionEnabled(segment),

@@ -263,7 +263,6 @@ class Search extends React.Component {
       UI.setTranslation({
         id_segment: segment.original_sid,
         status: segment.status,
-        caller: 'replace',
       })
     })
   }

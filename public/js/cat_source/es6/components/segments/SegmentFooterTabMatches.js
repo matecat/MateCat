@@ -278,7 +278,7 @@ class SegmentFooterTabMatches extends React.Component {
       this.props.segment.contributions.matches &&
       this.props.segment.contributions.matches.length === 0
     ) {
-      if (config.mt_enabled && !config.id_translator) {
+      if (config.mt_enabled) {
         matchesHtml.push(
           <ul key={0} className="graysmall message">
             <li>
