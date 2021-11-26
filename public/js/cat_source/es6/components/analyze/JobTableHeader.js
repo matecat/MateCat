@@ -60,7 +60,9 @@ class JobTableHeader extends React.Component {
             <div className="single p-95-99">{rates['95%-99%']}%</div>
             <div className="single tm-100">{rates['100%']}%</div>
             <div className="single tm-public">{rates['100%_PUBLIC']}%</div>
-            <div className="single tm-context">{rates['ICE']}%</div>
+            <div className="single tm-context">
+              {rates['ICE'] ? rates['ICE'] : 0}%
+            </div>
             <div className="single machine-translation">{rates.MT}%</div>
           </div>
         </div>
