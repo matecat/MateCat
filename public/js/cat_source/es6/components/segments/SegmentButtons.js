@@ -85,7 +85,7 @@ class SegmentButton extends React.Component {
       !revisionCompleted &&
       ((nextSegment.status.toLowerCase() === 'approved' &&
         nextSegment.autopropagated_from == 0) || //Approved and propagation confirmed
-        (nextSegment.ice_locked == 1 && !nextSegment.unlocked) || //Ice
+        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked) || //Ice
         nextSegment.status === 'NEW' ||
         nextSegment.status === 'DRAFT')
     const filtering =
@@ -100,7 +100,7 @@ class SegmentButton extends React.Component {
             (nextSegment.revision_number === config.revisionNumber ||
               (nextSegment.revision_number === 2 &&
                 config.revisionNumber === 1))) || //Not Same Rev
-          (nextSegment.ice_locked == 1 && !nextSegment.unlocked)) // Ice Locked
+          (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
       : enableGoToNext && nextSegment.status.toLowerCase() === 'approved' // Review Simple
     nextButton = enableGoToNext ? (
       <li>
@@ -192,7 +192,7 @@ class SegmentButton extends React.Component {
       ((nextSegment.status !== 'NEW' &&
         nextSegment.status !== 'DRAFT' &&
         nextSegment.autopropagated_from == 0) ||
-        (nextSegment.ice_locked == 1 && !nextSegment.unlocked))
+        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked))
     //TODO Store TP Information in the SegmentsStore
     this.currentSegmentTPEnabled = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,

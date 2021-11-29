@@ -27,6 +27,7 @@ import TextUtils from './utils/textUtils'
 import CursorUtils from './utils/cursorUtils'
 import OfflineUtils from './utils/offlineUtils'
 import Shortcuts from './utils/shortcuts'
+import SegmentUtils from './utils/segmentUtils'
 import SegmentFooterTabMatches from './components/segments/SegmentFooterTabMatches'
 
 window.MC = {}
@@ -64,5 +65,6 @@ window.CommonUtils = CommonUtils
 window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
+window.SegmentUtils = SegmentUtils
 
 window.SegmentFooterTabMatches = SegmentFooterTabMatches

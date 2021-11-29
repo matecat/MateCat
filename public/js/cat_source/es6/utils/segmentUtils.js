@@ -57,9 +57,10 @@ const SegmentUtils = {
   },
   //********** Tag Projection code end ******************/
 
+  isIceSegment: function (segment) {
+    return segment.ice_locked === '1'
+  },
   isUnlockedSegment: function (segment) {
-    // var readonly = UI.isReadonlySegment(segment) ;
-    // return (segment.ice_locked === "1" && !readonly) && !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
     return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
   },
 }

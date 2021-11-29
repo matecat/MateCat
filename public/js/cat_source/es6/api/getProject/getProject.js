@@ -15,10 +15,17 @@ export const getProject = async (id, password = config.password) => {
     },
   )
 
-  if (!response.ok) return Promise.reject(response)
+  if (!response.ok) {
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({response, errors: data.errors ?? data})
+    } else {
+      return Promise.reject({response})
+    }
+  }
 
   const {errors, ...data} = await response.json()
-  if (errors) return Promise.reject(errors)
+  if (errors && errors.length > 0) return Promise.reject({response, errors})
 
   return data
 }

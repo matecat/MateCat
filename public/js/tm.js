@@ -1195,7 +1195,7 @@ import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
             }, 1000)
           }
         })
-        .catch((errors) => {
+        .catch(({errors}) => {
           var TDcaller = TRcaller
           UI.showErrorUpload($(TDcaller), errors[0].message)
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
