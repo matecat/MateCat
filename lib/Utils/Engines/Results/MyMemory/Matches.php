@@ -32,8 +32,8 @@ class Engines_Results_MyMemory_Matches {
     protected $featureSet;
     protected $_args;
 
-    private $source;
-    private $target;
+    public $source;
+    public $target;
 
     public function __construct() {
 
@@ -138,6 +138,8 @@ class Engines_Results_MyMemory_Matches {
         $this->source           = array_key_exists( 'source', $match) ? $match[ 'source' ] : $source;
 
         $this->prop = $match[ 'prop' ];
+
+        \Log::doJsonLog('PIPPO' . json_encode($this->toArray()));
 
         return $this->toArray();
     }
