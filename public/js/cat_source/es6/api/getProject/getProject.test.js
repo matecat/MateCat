@@ -39,6 +39,8 @@ test('Error with wrong project id or password', async () => {
     ],
   )
 
-  const result = await getProject(19, 'df7d197a122d8').catch((error) => error)
+  const result = await getProject(19, 'df7d197a122d8').catch(
+    ({response, errors}) => errors,
+  )
   expect(result).toEqual(fakeData.wrong.errors)
 })
