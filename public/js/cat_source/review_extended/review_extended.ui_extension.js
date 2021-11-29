@@ -2,9 +2,7 @@ import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
 import moment from 'moment'
 
-import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
 import CommonUtils from '../es6/utils/commonUtils'
-import OfflineUtils from '../es6/utils/offlineUtils'
 import SegmentActions from '../es6/actions/SegmentActions'
 import SegmentStore from '../es6/stores/SegmentStore'
 import {getSegmentVersionsIssues} from '../es6/api/getSegmentVersionsIssues'
@@ -186,11 +184,16 @@ if (ReviewExtended.enabled()) {
       var sid = segment.sid
 
       let issues = this.getSegmentRevisionIssues(segment, config.revisionNumber)
+      /* If segment is modified and there aren't issues and is not an ICE force to add an Issue.
+         If is an ICE we allow to change the translation because is not possible to add an issue
+       */
+
       if (
         config.isReview &&
         !segment.splitted &&
         segment.modified &&
-        issues.length === 0
+        issues.length === 0 &&
+        segment.ice_locked !== '1'
       ) {
         SegmentActions.openIssuesPanel({sid: segment.sid}, true)
         setTimeout(() => SegmentActions.showIssuesMessage(segment.sid, 1))

@@ -24,6 +24,6 @@ export const deleteSegmentIssue = async ({
     },
   )
 
-  if (!response.ok) return Promise.reject(response)
+  if (!response.ok) return Promise.reject({response})
   return response
 }

@@ -2,19 +2,21 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getTeamMembers = async (teamId) => {
   let url = `${getMatecatApiDomain()}api/v2/teams/${teamId}/members`
 
-  const res = await fetch(url, {
+  const response = await fetch(url, {
     credentials: 'include',
   })
 
-  if (!res.ok) {
-    return Promise.reject(res)
+  if (!response.ok) {
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({response, errors: data.errors ?? data})
+    } else {
+      return Promise.reject({response})
+    }
   }
 
-  const {errors, ...restData} = await res.json()
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject({response, errors})
 
-  if (errors) {
-    return Promise.reject(errors)
-  }
-
-  return restData
+  return data
 }

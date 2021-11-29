@@ -142,7 +142,7 @@ class Segment extends React.Component {
     }
 
     if (
-      (this.props.segment.ice_locked === '1' && !readonly) ||
+      (SegmentUtils.isIceSegment(this.props.segment) && !readonly) ||
       this.secondPassLocked
     ) {
       if (this.props.segment.unlocked) {
@@ -403,8 +403,9 @@ class Segment extends React.Component {
   openRevisionPanel = (data) => {
     if (
       parseInt(data.sid) === parseInt(this.props.segment.sid) &&
-      (this.props.segment.ice_locked == 0 ||
-        (this.props.segment.ice_locked == 1 && this.props.segment.unlocked))
+      (!SegmentUtils.isIceSegment(this.props.segment) ||
+        (SegmentUtils.isIceSegment(this.props.segment) &&
+          this.props.segment.unlocked))
     ) {
       this.setState({
         selectedTextObj: data.selection,
@@ -436,7 +437,8 @@ class Segment extends React.Component {
   onClickEvent = () => {
     if (
       this.state.readonly ||
-      (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')
+      (!this.props.segment.unlocked &&
+        SegmentUtils.isIceSegment(this.props.segment))
     ) {
       UI.handleClickOnReadOnly($(this.section).closest('section'))
     } else if (this.props.segment.muted) {
@@ -624,7 +626,7 @@ class Segment extends React.Component {
 
     let readonly = this.state.readonly
     let showLockIcon =
-      this.props.segment.ice_locked === '1' || this.secondPassLocked
+      SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked
     let segment_classes = this.checkSegmentClasses()
 
     let split_group = this.props.segment.split_group || []
@@ -647,7 +649,7 @@ class Segment extends React.Component {
     let translationIssues = this.getTranslationIssues()
     let locked =
       !this.props.segment.unlocked &&
-      (this.props.segment.ice_locked === '1' || this.secondPassLocked)
+      (SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked)
     const segmentHasIssues = SegmentStore.segmentHasIssues(
       this.props.segment.sid,
     )

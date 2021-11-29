@@ -958,7 +958,7 @@ window.UI = {
           UI.getTranslationMismatches(id_segment)
         }
       })
-      .catch((errors) => {
+      .catch(({errors}) => {
         if (errors.length) {
           this.processErrors(errors, 'setTranslation')
         } else {

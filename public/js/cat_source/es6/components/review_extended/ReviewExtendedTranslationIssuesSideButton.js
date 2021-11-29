@@ -2,6 +2,7 @@ import React from 'react'
 import SegmentActions from '../../actions/SegmentActions'
 
 import Shortcuts from '../../utils/shortcuts'
+import SegmentUtils from '../../utils/segmentUtils'
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component {
   getIssueCount() {
@@ -43,7 +44,10 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
       )
     } else if (
       config.isReview &&
-      !(this.props.segment.ice_locked == 1 && !this.props.segment.unlocked)
+      !(
+        SegmentUtils.isIceSegment(this.props.segment) &&
+        !this.props.segment.unlocked
+      )
     ) {
       return (
         <div

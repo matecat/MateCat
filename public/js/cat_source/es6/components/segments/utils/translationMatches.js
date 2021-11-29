@@ -116,7 +116,7 @@ let TranslationMatches = {
 
     if (!currentSegment) return
 
-    if (currentSegment.ice_locked === '1' && !currentSegment.unlocked) {
+    if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
       const deferred = new jQuery.Deferred()
       return deferred.resolve()
