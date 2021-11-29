@@ -139,8 +139,6 @@ class Engines_Results_MyMemory_Matches {
 
         $this->prop = $match[ 'prop' ];
 
-        \Log::doJsonLog('PIPPO' . json_encode($this->toArray()));
-
         return $this->toArray();
     }
 
