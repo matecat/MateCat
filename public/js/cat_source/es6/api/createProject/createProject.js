@@ -15,14 +15,11 @@ export const createProject = async (options) => {
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
-  const response = await fetch(
-    `${getMatecatApiDomain()}?action=createProject`,
-    {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    },
-  )
+  const response = await fetch(`${config.basepath}?action=createProject`, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+  })
 
   if (!response.ok) return Promise.reject(response)
 

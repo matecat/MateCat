@@ -186,6 +186,9 @@ class ConversionHandler {
                     }
 
                 } catch (\Exception $e){
+
+                    \Log::doJsonLog("S3 Exception: Message: " . $e->getMessage());
+
                     $this->result[ 'code' ]     = -230; // S3 Exception
                     $this->result[ 'errors' ][] = [
                             "code"    => -230,
