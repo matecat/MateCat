@@ -251,8 +251,9 @@ const SegmentActions = {
     if (segment.splitted > 2) return false
 
     for (var i = 0, len = propagatedSegments.length; i < len; i++) {
-      var sid = propagatedSegments[i]
-      if (sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
+      const sid = propagatedSegments[i]
+      const segToModify = SegmentStore.getSegmentByIdToJS(sid)
+      if (sid !== segmentId && segment && !segToModify.splitted) {
         SegmentActions.updateOriginalTranslation(sid, segment.translation)
         SegmentActions.replaceEditAreaTextContent(sid, segment.translation)
         //Tag Projection: disable it if enable
