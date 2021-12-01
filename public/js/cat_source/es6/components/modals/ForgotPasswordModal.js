@@ -59,17 +59,12 @@ class ForgotPasswordModal extends React.Component {
             },
           ])
         })
-        .catch((response) => {
-          var data = JSON.parse(response.responseText)
-          var text
-          if (data) {
-            text = data
-          } else {
-            text =
-              'There was a problem saving the data, please try again later or contact support.'
-          }
+        .catch(({errors}) => {
+          const error = errors?.[0]
+            ? errors[0].message
+            : 'There was a problem saving the data, please try again later or contact support.'
           self.setState({
-            generalError: text,
+            generalError: error,
             requestRunning: false,
           })
         }),
