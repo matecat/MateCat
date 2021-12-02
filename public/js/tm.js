@@ -24,6 +24,8 @@ import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
     return elBottom <= winBottom && elTop >= winTop
   }
 
+  var checkAnalyzabilityTimer
+
   $.extend(UI, {
     initTM: function () {
       // script per lo slide del pannello di manage tmx
@@ -1343,12 +1345,12 @@ import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
       $('.popup-tm').removeClass('open').animate({right: '-1100px'}, 400)
       $('.outer-tm').hide()
       $('body').removeClass('side-popup')
-      if (!APP.isCattool && !checkAnalyzability('closing tmx panel')) {
-        disableAnalyze()
+      if (!APP.isCattool && !UI.checkAnalyzability('closing tmx panel')) {
+        UI.disableAnalyze()
         if (!checkAnalyzabilityTimer)
-          var checkAnalyzabilityTimer = window.setInterval(function () {
-            if (checkAnalyzability('set interval')) {
-              enableAnalyze()
+          checkAnalyzabilityTimer = window.setInterval(function () {
+            if (UI.checkAnalyzability('set interval')) {
+              UI.enableAnalyze()
               window.clearInterval(checkAnalyzabilityTimer)
             }
           }, 500)
