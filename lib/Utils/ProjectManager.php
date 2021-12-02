@@ -1864,28 +1864,6 @@ class ProjectManager {
                         }
                     }
 
-                    //
-                    // -------------------------------------
-                    // START SEGMENTS META
-                    // -------------------------------------
-                    //
-
-                    $metadataStruct = new Segments_SegmentMetadataStruct();
-
-                    // check if there is sizeRestriction
-                    if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ])){
-                        $metadataStruct->meta_key = 'sizeRestriction';
-                        $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
-                    }
-
-                    $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
-
-                    //
-                    // -------------------------------------
-                    // END SEGMENTS META
-                    // -------------------------------------
-                    //
-
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
@@ -1963,11 +1941,46 @@ class ProjectManager {
                                 }
                             }
 
-                            // segment original data
+                            //
+                            // -------------------------------------
+                            // START SEGMENTS META
+                            // -------------------------------------
+                            //
+
+                            $metadataStruct = new Segments_SegmentMetadataStruct();
+
+                            // check if there is sizeRestriction
+                            if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ]) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0){
+                                $metadataStruct->meta_key = 'sizeRestriction';
+                                $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                            }
+
+                            $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
+
+                            //
+                            // -------------------------------------
+                            // END SEGMENTS META
+                            // -------------------------------------
+                            //
+
+
+                            //
+                            // -------------------------------------
+                            // START SEGMENTS ORIGINAL DATA
+                            // -------------------------------------
+                            //
+
                             // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
                             $segmentOriginalDataStructMap = ( !empty( $dataRefMap ) ) ? [ 'map' => $dataRefMap ] : [];
                             $segmentOriginalDataStruct    = new Segments_SegmentOriginalDataStruct( $segmentOriginalDataStructMap );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
+
+                            //
+                            // -------------------------------------
+                            // END SEGMENTS ORIGINAL DATA
+                            // -------------------------------------
+                            //
+
 
                             //
                             // -------------------------------------------
@@ -1994,19 +2007,19 @@ class ProjectManager {
 
                             // segment struct
                             $segStruct = new Segments_SegmentStruct( [
-                                'id_file'                 => $fid,
-                                'id_file_part'            => (isset($filePartsId)) ? $filePartsId : null,
-                                'id_project'              => $this->projectStructure[ 'id_project' ],
-                                'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                'xliff_mrk_id'            => $seg_source[ 'mid' ],
-                                'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
-                                'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
-                                'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
-                                'segment_hash'            => $segmentHash,
-                                'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
-                                'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
-                                'raw_word_count'          => $wordCount,
-                                'show_in_cattool'         => $show_in_cattool
+                                    'id_file'                 => $fid,
+                                    'id_file_part'            => (isset($filePartsId)) ? $filePartsId : null,
+                                    'id_project'              => $this->projectStructure[ 'id_project' ],
+                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                    'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
+                                    'segment_hash'            => $segmentHash,
+                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                    'raw_word_count'          => $wordCount,
+                                    'show_in_cattool'         => $show_in_cattool
                             ] );
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
@@ -2073,6 +2086,30 @@ class ProjectManager {
                         }
 
                         $segmentHash = md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+
+
+                        //
+                        // -------------------------------------
+                        // START SEGMENTS META
+                        // -------------------------------------
+                        //
+
+                        $metadataStruct = new Segments_SegmentMetadataStruct();
+
+                        // check if there is sizeRestriction
+                        if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ]) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0){
+                            $metadataStruct->meta_key = 'sizeRestriction';
+                            $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                        }
+
+                        $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
+
+                        //
+                        // -------------------------------------
+                        // END SEGMENTS META
+                        // -------------------------------------
+                        //
+
 
                         // segment original data
                         if ( !empty( $segmentOriginalData ) ) {
