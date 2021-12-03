@@ -44,7 +44,7 @@ class ProjectCreationStatusController extends KleinController {
 
             $response = [];
             foreach( $result[ 'errors' ] as $error ){
-                $response[] = new Exception( $error[ 'message' ], $error[ 'code' ] );
+                $response[] = new Exception( $error[ 'message' ], (int)$error[ 'code' ] );
             }
 
             $this->response->code( 500 );
