@@ -381,7 +381,7 @@ const TEXT_UTILS = {
   },
   replaceUrl: function (textToReplace) {
     let regExpUrl =
-      /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/$.\w-_]*)?\??(?:\S+)#?(?:[\w]*))?)/gim
+      /(http|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/gim
     return textToReplace.replace(regExpUrl, function (match, text) {
       let href =
         text[text.length - 1] === '.'
