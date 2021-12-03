@@ -269,15 +269,17 @@ class Bootstrap {
                 $output .= "Aborting...\n";
                 $output .= "</pre>";
 
+                $isAPI = preg_match( '#/api/*#', @$_SERVER[ 'REQUEST_URI' ] );
+
                 Log::$fileName = 'fatal_errors.txt';
                 Log::doJsonLog( $output );
                 Utils::sendErrMailReport( $output );
 
                 if ( stripos( PHP_SAPI, 'cli' ) === false ) {
-                    header( "HTTP/1.1 200 OK" );
+                    header( "HTTP/1.1 500 Internal Server Error" );
                 }
 
-                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $isAPI ) {
 
                     //json_response
                     if ( INIT::$PRINT_ERRORS ) {
