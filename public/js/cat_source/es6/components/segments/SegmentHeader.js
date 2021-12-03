@@ -77,33 +77,33 @@ class SegmentHeader extends React.PureComponent {
   }
 
   render() {
-    var autopropagated = ''
-    var percentageHtml = ''
-    if (this.state.autopropagated) {
-      autopropagated = <span className="repetition">Autopropagated</span>
-    } else if (this.props.repetition) {
-      autopropagated = <span className="repetition">Repetition</span>
-    } else if (this.state.visible && this.state.percentage != '') {
+    let autopropagatedHtml
+    let percentageHtml
+    const {repetition, splitted, segmentOpened, sid} = this.props
+    const {autopropagated, visible, percentage, createdBy, classname} =
+      this.state
+    if (autopropagated && !splitted) {
+      autopropagatedHtml = <span className="repetition">Autopropagated</span>
+    } else if (repetition && !splitted) {
+      autopropagatedHtml = <span className="repetition">Repetition</span>
+    } else if (visible && percentage != '') {
       percentageHtml = (
         <h2
-          title={'Created by ' + this.state.createdBy}
-          className={' visible percentuage ' + this.state.classname}
+          title={'Created by ' + createdBy}
+          className={' visible percentuage ' + classname}
         >
-          {this.state.percentage}
+          {percentage}
         </h2>
       )
     }
 
-    return this.props.segmentOpened ? (
-      <div
-        className="header toggle"
-        id={'segment-' + this.props.sid + '-header'}
-      >
+    return segmentOpened ? (
+      <div className="header toggle" id={'segment-' + sid + '-header'}>
         {autopropagated}
         {percentageHtml}
       </div>
-    ) : this.state.autopropagated || this.props.repetition ? (
-      <div className={'header header-closed'}>{autopropagated}</div>
+    ) : autopropagated || repetition ? (
+      <div className={'header header-closed'}>{autopropagatedHtml}</div>
     ) : null
   }
 }

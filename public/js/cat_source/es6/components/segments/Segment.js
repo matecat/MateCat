@@ -738,6 +738,7 @@ class Segment extends React.Component {
             autopropagated={this.state.autopropagated}
             segmentOpened={this.props.segment.opened}
             repetition={autoPropagable}
+            splitted={this.props.segment.splitted}
           />
           <SegmentBody
             segment={this.props.segment}
