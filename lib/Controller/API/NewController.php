@@ -73,6 +73,24 @@ class NewController extends ajaxController {
      */
     protected $files_storage;
 
+    protected $httpHeader = "HTTP/1.0 200 OK";
+
+    private function setBadRequestHeader() {
+        $this->httpHeader = 'HTTP/1.0 400 Bad Request';
+    }
+
+    private function setUnauthorizedHeader() {
+        $this->httpHeader = 'HTTP/1.0 401 Unauthorized';
+    }
+
+    private function setInternalErrorHeader(){
+        $this->httpHeader = 'HTTP/1.0 500 Internal Server Error';
+    }
+
+    private function setInternalTimeoutHeader(){
+        $this->httpHeader = 'HTTP/1.0 504 Gateway Timeout';
+    }
+
     public function __construct() {
 
         parent::__construct();
@@ -81,9 +99,9 @@ class NewController extends ajaxController {
         header( "Connection: close" );
 
         if ( !$this->__validateAuthHeader() ) {
-            header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = 'Authentication failed';
+            $this->setUnauthorizedHeader();
             $this->finalize();
             die();
         }
@@ -127,7 +145,7 @@ class NewController extends ajaxController {
                 'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'instructions'    => [
+                'instructions'       => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
@@ -147,15 +165,15 @@ class NewController extends ajaxController {
          * in order to avoid mispelling errors
          *
          */
-        $this->postInput[ 'private_tm_key' ] = preg_replace("/\s+/", "", $this->postInput[ 'private_tm_key' ]);
+        $this->postInput[ 'private_tm_key' ] = preg_replace( "/\s+/", "", $this->postInput[ 'private_tm_key' ] );
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
         if ( empty( $_FILES ) ) {
+            $this->setBadRequestHeader();
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file. Not Sent." ];
-
             return -1;
         }
 
@@ -173,7 +191,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = $ex->getMessage();
             Log::doJsonLog( $ex->getMessage() );
-
+            $this->setBadRequestHeader();
             return $ex->getCode();
         }
 
@@ -302,6 +320,7 @@ class NewController extends ajaxController {
     }
 
     public function finalize() {
+        header( $this->httpHeader );
         $toJson = json_encode( $this->api_output );
         echo $toJson;
     }
@@ -311,6 +330,7 @@ class NewController extends ajaxController {
         $fs = FilesStorageFactory::create();
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
+            $this->setBadRequestHeader();
             return -1;
         }
 
@@ -319,6 +339,7 @@ class NewController extends ajaxController {
         try {
             $stdResult = $uploadFile->uploadFiles( $_FILES );
         } catch ( Exception $e ) {
+            $this->setBadRequestHeader();
             $stdResult                     = [];
             $this->result                  = [
                     'errors' => [
@@ -353,13 +374,15 @@ class NewController extends ajaxController {
             $msg = "Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
-
+            $this->setBadRequestHeader();
             return -1; //exit code
         }
 
         $cookieDir = $uploadFile->getDirUploadToken();
         $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
         $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+
+        $status = [];
 
         foreach ( $arFiles as $file_name ) {
             $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
@@ -374,8 +397,6 @@ class NewController extends ajaxController {
             $conversionHandler->setErrDir( $errDir );
             $conversionHandler->setFeatures( $this->featureSet );
             $conversionHandler->setUserIsLogged( $this->userIsLogged );
-
-            $status = [];
 
             if ( $ext == "zip" ) {
                 // this makes the conversionhandler accumulate eventual errors on files and continue
@@ -492,13 +513,7 @@ class NewController extends ajaxController {
                 }
             } else {
                 $conversionHandler->doAction();
-
-                $this->result = $conversionHandler->getResult();
-
-                if ( $this->result[ 'code' ] > 0 ) {
-                    $this->result = [];
-                }
-
+                $status[] = $conversionHandler->getResult();
             }
         }
 
@@ -509,7 +524,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = $status;
             $this->result[ 'errors' ]      = $status;
             Log::doJsonLog( $status );
-
+            $this->setBadRequestHeader();
             return -1;
         }
         /* Do conversions here */
@@ -560,7 +575,7 @@ class NewController extends ajaxController {
         $arMeta  = [];
 
         // create array_files_meta
-        foreach ($arFiles as $arFile){
+        foreach ( $arFiles as $arFile ) {
             $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
         }
 
@@ -614,7 +629,7 @@ class NewController extends ajaxController {
         } catch ( Exception $e ) {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->api_output[ 'debug' ]   = $e->getCode();
-
+            $this->setBadRequestHeader();
             return -1;
         }
 
@@ -645,14 +660,14 @@ class NewController extends ajaxController {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function getFileMetadata($filename) {
+    private function getFileMetadata( $filename ) {
         $info          = XliffProprietaryDetect::getInfo( $filename );
         $isXliff       = XliffFiles::isXliff( $filename );
         $isGlossary    = XliffFiles::isGlossaryFile( $filename );
         $isTMX         = XliffFiles::isTMXFile( $filename );
         $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
-        $forceXliff = $this->getFeatureSet()->filter(
+        $forceXliff      = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',
                 INIT::$FORCE_XLIFF_CONVERSION,
                 $this->userIsLogged,
@@ -684,12 +699,13 @@ class NewController extends ajaxController {
             $this->api_output[ 'status' ]  = 504;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = 'Execution timeout';
+            $this->setInternalTimeoutHeader();
         } elseif ( !empty( $this->result[ 'errors' ] ) ) {
             //errors already logged
             $this->api_output[ 'status' ]  = 500;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = array_values( $this->result[ 'errors' ] );
-
+            $this->setInternalErrorHeader();
         } else {
             //everything ok
             $this->_outputForSuccess();
@@ -851,10 +867,10 @@ class NewController extends ajaxController {
     }
 
     private static function __parseTmKeyInput( $tmKeyString ) {
-        $tmKeyString = trim($tmKeyString);
-        $tmKeyInfo = explode( ":", $tmKeyString );
-        $read      = true;
-        $write     = true;
+        $tmKeyString = trim( $tmKeyString );
+        $tmKeyInfo   = explode( ":", $tmKeyString );
+        $read        = true;
+        $write       = true;
 
         $permissionString = @$tmKeyInfo[ 1 ];
 
