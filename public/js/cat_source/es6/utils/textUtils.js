@@ -382,12 +382,12 @@ const TEXT_UTILS = {
   replaceUrl: function (textToReplace) {
     let regExpUrl =
       /(http|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/gim
-    return textToReplace.replace(regExpUrl, function (match, text) {
+    return textToReplace.replace(regExpUrl, function (match) {
       let href =
-        text[text.length - 1] === '.'
-          ? text.substring(0, text.length - 1)
-          : text
-      return '<a href="' + href + '" target="_blank">' + text + '</a>'
+        match[match.length - 1] === '.'
+          ? match.substring(0, match.length - 1)
+          : match
+      return '<a href="' + href + '" target="_blank">' + match + '</a>'
     })
   },
 }
