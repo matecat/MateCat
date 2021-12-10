@@ -1,3 +1,4 @@
+import {peeDataGraph} from './cat_source/es6/api/peeDataGraph'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 window.PEE = {
   chartOptions: {
@@ -302,7 +303,7 @@ window.PEE = {
     if (!$form.hasClass('error')) {
       console.log(fields)
       PEE.addGraphFilterToUrl(fields)
-      PEE.requestDataGraph(fields).done(function (data) {
+      PEE.requestDataGraph(fields).then(function (data) {
         PEE.createDataForGraph(data)
       })
     }
@@ -313,18 +314,11 @@ window.PEE = {
     google.charts.setOnLoadCallback(PEE.drawDefaultChart)
   },
   requestDataGraph: function (fields) {
-    var data = {
+    return peeDataGraph({
       sources: fields.source_lang,
       targets: fields.target_lang,
-      month_interval: [fields.start_date, fields.end_date],
-    }
-    if (fields.fuzzy_band) {
-      data.fuzzy_band = fields.fuzzy_band
-    }
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      url: '/api/app/utils/pee/graph',
+      monthInterval: [fields.start_date, fields.end_date],
+      fuzzyBand: fields.fuzzy_band,
     })
   },
   requestDataTable: function (data) {
@@ -404,7 +398,7 @@ window.PEE = {
       }
     }
 
-    PEE.requestDataGraph(fields).done(function (data) {
+    PEE.requestDataGraph(fields).then(function (data) {
       PEE.createDataForGraph(data)
     })
   },

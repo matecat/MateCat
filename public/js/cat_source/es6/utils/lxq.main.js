@@ -725,8 +725,7 @@ LXQ.init = function () {
           // console.log('postIgnoreError success: '+result);
         },
       })
-
-      // lexiqaIgnoreError({errorid});
+      // lexiqaIgnoreError({errorId: errorid});
     }
 
     var getVisibleWarningsCountForSegment = function (segment) {
