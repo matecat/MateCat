@@ -1,5 +1,5 @@
 import {sprintf} from 'sprintf-js'
-
+import {dqfConfirmAssignment as dqfConfirmAssignmentApi} from './cat_source/es6/api/dqfConfirmAssignment'
 ;(function (UI) {
   var STATUS_USER_NOT_ASSIGNED = 'not_assigned'
   var STATUS_USER_NOT_MATCHING = 'not_matching'
@@ -91,16 +91,12 @@ import {sprintf} from 'sprintf-js'
 
   function dqfConfirmAssignment() {
     console.log('confirmed')
-    var id_job = config.id_job
-    var password = config.review_password
-      ? config.review_password
-      : config.password
-    $.post(
-      sprintf('/api/app/dqf/jobs/%s/%s/assign', id_job, password),
-      {},
-    ).done(function (data) {
-      location.reload()
-    })
+
+    dqfConfirmAssignmentApi({
+      password: config.review_password
+        ? config.review_password
+        : config.password,
+    }).then(() => location.reload())
   }
 
   $.extend(UI, {
