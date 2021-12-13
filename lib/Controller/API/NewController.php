@@ -512,8 +512,14 @@ class NewController extends ajaxController {
                     }
                 }
             } else {
+
                 $conversionHandler->doAction();
-                $status[] = $conversionHandler->getResult();
+
+                $result = $conversionHandler->getResult();
+                if ( $result[ 'code' ] < 0 ) {
+                    $status[] = $result;
+                }
+
             }
         }
 
