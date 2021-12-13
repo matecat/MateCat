@@ -406,7 +406,12 @@ const CommonUtils = {
     }
   },
   getLanguageNameFromLocale: function (code) {
-    return config.languages_array.find((e) => e.code === code).name
+    try {
+      return config.languages_array.find((e) => e.code === code).name
+    } catch (e) {
+      console.error('Unknown Language', e)
+      return ''
+    }
   },
   addCommas: function (nStr) {
     nStr += ''
