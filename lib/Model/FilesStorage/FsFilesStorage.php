@@ -2,6 +2,7 @@
 
 namespace FilesStorage;
 
+use FilesStorage\Exceptions\FileSystemException;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 
@@ -34,6 +35,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param      $xliffPath
      *
      * @return bool|mixed
+     * @throws FileSystemException
      */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
 
@@ -66,6 +68,7 @@ class FsFilesStorage extends AbstractFilesStorage
             //use original xliff
             $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . @$force_extension;
         } else {
+
             //move original
             $raw_file_path = explode( DIRECTORY_SEPARATOR, $originalPath );
             $file_name     = array_pop( $raw_file_path );
@@ -73,9 +76,17 @@ class FsFilesStorage extends AbstractFilesStorage
             $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name );
 
             if ( !$outcome1 ) {
-                //Original directory deleted!!!
-                //CLEAR ALL CACHE
-                \Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+                // Original directory deleted!!!
+                // CLEAR ALL CACHE
+
+                $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang;
+
+                // check if cache dir exists
+                if(!file_exists($cacheDirToDelete)){
+                    throw new FileSystemException($cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.');
+                }
+
+                \Utils::deleteDir( $cacheDirToDelete );
 
                 return $outcome1;
             }
@@ -94,6 +105,14 @@ class FsFilesStorage extends AbstractFilesStorage
         if ( !$outcome2 ) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE - FATAL
+
+            $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang;
+
+            // check if cache dir exists
+            if(!file_exists($cacheDirToDelete)){
+                throw new FileSystemException($cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.');
+            }
+
             \Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
 
             return $outcome2;
@@ -102,7 +121,6 @@ class FsFilesStorage extends AbstractFilesStorage
         unlink( $xliffPath );
 
         return true;
-
     }
 
     /**
