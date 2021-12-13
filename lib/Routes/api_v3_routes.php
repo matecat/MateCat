@@ -30,5 +30,7 @@ route( '/api/v3/qr/download', 'POST', '\API\V3\DownloadQRController', 'download'
 
 $klein->with( '/api/v3/glossary', function () {
     route( '/blacklist/upload', 'POST', '\API\V3\BlacklistController', 'upload' );
+    route( '/blacklist/delete', 'DELETE', '\API\V3\BlacklistController', 'delete' );
+    route( '/blacklist/get', 'GET', '\API\V3\BlacklistController', 'get' );
 } );
 

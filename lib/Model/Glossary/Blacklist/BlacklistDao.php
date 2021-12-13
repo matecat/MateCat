@@ -9,31 +9,46 @@ class BlacklistDao extends \DataAccess_AbstractDao
     const TABLE = 'blacklist_files';
 
     /**
+     * @param     $jobId
+     * @param     $password
+     * @param int $ttl
+     *
+     * @return \DataAccess_IDaoStruct
+     */
+    public function getByJobIdAndPassword($jobId, $password, $ttl = 60){
+        $thisDao = new self();
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * FROM ". self::TABLE ." where id_job = :jid AND password = :password ");
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'jid' => $jobId, 'password' => $password ] )[ 0 ];
+    }
+
+    /**
      * @param     $uid
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return \DataAccess_IDaoStruct
      */
     public function getByUid($uid, $ttl = 60){
         $thisDao = new self();
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM ". self::TABLE ." where uid = :uid ");
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'uid' => $uid ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'uid' => $uid ] )[ 0 ];
     }
 
     /**
      * @param     $id
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return \DataAccess_IDaoStruct
      */
     public function getById($id, $ttl = 600){
         $thisDao = new self();
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM ". self::TABLE ." where id = :id ");
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct, [ 'id' => $id ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct, [ 'id' => $id ] )[ 0 ];
     }
 
     /**
@@ -67,7 +82,7 @@ class BlacklistDao extends \DataAccess_AbstractDao
      *
      * @return int
      */
-    public function remove($id){
+    public function deleteById($id){
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " DELETE FROM ". self::TABLE ." WHERE id = ?");
         $stmt->execute( [$id] ) ;

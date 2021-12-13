@@ -16,6 +16,7 @@ use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use FilesStorage\FilesStorageFactory;
+use Glossary\Blacklist\BlacklistDao;
 use Langs_Languages;
 
 
@@ -35,6 +36,37 @@ class BlacklistController extends KleinController {
      * @var array
      */
     private $file;
+
+    public function delete() {
+
+        $this->idJob = $this->request->param( 'jid' );
+        $this->password = $this->request->param( 'password' );
+
+        $dao = new BlacklistDao();
+
+        $model = $dao->getByJobIdAndPassword($this->idJob, $this->password);
+
+        $dao->deleteById($model->id);
+
+        $this->response->json( [
+            'success' => true,
+            'id' => $model->id
+        ] ) ;
+    }
+
+    public function get() {
+
+        $this->idJob = $this->request->param( 'jid' );
+        $this->password = $this->request->param( 'password' );
+
+        $dao = new BlacklistDao();
+        $model = $dao->getByJobIdAndPassword($this->idJob, $this->password);
+
+        //@TODO estrarre content da REDIS
+
+
+        $this->response->json( $model ) ;
+    }
 
     public function upload() {
 
