@@ -2,6 +2,7 @@
 
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FilesStorage\FilesStorageFactory;
+use Behat\Transliterator\Transliterator;
 
 class Utils {
 
@@ -163,6 +164,9 @@ class Utils {
         // adding - for spaces and union characters
         $find   = [ ' ', '&', '\r\n', '\n', '+', ',' ];
         $string = str_replace( $find, '-', $string );
+
+        // transliterate string
+        $string = Transliterator::transliterate($string);
 
         //delete and replace rest of special chars
         $find   = [ '/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/' ];
