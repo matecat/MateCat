@@ -186,11 +186,14 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
-        $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, json_decode($contributionStruct->dataRefMap,
-                true) );
+        $Filter = MateCatFilter::getInstance(
+                $featureSet,
+                $contributionStruct->getJobStruct()->source,
+                $contributionStruct->getJobStruct()->target,
+                json_decode($contributionStruct->dataRefMap, true)
+        );
 
         foreach ( $matches as &$match ) {
-            $match[ 'target' ] = $targetLang;
 
             if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
 
