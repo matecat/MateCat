@@ -32,8 +32,8 @@ class Engines_Results_MyMemory_Matches {
     protected $featureSet;
     protected $_args;
 
-    private $source;
-    private $target;
+    public $source;
+    public $target;
 
     public function __construct() {
 
@@ -80,6 +80,7 @@ class Engines_Results_MyMemory_Matches {
         if ( count( $this->_args ) == 1 and is_array( $this->_args[ 0 ] ) ) {
 
             $match = $this->_args[ 0 ];
+
             if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
                 $match[ 'last-update-date' ] = "0000-00-00";
             }
@@ -133,6 +134,8 @@ class Engines_Results_MyMemory_Matches {
         $this->memory_key       = array_key_exists( 'key', $match ) ? $match[ 'key' ] : '';
         $this->ICE              = array_key_exists( 'ICE', $match ) ? (bool)$match[ 'ICE' ] : false;
         $this->tm_properties    = array_key_exists( 'tm_properties', $match ) ? json_decode( $match[ 'tm_properties' ], true ) : [];
+        $this->target           = array_key_exists( 'target', $match) ? $match[ 'target' ] : $target;
+        $this->source           = array_key_exists( 'source', $match) ? $match[ 'source' ] : $source;
 
         $this->prop = $match[ 'prop' ];
 
