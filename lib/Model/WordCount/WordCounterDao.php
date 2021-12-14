@@ -157,6 +157,8 @@ class WordCounterDao extends DataAccess_AbstractDao {
                 INNER JOIN files_job as fj on j.id = fj.id_job
                 INNER join segments as s on fj.id_file = s.id_file
                 LEFT join segment_translations as st on s.id = st.id_segment and st.id_job = j.id
+                WHERE j.id = :id_job
+ 			    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			";
 
         $db = Database::obtain();
