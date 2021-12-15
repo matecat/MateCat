@@ -1,6 +1,7 @@
 import React from 'react'
 
 import ManageActions from '../../actions/ManageActions'
+import CommonUtils from '../../utils/commonUtils'
 
 class CreateTeam extends React.Component {
   constructor(props) {
@@ -23,7 +24,7 @@ class CreateTeam extends React.Component {
 
   onLabelCreate(value, text) {
     var self = this
-    if (APP.checkEmail(text)) {
+    if (CommonUtils.checkEmail(text)) {
       $(this.usersInput).dropdown('set selected', value)
       this.setState({
         errorDropdown: false,
@@ -47,7 +48,7 @@ class CreateTeam extends React.Component {
 
   checkMailDropDown() {
     let mail = $(this.usersInput).find('input.search').val()
-    return mail !== '' || APP.checkEmail(mail)
+    return mail !== '' || CommonUtils.checkEmail(mail)
   }
 
   onInputFocus() {

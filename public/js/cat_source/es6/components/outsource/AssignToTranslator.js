@@ -2,6 +2,7 @@ import React from 'react'
 import Cookies from 'js-cookie'
 
 import GMTSelect from './GMTSelect'
+import CommonUtils from '../../utils/commonUtils'
 
 class AssignToTranslator extends React.Component {
   constructor(props) {
@@ -43,7 +44,10 @@ class AssignToTranslator extends React.Component {
   }
 
   checkSendToTranslatorButton() {
-    if (this.email.value.length > 0 && APP.checkEmail(this.email.value)) {
+    if (
+      this.email.value.length > 0 &&
+      CommonUtils.checkEmail(this.email.value)
+    ) {
       $(this.sendButton).removeClass('disabled')
       return true
     } else {

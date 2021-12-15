@@ -1,8 +1,6 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
 import {sprintf} from 'sprintf-js'
-
-import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
@@ -133,52 +131,6 @@ window.APP = {
       closeOnSuccess: options.closeOnSuccess || false,
     })
     return APP.confirmValue // TODO: this return value is clearly meaningless
-  },
-  doRequest: function (req, log) {
-    var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
-    var version =
-      typeof config.build_number == 'undefined'
-        ? ''
-        : '-v' + config.build_number
-    var builtURL = req.url
-      ? req.url
-      : getMatecatApiDomain() +
-        '?action=' +
-        req.data.action +
-        logTxt +
-        this.appendTime() +
-        version +
-        ',jid=' +
-        config.id_job +
-        (typeof req.data.id_segment != 'undefined'
-          ? ',sid=' + req.data.id_segment
-          : '')
-    var reqType = req.type ? req.type : 'POST'
-    var setup = {
-      url: builtURL,
-
-      data: req.data,
-      type: reqType,
-      dataType: 'json',
-      xhrFields: {withCredentials: true},
-      //TODO set timeout longer than server curl for TM/MT
-    }
-
-    // Callbacks
-    if (typeof req.success === 'function') setup.success = req.success
-    if (typeof req.complete === 'function') setup.complete = req.complete
-    if (typeof req.context != 'undefined') setup.context = req.context
-    if (typeof req.error === 'function') setup.error = req.error
-    if (typeof req.beforeSend === 'function') setup.beforeSend = req.beforeSend
-
-    return $.ajax(setup)
-  },
-  appendTime: function () {
-    var t = new Date()
-    return '&time=' + t.getTime()
-  },
-  disableLink: function (e) {
-    e.preventDefault()
   },
   popup: function (conf) {
     this.closePopup()
@@ -448,7 +400,6 @@ window.APP = {
         .attr('disabled', 'disabled')
         .removeAttr('data-callback')
         .attr('data-callback-disabled', callback)
-        .bind('click', APP.disableLink)
     }
 
     var enableOk = function (context) {
@@ -459,7 +410,6 @@ window.APP = {
         .removeAttr('disabled')
         .removeAttr('data-callback-disabled')
         .attr('data-callback', callback)
-        .unbind('click', APP.disableLink)
     }
 
     var newPopup = renderPopup(conf)
@@ -571,26 +521,6 @@ window.APP = {
   },
   /*************************************************************************************************************/
 
-  evalFlashMessagesForNotificationBox: function () {
-    if (config.flash_messages && Object.keys(config.flash_messages).length) {
-      _.each(['warning', 'notice', 'error'], function (type) {
-        if (config.flash_messages[type]) {
-          _.each(config.flash_messages[type], function (obj) {
-            APP.addNotification({
-              autoDismiss: false,
-              dismissable: true,
-              position: 'bl',
-              text: obj.value,
-              title: type,
-              type: type,
-              allowHtml: true,
-            })
-          })
-        }
-      })
-    }
-  },
-
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
       return _.filter(config.flash_messages.service, function (service) {
@@ -628,15 +558,6 @@ window.APP = {
         }
       })
     }
-  },
-
-  checkEmail: function (text) {
-    var re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    if (!re.test(text.trim())) {
-      return false
-    }
-    return true
   },
 
   getUserShortName: function (user) {
