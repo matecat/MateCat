@@ -2,7 +2,6 @@
 
 namespace Features\QaCheckBlacklist\Utils;
 
-use Features\Aligner\Model\Jobs_JobDao;
 use Features\QaCheckBlacklist\AbstractBlacklist;
 use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
@@ -36,8 +35,8 @@ class BlacklistUtils
         $fs->deleteBlacklistFile($model->file_path);
         $dao->deleteById($id);
 
-        $this->clearCached('checkIfExistsBlacklist-'.$model->job_id.'-'.$model->password);
-        $this->clearCached('getAbstractBlacklist-'.$model->job_id.'-'.$model->password);
+        $this->clearCached(md5('checkIfExistsBlacklist-'.$model->id_job.'-'.$model->password));
+        $this->clearCached(md5('getAbstractBlacklist-'.$model->id_job.'-'.$model->password));
     }
 
     /**
@@ -168,8 +167,8 @@ class BlacklistUtils
      * @param $key
      */
     private function clearCached($key) {
-        if ( !$this->redis->exists( $key ) ) {
-            $this->redis->expire( $key, 0 ) ;
+        if ( $this->redis->exists( $key ) ) {
+            $this->redis->del( $key ) ;
         }
     }
 }

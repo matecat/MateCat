@@ -53,6 +53,7 @@ class BlacklistController extends KleinController {
             $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
             $blacklistUtils->delete($this->request->param( 'id_file' ));
             $dao->destroyGetByIdCache( $this->request->param( 'id_file' ) );
+            $dao->destroyGetByJobIdAndPasswordCache($model->id_job, $model->password);
 
             $this->response->json( [
                 'success' => true,
@@ -121,6 +122,7 @@ class BlacklistController extends KleinController {
 
         // check if project has already a blacklist
         $dao = new BlacklistDao();
+        $dao->destroyGetByJobIdAndPasswordCache($chunk->id, $chunk->password);
         $model = $dao->getByJobIdAndPassword($chunk->id, $chunk->password);
         if(!empty($model)){
             $this->returnError('Project has already a blacklist');
