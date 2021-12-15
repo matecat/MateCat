@@ -2,6 +2,7 @@ import TeamConstants from '../../constants/TeamConstants'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageActions from '../../actions/ManageActions'
 import React from 'react'
+import CommonUtils from '../../utils/commonUtils'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -303,7 +304,7 @@ class ModifyTeam extends React.Component {
               />
             ) : (
               <div className="ui tiny image label">
-                {APP.getUserShortName(user.toJS())}
+                {CommonUtils.getUserShortName(user.toJS())}
               </div>
             )}
 

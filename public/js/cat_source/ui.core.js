@@ -547,16 +547,6 @@ window.UI = {
     $('#action-download').removeClass('disabled')
   },
 
-  downloadFileURL: function (openOriginalFiles) {
-    return sprintf(
-      '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
-      config.basepath,
-      config.id_job,
-      config.password,
-      openOriginalFiles,
-    )
-  },
-
   continueDownloadWithGoogleDrive: function (openOriginalFiles) {
     if ($('#downloadProject').hasClass('disabled')) {
       return

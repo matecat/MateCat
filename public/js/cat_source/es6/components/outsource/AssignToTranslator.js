@@ -75,7 +75,7 @@ class AssignToTranslator extends React.Component {
     let self = this
     let time = 12
     if (this.props.job.get('translator')) {
-      let date = APP.getGMTDate(
+      let date = CommonUtils.getGMTDate(
         this.props.job.get('translator').get('delivery_timestamp') * 1000,
       )
       time = date.time.split(':')[0]

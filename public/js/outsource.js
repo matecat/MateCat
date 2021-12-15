@@ -1,5 +1,6 @@
 import ManageActions from './cat_source/es6/actions/ManageActions'
 import {addJobTranslator} from './cat_source/es6/api/addJobTranslator'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 if (!window.UI) {
   window.UI = {}
 }
@@ -94,9 +95,9 @@ $.extend(window.UI, {
 
   shareToTranslatorDateChangeNotification: function (email, oldDate, newDate) {
     oldDate = $.format.date(oldDate, 'yyyy-MM-d hh:mm a')
-    oldDate = APP.getGMTDate(oldDate)
+    oldDate = CommonUtils.getGMTDate(oldDate)
     newDate = $.format.date(newDate, 'yyyy-MM-d hh:mm a')
-    newDate = APP.getGMTDate(newDate)
+    newDate = CommonUtils.getGMTDate(newDate)
     return {
       title: 'Job delivery update',
       text:

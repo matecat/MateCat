@@ -560,14 +560,6 @@ window.APP = {
     }
   },
 
-  getUserShortName: function (user) {
-    if (user && user.first_name && user.last_name) {
-      return (user.first_name[0] + user.last_name[0]).toUpperCase()
-    } else {
-      return 'AU'
-    }
-  },
-
   getLastTeamSelected: function (teams) {
     if (config.isLoggedIn) {
       if (localStorage.getItem(this.teamStorageName)) {
@@ -583,6 +575,33 @@ window.APP = {
       } else {
         return teams[0]
       }
+    }
+  },
+  setTeamNameInMenu: function () {
+    if (APP.USER.STORE.teams) {
+      var team = this.getLastTeamSelected(APP.USER.STORE.teams)
+      $('.user-menu-container .organization-name').text(team.name) //??
+    } else {
+      var self = this
+      APP.USER.loadUserData().then(function () {
+        self.setTeamNameInMenu.bind(self)
+      })
+    }
+  },
+
+  setUserImage: function () {
+    if (APP.USER.STORE.user) {
+      if (!APP.USER.STORE.metadata || !APP.USER.STORE.metadata.gplus_picture)
+        return
+      var urlImage = APP.USER.STORE.metadata.gplus_picture
+      var html =
+        '<img class="ui-user-top-image-general user-menu-preferences" src="' +
+        urlImage +
+        '"/>'
+      $('.user-menu-container .ui-user-top-image').replaceWith(html)
+      /*$('.user-menu-preferences').on('click', function (e) {*/
+    } else {
+      setTimeout(this.setUserImage.bind(this), 500)
     }
   },
 
@@ -773,137 +792,6 @@ window.APP = {
           Cookies.delete(downloadToken)
         }
       })
-  },
-
-  downloadFileURL: function (openOriginalFiles, idJob, pass, downloadToken) {
-    return sprintf(
-      '%s?action=downloadFile&id_job=%s&password=%s&original=%s&downloadToken=%s',
-      config.basepath,
-      idJob,
-      pass,
-      openOriginalFiles,
-      downloadToken,
-    )
-  },
-
-  setTeamNameInMenu: function () {
-    if (APP.USER.STORE.teams) {
-      var team = this.getLastTeamSelected(APP.USER.STORE.teams)
-      $('.user-menu-container .organization-name').text(team.name) //??
-      $('.user-menu-container .organization-name').text(team.name) //??
-    } else {
-      var self = this
-      APP.USER.loadUserData().then(function () {
-        self.setTeamNameInMenu.bind(self)
-      })
-    }
-  },
-
-  setUserImage: function () {
-    if (APP.USER.STORE.user) {
-      if (!APP.USER.STORE.metadata || !APP.USER.STORE.metadata.gplus_picture)
-        return
-      var urlImage = APP.USER.STORE.metadata.gplus_picture
-      var html =
-        '<img class="ui-user-top-image-general user-menu-preferences" src="' +
-        urlImage +
-        '"/>'
-      $('.user-menu-container .ui-user-top-image').replaceWith(html)
-      /*$('.user-menu-preferences').on('click', function (e) {*/
-    } else {
-      setTimeout(this.setUserImage.bind(this), 500)
-    }
-  },
-
-  fromDateToString: function (date) {
-    var dd = new Date(date)
-    return {
-      day: $.format.date(dd, 'd'),
-      month: $.format.date(dd, 'MMMM'),
-      year: $.format.date(dd, 'yy'),
-      time:
-        $.format.date(dd, 'hh') +
-        ':' +
-        $.format.date(dd, 'mm') +
-        ' ' +
-        $.format.date(dd, 'a'),
-    }
-  },
-
-  getGMTDate: function (date, timeZoneFrom) {
-    if (typeof date === 'string' && date.indexOf('-') > -1) {
-      date = date.replace(/-/g, '/')
-    }
-    var timezoneToShow = APP.readCookie('matecat_timezone')
-    if (timezoneToShow == '') {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-    }
-    var dd = new Date(date)
-    timeZoneFrom = timeZoneFrom
-      ? timeZoneFrom
-      : -1 * (new Date().getTimezoneOffset() / 60) //TODO UTC0 ? Why the browser gmt
-    dd.setMinutes(dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60)
-    var timeZone = this.getGMTZoneString()
-    return {
-      day: $.format.date(dd, 'd'),
-      month: $.format.date(dd, 'MMMM'),
-      time:
-        $.format.date(dd, 'hh') +
-        ':' +
-        $.format.date(dd, 'mm') +
-        ' ' +
-        $.format.date(dd, 'a'),
-      time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
-      year: $.format.date(dd, 'yyyy'),
-      gmt: timeZone,
-    }
-  },
-
-  getGMTZoneString: function () {
-    // var timezoneToShow = "";
-    var timezoneToShow = APP.readCookie('matecat_timezone')
-    if (timezoneToShow == '') {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-    }
-    timezoneToShow = timezoneToShow > 0 ? '+' + timezoneToShow : timezoneToShow
-    return timezoneToShow % 1 === 0
-      ? 'GMT ' + timezoneToShow + ':00'
-      : 'GMT ' + parseInt(timezoneToShow) + ':30'
-  },
-
-  getDefaultTimeZone: function () {
-    var timezoneToShow = APP.readCookie('matecat_timezone')
-    if (timezoneToShow == '') {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-    }
-    return timezoneToShow
-  },
-
-  readCookie: function (cookieName) {
-    cookieName += '='
-    var cookies = document.cookie.split(';')
-
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i].trim()
-
-      if (cookie.indexOf(cookieName) == 0)
-        return cookie.substring(cookieName.length, cookie.length)
-    }
-    return ''
-  },
-
-  setCookie: function (cookieName, cookieValue, expiration) {
-    if (typeof expiration == 'undefined') {
-      expiration = new Date()
-      expiration.setYear(new Date().getFullYear() + 1)
-    }
-    document.cookie =
-      cookieName +
-      '=' +
-      cookieValue +
-      '; expires=' +
-      expiration.toUTCString() +
-      '; path=/'
   },
 }
 

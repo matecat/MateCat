@@ -192,7 +192,7 @@ class CreateTeam extends React.Component {
                       />
                     ) : (
                       <div className="ui tiny image label">
-                        {APP.getUserShortName(user)}
+                        {CommonUtils.getUserShortName(user)}
                       </div>
                     )}
                     <div className="middle aligned content">
