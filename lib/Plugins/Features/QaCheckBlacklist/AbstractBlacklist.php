@@ -7,17 +7,17 @@ abstract class AbstractBlacklist {
     /**
      * @var string
      */
-    private $file_path;
+    protected $file_path;
 
     /**
      * @var string
      */
-    private $id_job;
+    protected $id_job;
 
     /**
      * @var \Predis\Client
      */
-    private $redis ;
+    protected $redis ;
 
     public function __construct( $path, $id_job ) {
         $this->file_path = $path;
@@ -26,7 +26,7 @@ abstract class AbstractBlacklist {
         $this->redis = new \Predis\Client( \INIT::$REDIS_SERVERS );
     }
 
-    protected abstract function getContent( $file_path );
+    abstract public function getContent();
 
     protected abstract function deleteOriginalFile ( $file_path ); // ???? Va cancellato???
 
@@ -38,7 +38,7 @@ abstract class AbstractBlacklist {
         $key     = $this->getJobCacheKey();
 
         if ( !$redis->exists( $key ) ) {
-            $content = static::getContent( $this->file_path );
+            $content = static::getContent();
 
             $splitted = explode( PHP_EOL, $content );
             foreach ( $splitted as $token ) {

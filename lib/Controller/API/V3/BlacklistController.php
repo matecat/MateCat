@@ -37,37 +37,53 @@ class BlacklistController extends KleinController {
      */
     private $file;
 
+    /**
+     * @Route /blacklist/delete/[:id_file]
+     */
     public function delete() {
 
-        $this->idJob = $this->request->param( 'jid' );
-        $this->password = $this->request->param( 'password' );
-
         $dao = new BlacklistDao();
+        $model = $dao->getById($this->request->param( 'id_file' ));
 
-        $model = $dao->getByJobIdAndPassword($this->idJob, $this->password);
+        if(empty($model)){
+            $this->returnError('Blacklist not found', 0,404);
+        }
 
-        $dao->deleteById($model->id);
+        try {
+            $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+            $blacklistUtils->delete($this->request->param( 'id_file' ));
+            $dao->destroyGetByIdCache( $this->request->param( 'id_file' ) );
 
-        $this->response->json( [
-            'success' => true,
-            'id' => $model->id
-        ] ) ;
+            $this->response->json( [
+                'success' => true,
+                'id' => $this->request->param( 'id_file' )
+            ] ) ;
+        } catch (\Exception $exception){
+            $this->returnError($exception->getMessage());
+        }
     }
 
+    /**
+     * @Route  /blacklist/get/[:id_file]
+     */
     public function get() {
 
-        $this->idJob = $this->request->param( 'jid' );
-        $this->password = $this->request->param( 'password' );
-
         $dao = new BlacklistDao();
-        $model = $dao->getByJobIdAndPassword($this->idJob, $this->password);
+        $model = $dao->getById($this->request->param( 'id_file' ));
 
-        //@TODO estrarre content da REDIS
+        if(empty($model)){
+            return $this->returnError("Blacklist not found", 0, 404);
+        }
 
+        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+        $model->content = $blacklistUtils->getContent($this->request->param( 'id_file' ));
 
         $this->response->json( $model ) ;
     }
 
+    /**
+     * @Route /blacklist/upload
+     */
     public function upload() {
 
         $this->idJob = $this->request->param( 'jid' );
@@ -95,8 +111,6 @@ class BlacklistController extends KleinController {
             $this->returnError('File type MUST be text/plain');
         }
 
-        // more validation???
-
         // project has_blacklist?
         $dao = new \Projects_MetadataDao() ;
         $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $chunk->id_project,  'has_blacklist' ) ;
@@ -105,10 +119,17 @@ class BlacklistController extends KleinController {
             $this->returnError('Project has not set a blacklist');
         }
 
+        // check if project has already a blacklist
+        $dao = new BlacklistDao();
+        $model = $dao->getByJobIdAndPassword($chunk->id, $chunk->password);
+        if(!empty($model)){
+            $this->returnError('Project has already a blacklist');
+        }
+
         // upload file
         try {
             $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
-            $blacklistUtils->save($this->file['tmp_name'], $chunk->id, $chunk->password);
+            $idBlacklist = $blacklistUtils->save($this->file['tmp_name'], $chunk, $this->user->uid);
         } catch (\Exception $exception){
             $this->returnError($exception->getMessage());
         }
@@ -141,7 +162,7 @@ class BlacklistController extends KleinController {
 
         $this->response->json( [
             'success' => true,
-            'message' => 'The blacklist file was passed to the queue handler.'
+            'id' => $idBlacklist
         ] ) ;
     }
 

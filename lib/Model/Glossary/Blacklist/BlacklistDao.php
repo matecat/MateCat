@@ -9,6 +9,19 @@ class BlacklistDao extends \DataAccess_AbstractDao
     const TABLE = 'blacklist_files';
 
     /**
+     * @param $id
+     *
+     * @return int
+     */
+    public function deleteById($id){
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare( " DELETE FROM ". self::TABLE ." WHERE id = ?");
+        $stmt->execute( [$id] ) ;
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * @param     $jobId
      * @param     $password
      * @param int $ttl
@@ -17,24 +30,32 @@ class BlacklistDao extends \DataAccess_AbstractDao
      */
     public function getByJobIdAndPassword($jobId, $password, $ttl = 60){
         $thisDao = new self();
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM ". self::TABLE ." where id_job = :jid AND password = :password ");
+        $stmt = $this->_getStatementGetByJobIdAndPasswordForCache();
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'jid' => $jobId, 'password' => $password ] )[ 0 ];
     }
 
     /**
-     * @param     $uid
-     * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return \PDOStatement
      */
-    public function getByUid($uid, $ttl = 60){
-        $thisDao = new self();
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM ". self::TABLE ." where uid = :uid ");
+    protected function _getStatementGetByJobIdAndPasswordForCache() {
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'uid' => $uid ] )[ 0 ];
+        $conn = \Database::obtain()->getConnection();
+
+        return $conn->prepare( "SELECT * FROM ". self::TABLE ." where id_job = :jid AND password = :password ");
+    }
+
+    /**
+     * @param $jobId
+     * @param $password
+     *
+     * @return bool|int
+     */
+    public function destroyGetByJobIdAndPasswordCache( $jobId, $password ) {
+        $stmt = $this->_getStatementGetByJobIdAndPasswordForCache();
+
+        return $this->_destroyObjectCache( $stmt, [ 'jid' => $jobId, 'password' => $password ] );
     }
 
     /**
@@ -44,17 +65,39 @@ class BlacklistDao extends \DataAccess_AbstractDao
      * @return \DataAccess_IDaoStruct
      */
     public function getById($id, $ttl = 600){
+
         $thisDao = new self();
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM ". self::TABLE ." where id = :id ");
+        $stmt = $this->_getStatementGetByIdForCache();
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct, [ 'id' => $id ] )[ 0 ];
     }
 
     /**
+     *
+     * @return \PDOStatement
+     */
+    protected function _getStatementGetByIdForCache() {
+
+        $conn = \Database::obtain()->getConnection();
+
+        return $conn->prepare( "SELECT * FROM ". self::TABLE ." where id = :id ");
+    }
+
+    /**
+     * @param $id
+     *
+     * @return bool|int
+     */
+    public function destroyGetByIdCache( $id ) {
+        $stmt = $this->_getStatementGetByIdForCache();
+
+        return $this->_destroyObjectCache( $stmt, [ 'id' => $id ]);
+    }
+
+    /**
      * @param BlacklistModel $blacklistStruct
      *
-     * @return int
+     * @return string|null
      */
     public function save( BlacklistModel $blacklistStruct){
 
@@ -74,19 +117,10 @@ class BlacklistDao extends \DataAccess_AbstractDao
             'target' => $blacklistStruct->target,
         ] ) ;
 
-        return $stmt->rowCount();
-    }
+        if($stmt->rowCount() > 0){
+            return $conn->lastInsertId();
+        }
 
-    /**
-     * @param $id
-     *
-     * @return int
-     */
-    public function deleteById($id){
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare( " DELETE FROM ". self::TABLE ." WHERE id = ?");
-        $stmt->execute( [$id] ) ;
-
-        return $stmt->rowCount();
+        return null;
     }
 }

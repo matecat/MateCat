@@ -3,6 +3,8 @@
 namespace FilesStorage;
 
 use Database;
+use Glossary\Blacklist\BlacklistDao;
+use Glossary\Blacklist\BlacklistModel;
 use Log;
 use PDO;
 
@@ -446,17 +448,34 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      **********************************************************************************************
      */
 
+    public function deleteBlacklistFile($filePath) {
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+
+        if ( $isFsOnS3 ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            return $s3Client->deleteItem([
+                    'bucket' => static::$FILES_STORAGE_BUCKET,
+                    'key'    => $filePath,
+            ]);
+        }
+
+        return unlink($filePath);
+    }
+
     /**
-     * @param $filePath
-     * @param $jid
-     * @param $password
+     * @param string              $filePath
+     * @param \Chunks_ChunkStruct $chunkStruct
+     * @param                     $uid
      *
-     * @return mixed|void
-     * @throws \Exception
+     * @return mixed
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
      */
-    public function saveBlacklistFile($filePath, $jid, $password) {
+    public function saveBlacklistFile($filePath, \Chunks_ChunkStruct $chunkStruct, $uid) {
 
         $isFsOnS3 = AbstractFilesStorage::isOnS3();
+        $jid = $chunkStruct->id;
+        $password = $chunkStruct->password;
 
         if ( $isFsOnS3 ) {
             $blacklistPath = 'glossary' . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password . DIRECTORY_SEPARATOR . 'blacklist.txt';
@@ -477,5 +496,15 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                 throw new \Exception( 'Failed to save blacklist file on disk.', -14 );
             }
         }
+
+        $model = new BlacklistModel($chunkStruct);
+        $model->uid = $uid;
+        $model->target = $chunkStruct->target;
+        $model->file_name = "blacklist.txt";
+        $model->file_path = $blacklistPath;
+
+        $dao = new BlacklistDao();
+
+        return $dao->save($model);
     }
 }

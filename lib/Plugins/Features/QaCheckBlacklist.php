@@ -133,7 +133,7 @@ class QaCheckBlacklist extends BaseFeature {
          */
         $chunk =$params['chunk'] ;
 
-        $blacklist = BlacklistUtils::getAbstractBlacklist($chunk);
+        $blacklist = BlacklistUtils::getAbstractBlacklist($chunk->id, $chunk->password);
 
         $data['blacklist'] = array(
                 'matches' => $blacklist->getMatches( $target )
