@@ -180,6 +180,8 @@ window.APP = {
   disableLink: function (e) {
     e.preventDefault()
   },
+  keydownStopPropagation: (event) =>
+    event.key !== 'Escape' && event.stopPropagation(),
   popup: function (conf) {
     this.closePopup()
 
@@ -465,9 +467,20 @@ window.APP = {
     var newPopup = renderPopup(conf)
 
     $('body').append(newPopup)
+
+    const modalRef = document.getElementsByClassName('modal')[0]
+    if (modalRef) {
+      modalRef.setAttribute('tabIndex', '0')
+      modalRef.addEventListener('keydown', this.keydownStopPropagation)
+      modalRef.focus()
+    }
   },
 
   closePopup: function () {
+    const modalRef = document.getElementsByClassName('modal')[0]
+    if (modalRef)
+      modalRef.removeEventListener('keydown', this.keydownStopPropagation)
+
     $('.modal[data-type=view]').hide()
     $('.modal:not([data-type=view])').remove()
     // TODO: not sure this is still useful

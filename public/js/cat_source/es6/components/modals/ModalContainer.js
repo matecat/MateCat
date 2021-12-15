@@ -1,7 +1,9 @@
-import React from 'react'
+import React, {useEffect, useRef} from 'react'
 import $ from 'jquery'
 
 export const ModalContainer = ({title, styleContainer, children, onClose}) => {
+  const ref = useRef(null)
+
   const handleClose = (event) => {
     event.stopPropagation()
 
@@ -22,8 +24,25 @@ export const ModalContainer = ({title, styleContainer, children, onClose}) => {
     }
   }, [])
 
+  // prevent propagation keydown events
+  useEffect(() => {
+    if (!ref.current) return
+    const refTag = ref.current
+    const stopPropagation = (event) => event.stopPropagation()
+    refTag.addEventListener('keydown', stopPropagation)
+    refTag.focus()
+
+    return () => refTag.removeEventListener('keydown', stopPropagation)
+  }, [ref])
+
   return (
-    <div id="matecat-modal" className="matecat-modal" onClick={handleClose}>
+    <div
+      ref={ref}
+      tabIndex="0"
+      id="matecat-modal"
+      className="matecat-modal"
+      onClick={handleClose}
+    >
       <div className="matecat-modal-content" style={styleContainer}>
         <div className="matecat-modal-header">
           <div className="modal-logo" />
