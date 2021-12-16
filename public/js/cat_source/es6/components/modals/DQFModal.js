@@ -1,6 +1,7 @@
 import React from 'react'
 
 import DQFCredentials from './DQFCredentials'
+import {ModalWindow} from './ModalWindow'
 
 class DQFModal extends React.Component {
   constructor(props) {
@@ -55,7 +56,7 @@ class DQFModal extends React.Component {
       dqf_options.qualityLevel = this.qualityLevel.value
       $('.dqf-box #dqf_switch').trigger('dqfEnable')
       APP.USER.STORE.metadata.dqf_options = dqf_options
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     }
   }
 

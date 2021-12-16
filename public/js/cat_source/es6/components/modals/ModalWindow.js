@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 
 import {ModalContainer} from './ModalContainer'
 import {ModalOverlay} from './ModalOverlay'
@@ -14,7 +15,7 @@ const initialState = {
   onCloseCallback: false,
 }
 
-export class ModalWindow extends React.Component {
+class ModalWindowComponent extends React.Component {
   state = initialState
 
   onCloseModal = () => {
@@ -67,5 +68,12 @@ export class ModalWindow extends React.Component {
     )
   }
 }
+export let ModalWindow
 
-export default ModalWindow
+document.addEventListener('DOMContentLoaded', () => {
+  const mountPoint = document.getElementById('modal')
+  ModalWindow = ReactDOM.render(
+    React.createElement(ModalWindowComponent, {}),
+    mountPoint,
+  )
+})

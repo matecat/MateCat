@@ -1,6 +1,7 @@
 import ManageActions from './cat_source/es6/actions/ManageActions'
 import {addJobTranslator} from './cat_source/es6/api/addJobTranslator'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 if (!window.UI) {
   window.UI = {}
 }
@@ -9,7 +10,7 @@ $.extend(window.UI, {
   sendJobToTranslator: function (email, date, timezone, job, project) {
     addJobTranslator(email, date, timezone, job)
       .then(function (data) {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
         if (data.job) {
           UI.checkShareToTranslatorResponse(data, email, date, job, project)
         } else {
@@ -162,7 +163,7 @@ $.extend(window.UI, {
     }
   },
   showShareTranslatorError: function () {
-    APP.ModalWindow.onCloseModal()
+    ModalWindow.onCloseModal()
     var notification = {
       title: 'Problems sending the job',
       text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',

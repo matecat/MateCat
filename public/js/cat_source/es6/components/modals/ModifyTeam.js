@@ -3,6 +3,7 @@ import TeamsStore from '../../stores/TeamsStore'
 import ManageActions from '../../actions/ManageActions'
 import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
+import {ModalWindow} from './ModalWindow'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -89,7 +90,7 @@ class ModifyTeam extends React.Component {
   removeUser(user) {
     ManageActions.removeUserFromTeam(this.state.team, user)
     if (user.get('uid') === APP.USER.STORE.user.uid) {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     }
     this.setState({
       showRemoveMessageUserID: null,
@@ -202,7 +203,7 @@ class ModifyTeam extends React.Component {
       this.addUsers()
     }
     if (teamNameOk) {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     }
   }
 

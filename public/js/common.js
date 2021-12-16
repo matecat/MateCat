@@ -5,6 +5,7 @@ import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 
 window.APP = null
 
@@ -87,7 +88,7 @@ window.APP = {
       })
       .on('keyup', function (e) {
         if (e.keyCode == 27 && $('body').hasClass('side-popup')) {
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
           e.preventDefault()
           e.stopPropagation()
         }
@@ -724,10 +725,10 @@ window.APP = {
             ' grant Google Drive privileges to MateCat.',
           successText: 'Ok',
           successCallback: function () {
-            APP.ModalWindow.onCloseModal()
+            ModalWindow.onCloseModal()
           },
         }
-        APP.ModalWindow.showModalComponent(
+        ModalWindow.showModalComponent(
           ConfirmMessageModal,
           props,
           'Download fail',
@@ -781,10 +782,10 @@ window.APP = {
             text: cookie.message,
             successText: 'Ok',
             successCallback: function () {
-              APP.ModalWindow.onCloseModal()
+              ModalWindow.onCloseModal()
             },
           }
-          APP.ModalWindow.showModalComponent(
+          ModalWindow.showModalComponent(
             ConfirmMessageModal,
             props,
             'Download fail',
