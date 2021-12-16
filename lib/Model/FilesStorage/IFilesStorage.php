@@ -2,6 +2,8 @@
 
 namespace FilesStorage;
 
+use FileStorage\Exceptions\FileSystemException;
+
 /**
  * Interface IFilesStorage
  *
@@ -41,6 +43,7 @@ interface IFilesStorage {
      * @param      $xliffPath
      *
      * @return mixed
+     * @throws FileSystemException
      */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
 

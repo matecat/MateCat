@@ -22,8 +22,8 @@ class RevisionFeedbackModal extends React.Component {
         UI.reloadQualityReport()
         ModalWindow.onCloseModal()
         var notification = {
-          title: 'Feedback sent',
-          text: 'Feedback has been sent correctly',
+          title: 'Feedback submitted',
+          text: 'Feedback has been submitted correctly',
           type: 'success',
         }
         APP.addNotification(notification)

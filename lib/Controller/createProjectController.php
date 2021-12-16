@@ -373,7 +373,7 @@ class createProjectController extends ajaxController {
             $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
         } catch ( Exception $e ){
             $this->result[ 'errors' ][] = [
-                    "code" => -230, // S3 EXCEPTIONS HERE
+                    "code" => -235, // Error during moving file from upload session folder to queue path
                     "message" => $e->getMessage()
             ];
 

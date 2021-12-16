@@ -1,4 +1,4 @@
-import {sprintf} from 'sprintf-js'
+import {deleteCompletionEvents} from './es6/api/deleteCompletionEvents'
 import {setChunkComplete} from './es6/api/setChunkComplete'
 
 var ProjectCompletion = {
@@ -258,21 +258,9 @@ if (ProjectCompletion.enabled()) {
       function (e) {
         e.preventDefault()
 
-        $.ajax({
-          type: 'DELETE',
-          url: sprintf(
-            '/api/app/jobs/%s/%s/completion-events/%s',
-            config.id_job,
-            config.password,
-            config.last_completion_event_id,
-          ),
-        })
-          .done(function () {
-            location.reload()
-          })
-          .fail(function () {
-            console.error('Error undoing completion event')
-          })
+        deleteCompletionEvents()
+          .then(() => location.reload())
+          .catch(() => console.error('Error undoing completion event'))
       },
     )
 

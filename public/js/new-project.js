@@ -662,13 +662,22 @@ $.extend(UI.UPLOAD_PAGE, {
           APP.handleCreationStatus(data.id_project, data.password)
         })
         .catch((errors) => {
-          $('.error-message')
-            .find('p')
-            .text(
-              errors[0].code === -230
-                ? 'Sorry, file name too long. Try shortening it and try again.'
-                : errors[0].message,
-            )
+          let errorMsg
+          switch (errors[0].code) {
+            case -230: {
+              errorMsg =
+                'Sorry, file name too long. Try shortening it and try again.'
+              break
+            }
+            case -235: {
+              errorMsg =
+                'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
+              break
+            }
+            default:
+              errorMsg = errors[0].message
+          }
+          $('.error-message').find('p').text(errorMsg)
           $('.error-message').show()
           $('.uploadbtn').attr('value', 'Analyze')
           $('body').removeClass('creating')

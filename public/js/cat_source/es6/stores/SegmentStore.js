@@ -171,6 +171,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           segData = null
         })
       } else {
+        segment.splitted = false
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
         segment.warnings = {}
