@@ -959,7 +959,7 @@ window.UI = {
         }
       })
       .catch(({errors}) => {
-        if (errors.length) {
+        if (errors && errors.length) {
           this.processErrors(errors, 'setTranslation')
         } else {
           var idSegment = options.id_segment
