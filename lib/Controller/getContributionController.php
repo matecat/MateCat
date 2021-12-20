@@ -21,6 +21,7 @@ class getContributionController extends ajaxController {
     protected $id_after;
 
     private $__postInput = [];
+    private $cross_language = [];
 
     public function __construct() {
 

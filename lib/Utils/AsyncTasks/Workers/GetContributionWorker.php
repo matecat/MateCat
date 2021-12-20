@@ -134,7 +134,7 @@ class GetContributionWorker extends AbstractWorker {
                 ]
         ];
 
-        $message = json_encode( $_object );
+        $message = json_encode( $_object, true );
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
@@ -189,7 +189,7 @@ class GetContributionWorker extends AbstractWorker {
         $Filter = MateCatFilter::getInstance(
                 $featureSet,
                 $contributionStruct->getJobStruct()->source,
-                $contributionStruct->getJobStruct()->target,
+                $targetLang,
                 json_decode($contributionStruct->dataRefMap, true)
         );
 
