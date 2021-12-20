@@ -161,7 +161,7 @@ test('Rendering elements', async () => {
     expect(screen.getByText('Logout')).toBeInTheDocument()
     expect(screen.getByText('Logout')).toBeEnabled()
     expect(screen.getByTestId('team-select')).toBeInTheDocument()
-  })
+  }, 2000)
 })
 
 test('Click profile from user menu', async () => {
@@ -172,5 +172,5 @@ test('Click profile from user menu', async () => {
   await waitFor(() => {
     userEvent.click(screen.getByTestId('profile-item'))
     expect(screen.getByTestId('preferences-modal')).toBeInTheDocument()
-  })
+  }, 2000)
 })

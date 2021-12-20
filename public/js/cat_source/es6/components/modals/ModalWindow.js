@@ -15,7 +15,7 @@ const initialState = {
   onCloseCallback: false,
 }
 
-class ModalWindowComponent extends React.Component {
+export class ModalWindowComponent extends React.Component {
   state = initialState
 
   onCloseModal = () => {
