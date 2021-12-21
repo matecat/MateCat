@@ -17,6 +17,7 @@ import SegmentFilter from './es6/components/header/cattol/segment_filter/segment
 import {getJobMetadata} from './es6/api/getJobMetadata'
 import {logoutUser} from './es6/api/logoutUser'
 import {reloadQualityReport} from './es6/api/reloadQualityReport'
+import {ModalWindow} from './es6/components/modals/ModalWindow'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -297,7 +298,7 @@ var initEvents = function () {
   $('#action-three-dots .shortcuts').on('click', function (e) {
     e.preventDefault()
     e.stopPropagation()
-    APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')
+    ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')
     return false
   })
 

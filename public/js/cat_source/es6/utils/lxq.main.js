@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 
 import SegmentActions from '../actions/SegmentActions'
 import {toggleTagLexica} from '../api/toggleTagLexica'
@@ -713,19 +712,7 @@ LXQ.init = function () {
     }
 
     var postIgnoreError = function (errorid) {
-      $.ajax({
-        type: 'POST',
-        url: config.lexiqaServer + '/ignoreerror',
-        data: {
-          data: {
-            errorid: errorid,
-          },
-        },
-        success: function (result) {
-          // console.log('postIgnoreError success: '+result);
-        },
-      })
-      // lexiqaIgnoreError({errorId: errorid});
+      lexiqaIgnoreError({errorId: errorid})
     }
 
     var getVisibleWarningsCountForSegment = function (segment) {

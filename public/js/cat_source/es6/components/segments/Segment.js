@@ -20,6 +20,7 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
+import {ModalWindow} from '../modals/ModalWindow'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -361,10 +362,10 @@ class Segment extends React.Component {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         },
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ConfirmMessageModal,
         props,
         'Modify locked and approved segment ',

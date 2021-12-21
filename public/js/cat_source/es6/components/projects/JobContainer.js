@@ -730,7 +730,7 @@ class JobContainer extends React.Component {
 
     if (this.props.job.get('outsource')) {
       if (this.props.job.get('outsource').get('id_vendor') == '1') {
-        let gmtDate = APP.getGMTDate(
+        let gmtDate = CommonUtils.getGMTDate(
           this.props.job.get('outsource').get('delivery_timestamp') * 1000,
         )
         outsourceDelivery = (
@@ -743,7 +743,7 @@ class JobContainer extends React.Component {
         )
       }
     } else if (this.props.job.get('translator')) {
-      let gmtDate = APP.getGMTDate(
+      let gmtDate = CommonUtils.getGMTDate(
         this.props.job.get('translator').get('delivery_timestamp') * 1000,
       )
       outsourceDelivery = (

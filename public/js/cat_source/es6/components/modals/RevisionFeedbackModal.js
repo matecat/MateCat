@@ -1,6 +1,7 @@
 import React from 'react'
 
 import CatToolActions from '../../actions/CatToolActions'
+import {ModalWindow} from './ModalWindow'
 
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
@@ -19,7 +20,7 @@ class RevisionFeedbackModal extends React.Component {
     CatToolActions.sendRevisionFeedback(this.state.feedback)
       .then(() => {
         UI.reloadQualityReport()
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
         var notification = {
           title: 'Feedback submitted',
           text: 'Feedback has been submitted correctly',
@@ -86,7 +87,7 @@ class RevisionFeedbackModal extends React.Component {
             <div className="column">
               <div
                 className="ui button cancel-button"
-                onClick={() => APP.ModalWindow.onCloseModal()}
+                onClick={() => ModalWindow.onCloseModal()}
               >
                 {this.props.feedback ? 'Close' : "I'll do it later"}
               </div>

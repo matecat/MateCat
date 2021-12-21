@@ -1,28 +1,27 @@
-import ReactDOM from 'react-dom'
 import React from 'react'
 
 import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
 import ConfirmRegister from './cat_source/es6/components/modals/ConfirmRegister'
-import ModalWindow from './cat_source/es6/components/modals/ModalWindow'
 import PreferencesModal from './cat_source/es6/components/modals/PreferencesModal'
 import ResetPasswordModal from './cat_source/es6/components/modals/ResetPasswordModal'
 import ForgotPasswordModal from './cat_source/es6/components/modals/ForgotPasswordModal'
 import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
 import LoginModal from './cat_source/es6/components/modals/LoginModal'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 
 $.extend(APP, {
   setLoginEvents: function () {
-    APP.ModalWindow = ReactDOM.render(
-      React.createElement(ModalWindow),
-      $('#modal')[0],
-    )
+    // APP.ModalWindow = ReactDOM.render(
+    //   React.createElement(ModalWindow),
+    //   $('#modal')[0],
+    // )
 
     $('#modal').on('closemodal', function () {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     })
 
     $('#modal').on('opensuccess', function (e, param) {
-      APP.ModalWindow.showModalComponent(SuccessModal, param, param.title)
+      ModalWindow.showModalComponent(SuccessModal, param, param.title)
     })
 
     $('#modal').on('confirmregister', function (e, param) {
@@ -30,7 +29,7 @@ $.extend(APP, {
         width: '25%',
         maxWidth: '450px',
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ConfirmRegister,
         param,
         'Confirm Registration',
@@ -58,19 +57,10 @@ $.extend(APP, {
         width: '700px',
         maxWidth: '700px',
       }
-      APP.ModalWindow.showModalComponent(
-        PreferencesModal,
-        props,
-        'Profile',
-        style,
-      )
+      ModalWindow.showModalComponent(PreferencesModal, props, 'Profile', style)
     })
     $('#modal').on('openresetpassword', function () {
-      APP.ModalWindow.showModalComponent(
-        ResetPasswordModal,
-        {},
-        'Reset Password',
-      )
+      ModalWindow.showModalComponent(ResetPasswordModal, {}, 'Reset Password')
     })
     $('#modal').on('openforgotpassword', function () {
       var props = {}
@@ -80,7 +70,7 @@ $.extend(APP, {
       var style = {
         width: '577px',
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ForgotPasswordModal,
         props,
         'Forgot Password',
@@ -97,7 +87,7 @@ $.extend(APP, {
       if (param) {
         $.extend(props, param)
       }
-      APP.ModalWindow.showModalComponent(RegisterModal, props, 'Register Now')
+      ModalWindow.showModalComponent(RegisterModal, props, 'Register Now')
     })
     $('#modal').on('openlogin', function (e, param) {
       if ($('.popup-tm.open').length) {
@@ -205,6 +195,6 @@ $.extend(APP, {
     if (param) {
       $.extend(props, param)
     }
-    APP.ModalWindow.showModalComponent(LoginModal, props, title, style)
+    ModalWindow.showModalComponent(LoginModal, props, title, style)
   },
 })

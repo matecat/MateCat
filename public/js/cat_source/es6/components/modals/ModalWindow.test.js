@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import ReactDOM from 'react-dom'
 import React from 'react'
 
-import {ModalWindow} from './ModalWindow'
+import {ModalWindow, ModalWindowComponent} from './ModalWindow'
 
 const DummyComponent = () => {
   return <div>something</div>
@@ -19,7 +19,7 @@ beforeAll(() => {
 
 test('works properly', () => {
   const modalWindow = ReactDOM.render(
-    <ModalWindow />,
+    <ModalWindowComponent />,
     screen.getByTestId('modal'),
   )
 
@@ -57,7 +57,7 @@ test('works properly', () => {
 
 test('works properly ModalOverlay version', () => {
   const modalWindow = ReactDOM.render(
-    <ModalWindow />,
+    <ModalWindowComponent />,
     screen.getByTestId('modal'),
   )
 
