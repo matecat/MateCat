@@ -2414,13 +2414,6 @@ header {
   padding: 1px 5px;
 }
 
-#deselectMultilang {
-  margin-left: 30px;
-  font-size: 70%;
-  font-weight: normal;
-  color: #fff;
-}
-
 .close {
   background: url(../../img/x.png) center 1px no-repeat;
   width: 22px;
@@ -2495,18 +2488,6 @@ header {
 
 .translate-box h2 span.extra {
   margin-left: 10px;
-}
-
-.grayed {
-  display: none;
-  background: #000;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  opacity: 0.2;
-  z-index: 9;
 }
 
 .format-box {
