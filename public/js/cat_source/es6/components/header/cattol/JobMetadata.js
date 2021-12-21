@@ -21,7 +21,7 @@ class JobMetadata extends React.Component {
       minHeight: 400,
       maxWidth: 900,
     }
-    APP.ModalWindow.showModalComponent(
+    ModalWindow.showModalComponent(
       JobMetadataModal,
       props,
       'Job instructions and references',

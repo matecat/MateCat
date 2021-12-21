@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
 import ReactDOM from 'react-dom'
 import React from 'react'
@@ -11,7 +10,6 @@ import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import SegmentUtils from './es6/utils/segmentUtils'
 import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
@@ -20,6 +18,7 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
+import {ModalWindow} from './es6/components/modals/ModalWindow'
 
 window.UI = {
   /**
@@ -145,20 +144,20 @@ window.UI = {
           opts.propagation = false
           opts.autoPropagation = false
           UI.preExecChangeStatus(opts)
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         },
         cancelText: 'Propagate to All',
         cancelCallback: function () {
           opts.propagation = true
           opts.autoPropagation = false
           UI.execChangeStatus(opts)
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         },
         onClose: function () {
           UI.preExecChangeStatus(opts)
         },
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required ',
@@ -545,16 +544,6 @@ window.UI = {
 
   reEnableDownloadButton: function () {
     $('#action-download').removeClass('disabled')
-  },
-
-  downloadFileURL: function (openOriginalFiles) {
-    return sprintf(
-      '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
-      config.basepath,
-      config.id_job,
-      config.password,
-      openOriginalFiles,
-    )
   },
 
   continueDownloadWithGoogleDrive: function (openOriginalFiles) {
