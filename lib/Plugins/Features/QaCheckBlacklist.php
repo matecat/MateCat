@@ -15,6 +15,7 @@ use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
 use Projects\ProjectModel;
+use RedisHandler;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
 use Translations\WarningStruct;
@@ -71,7 +72,7 @@ class QaCheckBlacklist extends BaseFeature {
         /** @var $chunk \Chunks_ChunkStruct */
         $chunk = $params[ 'chunk' ];
 
-        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
 
         $queue_element = [
             'id_segment'          => $translation['id_segment'],

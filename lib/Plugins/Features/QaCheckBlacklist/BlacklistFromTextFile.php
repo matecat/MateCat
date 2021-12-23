@@ -12,8 +12,4 @@ class BlacklistFromTextFile extends AbstractBlacklist {
     public function getContent( ) {
         return file_get_contents($this->file_path);
     }
-
-    public function deleteOriginalFile( $file_path ) {
-        // TODO: Implement deleteOriginalFile() method.
-    }
 }

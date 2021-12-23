@@ -9,6 +9,7 @@ use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use RedisHandler;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamDao;
@@ -49,7 +50,7 @@ class ProjectModel {
      */
     public function hasBlacklist() {
 
-        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
 
         foreach ($this->project_struct->getJobs() as $job){
             $blacklist = $blacklistUtils->getAbstractBlacklist($job);

@@ -9,6 +9,7 @@ use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
+use RedisHandler;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -77,7 +78,7 @@ class BlacklistWorker extends AbstractWorker {
     private function getAbstractBlacklist($params)
     {
         $job = (isset($params['from_upload']) and isset($params['job_password'])) ? \Jobs_JobDao::getByIdAndPassword( $params['id_job'], $params['job_password'] ) : \Jobs_JobDao::getById( $params['id_job'] )[0];
-        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
 
         return $blacklistUtils->getAbstractBlacklist($job) ;
     }

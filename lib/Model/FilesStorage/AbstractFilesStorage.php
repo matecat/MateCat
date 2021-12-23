@@ -4,7 +4,7 @@ namespace FilesStorage;
 
 use Database;
 use Glossary\Blacklist\BlacklistDao;
-use Glossary\Blacklist\BlacklistModel;
+use Glossary\Blacklist\BlacklistStruct;
 use Log;
 use PDO;
 
@@ -497,7 +497,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             }
         }
 
-        $model = new BlacklistModel($chunkStruct);
+        $model = new BlacklistStruct($chunkStruct);
         $model->uid = $uid;
         $model->target = $chunkStruct->target;
         $model->file_name = "blacklist.txt";

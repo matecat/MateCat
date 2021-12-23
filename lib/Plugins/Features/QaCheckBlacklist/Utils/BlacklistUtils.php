@@ -50,7 +50,10 @@ class BlacklistUtils
         $dao = new BlacklistDao();
         $model = $dao->getById($id);
 
-        $job = \Jobs_JobDao::getByIdAndPassword($model->id_job, $model->password);
+        // Set a cache on jobdao requests here because
+        // we need only id and password here and they do not changes,
+        // btw even if they changes, a new redis value is set.
+        $job = \Jobs_JobDao::getByIdAndPassword($model->id_job, $model->password, 5 * 60);
         $blacklist = $this->getAbstractBlacklist($job);
 
         return explode("\n", $blacklist->getContent());
@@ -91,12 +94,12 @@ class BlacklistUtils
         $keyOnCache = md5('checkIfExistsBlacklist-'.$jid.'-'.$password);
 
         if($this->redis->exists($keyOnCache)){
-            return $this->redis->get($keyOnCache);
+            return $this->redis->get($keyOnCache) === 'TRUE';
         }
 
         $dao = new BlacklistDao();
         $model = $dao->getByJobIdAndPassword($jid, $password);
-        $checkIfExists = $model !== null;
+        $checkIfExists = ($model !== null) ? 'TRUE' : 'FALSE';
 
         $this->ensureCached($keyOnCache, $checkIfExists);
 

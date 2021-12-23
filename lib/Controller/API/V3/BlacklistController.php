@@ -18,6 +18,7 @@ use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use FilesStorage\FilesStorageFactory;
 use Glossary\Blacklist\BlacklistDao;
 use Langs_Languages;
+use RedisHandler;
 
 
 class BlacklistController extends KleinController {
@@ -50,7 +51,7 @@ class BlacklistController extends KleinController {
         }
 
         try {
-            $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+            $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
             $blacklistUtils->delete($this->request->param( 'id_file' ));
             $dao->destroyGetByIdCache( $this->request->param( 'id_file' ) );
             $dao->destroyGetByJobIdAndPasswordCache($model->id_job, $model->password);
@@ -76,7 +77,7 @@ class BlacklistController extends KleinController {
             return $this->returnError("Blacklist not found", 0, 404);
         }
 
-        $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
         $model->content = $blacklistUtils->getContent($this->request->param( 'id_file' ));
 
         $this->response->json( $model ) ;
@@ -130,7 +131,7 @@ class BlacklistController extends KleinController {
 
         // upload file
         try {
-            $blacklistUtils = new BlacklistUtils(new \Predis\Client( \INIT::$REDIS_SERVERS ));
+            $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
             $idBlacklist = $blacklistUtils->save($this->file['tmp_name'], $chunk, $this->user->uid);
         } catch (\Exception $exception){
             $this->returnError($exception->getMessage());

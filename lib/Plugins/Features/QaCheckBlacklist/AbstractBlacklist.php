@@ -2,6 +2,8 @@
 
 namespace Features\QaCheckBlacklist;
 
+use RedisHandler;
+
 abstract class AbstractBlacklist {
 
     /**
@@ -22,29 +24,26 @@ abstract class AbstractBlacklist {
     public function __construct( $path, $id_job ) {
         $this->file_path = $path;
         $this->id_job    = $id_job;
-
-        $this->redis = new \Predis\Client( \INIT::$REDIS_SERVERS );
+        $this->redis     = ( new RedisHandler() )->getConnection();
     }
 
     abstract public function getContent();
-
-    protected abstract function deleteOriginalFile ( $file_path ); // ???? Va cancellato???
 
     /**
      * Ensure cache in Redis
      */
     private function ensureCached() {
-        $redis   = new \Predis\Client( \INIT::$REDIS_SERVERS );
-        $key     = $this->getJobCacheKey();
+        $key = $this->getJobCacheKey();
 
-        if ( !$redis->exists( $key ) ) {
+        if ( !$this->redis->exists( $key ) ) {
             $content = static::getContent();
 
             $splitted = explode( PHP_EOL, $content );
             foreach ( $splitted as $token ) {
                 $token = trim( $token );
-                $redis->sadd( $key, $token );
+                $this->redis->sadd( $key, $token );
             }
+
             $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ;
         }
     }

@@ -17,8 +17,4 @@ class BlacklistFromZip extends AbstractBlacklist {
 
         return $content;
     }
-
-    protected function deleteOriginalFile( $file_path ) {
-        // TODO: Implement deleteOriginalFile() method.
-    }
 }

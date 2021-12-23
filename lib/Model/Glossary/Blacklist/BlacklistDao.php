@@ -95,27 +95,26 @@ class BlacklistDao extends \DataAccess_AbstractDao
     }
 
     /**
-     * @param BlacklistModel $blacklistStruct
+     * @param BlacklistStruct $blacklistStruct
      *
      * @return string|null
+     * @throws \ReflectionException
      */
-    public function save( BlacklistModel $blacklistStruct){
+    public function save( BlacklistStruct $blacklistStruct){
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( "
             INSERT INTO ". self::TABLE ." 
-             ( `id_job`, `password`, `file_path`, `file_name`, `target` )
+             ( `id_job`, `password`, `file_path`, `file_name`, `target`, `uid` )
              VALUES 
-             (:id_job, :password, :file_path, :file_name, :target)
+             (:id_job, :password, :file_path, :file_name, :target, :uid )
          ");
 
-        $stmt->execute( [
-            'id_job' => $blacklistStruct->chunk->id,
-            'password' => $blacklistStruct->chunk->password,
-            'file_path' => $blacklistStruct->file_path,
-            'file_name' => $blacklistStruct->file_name,
-            'target' => $blacklistStruct->target,
-        ] ) ;
+        $blacklistArray = $blacklistStruct->toPlainArray();
+        $blacklistArray['uid'] = (!empty($blacklistArray['uid'])) ? $blacklistArray['uid'] : 0;
+        unset($blacklistArray['id']); // we need to removed it here
+
+        $stmt->execute( $blacklistArray ) ;
 
         if($stmt->rowCount() > 0){
             return $conn->lastInsertId();
