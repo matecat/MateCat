@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
 import ReactDOM from 'react-dom'
 import React from 'react'
@@ -11,10 +10,15 @@ import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import SegmentUtils from './es6/utils/segmentUtils'
 import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
+import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
+import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
+import {getLocalWarnings} from './es6/api/getLocalWarnings'
+import {getSegments} from './es6/api/getSegments'
+import {setTranslation} from './es6/api/setTranslation'
+import {ModalWindow} from './es6/components/modals/ModalWindow'
 
 window.UI = {
   /**
@@ -140,20 +144,20 @@ window.UI = {
           opts.propagation = false
           opts.autoPropagation = false
           UI.preExecChangeStatus(opts)
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         },
         cancelText: 'Propagate to All',
         cancelCallback: function () {
           opts.propagation = true
           opts.autoPropagation = false
           UI.execChangeStatus(opts)
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         },
         onClose: function () {
           UI.preExecChangeStatus(opts)
         },
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required ',
@@ -198,7 +202,6 @@ window.UI = {
       {
         id_segment: options.segment_id,
         status: status,
-        caller: false,
         propagate: propagation,
         autoPropagation: options.autoPropagation,
       },
@@ -268,26 +271,23 @@ window.UI = {
       $('#outer').addClass('loading')
     }
 
-    APP.doRequest({
-      data: {
-        action: 'getSegments',
-        jid: config.id_job,
-        password: config.password,
-        step: UI.moreSegNum,
-        segment: segId,
-        where: where,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(where, 'getMoreSegments')
-      },
-      success: function (d) {
-        $(document).trigger('segments:load', d.data)
-        UI.getMoreSegments_success(d)
-      },
+    getSegments({
+      jid: config.id_job,
+      password: config.password,
+      step: UI.moreSegNum,
+      segment: segId,
+      where: where,
     })
+      .then((data) => {
+        $(document).trigger('segments:load', data.data)
+        UI.getMoreSegments_success(data)
+      })
+      .catch((errors) => {
+        if (errors.length) this.processErrors(errors, 'getMoreSegments')
+        OfflineUtils.failedConnection(where, 'getMoreSegments')
+      })
   },
   getMoreSegments_success: function (d) {
-    if (d.errors.length) this.processErrors(d.errors, 'getMoreSegments')
     var where = d.data.where
     if (d.data.files && _.size(d.data.files)) {
       this.renderFiles(d.data.files, where, false)
@@ -296,11 +296,11 @@ window.UI = {
     }
 
     if (
-      d.data.files.length === 0 ||
+      Object.keys(d.data.files).length === 0 ||
       SegmentStore.getLastSegmentId() === config.last_job_segment
     ) {
-      if (where == 'after') this.noMoreSegmentsAfter = true
-      if (where == 'before') this.noMoreSegmentsBefore = true
+      if (where === 'after') this.noMoreSegmentsAfter = true
+      if (where === 'before') this.noMoreSegmentsBefore = true
     }
     $('#outer').removeClass('loading loadingBefore')
     this.loadingMore = false
@@ -313,32 +313,27 @@ window.UI = {
       ? options.segmentToOpen
       : this.startSegmentId
 
-    return APP.doRequest({
-      data: {
-        action: 'getSegments',
-        jid: config.id_job,
-        password: config.password,
-        step: 40,
-        // step: step,
-        segment: seg,
-        where: where,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(0, 'getSegments')
-      },
-      success: function (d) {
-        $(document).trigger('segments:load', d.data)
+    return getSegments({
+      jid: config.id_job,
+      password: config.password,
+      step: 40,
+      segment: seg,
+      where: where,
+    })
+      .then((data) => {
+        $(document).trigger('segments:load', data.data)
 
         if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
-        UI.getSegments_success(d, options)
-      },
-    })
+        UI.getSegments_success(data, options)
+      })
+      .catch((errors) => {
+        if (errors.length) {
+          this.processErrors(errors, 'getSegments')
+        }
+        OfflineUtils.failedConnection(0, 'getSegments')
+      })
   },
   getSegments_success: function (d, options) {
-    if (d.errors.length) {
-      this.processErrors(d.errors, 'getSegments')
-    }
-
     var where = d.data.where
 
     if (!this.startSegmentId) {
@@ -439,43 +434,24 @@ window.UI = {
   },
 
   getTranslationMismatches: function (id_segment) {
-    APP.doRequest({
-      data: {
-        action: 'getTranslationMismatches',
-        password: config.password,
-        id_segment: id_segment.toString(),
-        id_job: config.id_job,
-      },
-      context: id_segment,
-      error: function () {
-        OfflineUtils.failedConnection(this, 'getTranslationMismatches')
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          UI.processErrors(d.errors, 'setTranslation')
-        } else {
-          UI.detectTranslationAlternatives(d, id_segment)
-        }
-      },
+    getTranslationMismatches({
+      password: config.password,
+      id_segment: id_segment.toString(),
+      id_job: config.id_job,
     })
+      .then((data) => {
+        UI.detectTranslationAlternatives(data, id_segment)
+      })
+      .catch((errors) => {
+        if (errors.length) {
+          UI.processErrors(errors, 'setTranslation')
+        } else {
+          OfflineUtils.failedConnection(id_segment, 'getTranslationMismatches')
+        }
+      })
   },
 
   detectTranslationAlternatives: function (d, id_segment) {
-    /**
-     *
-     * the three rows below are commented because business logic has changed, now auto-propagation info
-     * is sent as response in getMoreSegments and added as data in the "section" Tag and
-     * rendered/prepared in renderFiles/createHeader
-     * and managed in propagateTranslation
-     *
-     * TODO
-     * I leave them here but they should be removed
-     *
-     * @see renderFiles
-     * @see createHeader
-     * @see propagateTranslation
-     *
-     */
     var sameContentIndex = -1
     var segmentObj = SegmentStore.getSegmentByIdToJS(id_segment)
     $.each(d.data.editable, function (ind) {
@@ -570,16 +546,6 @@ window.UI = {
     $('#action-download').removeClass('disabled')
   },
 
-  downloadFileURL: function (openOriginalFiles) {
-    return sprintf(
-      '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
-      config.basepath,
-      config.id_job,
-      config.password,
-      openOriginalFiles,
-    )
-  },
-
   continueDownloadWithGoogleDrive: function (openOriginalFiles) {
     if ($('#downloadProject').hasClass('disabled')) {
       return
@@ -658,20 +624,6 @@ window.UI = {
   },
 
   checkWarnings: function () {
-    var dd = new Date()
-    var ts = dd.getTime()
-    var seg =
-      typeof this.currentSegmentId == 'undefined'
-        ? this.startSegmentId
-        : this.currentSegmentId
-    var token = seg + '-' + ts.toString()
-    var dataMix = {
-      action: 'getWarning',
-      id_job: config.id_job,
-      password: config.password,
-      token: token,
-    }
-
     // var mock = {
     //     ERRORS: {
     //         categories: {
@@ -690,14 +642,8 @@ window.UI = {
     //         }
     //     }
     // };
-
-    APP.doRequest({
-      data: dataMix,
-      error: function () {
-        UI.warningStopped = true
-        OfflineUtils.failedConnection(0, 'getWarning')
-      },
-      success: function (data) {
+    getGlobalWarnings({id_job: config.id_job, password: config.password})
+      .then((data) => {
         //console.log('check warnings success');
         UI.startWarning()
 
@@ -720,8 +666,11 @@ window.UI = {
         $(document).trigger('getWarning:global:success', {resp: data})
 
         SegmentActions.updateGlossaryData(data.data)
-      },
-    })
+      })
+      .catch((errors) => {
+        UI.warningStopped = true
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
   displayMessage: function (messages) {
     var self = this
@@ -787,40 +736,34 @@ window.UI = {
     const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
     const trg_content = TagUtils.prepareTextToSend(segment.translation)
 
-    APP.doRequest(
-      {
-        data: {
-          action: 'getWarning',
-          id: segment.sid,
-          token: token,
-          id_job: config.id_job,
-          password: config.password,
-          src_content: src_content,
-          trg_content: trg_content,
-          segment_status: segment_status,
-        },
-        error: function () {
-          OfflineUtils.failedConnection(0, 'getWarning')
-        },
-        success: function (d) {
-          if (UI.editAreaEditing) return
-          if (d.details && d.details.id_segment) {
-            SegmentActions.setSegmentWarnings(
-              d.details.id_segment,
-              d.details.issues_info,
-              d.details.tag_mismatch,
-            )
-          } else {
-            SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
-          }
-          $(document).trigger('getWarning:local:success', {
-            resp: d,
-            segment: segment,
-          })
-        },
-      },
-      'local',
-    )
+    getLocalWarnings({
+      id: segment.sid,
+      token: token,
+      id_job: config.id_job,
+      password: config.password,
+      src_content: src_content,
+      trg_content: trg_content,
+      segment_status: segment_status,
+    })
+      .then((data) => {
+        if (UI.editAreaEditing) return
+        if (data.details && data.details.id_segment) {
+          SegmentActions.setSegmentWarnings(
+            data.details.id_segment,
+            data.details.issues_info,
+            data.details.tag_mismatch,
+          )
+        } else {
+          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
+        }
+        $(document).trigger('getWarning:local:success', {
+          resp: data,
+          segment: segment,
+        })
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
 
   translationIsToSave: function (segment) {
@@ -848,7 +791,6 @@ window.UI = {
   setTranslation: function (options, callback) {
     var id_segment = options.id_segment
     var status = options.status
-    var caller = options.caller || false
     var propagate = options.propagate || false
 
     var segment = SegmentStore.getSegmentByIdToJS(id_segment)
@@ -862,7 +804,6 @@ window.UI = {
     var item = {
       id_segment: id_segment,
       status: status,
-      caller: caller,
       propagate: propagate,
       autoPropagation: options.autoPropagation,
     }
@@ -912,7 +853,6 @@ window.UI = {
     $.each(UI.setTranslationTail, function () {
       if (this.id_segment == item.id_segment) {
         this.status = item.status
-        this.caller = item.caller
         this.callback = item.callback
         this.propagate = item.propagate
       }
@@ -929,20 +869,14 @@ window.UI = {
   execSetTranslation: function (options, callback_to_execute) {
     var id_segment = options.id_segment
     var status = options.status
-    var caller = options.caller
     var propagate = options.propagate
     var sourceSegment, translation
     this.executingSetTranslation.push(id_segment)
     var reqArguments = arguments
-    var segment = SegmentStore.getSegmentByIdToJS(id_segment)
-    var contextBefore = UI.getContextBefore(id_segment)
-    var idBefore = UI.getIdBefore(id_segment)
-    var contextAfter = UI.getContextAfter(id_segment)
-    var idAfter = UI.getIdAfter(id_segment)
+    let segment = SegmentStore.getSegmentByIdToJS(id_segment)
 
     this.lastTranslatedSegmentId = id_segment
 
-    caller = typeof caller == 'undefined' ? false : caller
     try {
       // Attention, to be modified when we will lock tags
       translation = TagUtils.prepareTextToSend(segment.translation)
@@ -962,9 +896,6 @@ window.UI = {
       }
       return false
     }
-    var time_to_edit = UI.editTime
-    var id_translator = config.id_translator
-    var autosave = caller == 'autosave'
 
     var isSplitted = segment.splitted
     if (isSplitted) {
@@ -974,86 +905,30 @@ window.UI = {
         '.source',
       )
     }
-    this.tempReqArguments = {
-      id_segment: id_segment,
-      id_job: config.id_job,
-      password: config.password,
+    let requestArgs = {
+      segment,
       status: status,
       translation: translation,
-      segment: sourceSegment,
-      time_to_edit: time_to_edit,
-      id_translator: id_translator,
-      chosen_suggestion_index: segment.choosenSuggestionIndex,
-      autosave: autosave,
-      version: segment.version,
+      source: sourceSegment,
+      chosenSuggestionIndex: segment.choosenSuggestionIndex,
       propagate: propagate,
-      context_before: contextBefore,
-      id_before: idBefore,
-      context_after: contextAfter,
-      id_after: idAfter,
-      by_status: false,
-      revision_number: config.revisionNumber,
-      guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment),
-      current_password: config.currentPassword,
     }
     if (isSplitted) {
       SegmentActions.setStatus(segment.original_sid, null, status)
-      this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(
+      requestArgs.splitStatuses = this.collectSplittedStatuses(
         segment.original_sid,
         segment.sid,
         status,
       ).toString()
     }
-    if (!propagate) {
-      this.tempReqArguments.propagate = false
-    }
-    var reqData = this.tempReqArguments
-    reqData.action = 'setTranslation'
+
     if (callback_to_execute) {
       callback_to_execute.call(this)
     }
-    return APP.doRequest({
-      data: reqData,
-      context: [reqArguments, options],
-      error: function (response) {
-        var idSegment = this[0][0].id_segment
-        var index = UI.executingSetTranslation.indexOf(idSegment)
-        if (index > -1) {
-          UI.executingSetTranslation.splice(index, 1)
-        }
-        if (response.status === 409) {
-          SegmentActions.addClassToSegment(idSegment, 'setTranslationError')
-          var callback = function () {
-            UI.reloadToSegment(idSegment)
-          }
-          var props = {
-            text:
-              'There was an error saving segment ' +
-              idSegment +
-              '.</br></br>' +
-              'Press OK to refresh segments.',
-            successText: 'Ok',
-            successCallback: function () {
-              APP.ModalWindow.onCloseModal()
-            },
-          }
-          APP.ModalWindow.showModalComponent(
-            ConfirmMessageModal,
-            props,
-            'Error saving segment',
-            {},
-            callback,
-          )
-          return false
-        } else {
-          UI.addToSetTranslationTail(this[1])
-          OfflineUtils.changeStatusOffline(this[0][0].id_segment)
-          OfflineUtils.failedConnection(this[0], 'setTranslation')
-          OfflineUtils.decrementOfflineCacheRemaining()
-        }
-      },
-      success: function (data) {
-        var idSegment = this[0][0].id_segment
+
+    setTranslation(requestArgs)
+      .then((data) => {
+        var idSegment = options.id_segment
         var index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)
@@ -1062,7 +937,7 @@ window.UI = {
           callback(data)
         }
         UI.execSetTranslationTail()
-        UI.setTranslation_success(data, this[1])
+        UI.setTranslation_success(data, options)
 
         data.translation.segment = segment
         $(document).trigger('translation:change', data.translation)
@@ -1071,8 +946,22 @@ window.UI = {
         if (config.alternativesEnabled) {
           UI.getTranslationMismatches(id_segment)
         }
-      },
-    })
+      })
+      .catch(({errors}) => {
+        if (errors && errors.length) {
+          this.processErrors(errors, 'setTranslation')
+        } else {
+          var idSegment = options.id_segment
+          var index = UI.executingSetTranslation.indexOf(idSegment)
+          if (index > -1) {
+            UI.executingSetTranslation.splice(index, 1)
+          }
+          UI.addToSetTranslationTail(options)
+          OfflineUtils.changeStatusOffline(idSegment)
+          OfflineUtils.failedConnection(reqArguments, 'setTranslation')
+          OfflineUtils.decrementOfflineCacheRemaining()
+        }
+      })
   },
 
   collectSplittedStatuses: function (sid, splittedSid, status) {
@@ -1147,9 +1036,7 @@ window.UI = {
     var propagate = options.propagate
     var segment = $('#segment-' + id_segment)
 
-    if (response.errors.length) {
-      this.processErrors(response.errors, 'setTranslation')
-    } else if (response.data == 'OK') {
+    if (response.data == 'OK') {
       SegmentActions.setStatus(id_segment, null, status)
       this.setDownloadStatus(response.stats)
       CatToolActions.setProgress(response.stats)
@@ -1160,8 +1047,6 @@ window.UI = {
 
       this.checkWarnings(false)
       $(segment).attr('data-version', response.version)
-
-      this.tempReqArguments = null
 
       UI.checkSegmentsPropagation(
         propagate,

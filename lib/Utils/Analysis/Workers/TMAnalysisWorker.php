@@ -372,8 +372,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
                 if ( $isICE ) {
                     $tm_match_fuzzy_band            = "ICE";
-                    $tm_rate_paid                   = 0;
-                    $equivalentWordMapping[ "ICE" ] = 0;
+                    $tm_rate_paid                   = $equivalentWordMapping[ $tm_match_fuzzy_band ];
+//                    $equivalentWordMapping[ "ICE" ] = 0;
                 } else {
                     $tm_match_fuzzy_band = ( $publicTM ) ? "100%_PUBLIC" : "100%";
                     $tm_rate_paid        = $equivalentWordMapping[ $tm_match_fuzzy_band ];

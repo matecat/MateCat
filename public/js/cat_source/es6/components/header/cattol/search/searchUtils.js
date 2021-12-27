@@ -4,6 +4,8 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
+import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
+import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -89,24 +91,17 @@ let SearchUtils = {
     UI.body.addClass('searchActive')
     let makeSearchFn = () => {
       let dd = new Date()
-      APP.doRequest({
-        data: {
-          action: 'getSearch',
-          function: 'find',
-          job: config.id_job,
-          token: dd.getTime(),
-          password: config.password,
-          source: source,
-          target: target,
-          status: this.searchParams.status,
-          matchcase: this.searchParams['match-case'],
-          exactmatch: this.searchParams['exact-match'],
-          replace: replace,
-          revision_number: config.revisionNumber,
-        },
-        success: function (d) {
-          SearchUtils.execFind_success(d)
-        },
+
+      searchTermIntoSegments({
+        token: dd.getTime(),
+        source,
+        target,
+        status: this.searchParams.status,
+        matchcase: this.searchParams['match-case'],
+        exactmatch: this.searchParams['exact-match'],
+        replace,
+      }).then((data) => {
+        SearchUtils.execFind_success(data)
       })
     }
     //Save the current segment to not lose the translation
@@ -380,21 +375,14 @@ let SearchUtils = {
     let replace = p.replace ? p.replace : ''
     let dd = new Date()
 
-    return APP.doRequest({
-      data: {
-        action: 'getSearch',
-        function: 'replaceAll',
-        job: config.id_job,
-        token: dd.getTime(),
-        password: config.password,
-        source: source,
-        target: target,
-        status: p.status,
-        matchcase: p['match-case'],
-        exactmatch: p['exact-match'],
-        replace: replace,
-        revision_number: config.revisionNumber,
-      },
+    return replaceAllIntoSegments({
+      token: dd.getTime(),
+      source,
+      target,
+      status: p.status,
+      matchcase: p['match-case'],
+      exactmatch: p['exact-match'],
+      replace,
     })
   },
 

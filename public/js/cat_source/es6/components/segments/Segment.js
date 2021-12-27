@@ -20,6 +20,7 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
+import {ModalWindow} from '../modals/ModalWindow'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -142,7 +143,7 @@ class Segment extends React.Component {
     }
 
     if (
-      (this.props.segment.ice_locked === '1' && !readonly) ||
+      (SegmentUtils.isIceSegment(this.props.segment) && !readonly) ||
       this.secondPassLocked
     ) {
       if (this.props.segment.unlocked) {
@@ -361,10 +362,10 @@ class Segment extends React.Component {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         },
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ConfirmMessageModal,
         props,
         'Modify locked and approved segment ',
@@ -403,8 +404,9 @@ class Segment extends React.Component {
   openRevisionPanel = (data) => {
     if (
       parseInt(data.sid) === parseInt(this.props.segment.sid) &&
-      (this.props.segment.ice_locked == 0 ||
-        (this.props.segment.ice_locked == 1 && this.props.segment.unlocked))
+      (!SegmentUtils.isIceSegment(this.props.segment) ||
+        (SegmentUtils.isIceSegment(this.props.segment) &&
+          this.props.segment.unlocked))
     ) {
       this.setState({
         selectedTextObj: data.selection,
@@ -436,7 +438,8 @@ class Segment extends React.Component {
   onClickEvent = () => {
     if (
       this.state.readonly ||
-      (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')
+      (!this.props.segment.unlocked &&
+        SegmentUtils.isIceSegment(this.props.segment))
     ) {
       UI.handleClickOnReadOnly($(this.section).closest('section'))
     } else if (this.props.segment.muted) {
@@ -624,7 +627,7 @@ class Segment extends React.Component {
 
     let readonly = this.state.readonly
     let showLockIcon =
-      this.props.segment.ice_locked === '1' || this.secondPassLocked
+      SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked
     let segment_classes = this.checkSegmentClasses()
 
     let split_group = this.props.segment.split_group || []
@@ -647,7 +650,7 @@ class Segment extends React.Component {
     let translationIssues = this.getTranslationIssues()
     let locked =
       !this.props.segment.unlocked &&
-      (this.props.segment.ice_locked === '1' || this.secondPassLocked)
+      (SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked)
     const segmentHasIssues = SegmentStore.segmentHasIssues(
       this.props.segment.sid,
     )
@@ -659,7 +662,6 @@ class Segment extends React.Component {
         data-hash={this.props.segment.segment_hash}
         data-autopropagated={this.state.autopropagated}
         data-propagable={autoPropagable}
-        data-version={this.props.segment.version}
         data-split-group={split_group}
         data-split-original-id={originalId}
         data-tagmode="crunched"
@@ -737,6 +739,7 @@ class Segment extends React.Component {
             autopropagated={this.state.autopropagated}
             segmentOpened={this.props.segment.opened}
             repetition={autoPropagable}
+            splitted={this.props.segment.splitted}
           />
           <SegmentBody
             segment={this.props.segment}

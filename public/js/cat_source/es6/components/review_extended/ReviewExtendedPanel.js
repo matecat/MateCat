@@ -9,6 +9,8 @@ import Shortcuts from '../../utils/shortcuts'
 import ShortCutsModal from '../modals/ShortCutsModal'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
+import SegmentUtils from '../../utils/segmentUtils'
+import {ModalWindow} from '../modals/ModalWindow'
 
 class ReviewExtendedPanel extends React.Component {
   constructor(props) {
@@ -137,7 +139,7 @@ class ReviewExtendedPanel extends React.Component {
               <br />
               <a
                 onClick={() =>
-                  APP.ModalWindow.showModalComponent(
+                  ModalWindow.showModalComponent(
                     ShortCutsModal,
                     null,
                     'Shortcuts',
@@ -165,7 +167,8 @@ class ReviewExtendedPanel extends React.Component {
 
         {this.props.isReview &&
         !(
-          this.props.segment.ice_locked == 1 && !this.props.segment.unlocked
+          SegmentUtils.isIceSegment(this.props.segment) &&
+          !this.props.segment.unlocked
         ) ? (
           <ReviewExtendedIssuePanel
             sid={this.props.segment.sid}

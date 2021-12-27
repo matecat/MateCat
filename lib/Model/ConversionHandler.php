@@ -2,6 +2,7 @@
 
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use FilesStorage\Exceptions\FileSystemException;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 
 /**
@@ -185,7 +186,22 @@ class ConversionHandler {
                         return false;
                     }
 
+                } catch (FileSystemException $e){
+
+                    \Log::doJsonLog("FileSystem Exception: Message: " . $e->getMessage());
+
+                    $this->result[ 'code' ]     = -103; // FileSystem Exception
+                    $this->result[ 'errors' ][] = [
+                            "code"    => -103,
+                            "message" => $e->getMessage()
+                    ];
+
+                    return false;
+
                 } catch (\Exception $e){
+
+                    \Log::doJsonLog("S3 Exception: Message: " . $e->getMessage());
+
                     $this->result[ 'code' ]     = -230; // S3 Exception
                     $this->result[ 'errors' ][] = [
                             "code"    => -230,

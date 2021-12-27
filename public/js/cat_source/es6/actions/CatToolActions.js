@@ -15,6 +15,7 @@ import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
+import {ModalWindow} from '../components/modals/ModalWindow'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -228,10 +229,10 @@ let CatToolActions = {
         CommonUtils.addInSessionStorage('feedback-modal', 1, 'feedback-modal')
       },
       successCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(
+    ModalWindow.showModalComponent(
       RevisionFeedbackModal,
       props,
       'Feedback submission',

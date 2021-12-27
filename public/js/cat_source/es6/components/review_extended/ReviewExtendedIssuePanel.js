@@ -62,7 +62,7 @@ class ReviewExtendedIssuePanel extends React.Component {
             SegmentActions.issueAdded(this.props.sid, data.issue.id)
           })
         })
-        .catch((response) => this.handleFail(response.responseJSON))
+        .catch(this.handleFail.bind(this))
     }
 
     const segment = this.props.segment
@@ -71,7 +71,7 @@ class ReviewExtendedIssuePanel extends React.Component {
       segment.revision_number !== ReviewExtended.number
     ) {
       segment.status = 'approved'
-      setTranslation(segment)
+      setTranslation({segment})
         .then((response) => {
           issue.version = response.translation.version_number
           SegmentActions.setStatus(segment.sid, segment.id_file, segment.status)
@@ -84,9 +84,9 @@ class ReviewExtendedIssuePanel extends React.Component {
     }
   }
 
-  handleFail(response) {
-    if (response.errors && response.errors[0].code === -2000) {
-      UI.processErrors(response.errors, 'createIssue')
+  handleFail({errors}) {
+    if (errors && errors[0].code === -2000) {
+      UI.processErrors(errors, 'createIssue')
     } else {
       CommonUtils.genericErrorAlertMessage()
     }

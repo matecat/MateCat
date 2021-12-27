@@ -25,6 +25,8 @@ import {updateGlossaryItem} from '../api/updateGlossaryItem'
 import {approveSegments} from '../api/approveSegments'
 import {translateSegments} from '../api/translateSegments'
 import {splitSegment} from '../api/splitSegment'
+import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
+import {ModalWindow} from '../components/modals/ModalWindow'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -158,7 +160,6 @@ const SegmentActions = {
         id_segment: segment.sid,
         status:
           segment.status.toLowerCase() === 'new' ? 'draft' : segment.status,
-        caller: 'autosave',
       })
     } else {
       var deferred = $.Deferred()
@@ -251,8 +252,14 @@ const SegmentActions = {
     if (segment.splitted > 2) return false
 
     for (var i = 0, len = propagatedSegments.length; i < len; i++) {
-      var sid = propagatedSegments[i]
-      if (sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
+      const sid = propagatedSegments[i]
+      const segToModify = SegmentStore.getSegmentByIdToJS(sid)
+      if (
+        segToModify &&
+        sid !== segmentId &&
+        segment &&
+        !segToModify.splitted
+      ) {
         SegmentActions.updateOriginalTranslation(sid, segment.translation)
         SegmentActions.replaceEditAreaTextContent(sid, segment.translation)
         //Tag Projection: disable it if enable
@@ -433,7 +440,7 @@ const SegmentActions = {
         abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this),
       }
 
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         CopySourceModal,
         props,
         'Copy source to ALL segments',
@@ -448,43 +455,29 @@ const SegmentActions = {
     UI.unmountSegments() //TODO
     $('#outer').addClass('loading')
 
-    APP.doRequest({
-      data: {
-        action: 'copyAllSource2Target',
-        id_job: config.id_job,
-        pass: config.password,
-        revision_number: config.revisionNumber,
-      },
-      error: function () {
-        var notification = {
+    copyAllSourceToTarget()
+      .then(() => {
+        UI.unmountSegments()
+        UI.render({
+          segmentToOpen: UI.currentSegmentId,
+        })
+      })
+      .catch((errors) => {
+        APP.closePopup()
+        const notification = {
           title: 'Error',
           text: 'Error copying all sources to target. Try again!',
           type: 'error',
           position: 'bl',
-        }
-        APP.addNotification(notification)
-        UI.render({
-          segmentToOpen: UI.currentSegmentId,
-        })
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          APP.closePopup()
-          var notification = {
+          ...(errors[0]?.message && {
             title: 'Error',
-            text: d.errors[0].message,
+            text: errors[0].message,
             type: 'error',
             position: 'bl',
-          }
-          APP.addNotification(notification)
-        } else {
-          UI.unmountSegments()
-          UI.render({
-            segmentToOpen: UI.currentSegmentId,
-          })
+          }),
         }
-      },
-    })
+        APP.addNotification(notification)
+      })
   },
   abortCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
@@ -655,15 +648,13 @@ const SegmentActions = {
     })
   },
   deleteContribution: function (source, target, matchId, sid) {
-    TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).done(
-      (data) => {
-        if (data.errors.length === 0) {
-          AppDispatcher.dispatch({
-            actionType: SegmentConstants.DELETE_CONTRIBUTION,
-            sid: sid,
-            matchId: matchId,
-          })
-        }
+    TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
+      () => {
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.DELETE_CONTRIBUTION,
+          sid: sid,
+          matchId: matchId,
+        })
       },
     )
   },
@@ -1003,20 +994,20 @@ const SegmentActions = {
       text: 'It was not possible to approve all segments. There are some segments that have not been translated.',
       successText: 'Ok',
       successCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
+    ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
   },
   showTranslateAllModalWarnirng: function () {
     var props = {
       text: 'It was not possible to translate all segments.',
       successText: 'Ok',
       successCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
+    ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
   },
   approveFilteredSegments: function (segmentsArray) {
     if (segmentsArray.length >= 500) {
@@ -1052,7 +1043,7 @@ const SegmentActions = {
   },
   checkUnchangebleSegments: function (response, status) {
     if (response.unchangeble_segments.length > 0) {
-      if (status === 'APPROVED') {
+      if (!config.isReview) {
         this.showTranslateAllModalWarnirng()
       } else {
         this.showApproveAllModalWarnirng()

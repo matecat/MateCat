@@ -297,6 +297,139 @@ footer #statistics {
   color: #000;
 }
 
+/*new browser supported */
+.unsupported-browser {
+  width: 100%;
+  height: 100%;
+  background-color: #f5f6f7;
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+
+    .logoblack {
+      background-size: 200px auto;
+      width: 200px;
+      height: 50px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1024px;
+
+      > h2 {
+        margin-bottom: 0;
+      }
+
+      > p {
+        color: gray;
+        margin-bottom: 60px;
+      }
+
+      .browsers-list {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        color: gray;
+      }
+
+      .browsers-list > li {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        max-width: 180px;
+        height: 180px;
+        background-color: white;
+        border: 3px solid #e8e8e8;
+        cursor: pointer;
+
+        a {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+
+          img {
+            width: 110px;
+            height: auto;
+          }
+
+          span {
+            font-weight: bold;
+            font-size: 18px;
+          }
+        }
+
+        &:hover {
+          border-color: #d8d8d8;
+        }
+      }
+
+      .browsers-list {
+        > :first-child {
+          border-top-left-radius: 8px;
+          border-bottom-left-radius: 8px;
+        }
+
+        > :not(:first-child) {
+          border-left: none;
+        }
+
+        > :last-child {
+          border-top-right-radius: 8px;
+          border-bottom-right-radius: 8px;
+        }
+      }
+    }
+    /* homepage */
+
+    .homepage {
+      > h2 {
+        color: gray;
+        margin-bottom: 40px;
+      }
+
+      .boxes {
+        display: flex;
+        flex-direction: row;
+        color: gray;
+
+        > div {
+          padding: 10px;
+          background-color: #f1f1f1;
+          margin-left: 1px;
+          margin-right: 1px;
+
+          > h4 {
+            font-weight: normal;
+          }
+        }
+
+        .browsers-list > li {
+          max-width: 120px;
+          height: 120px;
+
+          img {
+            width: 80px;
+            height: auto;
+          }
+        }
+
+        > :last-child > :last-child {
+          margin-top: 105px;
+        }
+      }
+    }
+  }
+}
+
 /*browser supported box */
 
 .iepopup.nobrowser {

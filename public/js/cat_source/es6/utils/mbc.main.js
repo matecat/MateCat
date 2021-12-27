@@ -6,6 +6,9 @@ import CommentsStore from '../stores/CommentsStore'
 import {getMatecatApiDomain} from './getMatecatApiDomain'
 import TextUtils from './textUtils'
 import {getTeamUsers as getTeamUsersApi} from '../api/getTeamUsers'
+import {submitComment as submitCommentApi} from '../api/submitComment'
+import {getComments} from '../api/getComments'
+import {markAsResolvedThread} from '../api/markAsResolvedThread'
 
 const MBC = {
   enabled: function () {
@@ -226,60 +229,29 @@ MBC.init = function () {
     var submitComment = function (text, sid) {
       text = parseCommentHtmlBeforeSend(text)
 
-      var data = {
-        action: 'comment',
-        _sub: 'create',
-        id_client: config.id_client,
-        id_job: config.id_job,
-        id_segment: sid,
-        revision_number: config.revisionNumber,
+      return submitCommentApi({
+        idSegment: sid,
         username: getUsername(),
-        password: config.password,
-        source_page: getSourcePage(),
+        sourcePage: getSourcePage(),
         message: text,
-      }
-
-      return APP.doRequest({
-        data: data,
       })
     }
 
     var loadCommentData = function (success) {
-      var data = {
-        action: 'comment',
-        _sub: 'getRange',
-        id_job: config.id_job,
-        first_seg: UI.getSegmentId(UI.firstSegment),
-        last_seg: UI.getSegmentId(UI.lastSegment),
-        password: config.password,
-      }
-
-      APP.doRequest({
-        data: data,
-        success: success,
-        error: function () {
-          // TODO: handle error on comments fetch
-        },
-      })
+      getComments({
+        firstSegment: UI.getSegmentId(UI.firstSegment),
+        lastSegment: UI.getSegmentId(UI.lastSegment),
+      }).then(success)
     }
 
     var resolveThread = function (sid) {
-      var data = {
-        action: 'comment',
-        _sub: 'resolve',
-        id_job: config.id_job,
-        id_client: config.id_client,
-        id_segment: sid,
-        password: config.password,
-        source_page: getSourcePage(),
+      return markAsResolvedThread({
+        idSegment: sid,
         username: getUsername(),
-      }
-
-      return APP.doRequest({
-        data: data,
-        success: function (resp) {
-          $(document).trigger('mbc:comment:new', resp.data.entries[0])
-        },
+        sourcePage: getSourcePage(),
+      }).then((resp) => {
+        $(document).trigger('mbc:comment:new', resp.data.entries[0])
+        return resp
       })
     }
 

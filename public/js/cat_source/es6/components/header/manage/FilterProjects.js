@@ -5,6 +5,7 @@ import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'
 import ManageActions from '../../../actions/ManageActions'
 import ManageConstants from '../../../constants/ManageConstants'
+import CommonUtils from '../../../utils/commonUtils'
 
 class FilterProjects extends React.Component {
   constructor(props) {
@@ -131,7 +132,7 @@ class FilterProjects extends React.Component {
         let classDisable = member.get('projects') === 0 ? 'disabled' : ''
         let userIcon = (
           <a className="ui circular label">
-            {APP.getUserShortName(member.get('user').toJS())}
+            {CommonUtils.getUserShortName(member.get('user').toJS())}
           </a>
         )
         if (member.get('user_metadata')) {

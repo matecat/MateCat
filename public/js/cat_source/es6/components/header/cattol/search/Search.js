@@ -9,6 +9,7 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
+import {ModalWindow} from '../../../modals/ModalWindow'
 
 class Search extends React.Component {
   constructor(props) {
@@ -213,19 +214,19 @@ class Search extends React.Component {
       text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
       successText: 'Continue',
       successCallback: function () {
-        SearchUtils.execReplaceAll(self.state.search).then((d) => {
-          if (d.errors.length) {
-            APP.alert({msg: d.errors[0].message})
-            return false
-          }
-          const currentId = SegmentStore.getCurrentSegmentId()
-          UI.unmountSegments()
-          UI.render({
-            firstLoad: false,
-            segmentToOpen: currentId,
+        SearchUtils.execReplaceAll(self.state.search)
+          .then(() => {
+            const currentId = SegmentStore.getCurrentSegmentId()
+            UI.unmountSegments()
+            UI.render({
+              firstLoad: false,
+              segmentToOpen: currentId,
+            })
           })
-        })
-        APP.ModalWindow.onCloseModal()
+          .catch((errors) => {
+            APP.alert({msg: errors[0].message})
+          })
+        ModalWindow.onCloseModal()
         CatToolActions.storeSearchResults({
           total: 0,
           searchResults: [],
@@ -236,10 +237,10 @@ class Search extends React.Component {
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(
+    ModalWindow.showModalComponent(
       ConfirmMessageModal,
       props,
       'Confirmation required',
@@ -263,7 +264,6 @@ class Search extends React.Component {
       UI.setTranslation({
         id_segment: segment.original_sid,
         status: segment.status,
-        caller: 'replace',
       })
     })
   }

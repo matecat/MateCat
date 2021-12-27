@@ -27,6 +27,7 @@ import TextUtils from './utils/textUtils'
 import CursorUtils from './utils/cursorUtils'
 import OfflineUtils from './utils/offlineUtils'
 import Shortcuts from './utils/shortcuts'
+import SegmentUtils from './utils/segmentUtils'
 import SegmentFooterTabMatches from './components/segments/SegmentFooterTabMatches'
 
 window.MC = {}
@@ -44,7 +45,6 @@ window.SegmentStore = SegmentStore
 window.Header = Header
 window.JobMetadata = JobMetadata
 
-window.ModalWindow = ModalWindow
 window.ConfirmMessageModal = ConfirmMessageModal
 window.JobMetadataModal = JobMetadataModal
 
@@ -64,5 +64,10 @@ window.CommonUtils = CommonUtils
 window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
+window.SegmentUtils = SegmentUtils
 
 window.SegmentFooterTabMatches = SegmentFooterTabMatches
+
+document.addEventListener('DOMContentLoaded', function (event) {
+  window.ModalWindow = ModalWindow
+})

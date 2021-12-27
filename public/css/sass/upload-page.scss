@@ -2299,16 +2299,33 @@ header {
 
 .supported-formats .popup {
   margin: auto;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
-  width: 1045px;
-  height: 620px;
-  max-width: unset;
-}
+  min-width: 700px;
+  max-width: none;
+  width: 80%;
+  height: 76%;
 
+  .fileformat {
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 50px);
+    overflow: auto;
+
+    .format-box {
+      float: none;
+      flex: 1 1 auto;
+    }
+  }
+}
+@media (max-width: 1100px) {
+  .supported-formats .popup {
+    width: 95%;
+  }
+}
 .popup-tm .popup {
   width: 94% !important;
   margin: 0 !important;
