@@ -58,8 +58,7 @@ abstract class AbstractBlacklist {
     public function getMatches( $string ) {
         $this->ensureCached();
 
-        $redis           = new \Predis\Client( \INIT::$REDIS_SERVERS );
-        $blacklist_rows = $redis->smembers( $this->getJobCacheKey() ) ;
+        $blacklist_rows = $this->redis->smembers( $this->getJobCacheKey() ) ;
 
         $counter = [];
 
