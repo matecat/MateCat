@@ -94,11 +94,9 @@ class GetContributionWorker extends AbstractWorker {
 
             usort( $crossLangMatches, [ "self", "__compareScore" ] );
             $crossLangMatches = array_reverse( $crossLangMatches );
-            $crossLangMatches = array_slice( $crossLangMatches, 0, $contributionStruct->resultNum );
 
             $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
         }
-
     }
 
     /**

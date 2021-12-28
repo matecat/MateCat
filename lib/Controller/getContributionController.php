@@ -132,7 +132,7 @@ class getContributionController extends ajaxController {
         $contributionRequest->concordanceSearch = $this->concordance_search;
         $contributionRequest->fromTarget        = $this->switch_languages;
         $contributionRequest->resultNum         = $this->num_results;
-        $contributionRequest->crossLangTargets  = $this->cross_language;
+        $contributionRequest->crossLangTargets  = explode(",", $this->cross_language[0]);
 
         if ( self::isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
