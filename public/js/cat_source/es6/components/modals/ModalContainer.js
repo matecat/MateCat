@@ -29,10 +29,16 @@ export const ModalContainer = ({title, styleContainer, children, onClose}) => {
     if (!ref.current) return
     const refTag = ref.current
     const stopPropagation = (event) => event.stopPropagation()
+    const preventDefault = (event) =>
+      event.key === 'Tab' && event.preventDefault()
     refTag.addEventListener('keydown', stopPropagation)
+    refTag.addEventListener('keydown', preventDefault)
     refTag.focus()
 
-    return () => refTag.removeEventListener('keydown', stopPropagation)
+    return () => {
+      refTag.removeEventListener('keydown', stopPropagation)
+      refTag.removeEventListener('keydown', preventDefault)
+    }
   }, [ref])
 
   return (
