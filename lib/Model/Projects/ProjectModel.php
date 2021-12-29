@@ -53,9 +53,7 @@ class ProjectModel {
         $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
 
         foreach ($this->project_struct->getJobs() as $job){
-            $blacklist = $blacklistUtils->getAbstractBlacklist($job);
-
-            if($blacklist->getContent()){
+            if($blacklistUtils->checkIfExists($job->id, $job->password)){
                 return true;
             }
         }
