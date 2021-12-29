@@ -64,11 +64,11 @@ class PropagationAnalyser {
 
         $propagation = new \Propagation_PropagationTotalStruct();
 
-        if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // remove ICE
+        if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // check IF the parent segment is ICE
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
 
                 if ( $this->detectIce( $segmentTranslation ) ) {
-                    $propagation->addNotPropagatedIce( $segmentTranslation );
+                    $propagation->addNotPropagatedIce( $segmentTranslation ); // IF the parent segment is NOT ICE, we can not propagate it to ICEs
                     $this->notPropagatedIceCount++;
                 } else {
                     $propagation->addPropagatedNotIce( $segmentTranslation );
@@ -86,7 +86,10 @@ class PropagationAnalyser {
             }
         } else { // keep only ICE with the corresponding hash
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
+
+                //Propagate to other ICEs
                 if ( $this->detectMatchingIce( $parentSegmentTranslation, $segmentTranslation ) ) {
+
                     $propagation->addPropagatedIce( $segmentTranslation );
                     $propagation->addPropagatedId( $segmentTranslation->id_segment );
 
@@ -98,7 +101,8 @@ class PropagationAnalyser {
                     }
 
                     $this->propagatedIceCount++;
-                } else {
+
+                } else { // ??? Why ICEs can not propagate to normal segments?
                     $propagation->addNotPropagatedNotIce( $segmentTranslation );
                     $this->notPropagatedCount++;
                 }

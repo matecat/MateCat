@@ -45,7 +45,6 @@ window.SegmentStore = SegmentStore
 window.Header = Header
 window.JobMetadata = JobMetadata
 
-window.ModalWindow = ModalWindow
 window.ConfirmMessageModal = ConfirmMessageModal
 window.JobMetadataModal = JobMetadataModal
 
@@ -68,3 +67,7 @@ window.Shortcuts = Shortcuts
 window.SegmentUtils = SegmentUtils
 
 window.SegmentFooterTabMatches = SegmentFooterTabMatches
+
+document.addEventListener('DOMContentLoaded', function (event) {
+  window.ModalWindow = ModalWindow
+})

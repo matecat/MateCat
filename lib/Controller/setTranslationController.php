@@ -465,6 +465,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
             $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
+            $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
             try {
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(

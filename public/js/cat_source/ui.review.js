@@ -1,6 +1,7 @@
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentActions from './es6/actions/SegmentActions'
+import {ModalWindow} from './es6/components/modals/ModalWindow'
 
 window.Review = {
   enabled: function () {
@@ -37,10 +38,10 @@ window.alertNoTranslatedSegments = function () {
     text: 'There are no translated segments to revise in this job.',
     successText: 'Ok',
     successCallback: function () {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     },
   }
-  APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
+  ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
 }
 
 if (config.enableReview && config.isReview) {

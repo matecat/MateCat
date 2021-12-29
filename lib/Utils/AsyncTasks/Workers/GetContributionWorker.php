@@ -94,11 +94,9 @@ class GetContributionWorker extends AbstractWorker {
 
             usort( $crossLangMatches, [ "self", "__compareScore" ] );
             $crossLangMatches = array_reverse( $crossLangMatches );
-            $crossLangMatches = array_slice( $crossLangMatches, 0, $contributionStruct->resultNum );
 
             $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
         }
-
     }
 
     /**
@@ -134,7 +132,7 @@ class GetContributionWorker extends AbstractWorker {
                 ]
         ];
 
-        $message = json_encode( $_object );
+        $message = json_encode( $_object, true );
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
@@ -186,11 +184,14 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
-        $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, json_decode($contributionStruct->dataRefMap,
-                true) );
+        $Filter = MateCatFilter::getInstance(
+                $featureSet,
+                $contributionStruct->getJobStruct()->source,
+                $targetLang,
+                json_decode($contributionStruct->dataRefMap, true)
+        );
 
         foreach ( $matches as &$match ) {
-            $match[ 'target' ] = $targetLang;
 
             if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
 

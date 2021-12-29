@@ -4,10 +4,11 @@ import SplitJobModal from '../components/modals/SplitJob'
 import CreateTeamModal from '../components/modals/CreateTeam'
 import ModifyTeamModal from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
+import {ModalWindow} from '../components/modals/ModalWindow'
 
 let ModalsActions = {
   openCreateTeamModal: function () {
-    APP.ModalWindow.showModalComponent(CreateTeamModal, {}, 'Create New Team')
+    ModalWindow.showModalComponent(CreateTeamModal, {}, 'Create New Team')
   },
 
   openModifyTeamModal: function (team, hideChangeName) {
@@ -15,7 +16,7 @@ let ModalsActions = {
       team: team,
       hideChangeName: hideChangeName,
     }
-    APP.ModalWindow.showModalComponent(ModifyTeamModal, props, 'Modify Team')
+    ModalWindow.showModalComponent(ModifyTeamModal, props, 'Modify Team')
   },
 
   openSplitJobModal: function (job, project, callback) {
@@ -25,7 +26,7 @@ let ModalsActions = {
       callback: callback,
     }
     var style = {width: '670px', maxWidth: '670px'}
-    APP.ModalWindow.showModalComponent(SplitJobModal, props, 'Split Job', style)
+    ModalWindow.showModalComponent(SplitJobModal, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {
     var props = {
@@ -39,14 +40,14 @@ let ModalsActions = {
             successCallback.call()
           }
         })
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(
+    ModalWindow.showModalComponent(
       ConfirmMessageModal,
       props,
       'Confirmation required',
@@ -58,12 +59,7 @@ let ModalsActions = {
       metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
     }
     var style = {width: '670px', maxWidth: '670px'}
-    APP.ModalWindow.showModalComponent(
-      DQFModal,
-      props,
-      'DQF Preferences',
-      style,
-    )
+    ModalWindow.showModalComponent(DQFModal, props, 'DQF Preferences', style)
   },
 }
 

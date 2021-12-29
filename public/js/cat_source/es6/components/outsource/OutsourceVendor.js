@@ -7,6 +7,7 @@ import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
 import {getOutsourceQuote} from '../../api/getOutsourceQuote'
 import {getChangeRates} from '../../api/getChangeRates'
+import CommonUtils from '../../utils/commonUtils'
 
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -258,16 +259,16 @@ class OutsourceVendor extends React.Component {
 
   getDeliveryDate() {
     if (!_.isNull(this.props.job.get('outsource'))) {
-      return APP.getGMTDate(
+      return CommonUtils.getGMTDate(
         this.props.job.get('outsource').get('delivery_date'),
       )
     } else if (this.state.outsource) {
       // let timeZone = this.getTimeZone();
       // let dateString =  this.getDateString(deliveryToShow, timeZone);
       if (this.state.revision && this.state.chunkQuote.get('r_delivery')) {
-        return APP.getGMTDate(this.state.chunkQuote.get('r_delivery'))
+        return CommonUtils.getGMTDate(this.state.chunkQuote.get('r_delivery'))
       } else {
-        return APP.getGMTDate(this.state.chunkQuote.get('delivery'))
+        return CommonUtils.getGMTDate(this.state.chunkQuote.get('delivery'))
       }
     }
   }
