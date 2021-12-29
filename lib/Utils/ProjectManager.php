@@ -16,6 +16,10 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
+use Matecat\SubFiltering\Filters\PhCounter;
+use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -2589,10 +2593,38 @@ class ProjectManager {
                 $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $source  = $segment->segment;
                 $target  = $translation_row [ 2 ];
-                $check   = new QA( $source, $target );
+
+                //
+                // NOTE 2021-12-20
+                // ------------------------------------------------------
+                // In order to perform an integrity check
+                // we need to transform source and target to layer1
+                // This piece of code mimics setTranslationController (from line 322 to 341)
+
+                /** @var MateCatFilter filter */
+                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
+                $source = $filter->fromLayer0ToLayer1($source);
+                $target = $filter->fromLayer0ToLayer1($target);
+
+                $pipeline = new Pipeline();
+                $counter = new PhCounter();
+                $counter->transform( $target );
+
+                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
+                    $pipeline->getNextId();
+                }
+
+                $pipeline->addLast( new FromViewNBSPToSpaces() );
+                $pipeline->addLast( new SprintfToPH( $chunk->source, $chunk->target ) );
+
+                $src = $pipeline->transform( $source );
+                $trg = $pipeline->transform( $target );
+
+                $check   = new QA( $src, $trg );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
+                $check->setIdSegment( $translation_row [ 0 ] );
                 $check->performConsistencyCheck();
 
                 /* WARNING do not change the order of the keys */
@@ -2624,6 +2656,10 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
+
+    }
+
+    private function fdsfdsfd(){
 
     }
 
