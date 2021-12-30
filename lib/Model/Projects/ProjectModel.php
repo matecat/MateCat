@@ -66,9 +66,7 @@ class ProjectModel {
      * @throws \Exception
      */
     public function saveBlacklistPresence() {
-        if ( $this->hasBlacklist() ) {
-            $this->project_struct->setMetadata( 'has_blacklist', '1' );
-        }
+        $this->project_struct->setMetadata( 'has_blacklist', '1' );
     }
 
     public function resetUpdateList() {

@@ -127,7 +127,7 @@ class BlacklistUtils
             return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
         }
 
-        $keyOnCache = md5(self::GET_LIST_REDIS_KEY . '-' .$job->id.'-'.$job->password);
+        $keyOnCache = $this->getListRedisKey($job->id, $job->password);
 
         if($this->redis->exists($keyOnCache)){
             return unserialize($this->redis->get($keyOnCache));
