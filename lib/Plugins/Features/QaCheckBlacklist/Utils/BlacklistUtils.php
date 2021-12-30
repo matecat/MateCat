@@ -12,6 +12,9 @@ use Glossary\Blacklist\BlacklistDao;
 
 class BlacklistUtils
 {
+    const CHECK_IF_EXISTS_REDIS_KEY = 'checkIfExistsBlacklist';
+    const GET_LIST_REDIS_KEY = 'getAbstractBlacklist';
+
     /**
      * @var
      */
@@ -35,8 +38,8 @@ class BlacklistUtils
         $fs->deleteBlacklistFile($model->file_path);
         $dao->deleteById($id);
 
-        $this->clearCached(md5('checkIfExistsBlacklist-'.$model->id_job.'-'.$model->password));
-        $this->clearCached(md5('getAbstractBlacklist-'.$model->id_job.'-'.$model->password));
+        $this->clearCached($this->checkIfExistsRedisKey($model->id_job, $model->password));
+        $this->clearCached($this->getListRedisKey($model->id_job, $model->password));
     }
 
     /**
@@ -45,8 +48,8 @@ class BlacklistUtils
      * @return array
      * @throws \Exception
      */
-    public function getContent($id) {
-
+    public function getContent($id)
+    {
         $dao = new BlacklistDao();
         $model = $dao->getById($id);
 
@@ -73,12 +76,18 @@ class BlacklistUtils
     {
         if(false === $this->checkIfExists($chunkStruct->id, $chunkStruct->password)) {
             $fs = FilesStorageFactory::create();
+            $id = $fs->saveBlacklistFile($filePath, $chunkStruct, $uid);
 
-            return $fs->saveBlacklistFile($filePath, $chunkStruct, $uid);
+            if($id){
+                $this->ensureCached($this->checkIfExistsRedisKey($chunkStruct->id, $chunkStruct->password), 'TRUE');
+
+                return $id;
+            }
         }
 
         $dao = new BlacklistDao();
         $model = $dao->getByJobIdAndPassword($chunkStruct->id, $chunkStruct->password);
+        $this->ensureCached($this->checkIfExistsRedisKey($chunkStruct->id, $chunkStruct->password), 'TRUE');
 
         return $model->id;
     }
@@ -89,9 +98,9 @@ class BlacklistUtils
      *
      * @return bool
      */
-    public function checkIfExists($jid, $password) {
-
-        $keyOnCache = md5('checkIfExistsBlacklist-'.$jid.'-'.$password);
+    public function checkIfExists($jid, $password)
+    {
+        $keyOnCache = $this->checkIfExistsRedisKey($jid, $password);
 
         if($this->redis->exists($keyOnCache)){
             return $this->redis->get($keyOnCache) === 'TRUE';
@@ -103,7 +112,7 @@ class BlacklistUtils
 
         $this->ensureCached($keyOnCache, $checkIfExists);
 
-        return $checkIfExists;
+        return $checkIfExists === 'TRUE';
     }
 
     /**
@@ -118,7 +127,7 @@ class BlacklistUtils
             return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
         }
 
-        $keyOnCache = md5('getAbstractBlacklist-'.$job->id.'-'.$job->password);
+        $keyOnCache = md5(self::GET_LIST_REDIS_KEY . '-' .$job->id.'-'.$job->password);
 
         if($this->redis->exists($keyOnCache)){
             return unserialize($this->redis->get($keyOnCache));
@@ -157,11 +166,10 @@ class BlacklistUtils
      * @param $key
      * @param $content
      */
-    private function ensureCached($key, $content) {
-        if ( !$this->redis->exists( $key ) ) {
-            $this->redis->set( $key, $content );
-            $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
-        }
+    private function ensureCached($key, $content)
+    {
+        $this->redis->set( $key, $content );
+        $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
     }
 
     /**
@@ -169,9 +177,32 @@ class BlacklistUtils
      *
      * @param $key
      */
-    private function clearCached($key) {
+    private function clearCached($key)
+    {
         if ( $this->redis->exists( $key ) ) {
             $this->redis->del( $key ) ;
         }
+    }
+
+    /**
+     * @param string $jid
+     * @param string $password
+     *
+     * @return string
+     */
+    private function checkIfExistsRedisKey($jid, $password)
+    {
+        return md5(self::CHECK_IF_EXISTS_REDIS_KEY . '-' .$jid.'-'.$password);
+    }
+
+    /**
+     * @param string $jid
+     * @param string $password
+     *
+     * @return string
+     */
+    private function getListRedisKey($jid, $password)
+    {
+        return md5(self::GET_LIST_REDIS_KEY . '-' .$jid.'-'.$password);
     }
 }
