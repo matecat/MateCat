@@ -124,7 +124,7 @@ class BlacklistUtils
     public function getAbstractBlacklist(\Jobs_JobStruct $job)
     {
         if(false === $this->checkIfExists($job->id, $job->password)){
-            return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
+            return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id, $job->password ) ;
         }
 
         $keyOnCache = $this->getListRedisKey($job->id, $job->password);
@@ -154,7 +154,7 @@ class BlacklistUtils
             $blacklistFilePath = \INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $job->id . DIRECTORY_SEPARATOR . $job->password . DIRECTORY_SEPARATOR . 'blacklist.txt';
         }
 
-        $blacklistFromTextFile = new BlacklistFromTextFile( $blacklistFilePath,  $job->id );
+        $blacklistFromTextFile = new BlacklistFromTextFile( $blacklistFilePath,  $job->id, $job->password );
         $this->ensureCached($keyOnCache, serialize($blacklistFromTextFile));
 
         return $blacklistFromTextFile;

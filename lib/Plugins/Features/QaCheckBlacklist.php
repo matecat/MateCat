@@ -9,11 +9,7 @@
 namespace Features;
 
 use AMQHandler;
-use Features\QaCheckBlacklist\BlacklistFromTextFile;
-use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\S3FilesStorage;
 use Projects\ProjectModel;
 use RedisHandler;
 use TaskRunner\Commons\QueueElement;
@@ -125,16 +121,12 @@ class QaCheckBlacklist extends BaseFeature {
         $target = $params['trg_content'] ;
 
         /**
-         * @var $project \Projects_ProjectStruct
-         */
-        $project = $params['project'];
-
-        /**
          * @var $chunk \Chunks_ChunkStruct
          */
         $chunk =$params['chunk'] ;
 
-        $blacklist = BlacklistUtils::getAbstractBlacklist($chunk->id, $chunk->password);
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
+        $blacklist = $blacklistUtils->getAbstractBlacklist($chunk);
 
         $data['blacklist'] = array(
                 'matches' => $blacklist->getMatches( $target )

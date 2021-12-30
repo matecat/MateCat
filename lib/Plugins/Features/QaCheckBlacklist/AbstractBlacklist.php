@@ -17,13 +17,29 @@ abstract class AbstractBlacklist {
     protected $id_job;
 
     /**
+     * @var string
+     */
+    protected $password;
+
+    /**
      * @var \Predis\Client
      */
     protected $redis ;
 
-    public function __construct( $path, $id_job ) {
+    /**
+     * AbstractBlacklist constructor.
+     *
+     * @param $path
+     * @param $id_job
+     * @param $password
+     *
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
+     */
+    public function __construct( $path, $id_job, $password ) {
         $this->file_path = $path;
         $this->id_job    = $id_job;
+        $this->password    = $password;
         $this->redis     = ( new RedisHandler() )->getConnection();
     }
 
@@ -35,8 +51,8 @@ abstract class AbstractBlacklist {
     private function ensureCached() {
         $key = $this->getJobCacheKey();
 
-        if ( !$this->redis->exists( $key ) ) {
-            $content = static::getContent();
+        if ( $this->checkIfBlacklistKeywordsExistsInCache() ) {
+            $content = $this->getContent();
 
             $splitted = explode( PHP_EOL, $content );
             foreach ( $splitted as $token ) {
@@ -46,6 +62,21 @@ abstract class AbstractBlacklist {
 
             $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function checkIfBlacklistKeywordsExistsInCache()
+    {
+        $key = $this->getJobCacheKey();
+        $blacklistInRedis = $this->redis->smembers( $key );
+
+        return (
+            !$this->redis->exists( $key )
+            or empty( $blacklistInRedis )
+            or ( count($blacklistInRedis) === 1 and $blacklistInRedis[0] == "" )
+        );
     }
 
     /**
@@ -80,11 +111,11 @@ abstract class AbstractBlacklist {
         return $counter;
     }
 
-    public function getCached() {
-        $this->ensureCached();
-    }
-
-    private function getJobCacheKey() {
-        return "blacklist:id_job:{$this->id_job}";
+    /**
+     * @return string
+     */
+    private function getJobCacheKey()
+    {
+        return md5("blacklist:id_job:{$this->id_job}:password:{$this->password}");
     }
 }

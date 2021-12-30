@@ -4,11 +4,7 @@ namespace Features\QaCheckBlacklist\Worker ;
 
 use Features\QaCheckBlacklist;
 use Features\QaCheckBlacklist\AbstractBlacklist;
-use Features\QaCheckBlacklist\BlacklistFromTextFile;
-use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\S3FilesStorage;
 use RedisHandler;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;

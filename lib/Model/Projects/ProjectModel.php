@@ -5,7 +5,6 @@ namespace Projects;
 use API\V2\Exceptions\AuthorizationError;
 use Constants_Teams;
 use Exceptions\ValidationError;
-use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;

@@ -8,16 +8,9 @@
 
 namespace API\V3;
 
-use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
-use CatUtils;
-use Features\QaCheckBlacklist;
-use Features\QaCheckBlacklist\BlacklistFromTextFile;
-use Features\QaCheckBlacklist\BlacklistFromZip;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
-use FilesStorage\FilesStorageFactory;
 use Glossary\Blacklist\BlacklistDao;
-use Langs_Languages;
 use RedisHandler;
 
 
