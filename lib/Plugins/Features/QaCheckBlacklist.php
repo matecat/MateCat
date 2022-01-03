@@ -128,9 +128,9 @@ class QaCheckBlacklist extends BaseFeature {
         $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
         $blacklist = $blacklistUtils->getAbstractBlacklist($chunk);
 
-        $data['blacklist'] = array(
+        $data['blacklist'] = [
                 'matches' => $blacklist->getMatches( $target )
-        );
+        ];
 
         return $data;
     }

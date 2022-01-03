@@ -94,13 +94,13 @@ class BlacklistWorker extends AbstractWorker {
 
         foreach( $this->matches as $match => $count ) {
             for ($k = 0 ; $k < $count; $k++) {
-                $warning = new WarningStruct(array(
+                $warning = new WarningStruct([
                         'id_job'     => $id_job,
                         'id_segment' => $id_segment,
                         'severity'   => WarningModel::WARNING,
                         'scope'      => QaCheckBlacklist::BLACKLIST_SCOPE,
-                        'data'       => json_encode( array( 'match' => $match ) )
-                ));
+                        'data'       => '{"match":"'.$match.'"}' // we can't use json_decode because this function converts non latin characters to unicode
+                ]);
                 $warningModel->addWarning( $warning );
             }
         }

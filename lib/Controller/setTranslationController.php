@@ -6,6 +6,7 @@ use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
