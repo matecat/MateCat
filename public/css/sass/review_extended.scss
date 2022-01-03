@@ -157,6 +157,16 @@ input {
               button {
                 padding: 7px 10px;
                 background-color: #f2f4f7;
+                @media only screen and (max-width: 1450px) {
+                  padding: 7px 7px;
+                }
+                @media only screen and (max-width: 1260px) {
+                  padding: 7px 5px;
+                }
+                @media only screen and (max-width: 1140px) {
+                  padding: 7px 3px;
+                }
+
                 &:hover,
                 &.active {
                   background-color: #cacbcd;
