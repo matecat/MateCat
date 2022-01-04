@@ -144,7 +144,15 @@ class QualitySummaryTable extends React.Component {
             </div>,
           )
         } else {
-          catHtml.push(<div className="qr-element severity" key={'sev-' + i} />)
+          const isSeverityInsideCat = severityFound.size === 0
+          catHtml.push(
+            <div
+              className={`qr-element severity ${
+                isSeverityInsideCat ? 'empty' : ''
+              }`}
+              key={'sev-' + i}
+            />,
+          )
         }
       })
       let catTotalWeightHtml = (

@@ -285,6 +285,9 @@ header {
                   background: white;
                   position: relative;
                   z-index: -1;
+                  &.empty {
+                    background: $grey4;
+                  }
                   &:first-child {
                     border: none;
                   }
@@ -311,8 +314,6 @@ header {
                 background: $grey1;
               }
               .qr-total-severity {
-                display: flex;
-                justify-content: space-between;
                 padding: 20px 15px;
                 &.job-not-passed {
                   background-color: #fb590d;
