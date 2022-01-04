@@ -58,6 +58,8 @@ class BlacklistWorker extends AbstractWorker {
 
         $this->matches = $blacklist->getMatches( $params['translation'] ) ;
 
+        \Log::doJsonLog('PIPPO');
+
         $this->_updateWarningsOnSegmentId( $params['id_job'], $params['id_segment'] ) ;
 
         if ( !empty( $this->queueElement->params['propagated_ids']) ) {
@@ -92,8 +94,8 @@ class BlacklistWorker extends AbstractWorker {
         $warningModel->start();
         $warningModel->resetScope( QaCheckBlacklist::BLACKLIST_SCOPE );
 
-        foreach( $this->matches as $match => $count ) {
-            for ($k = 0 ; $k < $count; $k++) {
+        foreach( $this->matches as $match => $matchData ) {
+            for ($k = 0 ; $k < $matchData['count']; $k++) {
                 $warning = new WarningStruct([
                         'id_job'     => $id_job,
                         'id_segment' => $id_segment,
