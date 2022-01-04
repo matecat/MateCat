@@ -58,8 +58,6 @@ class BlacklistWorker extends AbstractWorker {
 
         $this->matches = $blacklist->getMatches( $params['translation'] ) ;
 
-        \Log::doJsonLog('PIPPO');
-
         $this->_updateWarningsOnSegmentId( $params['id_job'], $params['id_segment'] ) ;
 
         if ( !empty( $this->queueElement->params['propagated_ids']) ) {
@@ -101,7 +99,7 @@ class BlacklistWorker extends AbstractWorker {
                         'id_segment' => $id_segment,
                         'severity'   => WarningModel::WARNING,
                         'scope'      => QaCheckBlacklist::BLACKLIST_SCOPE,
-                        'data'       => '{"match":"'.$match.'"}' // we can't use json_decode because this function converts non latin characters to unicode
+                        'data'       => '{"match":"'.$matchData['match'].'", "count":"'.$matchData['count'].'", "positions": '.json_encode($matchData['positions']).'}'
                 ]);
                 $warningModel->addWarning( $warning );
             }
