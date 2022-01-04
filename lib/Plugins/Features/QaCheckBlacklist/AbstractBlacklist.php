@@ -112,7 +112,8 @@ abstract class AbstractBlacklist {
                     ];
                 }
 
-                $counter[ $blacklist_item ] = [
+                $counter[] = [
+                    'match' => $blacklist_item,
                     'count' => count($matches),
                     'positions' => $positions,
                 ];
