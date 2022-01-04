@@ -1019,7 +1019,7 @@
             }],
             "isocode":"jv",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"jv-ID"
         }
     ,
