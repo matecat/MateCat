@@ -30,6 +30,7 @@ export const unescapeHTML = (escapedHTML) => {
     return escapedHTML
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
       .replace(/&amp;/g, '&')
       .replace(/&nbsp;/g, ' ')
       .replace(/&apos;/g, "'")
