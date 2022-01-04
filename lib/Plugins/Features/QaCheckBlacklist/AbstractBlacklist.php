@@ -101,9 +101,21 @@ abstract class AbstractBlacklist {
             }
 
             $matches = WholeTextFinder::find($string, $blacklist_item, true, true);
+            $positions = [];
 
             if ( ! empty($matches) ) {
-                $counter[ $blacklist_item ]  = count($matches);
+
+                foreach ($matches as $match){
+                    $positions[] = [
+                        'start' => $match[1],
+                        'end' => $match[1] + mb_strlen($match[0]),
+                    ];
+                }
+
+                $counter[ $blacklist_item ] = [
+                    'count' => count($matches),
+                    'positions' => $positions,
+                ];
             }
         }
 
