@@ -386,6 +386,7 @@ class QA {
             29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
             3000 => 'Maximum characters limit exceeded.',
+            4000 => 'Glossary blacklist match detected',
 
     ];
 
