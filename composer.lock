@@ -925,16 +925,16 @@
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.14",
+            "version": "v1.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "d5ff07d8eca4212eb214859ff7bf5f4b781ce11b"
+                "reference": "43a8b2c5a1d7dce6c379464dd85291a546378285"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/d5ff07d8eca4212eb214859ff7bf5f4b781ce11b",
-                "reference": "d5ff07d8eca4212eb214859ff7bf5f4b781ce11b",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/43a8b2c5a1d7dce6c379464dd85291a546378285",
+                "reference": "43a8b2c5a1d7dce6c379464dd85291a546378285",
                 "shasum": ""
             },
             "require": {
@@ -972,9 +972,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/whole-text-finder/issues",
-                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.14"
+                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.15"
             },
-            "time": "2021-05-27T16:45:20+00:00"
+            "time": "2022-01-05T10:01:30+00:00"
         },
         {
             "name": "matecat/xliff-parser",
@@ -3854,5 +3854,5 @@
         "php": ">=5.5.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
