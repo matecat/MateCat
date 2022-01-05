@@ -206,7 +206,7 @@ class getWarningController extends ajaxController {
             'chunk'       => $this->chunk
         ] );
 
-        if(isset($data['blacklist']) and !empty($data['blacklist']) ){
+        if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
             $qa->addError(QA::GLOSSARY_BLACKLIST_MATCH);
         }
 
