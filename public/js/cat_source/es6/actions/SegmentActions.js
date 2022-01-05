@@ -820,12 +820,12 @@ const SegmentActions = {
     })
   },
 
-  updateGlossaryData(data) {
+  updateGlossaryData(data, sid) {
     if (QaCheckGlossary.enabled() && data.glossary) {
       QaCheckGlossary.update(data.glossary)
     }
     if (QaCheckBlacklist.enabled() && data.blacklist) {
-      QaCheckBlacklist.update(data.blacklist)
+      SegmentActions.addQaBlacklistMatches(sid, data.blacklist.matches)
     }
   },
 
