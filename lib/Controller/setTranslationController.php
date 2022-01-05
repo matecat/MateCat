@@ -341,6 +341,20 @@ class setTranslationController extends ajaxController {
         $check->setIdSegment( $this->id_segment );
         $check->performConsistencyCheck();
 
+        // set blacklist errors here
+        $data = [];
+
+        $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
+                'src_content' => $this->__postInput->src_content,
+                'trg_content' => $this->__postInput->trg_content,
+                'project'     => $this->project,
+                'chunk'       => $this->chunk
+        ] );
+
+        if(isset($data['blacklist']) and !empty($data['blacklist']) ){
+            $check->addError(QA::GLOSSARY_BLACKLIST_MATCH);
+        }
+
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
             $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );

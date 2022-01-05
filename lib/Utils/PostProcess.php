@@ -38,7 +38,7 @@ class PostProcess extends QA {
             return; //ALL RIGHT
         } else {
 
-            $this->_addError( self::ERR_TAG_MISMATCH );
+            $this->addError( self::ERR_TAG_MISMATCH );
 
         }
 
