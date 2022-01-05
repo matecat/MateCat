@@ -3,7 +3,6 @@ import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import React from 'react'
 
-import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import Header from './cat_source/es6/components/header/Header'
@@ -619,6 +618,17 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
+    $('body').on('keydown', function (e) {
+      if (e.key === 'Enter') {
+        if ($('.menu-dropdown.visible').length == 0) {
+          $('input.uploadbtn').click()
+        }
+      }
+    })
+    $('.supported-file-formats').click(function (e) {
+      e.preventDefault()
+      $('.supported-formats').show()
+    })
     $('.more-options-cont').on('click', function (e) {
       e.preventDefault()
       APP.openOptionsPanel('tm')
@@ -644,44 +654,76 @@ $.extend(UI.UPLOAD_PAGE, {
       },
     })
 
-    $('input.uploadbtn').click(function () {
-      if (!UI.allTMUploadsCompleted()) {
+    $('#swaplang').click(function (e) {
+      e.preventDefault()
+      var src = $('#source-lang').dropdown('get value')
+      var trg = $('#target-lang').dropdown('get value')
+      if (trg.split(',').length > 1) {
+        APP.alert({
+          msg: 'Cannot swap languages when <br>multiple target languages are selected!',
+        })
         return false
       }
+      $('#source-lang').dropdown('set selected', trg)
+      $('#target-lang').dropdown('set selected', src)
 
-      $('body').addClass('creating')
+      APP.changeTargetLang(src)
 
-      $('.error-message').hide()
-      $('.uploadbtn')
-        .attr('value', 'Analyzing...')
-        .attr('disabled', 'disabled')
-        .addClass('disabled')
-
-      createProject(APP.getCreateProjectParams())
-        .then(({data}) => {
-          APP.handleCreationStatus(data.id_project, data.password)
+      if ($('.template-download').length) {
+        if (UI.conversionsAreToRestart()) {
+          APP.confirm({
+            msg: 'Source language changed. The files must be reimported.',
+            callback: 'confirmRestartConversions',
+          })
+        }
+      } else if ($('.template-gdrive').length) {
+        APP.confirm({
+          msg: 'Source language has been changed.<br/>The files will be reimported.',
+          callback: 'confirmGDriveRestartConversions',
         })
-        .catch((errors) => {
-          let errorMsg
-          switch (errors[0].code) {
-            case -230: {
-              errorMsg =
-                'Sorry, file name too long. Try shortening it and try again.'
-              break
+      }
+    })
+
+    $('input.uploadbtn').click(function () {
+      if (!$('.uploadbtn').hasClass('disabled')) {
+        if (!UI.allTMUploadsCompleted()) {
+          return false
+        }
+
+        $('body').addClass('creating')
+
+        $('.error-message').hide()
+        $('.uploadbtn')
+          .attr('value', 'Analyzing...')
+          .attr('disabled', 'disabled')
+          .addClass('disabled')
+
+        createProject(APP.getCreateProjectParams())
+          .then(({data}) => {
+            APP.handleCreationStatus(data.id_project, data.password)
+          })
+          .catch((errors) => {
+            let errorMsg
+            switch (errors[0].code) {
+              case -230: {
+                errorMsg =
+                  'Sorry, file name too long. Try shortening it and try again.'
+                break
+              }
+              case -235: {
+                errorMsg =
+                  'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
+                break
+              }
+              default:
+                errorMsg = errors[0].message
             }
-            case -235: {
-              errorMsg =
-                'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
-              break
-            }
-            default:
-              errorMsg = errors[0].message
-          }
-          $('.error-message').find('p').text(errorMsg)
-          $('.error-message').show()
-          $('.uploadbtn').attr('value', 'Analyze')
-          $('body').removeClass('creating')
-        })
+            $('.error-message').find('p').text(errorMsg)
+            $('.error-message').show()
+            $('.uploadbtn').attr('value', 'Analyze')
+            $('body').removeClass('creating')
+          })
+      }
     })
 
     $('.upload-table').on('click', 'a.skip_link', function () {

@@ -131,8 +131,6 @@ $.extend(window.UI, {
     this.setTranslationTail = []
     this.executingSetTranslation = []
 
-    if (!config.isLoggedIn) this.body.addClass('isAnonymous')
-
     this.checkVersion()
     this.initTM()
     this.initAdvanceOptions()

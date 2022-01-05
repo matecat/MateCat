@@ -664,8 +664,6 @@ window.UI = {
         }
 
         $(document).trigger('getWarning:global:success', {resp: data})
-
-        SegmentActions.updateGlossaryData(data.data)
       })
       .catch((errors) => {
         UI.warningStopped = true
@@ -760,6 +758,7 @@ window.UI = {
           resp: data,
           segment: segment,
         })
+        SegmentActions.updateGlossaryData(data.data, segment.sid)
       })
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')

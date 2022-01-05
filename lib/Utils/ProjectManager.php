@@ -16,6 +16,10 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
+use Matecat\SubFiltering\Filters\PhCounter;
+use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -1963,7 +1967,6 @@ class ProjectManager {
                             // -------------------------------------
                             //
 
-
                             //
                             // -------------------------------------
                             // START SEGMENTS ORIGINAL DATA
@@ -1981,29 +1984,12 @@ class ProjectManager {
                             // -------------------------------------
                             //
 
-
-                            //
-                            // -------------------------------------------
-                            // NOTE 2020-12-07
-                            // -------------------------------------------
-                            //
-                            // When there is an 'original-data' map, save segment_hash of REPLACED string
-                            // in order to distinguish it in UI avoiding possible collisions
-                            // (same text, different 'original-data' maps).
-                            // Example:
-                            //
-                            // $mapA = '{"source1":"%@"}';
-                            // $mapB = '{"source1":"%s"}';
-                            //
-                            // $segmentA = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
-                            // $segmentB = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
-                            //
-                            $segmentHash = md5( $seg_source[ 'raw-content' ] );
-                            if ( !empty( $dataRefMap ) ) {
-                                $dataRefReplacer = new DataRefReplacer( $dataRefMap );
-                                $segmentHash     = md5( $dataRefReplacer->replace( $seg_source[ 'raw-content' ] ) );
+                            $sizeRestriction = null;
+                            if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ]) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0){
+                                $sizeRestriction = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
                             }
 
+                            $segmentHash = $this->createSegmentHash($seg_source[ 'raw-content' ], $dataRefMap, $sizeRestriction) ;
 
                             // segment struct
                             $segStruct = new Segments_SegmentStruct( [
@@ -2115,8 +2101,6 @@ class ProjectManager {
                         if ( !empty( $segmentOriginalData ) ) {
 
                             $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $segmentOriginalData );
-                            $segmentHash     = md5( $dataRefReplacer->replace( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) );
-
                             $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
                                     'data'             => $segmentOriginalData,
                                     'replaced_segment' => $dataRefReplacer->replace( $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) ),
@@ -2124,6 +2108,13 @@ class ProjectManager {
 
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
                         }
+
+                        $sizeRestriction = null;
+                        if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ]) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0){
+                            $sizeRestriction = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                        }
+
+                        $segmentHash = $this->createSegmentHash($xliff_trans_unit[ 'source' ][ 'raw-content' ], $segmentOriginalData, $sizeRestriction) ;
 
                         $segStruct = new Segments_SegmentStruct( [
                                 'id_file'             => $fid,
@@ -2163,6 +2154,47 @@ class ProjectManager {
             $this->show_in_cattool_segs_counter += $_fileCounter_Show_In_Cattool;
         }
 
+    }
+
+    /**
+     * -------------------------------------
+     * SEGMENT HASH
+     * -------------------------------------
+     *
+     * When there is an 'original-data' map, save segment_hash of REPLACED string
+     * in order to distinguish it in UI avoiding possible collisions
+     * (same text, different 'original-data' maps).
+     * Example:
+     *
+     * $mapA = '{"source1":"%@"}';
+     * $mapB = '{"source1":"%s"}';
+     *
+     * $segmentA = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
+     * $segmentB = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
+     *
+     * The same thing happens when the segment has a char size restriction.
+     *
+     *
+     * @param      $rawContent
+     * @param null $dataRefMap
+     * @param null $sizeRestriction
+     *
+     * @return string
+     */
+    private function createSegmentHash($rawContent, $dataRefMap = null, $sizeRestriction = null) {
+
+        $segmentToBeHashed = $rawContent;
+
+        if ( !empty( $dataRefMap ) ) {
+            $dataRefReplacer = new DataRefReplacer( $dataRefMap );
+            $segmentToBeHashed = $dataRefReplacer->replace( $rawContent );
+        }
+
+        if (!empty($sizeRestriction)) {
+            $segmentToBeHashed .= $segmentToBeHashed . '{"sizeRestriction": '.$sizeRestriction.'}';
+        }
+
+        return md5($segmentToBeHashed);
     }
 
     /**
@@ -2561,10 +2593,38 @@ class ProjectManager {
                 $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $source  = $segment->segment;
                 $target  = $translation_row [ 2 ];
-                $check   = new QA( $source, $target );
+
+                //
+                // NOTE 2021-12-20
+                // ------------------------------------------------------
+                // In order to perform an integrity check
+                // we need to transform source and target to layer1
+                // This piece of code mimics setTranslationController (from line 322 to 341)
+
+                /** @var MateCatFilter filter */
+                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
+                $source = $filter->fromLayer0ToLayer1($source);
+                $target = $filter->fromLayer0ToLayer1($target);
+
+                $pipeline = new Pipeline();
+                $counter = new PhCounter();
+                $counter->transform( $target );
+
+                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
+                    $pipeline->getNextId();
+                }
+
+                $pipeline->addLast( new FromViewNBSPToSpaces() );
+                $pipeline->addLast( new SprintfToPH( $chunk->source, $chunk->target ) );
+
+                $src = $pipeline->transform( $source );
+                $trg = $pipeline->transform( $target );
+
+                $check   = new QA( $src, $trg );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
+                $check->setIdSegment( $translation_row [ 0 ] );
                 $check->performConsistencyCheck();
 
                 /* WARNING do not change the order of the keys */
@@ -2596,6 +2656,10 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
+
+    }
+
+    private function fdsfdsfd(){
 
     }
 
