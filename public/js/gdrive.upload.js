@@ -1,5 +1,9 @@
+import {getGoogleDriveUploadedFiles} from './cat_source/es6/api/getGoogleDriveUploadedFiles'
+import {changeGDriveSourceLang} from './cat_source/es6/api/changeGDriveSourceLang'
+import {deleteGDriveUploadedFile} from './cat_source/es6/api/deleteGdriveUploadedFile'
+
 APP.tryListGDriveFiles = function () {
-  $.getJSON('/gdrive/list', function (listFiles) {
+  getGoogleDriveUploadedFiles().then((listFiles) => {
     $('.files-gdrive').html('')
 
     if (listFiles && listFiles.hasOwnProperty('files')) {
@@ -90,8 +94,7 @@ APP.tryListGDriveFiles = function () {
 
 APP.restartGDriveConversions = function () {
   var sourceLang = $('#source-lang').dropdown('get value')
-
-  $.getJSON('/gdrive/change/' + sourceLang, function (response) {
+  changeGDriveSourceLang(sourceLang).then((response) => {
     if (response.success) {
       console.log('Source language changed.')
     }
@@ -99,7 +102,7 @@ APP.restartGDriveConversions = function () {
 }
 
 APP.deleteGDriveFile = function (fileId) {
-  $.getJSON('/gdrive/delete/' + fileId, function (response) {
+  deleteGDriveUploadedFile(fileId).then((response) => {
     if (response.success) {
       APP.tryListGDriveFiles()
     }
