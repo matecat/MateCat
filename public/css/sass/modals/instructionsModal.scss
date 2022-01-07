@@ -48,7 +48,8 @@
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
-    //min-height: 300px;
+    max-height: 400px;
+    overflow: auto;
     p {
       line-height: 26px;
       word-break: break-all;
