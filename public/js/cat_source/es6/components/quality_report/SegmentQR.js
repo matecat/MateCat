@@ -78,6 +78,9 @@ class SegmentQR extends React.Component {
         MISMATCH: {
           label: 'Character mismatch',
         },
+        GLOSSARY: {
+          label: 'Glossary',
+        },
       },
       icons: {
         ERROR: 'icon-cancel-circle icon red',
