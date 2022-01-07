@@ -155,6 +155,21 @@ class getWarningController extends ajaxController {
     }
 
     /**
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    private function invokeGlobalWarningsOnFeatures() {
+
+        $this->result = $this->featureSet->filter( 'filterGlobalWarnings', $this->result, [
+                'chunk' => $this->chunk,
+        ] );
+
+    }
+
+    /**
      * Performs a check on single segment
      *
      * @throws Exception
@@ -176,21 +191,12 @@ class getWarningController extends ajaxController {
         $QA->setTargetSegLang( $this->chunk->target );
         $QA->performConsistencyCheck();
 
+        $this->invokeLocalWarningsOnFeatures($QA);
+
         $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
-
-        $this->invokeLocalWarningsOnFeatures();
     }
 
-
-    private function invokeGlobalWarningsOnFeatures() {
-
-        $this->result = $this->featureSet->filter( 'filterGlobalWarnings', $this->result, [
-                'chunk' => $this->chunk,
-        ] );
-
-    }
-
-    private function invokeLocalWarningsOnFeatures() {
+    private function invokeLocalWarningsOnFeatures(QA $qa) {
         $data = [];
 
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
@@ -199,6 +205,10 @@ class getWarningController extends ajaxController {
             'project'     => $this->project,
             'chunk'       => $this->chunk
         ] );
+
+        if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
+            $qa->addError(QA::GLOSSARY_BLACKLIST_MATCH);
+        }
 
         $this->result[ 'data' ] = $data;
     }

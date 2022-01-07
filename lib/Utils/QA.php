@@ -264,6 +264,8 @@ class QA {
 
     const ERR_SIZE_RESTRICTION = 3000;
 
+    const GLOSSARY_BLACKLIST_MATCH = 4000;
+
     /**
      * Human Readable error map.
      * Created accordingly with Error constants
@@ -370,6 +372,8 @@ class QA {
             2001 => '%smartcount tag count mismatch',
 
             3000 => 'Characters limit exceeded',
+
+            4000 => 'Glossary blacklist match detected',
     ];
 
     protected $_tipMap = [
@@ -382,6 +386,7 @@ class QA {
             29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
             3000 => 'Maximum characters limit exceeded.',
+            4000 => 'Glossary blacklist match detected',
 
     ];
 
@@ -475,7 +480,7 @@ class QA {
      *
      * @param int $errCode
      */
-    protected function _addError( $errCode ) {
+    public function addError( $errCode ) {
 
         //Real error Code log
 //        try {
@@ -553,6 +558,13 @@ class QA {
                 ] );
                 break;
 
+            case self::GLOSSARY_BLACKLIST_MATCH:
+                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::GLOSSARY_BLACKLIST_MATCH ],
+                        'tip'     => $this->_getTipValue( self::GLOSSARY_BLACKLIST_MATCH )
+                ] );
+                break;
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
@@ -754,7 +766,7 @@ class QA {
         $that      = new static( null, null );
         $jsonValue = json_decode( $jsonString, true );
         array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
-            $that->_addError( $errArray[ 'outcome' ] );
+            $that->addError( $errArray[ 'outcome' ] );
         } );
 
         return $that->exceptionList;
@@ -1380,13 +1392,13 @@ class QA {
             $errorList = libxml_get_errors();
             foreach ( $errorList as $error ) {
                 if ( $this->checkUnclosedTag( "x", $xmlString, $error ) ) {
-                    $this->_addError( self::ERR_UNCLOSED_X_TAG );
+                    $this->addError( self::ERR_UNCLOSED_X_TAG );
 
                     return $dom;
                 }
 
                 if ( $this->checkUnclosedTag( "g", $xmlString, $error ) ) {
-                    $this->_addError( self::ERR_UNCLOSED_G_TAG );
+                    $this->addError( self::ERR_UNCLOSED_G_TAG );
 
                     return $dom;
                 }
@@ -1396,7 +1408,7 @@ class QA {
 //            Log::doJsonLog($xmlString);
 //            Log::doJsonLog($errorList);
 
-            $this->_addError( $targetErrorType );
+            $this->addError( $targetErrorType );
         }
 
         return $dom;
@@ -1597,7 +1609,7 @@ class QA {
 
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace( " ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->_addError( self::ERR_TAG_ORDER );
+                $this->addError( self::ERR_TAG_ORDER );
                 $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
@@ -1606,7 +1618,7 @@ class QA {
 
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace( " ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->_addError( self::ERR_TAG_ORDER );
+                $this->addError( self::ERR_TAG_ORDER );
                 $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
@@ -1622,7 +1634,7 @@ class QA {
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
             if ( str_replace( " ", "", $selfClosingTags_src[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->_addError( self::ERR_TAG_ORDER );
+                $this->addError( self::ERR_TAG_ORDER );
                 $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $selfClosingTags_trg[ $pos ] );
 
                 return;
@@ -1646,7 +1658,7 @@ class QA {
         if ( count( $source_tags ) != count( $target_tags ) ) {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_WS_HEAD );
+                $this->addError( self::ERR_WS_HEAD );
             }
         }
 
@@ -1667,7 +1679,7 @@ class QA {
 //            Log::hexDump($this->source_seg);
 //            Log::hexDump($this->target_seg);
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
+                $this->addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
             }
         }
 
@@ -1682,7 +1694,7 @@ class QA {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
+                $this->addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
             }
         }
 
@@ -1696,7 +1708,7 @@ class QA {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_HEAD_TEXT );
+                $this->addError( self::ERR_BOUNDARY_HEAD_TEXT );
             }
         }
 
@@ -1713,7 +1725,7 @@ class QA {
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
 
-                $this->_addError(self::ERR_BOUNDARY_TAIL);
+                $this->addError(self::ERR_BOUNDARY_TAIL);
             }
 
         } elseif ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && empty( $source_tags[ 0 ] ) ) {
@@ -1837,7 +1849,7 @@ class QA {
             }
         }
 
-        $this->_addError( self::ERR_COUNT );
+        $this->addError( self::ERR_COUNT );
 
     }
 
@@ -1858,7 +1870,7 @@ class QA {
             //check for Tag ID MISMATCH
             $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
             if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
-                $this->_addError( self::ERR_TAG_ID );
+                $this->addError( self::ERR_TAG_ID );
 //            Log::doJsonLog($diffArray);
             }
         }
@@ -1969,7 +1981,7 @@ class QA {
         $errors = $bxExGValidator->validate();
 
         foreach ($errors as $error){
-            $this->_addError( $error );
+            $this->addError( $error );
         }
     }
 
@@ -2037,10 +2049,10 @@ class QA {
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
 
-        $this->_addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_NONE, $this ) );
+        $this->addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_NONE, $this ) );
 
         if ( $srcNodeCount != $trgNodeCount ) {
-            $this->_addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_COUNT, $this ) );
+            $this->addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_COUNT, $this ) );
         }
 
         return $trgNodeCount - $srcNodeCount;
@@ -2075,7 +2087,7 @@ class QA {
 
         //if source or target has a space at beginning and their relative positions are different
         if ( ( $headSrcWhiteSpaces === 0 || $headTrgWhiteSpaces === 0 ) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces ) {
-            $this->_addError( self::ERR_WS_HEAD );
+            $this->addError( self::ERR_WS_HEAD );
         }
 
 //        //normalize the target first space according to the source type
@@ -2140,7 +2152,7 @@ class QA {
         $trailingSrcChar = mb_substr( $srcNodeContent, $srcLen - 1, 1, 'utf-8' );
         $trailingTrgChar = mb_substr( $trgNodeContent, $trgLen - 1, 1, 'utf-8' );
         if ( ( $trailingSrcChar == " " || $trailingTrgChar == " " ) && $trailingSrcChar != $trailingTrgChar ) {
-            $this->_addError( self::ERR_WS_TAIL );
+            $this->addError( self::ERR_WS_TAIL );
         }
 
 //        //add another check for nested tag with ending spaces
@@ -2272,7 +2284,7 @@ class QA {
         $headSrcTabs = mb_stripos( $srcNodeContent, "\t", 0, 'utf-8' );
         $headTrgTabs = mb_stripos( $trgNodeContent, "\t", 0, 'utf-8' );
         if ( ( $headSrcTabs === 0 || $headTrgTabs === 0 ) && $headSrcTabs !== $headTrgTabs ) {
-            $this->_addError( self::ERR_TAB_HEAD );
+            $this->addError( self::ERR_TAB_HEAD );
         }
     }
 
@@ -2290,7 +2302,7 @@ class QA {
         $trailingSrcChar = mb_substr( $srcNodeContent, $srcLen - 1, 1, 'utf-8' );
         $trailingTrgChar = mb_substr( $trgNodeContent, $trgLen - 1, 1, 'utf-8' );
         if ( ( $trailingSrcChar == "\t" || $trailingTrgChar == "\t" ) && $trailingSrcChar != $trailingTrgChar ) {
-            $this->_addError( self::ERR_TAB_TAIL );
+            $this->addError( self::ERR_TAB_TAIL );
         }
 
     }
@@ -2307,7 +2319,7 @@ class QA {
         $headSrcCRNL = mb_split( '^[\r\n]+', $srcNodeContent );
         $headTrgCRNL = mb_split( '^[\r\n]+', $trgNodeContent );
         if ( ( count( $headSrcCRNL ) > 1 || count( $headTrgCRNL ) > 1 ) && $headSrcCRNL[ 0 ] !== $headTrgCRNL[ 0 ] ) {
-            $this->_addError( self::ERR_CR_HEAD );
+            $this->addError( self::ERR_CR_HEAD );
         }
 
     }
@@ -2325,7 +2337,7 @@ class QA {
         $headSrcCRNL = mb_split( '[\r\n]+$', $srcNodeContent );
         $headTrgCRNL = mb_split( '[\r\n]+$', $trgNodeContent );
         if ( ( count( $headSrcCRNL ) > 1 || count( $headTrgCRNL ) > 1 ) && end( $headSrcCRNL ) !== end( $headTrgCRNL ) ) {
-            $this->_addError( self::ERR_CR_TAIL );
+            $this->addError( self::ERR_CR_TAIL );
         }
 
     }
@@ -2335,7 +2347,7 @@ class QA {
         $nrOfNewLinesInTarget = mb_substr_count( $this->target_seg, self::$asciiPlaceHoldMap[ '0A' ][ 'placeHold' ] );
 
         for ( $i = 0; $i < abs( $nrOfNewLinesInSource - $nrOfNewLinesInTarget ); $i++ ) {
-            $this->_addError( self::ERR_NEWLINE_MISMATCH );
+            $this->addError( self::ERR_NEWLINE_MISMATCH );
         }
     }
 
@@ -2346,7 +2358,7 @@ class QA {
             $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
             $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $Filter->fromLayer1ToLayer2( $this->getTargetSeg() ) );
             if(false === $check){
-                $this->_addError( self::ERR_SIZE_RESTRICTION  );
+                $this->addError( self::ERR_SIZE_RESTRICTION  );
             }
         }
     }
@@ -2379,28 +2391,28 @@ class QA {
             for ( $i = 0; $i < abs( $symbolOccurrencesInSourceCount - $symbolOccurrencesInTargetCount ); $i++ ) {
                 switch ( $sym ) {
                     case '€':
-                        $this->_addError( self::ERR_EUROSIGN_MISMATCH );
+                        $this->addError( self::ERR_EUROSIGN_MISMATCH );
                         break;
                     case '@':
-                        $this->_addError( self::ERR_AT_MISMATCH );
+                        $this->addError( self::ERR_AT_MISMATCH );
                         break;
                     case '&amp;':
-                        $this->_addError( self::ERR_AMPERSAND_MISMATCH );
+                        $this->addError( self::ERR_AMPERSAND_MISMATCH );
                         break;
                     case '£':
-                        $this->_addError( self::ERR_POUNDSIGN_MISMATCH );
+                        $this->addError( self::ERR_POUNDSIGN_MISMATCH );
                         break;
                     case '%':
-                        $this->_addError( self::ERR_PERCENT_MISMATCH );
+                        $this->addError( self::ERR_PERCENT_MISMATCH );
                         break;
                     case '=':
-                        $this->_addError( self::ERR_EQUALSIGN_MISMATCH );
+                        $this->addError( self::ERR_EQUALSIGN_MISMATCH );
                         break;
                     case self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ]:
-                        $this->_addError( self::ERR_TAB_MISMATCH );
+                        $this->addError( self::ERR_TAB_MISMATCH );
                         break;
                     case '\\*':
-                        $this->_addError( self::ERR_STARSIGN_MISMATCH );
+                        $this->addError( self::ERR_STARSIGN_MISMATCH );
                         break;
                 }
             }
@@ -2418,7 +2430,7 @@ class QA {
             $symbolOccurrencesInTarget = mb_substr_count( $cleaned_target, $sym );
 
             for ( $i = 0; $i < abs( $symbolOccurrencesInSource - $symbolOccurrencesInTarget ); $i++ ) {
-                $this->_addError( self::ERR_SPECIAL_ENTITY_MISMATCH );
+                $this->addError( self::ERR_SPECIAL_ENTITY_MISMATCH );
             }
         }
 

@@ -123,7 +123,7 @@ class QaCheckBlacklist extends BaseFeature {
         /**
          * @var $chunk \Chunks_ChunkStruct
          */
-        $chunk =$params['chunk'] ;
+        $chunk = $params['chunk'] ;
 
         $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
         $blacklist = $blacklistUtils->getAbstractBlacklist($chunk);
