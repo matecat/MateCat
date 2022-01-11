@@ -12,6 +12,7 @@
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global $, window, document */
 import Cookies from 'js-cookie'
+import {initFileUpload} from "../../cat_source/es6/api/initFileUpload";
 
 window.UI = null;
 
@@ -502,9 +503,9 @@ $( function () {
     } );
 
     // Load existing files:
-    $( '#fileupload' ).each( function () {
+    $( '#upload-files-list #fileupload' ).each( function () {
         var that = this;
-        $.getJSON( this.action, function ( result ) {
+        initFileUpload().then((result)=>{
             if ( result && result.length ) {
                 $( that ).fileupload( 'option', 'done' )
                         .call( that, null, {result: result} );
