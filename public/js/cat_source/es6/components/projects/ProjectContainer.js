@@ -8,6 +8,7 @@ import TeamsActions from '../../actions/TeamsActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
+import CommonUtils from '../../utils/commonUtils'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -435,7 +436,7 @@ class ProjectContainer extends React.Component {
       let user = member.get('user')
       let userIcon = (
         <a className="ui circular label">
-          {APP.getUserShortName(member.get('user').toJS())}
+          {CommonUtils.getUserShortName(member.get('user').toJS())}
         </a>
       )
       if (member.get('user_metadata')) {

@@ -2,6 +2,8 @@ import TeamConstants from '../../constants/TeamConstants'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageActions from '../../actions/ManageActions'
 import React from 'react'
+import CommonUtils from '../../utils/commonUtils'
+import {ModalWindow} from './ModalWindow'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -21,7 +23,7 @@ class ModifyTeam extends React.Component {
     var self = this
 
     // if ( APP.checkEmail(text) && event.key === 'Enter') {
-    if (APP.checkEmail(text)) {
+    if (CommonUtils.checkEmail(text)) {
       $(this.inputNewUSer).dropdown('set selected', value)
       this.setState({
         inputUserError: false,
@@ -49,7 +51,7 @@ class ModifyTeam extends React.Component {
 
   createLabel(text) {
     var self = this
-    if (APP.checkEmail(text)) {
+    if (CommonUtils.checkEmail(text)) {
       $(this.inputNewUSer).find('input.search').val('')
       $(this.inputNewUSer).dropdown('set selected', text)
       this.setState({
@@ -88,7 +90,7 @@ class ModifyTeam extends React.Component {
   removeUser(user) {
     ManageActions.removeUserFromTeam(this.state.team, user)
     if (user.get('uid') === APP.USER.STORE.user.uid) {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     }
     this.setState({
       showRemoveMessageUserID: null,
@@ -142,7 +144,7 @@ class ModifyTeam extends React.Component {
   }
 
   addUser() {
-    if (APP.checkEmail(this.inputNewUSer.value)) {
+    if (CommonUtils.checkEmail(this.inputNewUSer.value)) {
       ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value)
       var resendInviteArray = this.state.resendInviteArray
       resendInviteArray.push(this.inputNewUSer.value)
@@ -201,7 +203,7 @@ class ModifyTeam extends React.Component {
       this.addUsers()
     }
     if (teamNameOk) {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
     }
   }
 
@@ -303,7 +305,7 @@ class ModifyTeam extends React.Component {
               />
             ) : (
               <div className="ui tiny image label">
-                {APP.getUserShortName(user.toJS())}
+                {CommonUtils.getUserShortName(user.toJS())}
               </div>
             )}
 
