@@ -6,6 +6,7 @@ use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -334,6 +335,7 @@ class setTranslationController extends ajaxController {
         $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
 
         $check = new QA( $src, $trg );
+        $check->setChunk($this->chunk);
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );

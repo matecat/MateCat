@@ -143,6 +143,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         }
 
         return $post_editing_effort;
+        
     }
 
 
@@ -153,10 +154,15 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         return $segment;
     }
 
-    public function getLocalWarning(){
+    public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
+
         $QA = new \QA( $this->segment, $this->translation );
+        $QA->setChunk($chunk);
+        $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
+
         $local_warning = new QALocalWarning($QA, $this->sid);
+
         return $local_warning->render();
     }
 }
