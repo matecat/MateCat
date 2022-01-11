@@ -186,29 +186,25 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->setFeatureSet( $featureSet );
+        $QA->setChunk( $this->chunk );
         $QA->setIdSegment( $this->__postInput->id );
         $QA->setSourceSegLang( $this->chunk->source );
         $QA->setTargetSegLang( $this->chunk->target );
         $QA->performConsistencyCheck();
 
-        $this->invokeLocalWarningsOnFeatures($QA);
+        $this->invokeLocalWarningsOnFeatures();
 
         $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
     }
 
-    private function invokeLocalWarningsOnFeatures(QA $qa) {
+    private function invokeLocalWarningsOnFeatures() {
         $data = [];
-
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
             'src_content' => $this->__postInput->src_content,
             'trg_content' => $this->__postInput->trg_content,
             'project'     => $this->project,
             'chunk'       => $this->chunk
         ] );
-
-        if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
-            $qa->addError(QA::GLOSSARY_BLACKLIST_MATCH);
-        }
 
         $this->result[ 'data' ] = $data;
     }

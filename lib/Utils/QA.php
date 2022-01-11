@@ -120,6 +120,11 @@ class errObject {
 class QA {
 
     /**
+     * @var Chunks_ChunkStruct
+     */
+    protected $chunk;
+
+    /**
      * @var FeatureSet
      */
     protected $featureSet;
@@ -1052,6 +1057,25 @@ class QA {
     }
 
     /**
+     * @return Chunks_ChunkStruct
+     */
+    public function getChunk() {
+        return $this->chunk;
+    }
+
+    /**
+     * @param $chunk
+     *
+     * @return $this
+     */
+    public function setChunk( $chunk ) {
+        $this->chunk = $chunk;
+
+        return $this;
+    }
+
+
+    /**
      * @param FeatureSet $featureSet
      *
      * @return $this
@@ -1547,6 +1571,7 @@ class QA {
         $this->_checkNewLineConsistency();
         $this->_checkSymbolConsistency();
         $this->_checkSizeRestriction();
+        $this->_checkGlossaryBlacklist();
 
         // all checks completed
         return $this->getErrors();
@@ -2359,6 +2384,42 @@ class QA {
             $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $Filter->fromLayer1ToLayer2( $this->getTargetSeg() ) );
             if(false === $check){
                 $this->addError( self::ERR_SIZE_RESTRICTION  );
+            }
+        }
+    }
+
+    /**
+     * Check glossary blacklist
+     *
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    protected function _checkGlossaryBlacklist()
+    {
+        if($this->chunk === null or $this->featureSet === null){
+            return;
+        }
+
+        // Add blacklist glossary warnings
+        $project = $this->chunk->getProject();
+
+        $dao = new \Projects_MetadataDao() ;
+        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id,  'has_blacklist' ) ;
+
+        if($has_blacklist){
+            $data = [];
+            $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
+                'src_content' => $this->source_seg,
+                'trg_content' => $this->target_seg,
+                'project'     => $this->chunk->getProject(),
+                'chunk'       => $this->chunk
+            ] );
+
+            if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
+                $this->addError(QA::GLOSSARY_BLACKLIST_MATCH);
             }
         }
     }

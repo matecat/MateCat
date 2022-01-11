@@ -143,6 +143,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         }
 
         return $post_editing_effort;
+        
     }
 
 
@@ -154,28 +155,11 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
     }
 
     public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
+
         $QA = new \QA( $this->segment, $this->translation );
+        $QA->setChunk($chunk);
+        $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
-
-        // Add blacklist glossary warnings
-        $project = $chunk->getProject();
-
-        $dao = new \Projects_MetadataDao() ;
-        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id,  'has_blacklist' ) ;
-
-        if($has_blacklist){
-            $data = [];
-            $data = $featureSet->filter( 'filterSegmentWarnings', $data, [
-                    'src_content' => $this->segment,
-                    'trg_content' => $this->translation,
-                    'project'     => $chunk->getProject(),
-                    'chunk'       => $chunk
-            ] );
-
-            if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
-                $QA->addError(QA::GLOSSARY_BLACKLIST_MATCH);
-            }
-        }
 
         $local_warning = new QALocalWarning($QA, $this->sid);
 
