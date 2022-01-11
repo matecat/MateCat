@@ -155,6 +155,21 @@ class getWarningController extends ajaxController {
     }
 
     /**
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    private function invokeGlobalWarningsOnFeatures() {
+
+        $this->result = $this->featureSet->filter( 'filterGlobalWarnings', $this->result, [
+                'chunk' => $this->chunk,
+        ] );
+
+    }
+
+    /**
      * Performs a check on single segment
      *
      * @throws Exception
@@ -171,28 +186,19 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->setFeatureSet( $featureSet );
+        $QA->setChunk( $this->chunk );
         $QA->setIdSegment( $this->__postInput->id );
         $QA->setSourceSegLang( $this->chunk->source );
         $QA->setTargetSegLang( $this->chunk->target );
         $QA->performConsistencyCheck();
 
-        $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
-
         $this->invokeLocalWarningsOnFeatures();
-    }
 
-
-    private function invokeGlobalWarningsOnFeatures() {
-
-        $this->result = $this->featureSet->filter( 'filterGlobalWarnings', $this->result, [
-                'chunk' => $this->chunk,
-        ] );
-
+        $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
     }
 
     private function invokeLocalWarningsOnFeatures() {
         $data = [];
-
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
             'src_content' => $this->__postInput->src_content,
             'trg_content' => $this->__postInput->trg_content,

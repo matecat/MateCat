@@ -9,8 +9,9 @@
 namespace Features;
 
 use AMQHandler;
-use Features\QaCheckBlacklist\BlacklistFromZip;
+use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects\ProjectModel;
+use RedisHandler;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
 use Translations\WarningStruct;
@@ -67,19 +68,24 @@ class QaCheckBlacklist extends BaseFeature {
         /** @var $chunk \Chunks_ChunkStruct */
         $chunk = $params[ 'chunk' ];
 
-        $queue_element = array(
-                'id_segment'          => $translation['id_segment'],
-                'id_job'              => $translation['id_job'],
-                'id_project'          => $chunk->id_project,
-                'segment'             => $segment['segment'],
-                'translation'         => $translation['translation'],
-                'recheck_translation' => true,
-                'propagated_ids'      => $params['propagated_ids']
-        ) ;
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
+
+        $queue_element = [
+            'id_segment'          => $translation['id_segment'],
+            'id_job'              => $translation['id_job'],
+            'job_password'        => $chunk->password,
+            'id_project'          => $chunk->id_project,
+            'segment'             => $segment['segment'],
+            'translation'         => $translation['translation'],
+            'recheck_translation' => true,
+            'from_upload'         => $blacklistUtils->checkIfExists($chunk->id, $chunk->password),
+            'propagated_ids'      => $params['propagated_ids']
+        ] ;
 
         self::enqueueTranslationCheck( $queue_element ) ;
-
     }
+
+
 
     public function filterGlobalWarnings( $result, $params ) {
         /**
@@ -115,20 +121,16 @@ class QaCheckBlacklist extends BaseFeature {
         $target = $params['trg_content'] ;
 
         /**
-         * @var $project \Projects_ProjectStruct
-         */
-        $project = $params['project'];
-
-        /**
          * @var $chunk \Chunks_ChunkStruct
          */
-        $chunk =$params['chunk'] ;
+        $chunk = $params['chunk'] ;
 
-        $blacklist = new BlacklistFromZip( $project->getFirstOriginalZipPath(),  $chunk->id ) ;
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
+        $blacklist = $blacklistUtils->getAbstractBlacklist($chunk);
 
-        $data['blacklist'] = array(
+        $data['blacklist'] = [
                 'matches' => $blacklist->getMatches( $target )
-        );
+        ];
 
         return $data;
     }

@@ -232,7 +232,6 @@ class TagEntity extends Component {
           onMouseLeave={() => tooltipToggle()}
           onClick={(e) => {
             e.stopPropagation()
-            console.log('entityId', entityId)
             this.onClickBound(entityId, entityPlaceholder)
             !openSplit &&
               setTimeout(() => {

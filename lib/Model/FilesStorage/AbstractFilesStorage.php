@@ -3,6 +3,8 @@
 namespace FilesStorage;
 
 use Database;
+use Glossary\Blacklist\BlacklistDao;
+use Glossary\Blacklist\BlacklistStruct;
 use Log;
 use PDO;
 
@@ -438,5 +440,71 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      */
     public static function isOnS3(){
         return (\INIT::$FILE_STORAGE_METHOD === 's3');
+    }
+
+    /**
+     **********************************************************************************************
+     * 5. BLACKLIST FILES
+     **********************************************************************************************
+     */
+
+    public function deleteBlacklistFile($filePath) {
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+
+        if ( $isFsOnS3 ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            return $s3Client->deleteItem([
+                    'bucket' => static::$FILES_STORAGE_BUCKET,
+                    'key'    => $filePath,
+            ]);
+        }
+
+        return unlink($filePath);
+    }
+
+    /**
+     * @param string              $filePath
+     * @param \Chunks_ChunkStruct $chunkStruct
+     * @param                     $uid
+     *
+     * @return mixed
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
+     */
+    public function saveBlacklistFile($filePath, \Chunks_ChunkStruct $chunkStruct, $uid) {
+
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+        $jid = $chunkStruct->id;
+        $password = $chunkStruct->password;
+
+        if ( $isFsOnS3 ) {
+            $blacklistPath = 'glossary' . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password . DIRECTORY_SEPARATOR . 'blacklist.txt';
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            $s3Client->uploadItem( [
+                'bucket' => static::$FILES_STORAGE_BUCKET,
+                'key'    => $blacklistPath,
+                'source' => $filePath
+            ] );
+        } else {
+            $blacklistPath = \INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password;
+            if(!is_dir($blacklistPath)){
+                mkdir($blacklistPath, 0755, true);
+            }
+
+            $storedBytes = file_put_contents( $blacklistPath . DIRECTORY_SEPARATOR . "blacklist.txt", file_get_contents( $filePath ) );
+            if ( $storedBytes === false ) {
+                throw new \Exception( 'Failed to save blacklist file on disk.', -14 );
+            }
+        }
+
+        $model = new BlacklistStruct($chunkStruct);
+        $model->uid = $uid;
+        $model->target = $chunkStruct->target;
+        $model->file_name = "blacklist.txt";
+        $model->file_path = $blacklistPath;
+
+        $dao = new BlacklistDao();
+
+        return $dao->save($model);
     }
 }

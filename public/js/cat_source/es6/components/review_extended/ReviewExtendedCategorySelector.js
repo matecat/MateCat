@@ -38,7 +38,7 @@ class ReviewExtendedCategorySelector extends React.Component {
       active: this.props.active,
       classCatName: true,
     })
-    if (this.props.category.severities.length > 6) {
+    if (this.props.category.severities.length > 7) {
       severities = this.props.category.severities.map((severity, i) => {
         return (
           <div

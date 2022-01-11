@@ -192,7 +192,7 @@ const SegmentActions = {
       UI.render({
         firstLoad: false,
         segmentToOpen: sid,
-      }).done(
+      }).then(
         () => callback && setTimeout(() => callback.apply(this, [sid]), 1000),
       )
     }
@@ -820,12 +820,12 @@ const SegmentActions = {
     })
   },
 
-  updateGlossaryData(data) {
+  updateGlossaryData(data, sid) {
     if (QaCheckGlossary.enabled() && data.glossary) {
       QaCheckGlossary.update(data.glossary)
     }
     if (QaCheckBlacklist.enabled() && data.blacklist) {
-      QaCheckBlacklist.update(data.blacklist)
+      SegmentActions.addQaBlacklistMatches(sid, data.blacklist.matches)
     }
   },
 

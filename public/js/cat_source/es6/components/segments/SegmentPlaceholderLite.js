@@ -86,7 +86,6 @@ class SegmentPlaceholderLite extends React.Component {
     const outerDivPadding = 33
     // Set min Editor height
     const minEditorHeight = 90
-    // console.log(`Computed ${sid}, height: ${maxEditor}`)
     const computedH =
       maxEditor + outerDivPadding > minEditorHeight
         ? maxEditor + outerDivPadding

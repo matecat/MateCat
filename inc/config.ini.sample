@@ -10,6 +10,9 @@ ENV = "production"    ; set to "production" for production environment
 ;If you don't need this check set the defined CHECK_FS to false
 CHECK_FS = no
 
+;Blacklist max file size
+BLACKLIST_FILE_SIZE_MAX = 2097152
+
 [development]
 CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
 COOKIE_DOMAIN = "localhost"

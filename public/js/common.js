@@ -133,6 +133,10 @@ window.APP = {
     })
     return APP.confirmValue // TODO: this return value is clearly meaningless
   },
+  keydownStopPropagation: (event) =>
+    event.key !== 'Escape' && event.stopPropagation(),
+  keydownPreventDefault: (event) =>
+    event.key === 'Tab' && event.preventDefault(),
   popup: function (conf) {
     this.closePopup()
 
@@ -416,9 +420,23 @@ window.APP = {
     var newPopup = renderPopup(conf)
 
     $('body').append(newPopup)
+
+    const modalRef = document.getElementsByClassName('modal')[0]
+    if (modalRef) {
+      modalRef.setAttribute('tabIndex', '0')
+      modalRef.addEventListener('keydown', this.keydownStopPropagation)
+      modalRef.addEventListener('keydown', this.keydownPreventDefault)
+      modalRef.focus()
+    }
   },
 
   closePopup: function () {
+    const modalRef = document.getElementsByClassName('modal')[0]
+    if (modalRef) {
+      modalRef.removeEventListener('keydown', this.keydownStopPropagation)
+      modalRef.removeEventListener('keydown', this.keydownPreventDefault)
+    }
+
     $('.modal[data-type=view]').hide()
     $('.modal:not([data-type=view])').remove()
     // TODO: not sure this is still useful
