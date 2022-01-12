@@ -87,8 +87,8 @@ class Header extends React.Component {
   }
 
   updateTeam = (team) => {
-    if (!this.state.teams) return
-    this.selectedTeam = team
+    if (!this.state.teams || !this.selectedTeam) return
+    if (this.selectedTeam.get('id') === team.get('id')) this.selectedTeam = team
     this.setState({
       teams: this.state.teams.map((teamState) =>
         team.get('id') === teamState.get('id') ? team : teamState,
