@@ -21,7 +21,6 @@ class CatUtils {
     const crlfPlaceholder      = '##$_0D0A$##';
     const lfPlaceholderRegex   = '/\#\#\$_0A\$\#\#/g';
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
-    // const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
     const crlfPlaceholderRegex = '/#\#\$_0D\$#\#\#\#\$_0A\$#\#/g';
 
     const tabPlaceholder      = '##$_09$##';
