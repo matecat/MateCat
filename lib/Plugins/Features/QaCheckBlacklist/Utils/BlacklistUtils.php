@@ -9,6 +9,8 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Glossary\Blacklist\BlacklistDao;
+use Translations\WarningDao;
+use Translations\WarningModel;
 
 class BlacklistUtils
 {
@@ -40,6 +42,17 @@ class BlacklistUtils
 
         $this->clearCached($this->checkIfExistsRedisKey($model->id_job, $model->password));
         $this->clearCached($this->getListRedisKey($model->id_job, $model->password));
+        $this->clearCached($this->getJobCacheRedisKey($model->id_job, $model->password));
+
+        // delete all translation_warnings associated to this job
+        $chunk = \Chunks_ChunkDao::getByIdAndPassword($model->id_job, $model->password);
+        $warnings = WarningDao::findByChunkAndScope($chunk, 'blacklist');
+
+        foreach ($warnings as $warning){
+            WarningDao::deleteByScope($model->id_job, $warning->id_segment, 'blacklist');
+        }
+
+        // "blacklist:id_job:{$this->id_job}:password:{$this->password}"
     }
 
     /**
@@ -204,5 +217,16 @@ class BlacklistUtils
     private function getListRedisKey($jid, $password)
     {
         return md5(self::GET_LIST_REDIS_KEY . '-' .$jid.'-'.$password);
+    }
+
+    /**
+     * @param $jid
+     * @param $password
+     *
+     * @return string
+     */
+    private function getJobCacheRedisKey($jid, $password)
+    {
+        return md5("blacklist:id_job:{$jid}:password:{$password}");
     }
 }
