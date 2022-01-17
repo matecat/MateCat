@@ -9,6 +9,6 @@
 
 namespace Engines\MMT;
 
-class MMTServiceApiRequestDenied extends MMTServiceApiException {
+class MMTServiceApiRequestException extends MMTServiceApiException {
 
 }

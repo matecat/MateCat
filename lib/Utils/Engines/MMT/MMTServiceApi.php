@@ -418,11 +418,10 @@ class MMTServiceApi {
 
         if ( $handler->hasError( $resourceHashId ) ) {
 
-            $name = "ConnectionException";
             if ( $handler->getError( $resourceHashId )[ 'errno' ] == 28 ) {
                 throw new MMTServiceApiException( "TimeoutException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})" );
             } elseif ( $handler->getError( $resourceHashId )[ 'http_code' ] ) {
-                throw new MMTServiceApiRequestDenied( $name, $handler->getError( $resourceHashId )[ 'http_code' ], "Request denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})" );
+                throw new MMTServiceApiRequestException( "ServiceException", $handler->getError( $resourceHashId )[ 'http_code' ], "Request denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})" );
             } else {
                 throw new MMTServiceApiException( "ConnectionException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})" );
             }
