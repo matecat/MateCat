@@ -1,7 +1,7 @@
 <?php
 
 use Engines\MMT\MMTServiceApi;
-use Engines\MMT\MMTServiceApiRequestDenied;
+use Engines\MMT\MMTServiceApiRequestException;
 
 /**
  * Created by PhpStorm.
@@ -171,8 +171,8 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         try {
             $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ] );
-        } catch ( MMTServiceApiRequestDenied $e ) {
-            // MMT license expired/changed (401) or account deleted (403)
+        } catch ( MMTServiceApiRequestException $e ) {
+            // MMT license expired/changed (401) or account deleted (403) or whatever HTTP exception
             Log::doJsonLog( $e->getMessage() );
 
             return true;

@@ -112,8 +112,8 @@ class INIT {
     public static $AUTHCOOKIEDURATION           = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE         = 62914560;         // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024; // bytes
-    public static $MAX_NUM_FILES    = 100;
-    public static $MAX_SOURCE_WORDS = 250000;
+    public static $MAX_NUM_FILES                = 100;
+    public static $MAX_SOURCE_WORDS             = 250000;
 
     /**
      * DQF configuration
@@ -194,8 +194,8 @@ class INIT {
      * MateCat Filters configuration
      */
     public static $FILTERS_USER_AGENT                    = "MateCat Community Instance";
-    public static $FILTERS_ADDRESS                       = "https://translated-matecat-filters-v1.p.mashape.com";
-    public static $FILTERS_MASHAPE_KEY                   = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
+    public static $FILTERS_ADDRESS                       = "https://translated-matecat-filters-v1.p.rapidapi.com";
+    public static $FILTERS_RAPIDAPI_KEY                  = "https://rapidapi.com/translated/api/matecat-filters to obtain your RapidAPI Key";
     public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
     public static $FILTERS_EMAIL_FAILURES                = false;
 

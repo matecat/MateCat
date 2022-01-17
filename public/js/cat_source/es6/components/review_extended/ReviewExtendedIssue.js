@@ -16,20 +16,19 @@ class ReviewExtendedIssue extends React.Component {
       visible:
         _.isUndefined(this.props.issue.visible) || this.props.issue.visible,
     }
+    this.issueCategories = JSON.parse(config.lqa_nested_categories).categories
   }
 
   getCategory() {
-    let id_category = this.props.issue.id_category
-    config.lqa_flat_categories = config.lqa_flat_categories
-      .replace(/\"\[/g, '[')
-      .replace(/\]"/g, ']')
-      .replace(/\"\{/g, '{')
-      .replace(/\}"/g, '}')
-    return _(JSON.parse(config.lqa_flat_categories))
-      .filter(function (e) {
-        return parseInt(e.id) == id_category
-      })
-      .first()
+    const id_category = this.props.issue.id_category
+    return this.issueCategories.find((cat) => parseInt(cat.id) == id_category)
+  }
+  getSeverity() {
+    const id_category = this.props.issue.id_category
+    const {severity} = this.props.issue
+    return this.issueCategories
+      .find((cat) => parseInt(cat.id) == id_category)
+      .severities.find((sev) => sev.label === severity)
   }
 
   deleteIssue(event) {
@@ -231,7 +230,8 @@ class ReviewExtendedIssue extends React.Component {
 
   render() {
     if (this.state.visible) {
-      let category = this.getCategory()
+      const category = this.getCategory()
+      const severity = this.getSeverity()
       // let formatted_date = moment(this.props.issue.created_at).format('lll');
 
       let commentViewButtonClass = this.state.commentView ? 're-active' : ''
@@ -298,8 +298,8 @@ class ReviewExtendedIssue extends React.Component {
                 {category.label}
               </span>
               <b>
-                <span title="Type of severity">
-                  [{this.props.issue.severity.substring(0, 3)}]
+                <span title="Type of severity" title={severity.label}>
+                  [{severity.code}]
                 </span>
               </b>
             </div>

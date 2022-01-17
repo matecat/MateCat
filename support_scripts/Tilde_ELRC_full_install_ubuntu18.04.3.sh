@@ -218,7 +218,7 @@ sudo systemctl enable matecat-filter.service
 sudo systemctl start matecat-filter.service
 
 sudo sed -i "s/FILTERS_ADDRESS.*/FILTERS_ADDRESS = http:\/\/localhost:8732/g" /home/$MATECAT_USER/cattool/inc/config.ini
-sudo sed -i "s/FILTERS_MASHAPE_KEY.*/FILTERS_MASHAPE_KEY = /g" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s/FILTERS_RAPIDAPI_KEY.*/FILTERS_RAPIDAPI_KEY = /g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo chown -R www-data:$MATECAT_USER $MATECAT_STORAGE_DIR
 sudo echo "127.0.0.1    $MATECAT_SERVERNAME" >> /etc/hosts
 
