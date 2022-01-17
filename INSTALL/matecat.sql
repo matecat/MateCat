@@ -71,6 +71,27 @@ CREATE TABLE `api_keys` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `blacklist_files`
+--
+
+DROP TABLE IF EXISTS `blacklist_files`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `blacklist_files` (
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,
+      `id_job` bigint(20) NOT NULL,
+      `password` varchar(45) NOT NULL,
+      `file_path` varchar(255) NOT NULL,
+      `file_name` varchar(255) NOT NULL,
+      `target` VARCHAR(10) NOT NULL,
+      `uid` bigint(20) NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `uid` (`uid`) USING BTREE,
+        KEY `id_job` (`id_job`) USING BTREE,
+        UNIQUE KEY `id_job_password` (`id_job`, `password`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+--
 -- Table structure for table `chunk_completion_events`
 --
 
@@ -1338,7 +1359,7 @@ USE `matecat`;
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
-INSERT INTO `engines` VALUES (11,'MyMemory (All Pairs)','TM','Machine translation from Google Translate and Microsoft Translator.','http://api.mymemory.translated.net','get','set','update','delete',
+INSERT INTO `engines` VALUES (11,'MyMemory (All Pairs)','TM','Machine translation from Google Translate and Microsoft Translator.','https://api.mymemory.translated.net','get','set','update','delete',
                                  '{\"gloss_get_relative_url\":\"glossary/get\",\"gloss_set_relative_url\":\"glossary/set\",\"gloss_update_relative_url\":\"glossary/update\",\"glossary_import_relative_url\":\"glossary/import\",\"glossary_export_relative_url\":\"glossary/export\",\"gloss_delete_relative_url\":\"glossary/delete\",\"tmx_import_relative_url\":\"tmx/import\",\"tmx_status_relative_url\":\"tmx/status\",\"tmx_export_create_url\":\"tmx/export/create\",\"tmx_export_check_url\":\"tmx/export/check\",\"tmx_export_download_url\":\"tmx/export/download\",\"tmx_export_list_url\":\"tmx/export/list\",\"tmx_export_email_url\":\"tmx/export/create\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}','MyMemory','{}','1',0,1,NULL);
 
 UPDATE engines SET id = 0 WHERE id = 10 ;
