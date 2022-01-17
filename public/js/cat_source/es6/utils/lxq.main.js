@@ -326,7 +326,7 @@ LXQ.init = function () {
       punctuation: '#3AB45F',
       spaces: '#3AB45F',
       urls: '#b8a300',
-      spelling: '#563d7c',
+      spelling: '#b9a7d3',
       specialchardetect: '#38C0C5',
       mspolicheck: '#38C0C5',
       multiple: '#EA92B8',
