@@ -30,7 +30,7 @@ const TAGS_UTILS = {
     return str
       .replace(
         config.crlfPlaceholderRegex,
-        `<span class="tag small tag-selfclosed" contenteditable="false"> </span><br>`,
+        `<span class="tag small ${tagSignatures['lineFeed'].style}"> </span><br>`,
       )
       .replace(
         config.lfPlaceholderRegex,
