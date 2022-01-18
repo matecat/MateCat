@@ -1,5 +1,6 @@
 import {peeDataGraph} from './cat_source/es6/api/peeDataGraph'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import {peeDataTable} from './cat_source/es6/api/peeDataTable/peeDataTable'
 window.PEE = {
   chartOptions: {
     trendlines: {
@@ -284,8 +285,8 @@ window.PEE = {
     $('#reset-button').on('click', PEE.resetGraphFilterToUrl)
 
     $('#date-select').on('change', function () {
-      var value = $(this).dropdown('get value')[0]
-      PEE.requestDataTable(value).done(function (data) {
+      var value = $(this).dropdown('get value')
+      peeDataTable(value).then(function (data) {
         PEE.tableGenerate(data)
       })
     })
@@ -301,7 +302,6 @@ window.PEE = {
       ])
     $form.form('validate form')
     if (!$form.hasClass('error')) {
-      console.log(fields)
       PEE.addGraphFilterToUrl(fields)
       PEE.requestDataGraph(fields).then(function (data) {
         PEE.createDataForGraph(data)
@@ -321,16 +321,6 @@ window.PEE = {
       fuzzyBand: fields.fuzzy_band,
     })
   },
-  requestDataTable: function (data) {
-    var data = {
-      date: data,
-    }
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      url: '/api/app/utils/pee/table',
-    })
-  },
   createDataForGraph: function (data) {
     var columns = []
     var rows = []
@@ -340,7 +330,7 @@ window.PEE = {
       }).name
     }
     var findAnnotations = function (l1, l2, date) {
-      return (annotation = PEE.annotations.find(function (elem) {
+      return PEE.annotations.find(function (elem) {
         return (
           elem.date === date &&
           (function (l1, l2, elem) {
@@ -354,7 +344,7 @@ window.PEE = {
             })
           })(l1, l2, elem)
         )
-      }))
+      })
     }
     data.lines.forEach(function (langs) {
       var column =
@@ -684,7 +674,6 @@ window.PEE = {
     if (keyParam) {
       var filters = keyParam.split(',')
       //Check if present and enable it
-      console.log(keyParam)
       if ($.tablesorter.storage) {
         $.tablesorter.storage(this, 'tablesorter-filters', filters)
       }
