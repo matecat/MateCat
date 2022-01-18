@@ -100,7 +100,6 @@ class SegmentFooter extends React.Component {
       tabs: this.registerTabInit(tabs, SegmentStore._footerTabsConfig.toJS()),
       hideMatches: hideMatches,
     }
-    this.selectedTab = 0
     this.registerTab = this.registerTab.bind(this)
     this.modifyTabVisibility = this.modifyTabVisibility.bind(this)
     this.getTabContainer = this.getTabContainer.bind(this)
@@ -299,12 +298,10 @@ class SegmentFooter extends React.Component {
 
   tabClick(tabName, forceOpen) {
     this.changeTab(tabName, forceOpen)
-    setTimeout(() => {
-      SegmentActions.setTabOpen(this.props.sid, tabName)
-    })
   }
 
   changeTab(tabName, forceOpen) {
+    console.log('@', tabName)
     forceOpen = forceOpen ? forceOpen : false
     let tabs = jQuery.extend(true, {}, this.state.tabs)
     let tab = jQuery.extend(true, {}, tabs[tabName])
@@ -322,28 +319,23 @@ class SegmentFooter extends React.Component {
       this.setHideMatchesCookie(false)
     }
     tabs[tabName] = tab
-    //Update selected Tab
-    let tabsEnabled = _.filter(this.state.tabs, (tab) => tab.visible)
-    this.selectedTab = _.findIndex(
-      tabsEnabled,
-      (elem) => tab.code === elem.code,
-    )
 
     this.setState({
       tabs: tabs,
     })
+
+    SegmentActions.setTabOpen(this.props.sid, tabName)
   }
 
   getNextTab() {
-    let idx = this.selectedTab
-    let tabs = _.filter(this.state.tabs, (tab) => tab.visible)
-    let tabIndex = (idx + 1) % tabs.length
-    let tabToOpen = tabs[tabIndex]
-    tabToOpen = Object.keys(this.state.tabs).find(
-      (key) => this.state.tabs[key].code === tabToOpen.code,
-    )
-    this.selectedTab = tabIndex
-    this.changeTab(tabToOpen, true)
+    const tabs = Object.entries(this.state.tabs)
+      .map(([key, value]) => ({...value, name: key}))
+      .filter(({visible}) => visible)
+    const actualTabIndex = tabs.findIndex(({open}) => open)
+    const nextTabIndex =
+      actualTabIndex + 1 <= tabs.length - 1 ? actualTabIndex + 1 : 0
+    const tabOpened = tabs.find(({code}) => code === tabs[nextTabIndex].code)
+    if (tabOpened) this.changeTab(tabOpened.name, true)
   }
 
   showMessage(sid, message) {
