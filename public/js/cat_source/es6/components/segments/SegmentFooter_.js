@@ -44,31 +44,34 @@ const TAB_ITEMS = {
     tabClass: 'cross-matches',
   },
 }
+const DELAY_MESSAGE = 7000
+const initialState = {
+  configurations: SegmentStore._footerTabsConfig.toJS(),
+  tabItems: Object.entries(TAB_ITEMS).map(([key, value]) => ({
+    ...value,
+    name: key,
+    enabled: false,
+    visible: false,
+    open: false,
+    elements: [],
+    label:
+      value.code === 'tm'
+        ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+        : value.label,
+  })),
+}
 
-function SegmentFooter_({sid, segment, fid}) {
+function SegmentFooter_({sid, segment}) {
   const [configurations, setConfigurations] = useState(
-    SegmentStore._footerTabsConfig.toJS(),
+    initialState.configurations,
   )
-  const [tabItems, setTabItems] = useState(
-    Object.entries(TAB_ITEMS).map(([key, value]) => {
-      return {
-        ...value,
-        name: key,
-        enabled: false,
-        visible: false,
-        open: false,
-        elements: [],
-        label:
-          value.code === 'tm'
-            ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
-            : value.label,
-      }
-    }),
-  )
-  const [tabStateChanges, setTabStateChanges] = useState({})
-  const [activeTab, setActiveTab] = useState({})
+  const [tabItems, setTabItems] = useState(initialState.tabItems)
+  const [tabStateChanges, setTabStateChanges] = useState(undefined)
+  const [activeTab, setActiveTab] = useState(undefined)
+  const [userChangedTab, setUserChangedTab] = useState(undefined)
+  const [message, setMessage] = useState('')
 
-  const hideMatchesCookie = useMemo(() => {
+  const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
     if (!isUndefined(Cookies.get(`${cookieName}-${config.id_job}`)))
       return Cookies.get(`${cookieName}-${config.id_job}`) === 'true'
@@ -83,16 +86,38 @@ function SegmentFooter_({sid, segment, fid}) {
     })
   }, [])
 
+  const nextTab = useMemo(() => {
+    const tabs = tabItems.filter(({enabled, visible}) => enabled && visible)
+    const actualTabIndex = tabs.findIndex(({open}) => open)
+    return actualTabIndex + 1 <= tabs.length - 1
+      ? tabs[actualTabIndex + 1]?.name
+      : tabs[0]?.name
+  }, [tabItems])
+
   // add listeners
   useEffect(() => {
+    const handleShortcutsKeyDown = (e) => {
+      if (segment.opened) {
+        if (
+          (UI.isMac && e.ctrlKey && e.altKey && e.code === 'KeyS') ||
+          (!UI.isMac && e.altKey && e.code === 'KeyS')
+        ) {
+          setUserChangedTab({[Symbol()]: nextTab})
+        }
+      }
+    }
     const registerTab = (tabs, configs) => setConfigurations(configs)
     const modifyTabVisibility = (name, visible) =>
       setTabStateChanges({name, visible})
-    const openTab = (sidProp, name) => sid === sidProp && setActiveTab({name})
+    const openTab = (sidProp, name) =>
+      sid === sidProp && setActiveTab({name, forceOpen: true})
     const addTabIndex = (sidProp, name, index) =>
       sid === sidProp && setTabStateChanges({name, index})
+    const closeAllTabs = () => setTabStateChanges({visible: false})
+    const showMessage = (sidProp, message) =>
+      sid === sidProp && setMessage(message)
 
-    //document.addEventListener('keydown', this.handleShortcutsKeyDown)
+    document.addEventListener('keydown', handleShortcutsKeyDown)
     SegmentStore.addListener(SegmentConstants.REGISTER_TAB, registerTab)
     SegmentStore.addListener(
       SegmentConstants.MODIFY_TAB_VISIBILITY,
@@ -100,55 +125,62 @@ function SegmentFooter_({sid, segment, fid}) {
     )
     SegmentStore.addListener(SegmentConstants.OPEN_TAB, openTab)
     SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, addTabIndex)
-    /*SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs)
-    SegmentStore.addListener(
-      SegmentConstants.SHOW_FOOTER_MESSAGE,
-      this.showMessage,
-    ) */
+    SegmentStore.addListener(SegmentConstants.CLOSE_TABS, closeAllTabs)
+    SegmentStore.addListener(SegmentConstants.SHOW_FOOTER_MESSAGE, showMessage)
 
     return () => {
+      document.removeEventListener('keydown', handleShortcutsKeyDown)
       SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, registerTab)
       SegmentStore.removeListener(
         SegmentConstants.MODIFY_TAB_VISIBILITY,
         modifyTabVisibility,
       )
       SegmentStore.removeListener(SegmentConstants.OPEN_TAB, openTab)
+      SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, addTabIndex)
+      SegmentStore.removeListener(SegmentConstants.CLOSE_TABS, closeAllTabs)
+      SegmentStore.removeListener(
+        SegmentConstants.SHOW_FOOTER_MESSAGE,
+        showMessage,
+      )
     }
-  }, [sid])
+  }, [sid, segment?.opened, nextTab])
 
   // add items
   useEffect(() => {
     setTabItems((prevState) =>
-      prevState
-        .map((item) => ({
-          ...item,
-          ...(item.name === 'alternatives' && {
-            enabled: segment.alternatives && size(segment.alternatives) > 0,
-            visible: segment.alternatives && size(segment.alternatives) > 0,
-            open: segment.alternatives && size(segment.alternatives) > 0,
-          }),
-          ...(item.name === 'messages' && {
-            enabled: segment.notes && segment.notes.length > 0,
-            visible: segment.notes && segment.notes.length > 0,
-          }),
-          ...(item.name === 'multiMatches' && {
-            enabled:
-              UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
-            visible:
-              UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
-          }),
-        }))
-        .map((item) => ({
-          ...item,
-          ...(configurations[item.name] && {...configurations[item.name]}),
-        })),
+      prevState.map((item) => ({
+        ...item,
+        ...(item.name === 'alternatives' && {
+          enabled: segment.alternatives && size(segment.alternatives) > 0,
+          visible: segment.alternatives && size(segment.alternatives) > 0,
+          open: segment.alternatives && size(segment.alternatives) > 0,
+        }),
+        ...(item.name === 'messages' && {
+          enabled: segment.notes && segment.notes.length > 0,
+          visible: segment.notes && segment.notes.length > 0,
+        }),
+        ...(item.name === 'multiMatches' && {
+          enabled: UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
+          visible: UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
+        }),
+      })),
     )
-  }, [segment, configurations])
+  }, [segment])
+
+  // merge with configurations
+  useEffect(() => {
+    setTabItems((prevState) =>
+      prevState.map((item) => ({
+        ...item,
+        ...(configurations[item.name] && {...configurations[item.name]}),
+      })),
+    )
+  }, [configurations])
 
   // set active tab
   useEffect(() => {
     if (!activeTab?.name) return
-    const hideMatches = hideMatchesCookie
+    const hideMatches = getHideMatchesCookie()
     setTabItems((prevState) => {
       const tab = prevState.find(({name}) => name === activeTab.name)
       if (tab.open && !activeTab.forceOpen && !hideMatches) {
@@ -163,17 +195,21 @@ function SegmentFooter_({sid, segment, fid}) {
         item.name === tab.name ? {...tab} : {...item, open: false},
       )
     })
-  }, [activeTab, hideMatchesCookie, setHideMatchesCookie])
+  }, [activeTab, getHideMatchesCookie, setHideMatchesCookie])
 
-  // on active tab call SegmentAction
+  // on user change tab
   useEffect(() => {
-    if (!activeTab?.name) return
-    SegmentActions.setTabOpen(sid, activeTab.name)
-  }, [activeTab, sid])
+    const name =
+      userChangedTab &&
+      userChangedTab[Object.getOwnPropertySymbols(userChangedTab)[0]]
+    if (!name) return
+    SegmentActions.setTabOpen(sid, name)
+    setActiveTab({name: name})
+  }, [userChangedTab, sid])
 
   // update tab state changes
   useEffect(() => {
-    if (!Object.keys(tabStateChanges).length) return
+    if (!tabStateChanges || !Object.keys(tabStateChanges).length) return
     setTabItems((prevState) =>
       prevState.map((item) =>
         (tabStateChanges.name && item.name === tabStateChanges.name) ||
@@ -183,6 +219,14 @@ function SegmentFooter_({sid, segment, fid}) {
       ),
     )
   }, [tabStateChanges])
+
+  // remove message after a few seconds
+  useEffect(() => {
+    if (!message) return
+    const timeout = setTimeout(() => setMessage(''), DELAY_MESSAGE)
+
+    return () => clearTimeout(timeout)
+  }, [message])
 
   const isTabLoading = ({code}) => {
     switch (code) {
@@ -303,14 +347,14 @@ function SegmentFooter_({sid, segment, fid}) {
       <li
         key={tab.code}
         className={`${!tab.visible ? 'hide' : ''} ${
-          tab.open && !hideMatchesCookie ? 'active' : ''
+          tab.open && !getHideMatchesCookie() ? 'active' : ''
         } tab-switcher tab-switcher-${tab.code} ${
           isLoading ? 'loading-tab' : ''
         }`}
         id={'segment-' + sid + tab.code}
         data-tab-class={tab.tabClass}
         data-code={tab.code}
-        onClick={() => setActiveTab({name: tab.name})}
+        onClick={() => setUserChangedTab({[Symbol()]: tab.name})}
       >
         {!isLoading ? (
           <a tabIndex="-1">
@@ -333,16 +377,15 @@ function SegmentFooter_({sid, segment, fid}) {
     <div className="footer toggle">
       <ul className="submenu">
         {tabItems.filter(({enabled}) => enabled).map((tab) => getListItem(tab))}
-
-        {/* {this.state.showMessage ? (
-          <li className="footer-message">{this.state.message}</li>
-        ) : null} */}
+        {message && <li className="footer-message">{message}</li>}
       </ul>
-      {/* {containers} */}
       {tabItems
         .filter(({enabled}) => enabled)
         .map((tab) =>
-          getTabContainer(tab, tab.open && !hideMatchesCookie ? 'active' : ''),
+          getTabContainer(
+            tab,
+            tab.open && !getHideMatchesCookie() ? 'active' : '',
+          ),
         )}
       <div className="addtmx-tr white-tx">
         <a
@@ -359,7 +402,6 @@ function SegmentFooter_({sid, segment, fid}) {
 SegmentFooter_.propTypes = {
   sid: PropTypes.string,
   segment: PropTypes.object,
-  fid: PropTypes.string,
 }
 
 export default SegmentFooter_

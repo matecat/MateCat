@@ -21,6 +21,7 @@ import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
 import {ModalWindow} from '../modals/ModalWindow'
+import SegmentFooter_ from './SegmentFooter_'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -772,7 +773,7 @@ class Segment extends React.Component {
           ) : null}
 
           {this.props.segment.opened ? (
-            <SegmentFooter
+            <SegmentFooter_
               segment={this.props.segment}
               sid={this.props.segment.sid}
               fid={this.props.fid}
