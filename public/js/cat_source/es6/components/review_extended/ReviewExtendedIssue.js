@@ -299,7 +299,11 @@ class ReviewExtendedIssue extends React.Component {
               </span>
               <b>
                 <span title="Type of severity" title={severity.label}>
-                  [{severity.code}]
+                  [
+                  {severity.code
+                    ? severity.code
+                    : severity.label.substring(0, 3)}
+                  ]
                 </span>
               </b>
             </div>
