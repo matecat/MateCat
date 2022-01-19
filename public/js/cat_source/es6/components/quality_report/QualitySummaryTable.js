@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useRef} from 'react'
 import _ from 'lodash'
 
 class QualitySummaryTable extends React.Component {
@@ -93,9 +93,6 @@ class QualitySummaryTable extends React.Component {
       let item = (
         <div className="qr-title qr-severity" key={sev.label + index}>
           <div className="qr-info">{sev.label}</div>
-          <div className="qr-label">
-            Weight: <b>{sev.penalty}</b>
-          </div>
         </div>
       )
       html.push(item)
@@ -107,7 +104,7 @@ class QualitySummaryTable extends React.Component {
         {html}
         <div className="qr-title qr-total-severity">
           <div className="qr-info">Total error points</div>
-          <div className="qr-info">
+          <div className="qr-info qr-info-total">
             <b>{totalScore}</b>
           </div>
         </div>
@@ -134,14 +131,16 @@ class QualitySummaryTable extends React.Component {
           !_.isUndefined(totalIssues) &&
           totalIssues.get('founds').get(currentSev.label)
         ) {
-          catTotalWeightValue =
-            catTotalWeightValue +
-            totalIssues.get('founds').get(currentSev.label) *
-              severityFound.get(0).get('penalty')
+          let issues = totalIssues.get('founds').get(currentSev.label)
+          let total = issues * severityFound.get(0).get('penalty')
+          catTotalWeightValue = catTotalWeightValue + total
           catHtml.push(
-            <div className="qr-element severity" key={'sev-' + i}>
-              {totalIssues.get('founds').get(currentSev.label)}
-            </div>,
+            <CellElement
+              issues={issues}
+              total={total}
+              severityFound={severityFound}
+              key={'sev-' + i}
+            />,
           )
         } else {
           const isSeverityInsideCat = severityFound.size === 0
@@ -247,3 +246,22 @@ class QualitySummaryTable extends React.Component {
 }
 
 export default QualitySummaryTable
+
+const CellElement = ({issues, severityFound, total}) => {
+  const container = useRef(null)
+  useEffect(() => {
+    $(container.current).popup({
+      position: 'top center',
+      offset: 60,
+    })
+  }, [])
+  return (
+    <div
+      className="qr-element severity"
+      data-html={`Severity Weight: ${severityFound.get(0).get('penalty')}`}
+      ref={container}
+    >
+      {issues}
+    </div>
+  )
+}

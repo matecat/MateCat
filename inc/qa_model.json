@@ -1,56 +1,121 @@
 {
   "model": {
     "version" : 1,
-    "label": "MateCat default",
-
+    "label": "Airbnb",
     "categories": [
       {
-        "label": "Style (readability, consistent style and tone)",
+        "label": "Style (Inconsistent style, Readability, Unidiomatic)",
         "code": "STY",
-        "dqf_id" : 4
-      }
-      ,{
-        "label": "Tag issues (mismatches, whitespaces)",
-        "code": "TAG",
-        "dqf_id" : 5
+        "severities": [
+          {
+            "label": "Polishing",
+            "code": "Pol",
+            "dqf_id" : 6,
+            "penalty": 0
+          },
+          {
+            "label": "Repetition",
+            "code": "Rep",
+            "dqf_id" : 7,
+            "penalty": 0
+          },
+          {
+            "label": "Minor",
+            "code": "Min",
+            "dqf_id" : 8,
+            "penalty": 1
+          },
+          {
+            "label": "Major",
+            "code": "Maj",
+            "dqf_id" : 9,
+            "penalty": 2
+          },
+          {
+            "label": "Context Minor",
+            "code": "CMin",
+            "dqf_id" : 10,
+            "penalty": 0
+          },
+          {
+            "label": "Context Major",
+            "code": "CMaj",
+            "dqf_id" : 11,
+            "penalty": 0
+          }
+        ]
       },
       {
-        "label": "Translation errors (mistranslation, additions or omissions)",
-        "code": "TER",
-        "dqf_id" : 1
+        "label": "Accuracy (Addition, Omission, Mistranslation, Untranslated, Inconsistency)",
+        "code": "ACC"
       },
       {
-        "label": "Terminology and translation consistency",
-        "code": "TRM",
-        "dqf_id" : 3
+        "label": "Client guidelines (Terminology, Style Guide, Project instructions)",
+        "code": "GUI"
       },
       {
-        "label": "Language quality (grammar, punctuation, spelling)",
-        "code": "LQ",
-        "dqf_id" : 2
+        "label": "Linguistic (Punctuation, Spelling, Grammar, Locale conventions)",
+        "code": "LNG"
+      },{
+        "label": "Client Edit",
+        "code": "CLI",
+        "severities": [
+          {
+            "label": "Polishing",
+            "code": "Pol",
+            "dqf_id" : 12,
+            "penalty": 1
+          }
+        ]
+      },{
+        "label": "Kudos",
+        "code": "KUD",
+        "severities": [
+          {
+            "label": "Polishing",
+            "code": "Pol",
+            "dqf_id" : 13,
+            "penalty": 3
+          }
+        ]
       }
     ],
     "severities": [
       {
-        "label": "Neutral",
-        "dqf_id" : 0,
+        "label": "Repetition",
+        "code": "Rep",
+        "dqf_id" : 1,
         "penalty": 0
-      },{
+      },
+      {
         "label": "Minor",
+        "code": "Min",
         "dqf_id" : 2,
-        "penalty": 0.5
+        "penalty": 1
       },
       {
         "label": "Major",
-        "dqf_id" : 2,
-        "penalty": 2
+        "code": "Maj",
+        "dqf_id" : 3,
+        "penalty": 6
+      },
+      {
+        "label": "Context Minor",
+        "code": "CMin",
+        "dqf_id" : 4,
+        "penalty": 0
+      },
+      {
+        "label": "Context Major",
+        "code": "CMaj",
+        "dqf_id" : 5,
+        "penalty": 1
       }
     ],
-
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : [ 20, 15 ]
+        "limit" : [8, 5]
       }
     }
   }
