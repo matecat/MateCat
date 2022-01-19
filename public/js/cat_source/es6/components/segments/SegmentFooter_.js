@@ -147,21 +147,27 @@ function SegmentFooter_({sid, segment}) {
 
   // add items
   useEffect(() => {
+    const hasAlternatives =
+      segment.alternatives && size(segment.alternatives) > 0
+    const hasNotes = segment.notes && segment.notes.length > 0
+    const hasMultiMatches =
+      UI.crossLanguageSettings && UI.crossLanguageSettings.primary
+
     setTabItems((prevState) =>
       prevState.map((item) => ({
         ...item,
         ...(item.name === 'alternatives' && {
-          enabled: segment.alternatives && size(segment.alternatives) > 0,
-          visible: segment.alternatives && size(segment.alternatives) > 0,
-          open: segment.alternatives && size(segment.alternatives) > 0,
+          enabled: hasAlternatives,
+          visible: hasAlternatives,
+          open: hasAlternatives,
         }),
         ...(item.name === 'messages' && {
-          enabled: segment.notes && segment.notes.length > 0,
-          visible: segment.notes && segment.notes.length > 0,
+          enabled: hasNotes,
+          visible: hasNotes,
         }),
         ...(item.name === 'multiMatches' && {
-          enabled: UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
-          visible: UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
+          enabled: hasMultiMatches,
+          visible: hasMultiMatches,
         }),
       })),
     )
