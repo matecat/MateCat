@@ -78,6 +78,7 @@ class GetContributionWorker extends AbstractWorker {
 
         $this->_publishPayload( $matches, $contributionStruct );
 
+        // cross language matches
         if ( !empty( $contributionStruct->crossLangTargets ) ) {
             $crossLangMatches = [];
 
@@ -95,7 +96,9 @@ class GetContributionWorker extends AbstractWorker {
             usort( $crossLangMatches, [ "self", "__compareScore" ] );
             $crossLangMatches = array_reverse( $crossLangMatches );
 
-            $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+            if(false === $contributionStruct->concordanceSearch and !empty($crossLangMatches)){
+                $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+            }
         }
     }
 
