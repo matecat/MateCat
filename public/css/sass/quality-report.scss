@@ -290,15 +290,6 @@ header {
                   &:first-child {
                     border: none;
                   }
-                  .qr-element.severity {
-                    display: flex;
-                    flex-direction: column;
-                  }
-                  .qr-element-label {
-                    font-size: 14px;
-                    color: grey;
-                    margin-right: 10px;
-                  }
                 }
               }
               .qr-title,

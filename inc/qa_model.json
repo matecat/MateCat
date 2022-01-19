@@ -1,121 +1,56 @@
 {
   "model": {
     "version" : 1,
-    "label": "Airbnb",
+    "label": "MateCat default",
+
     "categories": [
       {
-        "label": "Style (Inconsistent style, Readability, Unidiomatic)",
+        "label": "Style (readability, consistent style and tone)",
         "code": "STY",
-        "severities": [
-          {
-            "label": "Polishing",
-            "code": "Pol",
-            "dqf_id" : 6,
-            "penalty": 0
-          },
-          {
-            "label": "Repetition",
-            "code": "Rep",
-            "dqf_id" : 7,
-            "penalty": 0
-          },
-          {
-            "label": "Minor",
-            "code": "Min",
-            "dqf_id" : 8,
-            "penalty": 1
-          },
-          {
-            "label": "Major",
-            "code": "Maj",
-            "dqf_id" : 9,
-            "penalty": 2
-          },
-          {
-            "label": "Context Minor",
-            "code": "CMin",
-            "dqf_id" : 10,
-            "penalty": 0
-          },
-          {
-            "label": "Context Major",
-            "code": "CMaj",
-            "dqf_id" : 11,
-            "penalty": 0
-          }
-        ]
+        "dqf_id" : 4
+      }
+      ,{
+        "label": "Tag issues (mismatches, whitespaces)",
+        "code": "TAG",
+        "dqf_id" : 5
       },
       {
-        "label": "Accuracy (Addition, Omission, Mistranslation, Untranslated, Inconsistency)",
-        "code": "ACC"
+        "label": "Translation errors (mistranslation, additions or omissions)",
+        "code": "TER",
+        "dqf_id" : 1
       },
       {
-        "label": "Client guidelines (Terminology, Style Guide, Project instructions)",
-        "code": "GUI"
+        "label": "Terminology and translation consistency",
+        "code": "TRM",
+        "dqf_id" : 3
       },
       {
-        "label": "Linguistic (Punctuation, Spelling, Grammar, Locale conventions)",
-        "code": "LNG"
-      },{
-        "label": "Client Edit",
-        "code": "CLI",
-        "severities": [
-          {
-            "label": "Polishing",
-            "code": "Pol",
-            "dqf_id" : 12,
-            "penalty": 1
-          }
-        ]
-      },{
-        "label": "Kudos",
-        "code": "KUD",
-        "severities": [
-          {
-            "label": "Polishing",
-            "code": "Pol",
-            "dqf_id" : 13,
-            "penalty": 3
-          }
-        ]
+        "label": "Language quality (grammar, punctuation, spelling)",
+        "code": "LQ",
+        "dqf_id" : 2
       }
     ],
     "severities": [
       {
-        "label": "Repetition",
-        "code": "Rep",
-        "dqf_id" : 1,
+        "label": "Neutral",
+        "dqf_id" : 0,
         "penalty": 0
-      },
-      {
+      },{
         "label": "Minor",
-        "code": "Min",
         "dqf_id" : 2,
-        "penalty": 1
+        "penalty": 0.5
       },
       {
         "label": "Major",
-        "code": "Maj",
-        "dqf_id" : 3,
-        "penalty": 6
-      },
-      {
-        "label": "Context Minor",
-        "code": "CMin",
-        "dqf_id" : 4,
-        "penalty": 0
-      },
-      {
-        "label": "Context Major",
-        "code": "CMaj",
-        "dqf_id" : 5,
-        "penalty": 1
+        "dqf_id" : 2,
+        "penalty": 2
       }
     ],
+
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : [8, 5]
+        "limit" : [ 20, 15 ]
       }
     }
   }
