@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "242392040d93cdcc587f68582e3ed47c",
+    "content-hash": "3aa1559d8e4ec191c701b61895de0034",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -978,16 +978,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.88",
+            "version": "v1.0.90",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "61d8f882646f7625dcd0fec86d14b5ad346725f8"
+                "reference": "8b543008138e5e84f480ec575f89391fce7e1286"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/61d8f882646f7625dcd0fec86d14b5ad346725f8",
-                "reference": "61d8f882646f7625dcd0fec86d14b5ad346725f8",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/8b543008138e5e84f480ec575f89391fce7e1286",
+                "reference": "8b543008138e5e84f480ec575f89391fce7e1286",
                 "shasum": ""
             },
             "require": {
@@ -1023,9 +1023,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.88"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.90"
             },
-            "time": "2021-11-25T16:31:52+00:00"
+            "time": "2022-01-18T09:32:01+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -3851,7 +3851,9 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.5.0"
+        "php": ">=5.5.0",
+        "ext-curl": "*",
+        "ext-json": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.2.0"
