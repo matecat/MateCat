@@ -68,6 +68,26 @@ test('Translation Matches count result', () => {
   expect(screen.getByText('(1)')).toBeInTheDocument()
 })
 
+test('Translation conflicts (alternatives)', () => {
+  UI.registerFooterTabs()
+  const modifiedProps = {
+    ...props,
+    segment: {
+      ...props.segment,
+      alternatives: JSON.parse(
+        `{"editable":[{"translation":"L'expérience elle-même doit donner aux clients un accès privilégié à des lieux ou à des choses qu'ils ne pourraient pas trouver par eux-mêmes. test","TOT":"1","involved_id":["11450636"]}],"not_editable":[],"prop_available":1}`,
+      ),
+    },
+  }
+  render(<SegmentFooter {...modifiedProps} />)
+
+  expect(screen.getByTestId('matches')).toBeInTheDocument()
+  expect(screen.getByTestId('concordances')).toBeInTheDocument()
+  expect(screen.getByTestId('glossary')).toBeInTheDocument()
+  expect(screen.getByTestId('alternatives')).toBeInTheDocument()
+  expect(screen.getByTestId('alternatives')).toHaveClass('active')
+})
+
 test('Click tab', async () => {
   UI.registerFooterTabs()
   render(<SegmentFooter {...props} />)

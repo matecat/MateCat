@@ -143,20 +143,33 @@ function SegmentFooter({sid, segment}) {
     }
   }, [sid, segment?.opened, nextTab])
 
+  // merge with configurations
+  useEffect(() => {
+    if (!configurations) return
+    setTabItems((prevState) =>
+      prevState.map((item) => ({
+        ...item,
+        ...(configurations[item.name] && {...configurations[item.name]}),
+      })),
+    )
+  }, [configurations, segment])
+
   // add items
   useEffect(() => {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasNotes = segment.notes && segment.notes.length > 0
-    const hasMultiMatches =
-      UI.crossLanguageSettings && UI.crossLanguageSettings.primary
+    const hasNotes = Boolean(segment.notes && segment.notes.length > 0)
+    const hasMultiMatches = Boolean(
+      UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
+    )
 
     setTabItems((prevState) =>
       prevState.map((item) => ({
         ...item,
+        open:
+          item.name !== 'alternatives' && hasAlternatives ? false : item.open,
         ...(item.name === 'alternatives' && {
-          enabled: hasAlternatives,
           visible: hasAlternatives,
           open: hasAlternatives,
         }),
@@ -172,15 +185,18 @@ function SegmentFooter({sid, segment}) {
     )
   }, [segment])
 
-  // merge with configurations
+  // check if no tab is open
   useEffect(() => {
-    if (!configurations) return
-    setTabItems((prevState) =>
-      prevState.map((item) => ({
-        ...item,
-        ...(configurations[item.name] && {...configurations[item.name]}),
-      })),
-    )
+    setTabItems((prevState) => {
+      const openedTab = prevState.find(({open}) => open)
+      return !openedTab || (openedTab && openedTab.open && !openedTab.visible)
+        ? prevState.map((item) =>
+            item.name === 'matches'
+              ? {...item, open: true}
+              : {...item, open: false},
+          )
+        : prevState
+    })
   }, [configurations, segment])
 
   // set active tab
@@ -225,6 +241,17 @@ function SegmentFooter({sid, segment}) {
       ),
     )
   }, [tabStateChanges])
+
+  // restore active tab
+  useEffect(() => {
+    if (!activeTab?.name) return
+    setTabItems((prevState) =>
+      prevState.map((item) => ({
+        ...item,
+        open: activeTab.name === item.name,
+      })),
+    )
+  }, [segment, activeTab])
 
   // remove message after a few seconds
   useEffect(() => {
