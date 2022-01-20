@@ -35,6 +35,8 @@ test('Rendering elements', () => {
   expect(screen.getByTestId('matches')).toBeInTheDocument()
   expect(screen.getByTestId('concordances')).toBeInTheDocument()
   expect(screen.getByTestId('glossary')).toBeInTheDocument()
+  expect(screen.getByTestId('alternatives')).toBeInTheDocument()
+  expect(screen.getByTestId('alternatives')).toHaveClass('hide')
 })
 
 test('Add tab', () => {

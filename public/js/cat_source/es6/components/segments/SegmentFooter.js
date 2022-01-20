@@ -181,7 +181,7 @@ function SegmentFooter({sid, segment}) {
         ...(configurations[item.name] && {...configurations[item.name]}),
       })),
     )
-  }, [configurations])
+  }, [configurations, segment])
 
   // set active tab
   useEffect(() => {
