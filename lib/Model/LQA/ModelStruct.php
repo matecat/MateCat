@@ -39,6 +39,13 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
     /**
      * @return mixed
+     */
+    public function getPassOptions() {
+        return json_decode( $this->pass_options );
+    }
+
+    /**
+     * @return mixed
      * @throws Exception
      */
     public function getLimit() {
@@ -48,5 +55,35 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
         }
         return $options['limit'];
 
+    }
+
+    /**
+     * @return array
+     */
+    public function getDecodedModel() {
+
+        $categoriesArray = [];
+        foreach ( $this->getCategories() as $categoryStruct   ){
+
+            $category = $categoryStruct->toArrayWithJsonDecoded();
+
+            $categoriesArray[] = [
+                    'label' => $category['label'],
+                    'code' => $category['options']['code'],
+            ];
+        }
+
+        return [
+            'model' => [
+                "version" => 1,
+                "label" => $this->label,
+                "categories" => $categoriesArray,
+                "severities" => $this->getCategories()[0]->getJsonSeverities(),
+                "passfail" => [
+                    'type' => $this->pass_type,
+                    'options' =>  $this->getPassOptions()
+                ],
+            ]
+        ];
     }
 }
