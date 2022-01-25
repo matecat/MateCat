@@ -3034,6 +3034,10 @@ $reference = [
                         4 => 'me',
                         5 => 'ms',
                 ],
+        'text/x-tex'                                                              =>
+                [
+                        0 => 'md',
+                ],
 //            'text/turtle'                      =>
 //                    array(
 //                        0 => 'ttl',
