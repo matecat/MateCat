@@ -58,17 +58,17 @@ class SetContributionMTWorker extends SetContributionWorker {
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _update( Array $config, ContributionSetStruct $contributionStruct ){
+    protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
         $this->_set( $config, $contributionStruct );
     }
 
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
 
         //find all the job's TMs with write grants and make a contribution to them
         $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );
 
-        $config = [];
-        $config[ 'keys' ] = array_map( function( $tm_key ){
+        $config           = [];
+        $config[ 'keys' ] = array_map( function ( $tm_key ) {
             return $tm_key->key;
         }, $tm_keys );
 

@@ -14,6 +14,7 @@ class QAWarning {
 
     protected $structure;
 
+    const GLOSSARY_CATEGORY = "GLOSSARY";
     const TAGS_CATEGORY = "TAGS";
     const SIZE_CATEGORY = "SIZE";
     const MISMATCH_CATEGORY = "MISMATCH";
@@ -21,6 +22,10 @@ class QAWarning {
     protected function pushErrorSegment( $error_type, $error_category, $content ) {
 
         switch ( $error_category ) {
+            case QA::GLOSSARY_BLACKLIST_MATCH:
+                $category = self::GLOSSARY_CATEGORY;
+                break;
+
             case QA::ERR_SIZE_RESTRICTION:
                 $category = self::SIZE_CATEGORY;
                 break;

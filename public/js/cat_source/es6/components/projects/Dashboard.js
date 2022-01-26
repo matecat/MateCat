@@ -18,6 +18,7 @@ import {getProjects} from '../../api/getProjects'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
+import {ModalWindow} from '../modals/ModalWindow'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -258,20 +259,20 @@ class Dashboard extends React.Component {
 
     if (project.remote_file_service == 'gdrive') {
       continueDownloadFunction = function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadGDriveFile(null, job.id, job.password, callback)
       }
     } else {
       continueDownloadFunction = function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadFile(job.id, job.password, callback)
       }
     }
 
     const openUrl = function () {
-      APP.ModalWindow.onCloseModal()
+      ModalWindow.onCloseModal()
       ManageActions.enableDownloadButton(job.id)
       window.open(urlWarnings, '_blank')
     }
@@ -290,7 +291,7 @@ class Dashboard extends React.Component {
         warningText: 'Fix errors',
         warningCallback: openUrl,
       }
-      APP.ModalWindow.showModalComponent(
+      ModalWindow.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required',

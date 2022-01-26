@@ -9,6 +9,7 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
+import {ModalWindow} from '../../../modals/ModalWindow'
 
 class Search extends React.Component {
   constructor(props) {
@@ -225,7 +226,7 @@ class Search extends React.Component {
           .catch((errors) => {
             APP.alert({msg: errors[0].message})
           })
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
         CatToolActions.storeSearchResults({
           total: 0,
           searchResults: [],
@@ -236,10 +237,10 @@ class Search extends React.Component {
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalWindow.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(
+    ModalWindow.showModalComponent(
       ConfirmMessageModal,
       props,
       'Confirmation required',

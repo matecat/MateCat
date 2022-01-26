@@ -3,48 +3,24 @@ import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklist
 import TextUtils from '../../../../utils/textUtils'
 
 const activateQaCheckBlacklist = (qaCheckGlossary) => {
-  const generateGlossaryDecorator = (regex) => {
+  const generateGlossaryDecorator = () => {
     return {
       name: DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
       strategy: (contentBlock, callback) => {
-        if (regex !== '') {
-          findWithRegex(regex, contentBlock, callback)
-        }
+        qaCheckGlossary.forEach((match) => {
+          match.positions.forEach((position) => {
+            const {start, end} = position
+            callback(start, end)
+          })
+        })
+        // if (regex !== '') {
+        //   findWithRegex(regex, contentBlock, callback)
+        // }
       },
       component: QaCheckBlacklistHighlight,
     }
   }
-
-  const findWithRegex = (regex, contentBlock, callback) => {
-    const text = contentBlock.getText()
-    let matchArr, start, end
-    while ((matchArr = regex.exec(text)) !== null) {
-      start = matchArr.index
-      end = start + matchArr[0].length
-      callback(start, end)
-    }
-  }
-
-  const createGlossaryRegex = (glossaryArray) => {
-    let re
-    try {
-      const escapedMatches = glossaryArray.map((match) =>
-        TextUtils.escapeRegExp(match),
-      )
-      re = new RegExp('\\b(' + escapedMatches.join('|') + ')\\b', 'gi')
-      //If source languace is Cyrillic or CJK
-      if (config.isCJK) {
-        re = new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
-      }
-    } catch (e) {
-      return null
-    }
-    return re
-  }
-
-  console.log('Add Blacklist Decorator: ', qaCheckGlossary)
-  const regex = createGlossaryRegex(qaCheckGlossary)
-  return generateGlossaryDecorator(regex)
+  return generateGlossaryDecorator()
 }
 
 export default activateQaCheckBlacklist

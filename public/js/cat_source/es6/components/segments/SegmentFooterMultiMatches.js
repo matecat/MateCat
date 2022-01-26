@@ -31,14 +31,14 @@ class SegmentFooterMultiMatches extends React.Component {
     var self = this
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.id_segment);
-    $.each(matches, function () {
+    $.each(matches, function (match) {
       if (
         _.isUndefined(this.segment) ||
         this.segment === '' ||
         this.translation === ''
       )
         return true
-      var item = {}
+      var item = {...this}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
       item.cb = this.created_by

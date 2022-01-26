@@ -15,6 +15,7 @@ import {deleteMTEngine} from './cat_source/es6/api/deleteMTEngine'
 import {downloadTMX as downloadTMXApi} from './cat_source/es6/api/downloadTMX'
 import {loadTMX} from './cat_source/es6/api/loadTMX'
 import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -148,14 +149,14 @@ import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
             successText: 'Continue',
             successCallback: function () {
               UI.addMTEngine(provider, providerName)
-              APP.ModalWindow.onCloseModal()
+              ModalWindow.onCloseModal()
             },
             warningText: 'Cancel',
             warningCallback: function () {
-              APP.ModalWindow.onCloseModal()
+              ModalWindow.onCloseModal()
             },
           }
-          APP.ModalWindow.showModalComponent(
+          ModalWindow.showModalComponent(
             ConfirmMessageModal,
             props,
             'Confirmation required',

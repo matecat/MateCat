@@ -78,6 +78,7 @@ class GetContributionWorker extends AbstractWorker {
 
         $this->_publishPayload( $matches, $contributionStruct );
 
+        // cross language matches
         if ( !empty( $contributionStruct->crossLangTargets ) ) {
             $crossLangMatches = [];
 
@@ -94,11 +95,11 @@ class GetContributionWorker extends AbstractWorker {
 
             usort( $crossLangMatches, [ "self", "__compareScore" ] );
             $crossLangMatches = array_reverse( $crossLangMatches );
-            $crossLangMatches = array_slice( $crossLangMatches, 0, $contributionStruct->resultNum );
 
-            $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+            if(false === $contributionStruct->concordanceSearch and !empty($crossLangMatches)){
+                $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+            }
         }
-
     }
 
     /**
@@ -134,7 +135,7 @@ class GetContributionWorker extends AbstractWorker {
                 ]
         ];
 
-        $message = json_encode( $_object );
+        $message = json_encode( $_object, true );
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
@@ -189,7 +190,7 @@ class GetContributionWorker extends AbstractWorker {
         $Filter = MateCatFilter::getInstance(
                 $featureSet,
                 $contributionStruct->getJobStruct()->source,
-                $contributionStruct->getJobStruct()->target,
+                $targetLang,
                 json_decode($contributionStruct->dataRefMap, true)
         );
 

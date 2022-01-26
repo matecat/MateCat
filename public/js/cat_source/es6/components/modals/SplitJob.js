@@ -2,6 +2,7 @@ import React from 'react'
 import {checkSplitRequest} from '../../api/checkSplitRequest'
 import {confirmSplitRequest} from '../../api/confirmSplitRequest'
 import CommonUtils from '../../utils/commonUtils'
+import {ModalWindow} from './ModalWindow'
 
 class SplitJobModal extends React.Component {
   constructor(props) {
@@ -77,7 +78,7 @@ class SplitJobModal extends React.Component {
   }
 
   closeModal() {
-    APP.ModalWindow.onCloseModal()
+    ModalWindow.onCloseModal()
   }
 
   changeSplitNumber() {
@@ -198,7 +199,7 @@ class SplitJobModal extends React.Component {
       .then(function (d) {
         if (d.data && d.data.chunks) {
           self.props.callback()
-          APP.ModalWindow.onCloseModal()
+          ModalWindow.onCloseModal()
         }
       })
       .catch((errors) => {

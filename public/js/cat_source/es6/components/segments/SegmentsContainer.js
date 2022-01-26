@@ -17,6 +17,7 @@ import CommonUtils from '../../utils/commonUtils'
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import {ModalWindow} from '../modals/ModalWindow'
 
 class SegmentsContainer extends React.Component {
   constructor(props) {
@@ -229,11 +230,11 @@ class SegmentsContainer extends React.Component {
       currentFile: id_file,
     }
     let styleContainer = {
-      // minWidth: 600,
-      // minHeight: 400,
-      // maxWidth: 900,
+      minWidth: 600,
+      minHeight: 400,
+      maxWidth: 900,
     }
-    APP.ModalWindow.showModalComponent(
+    ModalWindow.showModalComponent(
       JobMetadataModal,
       props,
       'File notes',

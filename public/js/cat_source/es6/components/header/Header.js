@@ -34,6 +34,7 @@ class Header extends React.Component {
 
   componentDidMount = () => {
     TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams)
+    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
     TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
     TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
     TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser)
@@ -49,6 +50,7 @@ class Header extends React.Component {
 
   componentWillUnmount = () => {
     TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams)
+    TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
     TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
     TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
     TeamsStore.removeListener(TeamConstants.UPDATE_USER, this.updateUser)
@@ -81,6 +83,16 @@ class Header extends React.Component {
   renderTeams = (teams) => {
     this.setState({
       teams: teams,
+    })
+  }
+
+  updateTeam = (team) => {
+    if (!this.state.teams || !this.selectedTeam) return
+    if (this.selectedTeam.get('id') === team.get('id')) this.selectedTeam = team
+    this.setState({
+      teams: this.state.teams.map((teamState) =>
+        team.get('id') === teamState.get('id') ? team : teamState,
+      ),
     })
   }
 

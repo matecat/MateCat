@@ -16,14 +16,13 @@ export const lexiqaIgnoreError = async ({
       errorid: errorId,
     },
   })
-  const formData = new FormData()
 
-  Object.keys(dataParams).forEach((key) => {
-    formData.append(key, dataParams[key])
-  })
   const response = await fetch(`${lexiqaDomain}/ignoreerror`, {
     method: 'POST',
-    body: formData,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(dataParams),
   })
 
   if (!response.ok) return Promise.reject(response)

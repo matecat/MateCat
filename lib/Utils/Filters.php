@@ -36,9 +36,10 @@ class Filters {
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             ];
-            if ( !empty( INIT::$FILTERS_MASHAPE_KEY ) ) {
+            if ( !empty( INIT::$FILTERS_RAPIDAPI_KEY ) ) {
                 $options[ CURLOPT_HTTPHEADER ] = [
-                        'X-Mashape-Key: ' . INIT::$FILTERS_MASHAPE_KEY,
+                        'X-RapidAPI-Host: ' . parse_url( INIT::$FILTERS_ADDRESS )[ 'host' ],
+                        'X-RapidAPI-Key: ' . INIT::$FILTERS_RAPIDAPI_KEY,
                 ];
             }
 
@@ -69,8 +70,8 @@ class Filters {
             // Compute response
             if ( $info[ 'http_code' ] != 200 || $response === false ) {
                 $errResponse = [ "isSuccess" => false, "curlInfo" => $info ];
-                if ( $response === '{"message":"Invalid Mashape Key"}' ) {
-                    $errResponse[ 'errorMessage' ] = "Failed Mashape authentication. Check FILTERS_MASHAPE_KEY in config.ini";
+                if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
+                    $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
@@ -159,11 +160,11 @@ class Filters {
 
             // Filters are expecting an upload of a xliff file, so put the xliff
             // data in a temp file and configure POST param to upload it
-            $tmpXliffFile    = tempnam( sys_get_temp_dir(), "matecat-xliff-to-target-" );
+            $tmpXliffFile = tempnam( sys_get_temp_dir(), "matecat-xliff-to-target-" );
 
 
             $tmpFiles[ $id ] = $tmpXliffFile;
-            $x = file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
+            $x               = file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
 
             $dataGroups[ $id ] = [ 'xliffContent' => Utils::curlFile( $tmpXliffFile ) ];
         }
@@ -223,9 +224,9 @@ class Filters {
                 'sent_file_size'   => filesize( $sentFile ),
                 'source_lang'      => $jobData[ 'source' ],
                 'target_lang'      => $jobData[ 'target' ],
-                'job_id'           => isset($jobData[ 'id' ]) ? $jobData[ 'id' ] : null,
-                'job_pwd'          => isset($jobData[ 'password' ]) ? $jobData[ 'password' ] : null,
-                'job_owner'        => isset( $jobData[ 'owner' ]) ? $jobData[ 'owner' ] : null,
+                'job_id'           => isset( $jobData[ 'id' ] ) ? $jobData[ 'id' ] : null,
+                'job_pwd'          => isset( $jobData[ 'password' ] ) ? $jobData[ 'password' ] : null,
+                'job_owner'        => isset( $jobData[ 'owner' ] ) ? $jobData[ 'owner' ] : null,
                 'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
                 'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
                 'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),

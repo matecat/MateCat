@@ -88,13 +88,15 @@ class QualityReportSegmentModel {
 
     /**
      * @param QualityReport_QualityReportSegmentStruct $seg
-     * @param MateCatFilter                                   $Filter
+     * @param MateCatFilter                            $Filter
+     * @param FeatureSet                               $featureSet
+     * @param Chunks_ChunkStruct                       $chunk
      * @param bool                                     $isForUI
      *
      * @throws \Exception
      */
-    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, $isForUI = false ) {
-        $seg->warnings            = $seg->getLocalWarning();
+    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Chunks_ChunkStruct $chunk, $isForUI = false ) {
+        $seg->warnings            = $seg->getLocalWarning($featureSet, $chunk);
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
         $seg->secs_per_word       = $seg->getSecsPerWord();
@@ -208,7 +210,7 @@ class QualityReportSegmentModel {
 
             $seg->dataRefMap = $dataRefMap;
 
-            $this->_commonSegmentAssignments( $seg, $Filter, $isForUI );
+            $this->_commonSegmentAssignments( $seg, $Filter, $featureSet, $this->chunk, $isForUI );
             $this->_assignIssues( $seg, $issues, $issue_comments );
             $this->_assignComments( $seg, $comments );
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
