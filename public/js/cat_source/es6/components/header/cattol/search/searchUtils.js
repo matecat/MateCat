@@ -474,7 +474,6 @@ let SearchUtils = {
     let {text, tagsIntervals, tagsArray} = this.prepareTextToReplace(textToMark)
 
     let matchIndex = 0
-    // text = TextUtils.htmlEncode(text)
     text = text.replace(reg, (match, text, index) => {
       let intervalSpan = _.find(
         tagsIntervals,
