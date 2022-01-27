@@ -978,6 +978,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   getNextUntranslatedSegmentId() {
     let current = this.getCurrentSegment()
+      ? this.getCurrentSegment()
+      : this._segments.get(0)
     let next = this.getNextSegment(current.sid, null, 8, null, true)
     return next ? next.sid : this.nextUntranslatedFromServer
   },
