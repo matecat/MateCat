@@ -475,14 +475,9 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public static function loadAndValidateModelFromJsonFile( $projectStructure, $jsonPath = null ) {
 
-        // if there a is qa_model loaded use it
+        // if there a is an injected qa_model use it
         if(isset($projectStructure['qa_model']) and null !== $projectStructure['qa_model'] ){
-
             $decoded_model = $projectStructure['qa_model'];
-
-            // duplicate record
-            ModelDao::createModelFromJsonDefinition( $decoded_model );
-
         } else {
             // detect if the project created was a zip file, in which case try to detect
             // id_qa_model from json file.

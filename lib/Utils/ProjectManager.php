@@ -177,6 +177,7 @@ class ProjectManager {
                             'sanitize_project_options'     => true,
                             'file_segments_count'          => [],
                             'due_date'                     => null,
+                            'qa_model'                     => null,
                             'target_language_mt_engine_id' => [],
                             'standard_analysis_wc'         => 0
                     ] );
