@@ -290,6 +290,9 @@ header {
                   &:first-child {
                     border: none;
                   }
+                  &.severity_weight {
+                    background: $grey5 !important;
+                  }
                 }
               }
               .qr-title,
@@ -347,7 +350,7 @@ header {
                 }
               }
               .total-severity {
-                text-align: right;
+                text-align: center;
               }
             }
           }
@@ -742,7 +745,7 @@ header {
   opacity: 0.2;
   top: 3px;
   font-size: 15px;
-  background: url(../img/dot.png) 0 0 no-repeat;
+  background: url(../../img/dot.png) 0 0 no-repeat;
   background-size: 6px;
 }
 
