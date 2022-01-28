@@ -76,8 +76,7 @@ class ConversionHandler {
                 //Continue with conversion
                 break;
             case false:
-                $this->result[ 'code' ]     = 1; // OK for client, do not convert
-                $this->result[ 'errors' ][] = [ "code" => 0, "message" => "OK" ];
+                $this->result[ 'code' ]     = 1;
 
                 return 0;
                 break;

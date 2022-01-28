@@ -253,21 +253,16 @@ class convertFileController extends ajaxController {
 
         foreach ( $errors as $__err ) {
 
-            // this is an array which identified not converted files such as xliff files
-            $notConvertedFile = ["code" => 0, "message" => "OK"];
+            $this->result[ 'code' ] = 2;
 
-            if( $__err !== $notConvertedFile ){
-                $this->result[ 'code' ] = 2;
+            $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
-                $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
-
-                if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
-                    $this->result[ 'errors' ][ $brokenFileName ] = [
-                            'code'    => $__err[ 'code' ],
-                            'message' => $__err[ 'message' ],
-                            'debug'   => $brokenFileName
-                    ];
-                }
+            if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
+                $this->result[ 'errors' ][ $brokenFileName ] = [
+                        'code'    => $__err[ 'code' ],
+                        'message' => $__err[ 'message' ],
+                        'debug'   => $brokenFileName
+                ];
             }
         }
     }
