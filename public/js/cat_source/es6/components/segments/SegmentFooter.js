@@ -225,7 +225,7 @@ function SegmentFooter({sid, segment}) {
       userChangedTab &&
       userChangedTab[Object.getOwnPropertySymbols(userChangedTab)[0]]
     if (!name) return
-    SegmentActions.setTabOpen(sid, name)
+    setTimeout(() => SegmentActions.setTabOpen(sid, name))
     setActiveTab({name: name})
   }, [userChangedTab, sid])
 
