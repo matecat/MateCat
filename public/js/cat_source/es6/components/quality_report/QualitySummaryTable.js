@@ -195,7 +195,10 @@ class QualitySummaryTable extends React.Component {
             let total = issues * severityFound.get(0).get('penalty')
             catTotalWeightValue = catTotalWeightValue + total
             catHtml.push(
-              <div className="qr-element severity">
+              <div
+                className="qr-element severity"
+                key={'sev-total-issues-' + i}
+              >
                 <span>{issues}</span>
               </div>,
             )
