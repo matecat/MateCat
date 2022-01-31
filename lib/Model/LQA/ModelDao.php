@@ -73,8 +73,10 @@ class ModelDao extends DataAccess_AbstractDao {
             $h_string .= $category[ 'code' ];
         }
 
-        foreach( $model_root[ 'severities' ] as $severity ){
-            $h_string .= $severity[ 'penalty' ];
+        if(isset($model_root[ 'severities' ])){
+            foreach( $model_root[ 'severities' ] as $severity ){
+                $h_string .= $severity[ 'penalty' ];
+            }
         }
 
         $h_string .= $model_root[ 'passfail' ][ 'type' ] . implode( "", $model_root[ 'passfail' ][ 'options' ][ 'limit' ] );
@@ -96,7 +98,7 @@ class ModelDao extends DataAccess_AbstractDao {
         $model_root = $json['model'];
         $model = ModelDao::createRecord( $model_root );
 
-        $default_severities = $model_root['severities'];
+        $default_severities = isset($model_root['severities']) ? $model_root['severities'] : [];
         $categories         = $model_root['categories'];
 
         foreach($categories as $category) {
