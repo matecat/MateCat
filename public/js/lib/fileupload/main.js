@@ -583,11 +583,11 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         target_lang: $( '#target-lang' ).dropdown('get value'),
         segmentation_rule: $( '#segm_rule' ).val(),
         signal
-    }).then(function ( d ) {
+    }).then(function ( {data, errors} ) {
 
         filerow.removeClass( 'converting' );
         filerow.addClass( 'ready' );
-        if ( d.code == 1 || d.code == 2 ) {
+        if ( data.code == 1 || data.code == 2 ) {
 
             $( '.ui-progressbar-value', filerow ).addClass( 'completed' ).css( 'width', '100%' );
 
@@ -602,14 +602,13 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
             } );
 
             //if this conversion is related to a Zip File
-            if ( typeof d.data != 'undefined' && typeof d.data['zipFiles'] !== 'undefined' ) {
+            if ( typeof data.data != 'undefined' && typeof data.data['zipFiles'] !== 'undefined' ) {
                 //zip files has been loaded
                 //print internal file list
 
-                var zipFiles = $.parseJSON( d.data['zipFiles'] );
+                var zipFiles = $.parseJSON( data.data['zipFiles'] );
 
                 //START editing by Roberto Tucci <roberto@translated.net>
-                var rowParent = filerow.parent().first();
                 $.each( zipFiles, function ( i, file ) {
 
                     //clone the main row and edit its fields
@@ -646,9 +645,9 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         .attr( "data-url", newDataUrl )
                         .removeClass( 'zip_row' );
 
-                    for ( var k = 0; k < d.errors.length; k++ ) {
+                    for ( var k = 0; k < errors.length; k++ ) {
 
-                        if ( d.errors[k].debug == file['name'] ) {
+                        if ( errors[k].debug == file['name'] ) {
                             $( 'td.size', rowClone )
                                 .html("")
                                 .next()
@@ -657,7 +656,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                                 .css( {'font-size': '14px'} )
                                 .append(
                                     '<span class="label label-important">' +
-                                    d.errors[k].message +
+                                    errors[k].message +
                                     '</span>'
                                 );
                             $( rowClone ).addClass( 'failed' );
@@ -684,7 +683,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                 } );
 
-                if ( d.errors.length > 0 ) {
+                if ( errors.length > 0 ) {
                     UI.checkFailedConversionsNumber();
                     disableAnalyze();
                     return false;
@@ -707,11 +706,11 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                 }
             }
 
-        } else if ( d.code <= 0 || d.errors.length > 0 ) {
+        } else if ( data.code <= 0 || errors.length > 0 ) {
 
-            console.log( d.errors[0].message );
+            console.log( errors[0].message );
 
-            $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).css( {'font-size': '14px'} ).append( '<span class="label label-important">' + d.errors[0].message + '</span>' );
+            $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).css( {'font-size': '14px'} ).append( '<span class="label label-important">' + errors[0].message + '</span>' );
             $( filerow ).addClass( 'failed' );
             setTimeout( function () {
                 $( '.progress', filerow ).remove();
@@ -720,11 +719,9 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
             UI.checkFailedConversionsNumber();
 
             //filters ocr warning
-            if ( d.code == -20 ){
+            if ( data.code == -20 ){
                 enableAnalyze();
             }
-
-        } else {
 
         }
 
