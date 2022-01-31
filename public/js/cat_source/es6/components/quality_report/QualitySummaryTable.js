@@ -164,7 +164,10 @@ class QualitySummaryTable extends React.Component {
         }
       })
       let lineSeverityGroup = (
-        <div className="qr-body-list" key={'group-line-' + i}>
+        <div
+          className="qr-body-list severity_weight-line"
+          key={'group-line-' + i}
+        >
           {groupHtml}
           <div className="qr-element total-severity severity_weight" />
         </div>
@@ -191,7 +194,11 @@ class QualitySummaryTable extends React.Component {
             let issues = totalIssues.get('founds').get(currentSev.label)
             let total = issues * severityFound.get(0).get('penalty')
             catTotalWeightValue = catTotalWeightValue + total
-            catHtml.push(<div className="qr-element severity">{issues}</div>)
+            catHtml.push(
+              <div className="qr-element severity">
+                <span>{issues}</span>
+              </div>,
+            )
           } else {
             catHtml.push(
               <div className={`qr-element severity`} key={'sev-' + i} />,
@@ -200,7 +207,7 @@ class QualitySummaryTable extends React.Component {
         })
         let catTotalWeightHtml = (
           <div className="qr-element total-severity" key={'total-' + index}>
-            {catTotalWeightValue}
+            <span>{catTotalWeightValue}</span>
           </div>
         )
         let line = (

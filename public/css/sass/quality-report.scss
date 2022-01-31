@@ -293,8 +293,20 @@ header {
                   &.severity_weight {
                     background: $grey5 !important;
                   }
+                  span {
+                    top: 50%;
+                    position: absolute;
+                    transform: translateY(-50%);
+                  }
+                }
+                &.severity_weight-line {
+                  .qr-element {
+                    padding: 2px 15px;
+                    font-size: 14px;
+                  }
                 }
               }
+
               .qr-title,
               .qr-element {
                 padding: 10px 15px;
