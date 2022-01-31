@@ -149,7 +149,7 @@ class QualitySummaryTable extends React.Component {
           groupHtml.push(
             <div
               className={`qr-element severity severity_weight`}
-              key={'sev-weight' + i}
+              key={'sev-weight-' + sev.label + i}
             >
               Weight: {severityFind.get('penalty')}
             </div>,
@@ -158,7 +158,7 @@ class QualitySummaryTable extends React.Component {
           groupHtml.push(
             <div
               className={`qr-element severity severity_weight`}
-              key={'sev-weight' + i}
+              key={'sev-weight' + sev.label + i}
             />,
           )
         }
@@ -211,7 +211,7 @@ class QualitySummaryTable extends React.Component {
           </div>
         )
         let line = (
-          <div className="qr-body-list" key={cat.get('id') + index}>
+          <div className="qr-body-list" key={cat.get('label') + index}>
             {catHtml}
             {catTotalWeightHtml}
           </div>
@@ -257,7 +257,10 @@ class QualitySummaryTable extends React.Component {
           )
         } else {
           catHtml.push(
-            <div className="qr-element severity" key={'severity' + i} />,
+            <div
+              className="qr-element severity"
+              key={currentSev.label + cat.get('id')}
+            />,
           )
         }
       })
@@ -270,7 +273,7 @@ class QualitySummaryTable extends React.Component {
         </div>
       )
       let line = (
-        <div className="qr-body-list" key={cat.get('id') + index}>
+        <div className="qr-body-list" key={cat.get('label') + index}>
           {catHtml}
           {catTotalWeightHtml}
         </div>
