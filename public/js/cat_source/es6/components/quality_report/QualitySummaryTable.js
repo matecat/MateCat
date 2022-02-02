@@ -4,7 +4,9 @@ import _ from 'lodash'
 class QualitySummaryTable extends React.Component {
   constructor(props) {
     super(props)
-    this.lqaNestedCategories = this.props.qualitySummary.get('categories')
+    this.lqaNestedCategories = this.props.qualitySummary
+      .get('categories')
+      .sortBy((cat) => cat.get('id'))
     const {severities, thereAreSubCategories, categoriesGroups} =
       this.analyzeQualityModel()
     this.thereAreSubCategories = thereAreSubCategories
@@ -47,7 +49,7 @@ class QualitySummaryTable extends React.Component {
         })
       }
     })
-    severities = _.orderBy(severities, ['dqf_id'], ['asc'])
+    severities = _.orderBy(severities, ['id'])
     return {
       severities,
       thereAreSubCategories,
