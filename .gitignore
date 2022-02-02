@@ -31,6 +31,9 @@ public/css/build
 nodejs/*.log
 node_modules
 
+# Npm lock file
+package-lock.json
+
 # Development env config files
 .agignore
 .vagrant
