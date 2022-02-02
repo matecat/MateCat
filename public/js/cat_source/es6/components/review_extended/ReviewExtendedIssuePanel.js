@@ -2,6 +2,7 @@ import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
 import CommonUtils from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import {setTranslation} from '../../api/setTranslation'
+import {orderBy} from 'lodash'
 
 class ReviewExtendedIssuePanel extends React.Component {
   constructor(props) {
@@ -14,7 +15,10 @@ class ReviewExtendedIssuePanel extends React.Component {
       enableArrows: false,
       severityIndex: 0,
     }
-    this.issueCategories = JSON.parse(config.lqa_nested_categories).categories
+    this.issueCategories = orderBy(
+      JSON.parse(config.lqa_nested_categories).categories,
+      ['id'],
+    )
 
     this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this)
     this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this)

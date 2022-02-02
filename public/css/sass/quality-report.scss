@@ -284,15 +284,29 @@ header {
                   border-left: 1px solid $grey4;
                   background: white;
                   position: relative;
-                  z-index: -1;
                   &.empty {
                     background: $grey4;
                   }
                   &:first-child {
                     border: none;
                   }
+                  &.severity_weight {
+                    background: $grey5 !important;
+                  }
+                  span {
+                    top: 50%;
+                    position: absolute;
+                    transform: translateY(-50%);
+                  }
+                }
+                &.severity_weight-line {
+                  .qr-element {
+                    padding: 2px 15px;
+                    font-size: 14px;
+                  }
                 }
               }
+
               .qr-title,
               .qr-element {
                 padding: 10px 15px;
@@ -329,6 +343,9 @@ header {
                   background: inherit;
                   display: unset;
                 }
+                .qr-info.qr-info-total {
+                  font-size: 20px;
+                }
               }
               .qr-element.total-severity {
               }
@@ -345,7 +362,7 @@ header {
                 }
               }
               .total-severity {
-                text-align: right;
+                text-align: center;
               }
             }
           }
@@ -740,7 +757,7 @@ header {
   opacity: 0.2;
   top: 3px;
   font-size: 15px;
-  background: url(../img/dot.png) 0 0 no-repeat;
+  background: url(../../img/dot.png) 0 0 no-repeat;
   background-size: 6px;
 }
 

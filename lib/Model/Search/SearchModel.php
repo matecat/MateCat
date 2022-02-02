@@ -168,7 +168,7 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm );
+                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm, $occurrence[ 'original_map' ] );
                 $matchesCount = count( $matches );
 
                 if ( $this->hasMatches( $matches ) ) {
@@ -234,10 +234,13 @@ class SearchModel {
     /**
      * @param string $haystack
      * @param string $needle
+     * @param null  $originalMap
      *
      * @return array
      */
-    private function find( $haystack, $needle ) {
+    private function find( $haystack, $needle, $originalMap = null ) {
+        $haystack = StringTransformer::transform($haystack, $originalMap);
+
         return WholeTextFinder::find( $haystack, $needle, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
     }
 
@@ -343,9 +346,10 @@ class SearchModel {
         $ste_where = $this->_SteWhere();
 
         $query = "
-        SELECT  st.id_segment as id, st.translation as text
+        SELECT  st.id_segment as id, st.translation as text, od.map as original_map
 			FROM segment_translations st
 			INNER JOIN jobs j ON j.id = st.id_job
+			LEFT JOIN segment_original_data od on od.id_segment = st.id_segment
 			$ste_join
 			WHERE st.id_job = {$this->queryParams->job} 
 			{$password_where}
@@ -371,11 +375,12 @@ class SearchModel {
         $ste_where = $this->_SteWhere();
 
         $query = "
-        SELECT s.id, s.segment as text
+        SELECT s.id, s.segment as text, od.map as original_map
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			INNER JOIN jobs j ON j.id = fj.id_job
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
+			LEFT JOIN segment_original_data od on od.id_segment = s.id
             $ste_join
 			WHERE fj.id_job = {$this->queryParams->job}
 			{$password_where}
