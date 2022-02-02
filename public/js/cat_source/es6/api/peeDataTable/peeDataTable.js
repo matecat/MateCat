@@ -1,35 +1,20 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-import {flattenObject} from '../../utils/queryString'
-
 /**
- * PEE get data graph
+ * PEE get data table
  *
- * @param {Object} options
- * @param {string} options.sources
- * @param {string} options.targets
- * @param {Array} options.monthInterval
- * @param {string} options.fuzzyBand
+ * @param {string} date
  * @returns {Promise<object>}
  */
-export const peeDataGraph = async ({
-  sources,
-  targets,
-  monthInterval,
-  fuzzyBand,
-}) => {
-  const dataParams = flattenObject({
-    sources,
-    targets,
-    month_interval: monthInterval,
-    fuzzy_band: fuzzyBand,
-  })
+export const peeDataTable = async (date) => {
+  const dataParams = {
+    date,
+  }
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
 
-  const response = await fetch(`/api/app/utils/pee/graph`, {
+  const response = await fetch(`/api/app/utils/pee/table`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
