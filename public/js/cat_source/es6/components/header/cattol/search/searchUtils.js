@@ -342,7 +342,7 @@ let SearchUtils = {
     }
 
     let searchTarget = params.searchTarget
-    if (searchTarget !== '' && searchTarget !== ' ' && searchTarget !== '"') {
+    if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
       APP.alert({msg: 'You must specify the Target value to replace.'})
@@ -351,7 +351,7 @@ let SearchUtils = {
     }
 
     let replaceTarget = params.replaceTarget
-    if (replaceTarget !== '"') {
+    if (replaceTarget !== '') {
       this.searchParams.replace = replaceTarget
     } else {
       APP.alert({msg: 'You must specify the replacement value.'})
@@ -390,43 +390,42 @@ let SearchUtils = {
     this.featuredSearchResult = value
   },
 
-  prepareTextToReplace(text) {
-    var LTPLACEHOLDER = '##LESSTHAN##'
-    var GTPLACEHOLDER = '##GREATERTHAN##'
-    let spanArray = []
-    // text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
-    // text = text.replace(/(&lt;[/]*(span|mark|a).*?&gt;)/g, function ( match, text ) {
-    //     spanArray.push(text);
-    //     return "$&";
-    // });
-    text = text.replace(/>/g, function () {
-      return GTPLACEHOLDER
-    })
-    text = text.replace(/</g, function () {
-      return LTPLACEHOLDER
-    })
-    let tagsIntervals = []
-    let matchFind = 0
-    let regGtp = new RegExp(GTPLACEHOLDER, 'g')
-    text = text.replace(regGtp, function (match, index) {
-      let interval = {end: index}
-      tagsIntervals.push(interval)
-      matchFind++
-      return match
-    })
-    matchFind = 0
-    let regLtp = new RegExp(LTPLACEHOLDER, 'g')
-    text = text.replace(regLtp, function (match, index) {
-      if (tagsIntervals[matchFind] && tagsIntervals[matchFind].end) {
-        tagsIntervals[matchFind].start = index
+  prepareTextToReplace: (text) => {
+    const getIndex = (regExp, source) => {
+      const matchedIndex = []
+      let result
+      while ((result = regExp.exec(source))) {
+        const {index} = result
+        matchedIndex.push(index)
       }
-      matchFind++
-      return match
-    })
+      return matchedIndex
+    }
+
+    const LTPLACEHOLDER = '##LESSTHAN##'
+    const GTPLACEHOLDER = '##GREATERTHAN##'
+
+    const cleaned = text
+      .replace(/</g, LTPLACEHOLDER)
+      .replace(/>/g, GTPLACEHOLDER)
+    const LTP_REGEX = new RegExp(LTPLACEHOLDER, 'g')
+    const GTP_REGEX = new RegExp(GTPLACEHOLDER, 'g')
+
+    const indexes = [
+      ...getIndex(LTP_REGEX, cleaned).map((value, index) => ({
+        start: value,
+        index,
+      })),
+      ...getIndex(GTP_REGEX, cleaned).map((value, index) => ({
+        end: value,
+        index,
+      })),
+    ].flatMap((item, index, arr) =>
+      item.end ? {start: arr[item.index].start, end: item.end} : [],
+    )
+
     return {
-      text: text,
-      tagsIntervals: tagsIntervals,
-      tagsArray: spanArray,
+      text: cleaned,
+      tagsIntervals: indexes,
     }
   },
 
@@ -475,7 +474,6 @@ let SearchUtils = {
     let {text, tagsIntervals, tagsArray} = this.prepareTextToReplace(textToMark)
 
     let matchIndex = 0
-    text = TextUtils.htmlEncode(text)
     text = text.replace(reg, (match, text, index) => {
       let intervalSpan = _.find(
         tagsIntervals,
