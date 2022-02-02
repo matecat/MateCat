@@ -1,8 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import _ from 'lodash'
 
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
+import TooltipInfo from '../segments/TooltipInfo/TooltipInfo.component'
+import SegmentActions from '../../actions/SegmentActions'
 
 const transformStats = (stats) => {
   let reviewWordsSecondPass
@@ -84,6 +86,10 @@ export const CattolFooter = ({
   isReview,
 }) => {
   const [stats, setStats] = React.useState()
+  const [isShowingTooltip, setIsShowingTooltip] = useState({
+    progressBar: false,
+    todo: false,
+  })
   const sourceLang = languagesArray.find((item) => item.code == source).name
   const targetLang = languagesArray.find((item) => item.code == target).name
 
@@ -98,6 +104,34 @@ export const CattolFooter = ({
       CatToolStore.removeListener(CattoolConstants.SET_PROGRESS, listener)
     }
   }, [])
+
+  const onClickTodo = (e, targetName) => {
+    e.preventDefault()
+    // show tooltip
+    if (
+      (!config.isReview && UI.projectStats.translationCompleted) ||
+      (config.isReview &&
+        config.revisionNumber === 1 &&
+        UI.projectStats.revisionCompleted) ||
+      (config.isReview &&
+        config.revisionNumber === 2 &&
+        UI.projectStats.revises[1]?.advancement_wc === UI.projectStats.TOTAL)
+    ) {
+      setIsShowingTooltip({progressBar: false, todo: false, [targetName]: true})
+      return
+    }
+    if (config.isReview) {
+      UI.openNextTranslated()
+    } else {
+      SegmentActions.gotoNextUntranslatedSegment()
+    }
+  }
+
+  const getTooltip = (targetName) =>
+    isShowingTooltip[targetName] && (
+      <TooltipInfo text={'Job complete, no unapproved segments left'} />
+    )
+  const removeTooltip = () => setIsShowingTooltip(false)
 
   return (
     <footer className="footer-body">
@@ -115,38 +149,41 @@ export const CattolFooter = ({
         </p>
       </div>
 
-      <div className="progress-bar" data-testid="progress-bar">
-        <div className="meter" style={{width: '100%', position: 'relative'}}>
+      <div
+        className="progress-bar"
+        onMouseLeave={removeTooltip}
+        data-testid="progress-bar"
+      >
+        <div
+          className="meter"
+          onClick={(e) => onClickTodo(e, 'progressBar')}
+          style={{width: '100%', position: 'relative'}}
+        >
           {stats == null ? (
             <div className="bg-loader" />
           ) : !stats?.ANALYSIS_COMPLETE ? null : (
             <>
               <a
-                href="#"
                 className="approved-bar"
                 style={{width: stats.a_perc + '%'}}
                 title={'Approved ' + stats.a_perc_formatted}
               />
               <a
-                href="#"
                 className="approved-bar-2nd-pass"
                 style={{width: stats.a_perc_2nd + '%'}}
                 title={'2nd Approved ' + stats.a_perc_2nd_formatted}
               />
               <a
-                href="#"
                 className="translated-bar"
                 style={{width: stats.t_perc + '%'}}
                 title={'Translated ' + stats.t_perc_formatted}
               />
               <a
-                href="#"
                 className="rejected-bar"
                 style={{width: stats.r_perc + '%'}}
                 title={'Rejected ' + stats.r_perc_formatted}
               />
               <a
-                href="#"
                 className="draft-bar"
                 style={{width: stats.d_perc + '%'}}
                 title={'Draft ' + stats.d_perc_formatted}
@@ -161,6 +198,7 @@ export const CattolFooter = ({
           </span>
           %
         </div>
+        {getTooltip('progressBar')}
       </div>
 
       <div className="item">
@@ -187,7 +225,11 @@ export const CattolFooter = ({
         </div>
       </div>
 
-      <div className="item">
+      <div
+        className="item"
+        onClick={(e) => onClickTodo(e, 'todo')}
+        onMouseLeave={removeTooltip}
+      >
         {isReview ? (
           <div id="stat-todo">
             <span>To-do</span> :{' '}
@@ -198,6 +240,7 @@ export const CattolFooter = ({
             <span>To-do</span> : <strong>{stats?.TODO_FORMATTED || '-'}</strong>
           </div>
         )}
+        {getTooltip('todo')}
       </div>
 
       {!!stats && (
