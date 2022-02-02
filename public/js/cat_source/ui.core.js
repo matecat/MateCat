@@ -1228,7 +1228,7 @@ window.UI = {
   },
   readonlyClickDisplay: function () {
     ModalWindow.showModalComponent(AlertModal, {
-      text: UI.messageForClickOnIceMatch(),
+      text: UI.messageForClickOnReadonly(),
     })
   },
   messageForClickOnReadonly: function () {
