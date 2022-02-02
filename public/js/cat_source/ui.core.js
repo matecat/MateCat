@@ -19,6 +19,7 @@ import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
+import AlertModal from './es6/components/modals/AlertModal'
 
 window.UI = {
   /**
@@ -1007,17 +1008,25 @@ window.UI = {
 
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
-          APP.alert({
-            msg: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
-          })
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+            },
+            'Error',
+          )
         }
       }
 
       if (codeInt === -10 && operation !== 'getSegments') {
-        APP.alert({
-          msg: 'Job canceled or assigned to another translator',
-          callback: 'location.reload',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Job canceled or assigned to another translator',
+            successCallback: () => location.reload,
+          },
+          'Error',
+        )
       }
       if (codeInt === -1000 || codeInt === -101) {
         console.log('ERROR ' + codeInt)
@@ -1025,7 +1034,13 @@ window.UI = {
       }
 
       if (codeInt <= -2000 && !_.isUndefined(this.message)) {
-        APP.alert({msg: this.message})
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: this.message,
+          },
+          'Error',
+        )
       }
     })
   },
@@ -1196,7 +1211,13 @@ window.UI = {
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
       UI.selectingReadonly = setTimeout(function () {
-        APP.alert({msg: UI.messageForClickOnIceMatch()})
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: UI.messageForClickOnIceMatch(),
+          },
+          'Ice Match',
+        )
       }, 200)
       return
     }
@@ -1206,7 +1227,9 @@ window.UI = {
     }, 200)
   },
   readonlyClickDisplay: function () {
-    APP.alert({msg: UI.messageForClickOnReadonly()})
+    ModalWindow.showModalComponent(AlertModal, {
+      text: UI.messageForClickOnIceMatch(),
+    })
   },
   messageForClickOnReadonly: function () {
     var msgArchived = 'Job has been archived and cannot be edited.'

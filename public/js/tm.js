@@ -16,6 +16,7 @@ import {downloadTMX as downloadTMXApi} from './cat_source/es6/api/downloadTMX'
 import {loadTMX} from './cat_source/es6/api/loadTMX'
 import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
 import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -335,10 +336,16 @@ import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
             UI.hideAllBoxOnTables()
             if (this.files[0].size > config.maxTMXFileSize) {
               const numMb = config.maxTMXFileSize / (1024 * 1024)
-              APP.alert(
-                'File is too big.<br/>The maximuxm size allowed is ' +
-                  numMb +
-                  'MB.',
+              ModalWindow.showModalComponent(
+                AlertModal,
+                {
+                  text:
+                    'File is too big.<br/>The maximuxm size allowed is ' +
+                    numMb +
+                    'MB.',
+                  buttonText: 'OK',
+                },
+                'File too big',
               )
               return false
             }
@@ -1208,14 +1215,22 @@ import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 
     allTMUploadsCompleted: function () {
       if ($('#activetm .uploadfile.uploading').length) {
-        APP.alert({
-          msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'There is one or more TM uploads in progress. Try again when all uploads are completed!',
+          },
+          'Upload in progress',
+        )
         return false
       } else if ($('tr td a.downloading').length) {
-        APP.alert({
-          msg: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
+          },
+          'Upload in progress',
+        )
         return false
       } else {
         return true

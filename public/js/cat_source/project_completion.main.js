@@ -1,5 +1,7 @@
 import {deleteCompletionEvents} from './es6/api/deleteCompletionEvents'
 import {setChunkComplete} from './es6/api/setChunkComplete'
+import {ModalWindow} from './es6/components/modals/ModalWindow'
+import AlertModal from './es6/components/modals/AlertModal'
 
 var ProjectCompletion = {
   enabled: function () {
@@ -64,12 +66,15 @@ if (ProjectCompletion.enabled()) {
           UI.render(false)
         })
         .catch((errors) => {
-          APP.alert({
-            msg:
-              'An error occurred while marking this job as complete. Please contact support at ' +
-              '<a href="support@matecat.com">support@matecat.com</a>.',
-          })
-          console.log(errors)
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text:
+                'An error occurred while marking this job as complete. Please contact support at ' +
+                '<a href="support@matecat.com">support@matecat.com</a>.',
+            },
+            'Error',
+          )
           revertButtonState()
         })
     }

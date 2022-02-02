@@ -2,6 +2,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import LXQ from './cat_source/es6/utils/lxq.main'
 import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 import Speech2Text from './cat_source/es6/utils/speech2text'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -15,11 +17,14 @@ import Speech2Text from './cat_source/es6/utils/speech2text'
         .val(config.segmentation_rule)
         .attr('disabled', true)
       $('.mgmt-table-options .options-box.seg_rule').on('click', function () {
-        APP.alert({
-          title: 'Option not editable',
-          okTxt: 'Continue',
-          msg: 'Segment rules settings can only be edited <br/> when creating the project.    ',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Segment rules settings can only be edited when creating the project.',
+            buttonText: 'Continue',
+          },
+          'Option not editable',
+        )
       })
       //Check Lexiqa check
       if (LXQ.checkCanActivate()) {
@@ -97,11 +102,14 @@ import Speech2Text from './cat_source/es6/utils/speech2text'
           .find('.option-s2t-box-chrome-label')
           .css('display', 'inline')
         speech2textContainer.find('.onoffswitch').on('click', function () {
-          APP.alert({
-            title: 'Option not available',
-            okTxt: 'Continue',
-            msg: 'This options is only available on Chrome browser.',
-          })
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text: 'This options is only available on your browser.',
+              buttonText: 'Continue',
+            },
+            'Option not available',
+          )
         })
         speech2textCheck.addClass('option-unavailable')
       } else {

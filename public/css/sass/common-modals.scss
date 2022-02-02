@@ -1718,3 +1718,12 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     padding-bottom: 0 !important;
   }
 }
+
+.alert_modal {
+  .matecat-modal-body {
+    padding: 30px !important;
+    p {
+      line-height: 25px;
+    }
+  }
+}
