@@ -216,7 +216,12 @@ class QualitySummaryTable extends React.Component {
           </div>
         )
         let line = (
-          <div className="qr-body-list" key={cat.get('label') + index}>
+          <div
+            className={
+              'qr-body-list ' + (index === 0 ? 'qr-body-list-first' : '')
+            }
+            key={cat.get('label') + index}
+          >
             {catHtml}
             {catTotalWeightHtml}
           </div>
