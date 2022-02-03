@@ -5402,3 +5402,16 @@ a.pull-left.btn-ok.uploadtm {
 body svg {
   padding: 0 !important;
 }
+
+.virtual-list {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .row {
+    display: inline-block;
+    width: 100%;
+    height: auto;
+  }
+}

@@ -23,6 +23,7 @@ class SegmentsContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      rows: [],
       segments: Immutable.fromJS([]),
       splitGroup: [],
       timeToEdit: config.time_to_edit_enabled,
@@ -60,8 +61,18 @@ class SegmentsContainer extends React.Component {
     this.domContainer = document.getElementById('outer')
   }
 
+  getRows(segments) {
+    const ROW_HEIGHT = 90
+    return new Array(segments.size).fill({}).map((item, index) => ({
+      id: segments.get(index).get('sid'),
+      height: ROW_HEIGHT,
+      defaultHeight: ROW_HEIGHT,
+    }))
+  }
+
   splitSegments(segments, splitGroup) {
     this.setState({
+      rows: this.getRows(segments),
       segments: segments,
       splitGroup: splitGroup,
     })
@@ -115,6 +126,7 @@ class SegmentsContainer extends React.Component {
 
     let splitGroup = []
     this.setState({
+      rows: this.getRows(segments),
       segments: segments,
       splitGroup: splitGroup,
       timeToEdit: config.time_to_edit_enabled,
@@ -506,6 +518,7 @@ class SegmentsContainer extends React.Component {
 
   forceUpdateSegments(segments) {
     this.setState({
+      rows: this.getRows(segments),
       segments: segments,
       splitGroup: splitGroup,
     })
