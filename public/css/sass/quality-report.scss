@@ -274,14 +274,17 @@ header {
               }
               .qr-body-list {
                 display: flex;
-                border-top: 2px solid $grey4;
-                border-left: 2px solid $grey4;
-                border-right: 2px solid $grey4;
-                &:first-child {
-                  //border: none;
+                &:not(.severity_weight-line) {
+                  &:not(.qr-body-list-first) {
+                    border-top: 2px solid $grey4;
+                  }
+                  border-left: 2px solid $grey4;
+                  border-right: 2px solid $grey4;
+                  .qr-element {
+                    border-left: 1px solid $grey4;
+                  }
                 }
                 .qr-element {
-                  border-left: 1px solid $grey4;
                   background: white;
                   position: relative;
                   &.empty {
