@@ -2,21 +2,49 @@ import React, {useCallback, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {useVirtual} from 'react-virtual'
 
-function VirtualList({items, goToIndex, Component, alignment = 'auto'}) {
+function VirtualList({
+  items,
+  goToIndex,
+  Component,
+  width,
+  height,
+  onScroll = () => {},
+  renderedRange = () => {},
+  alignment = 'auto',
+  overscan = 10,
+}) {
   const parentRef = useRef()
   const {virtualItems, totalSize, scrollToIndex} = useVirtual({
     size: items.length,
     parentRef,
     estimateSize: useCallback((index) => items[index].height, [items]),
-    overscan: 5,
+    overscan,
   })
 
+  // go to index
   useEffect(() => {
     goToIndex >= 0 && scrollToIndex(goToIndex, {align: alignment})
   }, [goToIndex, alignment, scrollToIndex])
 
+  // rendered indexes
+  useEffect(() => {
+    renderedRange(virtualItems.map(({index}) => index))
+  }, [virtualItems, renderedRange])
+
+  // set inline style of width or heigh
+  useEffect(() => {
+    if (!parentRef?.current) return
+    const {current} = parentRef
+    if (width)
+      current.style.width = `${width}${typeof width === 'number' ? 'px' : ''}`
+    if (height)
+      current.style.height = `${height}${
+        typeof height === 'number' ? 'px' : ''
+      }`
+  }, [parentRef, width, height])
+
   return (
-    <div ref={parentRef} className="virtual-list">
+    <div ref={parentRef} className="virtual-list" onScroll={() => onScroll()}>
       <div
         style={{
           height: `${totalSize}px`,
@@ -54,7 +82,12 @@ VirtualList.propTypes = {
   items: PropTypes.array.isRequired,
   goToIndex: PropTypes.number,
   Component: PropTypes.elementType.isRequired,
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onScroll: PropTypes.func,
+  renderedRange: PropTypes.func,
   alignment: PropTypes.string,
+  overscan: PropTypes.number,
 }
 
 export default VirtualList
