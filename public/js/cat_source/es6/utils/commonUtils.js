@@ -6,6 +6,8 @@ import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import {ModalWindow} from '../components/modals/ModalWindow'
+import AlertModal from '../components/modals/AlertModal'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -137,17 +139,18 @@ const CommonUtils = {
    * @returns {*}
    */
   genericErrorAlertMessage() {
-    return APP.alert({
-      msg: sprintf(
-        'There was an error while saving data to server, please try again. ' +
-          'If the problem persists please contact %s reporting the web address of the current browser tab.',
-        sprintf(
-          '<a href="mailto:%s">%s</a>',
-          config.support_mail,
-          config.support_mail,
-        ),
-      ),
-    })
+    ModalWindow.showModalComponent(
+      AlertModal,
+      {
+        text:
+          'There was an error while saving data to server, please try again. <br/>If the problem persists please contact <a href="mailto:' +
+          config.support_mail +
+          '">' +
+          config.support_mail +
+          '</a> reporting the web address of the current browser tab',
+      },
+      'Search  Alert',
+    )
   },
 
   setBrowserHistoryBehavior() {

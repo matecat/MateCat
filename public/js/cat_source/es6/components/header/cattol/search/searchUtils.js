@@ -6,6 +6,8 @@ import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
 import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
 import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
+import AlertModal from '../../../modals/AlertModal'
+import {ModalWindow} from '../../../modals/ModalWindow'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -60,9 +62,13 @@ let SearchUtils = {
       _.isUndefined(this.searchParams.target) &&
       this.searchParams.status == 'all'
     ) {
-      APP.alert({
-        msg: 'Enter text in source or target input boxes<br /> or select a status.',
-      })
+      ModalWindow.showModalComponent(
+        AlertModal,
+        {
+          text: 'Enter text in source or target input boxes or select a status.',
+        },
+        'Search Alert',
+      )
       return false
     }
     SegmentActions.disableTagLock()
@@ -345,7 +351,13 @@ let SearchUtils = {
     if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
-      APP.alert({msg: 'You must specify the Target value to replace.'})
+      ModalWindow.showModalComponent(
+        AlertModal,
+        {
+          text: 'You must specify the Target value to replace.',
+        },
+        'Search Alert',
+      )
       delete this.searchParams.target
       return false
     }
@@ -354,7 +366,13 @@ let SearchUtils = {
     if (replaceTarget !== '') {
       this.searchParams.replace = replaceTarget
     } else {
-      APP.alert({msg: 'You must specify the replacement value.'})
+      ModalWindow.showModalComponent(
+        AlertModal,
+        {
+          text: 'You must specify the replacement value.',
+        },
+        'Search Alert',
+      )
       delete this.searchParams.replace
       return false
     }

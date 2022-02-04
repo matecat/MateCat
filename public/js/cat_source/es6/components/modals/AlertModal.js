@@ -24,7 +24,7 @@ class AlertModal extends React.Component {
             <div className="column right aligned">
               <div
                 className="ui primary button right floated"
-                onClick={this.closeModal}
+                onClick={() => this.closeModal()}
               >
                 {this.props.buttonText ? this.props.buttonText : 'Ok'}
               </div>

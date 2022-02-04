@@ -96,25 +96,6 @@ window.APP = {
 
     this.checkGlobalMassages()
   },
-  alert: function (options) {
-    //FIXME
-    // Alert message, NEVER displayed if there are a redirect after it because html div popups are no-blocking
-    // Transform alert to a function like confirm with a callable function passed as callback
-
-    if (typeof options == 'string') {
-      options.callback = false
-      options.msg = options
-    }
-    var callback = typeof options == 'string' ? false : options.callback
-    var content = typeof options == 'string' ? options : options.msg
-    this.popup({
-      type: 'alert',
-      onConfirm: callback,
-      closeClickingOutside: true,
-      title: options.title || 'Warning',
-      content: content,
-    })
-  },
 
   confirm: function (options) {
     this.waitingConfirm = true
