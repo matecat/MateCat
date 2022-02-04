@@ -34,3 +34,13 @@ $klein->with( '/api/v3/glossary', function () {
     route( '/blacklist/get/[:id_file]', 'GET', '\API\V3\BlacklistController', 'get' );
 } );
 
+$klein->with( '/api/v3/qa_model_template', function () {
+    route( '', 'GET', '\API\V3\QAModelTemplateController', 'index' );
+    route( '', 'POST', '\API\V3\QAModelTemplateController', 'create' );
+    route( '/[:id]', 'GET', '\API\V3\QAModelTemplateController', 'view' );
+    route( '/[:id]', 'DELETE', '\API\V3\QAModelTemplateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\QAModelTemplateController', 'edit' );
+    route( '/schema', 'GET', '\API\V3\QAModelTemplateController', 'schema' );
+    route( '/validate', 'GET', '\API\V3\QAModelTemplateController', 'validate' );
+} );
+

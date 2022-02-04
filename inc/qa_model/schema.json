@@ -1,0 +1,97 @@
+{
+  "type": "object",
+  "properties": {
+    "model": {
+      "type": "object",
+      "$ref": "#/definitions/model"
+    }
+  },
+  "required": ["model"],
+  "definitions": {
+    "model": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/category"
+          }
+        },
+        "passfail": {
+          "type": "object",
+          "$ref": "#/definitions/passfail"
+        }
+      },
+      "required": ["version", "label", "categories", "passfail"]
+    },
+    "category": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "severities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/severity"
+          }
+        }
+      },
+      "required": ["code", "label", "severities"]
+    },
+    "severity": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "dqf_id": {
+          "type": "integer"
+        },
+        "penalty": {
+          "type": "number"
+        }
+      },
+      "required": ["code", "label", "penalty"]
+    },
+    "passfail": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "points_per_thousand"
+          ]
+        },
+        "options": {
+          "type": "object",
+          "$ref": "#/definitions/passfailOptions"
+        }
+      },
+      "required": ["type", "options"]
+    },
+    "passfailOptions": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "array"
+        }
+      },
+      "required": ["limit"]
+    }
+  }
+}
