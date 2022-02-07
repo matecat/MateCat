@@ -765,16 +765,18 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
                 : 'update',
               key: $(tr).find('.privatekey').text(),
             }
-
-            APP.confirm({
-              name: 'confirmTMDisable',
-              cancelTxt: 'Cancel',
-              onCancel: 'cancelTMDisable',
-              callback: 'continueTMDisable',
-              okTxt: 'Continue',
-              context: JSON.stringify(data),
-              msg: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
-            })
+            ModalWindow.showModalComponent(
+              ConfirmMessageModal,
+              {
+                text: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
+                successText: 'Continue',
+                cancelText: 'Cancel',
+                successCallback: () => UI.continueTMDisable(data),
+                cancelCallback: () => UI.cancelTMDisable(data),
+                closeOnSuccess: true,
+              },
+              'Confirmation required',
+            )
             return false
           }
           UI.disableTM(el)
@@ -792,8 +794,7 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
         }
       }
     },
-    cancelTMDisable: function (context) {
-      var options = $.parseJSON(context)
+    cancelTMDisable: function (options) {
       $(
         '.mgmt-tm tr[data-key="' +
           options.key +
@@ -802,8 +803,7 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
           ' input',
       ).click()
     },
-    continueTMDisable: function (context) {
-      var options = $.parseJSON(context)
+    continueTMDisable: function (options) {
       const el = $(
         '.mgmt-tm tr[data-key="' +
           options.key +

@@ -1,14 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {ModalWindow} from './ModalWindow'
 
 class AlertModal extends React.Component {
   allowHTML(string) {
     return {__html: string}
   }
   closeModal() {
-    ModalWindow.onCloseModal()
-    if (this.props.successCallback) this.props.successCallback()
+    this.props.successCallback?.()
+    if (this.props.closeOnSuccess) this.props.onClose()
   }
   render() {
     return (

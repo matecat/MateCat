@@ -669,7 +669,7 @@ $.extend(UI.UPLOAD_PAGE, {
           {
             text: 'Cannot swap languages when multiple target languages are selected!',
           },
-          '',
+          'Warning',
         )
         return false
       }
@@ -680,16 +680,24 @@ $.extend(UI.UPLOAD_PAGE, {
 
       if ($('.template-download').length) {
         if (UI.conversionsAreToRestart()) {
-          APP.confirm({
-            msg: 'Source language changed. The files must be reimported.',
-            callback: 'confirmRestartConversions',
-          })
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text: 'Source language changed. The files must be reimported.',
+              successCallback: () => UI.confirmRestartConversions(),
+            },
+            'Confirmation required',
+          )
         }
       } else if ($('.template-gdrive').length) {
-        APP.confirm({
-          msg: 'Source language has been changed.<br/>The files will be reimported.',
-          callback: 'confirmGDriveRestartConversions',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Source language changed. The files must be reimported.',
+            successCallback: () => UI.confirmGDriveRestartConversions(),
+          },
+          'Confirmation required',
+        )
       }
     })
 
@@ -823,21 +831,27 @@ $.extend(UI.UPLOAD_PAGE, {
     if ($('.template-download').length) {
       //.template-download is present when jquery file upload is used and a file is found
       if (UI.conversionsAreToRestart()) {
-        APP.confirm({
-          msg: 'Source language has been changed.<br/>The files will be reimported.',
-          callback: 'confirmRestartConversions',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Source language changed. The files must be reimported.',
+            successCallback: () => UI.confirmRestartConversions(),
+          },
+          'Confirmation required',
+        )
       }
       if (UI.checkTMXLangFailure()) {
         UI.delTMXLangFailure()
       }
     } else if ($('.template-gdrive').length) {
-      APP.confirm({
-        msg: 'Source language has been changed.<br/>The files will be reimported.',
-        callback: 'confirmGDriveRestartConversions',
-      })
-    } else {
-      return
+      ModalWindow.showModalComponent(
+        AlertModal,
+        {
+          text: 'Source language changed. The files must be reimported.',
+          successCallback: () => UI.confirmGDriveRestartConversions(),
+        },
+        'Confirmation required',
+      )
     }
   },
   targetLanguageChangedCallback: function () {

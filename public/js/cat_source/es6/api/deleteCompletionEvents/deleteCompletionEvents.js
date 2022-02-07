@@ -9,13 +9,12 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} [options.lastCompletionEventId=config.last_completion_event_id]
  * @returns {Promise<object>}
  */
-export const deleteCompletionEvents = async ({
-  idJob = config.id_job,
-  password = config.password,
-  lastCompletionEventId = config.last_completion_event_id,
-}) => {
+export const deleteCompletionEvents = async () => {
+  const idJob = config.id_job
+  const password = config.password
+  const lastCompletionEventId = config.last_completion_event_id
   const response = await fetch(
-    `${getMatecatApiDomain()}/api/app/jobs/${idJob}/${password}/completion-events/${lastCompletionEventId}`,
+    `/api/app/jobs/${idJob}/${password}/completion-events/${lastCompletionEventId}`,
     {
       method: 'DELETE',
       credentials: 'include',

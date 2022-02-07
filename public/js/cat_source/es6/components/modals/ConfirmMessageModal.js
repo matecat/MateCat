@@ -15,12 +15,15 @@ class ConfirmMessageModal extends React.Component {
               <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
             </div>
             <div className="column right aligned">
-              {this.props.cancelCallback ? (
+              {this.props.cancelCallback || this.props.cancelText ? (
                 <div
                   className="ui button cancel-button"
-                  onClick={this.props.cancelCallback}
+                  onClick={() => {
+                    if (this.props.closeOnSuccess) this.props.onClose()
+                    this.props.cancelCallback?.()
+                  }}
                 >
-                  {this.props.cancelText}
+                  {this.props.cancelText ? this.props.cancelText : 'Cancel'}
                 </div>
               ) : (
                 ''
@@ -28,19 +31,25 @@ class ConfirmMessageModal extends React.Component {
               {this.props.warningCallback ? (
                 <div
                   className="ui primary button button-modal warning-button orange margin left-10 right-20"
-                  onClick={this.props.warningCallback}
+                  onClick={() => {
+                    if (this.props.closeOnSuccess) this.props.onClose()
+                    this.props.warningCallback?.()
+                  }}
                 >
                   {this.props.warningText}
                 </div>
               ) : (
                 ''
               )}
-              {this.props.successCallback ? (
+              {this.props.successCallback || this.props.successText ? (
                 <div
                   className="ui primary button right floated"
-                  onClick={this.props.successCallback}
+                  onClick={() => {
+                    if (this.props.closeOnSuccess) this.props.onClose()
+                    this.props.successCallback?.()
+                  }}
                 >
-                  {this.props.successText}
+                  {this.props.successText ? this.props.successText : 'Confirm'}
                 </div>
               ) : (
                 ''
