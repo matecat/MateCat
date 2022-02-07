@@ -1,5 +1,6 @@
-import {sprintf} from 'sprintf-js'
 import {dqfConfirmAssignment as dqfConfirmAssignmentApi} from './cat_source/es6/api/dqfConfirmAssignment'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
 ;(function (UI) {
   var STATUS_USER_NOT_ASSIGNED = 'not_assigned'
   var STATUS_USER_NOT_MATCHING = 'not_matching'
@@ -12,10 +13,9 @@ import {dqfConfirmAssignment as dqfConfirmAssignmentApi} from './cat_source/es6/
   var original_readonlyClickDisplay = UI.readonlyClickDisplay
 
   function readonlyClickDisplay() {
-    APP.confirm({
-      msg: UI.messageForClickOnReadonly(),
-      callback: 'dqfConfirmSignin',
-      okTxt: 'Ok',
+    ModalWindow.showModalComponent(AlertModal, {
+      text: UI.messageForClickOnReadonly(),
+      successCallback: dqfConfirmSignin,
     })
   }
 
