@@ -31,15 +31,15 @@ function RowSegment({
   collectionTypeSeparator,
   ...restProps
 }) {
-  const {updateHeightRow} = useContext(SegmentsContext)
+  const {onChangeRowHeight} = useContext(SegmentsContext)
   const ref = useRef()
-  const {height: newHeight} = useResizeObserver(ref, {defaultHeight})
+  const {height: newHeight} = useResizeObserver(ref, {minHeight: defaultHeight})
 
   useEffect(() => {
-    updateHeightRow(id, newHeight)
-  }, [id, newHeight, defaultHeight, updateHeightRow])
+    onChangeRowHeight(id, newHeight)
+  }, [id, newHeight, onChangeRowHeight])
 
-  const content = useMemo(() => {
+  const projectBar = useMemo(() => {
     const {segment, files, sideOpen} = restProps
     if (segment.id_file !== currentFileId) {
       const file = files
@@ -49,58 +49,50 @@ function RowSegment({
       const isFirstSegment = files && segment.sid === files[0].first_segment
       classes = isFirstSegment ? classes + ' first-segment' : classes
       return (
-        <React.Fragment>
-          <div className={'projectbar ' + classes}>
-            {file ? (
-              <div className={'projectbar-filename'}>
-                <span
-                  title={segment.filename}
-                  className={
-                    'fileFormat ' +
-                    CommonUtils.getIconClass(
-                      file.file_name.split('.')[
-                        file.file_name.split('.').length - 1
-                      ],
-                    )
-                  }
-                >
-                  {file.file_name}
-                </span>
-              </div>
-            ) : null}
-            {file ? (
-              <div className="projectbar-wordcounter">
-                <span>
-                  Payable Words: <strong>{file.weighted_words}</strong>
-                </span>
-              </div>
-            ) : null}
-            {file && file.metadata && file.metadata.instructions ? (
-              <div
-                className={'button-notes'}
-                onClick={() => this.openInstructionsModal(segment.id_file)}
+        <div className={'projectbar ' + classes}>
+          {file ? (
+            <div className={'projectbar-filename'}>
+              <span
+                title={segment.filename}
+                className={
+                  'fileFormat ' +
+                  CommonUtils.getIconClass(
+                    file.file_name.split('.')[
+                      file.file_name.split('.').length - 1
+                    ],
+                  )
+                }
               >
-                <LinkIcon />
-                <span>View notes</span>
-              </div>
-            ) : null}
-          </div>
-          {collectionTypeSeparator}
-          <Segment {...restProps} />
-        </React.Fragment>
+                {file.file_name}
+              </span>
+            </div>
+          ) : null}
+          {file ? (
+            <div className="projectbar-wordcounter">
+              <span>
+                Payable Words: <strong>{file.weighted_words}</strong>
+              </span>
+            </div>
+          ) : null}
+          {file && file.metadata && file.metadata.instructions ? (
+            <div
+              className={'button-notes'}
+              onClick={() => this.openInstructionsModal(segment.id_file)}
+            >
+              <LinkIcon />
+              <span>View notes</span>
+            </div>
+          ) : null}
+        </div>
       )
     }
-    return (
-      <React.Fragment>
-        {collectionTypeSeparator}
-        <Segment {...restProps} />
-      </React.Fragment>
-    )
-  }, [restProps, currentFileId, collectionTypeSeparator])
+  }, [restProps, currentFileId])
 
   return (
     <div ref={ref} className="row">
-      {content}
+      {projectBar}
+      {collectionTypeSeparator}
+      <Segment {...restProps} />
     </div>
   )
 }

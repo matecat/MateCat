@@ -19,6 +19,9 @@ import {ModalWindow} from '../modals/ModalWindow'
 import RowSegment from '../common/VirtualList/Rows/RowSegment'
 import VirtualList from '../common/VirtualList/VirtualList'
 
+const ROW_HEIGHT = 90
+const OVERSCAN = 5
+
 export const SegmentsContext = createContext({})
 
 class SegmentsContainer extends React.Component {
@@ -49,7 +52,7 @@ class SegmentsContainer extends React.Component {
     this.recomputeListSize = this.recomputeListSize.bind(this)
     this.forceUpdateSegments = this.forceUpdateSegments.bind(this)
     this.storeJobInfo = this.storeJobInfo.bind(this)
-    this.updateHeightRow = this.updateHeightRow.bind(this)
+    this.onChangeRowHeight = this.onChangeRowHeight.bind(this)
 
     this.lastScrollTop = 0
     this.segmentsHeightsMap = {}
@@ -62,30 +65,53 @@ class SegmentsContainer extends React.Component {
     this.index = this.props.startSegmentId
     this.lastOpenedHeight = '200'
     this.domContainer = document.getElementById('outer')
+
+    this.updatedRowsHeight = []
   }
 
   getRows(segments) {
-    const ROW_HEIGHT = 90
-    const actualRows = this.state.rows
+    /* const rowsBeforeStartIndex = this.state.rows.filter(
+      (row, index) => index < startIndex,
+    )
+    console.log('---->')
+    rowsBeforeStartIndex.forEach(({id, height}, index) => {
+      const segment = this.state.segments.find(
+        (segment) => segment.get('sid') === id,
+      )
+      const updatedHeight =
+        this.updatedRowsHeight.find(({id: updatedId}) => updatedId === id)
+          ?.height ?? height
+      const newHeight =
+        updatedHeight === ROW_HEIGHT
+          ? this.getSegmentDefaultHeight(index, segment)
+          : updatedHeight
+
+      if (newHeight !== height) this.onChangeRowHeight(id, newHeight)
+    }) */
+
     return new Array(segments.size).fill({}).map((item, index) => ({
       id: segments.get(index).get('sid'),
       height:
-        actualRows.find(({id}) => segments.get(index).get('sid') === id)
-          ?.height ?? ROW_HEIGHT,
+        this.updatedRowsHeight.find(
+          ({id}) => segments.get(index).get('sid') === id,
+        )?.height ?? ROW_HEIGHT,
       defaultHeight: ROW_HEIGHT,
     }))
   }
 
-  updateHeightRow(id, newHeight) {
+  onChangeRowHeight(id, newHeight) {
+    if (!this.updatedRowsHeight.find((row) => row.id === id))
+      this.updatedRowsHeight.push({id})
+    const updateHeight = (row) =>
+      row.id === id
+        ? {
+            ...row,
+            height: newHeight,
+          }
+        : row
+    this.updatedRowsHeight = this.updatedRowsHeight.map(updateHeight)
     this.setState({
-      rows: this.state.rows.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              height: newHeight,
-            }
-          : item,
-      ),
+      rows: this.state.rows.map(updateHeight),
     })
   }
 
@@ -185,7 +211,7 @@ class SegmentsContainer extends React.Component {
   }
 
   getIndexToScroll() {
-    let position = this.state.scrollToSelected ? 'auto' : 'start'
+    const position = this.state.scrollToSelected ? 'auto' : 'start'
     if (this.state.scrollTo && this.state.segments.size > 0) {
       const index = this.state.segments.findIndex((segment) => {
         if (this.state.scrollTo.toString().indexOf('-') === -1) {
@@ -392,6 +418,8 @@ class SegmentsContainer extends React.Component {
   }
 
   getSegmentHeight = (index, components) => {
+    return this.state.rows[index]?.height
+
     const segment = this.getSegmentByIndex(index)
 
     // --- No segment
@@ -452,6 +480,44 @@ class SegmentsContainer extends React.Component {
     return height
   }
 
+  getSegmentDefaultHeight({index, segment, previousSegment}) {
+    const container = document.createElement('div', {})
+    const html = getSegmentStructure(segment.toJS(), this.state.sideOpen)
+    container.innerHTML = ReactDOMServer.renderToStaticMarkup(html)
+    this.domContainer.appendChild(container)
+    const height = container.getElementsByTagName('section')[0].clientHeight
+    container.parentNode.removeChild(container)
+
+    const getBasicSize = ({index, segment, previousSegment}) => {
+      let basicSize = 0
+      // if is the first segment of a file, add the 43px of the file header
+      const previousFileId = previousSegment
+        ? previousSegment.get('id_file')
+        : 0
+      const isFirstSegment =
+        this.state.files &&
+        segment.get('sid') === this.state.files[0].first_segment
+      const fileDivHeight = isFirstSegment ? 60 : 75
+      const collectionDivHeight = isFirstSegment ? 35 : 50
+      if (previousFileId !== segment.get('id_file')) {
+        basicSize += fileDivHeight
+      }
+      // if it's last segment, add 150px of distance from footer
+      if (index === this.state.segments.size - 1) {
+        basicSize += 150
+      }
+      // if it's collection type add 42px of header
+      if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
+        basicSize += collectionDivHeight
+      }
+      // add height for comments padding
+      basicSize += this.getCommentsPadding(index, segment)
+      return basicSize
+    }
+
+    return height + getBasicSize({index, segment, previousSegment})
+  }
+
   onScroll() {
     let scrollTop = this.scrollContainer.scrollTop()
     let scrollBottom =
@@ -466,6 +532,30 @@ class SegmentsContainer extends React.Component {
     this.lastListSize = this.state.segments.size
     this.lastScrollTop = scrollTop
   }
+
+  /* normalizeScroll() {
+    const {startIndex} = this.lastUpdateObj
+    if (startIndex === undefined || !this.updatedRowsHeight || !this.state.rows)
+      return
+    const rowsBeforeStartIndex = this.state.rows.filter(
+      (row, index) => index >= startIndex && index < startIndex + OVERSCAN,
+    )
+    const previousHeight = rowsBeforeStartIndex.reduce(
+      (acc, {height}) => acc + height,
+      0,
+    )
+    const newHeight = rowsBeforeStartIndex.reduce((acc, {id, height}) => {
+      const updatedHeight =
+        this.updatedRowsHeight.find((row) => row.id === id)?.height ?? height
+      return acc + updatedHeight
+    }, 0)
+    // console.log(previousHeight, newHeight)
+    const diff = newHeight - previousHeight
+    if (diff) {
+      console.log(this.lastScrollTop, diff)
+      //this.scrollContainer.scrollTop(this.scrollContainer.scrollTop() + diff)
+    }
+  } */
 
   recomputeListSize(idFrom) {
     const index = this.state.segments.findIndex((segment) => {
@@ -573,7 +663,8 @@ class SegmentsContainer extends React.Component {
       nextState.tagLockEnabled !== this.state.tagLockEnabled ||
       nextState.window !== this.state.window ||
       (nextState.scrollTo && nextState.scrollTo !== this.state.scrollTo) ||
-      nextState.sideOpen !== this.state.sideOpen
+      nextState.sideOpen !== this.state.sideOpen ||
+      nextState.rows !== this.state.rows
     )
   }
 
@@ -622,13 +713,17 @@ class SegmentsContainer extends React.Component {
       ...segmentsProps.find(({segment}) => segment.sid === row.id),
     }))
     return (
-      <SegmentsContext.Provider value={{updateHeightRow: this.updateHeightRow}}>
+      <SegmentsContext.Provider
+        value={{onChangeRowHeight: this.onChangeRowHeight}}
+      >
         <VirtualList
           items={items}
           goToIndex={scrollToObject.scrollTo}
+          overscan={OVERSCAN}
           onScroll={() => this.onScroll()}
           alignment={scrollToObject.position}
           Component={RowSegment}
+          itemStyle={({segment}) => segment.opened && {zIndex: 1}}
           width={this.state.window.width}
           height={this.state.window.height}
           renderedRange={(range) =>

@@ -6,12 +6,13 @@ function VirtualList({
   items,
   goToIndex,
   Component,
+  itemStyle = () => ({}),
   width,
   height,
   onScroll = () => {},
   renderedRange = () => {},
   alignment = 'auto',
-  overscan = 10,
+  overscan = 5,
 }) {
   const parentRef = useRef()
   const {virtualItems, totalSize, scrollToIndex} = useVirtual({
@@ -54,7 +55,7 @@ function VirtualList({
       >
         {virtualItems.map((item) => (
           <div
-            key={item.index}
+            key={items[item.index].id ? items[item.index].id : item.index}
             item-index={item.index}
             style={{
               position: 'absolute',
@@ -63,12 +64,8 @@ function VirtualList({
               width: '100%',
               height: `${items[item.index].height}px`,
               transform: `translateY(${item.start}px)`,
+              ...itemStyle(items[item.index]),
             }}
-            className={`${
-              items[item.index].id % 2 === 0
-                ? 'whitesmoke-background'
-                : 'white-background'
-            }`}
           >
             <Component {...items[item.index]} />
           </div>
@@ -82,6 +79,7 @@ VirtualList.propTypes = {
   items: PropTypes.array.isRequired,
   goToIndex: PropTypes.number,
   Component: PropTypes.elementType.isRequired,
+  itemStyle: PropTypes.func,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onScroll: PropTypes.func,
