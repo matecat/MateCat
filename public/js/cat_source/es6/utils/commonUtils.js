@@ -463,6 +463,19 @@ const CommonUtils = {
     }
     return true
   },
+  validateEmailList: (emails) => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    let result = true
+    let error = null
+    emails.split(',').forEach(function (email) {
+      if (!re.test(email.trim())) {
+        result = false
+        error = email
+      }
+    })
+    return {result, emails: error}
+  },
   getUserShortName: function (user) {
     if (user && user.first_name && user.last_name) {
       return (user.first_name[0] + user.last_name[0]).toUpperCase()

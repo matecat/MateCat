@@ -66,16 +66,14 @@ if (ReviewExtended.enabled()) {
      * To delete a segment issue
      * @param context
      */
-    deleteTranslationIssue: function (context) {
-      var parsed = JSON.parse(context)
-      var issue_id = parsed.id_issue
-      var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment))
+    deleteTranslationIssue: function (idSegment, idIssue) {
+      var fid = UI.getSegmentFileId(UI.getSegmentById(idSegment))
 
       deleteSegmentIssueApi({
-        idSegment: parsed.id_segment,
-        idIssue: parsed.id_issue,
+        idSegment,
+        idIssue,
       }).then(() => {
-        UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
+        UI.deleteSegmentIssues(fid, idSegment, idIssue)
         UI.reloadQualityReport()
       })
     },
@@ -126,40 +124,8 @@ if (ReviewExtended.enabled()) {
       return true
     },
 
-    deleteIssue: function (issue, sid, dontShowMessage) {
-      var message = ''
-      if (issue.target_text) {
-        message = sprintf(
-          "You are about to delete the issue on string <span style='font-style: italic;'>'%s'</span> " +
-            'posted on %s.',
-          issue.target_text,
-          moment(issue.created_at).format('lll'),
-        )
-      } else {
-        message = sprintf(
-          'You are about to delete the issue posted on %s.',
-          moment(issue.created_at).format('lll'),
-        )
-      }
-      if (!dontShowMessage) {
-        APP.confirm({
-          name: 'Confirm issue deletion',
-          callback: 'deleteTranslationIssue',
-          msg: message,
-          okTxt: 'Yes delete this issue',
-          context: JSON.stringify({
-            id_segment: sid,
-            id_issue: issue.id,
-          }),
-        })
-      } else {
-        UI.deleteTranslationIssue(
-          JSON.stringify({
-            id_segment: sid,
-            id_issue: issue.id,
-          }),
-        )
-      }
+    deleteIssue: function (issue, sid) {
+      UI.deleteTranslationIssue(sid, issue.id)
     },
 
     getSegmentRevisionIssues(segment, revisionNumber) {

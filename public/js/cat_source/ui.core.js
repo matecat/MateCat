@@ -577,17 +577,20 @@ window.UI = {
     )
   },
   showFixWarningsOnDownload: function (continueDownloadFunction) {
-    APP.confirm({
-      name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
-      cancelTxt: 'Fix errors',
-      onCancel: 'goToFirstError',
-      callback: continueDownloadFunction,
-      okTxt: 'Download anyway',
-      msg:
-        'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-        ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
-        ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-    })
+    ModalWindow.showModalComponent(
+      ConfirmMessageModal,
+      {
+        cancelText: 'Fix errors',
+        cancelCallback: () => UI.goToFirstError(),
+        successCallback: () => continueDownloadFunction(),
+        successText: 'Download anyway',
+        text:
+          'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
+          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
+          ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
+      },
+      'Confirmation required',
+    )
   },
 
   runDownload: function () {
@@ -596,9 +599,9 @@ window.UI = {
     if ($('#downloadProject').hasClass('disabled')) return false
 
     if (config.isGDriveProject) {
-      continueDownloadFunction = 'continueDownloadWithGoogleDrive'
+      continueDownloadFunction = UI.continueDownloadWithGoogleDrive
     } else {
-      continueDownloadFunction = 'continueDownload'
+      continueDownloadFunction = UI.continueDownload
     }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup

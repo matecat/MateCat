@@ -17,6 +17,7 @@ import {loadTMX} from './cat_source/es6/api/loadTMX'
 import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
 import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -439,18 +440,14 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
           e.preventDefault()
           UI.clickOnShareButton($(this))
         })
-        .on(
-          'keydown',
-          '.message-share-tmx-input-email, .share-popup-container-input-email',
-          function (e) {
-            $(this).removeClass('error')
-            UI.hideAllBoxOnTables()
-            if (e.which == 13) {
-              e.preventDefault()
-              UI.clickOnShareButton($(this).parent().find('.share-button'))
-            }
-          },
-        )
+        .on('keydown', '.message-share-tmx-input-email', function (e) {
+          $(this).removeClass('error')
+          UI.hideAllBoxOnTables()
+          if (e.which == 13) {
+            e.preventDefault()
+            UI.clickOnShareButton($(this).parent().find('.share-button'))
+          }
+        })
         .on('change', '#multi-match-1, #multi-match-2', function () {
           UI.storeMultiMatchLangs()
         })
@@ -1964,78 +1961,18 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
 
         var description = tr.find('.edit-desc').data('descr')
 
-        if (description.length) {
-          description =
-            "<span class='share-popup-description'>" + description + '</span>'
-        }
-
-        //Create the users list with the logged user first
-        var htmlUsersList =
-          '<div class="share-popup-list-item">' +
-          '<span class="share-popup-item-name">' +
-          user.first_name +
-          ' ' +
-          user.last_name +
-          ' (you)</span>' +
-          '<span class="share-popup-item-email">' +
-          user.email +
-          '</span>' +
-          '</div>'
-        users.forEach(function (item) {
-          htmlUsersList =
-            htmlUsersList +
-            '<div class="share-popup-list-item">' +
-            '<span class="share-popup-item-name">' +
-            item.first_name +
-            ' ' +
-            item.last_name +
-            '</span>' +
-            '<span class="share-popup-item-email">' +
-            item.email +
-            '</span>' +
-            '</div>'
-        })
-
-        var message =
-          "<div class='share-popup-container'>" +
-          "<div class='share-popup-top'>" +
-          "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />" +
-          description +
-          " - <span class='share-popup-key'>" +
-          key +
-          '</span>' +
-          '</h3>' +
-          '</div>' +
-          "<div class='share-popup-container-bottom'>" +
-          '<p>This action cannot be undone.</p>' +
-          "<div class='share-popup-copy-result'></div>" +
-          "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>" +
-          "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>" +
-          "<div class='share-popup-input-result'></div>" +
-          '</div>' +
-          '</div>' +
-          "<div class='share-popup-container-list'>" +
-          "<h3 class='popup-tm'>Who owns the resource</h3>" +
-          "<div class='share-popup-list'>" +
-          htmlUsersList +
-          '</div>' +
-          '</div>'
         tr.find('.message-share-tmx-openemailpopup').on('click', function () {
-          APP.confirm({
-            type: 'share_key_popup',
-            name: 'share-window',
-            cancelTxt: 'Cancel',
-            msg: message,
-            title: 'Share resource',
-          })
-
-          $('.share-popup-copy-link-button').data(
-            'powertip',
-            "<div style='line-height: 20px;font-size: 15px;'>Click to copy to clipboard</div>",
+          ModalWindow.showModalComponent(
+            ShareTmModal,
+            {
+              description,
+              tmKey: key,
+              user,
+              users,
+              callback: () => UI.shareTmCallbackFromPopup(key),
+            },
+            'Share resource',
           )
-          $('.share-popup-copy-link-button').powerTip({
-            placement: 'n',
-          })
         })
       })
     },
@@ -2328,98 +2265,68 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
     },
     clickOnShareButton(button) {
       var tr = button.closest('tr')
-      var key = tr.length
-        ? tr.data('key')
-        : button
-            .closest('.share-popup-container')
-            .find('.share-popup-key')
-            .text()
+      var key = tr.data('key')
       var msg =
         'The resource <span style="font-weight: bold">' +
         key +
         '</span> has been shared.'
 
-      var validateEmail = function (emails) {
-        var re =
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        var result = true
-        emails.split(',').forEach(function (email) {
-          if (!re.test(email.trim())) result = email
-        })
-        return result
-      }
-
-      var emails = button.hasClass('share-button-popup')
-        ? button
-            .closest('.share-popup-container-bottom')
-            .find('.share-popup-container-input-email')
-            .val()
-        : button
-            .closest('.share-tmx-container')
-            .find('.message-share-tmx-input-email')
-            .val()
-
-      var validateReturn = validateEmail(emails)
+      var emails = button
+        .closest('.share-tmx-container')
+        .find('.message-share-tmx-input-email')
+        .val()
+      var validateReturn = CommonUtils.validateEmailList(emails)
 
       if (validateReturn !== true) {
         var errorMsg =
           'The email <span style="font-weight: bold">' +
           validateReturn +
           '</span> is not valid.'
-        if (button.hasClass('share-button-popup')) {
-          $('.share-popup-input-result').html(errorMsg)
-          $('.share-popup-container-input-email').addClass('error')
+
+        if (tr.closest('table').attr('id') == 'inactivetm') {
+          UI.showErrorOnInactiveTMTable(errorMsg)
         } else {
-          if (tr.closest('table').attr('id') == 'inactivetm') {
-            UI.showErrorOnInactiveTMTable(errorMsg)
-          } else {
-            UI.showErrorOnActiveTMTable(errorMsg)
-          }
-          tr.find('.message-share-tmx-input-email').addClass('error')
+          UI.showErrorOnActiveTMTable(errorMsg)
         }
+        tr.find('.message-share-tmx-input-email').addClass('error')
+
         return
       }
 
       UI.shareKeyByEmail(emails, key)
         .then(() => {
           UI.hideAllBoxOnTables()
-          if (button.hasClass('share-button-popup')) {
-            APP.closePopup()
-            UI.showSuccessOnActiveTMTable(msg)
-            $('tr .action a').removeClass('disabled')
-            $('.share-tmx-container').slideToggle(function () {
-              $(this).remove()
-            })
+          button.closest('.share-tmx-container').find('.cancelsharetmx').click()
+          if (tr.closest('table').attr('id') == 'inactivetm') {
+            UI.showSuccessOnInactiveTMTable(msg)
           } else {
-            button
-              .closest('.share-tmx-container')
-              .find('.cancelsharetmx')
-              .click()
-            if (tr.closest('table').attr('id') == 'inactivetm') {
-              UI.showSuccessOnInactiveTMTable(msg)
-            } else {
-              UI.showSuccessOnActiveTMTable(msg)
-            }
+            UI.showSuccessOnActiveTMTable(msg)
           }
-
           setTimeout(function () {
             UI.hideAllBoxOnTables()
           }, 4000)
         })
         .catch((errors) => {
           var errorMsg = errors[0].message
-          if (button.hasClass('share-button-popup')) {
-            $('.share-popup-input-result').text(errorMsg)
-            $('.share-popup-container-input-email').addClass('error')
+          if (tr.closest('table').attr('id') == 'inactivetm') {
+            UI.showErrorOnInactiveTMTable(errorMsg)
           } else {
-            if (tr.closest('table').attr('id') == 'inactivetm') {
-              UI.showErrorOnInactiveTMTable(errorMsg)
-            } else {
-              UI.showErrorOnActiveTMTable(errorMsg)
-            }
-            tr.find('.message-share-tmx-input-email').addClass('error')
+            UI.showErrorOnActiveTMTable(errorMsg)
           }
+          tr.find('.message-share-tmx-input-email').addClass('error')
         })
+    },
+    shareTmCallbackFromPopup: function (key) {
+      var msg =
+        'The resource <span style="font-weight: bold">' +
+        key +
+        '</span> has been shared.'
+      UI.showSuccessOnActiveTMTable(msg)
+      $('tr .action a').removeClass('disabled')
+      $('.share-tmx-container').slideToggle(function () {
+        $(this).remove()
+      })
+      UI.hideAllBoxOnTables()
     },
     /**
      * Share a key to one or more email, separated by comma
