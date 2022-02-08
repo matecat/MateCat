@@ -464,7 +464,6 @@ const SegmentActions = {
         })
       })
       .catch((errors) => {
-        APP.closePopup()
         const notification = {
           title: 'Error',
           text: 'Error copying all sources to target. Try again!',

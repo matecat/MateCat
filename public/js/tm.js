@@ -422,11 +422,7 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
           var esc = 27
 
           var handleEscPressed = function () {
-            if ($('.modal:not([data-type=view])').length) {
-              e.stopPropagation()
-              APP.closePopup()
-              return
-            } else if ($('.popup-tm.open').length) {
+            if ($('.popup-tm.open').length) {
               e.stopPropagation()
               UI.closeTMPanel()
               UI.clearTMPanel()
