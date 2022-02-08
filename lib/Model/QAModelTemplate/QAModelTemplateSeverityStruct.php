@@ -9,7 +9,7 @@ class QAModelTemplateSeverityStruct extends DataAccess_AbstractDaoSilentStruct i
 {
     public $id;
     public $id_category;
-    public $label;
+    public $severity_label;
     public $penalty;
     public $sort;
 }

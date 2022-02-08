@@ -2,7 +2,6 @@
 
 namespace Validator;
 
-use Swaggest\JsonSchema\Constraint\Properties;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;

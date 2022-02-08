@@ -174,9 +174,16 @@
     ],
     "passfail" : {
       "type" : "points_per_thousand",
-      "options" : {
-        "limit" : [10, 3]
-      }
+      "thresholds" : [
+        {
+          "label": "T",
+          "value": 10
+        },
+        {
+          "label": "R1",
+          "value": 3
+        }
+      ]
     }
   }
 }

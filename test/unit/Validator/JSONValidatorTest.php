@@ -23,6 +23,18 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse($validator->isValid($invalidFile));
     }
 
+    public function testInvalidMaxItemsFile()
+    {
+        $jsonSchema = file_get_contents( __DIR__ . '/../../support/files/json/schema/schema_1.json' );
+        $invalidFile = file_get_contents(__DIR__.'/../../support/files/json/files/invalid_maxItems.json');
+
+        $validator = new \Validator\JSONValidator($jsonSchema);
+        $error = $validator->validate($invalidFile)[0];
+
+        $this->assertFalse($validator->isValid($invalidFile));
+        $this->assertEquals("Too many items in array", $error->getError());
+    }
+
     public function testValidFile()
     {
         $jsonSchema = file_get_contents( __DIR__ . '/../../support/files/json/schema/schema_1.json' );

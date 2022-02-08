@@ -6,9 +6,8 @@ class CreateTableQaModelTemplates extends AbstractMatecatMigration {
         CREATE TABLE IF NOT EXISTS `qa_model_templates` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `uid` bigint(20) NOT NULL,
+          `version` int(11) NOT NULL,
           `label` varchar(45) NOT NULL,
-          `pass_type` varchar(255) NOT NULL,
-          `pass_options` varchar(255) NOT NULL,
             PRIMARY KEY (`id`),
             KEY `uid` (`uid`) USING BTREE
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

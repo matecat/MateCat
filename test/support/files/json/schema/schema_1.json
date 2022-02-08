@@ -9,6 +9,7 @@
     },
     "orders": {
       "type": "array",
+      "maxItems": 2,
       "items": {
         "$ref": "#/definitions/order"
       }

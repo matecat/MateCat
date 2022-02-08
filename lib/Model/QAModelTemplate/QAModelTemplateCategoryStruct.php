@@ -10,17 +10,13 @@ class QAModelTemplateCategoryStruct extends DataAccess_AbstractDaoSilentStruct i
     public $id;
     public $id_template;
     public $id_parent;
-    public $label;
+    public $category_label;
+    public $code;
     public $dqf_id;
     public $sort;
 
     /**
-     * @var array QAModelTemplateOptionStruct[]
-     */
-    public $options = [];
-
-    /**
-     * @var array QAModelTemplateSeverityStruct[]
+     * @var QAModelTemplateSeverityStruct[]
      */
     public $severities = [];
 }

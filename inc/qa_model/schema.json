@@ -11,6 +11,9 @@
     "model": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "version": {
           "type": "integer"
         },
@@ -19,6 +22,7 @@
         },
         "categories": {
           "type": "array",
+          "maxItems": 7,
           "items": {
             "$ref": "#/definitions/category"
           }
@@ -33,6 +37,12 @@
     "category": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "id_parent": {
+          "type": "integer"
+        },
         "label": {
           "type": "string"
         },
@@ -42,6 +52,7 @@
         },
         "severities": {
           "type": "array",
+          "maxItems": 5,
           "items": {
             "$ref": "#/definitions/severity"
           }
@@ -52,6 +63,9 @@
     "severity": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "label": {
           "type": "string"
         },
@@ -71,27 +85,42 @@
     "passfail": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "type": {
           "type": "string",
           "enum": [
             "points_per_thousand"
           ]
         },
-        "options": {
-          "type": "object",
-          "$ref": "#/definitions/passfailOptions"
+        "thresholds": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/passfailThreshold"
+          }
         }
       },
-      "required": ["type", "options"]
+      "required": ["type", "thresholds"]
     },
-    "passfailOptions": {
+    "passfailThreshold": {
       "type": "object",
       "properties": {
-        "limit": {
-          "type": "array"
+        "id": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string",
+          "enum": [
+            "T", "R1", "R2"
+          ]
+        },
+        "value": {
+          "type": "integer"
         }
       },
-      "required": ["limit"]
+      "required": ["label", "value"]
     }
   }
 }

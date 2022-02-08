@@ -1,20 +1,19 @@
 <?php
 
-class CreateTableQaModelTemplates extends AbstractMatecatMigration {
+class CreateTableQaModelCategoryTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [ '
-        CREATE TABLE IF NOT EXISTS `qa_model_templates` (
-          `id` bigint(20) NOT NULL AUTO_INCREMENT,
-          `uid` bigint(20) NOT NULL,
-          `label` varchar(45) NOT NULL,
+        CREATE TABLE IF NOT EXISTS `qa_model_template_categories` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `id_template` int(11) NOT NULL,
+          `id_parent` int(11) DEFAULT NULL,
+          `category_label` varchar(45) NOT NULL,
+          `code` varchar(45) NOT NULL,
           `dqf_id` int(11) DEFAULT NULL,
-          `pass_type` varchar(255) NOT NULL,
-          `pass_options` varchar(255) NOT NULL,
-            PRIMARY KEY (`id`),
-            KEY `uid` (`uid`) USING BTREE
+          `sort` int(11) DEFAULT NULL,
+            PRIMARY KEY (`id`)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
     ' ];
 
-    public $sql_down = [ 'DROP TABLE `qa_model_templates`;' ];
-
+    public $sql_down = [ 'DROP TABLE `qa_model_template_categories`;' ];
 }
