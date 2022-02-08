@@ -1,9 +1,12 @@
-import React, {useContext, useEffect, useMemo, useRef} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
 import {SegmentsContext} from '../../../segments/SegmentsContainer'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
 import CommonUtils from '../../../../utils/commonUtils'
+import JobMetadataModal from '../../../modals/JobMetadataModal'
+import {ModalWindow} from '../../../modals/ModalWindow'
+import CatToolStore from '../../../../stores/CatToolStore'
 
 const LinkIcon = () => {
   return (
@@ -39,7 +42,26 @@ function RowSegment({
     onChangeRowHeight(id, newHeight)
   }, [id, newHeight, onChangeRowHeight])
 
-  const projectBar = useMemo(() => {
+  const getProjectBar = () => {
+    const openInstructionsModal = (id_file) => {
+      const props = {
+        showCurrent: true,
+        files: CatToolStore.getJobFilesInfo(),
+        currentFile: id_file,
+      }
+      const styleContainer = {
+        minWidth: 600,
+        minHeight: 400,
+        maxWidth: 900,
+      }
+      ModalWindow.showModalComponent(
+        JobMetadataModal,
+        props,
+        'File notes',
+        styleContainer,
+      )
+    }
+
     const {segment, files, sideOpen} = restProps
     if (segment.id_file !== currentFileId) {
       const file = files
@@ -77,7 +99,7 @@ function RowSegment({
           {file && file.metadata && file.metadata.instructions ? (
             <div
               className={'button-notes'}
-              onClick={() => this.openInstructionsModal(segment.id_file)}
+              onClick={() => openInstructionsModal(segment.id_file)}
             >
               <LinkIcon />
               <span>View notes</span>
@@ -86,11 +108,11 @@ function RowSegment({
         </div>
       )
     }
-  }, [restProps, currentFileId])
+  }
 
   return (
     <div ref={ref} className="row">
-      {projectBar}
+      {getProjectBar()}
       {collectionTypeSeparator}
       <Segment {...restProps} />
     </div>

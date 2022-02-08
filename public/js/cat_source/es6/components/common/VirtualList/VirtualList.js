@@ -4,18 +4,23 @@ import {useVirtual} from 'react-virtual'
 
 function VirtualList({
   items,
-  goToIndex,
+  scrollToIndex = {
+    align: 'auto',
+  },
   Component,
   itemStyle = () => ({}),
   width,
   height,
   onScroll = () => {},
   renderedRange = () => {},
-  alignment = 'auto',
   overscan = 5,
 }) {
   const parentRef = useRef()
-  const {virtualItems, totalSize, scrollToIndex} = useVirtual({
+  const {
+    virtualItems,
+    totalSize,
+    scrollToIndex: fnScrollToIndex,
+  } = useVirtual({
     size: items.length,
     parentRef,
     estimateSize: useCallback((index) => items[index].height, [items]),
@@ -24,8 +29,11 @@ function VirtualList({
 
   // go to index
   useEffect(() => {
-    goToIndex >= 0 && scrollToIndex(goToIndex, {align: alignment})
-  }, [goToIndex, alignment, scrollToIndex])
+    if (typeof scrollToIndex?.value !== 'number') return
+    const {value, align} = scrollToIndex
+    console.log('@', value)
+    value >= 0 && fnScrollToIndex(value, {align})
+  }, [scrollToIndex, fnScrollToIndex])
 
   // rendered indexes
   useEffect(() => {
@@ -77,14 +85,16 @@ function VirtualList({
 
 VirtualList.propTypes = {
   items: PropTypes.array.isRequired,
-  goToIndex: PropTypes.number,
+  scrollToIndex: PropTypes.exact({
+    value: PropTypes.number,
+    align: PropTypes.string,
+  }),
   Component: PropTypes.elementType.isRequired,
   itemStyle: PropTypes.func,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,
-  alignment: PropTypes.string,
   overscan: PropTypes.number,
 }
 

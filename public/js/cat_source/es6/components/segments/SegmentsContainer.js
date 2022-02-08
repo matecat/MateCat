@@ -10,12 +10,9 @@ import CatToolStore from '../../stores/CatToolStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
 import Speech2Text from '../../utils/speech2text'
-import JobMetadataModal from '../modals/JobMetadataModal'
-import CommonUtils from '../../utils/commonUtils'
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import {ModalWindow} from '../modals/ModalWindow'
 import RowSegment from '../common/VirtualList/Rows/RowSegment'
 import VirtualList from '../common/VirtualList/VirtualList'
 
@@ -69,34 +66,52 @@ class SegmentsContainer extends React.Component {
     this.updatedRowsHeight = []
   }
 
+  getCachedRowsHeightBeforeStartIndex(startIndex = 0, segments) {
+    return segments
+      .toJS()
+      .filter((segment, index) => index < startIndex)
+      .map(({sid}, index) => {
+        const cachedValue = this.segmentsHeightsMap[sid]
+        const newHeight = !cachedValue?.height
+          ? this.getSegmentDefaultHeight({
+              index,
+              segment: segments.get(index),
+              previousSegment: index > 0 ? segments.get(index - 1) : undefined,
+            })
+          : cachedValue.height
+
+        this.segmentsHeightsMap[sid] = {
+          segment: segments.get(index),
+          height: newHeight,
+        }
+        return {id: sid, height: newHeight}
+      })
+  }
+
   getRows(segments) {
-    /* const rowsBeforeStartIndex = this.state.rows.filter(
-      (row, index) => index < startIndex,
-    )
-    console.log('---->')
-    rowsBeforeStartIndex.forEach(({id, height}, index) => {
-      const segment = this.state.segments.find(
-        (segment) => segment.get('sid') === id,
-      )
-      const updatedHeight =
-        this.updatedRowsHeight.find(({id: updatedId}) => updatedId === id)
-          ?.height ?? height
-      const newHeight =
-        updatedHeight === ROW_HEIGHT
-          ? this.getSegmentDefaultHeight(index, segment)
-          : updatedHeight
+    // get cached height for items before first item rendered
+    const rowsBeforeStartIndex = this.lastUpdateObj?.startIndex
+      ? this.getCachedRowsHeightBeforeStartIndex(
+          this.lastUpdateObj.startIndex,
+          this.state.segments,
+        )
+      : []
 
-      if (newHeight !== height) this.onChangeRowHeight(id, newHeight)
-    }) */
+    return new Array(segments.size).fill({}).map((item, index) => {
+      const sid = segments.get(index).get('sid')
+      const cachedHeight = rowsBeforeStartIndex.find(
+        ({id}) => sid === id,
+      )?.height
 
-    return new Array(segments.size).fill({}).map((item, index) => ({
-      id: segments.get(index).get('sid'),
-      height:
-        this.updatedRowsHeight.find(
-          ({id}) => segments.get(index).get('sid') === id,
-        )?.height ?? ROW_HEIGHT,
-      defaultHeight: ROW_HEIGHT,
-    }))
+      return {
+        id: sid,
+        height: cachedHeight
+          ? cachedHeight
+          : this.updatedRowsHeight.find(({id}) => sid === id)?.height ??
+            ROW_HEIGHT,
+        defaultHeight: cachedHeight ? cachedHeight : ROW_HEIGHT,
+      }
+    })
   }
 
   onChangeRowHeight(id, newHeight) {
@@ -278,25 +293,6 @@ class SegmentsContainer extends React.Component {
       })
     }
     return collectionType
-  }
-
-  openInstructionsModal(id_file) {
-    let props = {
-      showCurrent: true,
-      files: CatToolStore.getJobFilesInfo(),
-      currentFile: id_file,
-    }
-    let styleContainer = {
-      minWidth: 600,
-      minHeight: 400,
-      maxWidth: 900,
-    }
-    ModalWindow.showModalComponent(
-      JobMetadataModal,
-      props,
-      'File notes',
-      styleContainer,
-    )
   }
 
   getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
@@ -481,6 +477,7 @@ class SegmentsContainer extends React.Component {
   }
 
   getSegmentDefaultHeight({index, segment, previousSegment}) {
+    console.log('----> get height', segment.get('sid'))
     const container = document.createElement('div', {})
     const html = getSegmentStructure(segment.toJS(), this.state.sideOpen)
     container.innerHTML = ReactDOMServer.renderToStaticMarkup(html)
@@ -532,30 +529,6 @@ class SegmentsContainer extends React.Component {
     this.lastListSize = this.state.segments.size
     this.lastScrollTop = scrollTop
   }
-
-  /* normalizeScroll() {
-    const {startIndex} = this.lastUpdateObj
-    if (startIndex === undefined || !this.updatedRowsHeight || !this.state.rows)
-      return
-    const rowsBeforeStartIndex = this.state.rows.filter(
-      (row, index) => index >= startIndex && index < startIndex + OVERSCAN,
-    )
-    const previousHeight = rowsBeforeStartIndex.reduce(
-      (acc, {height}) => acc + height,
-      0,
-    )
-    const newHeight = rowsBeforeStartIndex.reduce((acc, {id, height}) => {
-      const updatedHeight =
-        this.updatedRowsHeight.find((row) => row.id === id)?.height ?? height
-      return acc + updatedHeight
-    }, 0)
-    // console.log(previousHeight, newHeight)
-    const diff = newHeight - previousHeight
-    if (diff) {
-      console.log(this.lastScrollTop, diff)
-      //this.scrollContainer.scrollTop(this.scrollContainer.scrollTop() + diff)
-    }
-  } */
 
   recomputeListSize(idFrom) {
     const index = this.state.segments.findIndex((segment) => {
@@ -681,6 +654,9 @@ class SegmentsContainer extends React.Component {
     ) {
       this.setState({
         window: data,
+        ...(this.state.window.width !== data.width && {
+          rows: this.getRows(this.state.segments),
+        }),
       })
       this.segmentsHeightsMap = {}
       this.segmentsHeightsMapPanelClose = {}
@@ -708,6 +684,7 @@ class SegmentsContainer extends React.Component {
   render() {
     const scrollToObject = this.getIndexToScroll()
     const segmentsProps = this.getSegments()
+    // set list items
     const items = this.state.rows.map((row) => ({
       ...row,
       ...segmentsProps.find(({segment}) => segment.sid === row.id),
@@ -718,10 +695,12 @@ class SegmentsContainer extends React.Component {
       >
         <VirtualList
           items={items}
-          goToIndex={scrollToObject.scrollTo}
+          scrollToIndex={{
+            value: scrollToObject.scrollTo,
+            align: scrollToObject.position,
+          }}
           overscan={OVERSCAN}
           onScroll={() => this.onScroll()}
-          alignment={scrollToObject.position}
           Component={RowSegment}
           itemStyle={({segment}) => segment.opened && {zIndex: 1}}
           width={this.state.window.width}
