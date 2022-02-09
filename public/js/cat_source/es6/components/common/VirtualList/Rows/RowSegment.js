@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
-import {SegmentsContext} from '../../../segments/SegmentsContainer'
+import {SegmentsContext} from '../../../segments/SegmentsContainer_'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
 import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
@@ -29,18 +29,18 @@ const LinkIcon = () => {
 
 function RowSegment({
   id,
-  defaultHeight,
+  height,
   currentFileId,
   collectionTypeSeparator,
   ...restProps
 }) {
   const {onChangeRowHeight} = useContext(SegmentsContext)
   const ref = useRef()
-  const {height: newHeight} = useResizeObserver(ref, {minHeight: defaultHeight})
+  const {height: newHeight} = useResizeObserver(ref, {actualHeight: height})
 
   useEffect(() => {
-    onChangeRowHeight(id, newHeight)
-  }, [id, newHeight, onChangeRowHeight])
+    newHeight !== height && onChangeRowHeight(id, newHeight)
+  }, [id, newHeight, height, onChangeRowHeight])
 
   const getProjectBar = () => {
     const openInstructionsModal = (id_file) => {
@@ -121,7 +121,7 @@ function RowSegment({
 
 RowSegment.propTypes = {
   id: PropTypes.string.isRequired,
-  defaultHeight: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
   currentFileId: PropTypes.string,
   collectionTypeSeparator: PropTypes.node,
   children: PropTypes.node,

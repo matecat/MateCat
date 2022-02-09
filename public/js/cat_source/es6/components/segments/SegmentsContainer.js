@@ -1,4 +1,4 @@
-import React, {createContext} from 'react'
+import React, {createContext, createRef} from 'react'
 import _ from 'lodash'
 import Immutable from 'immutable'
 import ReactDOMServer from 'react-dom/server'
@@ -20,6 +20,7 @@ const ROW_HEIGHT = 90
 const OVERSCAN = 5
 
 export const SegmentsContext = createContext({})
+const listRef = createRef()
 
 class SegmentsContainer extends React.Component {
   constructor(props) {
@@ -694,6 +695,7 @@ class SegmentsContainer extends React.Component {
         value={{onChangeRowHeight: this.onChangeRowHeight}}
       >
         <VirtualList
+          ref={listRef}
           items={items}
           scrollToIndex={{
             value: scrollToObject.scrollTo,

@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 
-function useResizeObserver(ref, {minWidth, minHeight} = {}) {
-  const [width, setWidth] = useState(minWidth)
-  const [height, setHeight] = useState(minHeight)
+function useResizeObserver(ref, {actualWidth = 0, actualHeight = 0} = {}) {
+  const [width, setWidth] = useState(actualWidth)
+  const [height, setHeight] = useState(actualHeight)
 
   useEffect(() => {
     if (!ref?.current) return
@@ -14,26 +14,26 @@ function useResizeObserver(ref, {minWidth, minHeight} = {}) {
       const width = Array.isArray(borderBoxSize)
         ? borderBoxSize[0]?.inlineSize
         : borderBoxSize.inlineSize
-      setWidth(minWidth ? (width > minWidth ? width : minWidth) : width)
+      setWidth(width ? width : actualWidth)
 
       const height = Array.isArray(borderBoxSize)
         ? borderBoxSize[0]?.blockSize
         : borderBoxSize.blockSize
-      setHeight(minHeight ? (height > minHeight ? height : minHeight) : height)
+      setHeight(height ? height : actualHeight)
     })
     resizeObserver.observe(current)
 
     return () => resizeObserver.disconnect()
-  }, [ref, minWidth, minHeight])
+  }, [ref, actualWidth, actualHeight])
 
   return {width, height}
 }
 
 useResizeObserver.propTypes = {
   ref: PropTypes.shape({current: PropTypes.elementType}).isRequired,
-  defaultSize: PropTypes.shape({
-    minWidth: PropTypes.number,
-    minHeight: PropTypes.number,
+  defaultSize: PropTypes.exact({
+    actualWidth: PropTypes.number,
+    actualHeight: PropTypes.number,
   }),
 }
 
