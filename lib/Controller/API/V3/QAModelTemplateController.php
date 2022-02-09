@@ -24,8 +24,9 @@ class QAModelTemplateController extends KleinController {
     {
         $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
         $pagination = 20;
+        $uid = $this->getUser()->uid;
 
-        return $this->response->json(QAModelTemplateDao::getAllPaginated($currentPage, $pagination));
+        return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, $currentPage, $pagination));
     }
 
     /**
@@ -75,7 +76,8 @@ class QAModelTemplateController extends KleinController {
     {
         $id = $this->request->param( 'id' );
         $model = QAModelTemplateDao::get([
-            'id' => $id
+            'id' => $id,
+            'uid' => $this->getUser()->uid
         ]);
 
         if(empty($model)){
@@ -110,7 +112,8 @@ class QAModelTemplateController extends KleinController {
     {
         $id = $this->request->param( 'id' );
         $model = QAModelTemplateDao::get([
-            'id' => $id
+            'id' => $id,
+            'uid' => $this->getUser()->uid
         ]);
 
         if(empty($model)){
@@ -151,7 +154,8 @@ class QAModelTemplateController extends KleinController {
     {
         $id = $this->request->param( 'id' );
         $model = QAModelTemplateDao::get([
-            'id' => $id
+            'id' => $id,
+            'uid' => $this->getUser()->uid
         ]);
 
         if(!empty($model)){

@@ -127,17 +127,20 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
+     * @param int $uid
      * @param int $current
      * @param int $pagination
      *
      * @return array
      */
-    public static function getAllPaginated($current = 1, $pagination = 20)
+    public static function getAllPaginated($uid, $current = 1, $pagination = 20)
     {
         $conn = \Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT count(id) as count FROM qa_model_templates ");
-        $stmt->execute();
+        $stmt = $conn->prepare( "SELECT count(id) as count FROM qa_model_templates WHERE uid = :uid");
+        $stmt->execute([
+            'uid' => $uid
+        ]);
 
         $count = $stmt->fetch(\PDO::FETCH_ASSOC);
         $pages = ceil($count['count'] / $pagination);
@@ -147,12 +150,15 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
 
         $models = [];
 
-        $stmt = $conn->prepare( "SELECT id FROM qa_model_templates LIMIT $pagination OFFSET $offset ");
-        $stmt->execute();
+        $stmt = $conn->prepare( "SELECT id FROM qa_model_templates WHERE uid = :uid LIMIT $pagination OFFSET $offset ");
+        $stmt->execute([
+            'uid' => $uid
+        ]);
 
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $model){
             $models[] = self::get([
-                'id' => $model['id']
+                'id' => $model['id'],
+                'uid' => $uid
             ]);
         }
 

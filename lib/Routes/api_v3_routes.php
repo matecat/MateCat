@@ -35,12 +35,12 @@ $klein->with( '/api/v3/glossary', function () {
 } );
 
 $klein->with( '/api/v3/qa_model_template', function () {
+    route( '/schema', 'GET', '\API\V3\QAModelTemplateController', 'schema' );
+    route( '/validate', 'POST', '\API\V3\QAModelTemplateController', 'validate' );
     route( '', 'GET', '\API\V3\QAModelTemplateController', 'index' );
     route( '', 'POST', '\API\V3\QAModelTemplateController', 'create' );
     route( '/[:id]', 'GET', '\API\V3\QAModelTemplateController', 'view' );
     route( '/[:id]', 'DELETE', '\API\V3\QAModelTemplateController', 'delete' );
     route( '/[:id]', 'PUT', '\API\V3\QAModelTemplateController', 'edit' );
-    route( '/schema', 'GET', '\API\V3\QAModelTemplateController', 'schema' );
-    route( '/validate', 'POST', '\API\V3\QAModelTemplateController', 'validate' );
 } );
 
