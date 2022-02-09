@@ -1,6 +1,6 @@
 <?php
 
-class CreateTableQaModelPassfailOptionsTemplates extends AbstractMatecatMigration {
+class CreateTableQaModelPassfailOptionTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         CREATE TABLE IF NOT EXISTS `qa_model_template_passfail_options` (
