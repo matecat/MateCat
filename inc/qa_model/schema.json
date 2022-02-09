@@ -11,9 +11,6 @@
     "model": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
         "version": {
           "type": "integer"
         },
@@ -37,9 +34,6 @@
     "category": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
         "id_parent": {
           "type": "integer"
         },
@@ -63,9 +57,6 @@
     "severity": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
         "label": {
           "type": "string"
         },
@@ -85,9 +76,6 @@
     "passfail": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
         "type": {
           "type": "string",
           "enum": [
@@ -107,9 +95,6 @@
     "passfailThreshold": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
         "label": {
           "type": "string",
           "enum": [

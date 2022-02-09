@@ -28,7 +28,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      * @return QAModelTemplateStruct
      * @throws \Exception
      */
-    public static function hydrateFromJSON($json)
+    public function hydrateFromJSON($json)
     {
         $json = json_decode($json);
 
@@ -39,56 +39,56 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $jsonModel = $json->model;
 
         // QAModelTemplateStruct
-        $QAModelTemplateStruct = new QAModelTemplateStruct();
-        $QAModelTemplateStruct->id = (isset($jsonModel->id)) ? $jsonModel->id : null;
+        $QAModelTemplateStruct = $this;
         $QAModelTemplateStruct->version = $jsonModel->version;
         $QAModelTemplateStruct->label = $jsonModel->label;
 
         // QAModelTemplatePassfailStruct
-        $QAModelTemplatePassfailStruct = new QAModelTemplatePassfailStruct();
-        $QAModelTemplatePassfailStruct->id = (isset($jsonModel->passfail->id)) ? $jsonModel->passfail->id : null;
+        $QAModelTemplatePassfailStruct = (!empty($QAModelTemplateStruct->passfail)) ? $QAModelTemplateStruct->passfail : new QAModelTemplatePassfailStruct();
         $QAModelTemplatePassfailStruct->passfail_type = $jsonModel->passfail->type;
         $QAModelTemplatePassfailStruct->id_template = (isset($jsonModel->id)) ? $jsonModel->id : null;
 
-        foreach ($jsonModel->passfail->thresholds as $threshold){
-            $modelTemplatePassfailThresholdStruct = new QAModelTemplatePassfailThresholdStruct();
-            $modelTemplatePassfailThresholdStruct->id = (isset($threshold->id)) ? $threshold->id : null;
+        foreach ($jsonModel->passfail->thresholds as $index => $threshold){
+
+            $modelTemplatePassfailThresholdStruct = (!empty($QAModelTemplateStruct->passfail->thresholds[$index])) ? $QAModelTemplateStruct->passfail->thresholds[$index] : new
+            QAModelTemplatePassfailThresholdStruct();
             $modelTemplatePassfailThresholdStruct->passfail_label = $threshold->label;
             $modelTemplatePassfailThresholdStruct->passfail_value = $threshold->value;
 
-            $QAModelTemplatePassfailStruct->thresholds[] = $modelTemplatePassfailThresholdStruct;
+            $QAModelTemplatePassfailStruct->thresholds[$index] = $modelTemplatePassfailThresholdStruct;
         }
 
         $QAModelTemplateStruct->passfail = $QAModelTemplatePassfailStruct;
 
         // QAModelTemplateCategoryStruct[]
-        foreach ($jsonModel->categories as $category){
+        foreach ($jsonModel->categories as $index => $category){
 
-            $QAModelTemplateCategoryStruct = new QAModelTemplateCategoryStruct();
-            $QAModelTemplateCategoryStruct->id = (isset($category->id)) ? $category->id : null;
-            $QAModelTemplateCategoryStruct->id_template = (isset($jsonModel->id)) ? $jsonModel->id : null;
+            $QAModelTemplateCategoryStruct = (!empty($QAModelTemplateStruct->categories[$index])) ? $QAModelTemplateStruct->categories[$index] : new QAModelTemplateCategoryStruct();
+            $QAModelTemplateCategoryStruct->id_template = (isset($QAModelTemplateStruct->id)) ? $QAModelTemplateStruct->id : null;
             $QAModelTemplateCategoryStruct->id_parent = (isset($jsonModel->id_parent)) ? $jsonModel->id_parent : null;
             $QAModelTemplateCategoryStruct->category_label = $category->label;
             $QAModelTemplateCategoryStruct->code  = $category->code;
 
-            foreach ($category->severities as $severity){
-                $severityModel = new QAModelTemplateSeverityStruct();
-                $severityModel->id = (isset($severity->id)) ? $severity->id : null;
+            foreach ($category->severities as $index2 => $severity){
+                $severityModel = (!empty($QAModelTemplateCategoryStruct->severities[$index2])) ? $QAModelTemplateCategoryStruct->severities[$index2] : new QAModelTemplateSeverityStruct();
                 $severityModel->id_category = (isset($category->id)) ? $category->id : null;
                 $severityModel->severity_label = $severity->label;
                 $severityModel->code  = $severity->code;
                 $severityModel->penalty  = $severity->penalty;
                 $severityModel->dqf_id  = (isset($severity->dqf_id)) ? $severity->dqf_id : null;
 
-                $QAModelTemplateCategoryStruct->severities[] = $severityModel;
+                $QAModelTemplateCategoryStruct->severities[$index2] = $severityModel;
             }
 
-            $QAModelTemplateStruct->categories[] = $QAModelTemplateCategoryStruct;
+            $QAModelTemplateStruct->categories[$index] = $QAModelTemplateCategoryStruct;
         }
 
         return $QAModelTemplateStruct;
     }
 
+    /**
+     * @return array|mixed
+     */
     public function jsonSerialize()
     {
         return [

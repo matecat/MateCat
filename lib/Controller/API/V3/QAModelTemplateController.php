@@ -4,7 +4,6 @@ namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
-use API\V2\Validators\TeamAccessValidator;
 use QAModelTemplate\QAModelTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
@@ -23,9 +22,10 @@ class QAModelTemplateController extends KleinController {
      */
     public function index()
     {
-        $models = QAModelTemplateDao::getAll();
+        $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
+        $pagination = 20;
 
-        return $this->response->json($models);
+        return $this->response->json(QAModelTemplateDao::getAllPaginated($currentPage, $pagination));
     }
 
     /**
@@ -71,11 +71,23 @@ class QAModelTemplateController extends KleinController {
      *
      * @return \Klein\Response
      */
-    public function delete($id)
+    public function delete()
     {
+        $id = $this->request->param( 'id' );
+        $model = QAModelTemplateDao::get([
+            'id' => $id
+        ]);
+
+        if(empty($model)){
+            $this->response->code(404);
+
+            return $this->response->json([
+                    'error' => 'Model not found'
+            ]);
+        }
+
         try {
             QAModelTemplateDao::remove($id);
-            $this->response->code(200);
 
             return $this->response->json([
                     'id' => $id
@@ -89,9 +101,17 @@ class QAModelTemplateController extends KleinController {
         }
     }
 
-    public function edit($id)
+    /**
+     * edit model
+     *
+     * @return \Klein\Response
+     */
+    public function edit()
     {
-        $model = QAModelTemplateDao::get($id);
+        $id = $this->request->param( 'id' );
+        $model = QAModelTemplateDao::get([
+            'id' => $id
+        ]);
 
         if(empty($model)){
             $this->response->code(404);
@@ -101,9 +121,25 @@ class QAModelTemplateController extends KleinController {
             ]);
         }
 
-        // fai cose e scrivi un json
+        try {
+            $json = $this->request->body();
+            $id = QAModelTemplateDao::editFromJSON($model, $json);
 
-        // salva
+            $this->response->code(200);
+            return $this->response->json([
+                'id' => $id
+            ]);
+        } catch (JSONValidatorError $exception){
+            $this->response->code(500);
+
+            return $this->response->json($exception);
+        } catch (\Exception $exception){
+            $this->response->code(500);
+
+            return $this->response->json([
+                    'error' => $exception->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -114,7 +150,9 @@ class QAModelTemplateController extends KleinController {
     public function view()
     {
         $id = $this->request->param( 'id' );
-        $model = QAModelTemplateDao::get($id);
+        $model = QAModelTemplateDao::get([
+            'id' => $id
+        ]);
 
         if(!empty($model)){
             return $this->response->json($model);
