@@ -612,7 +612,7 @@ window.UI = {
     ) {
       UI.showFixWarningsOnDownload(continueDownloadFunction)
     } else {
-      UI[continueDownloadFunction]()
+      continueDownloadFunction()
     }
   },
   startWarning: function () {
