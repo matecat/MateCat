@@ -151,7 +151,9 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
         $stmt->execute();
 
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $model){
-            $models[] = self::get($model['id']);
+            $models[] = self::get([
+                'id' => $model['id']
+            ]);
         }
 
         return [
