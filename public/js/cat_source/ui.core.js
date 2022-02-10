@@ -422,6 +422,7 @@ window.UI = {
             enableTagProjection: UI.enableTagProjection,
             tagModesEnabled: UI.tagModesEnabled,
             startSegmentId: this.startSegmentId,
+            firstJobSegment: config.first_job_segment,
           }),
           mountPoint,
         )

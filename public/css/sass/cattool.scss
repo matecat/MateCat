@@ -1,5 +1,5 @@
 @import '_mixins';
-
+@import 'commons/_colors';
 body.cattool {
   display: flex;
   height: 100vh;
@@ -195,6 +195,20 @@ body.cattool {
         grid-column-gap: 4px;
         justify-self: end;
       }
+    }
+  }
+  .pointer-first-segment {
+    height: 36px;
+    width: 36px;
+    background: transparent url('../../img/icons/arrow-up-circle.svg');
+    border-radius: 50%;
+    position: absolute;
+    display: inline-block;
+    left: 13px;
+    bottom: 8px;
+    cursor: pointer;
+    &:hover {
+      background-color: $grey3;
     }
   }
 }
