@@ -493,7 +493,7 @@ class SegmentsContainer extends React.Component {
     this.lastListSize = this.state.segments.size
     this.lastScrollTop = scrollTop
     this.setState({
-      scrollTopVisible: scrollTop > 200,
+      scrollTopVisible: scrollTop > 400,
     })
   }
 

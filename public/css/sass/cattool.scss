@@ -200,15 +200,18 @@ body.cattool {
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: transparent url('../../img/icons/arrow-up-circle.svg');
+    //background: $darkBlue url('../../img/icons/arrow-up.svg');
+    //background-size: 30px;
+    background: $darkBlue url('../../img/icons/arrow-up-circle-white.svg');
     border-radius: 50%;
     position: absolute;
     display: inline-block;
-    left: 13px;
+    left: 15px;
     bottom: 8px;
     cursor: pointer;
     &:hover {
-      background-color: $grey3;
+      //background-color: $grey3;
+      background-color: $darkBlueHover;
     }
   }
 }
