@@ -248,7 +248,8 @@ const SegmentActions = {
   },
 
   propagateTranslation: function (segmentId, propagatedSegments, status) {
-    let segment = SegmentStore.getSegmentByIdToJS(segmentId)
+    const segment = SegmentStore.getSegmentByIdToJS(segmentId)
+    if (!segment) return
     if (segment.splitted > 2) return false
 
     for (var i = 0, len = propagatedSegments.length; i < len; i++) {
