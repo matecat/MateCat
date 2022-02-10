@@ -68,8 +68,9 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
             $category = $categoryStruct->toArrayWithJsonDecoded();
 
             $categoriesArray[] = [
-                    'label' => $category['label'],
-                    'code' => $category['options']['code'],
+                'label' => $category['label'],
+                'code' => $category['options']['code'],
+                'severities' => $category['severities'],
             ];
         }
 
@@ -78,7 +79,6 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
                 "version" => 1,
                 "label" => $this->label,
                 "categories" => $categoriesArray,
-                "severities" => $this->getCategories()[0]->getJsonSeverities(),
                 "passfail" => [
                     'type' => $this->pass_type,
                     'options' =>  $this->getPassOptions()

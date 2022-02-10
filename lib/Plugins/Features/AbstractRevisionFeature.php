@@ -473,7 +473,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws \Exceptions\ValidationError
      */
 
-    public static function loadAndValidateModelFromJsonFile( $projectStructure, $jsonPath = null ) {
+    public static function loadAndValidateModelFromJsonFile( &$projectStructure, $jsonPath = null ) {
 
         // if there a is an injected qa_model use it
         if(isset($projectStructure['qa_model']) and null !== $projectStructure['qa_model'] ){
