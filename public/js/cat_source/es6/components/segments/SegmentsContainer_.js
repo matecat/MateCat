@@ -44,6 +44,7 @@ function SegmentsContainer_({
 }) {
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
+  const [newHeightRow, setNewHeightRow] = useState(undefined)
   const [widthArea, setWidthArea] = useState(0)
   const [heightArea, setHeightArea] = useState(0)
   const [startIndex, setStartIndex] = useState(0)
@@ -54,13 +55,12 @@ function SegmentsContainer_({
   const [lastSelectedSegment, setLastSelectedSegment] = useState(undefined)
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
 
-  const previousSegmentsSize = useRef(0)
+  const previousRowsLength = useRef(0)
 
-  /* const scrollParams = useMemo(() => {
+  const scrollToParams = useMemo(() => {
     const position = scrollToSelected ? 'auto' : 'start'
-    const segmentsSize = rows.length
-
-    if (scrollToSid && segmentsSize > 0) {
+    const ROWS_LENGTH = rows.length
+    if (scrollToSid && ROWS_LENGTH > 0) {
       const index = rows.findIndex(({segImmutable: segment}) => {
         if (scrollToSid.toString().indexOf('-') === -1) {
           return parseInt(segment.get('sid')) === parseInt(scrollToSid)
@@ -72,13 +72,13 @@ function SegmentsContainer_({
       let scrollTo
       if (scrollToSelected) {
         scrollTo = scrollToSid < lastScrolled ? index - 1 : index + 1
-        scrollTo = index > segmentsSize - 2 || index === 0 ? index : scrollTo
+        scrollTo = index > ROWS_LENGTH - 2 || index === 0 ? index : scrollTo
         lastScrolled = scrollToSid
         return {scrollTo: scrollTo, position: position}
       }
       scrollTo = index >= 2 ? index - 2 : index === 0 ? 0 : index - 1
-      scrollTo = index > segmentsSize - 8 ? index : scrollTo
-      if (scrollTo > 0 || scrollTo < segmentsSize - 8) {
+      scrollTo = index > ROWS_LENGTH - 8 ? index : scrollTo
+      if (scrollTo > 0 || scrollTo < ROWS_LENGTH - 8) {
         //if the opened segments is too big for the view dont show the previous
         const scrollToHeight = rows[index]?.height ?? 0
         const segmentBefore1 = rows[index - 1]?.height ?? 0
@@ -92,21 +92,19 @@ function SegmentsContainer_({
         }
       }
       return {scrollTo: scrollTo, position: position}
-    } else if (
-      previousSegmentsSize.current < segmentsSize &&
-      scrollDirectionTop
-    ) {
-      const diff = segmentsSize - previousSegmentsSize.current
+    } /* else if (previousRowsLength.current < ROWS_LENGTH && scrollDirectionTop) {
+      const diff = ROWS_LENGTH - previousRowsLength.current
+      console.log('diff', diff)
       return {
-        scrollTo: startIndex + diff,
+        scrollTo: diff,
         position: position,
       }
-    }
+    } */
     return {scrollTo: null, position: null}
-  }, []) */
+  }, [rows, heightArea, scrollToSelected, scrollToSid])
 
   const onChangeRowHeight = useCallback((id, newHeight) => {
-    setRows((prevState) =>
+    /* setRows((prevState) =>
       prevState.map((row) =>
         row.id === id
           ? {
@@ -115,7 +113,8 @@ function SegmentsContainer_({
             }
           : row,
       ),
-    )
+    ) */
+    setNewHeightRow({id, height: newHeight})
   }, [])
 
   const getSegmentRealHeight = useCallback(
@@ -168,7 +167,7 @@ function SegmentsContainer_({
   )
 
   const onScroll = useCallback(() => {
-    if (!listRef?.current) return
+    if (!listRef?.current || scrollToSid) return
 
     const scrollValue = listRef.current.scrollTop
     const scrollBottomValue =
@@ -182,7 +181,7 @@ function SegmentsContainer_({
       UI.getMoreSegments('before')
     }
     lastScrollTop = scrollValue
-  }, [])
+  }, [scrollToSid])
 
   // set width and height of area
   useEffect(() => {
@@ -208,8 +207,16 @@ function SegmentsContainer_({
       setSegments(segments)
     }
     const updateAllSegments = () => {}
-    const scrollToSegment = () => {}
-    const scrollToSelectedSegment = () => {}
+    const scrollToSegment = (sid) => {
+      lastScrolled = sid
+      setScrollToSid(sid)
+      setScrollToSelected(false)
+      // setTimeout(() => this.onScroll(), 500)
+    }
+    const scrollToSelectedSegment = (sid) => {
+      setScrollToSid(sid)
+      setScrollToSelected(true)
+    }
     const openSide = () => {}
     const closeSide = () => {}
     const storeJobInfo = (files) => setFiles(files)
@@ -312,9 +319,6 @@ function SegmentsContainer_({
       return collectionType
     }
 
-    // save segments size
-    previousSegmentsSize.current = segments.size
-
     //
     let currentFileId = 0
     const collectionsTypeArray = []
@@ -376,8 +380,14 @@ function SegmentsContainer_({
   useEffect(() => {
     if (startIndex === undefined || !stopIndex) return
     setRows((prevState) => {
+      // update with new height
+      const updated = prevState.map((row) =>
+        row.id === newHeightRow?.id
+          ? {...row, height: newHeightRow?.height}
+          : row,
+      )
       // rendered rows
-      const rowsRendered = prevState.filter(
+      const rowsRendered = updated.filter(
         (row, index) => index >= startIndex && index <= stopIndex,
       )
       const rowRenderedWithNoHeight = rowsRendered.find(
@@ -395,7 +405,7 @@ function SegmentsContainer_({
       // rows before start index
       const rowsBeforeStartIndex = (
         !rowRenderedWithNoHeight
-          ? prevState.filter((row, index) => index < startIndex)
+          ? updated.filter((row, index) => index < startIndex)
           : []
       ).map((row, index) => {
         const cached = cachedRowsHeightMap.get(row.id)
@@ -405,7 +415,7 @@ function SegmentsContainer_({
           ? getSegmentRealHeight({
               segment: row.segImmutable,
               previousSegment:
-                index > 0 ? prevState[index - 1].segImmutable : undefined,
+                index > 0 ? updated[index - 1].segImmutable : undefined,
             })
           : cached
         cachedRowsHeightMap.set(row.id, newHeight)
@@ -413,7 +423,7 @@ function SegmentsContainer_({
       })
 
       const nextState = !rowRenderedWithNoHeight
-        ? prevState.map((row, index) =>
+        ? updated.map((row, index) =>
             index > stopIndex
               ? {...row, height: ROW_HEIGHT}
               : {
@@ -423,14 +433,21 @@ function SegmentsContainer_({
                       ?.height ?? row.height,
                 },
           )
-        : prevState
+        : updated
       return nextState
     })
-  }, [startIndex, stopIndex, getSegmentRealHeight])
+  }, [
+    startIndex,
+    stopIndex,
+    newHeightRow?.id,
+    newHeightRow?.height,
+    getSegmentRealHeight,
+  ])
 
-  // reset scrollTo sid
+  // reset scrollTo sid and cache previous rows length
   useEffect(() => {
     if (!rows.length) return
+    previousRowsLength.current = rows.length
     const rowWithNoHeight = rows.find(({height}) => height === 0)
     !rowWithNoHeight && setScrollToSid(undefined)
   }, [rows])
@@ -483,10 +500,8 @@ function SegmentsContainer_({
         ref={listRef}
         items={rows}
         scrollToIndex={{
-          value: 38,
-          align: 'start',
-          //   value: scrollToObject.scrollTo,
-          //   align: scrollToObject.position,
+          value: scrollToParams.scrollTo,
+          align: scrollToParams.position,
         }}
         overscan={OVERSCAN}
         onScroll={onScroll}
