@@ -35,7 +35,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $json
      *
-     * @throws \Swaggest\JsonSchema\InvalidValue
+     * @throws \Exception
      */
     private static function validateJSON($json)
     {

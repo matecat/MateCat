@@ -17,6 +17,8 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
     public $hash;
 
+    public $qa_model_template_id;
+
     /**
      * Returns the serialized representation of categires and subcategories.
      *
