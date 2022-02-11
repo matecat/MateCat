@@ -30,17 +30,19 @@ const LinkIcon = () => {
 function RowSegment({
   id,
   height,
+  hasRendered,
   currentFileId,
   collectionTypeSeparator,
   ...restProps
 }) {
-  const {onChangeRowHeight} = useContext(SegmentsContext)
+  const {onChangeRowHeight, minRowHeight} = useContext(SegmentsContext)
   const ref = useRef()
-  const {height: newHeight} = useResizeObserver(ref, {actualHeight: height})
+  const {height: newHeight} = useResizeObserver(ref)
 
   useEffect(() => {
-    newHeight !== height && onChangeRowHeight(id, newHeight)
-  }, [id, newHeight, height, onChangeRowHeight])
+    if (!newHeight || (newHeight === height && hasRendered)) return
+    onChangeRowHeight(id, newHeight > minRowHeight ? newHeight : minRowHeight)
+  }, [id, newHeight, height, hasRendered, minRowHeight, onChangeRowHeight])
 
   const getProjectBar = () => {
     const openInstructionsModal = (id_file) => {
@@ -122,6 +124,7 @@ function RowSegment({
 RowSegment.propTypes = {
   id: PropTypes.string.isRequired,
   height: PropTypes.number.isRequired,
+  hasRendered: PropTypes.bool,
   currentFileId: PropTypes.string,
   collectionTypeSeparator: PropTypes.node,
   children: PropTypes.node,

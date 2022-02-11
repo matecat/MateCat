@@ -6,9 +6,8 @@ const VirtualList = forwardRef(
   (
     {
       items,
-      scrollToIndex = {
-        align: 'auto',
-      },
+      scrollToIndex = {},
+      scrollToOffset = {},
       Component,
       itemStyle = () => ({}),
       width,
@@ -23,6 +22,7 @@ const VirtualList = forwardRef(
       virtualItems,
       totalSize,
       scrollToIndex: fnScrollToIndex,
+      scrollToOffset: fnScrollToOffset,
     } = useVirtual({
       size: items.length,
       parentRef: ref,
@@ -30,12 +30,19 @@ const VirtualList = forwardRef(
       overscan,
     })
 
-    // go to index
+    // scroll to index
     useEffect(() => {
       if (typeof scrollToIndex?.value !== 'number') return
       const {value, align} = scrollToIndex
       value >= 0 && fnScrollToIndex(value, {align})
     }, [scrollToIndex, fnScrollToIndex])
+
+    // scroll to offset
+    useEffect(() => {
+      if (typeof scrollToOffset?.value !== 'number') return
+      const {value, align} = scrollToOffset
+      value >= 0 && fnScrollToOffset(value, {align})
+    }, [scrollToOffset, fnScrollToOffset])
 
     // rendered indexes
     useEffect(() => {
@@ -89,6 +96,10 @@ const VirtualList = forwardRef(
 VirtualList.propTypes = {
   items: PropTypes.array.isRequired,
   scrollToIndex: PropTypes.exact({
+    value: PropTypes.number,
+    align: PropTypes.string,
+  }),
+  scrollToOffset: PropTypes.exact({
     value: PropTypes.number,
     align: PropTypes.string,
   }),

@@ -28,12 +28,6 @@ const OVERSCAN = 5
 export const SegmentsContext = createContext({})
 const listRef = createRef()
 
-const cachedRowsHeightMap = new Map()
-const segmentsWithCollectionType = []
-let lastScrolled
-let scrollDirectionTop
-let lastScrollTop = 0
-
 function SegmentsContainer_({
   isReview,
   isReviewExtended,
@@ -44,18 +38,27 @@ function SegmentsContainer_({
 }) {
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
-  const [newHeightRow, setNewHeightRow] = useState(undefined)
+  const [updateRowHeight, setUpdateRowHeight] = useState(undefined)
   const [widthArea, setWidthArea] = useState(0)
   const [heightArea, setHeightArea] = useState(0)
   const [startIndex, setStartIndex] = useState(0)
   const [stopIndex, setStopIndex] = useState(0)
+  const [scrollToOffset, setScrollToOffset] = useState(undefined)
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [scrollToSid, setScrollToSid] = useState(startSegmentId)
   const [scrollToSelected, setScrollToSelected] = useState(false)
   const [lastSelectedSegment, setLastSelectedSegment] = useState(undefined)
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
 
-  const previousRowsLength = useRef(0)
+  const previousRowsInfo = useRef({length: 0, firstRowHeight: 0})
+  const persistenceVariabled = useRef({
+    lastScrolled: undefined,
+    scrollDirectionTop: false,
+    lastScrollTop: 0,
+    segmentsWithCollectionType: [],
+  })
+  const rowsRenderedHeight = useRef(new Map())
+  const cachedRowsHeightMap = useRef(new Map())
 
   const scrollToParams = useMemo(() => {
     const position = scrollToSelected ? 'auto' : 'start'
@@ -69,11 +72,13 @@ function SegmentsContainer_({
         }
       })
 
+      const {current: persistance} = persistenceVariabled
       let scrollTo
       if (scrollToSelected) {
-        scrollTo = scrollToSid < lastScrolled ? index - 1 : index + 1
+        scrollTo =
+          scrollToSid < persistance.lastScrolled ? index - 1 : index + 1
         scrollTo = index > ROWS_LENGTH - 2 || index === 0 ? index : scrollTo
-        lastScrolled = scrollToSid
+        persistance.lastScrolled = scrollToSid
         return {scrollTo: scrollTo, position: position}
       }
       scrollTo = index >= 2 ? index - 2 : index === 0 ? 0 : index - 1
@@ -92,8 +97,8 @@ function SegmentsContainer_({
         }
       }
       return {scrollTo: scrollTo, position: position}
-    } /* else if (previousRowsLength.current < ROWS_LENGTH && scrollDirectionTop) {
-      const diff = ROWS_LENGTH - previousRowsLength.current
+    } /* else if (previousRowsInfo.current < ROWS_LENGTH && scrollDirectionTop) {
+      const diff = ROWS_LENGTH - previousRowsInfo.current
       console.log('diff', diff)
       return {
         scrollTo: diff,
@@ -114,7 +119,8 @@ function SegmentsContainer_({
           : row,
       ),
     ) */
-    setNewHeightRow({id, height: newHeight})
+    rowsRenderedHeight.current.set(id, newHeight)
+    setUpdateRowHeight(Symbol())
   }, [])
 
   const getSegmentRealHeight = useCallback(
@@ -141,13 +147,18 @@ function SegmentsContainer_({
           basicSize += fileDivHeight
         }
         // if it's collection type add 42px of header
-        if (segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
+        if (
+          persistenceVariabled.current.segmentsWithCollectionType.indexOf(
+            segment.get('sid'),
+          ) !== -1
+        ) {
           basicSize += collectionDivHeight
         }
         return basicSize
       }
 
-      return height + getBasicSize({segment, previousSegment})
+      const realHeight = height + getBasicSize({segment, previousSegment})
+      return realHeight > ROW_HEIGHT ? realHeight : ROW_HEIGHT
     },
     [isSideOpen, files],
   )
@@ -167,21 +178,32 @@ function SegmentsContainer_({
   )
 
   const onScroll = useCallback(() => {
-    if (!listRef?.current || scrollToSid) return
+    if (!listRef?.current || scrollToSid || scrollToOffset) return
 
     const scrollValue = listRef.current.scrollTop
     const scrollBottomValue =
       listRef.current.firstChild.offsetHeight -
       (scrollValue + listRef.current.offsetHeight)
 
-    scrollDirectionTop = scrollValue < lastScrollTop
-    if (scrollBottomValue < 700 && !scrollDirectionTop) {
+    const {current: persistance} = persistenceVariabled
+    persistance.scrollDirectionTop = scrollValue < persistance.lastScrollTop
+
+    if (scrollBottomValue < 700 && !persistance.scrollDirectionTop) {
       UI.getMoreSegments('after')
-    } else if (scrollValue < 500 && scrollDirectionTop) {
+    } else if (scrollValue < 500 && persistance.scrollDirectionTop) {
       UI.getMoreSegments('before')
     }
-    lastScrollTop = scrollValue
-  }, [scrollToSid])
+    persistance.lastScrollTop = scrollValue
+  }, [scrollToSid, scrollToOffset])
+
+  const resetScrollTo = useCallback(() => {
+    setScrollToSid(undefined)
+    setScrollToOffset(undefined)
+    previousRowsInfo.current = {
+      length: rows.length,
+      firstRowHeight: rows[0].height,
+    }
+  }, [rows])
 
   // set width and height of area
   useEffect(() => {
@@ -208,7 +230,7 @@ function SegmentsContainer_({
     }
     const updateAllSegments = () => {}
     const scrollToSegment = (sid) => {
-      lastScrolled = sid
+      persistenceVariabled.current.lastScrolled = sid
       setScrollToSid(sid)
       setScrollToSelected(false)
       // setTimeout(() => this.onScroll(), 500)
@@ -345,6 +367,7 @@ function SegmentsContainer_({
             </div>
           )
           collectionsTypeArray.push(collectionType)
+          const {segmentsWithCollectionType} = persistenceVariabled.current
           if (segmentsWithCollectionType.indexOf(segment.sid) === -1) {
             segmentsWithCollectionType.push(segment.sid)
           }
@@ -359,7 +382,10 @@ function SegmentsContainer_({
 
         return {
           id: segment.sid,
-          height: prevState.find(({id}) => id === segment.sid)?.height ?? 0,
+          height:
+            prevState.find(({id}) => id === segment.sid)?.height ?? ROW_HEIGHT,
+          hasRendered:
+            prevState.find(({id}) => id === segment.sid)?.hasRendered ?? false,
           ...segmentProps,
         }
       }),
@@ -382,35 +408,41 @@ function SegmentsContainer_({
     setRows((prevState) => {
       // update with new height
       const updated = prevState.map((row) =>
-        row.id === newHeightRow?.id
-          ? {...row, height: newHeightRow?.height}
+        rowsRenderedHeight.current.get(row.id)
+          ? {
+              ...row,
+              height: rowsRenderedHeight.current.get(row.id),
+              hasRendered: true,
+            }
           : row,
       )
       // rendered rows
       const rowsRendered = updated.filter(
         (row, index) => index >= startIndex && index <= stopIndex,
       )
-      const rowRenderedWithNoHeight = rowsRendered.find(
-        ({height}) => height === 0,
+      const haveRowsRenderedHeight = !rowsRendered.find(
+        ({hasRendered}) => !hasRendered,
       )
 
       // update cache map
-      if (!rowRenderedWithNoHeight) {
+      if (haveRowsRenderedHeight) {
         rowsRendered.forEach(
           ({id, height, segment}) =>
-            !segment.opened && cachedRowsHeightMap.set(id, height),
+            !segment.opened && cachedRowsHeightMap.current.set(id, height),
         )
       }
 
       // rows before start index
       const rowsBeforeStartIndex = (
-        !rowRenderedWithNoHeight
+        haveRowsRenderedHeight
           ? updated.filter((row, index) => index < startIndex)
           : []
       ).map((row, index) => {
-        const cached = cachedRowsHeightMap.get(row.id)
-          ? cachedRowsHeightMap.get(row.id)
-          : row.height
+        const cached = cachedRowsHeightMap.current.get(row.id)
+          ? cachedRowsHeightMap.current.get(row.id)
+          : row.hasRendered
+          ? row.height
+          : false
         const newHeight = !cached
           ? getSegmentRealHeight({
               segment: row.segImmutable,
@@ -418,14 +450,14 @@ function SegmentsContainer_({
                 index > 0 ? updated[index - 1].segImmutable : undefined,
             })
           : cached
-        cachedRowsHeightMap.set(row.id, newHeight)
+        cachedRowsHeightMap.current.set(row.id, newHeight)
         return {...row, height: newHeight}
       })
 
-      const nextState = !rowRenderedWithNoHeight
+      const nextState = haveRowsRenderedHeight
         ? updated.map((row, index) =>
             index > stopIndex
-              ? {...row, height: ROW_HEIGHT}
+              ? row
               : {
                   ...row,
                   height:
@@ -434,23 +466,75 @@ function SegmentsContainer_({
                 },
           )
         : updated
+
+      /* console.log('#### ->', rowsBeforeStartIndex)
+      console.log('@ ->', rowsRendered) */
+
+      // console.log('#', nextState)
+      /*console.log(
+        '[',
+        nextState.reduce((acc, curr) => acc + curr.height, 0),
+      ) */
       return nextState
     })
-  }, [
-    startIndex,
-    stopIndex,
-    newHeightRow?.id,
-    newHeightRow?.height,
-    getSegmentRealHeight,
-  ])
+  }, [startIndex, stopIndex, updateRowHeight, getSegmentRealHeight])
 
-  // reset scrollTo sid and cache previous rows length
+  useEffect(() => {
+    if (!rows.length || !previousRowsInfo?.current) return
+    const {length, firstRowHeight} = previousRowsInfo.current
+    const {scrollDirectionTop} = persistenceVariabled.current
+    if (length < rows.length && scrollDirectionTop) {
+      // const haveRowsRenderedHeight = !rows.find(({height}) => height === 0)
+      // if (haveRowsRenderedHeight) {
+      const stopIndex = rows.length - length
+      const newEntriesHeight = rows
+        .filter((row, index) => index >= 0 && index < stopIndex)
+        .reduce((acc, {height}) => acc + height, 0)
+      console.log('newEntriesHeight', newEntriesHeight)
+      console.log(rows.filter((row, index) => index >= 0 && index < stopIndex))
+      console.log(
+        'rows[stopIndex].height',
+        rows[stopIndex].height,
+        'firstRowHeight',
+        firstRowHeight,
+        'stopIndex',
+        stopIndex,
+      )
+      console.log('---------------------------')
+      const scrollOffset =
+        newEntriesHeight /* + (rows[stopIndex].height - firstRowHeight) */
+      console.log('scrollOffset', scrollOffset)
+      setScrollToOffset(scrollOffset)
+      // }
+    }
+  }, [rows])
+
+  // reset scrollTo and cache previous rows info
   useEffect(() => {
     if (!rows.length) return
-    previousRowsLength.current = rows.length
-    const rowWithNoHeight = rows.find(({height}) => height === 0)
-    !rowWithNoHeight && setScrollToSid(undefined)
-  }, [rows])
+    const rowsBeforeStartIndex = rows.filter((row, index) => index < startIndex)
+    const haveCachedRowsBeforeStartIndex = rowsBeforeStartIndex.length
+      ? rowsBeforeStartIndex.every(({id}) =>
+          cachedRowsHeightMap.current.get(id),
+        )
+      : false
+    if (!haveCachedRowsBeforeStartIndex) return
+
+    const haveRowsRenderedHeight = !rows.find(({height}) => height === 0)
+    if (haveRowsRenderedHeight) resetScrollTo()
+  }, [rows, startIndex, stopIndex, resetScrollTo])
+
+  // safe force reset scrollTo
+  useEffect(() => {
+    if (!scrollToSid) return
+    const timeout = setTimeout(() => resetScrollTo(), 500)
+
+    return () => clearTimeout(timeout)
+  }, [scrollToSid, resetScrollTo])
+
+  useEffect(() => {
+    console.log('####', scrollToSid)
+  }, [scrollToSid])
 
   /* useEffect(() => {
     if (startIndex === undefined || !stopIndex) return
@@ -495,13 +579,18 @@ function SegmentsContainer_({
   }, [segments, startIndex, getSegmentRealHeight]) */
 
   return (
-    <SegmentsContext.Provider value={{onChangeRowHeight}}>
+    <SegmentsContext.Provider
+      value={{onChangeRowHeight, minRowHeight: ROW_HEIGHT}}
+    >
       <VirtualList
         ref={listRef}
         items={rows}
         scrollToIndex={{
           value: scrollToParams.scrollTo,
           align: scrollToParams.position,
+        }}
+        scrollToOffset={{
+          value: scrollToOffset,
         }}
         overscan={OVERSCAN}
         onScroll={onScroll}
