@@ -4,8 +4,9 @@ namespace QAModelTemplate;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
+use LQA\QAModelInterface;
 
-class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
+class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable, QAModelInterface
 {
     public $id;
     public $uid;
@@ -73,7 +74,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 $severityModel = (!empty($QAModelTemplateCategoryStruct->severities[$index2])) ? $QAModelTemplateCategoryStruct->severities[$index2] : new QAModelTemplateSeverityStruct();
                 $severityModel->id_category = (isset($category->id)) ? $category->id : null;
                 $severityModel->severity_label = $severity->label;
-                $severityModel->code  = $severity->code;
+                $severityModel->severity_code  = $severity->code;
                 $severityModel->penalty  = $severity->penalty;
                 $severityModel->dqf_id  = (isset($severity->dqf_id)) ? $severity->dqf_id : null;
 
@@ -84,6 +85,63 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         }
 
         return $QAModelTemplateStruct;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDecodedModel()
+    {
+        $categoriesArray = [];
+        $limitsArray = [];
+
+        foreach ($this->passfail->thresholds as $threshold){
+
+            if($threshold->passfail_label === 'T'){
+                $index = 0;
+            } elseif ($threshold->passfail_label === 'R1'){
+                $index = 1;
+            } elseif ($threshold->passfail_label === 'R2'){
+                $index = 2;
+            }
+
+            if(isset($index)){
+                $limitsArray[$index] =$threshold->passfail_value;
+            }
+        }
+
+        foreach ($this->categories as $categoryStruct){
+            $category = [];
+            $category['label'] = $categoryStruct->category_label;
+            $category['code'] = $categoryStruct->code;
+            $category['severities'] = [];
+
+            foreach ($categoryStruct->severities as $severityStruct){
+                $category['severities'][] = [
+                    'label' => $severityStruct->severity_label,
+                    'code' => $severityStruct->severity_code,
+                    'dqf_id' => ($severityStruct->dqf_id) ? $severityStruct->dqf_id : null,
+                    'penalty' => $severityStruct->penalty,
+                ];
+            }
+
+            $categoriesArray[] = $category;
+        }
+
+        return [
+            'model' => [
+                "id_template" => $this->id,
+                "version" => $this->version,
+                "label" => $this->label,
+                "categories" => $categoriesArray,
+                "passfail" => [
+                    'type' => $this->passfail->passfail_type,
+                    'options' => [
+                        'limit' => $limitsArray
+                    ]
+                ],
+            ]
+        ];
     }
 
     /**

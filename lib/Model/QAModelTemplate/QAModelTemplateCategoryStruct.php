@@ -12,7 +12,6 @@ class QAModelTemplateCategoryStruct extends DataAccess_AbstractDaoSilentStruct i
     public $id_parent;
     public $category_label;
     public $code;
-    public $dqf_id;
     public $sort;
 
     /**
@@ -31,7 +30,6 @@ class QAModelTemplateCategoryStruct extends DataAccess_AbstractDaoSilentStruct i
             'id_parent' => $this->id_parent,
             'label' => $this->category_label,
             'code' => $this->code,
-            'dqf_id' => $this->dqf_id,
             'sort' => $this->sort,
             'severities' => $this->severities,
         ];

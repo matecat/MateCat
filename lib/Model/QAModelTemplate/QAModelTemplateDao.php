@@ -299,14 +299,13 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
 
             foreach ($modelTemplateStruct->categories as $categoryStruct){
                 $categoryStruct->id_template = $QAModelTemplateId;
-                $stmt = $conn->prepare( "INSERT INTO qa_model_template_categories (id_template, id_parent, category_label, code, dqf_id, sort) 
-                    VALUES (:id_template, :id_parent, :category_label, :code, :dqf_id, :sort) " );
+                $stmt = $conn->prepare( "INSERT INTO qa_model_template_categories (id_template, id_parent, category_label, code, sort) 
+                    VALUES (:id_template, :id_parent, :category_label, :code, :sort) " );
                 $stmt->execute([
                     'id_template' => $categoryStruct->id_template,
                     'id_parent' => ($categoryStruct->id_parent) ? $categoryStruct->id_parent : null,
                     'category_label' => $categoryStruct->category_label,
                     'code' => $categoryStruct->code,
-                    'dqf_id' => ($categoryStruct->dqf_id) ? $categoryStruct->dqf_id : null,
                     'sort' => ($categoryStruct->sort) ? $categoryStruct->sort : null,
                 ]);
 
@@ -314,12 +313,14 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
 
                 foreach ($categoryStruct->severities as $severityStruct){
                     $severityStruct->id_category = $QAModelTemplateCategoryId;
-                    $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category, severity_label, penalty, sort) 
-                    VALUES (:id_category, :severity_label, :penalty, :sort) " );
+                    $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category, severity_label, severity_code, penalty, dqf_id, sort) 
+                    VALUES (:id_category, :severity_label, :severity_code, :penalty, :dqf_id, :sort) " );
                     $stmt->execute([
                             'id_category' => $severityStruct->id_category,
                             'severity_label' => $severityStruct->severity_label,
                             'penalty' => $severityStruct->penalty,
+                            'severity_code' => $severityStruct->severity_code,
+                            'dqf_id' => ($severityStruct->dqf_id) ? $severityStruct->dqf_id : null,
                             'sort' => ($severityStruct->sort) ? $severityStruct->sort : null,
                     ]);
                 }
@@ -373,23 +374,24 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             }
 
             foreach ($modelTemplateStruct->categories as $categoryStruct){
-                $stmt = $conn->prepare( "UPDATE qa_model_template_categories SET id_template=:id_template, id_parent=:id_parent, category_label=:category_label, code=:code, dqf_id=:dqf_id, sort=:sort  WHERE id=:id " );
+                $stmt = $conn->prepare( "UPDATE qa_model_template_categories SET id_template=:id_template, id_parent=:id_parent, category_label=:category_label, code=:code, sort=:sort  WHERE id=:id " );
                 $stmt->execute([
                         'id' => $categoryStruct->id,
                         'id_template' => $categoryStruct->id_template,
                         'id_parent' => ($categoryStruct->id_parent) ? $categoryStruct->id_parent : null,
                         'category_label' => $categoryStruct->category_label,
                         'code' => $categoryStruct->code,
-                        'dqf_id' => ($categoryStruct->dqf_id) ? $categoryStruct->dqf_id : null,
                         'sort' => ($categoryStruct->sort) ? $categoryStruct->sort : null,
                 ]);
 
                 foreach ($categoryStruct->severities as $severityStruct){
-                    $stmt = $conn->prepare( "UPDATE qa_model_template_severities SET id_category=:id_category, severity_label=:severity_label, penalty=:penalty, sort=:sort WHERE id=:id  " );
+                    $stmt = $conn->prepare( "UPDATE qa_model_template_severities SET id_category=:id_category, severity_label=:severity_label, severity_code=:severity_code, penalty=:penalty, dqf_id=:dqf_id, sort=:sort WHERE id=:id  " );
                     $stmt->execute([
                         'id' => $severityStruct->id,
                         'id_category' => $categoryStruct->id,
                         'severity_label' => $severityStruct->severity_label,
+                        'severity_code' => $severityStruct->severity_code,
+                        'dqf_id' => ($severityStruct->dqf_id) ? $severityStruct->dqf_id : null,
                         'penalty' => $severityStruct->penalty,
                         'sort' => ($severityStruct->sort) ? $severityStruct->sort : null,
                     ]);

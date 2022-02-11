@@ -2,6 +2,8 @@
 
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use LQA\ModelDao;
+use LQA\ModelStruct;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
@@ -59,6 +61,11 @@ class NewController extends ajaxController {
      * @var \Teams\TeamStruct
      */
     protected $team;
+
+    /**
+     * @var ModelStruct
+     */
+    protected $qaModel;
 
     protected $projectStructure;
 
@@ -146,6 +153,7 @@ class NewController extends ajaxController {
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
                 'id_team'              => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model_template' => [ 'filter' => FILTER_VALIDATE_INT ],
                 'lexiqa'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'speech2text'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
@@ -193,6 +201,7 @@ class NewController extends ajaxController {
             $this->__validateTmAndKeys();
             $this->__validateTeam();
             $this->__validateQaModelTemplate();
+            $this->__validateQaModel();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -635,8 +644,13 @@ class NewController extends ajaxController {
             $this->projectManager->setTeam( $this->team );
         }
 
+        // with the qa template id
         if( $this->qaModelTemplate ) {
-            $projectStructure[ 'qa_model_template' ] = $this->qaModelTemplate;
+            $projectStructure[ 'qa_model_template' ] = $this->qaModelTemplate->getDecodedModel();
+        }
+
+        if( $this->qaModel ) {
+            $projectStructure[ 'qa_model' ] = $this->qaModel->getDecodedModel();
         }
 
         //set features override
@@ -1057,6 +1071,33 @@ class NewController extends ajaxController {
             }
 
             $this->qaModelTemplate = $qaModelTemplate;
+        }
+    }
+
+    /**
+     * Checks if id_qa_model is valid
+     *
+     * @throws Exception
+     */
+    private function __validateQaModel() {
+        if ( !empty( $this->postInput[ 'id_qa_model' ] ) ) {
+
+            $qaModel = ModelDao::findById($this->postInput[ 'id_qa_model' ]);
+
+            // check if qa_model exists
+            if(null === $qaModel){
+                throw new \Exception('This QA Model does not exists');
+            }
+
+            // check featureSet
+            $qaModelLabel = strtolower($qaModel->label);
+            $featureSetCodes = $this->getFeatureSet()->getCodes();
+
+            if($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)){
+                throw new \Exception('This QA Model does not belong to the authenticated user');
+            }
+
+            $this->qaModel = $qaModel;
         }
     }
 

@@ -4,7 +4,7 @@ namespace LQA;
 
 use Exception;
 
-class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct, QAModelInterface {
 
     protected static $auto_increment_fields = ['id'];
     protected static $primary_keys = ['id'];
@@ -41,6 +41,13 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
     /**
      * @return mixed
+     */
+    public function getPassOptions() {
+        return json_decode( $this->pass_options );
+    }
+
+    /**
+     * @return mixed
      * @throws Exception
      */
     public function getLimit() {
@@ -50,5 +57,35 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
         }
         return $options['limit'];
 
+    }
+
+    /**
+     * @return array
+     */
+    public function getDecodedModel() {
+
+        $categoriesArray = [];
+        foreach ( $this->getCategories() as $categoryStruct   ){
+
+            $category = $categoryStruct->toArrayWithJsonDecoded();
+
+            $categoriesArray[] = [
+                'label' => $category['label'],
+                'code' => $category['options']['code'],
+                'severities' => $category['severities'],
+            ];
+        }
+
+        return [
+            'model' => [
+                "version" => 1,
+                "label" => $this->label,
+                "categories" => $categoriesArray,
+                "passfail" => [
+                    'type' => $this->pass_type,
+                    'options' =>  $this->getPassOptions()
+                ],
+            ]
+        ];
     }
 }

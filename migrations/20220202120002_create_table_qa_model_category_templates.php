@@ -9,7 +9,6 @@ class CreateTableQaModelCategoryTemplates extends AbstractMatecatMigration {
           `id_parent` int(11) DEFAULT NULL,
           `category_label` varchar(45) NOT NULL,
           `code` varchar(45) NOT NULL,
-          `dqf_id` int(11) DEFAULT NULL,
           `sort` int(11) DEFAULT NULL,
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
