@@ -6,15 +6,14 @@ const VirtualList = forwardRef(
   (
     {
       items,
-      scrollToIndex = {},
-      scrollToOffset = {},
-      Component,
-      itemStyle = () => ({}),
+      overscan = 5,
       width,
       height,
+      scrollToIndex = {},
+      onRender,
+      itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
-      overscan = 5,
     },
     ref,
   ) => {
@@ -22,7 +21,6 @@ const VirtualList = forwardRef(
       virtualItems,
       totalSize,
       scrollToIndex: fnScrollToIndex,
-      scrollToOffset: fnScrollToOffset,
     } = useVirtual({
       size: items.length,
       parentRef: ref,
@@ -33,16 +31,9 @@ const VirtualList = forwardRef(
     // scroll to index
     useEffect(() => {
       if (typeof scrollToIndex?.value !== 'number') return
-      const {value, align} = scrollToIndex
-      value >= 0 && fnScrollToIndex(value, {align})
-    }, [scrollToIndex, fnScrollToIndex])
-
-    // scroll to offset
-    useEffect(() => {
-      if (typeof scrollToOffset?.value !== 'number') return
-      const {value, align} = scrollToOffset
-      value >= 0 && fnScrollToOffset(value, {align})
-    }, [scrollToOffset, fnScrollToOffset])
+      scrollToIndex.value >= 0 &&
+        fnScrollToIndex(scrollToIndex.value, {align: scrollToIndex?.align})
+    }, [scrollToIndex?.value, scrollToIndex?.align, fnScrollToIndex])
 
     // rendered indexes
     useEffect(() => {
@@ -81,10 +72,10 @@ const VirtualList = forwardRef(
                 width: '100%',
                 height: `${items[item.index].height}px`,
                 transform: `translateY(${item.start}px)`,
-                ...itemStyle(items[item.index]),
+                ...itemStyle(item.index),
               }}
             >
-              <Component {...items[item.index]} />
+              {onRender(item.index)}
             </div>
           ))}
         </div>
@@ -95,21 +86,17 @@ const VirtualList = forwardRef(
 
 VirtualList.propTypes = {
   items: PropTypes.array.isRequired,
+  overscan: PropTypes.number,
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   scrollToIndex: PropTypes.exact({
     value: PropTypes.number,
     align: PropTypes.string,
   }),
-  scrollToOffset: PropTypes.exact({
-    value: PropTypes.number,
-    align: PropTypes.string,
-  }),
-  Component: PropTypes.elementType.isRequired,
+  onRender: PropTypes.func.isRequired,
   itemStyle: PropTypes.func,
-  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,
-  overscan: PropTypes.number,
 }
 
 VirtualList.displayName = 'VirtualList'

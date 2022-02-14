@@ -5414,4 +5414,8 @@ body svg {
     width: 100%;
     height: auto;
   }
+
+  .last-row > :last-child {
+    margin-bottom: 120px;
+  }
 }

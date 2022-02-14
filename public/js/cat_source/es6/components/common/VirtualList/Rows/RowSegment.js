@@ -31,6 +31,7 @@ function RowSegment({
   id,
   height,
   hasRendered,
+  isLastRow = false,
   currentFileId,
   collectionTypeSeparator,
   ...restProps
@@ -113,7 +114,7 @@ function RowSegment({
   }
 
   return (
-    <div ref={ref} className="row">
+    <div ref={ref} className={`row${isLastRow ? ' last-row' : ''}`}>
       {getProjectBar()}
       {collectionTypeSeparator}
       <Segment {...restProps} />
@@ -125,9 +126,9 @@ RowSegment.propTypes = {
   id: PropTypes.string.isRequired,
   height: PropTypes.number.isRequired,
   hasRendered: PropTypes.bool,
+  isLastRow: PropTypes.bool,
   currentFileId: PropTypes.string,
   collectionTypeSeparator: PropTypes.node,
-  children: PropTypes.node,
 }
 
 export default RowSegment

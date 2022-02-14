@@ -6,6 +6,7 @@ function useResizeObserver(ref, {actualWidth = 0, actualHeight = 0} = {}) {
   const [height, setHeight] = useState(actualHeight)
 
   useEffect(() => {
+    let wasCleaned = false
     if (!ref?.current) return
     const {current} = ref
     const resizeObserver = new ResizeObserver((entries) => {
@@ -14,16 +15,19 @@ function useResizeObserver(ref, {actualWidth = 0, actualHeight = 0} = {}) {
       const width = Array.isArray(borderBoxSize)
         ? borderBoxSize[0]?.inlineSize
         : borderBoxSize.inlineSize
-      setWidth(width ? width : actualWidth)
+      !wasCleaned && setWidth(width ? width : actualWidth)
 
       const height = Array.isArray(borderBoxSize)
         ? borderBoxSize[0]?.blockSize
         : borderBoxSize.blockSize
-      setHeight(height ? height : actualHeight)
+      !wasCleaned && setHeight(height ? height : actualHeight)
     })
     resizeObserver.observe(current)
 
-    return () => resizeObserver.disconnect()
+    return () => {
+      wasCleaned = true
+      resizeObserver.disconnect()
+    }
   }, [ref, actualWidth, actualHeight])
 
   return {width, height}
