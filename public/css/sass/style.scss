@@ -1990,38 +1990,6 @@ section.editor .loader_on {
   margin: 3px 30px 0 0;
 }
 
-.header {
-  height: 20px;
-  width: 100%;
-  color: $grey1;
-  font-size: 12px;
-  background: $grey4 !important;
-  margin-bottom: 0px;
-}
-
-.header .repetition {
-  margin: 0 auto;
-  text-transform: uppercase;
-  color: #fff;
-  font-size: 12px;
-  background: $grey2;
-  padding: 4px 8px;
-  position: relative;
-  z-index: 12;
-  max-width: 102px;
-}
-
-.header.header-closed {
-  background: transparent !important;
-  position: absolute;
-  span {
-    z-index: 1;
-    padding: 2px 6px;
-    font-size: 11px;
-    top: -2px;
-  }
-}
-
 .close {
   width: 14px;
   height: 14px;
@@ -2343,10 +2311,6 @@ section:not(.editor).editarea .highlighted2 {
 	transition:background-color 2s !important;
 	background-color: #fff !important;
 }*/
-.editarea:hover {
-  border-color: rgba(34, 36, 38, 0.35);
-  box-shadow: none;
-}
 
 .editarea:focus {
   border: 1px solid #96c8da;

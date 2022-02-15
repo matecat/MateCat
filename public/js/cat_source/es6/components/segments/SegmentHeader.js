@@ -96,18 +96,26 @@ class SegmentHeader extends React.PureComponent {
         </h2>
       )
     }
-
+    const savingHtml = (
+      <div className={'header-segment-saving'}>
+        <div className={'header-segment-saving-loader'} />
+        <span>Saving</span>
+      </div>
+    )
     return segmentOpened ? (
       <div className="header toggle" id={'segment-' + sid + '-header'}>
         {autopropagated}
         {percentageHtml}
+        {saving ? savingHtml : null}{' '}
       </div>
     ) : autopropagated || repetition ? (
       <div className={'header header-closed'}>
         {autopropagatedHtml}
-        {saving ? <div>Saving</div> : null}
+        {saving ? savingHtml : null}
       </div>
-    ) : null
+    ) : (
+      <div className={'header header-closed'}>{saving ? savingHtml : null}</div>
+    )
   }
 }
 
