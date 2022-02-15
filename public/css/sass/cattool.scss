@@ -52,12 +52,20 @@ body.cattool {
       height: 44px;
 
       .item {
+        position: relative;
         font-size: 14px;
         font-weight: bold;
         font-style: normal;
         font-stretch: normal;
         line-height: 1.5;
         color: black;
+
+        .common-tooltip {
+          font-weight: normal;
+          span {
+            max-width: none;
+          }
+        }
 
         p {
           margin: 0;
@@ -118,12 +126,20 @@ body.cattool {
       }
 
       .progress-bar {
+        position: relative;
         display: grid;
         grid-template-columns: 1fr 44px;
         grid-column-gap: 8px;
 
         .percent {
           font-weight: 600;
+        }
+
+        .common-tooltip {
+          left: calc(50% - 22px);
+          span {
+            max-width: none;
+          }
         }
 
         .meter {

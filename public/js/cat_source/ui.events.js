@@ -341,7 +341,7 @@ $.extend(window.UI, {
         e.preventDefault()
         $('.alert').remove()
       })
-      .on('click', '#statistics .meter a, #stat-todo', function (e) {
+      .on('click', '#statistics .meter a', function (e) {
         e.preventDefault()
         if (config.isReview) {
           UI.openNextTranslated()
