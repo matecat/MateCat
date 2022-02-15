@@ -1,5 +1,8 @@
 import {deleteCompletionEvents} from './es6/api/deleteCompletionEvents'
 import {setChunkComplete} from './es6/api/setChunkComplete'
+import {ModalWindow} from './es6/components/modals/ModalWindow'
+import AlertModal from './es6/components/modals/AlertModal'
+import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 
 var ProjectCompletion = {
   enabled: function () {
@@ -64,12 +67,15 @@ if (ProjectCompletion.enabled()) {
           UI.render(false)
         })
         .catch((errors) => {
-          APP.alert({
-            msg:
-              'An error occurred while marking this job as complete. Please contact support at ' +
-              '<a href="support@matecat.com">support@matecat.com</a>.',
-          })
-          console.log(errors)
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text:
+                'An error occurred while marking this job as complete. Please contact support at ' +
+                '<a href="support@matecat.com">support@matecat.com</a>.',
+            },
+            'Error',
+          )
           revertButtonState()
         })
     }
@@ -120,24 +126,36 @@ if (ProjectCompletion.enabled()) {
     }
 
     var clickMarkAsCompleteForReview = function () {
-      APP.confirm({
-        callback: 'markAsCompleteSubmit',
-        msg:
-          'You are about to mark this job as completed. ' +
-          'This will allow translators to edit the job again. ' +
-          'Are you sure you want to mark the job as complete?',
-      })
+      ModalWindow.showModalComponent(
+        ConfirmMessageModal,
+        {
+          text:
+            'You are about to mark this job as completed. ' +
+            'This will allow translators to edit the job again. ' +
+            'Are you sure you want to mark the job as complete?',
+          successText: 'Continue',
+          cancelText: 'Cancel',
+          successCallback: () => UI.markAsCompleteSubmit(),
+        },
+        'Confirmation required',
+      )
     }
 
     var clickMarkAsCompleteForTranslate = function () {
-      APP.confirm({
-        callback: 'markAsCompleteSubmit',
-        msg:
-          'You are about to mark this job as completed. ' +
-          'This will allow reviewers to start revision. After this confirm, ' +
-          'the job will no longer become editable again until the review is over. ' +
-          'Are you sure you want to mark the job as complete?',
-      })
+      ModalWindow.showModalComponent(
+        ConfirmMessageModal,
+        {
+          text:
+            'You are about to mark this job as completed. ' +
+            'This will allow reviewers to start revision. After this confirm, ' +
+            'the job will no longer become editable again until the review is over. ' +
+            'Are you sure you want to mark the job as complete?',
+          successText: 'Continue',
+          cancelText: 'Cancel',
+          successCallback: () => UI.markAsCompleteSubmit(),
+        },
+        'Confirmation required',
+      )
     }
 
     var translateAndReadonly = function () {
@@ -198,16 +216,19 @@ if (ProjectCompletion.enabled()) {
     }
 
     var showFixWarningsModal = function () {
-      APP.confirm({
-        name: 'markJobAsComplete', // <-- this is the name of the function that gets invoked?
-        cancelTxt: 'Fix errors',
-        onCancel: 'goToFirstError',
-        callback: 'markJobAsComplete',
-        okTxt: 'Mark as complete',
-        msg:
-          'Unresolved issues may prevent completing your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
-          ' underline;" href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> ',
-      })
+      ModalWindow.showModalComponent(
+        ConfirmMessageModal,
+        {
+          text:
+            'Unresolved issues may prevent completing your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
+            ' underline;" href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> ',
+          successText: 'Mark as complete',
+          cancelText: 'Fix errors',
+          cancelCallback: () => UI.goToFirstError(),
+          successCallback: () => UI.markJobAsComplete(),
+        },
+        'Confirmation required',
+      )
     }
 
     var checkCompletionOnReady = function () {

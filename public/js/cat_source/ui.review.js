@@ -1,5 +1,4 @@
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
-import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentActions from './es6/actions/SegmentActions'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
 
@@ -23,13 +22,11 @@ $.extend(window.UI, {
 })
 
 window.alertNotTranslatedYet = function (sid) {
-  APP.confirm({
-    name: 'confirmNotYetTranslated',
-    cancelTxt: 'Close',
-    callback: 'openNextTranslated',
-    okTxt: 'Open next translated segment',
-    context: sid,
-    msg: UI.alertNotTranslatedMessage,
+  ModalWindow.showModalComponent(ConfirmMessageModal, {
+    cancelText: 'Close',
+    successCallback: () => UI.openNextTranslated(sid),
+    successText: 'Open next translated segment',
+    text: UI.alertNotTranslatedMessage,
   })
 }
 

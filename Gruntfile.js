@@ -219,6 +219,17 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'pee.js',
       },
+      components: {
+        options: {
+          transform: [babelifyTransform],
+          browserifyOptions: {
+            paths: [__dirname + '/node_modules'],
+          },
+          watch: true,
+        },
+        src: [basePath + 'cat_source/es6/components.js'],
+        dest: buildPath + 'components.js',
+      },
     },
 
     /**
@@ -484,6 +495,7 @@ module.exports = function (grunt) {
     'browserify:analyze',
     'browserify:xliffToTarget',
     'browserify:pee',
+    'browserify:components',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',

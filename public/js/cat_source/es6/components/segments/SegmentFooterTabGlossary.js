@@ -175,10 +175,6 @@ class SegmentFooterTabGlossary extends React.Component {
       this.target.textContent = ''
     } else {
       this.searchInTarget()
-      // APP.alert({msg: 'Please insert a glossary term.'});
-      // this.setState({
-      //     enableAddButton: false
-      // });
     }
   }
 

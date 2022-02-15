@@ -27,6 +27,7 @@ import {translateSegments} from '../api/translateSegments'
 import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import {ModalWindow} from '../components/modals/ModalWindow'
+import AlertModal from '../components/modals/AlertModal'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -464,7 +465,6 @@ const SegmentActions = {
         })
       })
       .catch((errors) => {
-        APP.closePopup()
         const notification = {
           title: 'Error',
           text: 'Error copying all sources to target. Try again!',
@@ -589,7 +589,13 @@ const SegmentActions = {
   /************ SPLIT ****************/
   openSplitSegment: function (sid) {
     if (OfflineUtils.offline) {
-      APP.alert('Split is disabled in Offline Mode')
+      ModalWindow.showModalComponent(
+        AlertModal,
+        {
+          text: 'Split is disabled in Offline Mode',
+        },
+        'Split disabled',
+      )
       return
     }
     AppDispatcher.dispatch({
