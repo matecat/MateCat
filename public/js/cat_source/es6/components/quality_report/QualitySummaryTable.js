@@ -135,7 +135,7 @@ class QualitySummaryTable extends React.Component {
     let html = []
     this.categoriesGroups.forEach((group, i) => {
       let groupHtml = []
-      let sevGroup = group[0].get('severities')
+      const sevGroup = group[0].get('severities')
       groupHtml.push(
         <div
           className="qr-element qr-issue-name severity_weight"
@@ -165,7 +165,7 @@ class QualitySummaryTable extends React.Component {
           )
         }
       })
-      let lineSeverityGroup = (
+      const lineSeverityGroup = (
         <div
           className="qr-body-list severity_weight-line"
           key={'group-line-' + i}
@@ -182,7 +182,7 @@ class QualitySummaryTable extends React.Component {
             {cat.get('label')}
           </div>,
         )
-        let totalIssues = this.getIssuesForCategory(cat.get('id'))
+        const totalIssues = this.getIssuesForCategory(cat.get('id'))
         let catTotalWeightValue = 0
         this.severities.forEach((currentSev, i) => {
           let severityFound = cat.get('severities').filter((sev) => {
@@ -193,8 +193,8 @@ class QualitySummaryTable extends React.Component {
             !_.isUndefined(totalIssues) &&
             totalIssues.get('founds').get(currentSev.label)
           ) {
-            let issues = totalIssues.get('founds').get(currentSev.label)
-            let total = issues * severityFound.get(0).get('penalty')
+            const issues = totalIssues.get('founds').get(currentSev.label)
+            const total = issues * severityFound.get(0).get('penalty')
             catTotalWeightValue = catTotalWeightValue + total
             catHtml.push(
               <div
@@ -215,7 +215,22 @@ class QualitySummaryTable extends React.Component {
             <span>{catTotalWeightValue}</span>
           </div>
         )
-        let line = (
+        if (cat.get('label') === 'Kudos') {
+          let issues = 0
+          cat.get('severities').forEach((sev) => {
+            issues += totalIssues.get('founds').get(sev.get('label'))
+          })
+          catTotalWeightHtml = (
+            <div
+              className="qr-element total-severity kudos-total"
+              key={'total-' + index}
+            >
+              <div className={'kudos-total-label'}>Kudos total points</div>
+              <div className={'kudos-total-number'}>{issues}</div>
+            </div>
+          )
+        }
+        const line = (
           <div
             className={
               'qr-body-list ' + (index === 0 ? 'qr-body-list-first' : '')

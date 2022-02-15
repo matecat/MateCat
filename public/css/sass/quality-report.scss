@@ -292,6 +292,9 @@ header {
                   }
                   &:first-child {
                     border: none;
+                    display: flex;
+                    justify-content: center;
+                    flex-direction: column;
                   }
                   &.severity_weight {
                     background: $grey5 !important;
@@ -350,9 +353,8 @@ header {
                   font-size: 20px;
                 }
               }
-              .qr-element.total-severity {
-              }
               .total-severity {
+                text-align: center;
                 &.job-not-passed {
                   background-color: rgba(255, 123, 35, 0.31);
                   text-align: center;
@@ -363,9 +365,13 @@ header {
                   text-align: center;
                   border-left: 1px solid rgba(0, 255, 0, 0.23);
                 }
-              }
-              .total-severity {
-                text-align: center;
+                &.kudos-total {
+                  display: flex;
+                  flex-direction: column;
+                  background: $grey3;
+                  font-weight: 700;
+                  text-transform: capitalize;
+                }
               }
             }
           }
