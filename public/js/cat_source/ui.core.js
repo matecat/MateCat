@@ -296,13 +296,22 @@ window.UI = {
       $(window).trigger('segmentsAdded', {resp: d.data.files})
     }
 
-    if (
+    /* if (
       Object.keys(d.data.files).length === 0 ||
       SegmentStore.getLastSegmentId() === config.last_job_segment
     ) {
       if (where === 'after') this.noMoreSegmentsAfter = true
       if (where === 'before') this.noMoreSegmentsBefore = true
-    }
+    } */
+    if (Object.keys(d.data.files).length === 0 && where === 'before')
+      this.noMoreSegmentsBefore = true
+    if (
+      Object.keys(d.data.files).length === 0 ||
+      (SegmentStore.getLastSegmentId() === config.last_job_segment &&
+        where === 'after')
+    )
+      this.noMoreSegmentsAfter = true
+
     $('#outer').removeClass('loading loadingBefore')
     this.loadingMore = false
   },

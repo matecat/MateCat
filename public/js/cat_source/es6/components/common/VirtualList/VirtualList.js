@@ -40,7 +40,7 @@ const VirtualList = forwardRef(
       renderedRange(virtualItems.map(({index}) => index))
     }, [virtualItems, renderedRange])
 
-    // set inline style of width or heigh
+    // set inline style of width or height
     useEffect(() => {
       if (!ref?.current) return
       const {current} = ref

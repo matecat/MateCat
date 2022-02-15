@@ -41,6 +41,8 @@ function SegmentsContainer_({
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)
   const [onUpdateRow, setOnUpdateRow] = useState(undefined)
+  const [boundarySegmentIdToCache, setBoundarySegmentIdToCache] =
+    useState(undefined)
   const [widthArea, setWidthArea] = useState(0)
   const [heightArea, setHeightArea] = useState(0)
   const [startIndex, setStartIndex] = useState(0)
@@ -51,12 +53,13 @@ function SegmentsContainer_({
   const [lastSelectedSegment, setLastSelectedSegment] = useState(undefined)
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
 
-  const previousRowsLength = useRef(0)
   const persistenceVariables = useRef({
     lastScrolled: undefined,
     scrollDirectionTop: false,
     lastScrollTop: 0,
     segmentsWithCollectionType: [],
+    previousWidthArea: widthArea,
+    previousIsSideOpen: isSideOpen,
     haveBeenAddedSegmentsBefore: false,
   })
   const rowsRenderedHeight = useRef(new Map())
@@ -313,8 +316,8 @@ function SegmentsContainer_({
       setScrollToSelected(true)
       // setTimeout(() => this.onScroll(), 500)
     }
-    const openSide = () => {}
-    const closeSide = () => {}
+    const openSide = () => setIsSideOpen(true)
+    const closeSide = () => setIsSideOpen(false)
     const storeJobInfo = (files) => setFiles(files)
 
     SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, renderSegments)
@@ -382,14 +385,24 @@ function SegmentsContainer_({
   // cache rows before start index
   useEffect(() => {
     if (!rows.length || hasCachedRows) return
-    const stopIndex = !essentialRows.length
-      ? rows.findIndex(({id}) => id === startSegmentId)
-      : essentialRows[0]?.id !== rows[0]?.id
-      ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
-      : essentialRows.length - 1
+    const stopIndexFromStartSegmentId = rows.findIndex(
+      ({id}) => id === (boundarySegmentIdToCache ?? startSegmentId),
+    )
+
+    const stopIndex =
+      !essentialRows.length || boundarySegmentIdToCache
+        ? stopIndexFromStartSegmentId >= 0
+          ? stopIndexFromStartSegmentId
+          : 0
+        : essentialRows[0]?.id !== rows[0]?.id
+        ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
+        : essentialRows.length - 1
 
     rows
-      .filter((row, index) => index <= stopIndex)
+      .filter(
+        ({segImmutable}, index) =>
+          index <= stopIndex || segImmutable.get('opened'),
+      )
       .forEach((row, index) => {
         const cached = cachedRowsHeightMap.current.get(row.id)
         const newHeight = !cached
@@ -401,8 +414,17 @@ function SegmentsContainer_({
           : cached
         cachedRowsHeightMap.current.set(row.id, newHeight)
       })
+
+    setBoundarySegmentIdToCache(undefined)
     setHasCachedRows(true)
-  }, [rows, essentialRows, startSegmentId, hasCachedRows, getSegmentRealHeight])
+  }, [
+    rows,
+    essentialRows,
+    boundarySegmentIdToCache,
+    startSegmentId,
+    hasCachedRows,
+    getSegmentRealHeight,
+  ])
 
   // set scroll sid when get more segments before
   useEffect(() => {
@@ -440,7 +462,8 @@ function SegmentsContainer_({
     }
 
     const scrollTop =
-      additionalHeight - cachedRowsHeightMap.current.get(rows[stopIndex - 1].id)
+      additionalHeight -
+      /* cachedRowsHeightMap.current.get(rows[stopIndex - 1].id) */ ROW_HEIGHT
     listRef.current.scrollTop = scrollTop
 
     setScrollToSid(rows[stopIndex + 1].id)
@@ -449,6 +472,7 @@ function SegmentsContainer_({
     current.haveBeenAddedSegmentsBefore = true
   }, [rows, essentialRows, hasCachedRows, stopIndex])
 
+  // update rows height
   useEffect(() => {
     if (startIndex === undefined || !stopIndex || !hasCachedRows) return
     console.log('startIndex', startIndex, 'stopIndex', stopIndex)
@@ -480,6 +504,7 @@ function SegmentsContainer_({
     })
   }, [startIndex, stopIndex, hasCachedRows, onUpdateRow])
 
+  // set essential rows
   useEffect(() => {
     if (
       !hasCachedRows ||
@@ -488,7 +513,6 @@ function SegmentsContainer_({
     )
       return
     if (essentialRows.length !== rows.length) {
-      console.log(rows, cachedRowsHeightMap)
       setEssentialRows(
         rows.map(({id, height, hasRendered}) => ({
           id,
@@ -531,7 +555,33 @@ function SegmentsContainer_({
     console.log('essentialRows', essentialRows)
   }, [essentialRows])
 
-  // reset scrollTo and cache previous rows length
+  // recompute and cache rows before start index
+  useEffect(() => {
+    if (!essentialRows.length) return
+    const {previousWidthArea, previousIsSideOpen} = persistenceVariables.current
+    if (widthArea !== previousWidthArea || isSideOpen !== previousIsSideOpen) {
+      // clear cached rows height
+      cachedRowsHeightMap.current.clear()
+      // set boundary
+      const firstRowSidRendered = essentialRows[startIndex].id
+      essentialRows.forEach(
+        (row, index) =>
+          index <= startIndex && rowsRenderedHeight.current.delete(row.id),
+      )
+      setBoundarySegmentIdToCache(firstRowSidRendered)
+      setScrollToSid(firstRowSidRendered)
+      setHasCachedRows(false)
+    }
+  }, [widthArea, isSideOpen, startIndex, essentialRows])
+
+  // save current widthArea and isSideOpen flag
+  useEffect(() => {
+    const {current} = persistenceVariables
+    current.previousWidthArea = widthArea
+    current.previousIsSideOpen = isSideOpen
+  }, [widthArea, isSideOpen])
+
+  // reset scrollTo
   useEffect(() => {
     if (!rows.length || !hasCachedRows) return
     const rowsRendered = rows.filter(
@@ -542,7 +592,6 @@ function SegmentsContainer_({
     if (!haveBeenRowsRendered) return
 
     setScrollToSid(undefined)
-    previousRowsLength.current = rows.length
     persistenceVariables.current.haveBeenAddedSegmentsBefore = false
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
