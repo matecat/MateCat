@@ -227,7 +227,7 @@ class QualitySummaryTable extends React.Component {
               className="qr-element total-severity kudos-total"
               key={'total-' + index}
             >
-              <div className={'kudos-total-label'}>Kudos total points</div>
+              <div className={'kudos-total-label'}>Total Kudos Points</div>
               <div className={'kudos-total-number'}>{issues}</div>
             </div>
           )
