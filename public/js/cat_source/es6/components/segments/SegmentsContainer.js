@@ -34,6 +34,7 @@ class SegmentsContainer extends React.Component {
       },
       sideOpen: false,
       files: CatToolStore.getJobFilesInfo(),
+      scrollTopVisible: false,
     }
     this.renderSegments = this.renderSegments.bind(this)
     this.updateAllSegments = this.updateAllSegments.bind(this)
@@ -491,6 +492,9 @@ class SegmentsContainer extends React.Component {
     }
     this.lastListSize = this.state.segments.size
     this.lastScrollTop = scrollTop
+    this.setState({
+      scrollTopVisible: scrollTop > 400,
+    })
   }
 
   recomputeListSize(idFrom) {
@@ -516,6 +520,10 @@ class SegmentsContainer extends React.Component {
     this.setState({
       files: files,
     })
+  }
+
+  goToFirstSegment() {
+    SegmentActions.scrollToSegment(this.props.firstJobSegment)
   }
 
   componentDidMount() {
@@ -598,7 +606,8 @@ class SegmentsContainer extends React.Component {
       nextState.tagLockEnabled !== this.state.tagLockEnabled ||
       nextState.window !== this.state.window ||
       (nextState.scrollTo && nextState.scrollTo !== this.state.scrollTo) ||
-      nextState.sideOpen !== this.state.sideOpen
+      nextState.sideOpen !== this.state.sideOpen ||
+      nextState.scrollTopVisible !== this.state.scrollTopVisible
     )
   }
 
@@ -643,57 +652,71 @@ class SegmentsContainer extends React.Component {
     let scrollToObject = this.getIndexToScroll()
     let items = this.getSegments()
     let width = this.state.window.width
+    const {scrollTopVisible} = this.state
     return (
-      <VirtualList
-        ref={(list) => (this.listRef = list)}
-        width={width}
-        height={this.state.window.height}
-        style={{overflowX: 'hidden'}}
-        estimatedItemSize={80}
-        overscanCount={10}
-        itemCount={items.length}
-        itemSize={(index) => this.getSegmentHeight(index, items)}
-        scrollToAlignment={scrollToObject.position}
-        scrollToIndex={scrollToObject.scrollTo}
-        // scrollOffset={1000}
-        onScroll={() => this.onScroll()}
-        renderItem={({index, style}) => {
-          let styleCopy = Object.assign({}, style)
-          if (index === 0) {
-            let segment = this.getSegmentByIndex(index)
-            let segment1 = this.getSegmentByIndex(1)
-            let segment2 = this.getSegmentByIndex(2)
+      <React.Fragment>
+        <VirtualList
+          ref={(list) => (this.listRef = list)}
+          width={width}
+          height={this.state.window.height}
+          style={{overflowX: 'hidden'}}
+          estimatedItemSize={80}
+          overscanCount={10}
+          itemCount={items.length}
+          itemSize={(index) => this.getSegmentHeight(index, items)}
+          scrollToAlignment={scrollToObject.position}
+          scrollToIndex={scrollToObject.scrollTo}
+          // scrollOffset={1000}
+          onScroll={() => this.onScroll()}
+          renderItem={({index, style}) => {
+            let styleCopy = Object.assign({}, style)
+            if (index === 0) {
+              let segment = this.getSegmentByIndex(index)
+              let segment1 = this.getSegmentByIndex(1)
+              let segment2 = this.getSegmentByIndex(2)
 
-            if (segment.get('openComments')) {
-              let comments = CommentsStore.getCommentsBySegment(
-                segment.get('original_sid'),
-              )
-              if (index === 0 && comments.length === 0)
-                styleCopy.marginTop = '110px'
-              else if (index === 0 && comments.length > 0)
-                styleCopy.marginTop = '270px'
-            } else if (segment1 && segment1.get('openComments')) {
-              let comments = CommentsStore.getCommentsBySegment(
-                segment1.get('original_sid'),
-              )
-              if (comments.length === 0) styleCopy.marginTop = '40px'
-              else if (comments.length > 0) styleCopy.marginTop = '140px'
-            } else if (segment2 && segment2.get('openComments')) {
-              let comments = CommentsStore.getCommentsBySegment(
-                segment2.get('original_sid'),
-              )
-              if (comments.length === 0) styleCopy.marginTop = '20px'
-              else if (comments.length > 0) styleCopy.marginTop = '50px'
+              if (segment.get('openComments')) {
+                let comments = CommentsStore.getCommentsBySegment(
+                  segment.get('original_sid'),
+                )
+                if (index === 0 && comments.length === 0)
+                  styleCopy.marginTop = '110px'
+                else if (index === 0 && comments.length > 0)
+                  styleCopy.marginTop = '270px'
+              } else if (segment1 && segment1.get('openComments')) {
+                let comments = CommentsStore.getCommentsBySegment(
+                  segment1.get('original_sid'),
+                )
+                if (comments.length === 0) styleCopy.marginTop = '40px'
+                else if (comments.length > 0) styleCopy.marginTop = '140px'
+              } else if (segment2 && segment2.get('openComments')) {
+                let comments = CommentsStore.getCommentsBySegment(
+                  segment2.get('original_sid'),
+                )
+                if (comments.length === 0) styleCopy.marginTop = '20px'
+                else if (comments.length > 0) styleCopy.marginTop = '50px'
+              }
             }
-          }
-          return (
-            <div className={'segment-container'} key={index} style={styleCopy}>
-              {items[index]}
-            </div>
-          )
-        }}
-        onItemsRendered={(obj) => (this.lastUpdateObj = obj)}
-      />
+            return (
+              <div
+                className={'segment-container'}
+                key={index}
+                style={styleCopy}
+              >
+                {items[index]}
+              </div>
+            )
+          }}
+          onItemsRendered={(obj) => (this.lastUpdateObj = obj)}
+        />
+        {scrollTopVisible && (
+          <div
+            className={'pointer-first-segment'}
+            title="Go to first segment"
+            onClick={() => this.goToFirstSegment()}
+          ></div>
+        )}
+      </React.Fragment>
     )
   }
 }

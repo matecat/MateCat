@@ -2571,12 +2571,15 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
+                $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
+
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                         [
                                 'approved'            => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
                                 'locked'              => 0,
                                 'match_type'          => 'ICE',
-                                'eq_word_count'       => 0,
+                                // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
+                                'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ),
                                 'standard_word_count' => null,
                                 'status'              => $status,
                                 'suggestion_match'    => null,
@@ -2590,7 +2593,6 @@ class ProjectManager {
 
                 // Use QA to get target segment
                 $chunk   = \Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
-                $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $source  = $segment->segment;
                 $target  = $translation_row [ 2 ];
 

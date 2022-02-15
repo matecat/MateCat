@@ -6,6 +6,8 @@ import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import {ModalWindow} from '../components/modals/ModalWindow'
+import AlertModal from '../components/modals/AlertModal'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -137,17 +139,18 @@ const CommonUtils = {
    * @returns {*}
    */
   genericErrorAlertMessage() {
-    return APP.alert({
-      msg: sprintf(
-        'There was an error while saving data to server, please try again. ' +
-          'If the problem persists please contact %s reporting the web address of the current browser tab.',
-        sprintf(
-          '<a href="mailto:%s">%s</a>',
-          config.support_mail,
-          config.support_mail,
-        ),
-      ),
-    })
+    ModalWindow.showModalComponent(
+      AlertModal,
+      {
+        text:
+          'There was an error while saving data to server, please try again. <br/>If the problem persists please contact <a href="mailto:' +
+          config.support_mail +
+          '">' +
+          config.support_mail +
+          '</a> reporting the web address of the current browser tab',
+      },
+      'Search  Alert',
+    )
   },
 
   setBrowserHistoryBehavior() {
@@ -459,6 +462,19 @@ const CommonUtils = {
       return false
     }
     return true
+  },
+  validateEmailList: (emails) => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    let result = true
+    let error = null
+    emails.split(',').forEach(function (email) {
+      if (!re.test(email.trim())) {
+        result = false
+        error = email
+      }
+    })
+    return {result, emails: error}
   },
   getUserShortName: function (user) {
     if (user && user.first_name && user.last_name) {

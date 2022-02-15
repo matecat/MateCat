@@ -19,6 +19,7 @@ import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
+import AlertModal from './es6/components/modals/AlertModal'
 
 window.UI = {
   /**
@@ -422,6 +423,7 @@ window.UI = {
             enableTagProjection: UI.enableTagProjection,
             tagModesEnabled: UI.tagModesEnabled,
             startSegmentId: this.startSegmentId,
+            firstJobSegment: config.first_job_segment,
           }),
           mountPoint,
         )
@@ -576,17 +578,20 @@ window.UI = {
     )
   },
   showFixWarningsOnDownload: function (continueDownloadFunction) {
-    APP.confirm({
-      name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
-      cancelTxt: 'Fix errors',
-      onCancel: 'goToFirstError',
-      callback: continueDownloadFunction,
-      okTxt: 'Download anyway',
-      msg:
-        'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-        ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
-        ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-    })
+    ModalWindow.showModalComponent(
+      ConfirmMessageModal,
+      {
+        cancelText: 'Fix errors',
+        cancelCallback: () => UI.goToFirstError(),
+        successCallback: () => continueDownloadFunction(),
+        successText: 'Download anyway',
+        text:
+          'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
+          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
+          ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
+      },
+      'Confirmation required',
+    )
   },
 
   runDownload: function () {
@@ -595,9 +600,9 @@ window.UI = {
     if ($('#downloadProject').hasClass('disabled')) return false
 
     if (config.isGDriveProject) {
-      continueDownloadFunction = 'continueDownloadWithGoogleDrive'
+      continueDownloadFunction = UI.continueDownloadWithGoogleDrive
     } else {
-      continueDownloadFunction = 'continueDownload'
+      continueDownloadFunction = UI.continueDownload
     }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
@@ -608,7 +613,7 @@ window.UI = {
     ) {
       UI.showFixWarningsOnDownload(continueDownloadFunction)
     } else {
-      UI[continueDownloadFunction]()
+      continueDownloadFunction()
     }
   },
   startWarning: function () {
@@ -1007,17 +1012,25 @@ window.UI = {
 
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
-          APP.alert({
-            msg: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
-          })
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+            },
+            'Error',
+          )
         }
       }
 
       if (codeInt === -10 && operation !== 'getSegments') {
-        APP.alert({
-          msg: 'Job canceled or assigned to another translator',
-          callback: 'location.reload',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Job canceled or assigned to another translator',
+            successCallback: () => location.reload,
+          },
+          'Error',
+        )
       }
       if (codeInt === -1000 || codeInt === -101) {
         console.log('ERROR ' + codeInt)
@@ -1025,7 +1038,13 @@ window.UI = {
       }
 
       if (codeInt <= -2000 && !_.isUndefined(this.message)) {
-        APP.alert({msg: this.message})
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: this.message,
+          },
+          'Error',
+        )
       }
     })
   },
@@ -1196,7 +1215,13 @@ window.UI = {
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
       UI.selectingReadonly = setTimeout(function () {
-        APP.alert({msg: UI.messageForClickOnIceMatch()})
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: UI.messageForClickOnIceMatch(),
+          },
+          'Ice Match',
+        )
       }, 200)
       return
     }
@@ -1206,7 +1231,9 @@ window.UI = {
     }, 200)
   },
   readonlyClickDisplay: function () {
-    APP.alert({msg: UI.messageForClickOnReadonly()})
+    ModalWindow.showModalComponent(AlertModal, {
+      text: UI.messageForClickOnReadonly(),
+    })
   },
   messageForClickOnReadonly: function () {
     var msgArchived = 'Job has been archived and cannot be edited.'

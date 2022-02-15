@@ -912,19 +912,10 @@ class setTranslationController extends ajaxController {
      * @return mixed
      */
     private function getOldCount( $segment, $old_translation ) {
+
         $word_count_type = $this->project->getWordCountType();
 
-        if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ) {
-            $old_count = $segment[ 'raw_word_count' ];
-        } else {
-            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation[ 'match_type' ] == 'ICE' ) {
-                $old_count = $segment[ 'raw_word_count' ];
-            } else {
-                $old_count = $old_translation[ 'eq_word_count' ];
-            }
-        }
-
-        return $old_count;
+        return ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW  ) ? $segment[ 'raw_word_count' ] : $old_translation[ 'eq_word_count' ];
     }
 
     /**
