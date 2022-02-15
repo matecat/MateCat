@@ -79,7 +79,7 @@ class SegmentHeader extends React.PureComponent {
   render() {
     let autopropagatedHtml
     let percentageHtml
-    const {repetition, splitted, segmentOpened, sid} = this.props
+    const {repetition, splitted, segmentOpened, sid, saving} = this.props
     const {autopropagated, visible, percentage, createdBy, classname} =
       this.state
     if (autopropagated && !splitted) {
@@ -103,7 +103,10 @@ class SegmentHeader extends React.PureComponent {
         {percentageHtml}
       </div>
     ) : autopropagated || repetition ? (
-      <div className={'header header-closed'}>{autopropagatedHtml}</div>
+      <div className={'header header-closed'}>
+        {autopropagatedHtml}
+        {saving ? <div>Saving</div> : null}
+      </div>
     ) : null
   }
 }
