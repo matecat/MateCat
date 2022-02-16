@@ -23,6 +23,7 @@
         "matecat/subfiltering": "^1.0",
         "behat/transliterator": "^1.3",
         "ext-curl": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "swaggest/json-schema": "^0.12.39"
     }
 }
