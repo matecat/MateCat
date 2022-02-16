@@ -429,11 +429,11 @@ function SegmentsContainer_({
   // set scroll sid when get more segments before
   useEffect(() => {
     if (!rows.length || !essentialRows.length || !hasCachedRows) return
+    const {current} = persistenceVariables
+
     const hasAddedSegmentsBefore =
       rows.length > essentialRows.length && essentialRows[0]?.id !== rows[0]?.id
-    if (!hasAddedSegmentsBefore) return
-
-    const {current} = persistenceVariables
+    if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
     const additionalHeight = rows
@@ -461,16 +461,15 @@ function SegmentsContainer_({
       }px)`
     }
 
-    const scrollTop =
-      additionalHeight -
-      /* cachedRowsHeightMap.current.get(rows[stopIndex - 1].id) */ ROW_HEIGHT
-    listRef.current.scrollTop = scrollTop
+    const previousScrollTop = listRef.current.scrollTop
+    const scrollTop = additionalHeight - ROW_HEIGHT
+    listRef.current.scrollTop = scrollTop + previousScrollTop
 
-    setScrollToSid(rows[stopIndex + 1].id)
+    // setScrollToSid(rows[stopIndex + 1].id)
 
     // listRef.current.scrollTop = scrollTop
     current.haveBeenAddedSegmentsBefore = true
-  }, [rows, essentialRows, hasCachedRows, stopIndex])
+  }, [rows, essentialRows, hasCachedRows /* , stopIndex */])
 
   // update rows height
   useEffect(() => {
