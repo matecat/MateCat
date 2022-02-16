@@ -5415,7 +5415,24 @@ body svg {
     height: auto;
   }
 
+  > :first-child
+    > :not(:first-child)
+    > div
+    section:not(.editor)
+    .segment-body-content {
+    min-height: 89px;
+  }
+
   .last-row > :last-child {
     margin-bottom: 120px;
   }
+}
+
+#file
+  .virtual-list
+  > :first-child
+  > :not(:first-child)
+  > div
+  section:not(.editor) {
+  border-top: none !important;
 }

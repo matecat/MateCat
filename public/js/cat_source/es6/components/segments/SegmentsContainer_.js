@@ -3,6 +3,7 @@ import React, {
   createRef,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -427,7 +428,7 @@ function SegmentsContainer_({
   ])
 
   // set scroll sid when get more segments before
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!rows.length || !essentialRows.length || !hasCachedRows) return
     const {current} = persistenceVariables
 
@@ -462,7 +463,7 @@ function SegmentsContainer_({
     }
 
     const previousScrollTop = listRef.current.scrollTop
-    const scrollTop = additionalHeight - ROW_HEIGHT
+    const scrollTop = additionalHeight
     listRef.current.scrollTop = scrollTop + previousScrollTop
 
     // setScrollToSid(rows[stopIndex + 1].id)
@@ -477,11 +478,14 @@ function SegmentsContainer_({
     console.log('startIndex', startIndex, 'stopIndex', stopIndex)
     setRows((prevState) => {
       // update with new height
-      const nextState = prevState.map((row) =>
+      const nextState = prevState.map((row, index) =>
         rowsRenderedHeight.current.get(row.id)
           ? {
               ...row,
-              height: rowsRenderedHeight.current.get(row.id),
+              height:
+                index < startIndex && !row.segImmutable.get('opened')
+                  ? cachedRowsHeightMap.current.get(row.id)
+                  : rowsRenderedHeight.current.get(row.id),
               hasRendered: true,
             }
           : {
@@ -515,7 +519,9 @@ function SegmentsContainer_({
       setEssentialRows(
         rows.map(({id, height, hasRendered}) => ({
           id,
-          height: cachedRowsHeightMap.current.get(id) ?? height,
+          height: rowsRenderedHeight.current.get(id)
+            ? rowsRenderedHeight.current.get(id)
+            : cachedRowsHeightMap.current.get(id) ?? height,
           hasRendered,
         })),
       )
