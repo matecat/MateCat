@@ -86,7 +86,8 @@ class SegmentHeader extends React.PureComponent {
       autopropagatedHtml = <span className="repetition">Autopropagated</span>
     } else if (repetition && !splitted) {
       autopropagatedHtml = <span className="repetition">Repetition</span>
-    } else if (visible && percentage != '') {
+    }
+    if (visible && percentage != '') {
       percentageHtml = (
         <h2
           title={'Created by ' + createdBy}
