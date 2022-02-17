@@ -42,8 +42,6 @@ function SegmentsContainer_({
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)
   const [onUpdateRow, setOnUpdateRow] = useState(undefined)
-  const [boundarySegmentIdToCache, setBoundarySegmentIdToCache] =
-    useState(undefined)
   const [widthArea, setWidthArea] = useState(0)
   const [heightArea, setHeightArea] = useState(0)
   const [startIndex, setStartIndex] = useState(0)
@@ -61,6 +59,7 @@ function SegmentsContainer_({
     segmentsWithCollectionType: [],
     previousWidthArea: widthArea,
     previousIsSideOpen: isSideOpen,
+    previousRowsUntilStartIndex: undefined,
     haveBeenAddedSegmentsBefore: false,
   })
   const rowsRenderedHeight = useRef(new Map())
@@ -366,7 +365,7 @@ function SegmentsContainer_({
 
   // set list rows
   useEffect(() => {
-    if (!segments || segments.size === rows.length) return
+    if (!segments) return
     setHasCachedRows(false)
     setRows((prevState) =>
       new Array(segments.size).fill({}).map((item, index) => {
@@ -381,23 +380,25 @@ function SegmentsContainer_({
         }
       }),
     )
-  }, [segments, rows])
+  }, [segments])
 
   // cache rows before start index
   useEffect(() => {
     if (!rows.length || hasCachedRows) return
     const stopIndexFromStartSegmentId = rows.findIndex(
-      ({id}) => id === (boundarySegmentIdToCache ?? startSegmentId),
+      ({id}) => id === startSegmentId,
     )
 
-    const stopIndex =
-      !essentialRows.length || boundarySegmentIdToCache
-        ? stopIndexFromStartSegmentId >= 0
-          ? stopIndexFromStartSegmentId
-          : 0
-        : essentialRows[0]?.id !== rows[0]?.id
-        ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
-        : essentialRows.length - 1
+    const stopIndex = !essentialRows.length
+      ? stopIndexFromStartSegmentId >= 0
+        ? stopIndexFromStartSegmentId
+        : 0
+      : essentialRows[0]?.id !== rows[0]?.id
+      ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
+      : essentialRows[essentialRows.length - 1]?.id !==
+        rows[rows.length - 1]?.id
+      ? essentialRows.length - 1
+      : startIndex
 
     rows
       .filter(
@@ -416,14 +417,13 @@ function SegmentsContainer_({
         cachedRowsHeightMap.current.set(row.id, newHeight)
       })
 
-    setBoundarySegmentIdToCache(undefined)
     setHasCachedRows(true)
   }, [
     rows,
     essentialRows,
-    boundarySegmentIdToCache,
     startSegmentId,
     hasCachedRows,
+    startIndex,
     getSegmentRealHeight,
   ])
 
@@ -466,11 +466,8 @@ function SegmentsContainer_({
     const scrollTop = additionalHeight
     listRef.current.scrollTop = scrollTop + previousScrollTop
 
-    // setScrollToSid(rows[stopIndex + 1].id)
-
-    // listRef.current.scrollTop = scrollTop
     current.haveBeenAddedSegmentsBefore = true
-  }, [rows, essentialRows, hasCachedRows /* , stopIndex */])
+  }, [rows, essentialRows, hasCachedRows])
 
   // update rows height
   useEffect(() => {
@@ -563,21 +560,37 @@ function SegmentsContainer_({
   // recompute and cache rows before start index
   useEffect(() => {
     if (!essentialRows.length) return
-    const {previousWidthArea, previousIsSideOpen} = persistenceVariables.current
+    const {current} = persistenceVariables
+    const {previousWidthArea, previousIsSideOpen} = current
     if (widthArea !== previousWidthArea || isSideOpen !== previousIsSideOpen) {
+      current.previousRowsUntilStartIndex = essentialRows.filter(
+        (row, index) => index < startIndex + (OVERSCAN - 1),
+      )
       // clear cached rows height
       cachedRowsHeightMap.current.clear()
-      // set boundary
-      const firstRowSidRendered = essentialRows[startIndex].id
-      essentialRows.forEach(
-        (row, index) =>
-          index <= startIndex && rowsRenderedHeight.current.delete(row.id),
-      )
-      setBoundarySegmentIdToCache(firstRowSidRendered)
-      setScrollToSid(firstRowSidRendered)
       setHasCachedRows(false)
     }
   }, [widthArea, isSideOpen, startIndex, essentialRows])
+
+  // normalize scrollbar after resizing
+  useEffect(() => {
+    const {current} = persistenceVariables
+    if (!hasCachedRows || !current.previousRowsUntilStartIndex) return
+    const previousHeight = current.previousRowsUntilStartIndex.reduce(
+      (acc, {height}) => acc + height,
+      0,
+    )
+    const actualHeight = current.previousRowsUntilStartIndex.reduce(
+      (acc, {id}) => acc + cachedRowsHeightMap.current.get(id),
+    )
+
+    console.log('previous', current.previousRowsUntilStartIndex)
+    console.log('cache', cachedRowsHeightMap)
+    console.log('previousHeight', previousHeight)
+    console.log('actualHeight', actualHeight)
+
+    current.previousRowsUntilStartIndex = undefined
+  }, [hasCachedRows, startIndex])
 
   // save current widthArea and isSideOpen flag
   useEffect(() => {

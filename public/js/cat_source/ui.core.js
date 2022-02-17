@@ -306,9 +306,9 @@ window.UI = {
     if (Object.keys(d.data.files).length === 0 && where === 'before')
       this.noMoreSegmentsBefore = true
     if (
-      Object.keys(d.data.files).length === 0 ||
-      (SegmentStore.getLastSegmentId() === config.last_job_segment &&
-        where === 'after')
+      Object.keys(d.data.files).length === 0 &&
+      SegmentStore.getLastSegmentId() === config.last_job_segment &&
+      where === 'after'
     )
       this.noMoreSegmentsAfter = true
 
