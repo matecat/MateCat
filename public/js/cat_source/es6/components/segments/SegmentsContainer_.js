@@ -390,15 +390,18 @@ function SegmentsContainer_({
     )
 
     const stopIndex = !essentialRows.length
-      ? stopIndexFromStartSegmentId >= 0
+      ? // At the first time i get index from the startSegmentId prop
+        stopIndexFromStartSegmentId >= 0
         ? stopIndexFromStartSegmentId
         : 0
-      : essentialRows[0]?.id !== rows[0]?.id
+      : // Was added more segments before and i get index by first row of essentialRows
+      essentialRows[0]?.id !== rows[0]?.id
       ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
-      : essentialRows[essentialRows.length - 1]?.id !==
-        rows[rows.length - 1]?.id
+      : // Was added more segments before and i get index by essentialRows length
+      essentialRows[essentialRows.length - 1]?.id !== rows[rows.length - 1]?.id
       ? essentialRows.length - 1
-      : startIndex
+      : // default start index of virtual list component
+        startIndex
 
     rows
       .filter(
@@ -427,7 +430,7 @@ function SegmentsContainer_({
     getSegmentRealHeight,
   ])
 
-  // set scroll sid when get more segments before
+  // adapt scroll when was added more segments before
   useLayoutEffect(() => {
     if (!rows.length || !essentialRows.length || !hasCachedRows) return
     const {current} = persistenceVariables
@@ -441,16 +444,22 @@ function SegmentsContainer_({
       .filter((row, index) => index < stopIndex)
       .reduce((acc, {id}) => acc + cachedRowsHeightMap.current.get(id), 0)
 
-    const contentElement = listRef.current.firstChild
     // set new height to content element
+    const contentElement = listRef.current.firstChild
     contentElement.style.height = `${
       contentElement.offsetHeight + additionalHeight
     }px`
 
-    const difference = essentialRows[0].height - rows[stopIndex - 1].height
+    cachedRowsHeightMap.current.set(essentialRows[0].id, ROW_HEIGHT)
+
+    const difference = essentialRows[0].height - ROW_HEIGHT
 
     for (let i = 0; i < contentElement.children.length; i++) {
       const rowElement = contentElement.children[i]
+      /* if (i === 0) {
+        rowElement.style.display = 'flex'
+        rowElement.style.flexDirection = 'column-reverse'
+      } */
       const translateY = parseFloat(
         rowElement.style.transform.substring(
           rowElement.style.transform.indexOf('(') + 1,
@@ -462,14 +471,13 @@ function SegmentsContainer_({
       }px)`
     }
 
-    const previousScrollTop = listRef.current.scrollTop
     const scrollTop = additionalHeight
-    listRef.current.scrollTop = scrollTop + previousScrollTop
+    listRef.current.scrollTop = scrollTop
 
     current.haveBeenAddedSegmentsBefore = true
   }, [rows, essentialRows, hasCachedRows])
 
-  // update rows height
+  // updating rows height
   useEffect(() => {
     if (startIndex === undefined || !stopIndex || !hasCachedRows) return
     console.log('startIndex', startIndex, 'stopIndex', stopIndex)
@@ -490,7 +498,7 @@ function SegmentsContainer_({
               height: cachedRowsHeightMap.current.get(row.id) ?? row.height,
             },
       )
-      // rendered rows
+      // get rendered rows
       const rowsRendered = nextState.filter(
         (row, index) => index >= startIndex && index <= stopIndex,
       )
@@ -504,7 +512,7 @@ function SegmentsContainer_({
     })
   }, [startIndex, stopIndex, hasCachedRows, onUpdateRow])
 
-  // set essential rows
+  // set essential rows of virtual list component
   useEffect(() => {
     if (
       !hasCachedRows ||
@@ -537,19 +545,9 @@ function SegmentsContainer_({
         rowsRendered.length
       if (!haveBeenRowsRendered) return
 
-      const rowsBeforeStartIndex = rows.filter(
-        (row, index) => index < startIndex,
+      setEssentialRows(
+        rows.map(({id, height, hasRendered}) => ({id, height, hasRendered})),
       )
-      const haveBeenCachedRowsBeforeStartIndex = rowsBeforeStartIndex.length
-        ? rowsBeforeStartIndex.every(({id}) =>
-            cachedRowsHeightMap.current.get(id),
-          )
-        : true
-
-      if (haveBeenCachedRowsBeforeStartIndex)
-        setEssentialRows(
-          rows.map(({id, height, hasRendered}) => ({id, height, hasRendered})),
-        )
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
@@ -557,40 +555,64 @@ function SegmentsContainer_({
     console.log('essentialRows', essentialRows)
   }, [essentialRows])
 
-  // recompute and cache rows before start index
-  useEffect(() => {
-    if (!essentialRows.length) return
-    const {current} = persistenceVariables
-    const {previousWidthArea, previousIsSideOpen} = current
-    if (widthArea !== previousWidthArea || isSideOpen !== previousIsSideOpen) {
-      current.previousRowsUntilStartIndex = essentialRows.filter(
-        (row, index) => index < startIndex + (OVERSCAN - 1),
-      )
-      // clear cached rows height
-      cachedRowsHeightMap.current.clear()
-      setHasCachedRows(false)
-    }
-  }, [widthArea, isSideOpen, startIndex, essentialRows])
+  // recompute and cache rows before start index (ex. window resizing or side open/close)
+  // useEffect(() => {
+  //   if (!essentialRows.length) return
+  //   const {current} = persistenceVariables
+  //   const {previousWidthArea, previousIsSideOpen} = current
+  //   if (widthArea !== previousWidthArea || isSideOpen !== previousIsSideOpen) {
+  //     current.previousRowsUntilStartIndex = essentialRows.filter(
+  //       (row, index) => index <= startIndex + OVERSCAN,
+  //     )
+  //     // estimate rows height before index start
+  //     const perc = previousWidthArea / widthArea
 
-  // normalize scrollbar after resizing
-  useEffect(() => {
-    const {current} = persistenceVariables
-    if (!hasCachedRows || !current.previousRowsUntilStartIndex) return
-    const previousHeight = current.previousRowsUntilStartIndex.reduce(
-      (acc, {height}) => acc + height,
-      0,
-    )
-    const actualHeight = current.previousRowsUntilStartIndex.reduce(
-      (acc, {id}) => acc + cachedRowsHeightMap.current.get(id),
-    )
+  //     essentialRows.forEach(({id, height}) => {
+  //       const newHeight =
+  //         height * perc > ROW_HEIGHT ? height * perc : ROW_HEIGHT
 
-    console.log('previous', current.previousRowsUntilStartIndex)
-    console.log('cache', cachedRowsHeightMap)
-    console.log('previousHeight', previousHeight)
-    console.log('actualHeight', actualHeight)
+  //       if (cachedRowsHeightMap.current.get(id))
+  //         cachedRowsHeightMap.current.set(id, newHeight)
 
-    current.previousRowsUntilStartIndex = undefined
-  }, [hasCachedRows, startIndex])
+  //       if (rowsRenderedHeight.current.get(id))
+  //         rowsRenderedHeight.current.set(id, newHeight)
+  //     })
+
+  //     setHasCachedRows(false)
+  //   }
+  // }, [widthArea, isSideOpen, startIndex, essentialRows])
+
+  // // normalize scrollbar after resizing
+  // useEffect(() => {
+  //   const {current} = persistenceVariables
+  //   if (!rows.length || !hasCachedRows || !current.previousRowsUntilStartIndex)
+  //     return
+  //   const previousHeight = current.previousRowsUntilStartIndex.reduce(
+  //     (acc, {height}) => acc + height,
+  //     0,
+  //   )
+  //   const actualHeight = current.previousRowsUntilStartIndex.reduce(
+  //     (acc, curr) => {
+  //       const index = rows.findIndex(({id}) => id === curr.id)
+  //       const cachedHeight = rows[index].segImmutable.get('opened')
+  //         ? rows[index].height
+  //         : cachedRowsHeightMap.current.get(curr.id) ??
+  //           getSegmentRealHeight({
+  //             segment: rows[index].segImmutable,
+  //             previousSegment:
+  //               index > 0 ? rows[index - 1].segImmutable : undefined,
+  //           })
+  //       return acc + cachedHeight
+  //     },
+  //     0,
+  //   )
+
+  //   const previousScrollTop = listRef.current.scrollTop
+  //   listRef.current.scrollTop =
+  //     previousScrollTop - (previousHeight - actualHeight)
+
+  //   current.previousRowsUntilStartIndex = undefined
+  // }, [rows, hasCachedRows, startIndex, getSegmentRealHeight])
 
   // save current widthArea and isSideOpen flag
   useEffect(() => {
