@@ -263,6 +263,40 @@ let CatToolActions = {
       })
     }
   },
+
+  /**
+   * Function to add notifications to the interface
+   * notification object with the following properties
+   *
+   * title:           (String) Title of the notification.
+   * text:            (String) Message of the notification
+   * type:            (String, Default "info") Level of the notification. Available: success, error, warning and info.
+   * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
+   *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
+   * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
+   * openCallback     (Function) A callback function that will be called when the notification is successfully added.
+   * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
+   * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
+   *
+   */
+  addNotification: function (notification) {
+    return AppDispatcher.dispatch({
+      actionType: CattolConstants.ADD_NOTIFICATION,
+      notification,
+    })
+  },
+  removeNotification: function (notification) {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.REMOVE_NOTIFICATION,
+      notification,
+    })
+  },
+
+  removeAllNotifications: function () {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.REMOVE_ALL_NOTIFICATION,
+    })
+  },
 }
 
 export default CatToolActions

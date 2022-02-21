@@ -1,7 +1,6 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
-import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
@@ -96,16 +95,16 @@ window.APP = {
    *
    */
 
-  addNotification: function (notification) {
-    if (!APP.notificationBox) {
-      APP.notificationBox = ReactDOM.render(
-        React.createElement(NotificationBox),
-        $('.notifications-wrapper')[0],
-      )
-    }
-
-    return APP.notificationBox.addNotification(notification)
-  },
+  // addNotification: function (notification) {
+  //   if (!APP.notificationBox) {
+  //     APP.notificationBox = ReactDOM.render(
+  //       React.createElement(NotificationBox),
+  //       $('.notifications-wrapper')[0],
+  //     )
+  //   }
+  //
+  //   return APP.notificationBox.addNotification(notification)
+  // },
   removeNotification: function (notification) {
     if (APP.notificationBox) {
       APP.notificationBox.removeNotification(notification)
@@ -151,7 +150,7 @@ window.APP = {
               })
             },
           }
-          APP.addNotification(notification)
+          CatToolActions.addNotification(notification)
           return false
         }
       })
@@ -248,7 +247,7 @@ window.APP = {
               text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact support@matecat.com',
               type: 'error',
             }
-            APP.addNotification(notification)
+            CatToolActions.addNotification(notification)
           }
           if (callback) {
             callback()
@@ -374,7 +373,7 @@ window.APP = {
               config.support_mail,
             type: 'error',
           }
-          APP.addNotification(notification)
+          CatToolActions.addNotification(notification)
           var props = {
             text: cookie.message,
             successText: 'Ok',
