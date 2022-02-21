@@ -24,8 +24,6 @@ import CattolConstants from '../../constants/CatToolConstants'
 
 const NotificationBox = () => {
   const [notifications, setNotifications] = useState([])
-  const [catVisible, setCatVisible] = useState(false)
-  const myRefs = useRef([])
   const uid = useRef(300)
   const positions = {
     tl: 'tl',
@@ -45,28 +43,8 @@ const NotificationBox = () => {
     })
   }
   const removeAllNotifications = () => {
-    myRefs.current.forEach(function (container) {
-      container.hideNotification()
-    })
-  }
-  const showMateCat = () => {
-    setCatVisible(true)
-  }
-
-  const hideMateCat = (notificationUid) => {
-    const notificationsBottomLeft = notifications.filter((notification) => {
-      return !notification.dismissed && notification.position === 'bl'
-    })
-    if (notificationsBottomLeft.length == 0) {
-      setCatVisible(false)
-    }
     setNotifications((prevState) => {
-      let newNotifications = [...prevState].filter((notification) => {
-        if (notification.uid === notificationUid) {
-          notification.dismissed = true
-        }
-        return notification
-      })
+      const newNotifications = [...prevState].map((n) => (n.remove = true))
       return [...newNotifications]
     })
   }
@@ -95,9 +73,15 @@ const NotificationBox = () => {
       })
     }
     const removeNotification = (notification) => {
-      if (myRefs.current[notification.uid]) {
-        myRefs.current[container].hideNotification()
-      }
+      setNotifications((prevState) => {
+        const newNotifications = [...prevState].map((n) => {
+          if (n.uid === notification.uid) {
+            n.remove = true
+          }
+          return notification
+        })
+        return [...newNotifications]
+      })
     }
 
     CatToolStore.addListener(CattolConstants.ADD_NOTIFICATION, addNotification)
@@ -137,11 +121,9 @@ const NotificationBox = () => {
 
             if (_notifications.length) {
               let items = []
-              let cat = ''
               _notifications.forEach((notification) => {
                 const item = (
                   <NotificationItem
-                    ref={(el) => myRefs.current.push(el)}
                     title={notification.title}
                     position={notification.position}
                     type={notification.type}
@@ -155,37 +137,18 @@ const NotificationBox = () => {
                     dismissable={notification.dismissable}
                     key={notification.uid}
                     uid={notification.uid}
-                    hideMateCat={hideMateCat}
-                    showMateCat={showMateCat}
+                    remove={notification.remove}
                   />
                 )
                 items.push(item)
               })
-              if (position === 'bl' && _notifications[0].type === 'info') {
-                let catStyle = {}
-                if (catVisible) {
-                  catStyle.bottom = '0px'
-                  catStyle.opacity = 1
-                } else {
-                  catStyle.bottom = '-200px'
-                  catStyle.opacity = 0
-                  catStyle.height = 0
-                }
-                cat = (
-                  <div
-                    className="notifications-cat-smiling"
-                    style={catStyle}
-                  ></div>
-                )
-              }
 
               return (
                 <div
                   key={index}
-                  className={'notifications-position-' + position}
+                  className={`notifications-position-${position}`}
                   id={'not-' + index}
                 >
-                  {cat}
                   {items}
                 </div>
               )
