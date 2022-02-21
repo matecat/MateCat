@@ -16,15 +16,22 @@ import RowSegment from '../common/VirtualList/Rows/RowSegment'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
+import CommentsConstants from '../../constants/CommentsConstants'
 import CatToolStore from '../../stores/CatToolStore'
 import Speech2Text from '../../utils/speech2text'
 import SegmentActions from '../../actions/SegmentActions'
 import {isUndefined} from 'lodash'
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
+import CommentsStore from '../../stores/CommentsStore'
 
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
+const COMMENTS_PADDING_TOP = [
+  {empty: 110, filled: 270},
+  {empty: 40, filled: 140},
+  {filled: 50},
+]
 
 export const SegmentsContext = createContext({})
 const listRef = createRef()
@@ -51,6 +58,7 @@ function SegmentsContainer_({
   const [scrollToSelected, setScrollToSelected] = useState(false)
   const [lastSelectedSegment, setLastSelectedSegment] = useState(undefined)
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
+  const [addedComment, setAddedComment] = useState(undefined)
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -58,8 +66,6 @@ function SegmentsContainer_({
     lastScrollTop: 0,
     segmentsWithCollectionType: [],
     previousWidthArea: widthArea,
-    previousIsSideOpen: isSideOpen,
-    previousRowsUntilStartIndex: undefined,
     haveBeenAddedSegmentsBefore: false,
   })
   const rowsRenderedHeight = useRef(new Map())
@@ -319,6 +325,7 @@ function SegmentsContainer_({
     const openSide = () => setIsSideOpen(true)
     const closeSide = () => setIsSideOpen(false)
     const storeJobInfo = (files) => setFiles(files)
+    const onAddComment = (sid) => setAddedComment({sid})
 
     SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, renderSegments)
     SegmentStore.addListener(
@@ -336,6 +343,7 @@ function SegmentsContainer_({
     SegmentStore.addListener(SegmentConstants.OPEN_SIDE, openSide)
     SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, closeSide)
     CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, storeJobInfo)
+    CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
 
     return () => {
       SegmentStore.removeListener(
@@ -360,6 +368,7 @@ function SegmentsContainer_({
         CatToolConstants.STORE_FILES_INFO,
         storeJobInfo,
       )
+      CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, onAddComment)
     }
   }, [])
 
@@ -456,10 +465,6 @@ function SegmentsContainer_({
 
     for (let i = 0; i < contentElement.children.length; i++) {
       const rowElement = contentElement.children[i]
-      /* if (i === 0) {
-        rowElement.style.display = 'flex'
-        rowElement.style.flexDirection = 'column-reverse'
-      } */
       const translateY = parseFloat(
         rowElement.style.transform.substring(
           rowElement.style.transform.indexOf('(') + 1,
@@ -555,71 +560,42 @@ function SegmentsContainer_({
     console.log('essentialRows', essentialRows)
   }, [essentialRows])
 
-  // recompute and cache rows before start index (ex. window resizing or side open/close)
-  // useEffect(() => {
-  //   if (!essentialRows.length) return
-  //   const {current} = persistenceVariables
-  //   const {previousWidthArea, previousIsSideOpen} = current
-  //   if (widthArea !== previousWidthArea || isSideOpen !== previousIsSideOpen) {
-  //     current.previousRowsUntilStartIndex = essentialRows.filter(
-  //       (row, index) => index <= startIndex + OVERSCAN,
-  //     )
-  //     // estimate rows height before index start
-  //     const perc = previousWidthArea / widthArea
-
-  //     essentialRows.forEach(({id, height}) => {
-  //       const newHeight =
-  //         height * perc > ROW_HEIGHT ? height * perc : ROW_HEIGHT
-
-  //       if (cachedRowsHeightMap.current.get(id))
-  //         cachedRowsHeightMap.current.set(id, newHeight)
-
-  //       if (rowsRenderedHeight.current.get(id))
-  //         rowsRenderedHeight.current.set(id, newHeight)
-  //     })
-
-  //     setHasCachedRows(false)
-  //   }
-  // }, [widthArea, isSideOpen, startIndex, essentialRows])
-
-  // // normalize scrollbar after resizing
-  // useEffect(() => {
-  //   const {current} = persistenceVariables
-  //   if (!rows.length || !hasCachedRows || !current.previousRowsUntilStartIndex)
-  //     return
-  //   const previousHeight = current.previousRowsUntilStartIndex.reduce(
-  //     (acc, {height}) => acc + height,
-  //     0,
-  //   )
-  //   const actualHeight = current.previousRowsUntilStartIndex.reduce(
-  //     (acc, curr) => {
-  //       const index = rows.findIndex(({id}) => id === curr.id)
-  //       const cachedHeight = rows[index].segImmutable.get('opened')
-  //         ? rows[index].height
-  //         : cachedRowsHeightMap.current.get(curr.id) ??
-  //           getSegmentRealHeight({
-  //             segment: rows[index].segImmutable,
-  //             previousSegment:
-  //               index > 0 ? rows[index - 1].segImmutable : undefined,
-  //           })
-  //       return acc + cachedHeight
-  //     },
-  //     0,
-  //   )
-
-  //   const previousScrollTop = listRef.current.scrollTop
-  //   listRef.current.scrollTop =
-  //     previousScrollTop - (previousHeight - actualHeight)
-
-  //   current.previousRowsUntilStartIndex = undefined
-  // }, [rows, hasCachedRows, startIndex, getSegmentRealHeight])
-
-  // save current widthArea and isSideOpen flag
+  // set padding top to list ref (Comments padding)
   useEffect(() => {
-    const {current} = persistenceVariables
-    current.previousWidthArea = widthArea
-    current.previousIsSideOpen = isSideOpen
-  }, [widthArea, isSideOpen])
+    if (!segments.size || !listRef?.current) return
+    const getPadding = () => {
+      if (isSideOpen) {
+        const segment1 = segments.get(0)
+        const segment2 = segments.get(1)
+        const segment3 = segments.get(2)
+
+        const [paddingSegment1, paddingSegment2, paddingSegment3] =
+          COMMENTS_PADDING_TOP
+
+        if (segment1.get('openComments')) {
+          const comments = CommentsStore.getCommentsBySegment(
+            segment1.get('original_sid'),
+          )
+          if (comments.length === 0) return paddingSegment1.empty
+          else if (comments.length > 0) return paddingSegment1.filled
+        } else if (segment2 && segment2.get('openComments')) {
+          const comments = CommentsStore.getCommentsBySegment(
+            segment2.get('original_sid'),
+          )
+          if (comments.length === 0) return paddingSegment2.empty
+          else if (comments.length > 0) return paddingSegment2.filled
+        } else if (segment3 && segment3.get('openComments')) {
+          const comments = CommentsStore.getCommentsBySegment(
+            segment3.get('original_sid'),
+          )
+          if (comments.length > 0) return paddingSegment3.filled
+        }
+      }
+      return 0
+    }
+    // set inline style
+    listRef.current.style.paddingTop = `${getPadding()}px`
+  }, [isSideOpen, segments, addedComment])
 
   // reset scrollTo
   useEffect(() => {
@@ -645,6 +621,7 @@ function SegmentsContainer_({
     >
       <VirtualList
         ref={listRef}
+        className="virtual-list"
         items={essentialRows}
         scrollToIndex={{
           value: scrollToParams.scrollTo,

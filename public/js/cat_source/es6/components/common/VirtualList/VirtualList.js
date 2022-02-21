@@ -7,6 +7,7 @@ const VirtualList = forwardRef(
     {
       items,
       overscan = 5,
+      className = 'virtual-list',
       width,
       height,
       scrollToIndex = {},
@@ -53,7 +54,7 @@ const VirtualList = forwardRef(
     }, [ref, width, height])
 
     return (
-      <div ref={ref} className="virtual-list" onScroll={() => onScroll()}>
+      <div ref={ref} className={className} onScroll={() => onScroll()}>
         <div
           style={{
             height: `${totalSize}px`,
@@ -87,6 +88,7 @@ const VirtualList = forwardRef(
 VirtualList.propTypes = {
   items: PropTypes.array.isRequired,
   overscan: PropTypes.number,
+  className: PropTypes.string,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   scrollToIndex: PropTypes.exact({
