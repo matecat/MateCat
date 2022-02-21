@@ -9,6 +9,7 @@
 namespace API\V3;
 
 use API\V2\KleinController;
+use API\V2\Validators\LoginValidator;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Glossary\Blacklist\BlacklistDao;
 use RedisHandler;
@@ -30,6 +31,11 @@ class BlacklistController extends KleinController {
      * @var array
      */
     private $file;
+
+    protected function afterConstruct() {
+        parent::afterConstruct();
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
 
     /**
      * @Route /blacklist/delete/[:id_file]

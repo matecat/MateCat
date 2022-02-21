@@ -2635,8 +2635,8 @@ class ProjectManager {
                         'id_segment'             => $translation_row [ 0 ],
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
-                        'status'                  => $iceLockArray[ 'status' ],
-                        'translation'            => $check->getTargetSeg(),
+                        'status'                 => $iceLockArray[ 'status' ],
+                        'translation'            => $filter->fromLayer1ToLayer0($check->getTargetSeg()) ,
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $iceLockArray[ 'match_type' ],
                         'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
