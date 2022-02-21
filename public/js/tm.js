@@ -2273,10 +2273,10 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
         .val()
       var validateReturn = CommonUtils.validateEmailList(emails)
 
-      if (validateReturn !== true) {
+      if (validateReturn.result !== true) {
         var errorMsg =
           'The email <span style="font-weight: bold">' +
-          validateReturn +
+          validateReturn.emails +
           '</span> is not valid.'
 
         if (tr.closest('table').attr('id') == 'inactivetm') {
