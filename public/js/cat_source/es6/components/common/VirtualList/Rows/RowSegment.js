@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
-import {SegmentsContext} from '../../../segments/SegmentsContainer_'
+import {SegmentsContext} from '../../../segments/SegmentsContainer'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
 import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
