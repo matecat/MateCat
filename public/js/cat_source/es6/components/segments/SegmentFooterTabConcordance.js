@@ -59,9 +59,6 @@ class SegmentFooterTabConcordance extends React.Component {
     }
   }
 
-  refreshRecomputeSegment = () =>
-    setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment))
-
   sourceChange(event) {
     const previousResult = this.state.results
     this.setState({
@@ -69,9 +66,6 @@ class SegmentFooterTabConcordance extends React.Component {
       target: '',
       results: [],
     })
-    if (previousResult.length) {
-      this.refreshRecomputeSegment()
-    }
   }
 
   targetChange(event) {
@@ -81,9 +75,6 @@ class SegmentFooterTabConcordance extends React.Component {
       target: event.target.value,
       results: [],
     })
-    if (previousResult.length) {
-      this.refreshRecomputeSegment()
-    }
   }
 
   getConcordance(query, type) {
@@ -112,7 +103,6 @@ class SegmentFooterTabConcordance extends React.Component {
         loading: false,
       })
     }
-    this.refreshRecomputeSegment()
   }
 
   processResults() {
@@ -206,7 +196,6 @@ class SegmentFooterTabConcordance extends React.Component {
     this.setState({
       extended: !this.state.extended,
     })
-    this.refreshRecomputeSegment()
   }
 
   componentDidMount() {

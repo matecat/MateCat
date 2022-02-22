@@ -483,12 +483,6 @@ const SegmentActions = {
   abortCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
   },
-  recomputeSegment: function (sid) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.RECOMPUTE_SIZE,
-      sid: sid,
-    })
-  },
   /******************* EditArea ************/
   modifiedTranslation: function (sid, status) {
     AppDispatcher.dispatch({

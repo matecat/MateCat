@@ -362,7 +362,6 @@ class SegmentFooterTabGlossary extends React.Component {
     ) {
       this.comment.focus()
     }
-    setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment))
   }
 
   allowHTML(string) {
