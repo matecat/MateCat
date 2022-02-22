@@ -10,14 +10,6 @@
     height: auto;
   }
 
-  > :first-child
-    > :not(:first-child)
-    > div
-    > :first-child:not(.editor)
-    .segment-body-content {
-    min-height: 89px;
-  }
-
   .last-row > :last-child {
     margin-bottom: 120px;
   }
@@ -29,5 +21,5 @@
   > :not(:first-child)
   > div
   > :first-child:not(.editor) {
-  border-top: none !important;
+  border-top-color: #d9e0e8 !important;
 }
