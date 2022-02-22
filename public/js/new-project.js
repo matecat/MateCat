@@ -13,6 +13,8 @@ import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_sou
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 import {createProject} from './cat_source/es6/api/createProject'
+import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -322,11 +324,14 @@ APP.checkForSpeechToText = function () {
       .find('.onoffswitch')
       .off('click')
       .on('click', function () {
-        APP.alert({
-          title: 'Option not available',
-          okTxt: 'Continue',
-          msg: 'This options is only available on Chrome browser.',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'This options is only available on your browser.',
+            buttonText: 'Continue',
+          },
+          'Option not available',
+        )
       })
     speech2textCheck.addClass('option-unavailable')
   }
@@ -659,9 +664,13 @@ $.extend(UI.UPLOAD_PAGE, {
       var src = $('#source-lang').dropdown('get value')
       var trg = $('#target-lang').dropdown('get value')
       if (trg.split(',').length > 1) {
-        APP.alert({
-          msg: 'Cannot swap languages when <br>multiple target languages are selected!',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Cannot swap languages when multiple target languages are selected!',
+          },
+          'Warning',
+        )
         return false
       }
       $('#source-lang').dropdown('set selected', trg)
@@ -671,16 +680,24 @@ $.extend(UI.UPLOAD_PAGE, {
 
       if ($('.template-download').length) {
         if (UI.conversionsAreToRestart()) {
-          APP.confirm({
-            msg: 'Source language changed. The files must be reimported.',
-            callback: 'confirmRestartConversions',
-          })
+          ModalWindow.showModalComponent(
+            AlertModal,
+            {
+              text: 'Source language changed. The files must be reimported.',
+              successCallback: () => UI.confirmRestartConversions(),
+            },
+            'Confirmation required',
+          )
         }
       } else if ($('.template-gdrive').length) {
-        APP.confirm({
-          msg: 'Source language has been changed.<br/>The files will be reimported.',
-          callback: 'confirmGDriveRestartConversions',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Source language changed. The files must be reimported.',
+            successCallback: () => UI.confirmGDriveRestartConversions(),
+          },
+          'Confirmation required',
+        )
       }
     })
 
@@ -814,21 +831,27 @@ $.extend(UI.UPLOAD_PAGE, {
     if ($('.template-download').length) {
       //.template-download is present when jquery file upload is used and a file is found
       if (UI.conversionsAreToRestart()) {
-        APP.confirm({
-          msg: 'Source language has been changed.<br/>The files will be reimported.',
-          callback: 'confirmRestartConversions',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'Source language changed. The files must be reimported.',
+            successCallback: () => UI.confirmRestartConversions(),
+          },
+          'Confirmation required',
+        )
       }
       if (UI.checkTMXLangFailure()) {
         UI.delTMXLangFailure()
       }
     } else if ($('.template-gdrive').length) {
-      APP.confirm({
-        msg: 'Source language has been changed.<br/>The files will be reimported.',
-        callback: 'confirmGDriveRestartConversions',
-      })
-    } else {
-      return
+      ModalWindow.showModalComponent(
+        AlertModal,
+        {
+          text: 'Source language changed. The files must be reimported.',
+          successCallback: () => UI.confirmGDriveRestartConversions(),
+        },
+        'Confirmation required',
+      )
     }
   },
   targetLanguageChangedCallback: function () {
@@ -924,9 +947,14 @@ APP.postProjectCreation = function (d) {
       if (d.status == 'EMPTY') {
         console.log('EMPTY')
         $('body').removeClass('creating')
-        APP.alert({
-          msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
-        })
+        ModalWindow.showModalComponent(
+          AlertModal,
+          {
+            text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
+            buttonText: 'Continue',
+          },
+          'No text to translate',
+        )
         $('.uploadbtn')
           .attr('value', 'Analyze')
           .removeAttr('disabled')

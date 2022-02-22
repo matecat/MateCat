@@ -4837,8 +4837,8 @@ jest-mock@^27.1.1:
   resolved "https://registry.npmjs.org/jest-mock/-/jest-mock-27.1.1.tgz"
   integrity sha512-SClsFKuYBf+6SSi8jtAYOuPw8DDMsTElUWEae3zq7vDhH01ayVSIHUSIa8UgbDOUalCFp6gNsaikN0rbxN4dbw==
   dependencies:
-    "@jest/types" "^27.1.1"
-    "@types/node" "*"
+    inherits "^2.0.1"
+    safe-buffer "^5.0.1"
 
 jest-pnp-resolver@^1.2.2:
   version "1.2.2"

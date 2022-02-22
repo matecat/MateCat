@@ -60,7 +60,7 @@
     "jest": "^27.0.5",
     "lint-staged": ">=10",
     "msw": "^0.30.0",
-    "node-sass": "^6.0.0",
+    "node-sass": "^7.0.0",
     "prettier": "^2.2.1",
     "whatwg-fetch": "^3.6.2"
   }

@@ -682,7 +682,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
-            $sum_sql = " SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
+            $sum_sql = " SUM( eq_word_count )";
         }
 
         /**

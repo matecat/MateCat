@@ -52,13 +52,13 @@ class ReviewExtendedIssue extends React.Component {
       timer: 10000,
       closeCallback: function () {
         if (!self.state.visible) {
-          SegmentActions.deleteIssue(self.props.issue, self.props.sid, true)
+          SegmentActions.deleteIssue(self.props.issue, self.props.sid)
         }
       },
     }
     let boxUndo = APP.addNotification(notification)
     window.onbeforeunload = function () {
-      SegmentActions.deleteIssue(self.props.issue, self.props.sid, true)
+      SegmentActions.deleteIssue(self.props.issue, self.props.sid)
     }
     setTimeout(function () {
       let $button = $('.undo-issue-deleted-' + self.props.issue.id)

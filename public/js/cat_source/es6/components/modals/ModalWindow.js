@@ -35,7 +35,11 @@ export class ModalWindowComponent extends React.Component {
     this.setState({
       title,
       component,
-      compProps: props,
+      compProps: {
+        ...props,
+        onClose: this.onCloseModal,
+        closeOnSuccess: props.closeOnSuccess ? props.closeOnSuccess : true,
+      },
       styleContainer: style,
       onCloseCallback: onCloseCallback,
       isShowingModal: true,

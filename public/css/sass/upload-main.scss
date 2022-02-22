@@ -341,26 +341,6 @@
   }
 }
 
-/*@media only screen and (min-width: 1200px) {
-    .translate-box.target {
-        #target-lang {
-            .multiple-none-text {
-                display: none;
-            }
-        }
-    }
-}*/
-
-/*@media only screen and (min-width: 1380px) {
-    .translate-box.target {
-        #target-lang {
-            .multiple-none-text {
-                display: none;
-            }
-        }
-    }
-}*/
-
 @media only screen and (min-width: 1600px) {
   .wrapper-upload {
     .translate-box {
@@ -406,6 +386,13 @@
       }
       #tmx-select {
         width: 170px;
+      }
+      &.target {
+        #target-lang {
+          .multiple-none-text {
+            display: none;
+          }
+        }
       }
     }
   }

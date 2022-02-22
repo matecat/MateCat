@@ -93,10 +93,12 @@ class GetContributionWorker extends AbstractWorker {
                 }
             }
 
-            usort( $crossLangMatches, [ "self", "__compareScore" ] );
-            $crossLangMatches = array_reverse( $crossLangMatches );
+            if( !empty($crossLangMatches) ){
+                usort( $crossLangMatches, [ "self", "__compareScore" ] );
+                $crossLangMatches = array_reverse( $crossLangMatches );
+            }
 
-            if(false === $contributionStruct->concordanceSearch and !empty($crossLangMatches)){
+            if(false === $contributionStruct->concordanceSearch){
                 $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
             }
         }
