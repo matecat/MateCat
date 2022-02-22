@@ -79,43 +79,6 @@ window.APP = {
     return false
   },
 
-  /**
-   * Function to add notifications to the interface
-   * notification object with the following properties
-   *
-   * title:           (String) Title of the notification.
-   * text:            (String) Message of the notification
-   * type:            (String, Default "info") Level of the notification. Available: success, error, warning and info.
-   * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
-   *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
-   * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
-   * openCallback     (Function) A callback function that will be called when the notification is successfully added.
-   * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
-   * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
-   *
-   */
-
-  // addNotification: function (notification) {
-  //   if (!APP.notificationBox) {
-  //     APP.notificationBox = ReactDOM.render(
-  //       React.createElement(NotificationBox),
-  //       $('.notifications-wrapper')[0],
-  //     )
-  //   }
-  //
-  //   return APP.notificationBox.addNotification(notification)
-  // },
-  removeNotification: function (notification) {
-    if (APP.notificationBox) {
-      APP.notificationBox.removeNotification(notification)
-    }
-  },
-
-  removeAllNotifications: function () {
-    if (APP.notificationBox) {
-      APP.notificationBox.removeAllNotifications()
-    }
-  },
   /*************************************************************************************************************/
 
   lookupFlashServiceParam: function (name) {
@@ -242,12 +205,7 @@ window.APP = {
            */
           var tokenData = $.parseJSON(token)
           if (parseInt(tokenData.code) < 0) {
-            var notification = {
-              title: 'Error',
-              text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact support@matecat.com',
-              type: 'error',
-            }
-            CatToolActions.addNotification(notification)
+            this.showDownloadErrorMessage()
           }
           if (callback) {
             callback()
@@ -295,6 +253,17 @@ window.APP = {
     //append from to newly created iFrame and submit form post
     iFrameDownload.contents().find('body').append(iFrameForm)
     iFrameDownload.contents().find('#fileDownload').submit()
+  },
+
+  showDownloadErrorMessage: function () {
+    const notification = {
+      title: 'Error',
+      text:
+        'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact ' +
+        config.support_mail,
+      type: 'error',
+    }
+    CatToolActions.addNotification(notification)
   },
 
   downloadGDriveFile: function (openOriginalFiles, jobId, pass, callback) {
@@ -366,14 +335,7 @@ window.APP = {
         }
         var cookie = Cookies.get(downloadToken)
         if (cookie) {
-          var notification = {
-            title: 'Error',
-            text:
-              'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact ' +
-              config.support_mail,
-            type: 'error',
-          }
-          CatToolActions.addNotification(notification)
+          this.showDownloadErrorMessage()
           var props = {
             text: cookie.message,
             successText: 'Ok',

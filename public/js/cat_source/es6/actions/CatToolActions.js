@@ -192,26 +192,6 @@ let CatToolActions = {
     ) {
       let revise = CatToolStore.getQR(config.revisionNumber)
       if (revise && !revise[0].feedback) {
-        // var notification = {
-        //     title: 'Leave your feedback',
-        //     text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
-        //         "<a id='leaveFeedback' style='cursor: pointer'> Write feedback. </a>",
-        //     allowHtml: true,
-        //     timer: 6000,
-        //     type: 'warning',
-        //     position: "tc",
-        //     closeCallback: ()=>{
-        //         $('#leaveFeedback').off('click');
-        //     },
-        //     openCallback: ()=>{
-        //         $('#leaveFeedback').bind('click','#leaveFeedback', () => {
-        //             APP.removeAllNotifications();
-        //             CatToolActions.openFeedbackModal("", config.revisionNumber);
-        //         });
-        //     }
-        // };
-        //
-        // APP.addNotification(notification);
         const isModalClosed =
           CommonUtils.getFromSessionStorage('feedback-modal')
         if (!isModalClosed) {

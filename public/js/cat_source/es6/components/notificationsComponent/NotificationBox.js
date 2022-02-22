@@ -44,7 +44,10 @@ const NotificationBox = () => {
   }
   const removeAllNotifications = () => {
     setNotifications((prevState) => {
-      const newNotifications = [...prevState].map((n) => (n.remove = true))
+      const newNotifications = [...prevState].map((n) => {
+        n.remove = true
+        return n
+      })
       return [...newNotifications]
     })
   }
@@ -55,7 +58,6 @@ const NotificationBox = () => {
       newNotification.uid = newNotification.uid
         ? newNotification.uid
         : uid.current
-      newNotification.dismissed = false
       if (typeof newNotification.position === 'undefined') {
         newNotification.position = 'bl'
       }
@@ -75,10 +77,10 @@ const NotificationBox = () => {
     const removeNotification = (notification) => {
       setNotifications((prevState) => {
         const newNotifications = [...prevState].map((n) => {
-          if (n.uid === notification.uid) {
+          if (n.uid === notification.uid && !n.remove) {
             n.remove = true
           }
-          return notification
+          return n
         })
         return [...newNotifications]
       })

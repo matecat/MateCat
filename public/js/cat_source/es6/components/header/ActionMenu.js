@@ -3,6 +3,7 @@ import _ from 'lodash'
 
 import Icon3Dots from '../icons/Icon3Dots'
 import {exportQualityReport} from '../../api/exportQualityReport'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ActionMenu extends React.Component {
   constructor(props) {
@@ -86,7 +87,7 @@ class ActionMenu extends React.Component {
           text: `Downloading CSV error status code: ${errors.status}`,
           type: 'error',
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
       .finally(() =>
         this.setState({
