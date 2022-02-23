@@ -66,6 +66,9 @@ class changePasswordController extends ajaxController {
             $pDao->changePassword( $pStruct, $new_password );
             $pDao->destroyCacheById( $this->res_id );
 
+            // invalidate cache for ProjectData
+            $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
+
             $pStruct->getFeaturesSet()
                     ->run( 'project_password_changed', $pStruct, $actual_pwd );
 
@@ -92,6 +95,10 @@ class changePasswordController extends ajaxController {
                         ->getFeaturesSet()
                         ->run( 'job_password_changed', $jStruct, $actual_pwd );
             }
+
+            // invalidate cache for ProjectData
+            $pDao = new Projects_ProjectDao();
+            $pDao->destroyCacheForProjectData($jStruct->getProject()->id, $jStruct->getProject()->password);
 
             Database::obtain()->commit();
 
