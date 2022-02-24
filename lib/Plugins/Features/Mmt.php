@@ -377,12 +377,15 @@ class Mmt extends BaseFeature {
 
             $ownerMmtEngineMetaData = null;
             if(isset($uStruct->uid)){
-                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, self::FEATURE_CODE ); // engine_id
             }
+
+            $projectFeaturesString = $projectStruct->getMetadataValue( \Projects_MetadataDao::FEATURES_KEY );
+            $features = explode(',', $projectFeaturesString);
 
             try {
 
-                if( !empty( $ownerMmtEngineMetaData ) ){
+                if( in_array( self::FEATURE_CODE, $features ) and !empty( $ownerMmtEngineMetaData ) ){
 
                     if( $contributionStruct->id_mt == $ownerMmtEngineMetaData->value ){
 
