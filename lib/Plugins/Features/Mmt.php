@@ -381,12 +381,9 @@ class Mmt extends BaseFeature {
                 $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, self::FEATURE_CODE ); // engine_id
             }
 
-            $projectFeaturesString = $projectStruct->getMetadataValue( \Projects_MetadataDao::FEATURES_KEY );
-            $features = explode(',', $projectFeaturesString);
-
             try {
 
-                if( in_array( self::FEATURE_CODE, $features ) and !empty( $ownerMmtEngineMetaData ) ){
+                if( $projectStruct->hasFeature(self::FEATURE_CODE ) and !empty( $ownerMmtEngineMetaData ) ){
 
                     // @TODO if I remove user_metadata what happens here?
                     if( $contributionStruct->id_mt == $ownerMmtEngineMetaData->value ){

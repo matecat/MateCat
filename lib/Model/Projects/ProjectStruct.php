@@ -264,4 +264,5 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return in_array( $feature_code, $this->getFeaturesSet()->getCodes() ) ;
     }
 
+
 }
