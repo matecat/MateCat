@@ -69,7 +69,7 @@ class Mmt extends BaseFeature {
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $userStruct->uid, 'mmt' );
+        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
 
         if( !empty( $engineEnabled ) ){
             unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
@@ -113,8 +113,9 @@ class Mmt extends BaseFeature {
             throw $e;
         }
 
+        // @TODO if I remove user_metadata what happens at row 391?
         $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
+        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
 
         return $newCreatedDbRowStruct;
 
@@ -143,12 +144,12 @@ class Mmt extends BaseFeature {
     public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $engineStruct->uid, 'mmt' );
+        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $engineStruct->uid, self::FEATURE_CODE );
 
         if( $engineStruct->class_load == Constants_Engines::MMT ){
 
             if( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ){
-                $UserMetadataDao->delete( $engineStruct->uid, 'mmt' );
+                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
             }
 
         }
@@ -387,6 +388,7 @@ class Mmt extends BaseFeature {
 
                 if( in_array( self::FEATURE_CODE, $features ) and !empty( $ownerMmtEngineMetaData ) ){
 
+                    // @TODO if I remove user_metadata what happens here?
                     if( $contributionStruct->id_mt == $ownerMmtEngineMetaData->value ){
 
                         //Execute the normal Set::setContributionMT called from setTranslation controller
@@ -440,7 +442,7 @@ class Mmt extends BaseFeature {
             }
 
             //retrieve OWNER MMT License
-            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, self::FEATURE_CODE ); // engine_id
             try {
 
                 if ( !empty( $ownerMmtEngineMetaData ) ) {
@@ -520,7 +522,7 @@ class Mmt extends BaseFeature {
         }
 
         //retrieve OWNER MMT License
-        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, 'mmt' ); // engine_id
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
