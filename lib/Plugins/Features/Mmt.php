@@ -14,21 +14,20 @@ use Analysis\Workers\FastAnalysis;
 use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionSetStruct;
-use Contribution\Set;
 use Database;
 use Engine;
 use Engines_AbstractEngine;
 use Engines_MMT;
-use Engines_MyMemory;
 use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
 use EnginesModel_MMTStruct;
 use Exception;
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
+use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use stdClass;
 use TaskRunner\Commons\QueueElement;
@@ -371,11 +370,13 @@ class Mmt extends BaseFeature {
         if( !array_key_exists( Constants_Engines::MMT, Constants_Engines::getAvailableEnginesList() ) ) return $response;
 
         //Project is not anonymous
-        if( !empty( $projectStruct->id_customer ) ){
+        if( !$projectStruct->isAnonymous() ){
 
             try {
 
-                if( $projectStruct->hasFeature(self::FEATURE_CODE )  ){
+                $features = FeatureSet::splitString( $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
+
+                if( in_array( self::FEATURE_CODE, $features )  ){
                     $response = $contributionStruct;
                 } else {
                     $response = null;

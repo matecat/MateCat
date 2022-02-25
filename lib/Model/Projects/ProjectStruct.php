@@ -31,6 +31,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $id_assignee ;
     public $due_date;
 
+    public function isAnonymous(){
+        return $this->id_customer == 'translated_user';
+    }
 
     /**
      * @return bool
