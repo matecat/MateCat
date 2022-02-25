@@ -373,41 +373,12 @@ class Mmt extends BaseFeature {
         //Project is not anonymous
         if( !empty( $projectStruct->id_customer ) ){
 
-            //retrieve OWNER MMT License
-            $uStruct        = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $projectStruct->id_customer );
-
-            $ownerMmtEngineMetaData = null;
-            if(isset($uStruct->uid)){
-                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, self::FEATURE_CODE ); // engine_id
-            }
-
             try {
 
-                if( $projectStruct->hasFeature(self::FEATURE_CODE ) and !empty( $ownerMmtEngineMetaData ) ){
-
-                    // @TODO if I remove user_metadata what happens here?
-                    if( $contributionStruct->id_mt == $ownerMmtEngineMetaData->value ){
-
-                        //Execute the normal Set::setContributionMT called from setTranslation controller
-                        $response = $contributionStruct;
-
-                    } else {
-
-                        $mmtContribution = clone $contributionStruct;
-                        //Override the mt_engine id and send the message to MMT also
-                        $mmtContribution->id_mt = $ownerMmtEngineMetaData->value;
-                        //send two contribution, one for the job engine and one for user MMT through the normal Set::contributionMT
-                        Set::contributionMT( $mmtContribution );
-
-                        $job_MtEngine = Engine::getInstance( $contributionStruct->id_mt );
-                        if( $job_MtEngine instanceof Engines_MyMemory ){
-                            $response = null;
-                        } else{
-                            $response = $contributionStruct;
-                        }
-
-                    }
-
+                if( $projectStruct->hasFeature(self::FEATURE_CODE )  ){
+                    $response = $contributionStruct;
+                } else {
+                    $response = null;
                 }
 
             } catch ( Exception $e ) {
