@@ -166,6 +166,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             occurrencesInSearch: occurrencesInSearch,
             searchParams: self.searchParams,
             updatedSource: splittedSourceAr[i],
+            openComments: false,
+            openSplit: false,
           }
           newSegments.push(segData)
           segData = null
@@ -196,6 +198,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
         )
         segment.updatedSource = segment.segment
+        segment.openComments = false
+        segment.openSplit = false
         newSegments.push(this)
       }
     })

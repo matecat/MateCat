@@ -67,11 +67,11 @@ function SegmentsContainer({
     scrollDirectionTop: false,
     lastScrollTop: 0,
     segmentsWithCollectionType: [],
-    previousWidthArea: widthArea,
     haveBeenAddedSegmentsBefore: false,
   })
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
+  const cachedSegmentsToJS = useRef(new Map())
 
   const onChangeRowHeight = useCallback((id, newHeight) => {
     rowsRenderedHeight.current.set(id, newHeight)
@@ -126,7 +126,7 @@ function SegmentsContainer({
 
   const getSegmentRealHeight = useCallback(
     ({segment, previousSegment}) => {
-      // console.log('----> get height', segment.get('sid'))
+      console.log('----> get height', segment.get('sid'))
       const container = document.createElement('div', {})
       const html = getSegmentStructure(segment.toJS(), isSideOpen)
       container.innerHTML = ReactDOMServer.renderToStaticMarkup(html)
@@ -247,7 +247,15 @@ function SegmentsContainer({
 
     return new Array(segments.size).fill({}).map((item, index) => {
       const segImmutable = segments.get(index)
-      const segment = segImmutable.toJS()
+
+      const cached = cachedSegmentsToJS.current.get(segImmutable.get('sid'))
+      const segment =
+        cached && segImmutable.equals(cached.segImmutable)
+          ? cached.segment
+          : segImmutable.toJS()
+
+      cachedSegmentsToJS.current.set(segment.sid, {segImmutable, segment})
+
       const collectionType = getCollectionType(segment)
       let collectionTypeSeparator
       if (
@@ -313,7 +321,6 @@ function SegmentsContainer({
   // add actions listener
   useEffect(() => {
     const renderSegments = (segments) => setSegments(segments)
-    const updateAllSegments = () => {}
     const scrollToSegment = (sid) => {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
@@ -332,10 +339,6 @@ function SegmentsContainer({
 
     SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, renderSegments)
     SegmentStore.addListener(
-      SegmentConstants.UPDATE_ALL_SEGMENTS,
-      updateAllSegments,
-    )
-    SegmentStore.addListener(
       SegmentConstants.SCROLL_TO_SEGMENT,
       scrollToSegment,
     )
@@ -352,10 +355,6 @@ function SegmentsContainer({
       SegmentStore.removeListener(
         SegmentConstants.RENDER_SEGMENTS,
         renderSegments,
-      )
-      SegmentStore.removeListener(
-        SegmentConstants.UPDATE_ALL_SEGMENTS,
-        updateAllSegments,
       )
       SegmentStore.removeListener(
         SegmentConstants.SCROLL_TO_SEGMENT,
@@ -488,7 +487,7 @@ function SegmentsContainer({
   // updating rows height
   useEffect(() => {
     if (startIndex === undefined || !stopIndex || !hasCachedRows) return
-    // console.log('startIndex', startIndex, 'stopIndex', stopIndex)
+    console.log('startIndex', startIndex, 'stopIndex', stopIndex)
     setRows((prevState) => {
       // update with new height
       const nextState = prevState.map((row, index) =>
@@ -559,9 +558,9 @@ function SegmentsContainer({
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  // useEffect(() => {
-  //   console.log('essentialRows', essentialRows)
-  // }, [essentialRows])
+  useEffect(() => {
+    console.log('essentialRows', essentialRows)
+  }, [essentialRows])
 
   // set padding top to list ref (Comments padding)
   useEffect(() => {
@@ -614,9 +613,9 @@ function SegmentsContainer({
     persistenceVariables.current.haveBeenAddedSegmentsBefore = false
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  // useEffect(() => {
-  //   console.log('####', scrollToSid)
-  // }, [scrollToSid])
+  useEffect(() => {
+    console.log('####', scrollToSid)
+  }, [scrollToSid])
 
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
