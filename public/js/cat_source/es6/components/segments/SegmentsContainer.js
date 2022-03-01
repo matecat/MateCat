@@ -62,6 +62,7 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
 
+  const previousSegments = useRef()
   const persistenceVariables = useRef({
     lastScrolled: undefined,
     scrollDirectionTop: false,
@@ -376,7 +377,12 @@ function SegmentsContainer({
 
   // set list rows
   useEffect(() => {
-    if (!segments) return
+    const isSegmentsDifferent = !!segments.find((segment, index) => {
+      const previousSegment = previousSegments?.current.get(index)
+      return previousSegment?.get('opened') !== segment.get('opened')
+    })
+    previousSegments.current = segments
+    if (!segments || !isSegmentsDifferent) return
     setHasCachedRows(false)
     setRows((prevState) =>
       new Array(segments.size).fill({}).map((item, index) => {
