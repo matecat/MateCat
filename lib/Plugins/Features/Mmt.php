@@ -14,21 +14,20 @@ use Analysis\Workers\FastAnalysis;
 use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionSetStruct;
-use Contribution\Set;
 use Database;
 use Engine;
 use Engines_AbstractEngine;
 use Engines_MMT;
-use Engines_MyMemory;
 use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
 use EnginesModel_MMTStruct;
 use Exception;
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
+use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use stdClass;
 use TaskRunner\Commons\QueueElement;
@@ -69,7 +68,7 @@ class Mmt extends BaseFeature {
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $userStruct->uid, 'mmt' );
+        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
 
         if( !empty( $engineEnabled ) ){
             unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
@@ -113,8 +112,9 @@ class Mmt extends BaseFeature {
             throw $e;
         }
 
+        // @TODO if I remove user_metadata what happens at row 391?
         $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, 'mmt', $newCreatedDbRowStruct->id );
+        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
 
         return $newCreatedDbRowStruct;
 
@@ -143,12 +143,12 @@ class Mmt extends BaseFeature {
     public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $engineStruct->uid, 'mmt' );
+        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $engineStruct->uid, self::FEATURE_CODE );
 
         if( $engineStruct->class_load == Constants_Engines::MMT ){
 
             if( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ){
-                $UserMetadataDao->delete( $engineStruct->uid, 'mmt' );
+                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
             }
 
         }
@@ -370,42 +370,16 @@ class Mmt extends BaseFeature {
         if( !array_key_exists( Constants_Engines::MMT, Constants_Engines::getAvailableEnginesList() ) ) return $response;
 
         //Project is not anonymous
-        if( !empty( $projectStruct->id_customer ) ){
-
-            //retrieve OWNER MMT License
-            $uStruct        = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $projectStruct->id_customer );
-
-            $ownerMmtEngineMetaData = null;
-            if(isset($uStruct->uid)){
-                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
-            }
+        if( !$projectStruct->isAnonymous() ){
 
             try {
 
-                if( !empty( $ownerMmtEngineMetaData ) ){
+                $features = FeatureSet::splitString( $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
 
-                    if( $contributionStruct->id_mt == $ownerMmtEngineMetaData->value ){
-
-                        //Execute the normal Set::setContributionMT called from setTranslation controller
-                        $response = $contributionStruct;
-
-                    } else {
-
-                        $mmtContribution = clone $contributionStruct;
-                        //Override the mt_engine id and send the message to MMT also
-                        $mmtContribution->id_mt = $ownerMmtEngineMetaData->value;
-                        //send two contribution, one for the job engine and one for user MMT through the normal Set::contributionMT
-                        Set::contributionMT( $mmtContribution );
-
-                        $job_MtEngine = Engine::getInstance( $contributionStruct->id_mt );
-                        if( $job_MtEngine instanceof Engines_MyMemory ){
-                            $response = null;
-                        } else{
-                            $response = $contributionStruct;
-                        }
-
-                    }
-
+                if( in_array( self::FEATURE_CODE, $features )  ){
+                    $response = $contributionStruct;
+                } else {
+                    $response = null;
                 }
 
             } catch ( Exception $e ) {
@@ -437,7 +411,7 @@ class Mmt extends BaseFeature {
             }
 
             //retrieve OWNER MMT License
-            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, 'mmt' ); // engine_id
+            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, self::FEATURE_CODE ); // engine_id
             try {
 
                 if ( !empty( $ownerMmtEngineMetaData ) ) {
@@ -517,7 +491,7 @@ class Mmt extends BaseFeature {
         }
 
         //retrieve OWNER MMT License
-        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, 'mmt' ); // engine_id
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
