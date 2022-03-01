@@ -298,7 +298,7 @@ var initEvents = function () {
   $('#action-three-dots .shortcuts').on('click', function (e) {
     e.preventDefault()
     e.stopPropagation()
-    ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')
+    ModalWindow.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
     return false
   })
 
