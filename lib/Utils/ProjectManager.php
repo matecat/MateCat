@@ -846,12 +846,27 @@ class ProjectManager {
 
         $k_file = 0;
         foreach ( $totalFilesStructure as $fid => $file_info ) {
-            if ( isset( $this->projectStructure[ 'instructions' ][ $k_file ] ) && !empty( $this->projectStructure[ 'instructions' ][ $k_file ] ) ) {
-                $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $k_file ] );
-            }
-            $k_file++;
-        }
 
+            //
+            // ==============================================
+            // NOTE 2022-03-01
+            // ==============================================
+            //
+            // Save the instruction notes in the same order of files
+            //
+            // `array_files` array contains the original file list (with correct file order).
+            // The file order in $totalFilesStructure instead (which comes from a conversion process) may do not correspond.
+            //
+            $array_files = $this->getProjectStructure()['array_files'];
+            foreach ($array_files as $filename){
+                if($file_info['original_filename'] === $filename){
+                    if ( isset( $this->projectStructure[ 'instructions' ][ $k_file ] ) && !empty( $this->projectStructure[ 'instructions' ][ $k_file ] ) ) {
+                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $k_file ] );
+                    }
+                    $k_file++;
+                }
+            }
+        }
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
