@@ -238,7 +238,7 @@ class ProjectManager {
                  */
                 $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
             }
-            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+//            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
         }
 
         return $features;
@@ -844,7 +844,7 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
-        $k_file = 0;
+
         foreach ( $totalFilesStructure as $fid => $file_info ) {
 
             //
@@ -858,12 +858,12 @@ class ProjectManager {
             // The file order in $totalFilesStructure instead (which comes from a conversion process) may do not correspond.
             //
             $array_files = $this->getProjectStructure()['array_files'];
-            foreach ($array_files as $filename){
+            foreach ($array_files as $index => $filename){
                 if($file_info['original_filename'] === $filename){
-                    if ( isset( $this->projectStructure[ 'instructions' ][ $k_file ] ) && !empty( $this->projectStructure[ 'instructions' ][ $k_file ] ) ) {
-                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $k_file ] );
+                    if ( isset( $this->projectStructure[ 'instructions' ][ $index ] ) && !empty( $this->projectStructure[ 'instructions' ][ $index ] ) ) {
+                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $index ] );
                     }
-                    $k_file++;
+
                 }
             }
         }
