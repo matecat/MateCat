@@ -615,127 +615,129 @@ class ProjectManager {
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         $totalFilesStructure = [];
-        foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
-            //converted file is inside cache directory
-            //get hash from file name inside UUID dir
-            $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
-            $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
+        if( isset($linkFiles[ 'conversionHashes' ]) and isset($linkFiles[ 'conversionHashes' ][ 'sha' ] ) ){
+            foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
+                //converted file is inside cache directory
+                //get hash from file name inside UUID dir
+                $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
+                $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
 
-            // Example:
-            // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
-            // $hashFile[ 1 ] = it-it
-            $sha1_original = $hashFile[ 0 ];
-            $lang          = $hashFile[ 1 ];
+                // Example:
+                // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
+                // $hashFile[ 1 ] = it-it
+                $sha1_original = $hashFile[ 0 ];
+                $lang          = $hashFile[ 1 ];
 
-            //use hash and lang to fetch file from package
-            $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
+                //use hash and lang to fetch file from package
+                $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
 
-            //associate the hash to the right file in upload directory
-            //get original file name, to insert into DB and cp in storage
-            //PLEASE NOTE, this can be an array when the same file added more
-            // than once and with different names
-            $_originalFileNames = $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $linkFile ];
+                //associate the hash to the right file in upload directory
+                //get original file name, to insert into DB and cp in storage
+                //PLEASE NOTE, this can be an array when the same file added more
+                // than once and with different names
+                $_originalFileNames = $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $linkFile ];
 
-            unset( $hashFile );
+                unset( $hashFile );
 
-            try {
+                try {
 
-                if ( count( $_originalFileNames ) === 0 ) {
-                    throw new Exception( 'No hash files found', -6 );
-                }
-
-                if ( AbstractFilesStorage::isOnS3() ) {
-                    if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
+                    if ( count( $_originalFileNames ) === 0 ) {
+                        throw new Exception( 'No hash files found', -6 );
                     }
-                } else {
-                    if ( !file_exists( $cachedXliffFilePathName ) ) {
-                        throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
-                    }
-                }
 
-                $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
-
-                if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
-                    throw new Exception( "Failed to find converted Xliff", -3 );
-                }
-
-                $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
-
-                if ( count( $filesStructure ) === 0 ) {
-                    throw new Exception( 'Files could not be saved in database.', -6 );
-                }
-
-                //check if the files language equals the source language. If not, set an error message.
-                if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
-                    $this->validateFilesLanguages();
-                }
-
-            } catch ( Exception $e ) {
-
-                if ( $e->getCode() == -10 ) {
-
-                    //Failed to store the original Zip
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -10, "message" => $e->getMessage()
-                    ];
-
-                } elseif ( $e->getCode() == -11 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
-                    ];
-                } elseif ( $e->getCode() == -12 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -7, "message" => "Failed to store reference files in database"
-                    ];
-                } // SEVERE EXCEPTIONS HERE
-                elseif ( $e->getCode() == -6 ) {
-                    //"File not found on server after upload."
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -6,
-                            "message" => $e->getMessage()
-                    ];
-                } elseif ( $e->getCode() == -3 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -7,
-                            "message" => "File not found. Failed to save XLIFF conversion on disk."
-                    ];
-                } elseif ( $e->getCode() == -13 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -13, "message" => $e->getMessage()
-                    ];
-                    //we can not write to disk!! Break project creation
-                } // S3 EXCEPTIONS HERE
-                elseif ( $e->getCode() == -200 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -200,
-                            "message" => $e->getMessage()
-                    ];
-                } else {
-                    if ( $e->getCode() == 0 ) {
-
-                        // check for 'Invalid copy source encoding' error
-                        $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
-
-                        if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
-                            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                    "code"    => -200,
-                                    "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
-                            ];
+                    if ( AbstractFilesStorage::isOnS3() ) {
+                        if ( null === $cachedXliffFilePathName ) {
+                            throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
+                        }
+                    } else {
+                        if ( !file_exists( $cachedXliffFilePathName ) ) {
+                            throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
                         }
                     }
+
+                    $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
+
+                    if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
+                        throw new Exception( "Failed to find converted Xliff", -3 );
+                    }
+
+                    $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
+
+                    if ( count( $filesStructure ) === 0 ) {
+                        throw new Exception( 'Files could not be saved in database.', -6 );
+                    }
+
+                    //check if the files language equals the source language. If not, set an error message.
+                    if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
+                        $this->validateFilesLanguages();
+                    }
+
+                } catch ( Exception $e ) {
+
+                    if ( $e->getCode() == -10 ) {
+
+                        //Failed to store the original Zip
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -10, "message" => $e->getMessage()
+                        ];
+
+                    } elseif ( $e->getCode() == -11 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
+                        ];
+                    } elseif ( $e->getCode() == -12 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -7, "message" => "Failed to store reference files in database"
+                        ];
+                    } // SEVERE EXCEPTIONS HERE
+                    elseif ( $e->getCode() == -6 ) {
+                        //"File not found on server after upload."
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code"    => -6,
+                                "message" => $e->getMessage()
+                        ];
+                    } elseif ( $e->getCode() == -3 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code"    => -7,
+                                "message" => "File not found. Failed to save XLIFF conversion on disk."
+                        ];
+                    } elseif ( $e->getCode() == -13 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -13, "message" => $e->getMessage()
+                        ];
+                        //we can not write to disk!! Break project creation
+                    } // S3 EXCEPTIONS HERE
+                    elseif ( $e->getCode() == -200 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code"    => -200,
+                                "message" => $e->getMessage()
+                        ];
+                    } else {
+                        if ( $e->getCode() == 0 ) {
+
+                            // check for 'Invalid copy source encoding' error
+                            $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
+
+                            if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
+                                $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                        "code"    => -200,
+                                        "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                                ];
+                            }
+                        }
+                    }
+                    $this->__clearFailedProject( $e );
+
+                    //EXIT
+                    return false;
+
                 }
-                $this->__clearFailedProject( $e );
 
-                //EXIT
-                return false;
+                //array append like array_merge but it do not renumber the numeric keys, so we can preserve the files id
+                $totalFilesStructure += $filesStructure;
 
-            }
-
-            //array append like array_merge but it do not renumber the numeric keys, so we can preserve the files id
-            $totalFilesStructure += $filesStructure;
-
-        } //end of conversion hash-link loop
+            } //end of conversion hash-link loop
+        }
 
         //Throws exception
         try {
@@ -1272,6 +1274,10 @@ class ProjectManager {
 
             }
 
+            // check for job_first_segment and job_last_segment existence
+            if(!isset($this->min_max_segments_id[ 'job_first_segment' ]) or !isset($this->min_max_segments_id[ 'job_last_segment' ]) ){
+                throw new \Exception('Job cannot be created. No job_first_segment or job_last_segment found!');
+            }
 
             $this->_log( $projectStructure[ 'private_tm_key' ] );
 
@@ -2238,10 +2244,10 @@ class ProjectManager {
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // get metadata
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+            $meta = isset($this->projectStructure[ 'array_files_meta' ][ $pos ]) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
             $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, @$meta );
+            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -2573,6 +2579,7 @@ class ProjectManager {
             foreach ( $struct as $pos => $translation_row ) {
 
                 $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
+                $ice_payable_rates = (isset($this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ])) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
 
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                         [
@@ -2580,7 +2587,7 @@ class ProjectManager {
                                 'locked'              => 0,
                                 'match_type'          => 'ICE',
                                 // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
-                                'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ),
+                                'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
                                 'standard_word_count' => null,
                                 'status'              => $status,
                                 'suggestion_match'    => null,

@@ -1818,29 +1818,40 @@ class QA {
                 //Steps:
 
                 //- re-align ids
-                foreach ( $this->trgDomMap[ 'g' ] as $pos => $tagID ) {
-                    $pattern[]     = '|<g id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?>|ui';
-                    $replacement[] = '<g id="###' . $this->srcDomMap[ 'g' ][ $pos ] . '###">';
+                if(isset($this->trgDomMap[ 'g' ])){
+                    foreach ( $this->trgDomMap[ 'g' ] as $pos => $tagID ) {
+                        $pattern[]     = '|<g id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?>|ui';
+                        $replacement[] = '<g id="###' . $this->srcDomMap[ 'g' ][ $pos ] . '###">';
+                    }
                 }
 
-                foreach ( $this->trgDomMap[ 'x' ] as $pos => $tagID ) {
-                    $pattern[]     = '|<x id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
-                    $replacement[] = '<x id="###' . $this->srcDomMap[ 'x' ][ $pos ] . '###" />';
+                if(isset($this->trgDomMap[ 'x' ])){
+                    foreach ( $this->trgDomMap[ 'x' ] as $pos => $tagID ) {
+                        $pattern[]     = '|<x id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
+                        $replacement[] = '<x id="###' . $this->srcDomMap[ 'x' ][ $pos ] . '###" />';
+                    }
                 }
 
-                foreach ( $this->trgDomMap[ 'bx' ] as $pos => $tagID ) {
-                    $pattern[]     = '|<bx id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
-                    $replacement[] = '<bx id="###' . $this->srcDomMap[ 'bx' ][ $pos ] . '###" />';
+                if(isset($this->trgDomMap[ 'bx' ])){
+                    foreach ( $this->trgDomMap[ 'bx' ] as $pos => $tagID ) {
+                        $pattern[]     = '|<bx id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
+                        $replacement[] = '<bx id="###' . $this->srcDomMap[ 'bx' ][ $pos ] . '###" />';
+                    }
                 }
 
-                foreach ( $this->trgDomMap[ 'ex' ] as $pos => $tagID ) {
-                    $pattern[]     = '|<ex id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
-                    $replacement[] = '<ex id="###' . $this->srcDomMap[ 'ex' ][ $pos ] . '###" />';
+                if(isset($this->trgDomMap[ 'ex' ])){
+                    foreach ( $this->trgDomMap[ 'ex' ] as $pos => $tagID ) {
+                        $pattern[]     = '|<ex id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
+                        $replacement[] = '<ex id="###' . $this->srcDomMap[ 'ex' ][ $pos ] . '###" />';
+                    }
                 }
 
-                foreach ( $this->trgDomMap[ 'ph' ] as $pos => $tagID ) {
-                    $pattern[]     = '|<ph id ?= ?["\']{1}(' . $tagID . ')["\']{1} (equiv-text=["\'].+?["\'] ?)/>|ui';
-                    $replacement[] = '<ph id="###' . $this->srcDomMap[ 'ph' ][ $pos ] . '###" $2/>';
+                if(isset($this->trgDomMap[ 'ph' ])){
+                    foreach ( $this->trgDomMap[ 'ph' ] as $pos => $tagID ) {
+                        $pattern[]     = '|<ph id ?= ?["\']{1}(' . $tagID . ')["\']{1} (equiv-text=["\'].+?["\'] ?)/>|ui';
+                        $replacement[] = '<ph id="###' . $this->srcDomMap[ 'ph' ][ $pos ] . '###" $2/>';
+                    }
+
                 }
 
                 $result = preg_replace( $pattern, $replacement, $this->target_seg, 1 );

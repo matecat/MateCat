@@ -171,7 +171,10 @@ class GlossaryWorker extends AbstractWorker {
         $tmp_result = [];
         foreach ( $TMS_RESULT as $k => $val ) {
             // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-            if ( ( $res = mb_stripos( $segment, preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k ) ) ) === false ) {
+            $tmsMatch = preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k );
+            $res = ($tmsMatch !== null) ? mb_stripos( $segment, $tmsMatch ) : null;
+
+            if ( $res  === false ) {
                 unset( $TMS_RESULT[ $k ] ); // unset glossary terms not contained in the request
             } else {
                 $tmp_result[ $k ] = $res;
