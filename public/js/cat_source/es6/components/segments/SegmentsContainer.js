@@ -62,7 +62,7 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
 
-  const previousSegments = useRef()
+  // const previousSegments = useRef()
   const persistenceVariables = useRef({
     lastScrolled: undefined,
     scrollDirectionTop: false,
@@ -377,27 +377,34 @@ function SegmentsContainer({
 
   // set list rows
   useEffect(() => {
-    const isSegmentsDifferent = !!segments.find((segment, index) => {
-      const previousSegment = previousSegments?.current.get(index)
+    // const haveSegmentsChanges = !!segments.find((segment, index) => {
+    //   const previousSegment = previousSegments?.current.get(index)
+    //   return previousSegment?.get('opened') !== segment.get('opened')
+    // })
+    // previousSegments.current = segments
+    const haveSegmentsChanges = !!segments.find((segment, index) => {
+      const previousSegment = rows[index]?.segImmutable
       return previousSegment?.get('opened') !== segment.get('opened')
     })
-    previousSegments.current = segments
-    if (!segments || !isSegmentsDifferent) return
-    setHasCachedRows(false)
+
+    if (!segments || !haveSegmentsChanges) return
+    console.log('@ set rows')
+    if (segments.size !== rows.length) setHasCachedRows(false)
     setRows((prevState) =>
       new Array(segments.size).fill({}).map((item, index) => {
-        const prevStateRow = prevState.find(
-          ({id}) => id === segments.get(index).get('sid'),
-        )
+        const newestSegment = segments.get(index)
+        const newestSid = newestSegment.get('sid')
+        const prevStateRow = prevState.find(({id}) => id === newestSid)
         return {
-          id: segments.get(index).get('sid'),
+          id: newestSid,
           height: prevStateRow?.height ?? ROW_HEIGHT,
           hasRendered: prevStateRow?.hasRendered ?? false,
-          segImmutable: segments.get(index),
+          segImmutable: newestSegment,
         }
       }),
     )
-  }, [segments])
+    console.log('# end set rows')
+  }, [segments, rows])
 
   // cache rows before start index
   useEffect(() => {
