@@ -637,8 +637,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   isSideOpen: function () {
     return this.sideOpen
   },
-  segmentHasIssues: function (sid) {
-    const segment = this.getSegmentByIdToJS(sid)
+  segmentHasIssues: function (segment) {
     if (!segment) return false
     const versionWithIssues =
       segment.versions &&

@@ -602,7 +602,7 @@ class Segment extends React.Component {
         if (
           this.props.segment.opened &&
           !config.isReview &&
-          !SegmentStore.segmentHasIssues(this.props.segment.sid)
+          !SegmentStore.segmentHasIssues(this.props.segment)
         ) {
           SegmentActions.closeSegmentIssuePanel(this.props.segment.sid)
         }
@@ -651,9 +651,7 @@ class Segment extends React.Component {
     let locked =
       !this.props.segment.unlocked &&
       (SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked)
-    const segmentHasIssues = SegmentStore.segmentHasIssues(
-      this.props.segment.sid,
-    )
+    const segmentHasIssues = SegmentStore.segmentHasIssues(this.props.segment)
     return (
       <section
         ref={(section) => (this.section = section)}

@@ -62,7 +62,6 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
 
-  // const previousSegments = useRef()
   const persistenceVariables = useRef({
     lastScrolled: undefined,
     scrollDirectionTop: false,
@@ -127,7 +126,7 @@ function SegmentsContainer({
 
   const getSegmentRealHeight = useCallback(
     ({segment, previousSegment}) => {
-      console.log('----> get height', segment.get('sid'))
+      // console.log('----> get height', segment.get('sid'))
       const container = document.createElement('div', {})
       const html = getSegmentStructure(segment.toJS(), isSideOpen)
       container.innerHTML = ReactDOMServer.renderToStaticMarkup(html)
@@ -198,8 +197,8 @@ function SegmentsContainer({
     setScrollTopVisible(scrollValue > 400)
   }, [scrollToSid])
 
-  // segments props
-  const segmentsProps = useMemo(() => {
+  // segments details - ex. div collection type ecc.
+  const segmentsDetails = useMemo(() => {
     const getCollectionType = (segment) => {
       let collectionType
       if (segment.notes) {
@@ -341,11 +340,6 @@ function SegmentsContainer({
 
   // set list rows
   useEffect(() => {
-    // const haveSegmentsChanges = !!segments.find((segment, index) => {
-    //   const previousSegment = previousSegments?.current.get(index)
-    //   return previousSegment?.get('opened') !== segment.get('opened')
-    // })
-    // previousSegments.current = segments
     const haveSegmentsChanges = !!segments.find((segment, index) => {
       const previousSegment = rows[index]?.segImmutable
       return previousSegment?.get('opened') !== segment.get('opened')
@@ -462,7 +456,7 @@ function SegmentsContainer({
   // updating rows height
   useEffect(() => {
     if (startIndex === undefined || !stopIndex || !hasCachedRows) return
-    console.log('startIndex', startIndex, 'stopIndex', stopIndex)
+    // console.log('startIndex', startIndex, 'stopIndex', stopIndex)
     setRows((prevState) => {
       // update with new height
       const nextState = prevState.map((row, index) =>
@@ -533,9 +527,9 @@ function SegmentsContainer({
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  useEffect(() => {
-    console.log('essentialRows', essentialRows)
-  }, [essentialRows])
+  // useEffect(() => {
+  //   console.log('essentialRows', essentialRows)
+  // }, [essentialRows])
 
   // set padding top to list ref (Comments padding)
   useEffect(() => {
@@ -588,13 +582,13 @@ function SegmentsContainer({
     persistenceVariables.current.haveBeenAddedSegmentsBefore = false
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  useEffect(() => {
-    console.log('####', scrollToSid)
-  }, [scrollToSid])
+  // useEffect(() => {
+  //   console.log('####', scrollToSid)
+  // }, [scrollToSid])
 
   // single segment props to move down RowSegment component
   const getSegmentPropsBySid = (sid) => {
-    const {currentFileId, collectionTypeSeparator} = segmentsProps.find(
+    const {currentFileId, collectionTypeSeparator} = segmentsDetails.find(
       ({sid: iteratedSid}) => iteratedSid === sid,
     )
     const {segment, segImmutable} = cachedSegmentsToJS.current.get(sid)
