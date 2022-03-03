@@ -238,7 +238,7 @@ class ProjectManager {
                  */
                 $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
             }
-            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+//            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
         }
 
         return $features;
@@ -844,14 +844,29 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
-        $k_file = 0;
-        foreach ( $totalFilesStructure as $fid => $file_info ) {
-            if ( isset( $this->projectStructure[ 'instructions' ][ $k_file ] ) && !empty( $this->projectStructure[ 'instructions' ][ $k_file ] ) ) {
-                $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $k_file ] );
-            }
-            $k_file++;
-        }
 
+        foreach ( $totalFilesStructure as $fid => $file_info ) {
+
+            //
+            // ==============================================
+            // NOTE 2022-03-01
+            // ==============================================
+            //
+            // Save the instruction notes in the same order of files
+            //
+            // `array_files` array contains the original file list (with correct file order).
+            // The file order in $totalFilesStructure instead (which comes from a conversion process) may do not correspond.
+            //
+            $array_files = $this->getProjectStructure()['array_files'];
+            foreach ($array_files as $index => $filename){
+                if($file_info['original_filename'] === $filename){
+                    if ( isset( $this->projectStructure[ 'instructions' ][ $index ] ) && !empty( $this->projectStructure[ 'instructions' ][ $index ] ) ) {
+                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $index ] );
+                    }
+
+                }
+            }
+        }
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
