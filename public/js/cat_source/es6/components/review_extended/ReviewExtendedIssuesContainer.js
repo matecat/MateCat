@@ -335,7 +335,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
       this.setLastIssueAdded,
     )
     //Undo notification
-    APP.removeAllNotifications()
+    CatToolActions.removeAllNotifications()
   }
 
   componentDidUpdate(prevProps, prevState) {
