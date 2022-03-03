@@ -449,7 +449,12 @@ class GetContributionWorker extends AbstractWorker {
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
             $config   = array_merge( $tmEngine->getConfigStruct(), $_config );
 
-            $temp_matches = $tmEngine->get( $config );
+            $temp_matches = [];
+
+            if($this->issetSourceAndTarget($config)){
+                $temp_matches = $tmEngine->get( $config );
+            }
+
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = (isset($contributionStruct->dataRefMap) and $contributionStruct->dataRefMap !== '') ? json_decode($contributionStruct->dataRefMap, true) : [];
@@ -488,6 +493,16 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         return [ $mt_result, $matches ];
+    }
+
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
+    private function issetSourceAndTarget($_config)
+    {
+        return (isset($_config[ 'source' ]) and $_config[ 'source' ] !== '' and isset($_config[ 'target' ]) and $_config[ 'target' ] !== '' );
     }
 
     /**
