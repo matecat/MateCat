@@ -593,11 +593,10 @@ function SegmentsContainer({
   }, [scrollToSid])
 
   // single segment props to move down RowSegment component
-  const getSingleSegmentProps = ({
-    sid,
-    currentFileId,
-    collectionTypeSeparator,
-  }) => {
+  const getSegmentPropsBySid = (sid) => {
+    const {currentFileId, collectionTypeSeparator} = segmentsProps.find(
+      ({sid: iteratedSid}) => iteratedSid === sid,
+    )
     const {segment, segImmutable} = cachedSegmentsToJS.current.get(sid)
     return {
       segment,
@@ -640,11 +639,7 @@ function SegmentsContainer({
             <RowSegment
               {...{
                 ...essentialRows[index],
-                ...getSingleSegmentProps(
-                  segmentsProps.find(
-                    ({sid}) => sid === essentialRows[index].id,
-                  ),
-                ),
+                ...getSegmentPropsBySid(essentialRows[index].id),
                 ...(index === essentialRows.length - 1 && {isLastRow: true}),
               }}
             />
