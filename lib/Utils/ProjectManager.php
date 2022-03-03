@@ -238,7 +238,8 @@ class ProjectManager {
                  */
                 $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
             }
-//            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+
+            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
         }
 
         return $features;
