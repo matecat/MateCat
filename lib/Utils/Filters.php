@@ -66,12 +66,15 @@ class Filters {
         // Compute results
         foreach ( $responses as $id => &$response ) {
             $info = $infos[ $id ];
+            $originalResponse = json_decode($response);
 
             // Compute response
             if ( $info[ 'http_code' ] != 200 || $response === false ) {
                 $errResponse = [ "isSuccess" => false, "curlInfo" => $info ];
                 if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
+                } elseif (isset($originalResponse->errorMessage)) {
+                    $errResponse[ 'errorMessage' ] = $originalResponse->errorMessage;
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
