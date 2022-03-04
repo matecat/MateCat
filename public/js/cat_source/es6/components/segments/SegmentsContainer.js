@@ -347,15 +347,23 @@ function SegmentsContainer({
 
     if (!segments || !haveSegmentsChanges) return
     if (segments.size !== rows.length) setHasCachedRows(false)
-    setRows((prevState) =>
+    setRows(
+      /* (prevState) => */
       new Array(segments.size).fill({}).map((item, index) => {
         const newestSegment = segments.get(index)
         const newestSid = newestSegment.get('sid')
-        const prevStateRow = prevState.find(({id}) => id === newestSid)
+        // const prevStateRow = prevState.find(({id}) => id === newestSid)
+        const hasRendered = !!rowsRenderedHeight.current.get(newestSid)
+        const cachedHeight = newestSegment.get('opened')
+          ? rowsRenderedHeight.current.get(newestSid)
+          : cachedRowsHeightMap.current.get(newestSid)
+        const prevStateRow = cachedHeight
+          ? {height: cachedHeight, hasRendered}
+          : {height: ROW_HEIGHT, hasRendered: false}
         return {
           id: newestSid,
-          height: prevStateRow?.height ?? ROW_HEIGHT,
-          hasRendered: prevStateRow?.hasRendered ?? false,
+          height: prevStateRow?.height /* ?? ROW_HEIGHT */,
+          hasRendered: prevStateRow?.hasRendered /* ?? false */,
           segImmutable: newestSegment,
         }
       }),
