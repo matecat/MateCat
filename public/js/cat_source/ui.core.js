@@ -370,7 +370,6 @@ window.UI = {
     this.removeCacheObjects()
     SegmentStore.removeAllSegments()
     SegmentActions.closeSideSegments()
-    $('#outer').empty()
   },
 
   renderFiles: function (files, where, starting) {
