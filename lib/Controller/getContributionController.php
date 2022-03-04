@@ -132,7 +132,7 @@ class getContributionController extends ajaxController {
         $contributionRequest->concordanceSearch = $this->concordance_search;
         $contributionRequest->fromTarget        = $this->switch_languages;
         $contributionRequest->resultNum         = $this->num_results;
-        $contributionRequest->crossLangTargets  = explode(",", $this->cross_language[0]);
+        $contributionRequest->crossLangTargets  = $this->getCrossLanguages();
 
         if ( self::isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -144,6 +144,22 @@ class getContributionController extends ajaxController {
 
         $this->result = [ "errors" => [], "data" => [ "message" => "OK", "id_client" => $this->id_client ] ];
 
+    }
+
+    /**
+     * @return array
+     */
+    private function getCrossLanguages()
+    {
+        $crossLanguages = [];
+
+        foreach ( explode(",", $this->cross_language[0]) as $langauge ) {
+            if($langauge !== ''){
+                $crossLanguages[] = $langauge;
+            }
+        }
+
+        return $crossLanguages;
     }
 
     /**

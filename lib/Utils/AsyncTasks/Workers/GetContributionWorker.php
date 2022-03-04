@@ -83,13 +83,17 @@ class GetContributionWorker extends AbstractWorker {
             $crossLangMatches = [];
 
             foreach ( $contributionStruct->crossLangTargets as $lang ) {
-                list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
-                $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
-                $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+                // double check for not black lang
+                if( $lang !== '' ){
+                    list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
-                foreach ( $matches as $match ) {
-                    $crossLangMatches[] = $match;
+                    $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
+                    $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+
+                    foreach ( $matches as $match ) {
+                        $crossLangMatches[] = $match;
+                    }
                 }
             }
 
