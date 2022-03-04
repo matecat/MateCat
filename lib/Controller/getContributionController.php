@@ -147,19 +147,14 @@ class getContributionController extends ajaxController {
     }
 
     /**
+     * Remove voids
+     * ("en-GB," => [0 => 'en-GB'])
+     *
      * @return array
      */
     private function getCrossLanguages()
     {
-        $crossLanguages = [];
-
-        foreach ( explode(",", $this->cross_language[0]) as $langauge ) {
-            if($langauge !== ''){
-                $crossLanguages[] = $langauge;
-            }
-        }
-
-        return $crossLanguages;
+        return explode(",", rtrim($this->cross_language[0], ','));
     }
 
     /**
