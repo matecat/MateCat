@@ -83,13 +83,17 @@ class GetContributionWorker extends AbstractWorker {
             $crossLangMatches = [];
 
             foreach ( $contributionStruct->crossLangTargets as $lang ) {
-                list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
-                $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
-                $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+                // double check for not black lang
+                if( $lang !== '' ){
+                    list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
-                foreach ( $matches as $match ) {
-                    $crossLangMatches[] = $match;
+                    $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
+                    $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+
+                    foreach ( $matches as $match ) {
+                        $crossLangMatches[] = $match;
+                    }
                 }
             }
 
@@ -449,7 +453,12 @@ class GetContributionWorker extends AbstractWorker {
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
             $config   = array_merge( $tmEngine->getConfigStruct(), $_config );
 
-            $temp_matches = $tmEngine->get( $config );
+            $temp_matches = [];
+
+            if($this->issetSourceAndTarget($config)){
+                $temp_matches = $tmEngine->get( $config );
+            }
+
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = (isset($contributionStruct->dataRefMap) and $contributionStruct->dataRefMap !== '') ? json_decode($contributionStruct->dataRefMap, true) : [];
@@ -488,6 +497,16 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         return [ $mt_result, $matches ];
+    }
+
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
+    private function issetSourceAndTarget($_config)
+    {
+        return (isset($_config[ 'source' ]) and $_config[ 'source' ] !== '' and isset($_config[ 'target' ]) and $_config[ 'target' ] !== '' );
     }
 
     /**
