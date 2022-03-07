@@ -52,6 +52,69 @@ body.cattool {
 }
 
 section {
+  .header {
+    height: 20px;
+    width: 100%;
+    color: $grey1;
+    font-size: 12px;
+    background: $grey4 !important;
+    margin-bottom: 0px;
+    .percentuage {
+      position: relative;
+      display: none;
+      width: 45px;
+      color: #fff;
+      font-size: 12px;
+      text-decoration: none;
+      font-weight: 100;
+      margin: 0 auto;
+      text-align: center;
+      line-height: 20px;
+    }
+    &.header-closed {
+      background: transparent !important;
+      position: absolute;
+
+      span {
+        z-index: 1;
+        padding: 2px 6px;
+        font-size: 11px;
+        top: -2px;
+      }
+    }
+    .repetition {
+      margin: 0 auto;
+      text-transform: uppercase;
+      color: #fff;
+      font-size: 12px;
+      background: $grey2;
+      padding: 4px 8px;
+      position: relative;
+      z-index: 12;
+      max-width: 102px;
+    }
+    .header-segment-saving {
+      display: flex;
+      justify-content: space-between;
+      width: 55px;
+      align-items: center;
+      float: right;
+      padding-right: 15px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      span {
+        font-size: 14px;
+        padding: 0;
+      }
+      .header-segment-saving-loader {
+        width: 16px;
+        height: 16px;
+        background: url(../../img/loading.gif);
+        background-size: cover;
+      }
+    }
+  }
   &.opened {
     .buttons {
       display: inline-block;
