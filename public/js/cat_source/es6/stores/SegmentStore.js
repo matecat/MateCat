@@ -126,6 +126,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           )[i]
           let status = segment.target_chunk_lengths.statuses[i]
           let segData = {
+            saving: false,
             splitted: true,
             autopropagated_from: '0',
             has_reference: 'false',
@@ -171,6 +172,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           segData = null
         })
       } else {
+        segment.saving = false
         segment.splitted = false
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
@@ -746,6 +748,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       [index, 'qaBlacklistGlossary'],
       matches,
     )
+  },
+  setSegmentSaving(sid, saving) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn([index, 'saving'], saving)
   },
   /**
    *
@@ -1762,6 +1769,13 @@ AppDispatcher.register(function (action) {
         SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
         action.sid,
         action.limit,
+      )
+      break
+    case SegmentConstants.SET_SEGMENT_SAVING:
+      SegmentStore.setSegmentSaving(action.sid, action.saving)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
       )
       break
     default:

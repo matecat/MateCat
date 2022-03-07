@@ -819,7 +819,7 @@ window.UI = {
     } else {
       this.updateToSetTranslationTail(item)
     }
-
+    SegmentActions.setSegmentSaving(id_segment, true)
     // If is offline and is in the tail I decrease the counter
     // else I execute the tail
     if (OfflineUtils.offline && config.offlineModeEnabled) {
@@ -942,7 +942,7 @@ window.UI = {
         }
         UI.execSetTranslationTail()
         UI.setTranslation_success(data, options)
-
+        SegmentActions.setSegmentSaving(id_segment, false)
         data.translation.segment = segment
         $(document).trigger('translation:change', data.translation)
         data.segment = segment
