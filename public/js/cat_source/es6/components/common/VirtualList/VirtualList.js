@@ -65,7 +65,6 @@ const VirtualList = forwardRef(
           {virtualItems.map((item) => (
             <div
               key={items[item.index].id ? items[item.index].id : item.index}
-              item-index={item.index}
               style={{
                 position: 'absolute',
                 top: 0,
