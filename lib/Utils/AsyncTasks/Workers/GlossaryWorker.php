@@ -304,9 +304,6 @@ class GlossaryWorker extends AbstractWorker {
             }
         }
 
-        $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-        $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-
         $config[ 'prop' ] = $tmProps;
         $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
         $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
@@ -389,17 +386,9 @@ class GlossaryWorker extends AbstractWorker {
 
         $config['id_match'] = $payload['id_segment'];
 
-        $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-        $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-
         $config[ 'prop' ] = $tmProps;
         $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
         $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
-
-        if ( $config[ 'newsegment' ] && $config[ 'newtranslation' ] ) {
-            $config[ 'newsegment' ]     = htmlspecialchars( $config[ 'newsegment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-            $config[ 'newtranslation' ] = htmlspecialchars( $config[ 'newtranslation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-        }
 
         //prepare the error report
         $set_code = [];
