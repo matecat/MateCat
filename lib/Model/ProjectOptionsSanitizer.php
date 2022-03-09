@@ -70,6 +70,7 @@ class ProjectOptionsSanitizer {
             'es-ES',
             'es-CO',
             'es-MX',
+            'es-US',
             'sw-KE',
             'sv-SE',
             'de-CH',
