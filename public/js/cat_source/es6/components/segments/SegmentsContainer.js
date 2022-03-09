@@ -67,7 +67,6 @@ function SegmentsContainer({
     scrollDirectionTop: false,
     lastScrollTop: 0,
     segmentsWithCollectionType: [],
-    haveBeenAddedSegmentsBefore: false,
   })
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
@@ -348,11 +347,9 @@ function SegmentsContainer({
     if (!segments || !haveSegmentsChanges) return
     if (segments.size !== rows.length) setHasCachedRows(false)
     setRows(
-      /* (prevState) => */
       new Array(segments.size).fill({}).map((item, index) => {
         const newestSegment = segments.get(index)
         const newestSid = newestSegment.get('sid')
-        // const prevStateRow = prevState.find(({id}) => id === newestSid)
         const hasRendered = !!rowsRenderedHeight.current.get(newestSid)
         const cachedHeight = newestSegment.get('opened')
           ? rowsRenderedHeight.current.get(newestSid)
@@ -362,8 +359,8 @@ function SegmentsContainer({
           : {height: ROW_HEIGHT, hasRendered: false}
         return {
           id: newestSid,
-          height: prevStateRow?.height /* ?? ROW_HEIGHT */,
-          hasRendered: prevStateRow?.hasRendered /* ?? false */,
+          height: prevStateRow?.height,
+          hasRendered: prevStateRow?.hasRendered,
           segImmutable: newestSegment,
         }
       }),
@@ -421,11 +418,10 @@ function SegmentsContainer({
   // adapt scroll when was added more segments before
   useLayoutEffect(() => {
     if (!rows.length || !essentialRows.length || !hasCachedRows) return
-    const {current} = persistenceVariables
 
     const hasAddedSegmentsBefore =
       rows.length > essentialRows.length && essentialRows[0]?.id !== rows[0]?.id
-    if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
+    if (!hasAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
     const additionalHeight = rows
@@ -457,8 +453,6 @@ function SegmentsContainer({
 
     const scrollTop = additionalHeight
     listRef.current.scrollTop = scrollTop
-
-    current.haveBeenAddedSegmentsBefore = true
   }, [rows, essentialRows, hasCachedRows])
 
   // updating rows height
@@ -498,12 +492,7 @@ function SegmentsContainer({
 
   // set essential rows of virtual list component
   useEffect(() => {
-    if (
-      !hasCachedRows ||
-      (startIndex === 0 &&
-        persistenceVariables.current.haveBeenAddedSegmentsBefore)
-    )
-      return
+    if (!hasCachedRows) return
     if (essentialRows.length !== rows.length) {
       setEssentialRows(
         rows.map(({id, height, hasRendered}) => ({
@@ -587,7 +576,6 @@ function SegmentsContainer({
     if (!haveBeenRowsRendered) return
 
     setScrollToSid(undefined)
-    persistenceVariables.current.haveBeenAddedSegmentsBefore = false
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
   // useEffect(() => {
