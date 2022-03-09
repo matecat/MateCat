@@ -587,8 +587,8 @@ function SegmentsContainer({
 
   // reset scrollTo
   useEffect(() => {
-    if (!rows.length || !hasCachedRows) return
-    const rowsRendered = rows.filter(
+    if (!essentialRows.length || !hasCachedRows) return
+    const rowsRendered = essentialRows.filter(
       (row, index) => index >= startIndex && index <= stopIndex,
     )
     const haveBeenRowsRendered =
