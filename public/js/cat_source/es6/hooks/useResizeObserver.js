@@ -1,6 +1,18 @@
 import {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 
+/**
+ * A React hook that simplify the usage of ResizeObserver API
+ *
+ * @param {Object} ref - React Ref target
+ * @param {Object} options
+ * @param {number} [options.actualWidth=0]
+ * @param {number} [options.actualHeight=0]
+ * @returns {Object} size
+ * @returns {number} size.width
+ * @returns {number} size.height
+ */
+
 function useResizeObserver(ref, {actualWidth = 0, actualHeight = 0} = {}) {
   const [width, setWidth] = useState(actualWidth)
   const [height, setHeight] = useState(actualHeight)
