@@ -127,7 +127,6 @@ function SegmentsContainer({
 
   const getSegmentRealHeight = useCallback(
     ({segment, previousSegment}) => {
-      // console.log('----> get height', segment.get('sid'))
       const container = document.createElement('div', {})
       const html = getSegmentStructure(segment.toJS(), isSideOpen)
       container.innerHTML = ReactDOMServer.renderToStaticMarkup(html)
@@ -290,12 +289,10 @@ function SegmentsContainer({
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
       setScrollToSelected(false)
-      // setTimeout(() => this.onScroll(), 500)
     }
     const scrollToSelectedSegment = (sid) => {
       setScrollToSid(sid)
       setScrollToSelected(true)
-      // setTimeout(() => this.onScroll(), 500)
     }
     const openSide = () => setIsSideOpen(true)
     const closeSide = () => setIsSideOpen(false)
@@ -472,7 +469,6 @@ function SegmentsContainer({
   // updating rows height
   useEffect(() => {
     if (startIndex === undefined || !stopIndex || !hasCachedRows) return
-    // console.log('startIndex', startIndex, 'stopIndex', stopIndex)
     setRows((prevState) => {
       // update with new height
       const nextState = prevState.map((row, index) =>
@@ -544,10 +540,6 @@ function SegmentsContainer({
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  // useEffect(() => {
-  //   console.log('essentialRows', essentialRows)
-  // }, [essentialRows])
-
   // set padding top to list ref (Comments padding)
   useEffect(() => {
     if (!segments.size || !listRef?.current) return
@@ -598,10 +590,6 @@ function SegmentsContainer({
     setScrollToSid(undefined)
     persistenceVariables.current.haveBeenAddedSegmentsBefore = false
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
-
-  // useEffect(() => {
-  //   console.log('####', scrollToSid)
-  // }, [scrollToSid])
 
   // single segment props to move down RowSegment component
   const getSegmentPropsBySid = (sid) => {
