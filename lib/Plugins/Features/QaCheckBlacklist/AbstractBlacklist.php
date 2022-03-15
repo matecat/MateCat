@@ -51,8 +51,9 @@ abstract class AbstractBlacklist {
      */
     public function getWordsCount()
     {
-        if ( $this->checkIfBlacklistKeywordsExistsInCache() ) {
-            $content = $this->getContent();
+        $content = $this->getContent();
+
+        if ( null !== $content ) {
 
             $splitted = explode( PHP_EOL, $content );
 
