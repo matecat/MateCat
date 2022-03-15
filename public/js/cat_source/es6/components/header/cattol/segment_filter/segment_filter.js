@@ -1,5 +1,3 @@
-import {sprintf} from 'sprintf-js'
-
 import SegmentStore from '../../../../stores/SegmentStore'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
@@ -22,8 +20,6 @@ let SegmentFilterUtils = {
     return listOfSegments.indexOf(segmentId) !== -1
   },
 
-  notification: null,
-
   callbackForSegmentNotInSample: (segmentId) => {
     var title = 'Segment not in sample'
     var text =
@@ -33,10 +29,8 @@ let SegmentFilterUtils = {
       'segment is no longer in the sample'
 
     return (function () {
-      if (SegmentFilterUtils.notification)
-        APP.removeNotification(SegmentFilterUtils.notification)
-
-      SegmentFilterUtils.notification = APP.addNotification({
+      CatToolActions.addNotification({
+        uid: 'segment-filter',
         autoDismiss: false,
         dismissable: true,
         position: 'bl',

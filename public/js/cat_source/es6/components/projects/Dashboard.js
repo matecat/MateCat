@@ -19,6 +19,7 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
 import {ModalWindow} from '../modals/ModalWindow'
+import NotificationBox from '../notificationsComponent/NotificationBox'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -498,4 +499,10 @@ export default Dashboard
 document.addEventListener('DOMContentLoaded', () => {
   const mountPoint = document.getElementById('manage-container')
   ReactDOM.render(React.createElement(Dashboard, {}), mountPoint)
+
+  //Toast Notifications
+  const mountPointNotifications = document.getElementsByClassName(
+    'notifications-wrapper',
+  )[0]
+  ReactDOM.render(<NotificationBox />, mountPointNotifications)
 })

@@ -192,26 +192,6 @@ let CatToolActions = {
     ) {
       let revise = CatToolStore.getQR(config.revisionNumber)
       if (revise && !revise[0].feedback) {
-        // var notification = {
-        //     title: 'Leave your feedback',
-        //     text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
-        //         "<a id='leaveFeedback' style='cursor: pointer'> Write feedback. </a>",
-        //     allowHtml: true,
-        //     timer: 6000,
-        //     type: 'warning',
-        //     position: "tc",
-        //     closeCallback: ()=>{
-        //         $('#leaveFeedback').off('click');
-        //     },
-        //     openCallback: ()=>{
-        //         $('#leaveFeedback').bind('click','#leaveFeedback', () => {
-        //             APP.removeAllNotifications();
-        //             CatToolActions.openFeedbackModal("", config.revisionNumber);
-        //         });
-        //     }
-        // };
-        //
-        // APP.addNotification(notification);
         const isModalClosed =
           CommonUtils.getFromSessionStorage('feedback-modal')
         if (!isModalClosed) {
@@ -262,6 +242,40 @@ let CatToolActions = {
         feedback: review.feedback,
       })
     }
+  },
+
+  /**
+   * Function to add notifications to the interface
+   * notification object with the following properties
+   *
+   * title:           (String) Title of the notification.
+   * text:            (String) Message of the notification
+   * type:            (String, Default "info") Level of the notification. Available: success, error, warning and info.
+   * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
+   *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
+   * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
+   * openCallback     (Function) A callback function that will be called when the notification is successfully added.
+   * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
+   * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
+   *
+   */
+  addNotification: function (notification) {
+    return AppDispatcher.dispatch({
+      actionType: CattolConstants.ADD_NOTIFICATION,
+      notification,
+    })
+  },
+  removeNotification: function (notification) {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.REMOVE_NOTIFICATION,
+      notification,
+    })
+  },
+
+  removeAllNotifications: function () {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.REMOVE_ALL_NOTIFICATION,
+    })
   },
 }
 

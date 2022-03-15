@@ -8,6 +8,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {changeJobPassword} from '../../api/changeJobPassword'
+import CatToolActions from '../../actions/CatToolActions'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -135,7 +136,8 @@ class JobContainer extends React.Component {
       this.oldPassword,
       revision_number,
     ).then(function (data) {
-      let notification = {
+      const notification = {
+        uid: 'change-password',
         title: 'Change job ' + label + ' password',
         text:
           'The ' +
@@ -146,7 +148,7 @@ class JobContainer extends React.Component {
         allowHtml: true,
         timer: 10000,
       }
-      let boxUndo = APP.addNotification(notification)
+      CatToolActions.addNotification(notification)
       let translator = self.props.job.get('translator')
       ManageActions.changeJobPassword(
         self.props.project,
@@ -158,7 +160,7 @@ class JobContainer extends React.Component {
       setTimeout(function () {
         $('.undo-password').off('click')
         $('.undo-password').on('click', function () {
-          APP.removeNotification(boxUndo)
+          CatToolActions.removeNotification(notification)
           changeJobPassword(
             self.props.job.toJS(),
             data.password,
@@ -166,14 +168,14 @@ class JobContainer extends React.Component {
             1,
             self.oldPassword,
           ).then(function (data) {
-            notification = {
+            const restoreNotification = {
               title: 'Change job password',
               text: 'The previous password has been restored.',
               type: 'warning',
               position: 'bl',
               timer: 7000,
             }
-            APP.addNotification(notification)
+            CatToolActions.addNotification(restoreNotification)
             ManageActions.changeJobPassword(
               self.props.project,
               self.props.job,
@@ -194,7 +196,8 @@ class JobContainer extends React.Component {
     changeJobPassword(this.props.job.toJS(), this.oldPassword).then(function (
       data,
     ) {
-      let notification = {
+      const notification = {
+        uid: 'remove-translator',
         title: 'Job unassigned',
         text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
         type: 'warning',
@@ -202,7 +205,7 @@ class JobContainer extends React.Component {
         allowHtml: true,
         timer: 10000,
       }
-      let boxUndo = APP.addNotification(notification)
+      CatToolActions.addNotification(notification)
       let translator = self.props.job.get('translator')
       ManageActions.changeJobPassword(
         self.props.project,
@@ -214,7 +217,7 @@ class JobContainer extends React.Component {
       setTimeout(function () {
         $('.undo-password').off('click')
         $('.undo-password').on('click', function () {
-          APP.removeNotification(boxUndo)
+          CatToolActions.removeNotification(notification)
           changeJobPassword(
             self.props.job.toJS(),
             data.password,
@@ -222,14 +225,15 @@ class JobContainer extends React.Component {
             1,
             self.oldPassword,
           ).then(function (data) {
-            notification = {
+            const passwordNotification = {
+              uid: 'change-password',
               title: 'Change job password',
               text: 'The previous password has been restored.',
               type: 'warning',
               position: 'bl',
               timer: 7000,
             }
-            APP.addNotification(notification)
+            CatToolActions.addNotification(passwordNotification)
             ManageActions.changeJobPassword(
               self.props.project,
               self.props.job,

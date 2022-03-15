@@ -115,6 +115,21 @@ AppDispatcher.register(function (action) {
       CatToolStore.clientConnect(action.clientId)
       CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT)
       break
+    case CatToolConstants.ADD_NOTIFICATION:
+      CatToolStore.emitChange(
+        CatToolConstants.ADD_NOTIFICATION,
+        action.notification,
+      )
+      break
+    case CatToolConstants.REMOVE_NOTIFICATION:
+      CatToolStore.emitChange(
+        CatToolConstants.REMOVE_NOTIFICATION,
+        action.notification,
+      )
+      break
+    case CatToolConstants.REMOVE_ALL_NOTIFICATION:
+      CatToolStore.emitChange(CatToolConstants.REMOVE_ALL_NOTIFICATION)
+      break
   }
 })
 

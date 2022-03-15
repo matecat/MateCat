@@ -13,4 +13,7 @@ module.exports = keyMirror({
   UPDATE_QR: null,
   STORE_SEARCH_RESULT: null,
   CLIENT_CONNECT: null,
+  ADD_NOTIFICATION: null,
+  REMOVE_NOTIFICATION: null,
+  REMOVE_ALL_NOTIFICATION: null,
 })

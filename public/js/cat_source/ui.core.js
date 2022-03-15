@@ -21,6 +21,7 @@ import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
 import AlertModal from './es6/components/modals/AlertModal'
+import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
 
 window.UI = {
   /**
@@ -270,7 +271,7 @@ window.UI = {
     if (where == 'before') {
       $('#outer').addClass('loadingBefore')
     } else if (where == 'after') {
-      $('#outer').addClass('loading')
+      $('#outer').addClass('loadingAfter')
     }
 
     getSegments({
@@ -306,7 +307,7 @@ window.UI = {
     )
       this.noMoreSegmentsAfter = true
 
-    $('#outer').removeClass('loading loadingBefore')
+    $('#outer').removeClass('loading loadingBefore loadingAfter')
     this.loadingMore = false
   },
 
@@ -353,7 +354,7 @@ window.UI = {
         SegmentActions.openSegment(seg)
       }
     }
-    $('#outer').removeClass('loading loadingBefore')
+    $('#outer').removeClass('loading loadingBefore loadingAfter')
 
     this.loadingMore = false
     CatToolActions.updateFooterStatistics()
@@ -372,7 +373,6 @@ window.UI = {
     this.removeCacheObjects()
     SegmentStore.removeAllSegments()
     SegmentActions.closeSideSegments()
-    $('#outer').empty()
   },
 
   renderFiles: function (files, where, starting) {
@@ -382,19 +382,6 @@ window.UI = {
     }
     var segments = []
     $.each(files, function () {
-      var newFile = ''
-      var articleToAdd = !$('#file').length
-      if (articleToAdd) {
-        newFile +=
-          '<article id="file" class="loading mbc-commenting-closed">' +
-          '   <div class="article-segments-container"></div>' +
-          '</article>'
-      }
-
-      if (articleToAdd) {
-        $('#outer').append(newFile)
-        $('#outer').append('   <div id="loader-getMoreSegments"/>')
-      }
       segments = segments.concat(this.segments)
     })
     UI.renderSegments(segments, false, where)
@@ -402,7 +389,6 @@ window.UI = {
 
     if (starting) {
       this.init()
-      // LXQ.getLexiqaWarnings();
     }
   },
 
@@ -413,9 +399,7 @@ window.UI = {
       justCreated
     ) {
       if (!this.SegmentsContainers) {
-        if (!this.SegmentsContainers) {
-          this.SegmentsContainers = []
-        }
+        this.SegmentsContainers = []
         var mountPoint = $('.article-segments-container')[0]
         this.SegmentsContainers[0] = ReactDOM.render(
           React.createElement(SegmentsContainer, {
@@ -704,7 +688,7 @@ window.UI = {
             })
           },
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
         self.displayedMessages.push(elem.token)
         return false
       }
@@ -713,13 +697,14 @@ window.UI = {
   checkVersion: function () {
     if (this.version != config.build_number) {
       var notification = {
+        uid: 'checkVersion',
         title: 'New version of MateCat',
         text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
         type: 'warning',
         allowHtml: true,
         position: 'bl',
       }
-      APP.addNotification(notification)
+      CatToolActions.addNotification(notification)
     }
   },
   registerQACheck: function () {
@@ -1130,8 +1115,8 @@ window.UI = {
         allowHtml: true,
         position: 'bl',
       }
-      APP.removeAllNotifications()
-      APP.addNotification(notification)
+      CatToolActions.removeAllNotifications()
+      CatToolActions.addNotification(notification)
     } else {
       SegmentActions.setSegmentPropagation(id_segment, null, false)
     }
@@ -1277,4 +1262,9 @@ $(document).ready(function () {
 $(window).resize(function () {
   // UI.fixHeaderHeightChange();
   APP.fitText($('#pname-container'), $('#pname'), 25)
+})
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
+  ReactDOM.render(<NotificationBox />, mountPoint)
 })
