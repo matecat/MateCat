@@ -6,6 +6,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import CommonUtils from '../../utils/commonUtils'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ReviewExtendedIssue extends React.Component {
   constructor(props) {
@@ -39,7 +40,7 @@ class ReviewExtendedIssue extends React.Component {
       visible: false,
     })
     let self = this
-    APP.removeAllNotifications()
+    CatToolActions.removeAllNotifications()
     let notification = {
       title: 'Issue deleted',
       text:
@@ -56,7 +57,7 @@ class ReviewExtendedIssue extends React.Component {
         }
       },
     }
-    let boxUndo = APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
     window.onbeforeunload = function () {
       SegmentActions.deleteIssue(self.props.issue, self.props.sid)
     }
@@ -68,7 +69,7 @@ class ReviewExtendedIssue extends React.Component {
           visible: true,
         })
         self.props.changeVisibility(self.props.issue.id, true)
-        APP.removeAllNotifications()
+        CatToolActions.removeAllNotifications()
         notification = {
           title: 'Issue deleted',
           text: 'The issue has been restored.',
@@ -76,7 +77,7 @@ class ReviewExtendedIssue extends React.Component {
           position: 'bl',
           timer: 5000,
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
         window.onbeforeunload = null
       })
     }, 500)

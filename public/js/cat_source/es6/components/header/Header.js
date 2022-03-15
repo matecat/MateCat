@@ -1,7 +1,6 @@
 import React from 'react'
 
 import TeamSelect from './TeamsSelect'
-import ProjectInfo from './HeaderProjectInfo'
 import FilterProjects from './manage/FilterProjects'
 import TeamConstants from '../../constants/TeamConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
@@ -257,12 +256,6 @@ class Header extends React.Component {
           <FilterProjects selectedTeam={this.selectedTeam} />
         </div>
       )
-    } else if (this.props.showJobInfo) {
-      return (
-        <div className="nine wide column header-project-container-info">
-          <ProjectInfo />
-        </div>
-      )
     }
   }
 
@@ -283,7 +276,6 @@ class Header extends React.Component {
     const {getHeaderComponentToShow, getUserIcon} = this
     const {
       showLinks,
-      showJobInfo,
       showFilterProjects,
       showModals,
       showTeams,
@@ -298,8 +290,6 @@ class Header extends React.Component {
 
     if (showLinks) {
       containerClass = 'user-teams thirteen'
-    } else if (showJobInfo) {
-      containerClass = 'user-teams three'
     }
 
     return (
@@ -369,7 +359,6 @@ class Header extends React.Component {
 
 Header.defaultProps = {
   showFilterProjects: false,
-  showJobInfo: false,
   showModals: true,
   showLinks: false,
   loggedUser: true,

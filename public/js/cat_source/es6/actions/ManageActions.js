@@ -13,6 +13,7 @@ import {createTeam} from '../api/createTeam'
 import {addUserTeam} from '../api/addUserTeam'
 import {removeTeamUser} from '../api/removeTeamUser'
 import {updateTeamName} from '../api/updateTeamName'
+import CatToolActions from './CatToolActions'
 
 let ManageActions = {
   /********* Projects *********/
@@ -177,7 +178,7 @@ let ManageActions = {
       allowHtml: true,
       autoDismiss: false,
     }
-    APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
   },
 
   changeProjectAssignee: function (team, project, user) {
@@ -271,7 +272,7 @@ let ManageActions = {
             allowHtml: true,
             timer: 3000,
           }
-          APP.addNotification(notification)
+          CatToolActions.addNotification(notification)
           getTeamMembers(selectedTeam.id).then(function (data) {
             selectedTeam.members = data.members
             selectedTeam.pending_invitations = data.pending_invitations

@@ -9,6 +9,7 @@ import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
 import CommonUtils from '../../utils/commonUtils'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -68,7 +69,7 @@ class ProjectContainer extends React.Component {
           allowHtml: true,
           timer: 3000,
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       }
     }
   }

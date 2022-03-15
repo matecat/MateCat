@@ -263,7 +263,6 @@ if (config.isLoggedIn) {
   getUserData().then((data) => {
     ReactDOM.render(
       React.createElement(Header, {
-        showJobInfo: true,
         showModals: true,
         showTeams: false,
         isQualityReport: true,
@@ -279,7 +278,6 @@ if (config.isLoggedIn) {
 } else {
   ReactDOM.render(
     React.createElement(Header, {
-      showJobInfo: true,
       showModals: true,
       showTeams: false,
       isQualityReport: true,
