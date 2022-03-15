@@ -1,0 +1,25 @@
+.virtual-list {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .row {
+    display: inline-block;
+    width: 100%;
+    height: auto;
+  }
+
+  .last-row > :last-child {
+    margin-bottom: 120px;
+  }
+}
+
+#file
+  .virtual-list
+  > :first-child
+  > :not(:first-child)
+  > div
+  > :first-child:not(.editor) {
+  border-top-color: #d9e0e8 !important;
+}

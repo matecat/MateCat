@@ -5,6 +5,7 @@ import React from 'react'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
+// import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
@@ -296,13 +297,15 @@ window.UI = {
       $(window).trigger('segmentsAdded', {resp: d.data.files})
     }
 
+    if (Object.keys(d.data.files).length === 0 && where === 'before')
+      this.noMoreSegmentsBefore = true
     if (
-      Object.keys(d.data.files).length === 0 ||
-      SegmentStore.getLastSegmentId() === config.last_job_segment
-    ) {
-      if (where === 'after') this.noMoreSegmentsAfter = true
-      if (where === 'before') this.noMoreSegmentsBefore = true
-    }
+      Object.keys(d.data.files).length === 0 &&
+      SegmentStore.getLastSegmentId() === config.last_job_segment &&
+      where === 'after'
+    )
+      this.noMoreSegmentsAfter = true
+
     $('#outer').removeClass('loading loadingBefore')
     this.loadingMore = false
   },
