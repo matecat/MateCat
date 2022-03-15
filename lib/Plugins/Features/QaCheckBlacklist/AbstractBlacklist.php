@@ -47,6 +47,23 @@ abstract class AbstractBlacklist {
     abstract public function getContent();
 
     /**
+     * @return int|null
+     */
+    public function getWordsCount()
+    {
+        $content = $this->getContent();
+
+        if ( null !== $content ) {
+
+            $splitted = explode( PHP_EOL, $content );
+
+            return count($splitted);
+        }
+
+        return null;
+    }
+
+    /**
      * Ensure cache in Redis
      */
     private function ensureCached() {

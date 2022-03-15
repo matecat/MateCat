@@ -61,7 +61,7 @@ const SegmentActions = {
           text: errors[0].message,
           type: 'error',
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
   },
   addSegments: function (segments, where) {
@@ -477,17 +477,11 @@ const SegmentActions = {
             position: 'bl',
           }),
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
   },
   abortCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
-  },
-  recomputeSegment: function (sid) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.RECOMPUTE_SIZE,
-      sid: sid,
-    })
   },
   /******************* EditArea ************/
   modifiedTranslation: function (sid, status) {
@@ -585,6 +579,13 @@ const SegmentActions = {
     if (!_.isUndefined(translation) && translation.length > 0) {
       SegmentActions.replaceEditAreaTextContent(sid, translation)
     }
+  },
+  setSegmentSaving(sid, saving) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_SEGMENT_SAVING,
+      sid,
+      saving,
+    })
   },
   /************ SPLIT ****************/
   openSplitSegment: function (sid) {

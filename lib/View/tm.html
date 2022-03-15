@@ -299,7 +299,7 @@
                                       </a>
 
                                     </div>
-                                    <div class="step2 pull-left hide">
+                                    <div class="step2 pull-left hide" style="display: none;">
 
                                         <form id="mt-provider-details">
                                             <span class="fields"></span>
@@ -313,27 +313,26 @@
                                             <!--</a>-->
                                         </form>
                                     </div>
-                                    <div class="step3 pull-left hide">
+                                    <div class="step3 pull-left hide" style="display: none;">
                                         <div class="text-left"></div>
 
                                     </div>
                                 </div>
+                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                            <p class="tm-warning-message" style="display: none;"><span></span></p>
 
                             <div class="block pull-right ">
                                 <tal:block tal:condition="php: empty(logged_user)">
                                     <a class="btn-ok clear add-tm add-mt-engine disabled">Add a MT engine</a>
-                                    <h3 class="pull-left">Available MT</h3>
                                 </tal:block>
                                 <tal:block tal:condition="php: !empty(logged_user)">
                                     <a class="btn-ok clear add-tm add-mt-engine">Add a MT engine</a>
-                                    <h3 class="pull-left">Available MT</h3>
                                 </tal:block>
                             </div>
-
-
-                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                            <p class="tm-warning-message" style="display: none;"><span></span></p>
-                            <table class="mgmt-mt">
+                            <div class="block pull-right ">
+                                    <h3 class="pull-left">Active MT</h3>
+                            </div>
+                            <table class="mgmt-mt active-mt">
                                 <thead>
                                 <tr>
                                     <th class="privatekey">Engine Name</th>
@@ -362,21 +361,6 @@
                                                 &nbsp;
                                             </td>
                                         </tr>
-                                        <tal:block tal:repeat="engine mt_engines">
-                                        <tr class="" data-id="${engine/id}">
-                                            <td class="mt-provider" tal:content="structure engine/name"></td>
-                                            <td class="engine-name">
-                                                <div class="">${engine/description}</div>
-                                            </td>
-                                            <td class="enable-mt text-center">
-                                                <input tal:condition="php: page == 'home'" type="checkbox" />
-                                                <!--<input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />-->
-                                            </td>
-                                            <td class="action">
-                                                <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
-                                            </td>
-                                        </tr>
-                                        </tal:block>
                                     </tal:block>
 
                                     <tal:block tal:condition="php: page == 'cattool'">
@@ -397,6 +381,40 @@
                                             </tal:block>
                                         </tal:block>
 
+                                    </tal:block>
+
+                                </tbody>
+
+                            </table>
+                            <tal:block tal:condition="php: !empty(logged_user)">
+
+                                <div class="block pull-right ">
+                                    <h3 class="pull-left">Inactive MT</h3>
+                                </div>
+                                <table class="mgmt-mt inactive-mt">
+
+                                    <tbody>
+
+                                    <tal:block tal:condition="php: page == 'home'">
+                                        <tal:block tal:repeat="engine mt_engines">
+                                            <tr class="inactivemt" data-id="${engine/id}">
+                                                <td class="mt-provider" tal:content="structure engine/name"></td>
+                                                <td class="engine-name">
+                                                    <div class="">${engine/description}</div>
+                                                </td>
+                                                <td class="enable-mt text-center">
+                                                    <input tal:condition="php: page == 'home'" type="checkbox" />
+                                                    <!--<input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />-->
+                                                </td>
+                                                <td class="action">
+                                                    <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
+                                                </td>
+                                            </tr>
+                                        </tal:block>
+                                    </tal:block>
+
+                                    <tal:block tal:condition="php: page == 'cattool'">
+
                                         <tal:block tal:repeat="engine mt_engines">
                                             <tal:block tal:condition="php: mt_id != engine.id">
                                                 <tr class="" data-id="${engine/id}">
@@ -414,9 +432,10 @@
                                         </tal:block>
                                     </tal:block>
 
-                                </tbody>
+                                    </tbody>
 
-                            </table>
+                                </table>
+                            </tal:block>
                             <tal:block tal:condition="php: empty(logged_user)">
                                 <tal:block tal:condition="php: page == 'home'">
                                 <p style="margin-top: 138px;"><a id='sign-in-o-mt' href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>

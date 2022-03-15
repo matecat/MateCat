@@ -78,7 +78,7 @@ class BlacklistController extends KleinController {
 
         $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
         $model->content = $blacklistUtils->getContent($this->request->param( 'id_file' ));
-
+        $model->blacklist_word_count = (!empty($model->content)) ? count($model->content) : null;
         $this->response->json( $model ) ;
     }
 
@@ -125,7 +125,7 @@ class BlacklistController extends KleinController {
         $dao->destroyGetByJobIdAndPasswordCache($chunk->id, $chunk->password);
         $model = $dao->getByJobIdAndPassword($chunk->id, $chunk->password);
         if(!empty($model)){
-            $this->returnError('Project has already a blacklist');
+            $this->returnError('Job has already a blacklist');
         }
 
         // upload file

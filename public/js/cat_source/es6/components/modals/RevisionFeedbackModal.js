@@ -26,7 +26,7 @@ class RevisionFeedbackModal extends React.Component {
           text: 'Feedback has been submitted correctly',
           type: 'success',
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
       .catch(() => {
         var notification = {
@@ -34,7 +34,7 @@ class RevisionFeedbackModal extends React.Component {
           text: 'An error occurred while sending feedback please try again or contact support.',
           type: 'error',
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
   }
 

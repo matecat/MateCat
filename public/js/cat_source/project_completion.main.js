@@ -3,6 +3,7 @@ import {setChunkComplete} from './es6/api/setChunkComplete'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
 import AlertModal from './es6/components/modals/AlertModal'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
+import CatToolActions from './es6/actions/CatToolActions'
 
 var ProjectCompletion = {
   enabled: function () {
@@ -179,13 +180,9 @@ if (ProjectCompletion.enabled()) {
 
     var original_handleClickOnReadOnly = UI.handleClickOnReadOnly
 
-    var translateWarningMessage
-
     var handleClickOnReadOnly = function () {
       if (!config.isReview && config.job_completion_current_phase == 'revise') {
-        if (!translateWarningMessage || translateWarningMessage.dismissed) {
-          showTranslateWarningMessage()
-        }
+        showTranslateWarningMessage()
       } else {
         original_handleClickOnReadOnly.apply(undefined, arguments)
       }
@@ -261,16 +258,16 @@ if (ProjectCompletion.enabled()) {
           '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
       }
 
-      translateWarningMessage = window.intercomErrorNotification =
-        APP.addNotification({
-          autoDismiss: false,
-          dismissable: true,
-          position: 'tc',
-          text: message,
-          title: 'Warning',
-          type: 'warning',
-          allowHtml: true,
-        })
+      CatToolActions.addNotification({
+        uid: 'translate-warning',
+        autoDismiss: false,
+        dismissable: true,
+        position: 'tc',
+        text: message,
+        title: 'Warning',
+        type: 'warning',
+        allowHtml: true,
+      })
     }
 
     $(document).on(
@@ -291,7 +288,7 @@ if (ProjectCompletion.enabled()) {
         config.job_completion_current_phase == 'translate' &&
         config.job_marked_complete == 0
       ) {
-        APP.addNotification({
+        CatToolActions.addNotification({
           type: 'warning',
           title: 'Warning',
           text: 'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',

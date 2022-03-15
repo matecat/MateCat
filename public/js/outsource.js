@@ -2,6 +2,7 @@ import ManageActions from './cat_source/es6/actions/ManageActions'
 import {addJobTranslator} from './cat_source/es6/api/addJobTranslator'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
 if (!window.UI) {
   window.UI = {}
 }
@@ -55,7 +56,7 @@ $.extend(window.UI, {
       allowHtml: true,
       timer: 10000,
     }
-    APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
     ManageActions.changeJobPasswordFromOutsource(
       project,
       job,
@@ -172,6 +173,6 @@ $.extend(window.UI, {
       allowHtml: true,
       timer: 10000,
     }
-    APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
   },
 })
