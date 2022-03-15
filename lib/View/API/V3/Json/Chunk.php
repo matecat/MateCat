@@ -128,7 +128,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$chunk->total_raw_wc,
                 'standard_wc'             => (float)$chunk->standard_analysis_wc,
-                'blacklistWordsCount'     => $blacklistWordsCount,
+                'blacklist_word_count'     => $blacklistWordsCount,
         ];
 
         if ( $featureSet->hasRevisionFeature() ) {

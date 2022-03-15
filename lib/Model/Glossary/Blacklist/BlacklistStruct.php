@@ -13,6 +13,7 @@ class BlacklistStruct extends DataAccess_AbstractDaoSilentStruct implements Data
     public $file_name;
     public $target;
     public $uid;
+    public $blacklist_word_count;
 
     public function __construct( \Chunks_ChunkStruct $chunk ) {
         parent::__construct([

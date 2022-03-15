@@ -78,7 +78,7 @@ class BlacklistController extends KleinController {
 
         $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
         $model->content = $blacklistUtils->getContent($this->request->param( 'id_file' ));
-
+        $model->blacklist_word_count = (!empty($model->content)) ? count($model->content) : null;
         $this->response->json( $model ) ;
     }
 
