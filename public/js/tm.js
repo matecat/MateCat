@@ -1692,13 +1692,16 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
     activateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" checked class="temp" />')
-      var tbody = tr.parents('tbody')
-      $(tbody).prepend(tr)
-      tbody
-        .find('.activemt input[type=checkbox]')
-        .replaceWith('<input type="checkbox" />')
-      tbody.find('.activemt').removeClass('activemt')
-      tr.addClass('activemt').removeClass('temp')
+
+      const activeMtBody = $('.mgmt-mt.active-mt tbody')
+      activeMtBody.append(tr)
+      // var tbody = tr.parents('tbody')
+      tr.removeClass('inactivemt')
+      activeMtBody.find('.activemt input[type=checkbox]').each((i, elem) => {
+        UI.deactivateMT(elem)
+      })
+      // $(tbody).prepend(tr)
+      tr.addClass('activemt').removeClass('inactivemt').removeClass('temp')
       $('#mt_engine option').removeAttr('selected')
       $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr(
         'selected',
@@ -1709,9 +1712,12 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
     deactivateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" />')
-      tr.removeClass('activemt')
+      tr.removeClass('activemt').addClass('inactivemt')
       $('#mt_engine option').removeAttr('selected')
       $('#mt_engine option[value=0]').attr('selected', 'selected')
+      const inactiveMtBody = $('.mgmt-mt.inactive-mt tbody')
+      inactiveMtBody.prepend(tr)
+      UI.pulseMTadded($('.inactivemt').first())
     },
     openTMActionDropdown: function (switcher) {
       $(switcher).parents('td').find('.dropdown').toggle()
@@ -2273,10 +2279,10 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
         .val()
       var validateReturn = CommonUtils.validateEmailList(emails)
 
-      if (validateReturn !== true) {
+      if (validateReturn.result !== true) {
         var errorMsg =
           'The email <span style="font-weight: bold">' +
-          validateReturn +
+          validateReturn.emails +
           '</span> is not valid.'
 
         if (tr.closest('table').attr('id') == 'inactivetm') {

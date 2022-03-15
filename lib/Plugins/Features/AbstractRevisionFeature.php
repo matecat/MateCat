@@ -24,6 +24,7 @@ use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
+use LQA\ModelStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Revise_FeedbackDAO;
@@ -469,43 +470,56 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @throws \Predis\Connection\ConnectionException
      * @throws \ReflectionException
+     * @throws \Exceptions\ValidationError
      */
 
-    public static function loadAndValidateModelFromJsonFile( $projectStructure, $jsonPath = null ) {
-        // detect if the project created was a zip file, in which case try to detect
-        // id_qa_model from json file.
-        // otherwise assign the default model
+    public static function loadAndValidateModelFromJsonFile( &$projectStructure, $jsonPath = null ) {
 
-        $qa_model = false;
-        $fs       = FilesStorageFactory::create();
-        $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure[ 'uploadToken' ] );
+        // CASE 1 there is an injected QA template id
+        if(isset($projectStructure['qa_model_template']) and null !== $projectStructure['qa_model_template']){
+            $decoded_model = $projectStructure['qa_model_template'];
+        }
+        // CASE 2 there a is an injected qa_model
+        elseif(isset($projectStructure['qa_model']) and null !== $projectStructure['qa_model'] ){
+            $decoded_model = $projectStructure['qa_model'];
+        }
+        // CASE3 otherwise
+        else {
+            // detect if the project created was a zip file, in which case try to detect
+            // id_qa_model from json file.
+            // otherwise assign the default model
 
-        Log::doJsonLog( $zip_file );
+            $qa_model = false;
+            $fs       = FilesStorageFactory::create();
+            $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure[ 'uploadToken' ] );
 
-        if ( $zip_file !== false ) {
-            $zip = new ZipArchive();
-            $zip->open( $zip_file );
-            $qa_model = $zip->getFromName( '__meta/qa_model.json' );
+            Log::doJsonLog( $zip_file );
 
-            if ( AbstractFilesStorage::isOnS3() ){
-                unlink( $zip_file );
+            if ( $zip_file !== false ) {
+                $zip = new ZipArchive();
+                $zip->open( $zip_file );
+                $qa_model = $zip->getFromName( '__meta/qa_model.json' );
+
+                if ( AbstractFilesStorage::isOnS3() ){
+                    unlink( $zip_file );
+                }
+
             }
 
-        }
+            // File is not a zip OR model was not found in zip
 
-        // File is not a zip OR model was not found in zip
+            Log::doJsonLog( "QA model is : " . var_export( $qa_model, true ) );
 
-        Log::doJsonLog( "QA model is : " . var_export( $qa_model, true ) );
-
-        if ( $qa_model === false ) {
-            if ( $jsonPath == null ) {
-                $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
-            } else {
-                $qa_model = file_get_contents( $jsonPath );
+            if ( $qa_model === false ) {
+                if ( $jsonPath == null ) {
+                    $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
+                } else {
+                    $qa_model = file_get_contents( $jsonPath );
+                }
             }
-        }
 
-        $decoded_model = json_decode( $qa_model, true );
+            $decoded_model = json_decode( $qa_model, true );
+        }
 
         if ( $decoded_model === null ) {
             $projectStructure[ 'result' ][ 'errors' ][] = [

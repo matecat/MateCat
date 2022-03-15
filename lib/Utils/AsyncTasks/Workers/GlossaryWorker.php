@@ -171,7 +171,10 @@ class GlossaryWorker extends AbstractWorker {
         $tmp_result = [];
         foreach ( $TMS_RESULT as $k => $val ) {
             // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-            if ( ( $res = mb_stripos( $segment, preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k ) ) ) === false ) {
+            $tmsMatch = preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k );
+            $res = ($tmsMatch !== null) ? mb_stripos( $segment, $tmsMatch ) : null;
+
+            if ( $res  === false ) {
                 unset( $TMS_RESULT[ $k ] ); // unset glossary terms not contained in the request
             } else {
                 $tmp_result[ $k ] = $res;
@@ -301,9 +304,6 @@ class GlossaryWorker extends AbstractWorker {
             }
         }
 
-        $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-        $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-
         $config[ 'prop' ] = $tmProps;
         $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
         $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
@@ -386,17 +386,9 @@ class GlossaryWorker extends AbstractWorker {
 
         $config['id_match'] = $payload['id_segment'];
 
-        $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-        $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-
         $config[ 'prop' ] = $tmProps;
         $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
         $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
-
-        if ( $config[ 'newsegment' ] && $config[ 'newtranslation' ] ) {
-            $config[ 'newsegment' ]     = htmlspecialchars( $config[ 'newsegment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-            $config[ 'newtranslation' ] = htmlspecialchars( $config[ 'newtranslation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-        }
 
         //prepare the error report
         $set_code = [];

@@ -483,12 +483,6 @@ const SegmentActions = {
   abortCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
   },
-  recomputeSegment: function (sid) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.RECOMPUTE_SIZE,
-      sid: sid,
-    })
-  },
   /******************* EditArea ************/
   modifiedTranslation: function (sid, status) {
     AppDispatcher.dispatch({
@@ -585,6 +579,13 @@ const SegmentActions = {
     if (!_.isUndefined(translation) && translation.length > 0) {
       SegmentActions.replaceEditAreaTextContent(sid, translation)
     }
+  },
+  setSegmentSaving(sid, saving) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_SEGMENT_SAVING,
+      sid,
+      saving,
+    })
   },
   /************ SPLIT ****************/
   openSplitSegment: function (sid) {

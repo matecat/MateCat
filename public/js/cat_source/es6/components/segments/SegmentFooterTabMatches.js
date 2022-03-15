@@ -191,7 +191,6 @@ class SegmentFooterTabMatches extends React.Component {
    * Do not delete, overwritten by plugin
    */
   componentDidUpdate(prevProps) {
-    setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment))
     if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
       SegmentActions.getContribution(this.props.segment.sid)
     }

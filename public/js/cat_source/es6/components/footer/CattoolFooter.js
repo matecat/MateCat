@@ -129,7 +129,13 @@ export const CattolFooter = ({
 
   const getTooltip = (targetName) =>
     isShowingTooltip[targetName] && (
-      <TooltipInfo text={'Job complete, no unapproved segments left'} />
+      <TooltipInfo
+        text={
+          !config.isReview
+            ? 'Job complete, no untranslated segments left'
+            : 'Job complete, no unapproved segments left'
+        }
+      />
     )
   const removeTooltip = () => setIsShowingTooltip(false)
 

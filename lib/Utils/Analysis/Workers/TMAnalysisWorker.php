@@ -159,7 +159,9 @@ class TMAnalysisWorker extends AbstractWorker {
                 isset( $this->_matches[ 0 ][ 'ICE' ] ) && $this->_matches[ 0 ][ 'ICE' ]
         );
 
-        $eq_words       = $equivalentWordMapping[ $new_match_type ] * $queueElement->params->raw_word_count / 100;
+        $eqWordMapping = (isset($equivalentWordMapping[ $new_match_type ])) ? $equivalentWordMapping[ $new_match_type ] : null;
+
+        $eq_words       = $eqWordMapping * $queueElement->params->raw_word_count / 100;
         $standard_words = $eq_words;
 
         /**
@@ -372,7 +374,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
                 if ( $isICE ) {
                     $tm_match_fuzzy_band            = "ICE";
-                    $tm_rate_paid                   = $equivalentWordMapping[ $tm_match_fuzzy_band ];
+                    $tm_rate_paid                   = (isset($equivalentWordMapping[ $tm_match_fuzzy_band ])) ? $equivalentWordMapping[ $tm_match_fuzzy_band ] : null;
 //                    $equivalentWordMapping[ "ICE" ] = 0;
                 } else {
                     $tm_match_fuzzy_band = ( $publicTM ) ? "100%_PUBLIC" : "100%";
