@@ -51,8 +51,6 @@ class BlacklistUtils
         foreach ($warnings as $warning){
             WarningDao::deleteByScope($model->id_job, $warning->id_segment, 'blacklist');
         }
-
-        // "blacklist:id_job:{$this->id_job}:password:{$this->password}"
     }
 
     /**

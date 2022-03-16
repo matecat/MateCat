@@ -95,7 +95,8 @@ class Chunk extends \API\V2\Json\Chunk {
         $blacklistWordsCount = null;
 
         $dao = new BlacklistDao();
-        $model = $dao->getByJobIdAndPassword((int)$chunk->id, $chunk->password);
+        $dao->destroyGetByJobIdAndPasswordCache($chunk->id, $chunk->password);
+        $model = $dao->getByJobIdAndPassword($chunk->id, $chunk->password);
 
         if(!empty($model)){
             $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );

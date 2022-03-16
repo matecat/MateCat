@@ -55,7 +55,7 @@ abstract class AbstractBlacklist {
 
         if ( null !== $content ) {
 
-            $splitted = explode( PHP_EOL, $content );
+            $splitted = explode( "\n", $content );
 
             return count($splitted);
         }
