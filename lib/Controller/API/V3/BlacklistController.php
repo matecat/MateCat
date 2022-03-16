@@ -125,7 +125,7 @@ class BlacklistController extends KleinController {
         $dao->destroyGetByJobIdAndPasswordCache($chunk->id, $chunk->password);
         $model = $dao->getByJobIdAndPassword($chunk->id, $chunk->password);
         if(!empty($model)){
-            $this->returnError('Project has already a blacklist');
+            $this->returnError('Job has already a blacklist');
         }
 
         // upload file
