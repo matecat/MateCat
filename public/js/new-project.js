@@ -634,6 +634,10 @@ $.extend(UI.UPLOAD_PAGE, {
       e.preventDefault()
       $('.supported-formats').show()
     })
+    $('.supported-formats .x-popup').click(function (e) {
+      e.preventDefault()
+      $('.supported-formats').hide()
+    })
     $('.more-options-cont').on('click', function (e) {
       e.preventDefault()
       APP.openOptionsPanel('tm')
