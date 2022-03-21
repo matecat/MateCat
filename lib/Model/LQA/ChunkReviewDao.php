@@ -246,6 +246,12 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param Chunks_ChunkStruct $chunkStruct
+     * @param null               $ttl
+     *
+     * @return bool|int
+     */
     public function destroyCacheForFindChunkReviews( Chunks_ChunkStruct $chunkStruct, $ttl = null ) {
 
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement([ $chunkStruct ], null, $ttl);
