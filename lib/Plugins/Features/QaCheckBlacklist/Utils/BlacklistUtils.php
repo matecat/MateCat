@@ -70,7 +70,7 @@ class BlacklistUtils
         $job = \Jobs_JobDao::getByIdAndPassword($model->id_job, $model->password, 5 * 60);
         $blacklist = $this->getAbstractBlacklist($job);
 
-        return explode("\n", $blacklist->getContent());
+        return $blacklist->getWords();
     }
 
     /**
@@ -159,13 +159,20 @@ class BlacklistUtils
                     'save_as' => "/tmp/glossary/" . md5($job->id . $job->password . 'blacklist').'.txt'
             ];
 
+            $content = $s3Client->openItem([
+                    'bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                    'key' => $blacklistFilePath,
+            ]);
+
             $s3Client->downloadItem( $s3Params );
             $blacklistFilePath = $s3Params[ 'save_as' ];
         } else {
             $blacklistFilePath = \INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $job->id . DIRECTORY_SEPARATOR . $job->password . DIRECTORY_SEPARATOR . 'blacklist.txt';
+            $content = file_get_contents($blacklistFilePath);
         }
 
-        $blacklistFromTextFile = new BlacklistFromTextFile( $blacklistFilePath,  $job->id, $job->password );
+        $blacklistFromTextFile = new BlacklistFromTextFile( $blacklistFilePath, $job->id, $job->password );
+        $blacklistFromTextFile->setContent($content);
         $this->ensureCached($keyOnCache, serialize($blacklistFromTextFile));
 
         return $blacklistFromTextFile;
@@ -179,8 +186,13 @@ class BlacklistUtils
      */
     private function ensureCached($key, $content)
     {
-        $this->redis->set( $key, $content );
-        $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
+        try {
+            $this->redis->set( $key, $content );
+            $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
+        } catch (\Exception $exception){
+            \Log::doJsonLog('Error in saving '.$key.' on Redis:' . $exception->getMessage());
+            // do nothing
+        }
     }
 
     /**

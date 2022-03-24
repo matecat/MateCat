@@ -23,6 +23,11 @@ abstract class AbstractBlacklist {
     protected $password;
 
     /**
+     * @var string
+     */
+    protected $content;
+
+    /**
      * @var \Predis\Client
      */
     protected $redis ;
@@ -44,23 +49,39 @@ abstract class AbstractBlacklist {
         $this->redis     = ( new RedisHandler() )->getConnection();
     }
 
+    /**
+     * @param string $content
+     */
+    public function setContent( $content ) {
+        $this->content = $content;
+    }
+
+    /**
+     * @return mixed
+     */
     abstract public function getContent();
+
+    /**
+     * @return array|null
+     */
+    public function getWords()
+    {
+        $content = $this->getContent();
+
+        if ( null !== $content ) {
+
+            return explode( PHP_EOL, $content );
+        }
+
+        return null;
+    }
 
     /**
      * @return int|null
      */
     public function getWordsCount()
     {
-        $content = $this->getContent();
-
-        if ( null !== $content ) {
-
-            $splitted = explode( "\n", $content );
-
-            return count($splitted);
-        }
-
-        return null;
+        return (!empty($this->getWords())) ? count($this->getWords()) : null;
     }
 
     /**
@@ -70,12 +91,10 @@ abstract class AbstractBlacklist {
         $key = $this->getJobCacheKey();
 
         if ( $this->checkIfBlacklistKeywordsExistsInCache() ) {
-            $content = $this->getContent();
-
-            $splitted = explode( PHP_EOL, $content );
-            foreach ( $splitted as $token ) {
-                $token = trim( $token );
-                $this->redis->sadd( $key, $token );
+            $words = $this->getWords();
+            foreach ( $words as $word ) {
+                $word = trim( $word );
+                $this->redis->sadd( $key, $word );
             }
 
             $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ;
