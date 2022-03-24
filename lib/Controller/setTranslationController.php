@@ -323,13 +323,13 @@ class setTranslationController extends ajaxController {
         $counter = new PhCounter();
         $counter->transform( $this->__postInput[ 'translation' ] );
 
-        $pipeline = new Pipeline();
+        $pipeline = new Pipeline($this->chunk->source, $this->chunk->target);
         for ( $i = 0; $i < $counter->getCount(); $i++ ) {
             $pipeline->getNextId();
         }
 
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
-        $pipeline->addLast( new SprintfToPH( $this->chunk->source, $this->chunk->target ) );
+        $pipeline->addLast( new SprintfToPH() );
 
         $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
         $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
