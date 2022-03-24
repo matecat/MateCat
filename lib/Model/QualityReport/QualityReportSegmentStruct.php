@@ -157,6 +157,8 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
     public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
 
         $QA = new \QA( $this->segment, $this->translation );
+        $QA->setSourceSegLang($chunk->source);
+        $QA->setTargetSegLang($chunk->target);
         $QA->setChunk($chunk);
         $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
