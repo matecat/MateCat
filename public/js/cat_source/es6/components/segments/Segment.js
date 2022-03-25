@@ -786,7 +786,7 @@ class Segment extends React.Component {
             <SegmentsCommentsIcon {...this.props} />
           ) : null}
 
-          {this.props.isReviewExtended && (
+          {this.props.isReview && (
             <div
               data-mount="translation-issues-button"
               className="translation-issues-button"
