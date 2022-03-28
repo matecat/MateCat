@@ -586,6 +586,16 @@
     ,
         {
             "localized":[{
+                "en":"Emakhuwa"
+            }],
+            "isocode":"vmw",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"vmw-MZ"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Esperanto"
             }],
             "isocode":"eo",
@@ -1659,10 +1669,10 @@
             "localized":[{
                 "en":"Odia"
             }],
-            "isocode":"or",
+            "isocode":"ory",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"or-IN"
+            "rfc3066code":"ory-IN"
         }
     ,
         {
