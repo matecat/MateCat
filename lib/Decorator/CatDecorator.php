@@ -123,8 +123,6 @@ class CatDecorator extends \AbstractDecorator {
                 Constants_TranslationStatus::STATUS_DRAFT      => 'Draft',
                 Constants_TranslationStatus::STATUS_TRANSLATED => 'Translated',
                 Constants_TranslationStatus::STATUS_APPROVED   => 'Approved',
-                Constants_TranslationStatus::STATUS_REJECTED   => 'Rejected',
-                Constants_TranslationStatus::STATUS_FIXED      => 'Fixed',
                 Constants_TranslationStatus::STATUS_REBUTTED   => 'Rebutted'
         );
     }
