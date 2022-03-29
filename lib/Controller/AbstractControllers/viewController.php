@@ -105,14 +105,10 @@ abstract class viewController extends controller {
      */
     public function finalize() {
 
-        try {
-            $this->setInitialTemplateVars();
-            $this->setTemplateVars();
-            $this->featureSet->run( 'appendDecorators', $this, $this->template );
-            $this->setTemplateFinalVars();
-        } catch ( Exception $ignore ) {
-            Log::doJsonLog( $ignore );
-        }
+        $this->setInitialTemplateVars();
+        $this->setTemplateVars();
+        $this->featureSet->run( 'appendDecorators', $this, $this->template );
+        $this->setTemplateFinalVars();
 
         ob_get_contents();
         ob_get_clean();
