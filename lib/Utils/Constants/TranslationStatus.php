@@ -47,9 +47,11 @@ class Constants_TranslationStatus {
 
     public static $REVISION_STATUSES = array(
             self::STATUS_APPROVED,
+            self::STATUS_REJECTED
     );
 
     public static $POST_REVISION_STATUSES = array(
+            self::STATUS_FIXED,
             self::STATUS_REBUTTED
     );
 

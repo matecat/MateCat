@@ -109,7 +109,9 @@ class CatDecorator extends \AbstractDecorator {
         $statuses = array_merge(
                 Constants_TranslationStatus::$INITIAL_STATUSES,
                 Constants_TranslationStatus::$TRANSLATION_STATUSES,
-                Constants_TranslationStatus::$REVISION_STATUSES
+                [
+                    Constants_TranslationStatus::STATUS_APPROVED,
+                ]
         );
 
         return array_map( function ( $item ) {
