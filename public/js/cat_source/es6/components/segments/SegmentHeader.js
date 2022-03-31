@@ -105,8 +105,7 @@ class SegmentHeader extends React.PureComponent {
     )
     return segmentOpened ? (
       <div className="header toggle" id={'segment-' + sid + '-header'}>
-        {autopropagated}
-        {percentageHtml}
+        {autopropagated ? autopropagatedHtml : percentageHtml}
         {saving ? savingHtml : null}{' '}
       </div>
     ) : autopropagated || repetition ? (
