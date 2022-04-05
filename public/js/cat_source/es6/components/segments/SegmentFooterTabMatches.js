@@ -151,7 +151,11 @@ class SegmentFooterTabMatches extends React.Component {
       <ul className="graysmall-details">
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         <li>{match.suggestion_info}</li>
-
+        <li className={'graydesc'}>
+          <span className={'bold'} style={{fontSize: '14px'}}>
+            {CommonUtils.getLanguageNameFromLocale(match.target)}
+          </span>
+        </li>
         <li className="graydesc">
           Source:
           <span className="bold" style={{fontSize: '14px'}}>
@@ -159,11 +163,7 @@ class SegmentFooterTabMatches extends React.Component {
             {match.cb}
           </span>
         </li>
-        <li className={'graydesc'}>
-          <span className={'bold'} style={{fontSize: '14px'}}>
-            {CommonUtils.getLanguageNameFromLocale(match.target)}
-          </span>
-        </li>
+
         {this.getMatchInfoMetadata(match)}
       </ul>
     )
