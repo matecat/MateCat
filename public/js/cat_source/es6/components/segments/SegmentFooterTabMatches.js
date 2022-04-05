@@ -160,7 +160,7 @@ class SegmentFooterTabMatches extends React.Component {
           </span>
         </li>
         <li className={'graydesc'}>
-          <span className={'bold'}>
+          <span className={'bold'} style={{fontSize: '14px'}}>
             {CommonUtils.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
