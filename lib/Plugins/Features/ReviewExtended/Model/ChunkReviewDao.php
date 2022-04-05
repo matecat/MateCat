@@ -105,7 +105,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
         $result = $stmt->fetch();
 
-        return $result[ 0 ] == null ? 0 : $result[ 0 ];
+        return ( !$result || $result[ 0 ] == null ) ? 0 : $result[ 0 ];
     }
 
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {

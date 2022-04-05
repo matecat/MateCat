@@ -174,32 +174,6 @@ class catController extends viewController {
         $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
         $this->template->user_keys = $userKeys->getKeys( $this->chunk->tm_keys ) ;
 
-        /**
-         * Retrieve information about job errors
-         * ( Note: these information are fed by the revision process )
-         * @see setRevisionController
-         */
-
-        $reviseClass = new Constants_Revise;
-
-        $jobQA = new Revise_JobQA(
-                $this->jid,
-                $this->password,
-                $this->wStruct->getTotal(),
-                $reviseClass
-        );
-
-        list( $jobQA, $reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $this->jid, $this->password, $this->wStruct->getTotal() );
-
-
-        $jobQA->retrieveJobErrorTotals();
-
-        $this->qa_data = json_encode( $jobQA->getQaData() );
-
-        $jobVote = $jobQA->evalJobVote();
-        $this->qa_overall = $jobVote[ 'minText' ];
-
-
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
 
         //this gets all engines of the user

@@ -14,10 +14,11 @@ class Segments_SegmentOriginalDataDao extends DataAccess_AbstractDao {
         $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_original_data WHERE id_segment = ? " );
 
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
                 new Segments_SegmentOriginalDataStruct(),
                 [ $id_segment ]
-        )[0];
+        );
+        return !empty( $result ) ? $result[0] : null;
     }
 
     /**

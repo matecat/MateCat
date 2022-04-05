@@ -72,27 +72,6 @@ abstract class DataAccess_AbstractDao {
         return $this->database;
     }
 
-    /**
-     * @param DataAccess_IDaoStruct $obj
-     *
-     * @throws Exception
-     */
-    public function create( DataAccess_IDaoStruct $obj ) {
-        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
-    }
-
-    public function read( DataAccess_IDaoStruct $obj ) {
-        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
-    }
-
-    public function atomicUpdate( DataAccess_IDaoStruct $obj ) {
-        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
-    }
-
-    public function delete( DataAccess_IDaoStruct $obj ) {
-        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
-    }
-
     public function createList( Array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
@@ -126,7 +105,7 @@ abstract class DataAccess_AbstractDao {
      *                      <li>A DataAccess_IDaoStruct object</li>
      *                  </ul>
      */
-    public static function sanitizeArray( $input ) {
+    public static function sanitizeArray( array $input ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 

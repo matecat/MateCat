@@ -531,7 +531,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         /**
          * Append the qa model to the project structure for later use.
          */
-        if ( !array_key_exists( 'features', $projectStructure ) ) {
+        if ( !isset( $projectStructure[ 'features' ] ) ) {
             $projectStructure[ 'features' ] = [];
         }
 

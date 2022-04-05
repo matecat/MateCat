@@ -192,7 +192,7 @@ class QualityReportModel {
         );
         $name             = '';
 
-        if ( $completion_event[ 'uid' ] != null ) {
+        if ( !empty( $completion_event ) && $completion_event[ 'uid' ] != null ) {
             $userDao = new Users_UserDao( \Database::obtain() );
             $user    = $userDao->getByUid( $completion_event[ 'uid' ] );
             $name    = $user->fullName();

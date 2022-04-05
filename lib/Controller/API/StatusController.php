@@ -9,7 +9,7 @@
  */
 class StatusController extends ajaxController {
 
-    protected $api_output = array(
+    protected array $api_output = array(
         'status' => 'FAIL'
     );
 

@@ -91,11 +91,10 @@ class Executor implements SplObserver {
      * Logging method
      *
      * @param      $_msg
-     * @param bool $from_self
      */
-    protected function _logMsg( $_msg, $from_self = true ) {
+    protected function _logMsg( $_msg ) {
         if ( INIT::$DEBUG ) {
-            echo "[" . date( DATE_RFC822 ) . "] " . $_msg . "\n";
+            echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
             Log::doJsonLog( $_msg );
         }
     }
@@ -248,7 +247,7 @@ class Executor implements SplObserver {
                 /**
                  * Do not re-instantiate an already existent object
                  */
-                if ( ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
+                if ( $this->_worker == null || ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
                     $this->_worker->attach( $this );
                     $this->_worker->setPid( $this->_executor_instance_id );

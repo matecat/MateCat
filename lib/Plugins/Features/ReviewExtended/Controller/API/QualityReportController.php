@@ -142,7 +142,7 @@ class QualityReportController extends BaseChunkController {
                 "prev"            => null,
         ];
 
-        $filter_query = http_build_query( [ 'filter' => array_filter( $filter ) ] );
+        $filter_query = http_build_query( [ 'filter' => array_filter( empty( $filter ) ? [] : $filter ) ] );
         if ( $this->chunk->job_last_segment > end( $segments_id ) ) {
             $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
                             null );
@@ -255,6 +255,10 @@ class QualityReportController extends BaseChunkController {
 
                 $return[ $key ] = (int)$tte->tte;
             }
+        }
+
+        if ( false === isset( $return[ 'translation' ] ) ) {
+            $return[ 'translation' ] = 0;
         }
 
         if ( false === isset( $return[ 'revise' ] ) ) {

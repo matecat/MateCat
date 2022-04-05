@@ -85,13 +85,19 @@ class SecondPassReview extends BaseFeature {
     }
 
     public function filterGetSegmentsResult( $data, Chunks_ChunkStruct $chunk ) {
+
+        if ( empty( $data[ 'files' ] ) ){
+            // this means that there are no more segments after
+            return $data;
+        }
+
         reset( $data[ 'files' ] );
 
         $firstFile = current( $data[ 'files' ] );
         $lastFile  = end( $data[ 'files' ] );
         $firstSid  = $firstFile[ 'segments' ][ 0 ][ 'sid' ];
 
-        if( isset($lastFile[ 'segments' ]) and is_array($lastFile[ 'segments' ]) ) {
+        if ( isset( $lastFile[ 'segments' ] ) and is_array( $lastFile[ 'segments' ] ) ) {
             $lastSegment = end( $lastFile[ 'segments' ] );
             $lastSid     = $lastSegment[ 'sid' ];
 
@@ -106,7 +112,7 @@ class SecondPassReview extends BaseFeature {
             foreach ( $data[ 'files' ] as $file => $content ) {
                 foreach ( $content[ 'segments' ] as $key => $segment ) {
 
-                    if(isset( $by_id_segment[ $segment[ 'sid' ] ] )){
+                    if ( isset( $by_id_segment[ $segment[ 'sid' ] ] ) ) {
                         $data [ 'files' ] [ $file ] [ 'segments' ] [ $key ] [ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
                                 $by_id_segment[ $segment[ 'sid' ] ]->source_page
                         );

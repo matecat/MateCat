@@ -110,7 +110,11 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      * @return bool|void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( TranslationsSplit_SplitStruct $obj ) {
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+
+        /**
+         * @var $obj TranslationsSplit_SplitStruct
+         */
         if ( $obj->id_segment === null ) {
             throw new Exception( "ID segment required" );
         }

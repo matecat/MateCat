@@ -56,12 +56,15 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
               " AND `key` = :key "
       );
 
+      /**
+       * @var $result Projects_MetadataStruct[]
+       */
       $result = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), array(
               'id_project' => $id_project,
               'key' => $key
       ) );
 
-      return @$result[0];
+      return !empty( $result) ? $result[0] : null;
 
   }
 
@@ -101,15 +104,15 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
       $conn = Database::obtain()->getConnection();
       $stmt = $conn->prepare(  $sql );
-      $stmt->execute( array(
-          'id_project' => $id_project,
-          'key' => $key,
-      ) );
+      $stmt->execute( [
+              'id_project' => $id_project,
+              'key'        => $key,
+      ] );
 
       $this->destroyMetadataCache( $id_project );
 
   }
-    
+
     public static function buildChunkKey( $key, Chunks_ChunkStruct $chunk ) {
         return "{$key}_chunk_{$chunk->id}_{$chunk->password}" ;
     }

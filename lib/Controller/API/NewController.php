@@ -283,7 +283,7 @@ class NewController extends ajaxController {
         if ( $this->postInput[ 'project_completion' ] ) {
             $feature                 = new BasicFeatureStruct();
             $feature->feature_code   = 'project_completion';
-            $this->projectFeatures[] = $feature;
+            $this->projectFeatures[ $feature->feature_code ] = $feature;
         }
 
         $this->projectFeatures = $this->featureSet->filter(

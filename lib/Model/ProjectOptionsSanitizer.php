@@ -209,7 +209,7 @@ class ProjectOptionsSanitizer {
         $rules = [ 'patent', 'paragraph' ];
 
         if (
-                array_key_exists( 'segmentation_rule', $this->options ) &&
+                isset( $this->options[ 'segmentation_rule' ] ) &&
                 in_array( $this->options[ 'segmentation_rule' ], $rules )
         ) {
             $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];

@@ -96,28 +96,7 @@ class setCurrentSegmentController extends ajaxController {
 
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = [];
-
-        //get segment revision informations
-        $reviseDao                      = new Revise_ReviseDAO( Database::obtain() );
-        $searchReviseStruct             = Revise_ReviseStruct::getStruct();
-        $searchReviseStruct->id_job     = $this->id_job;
-        $searchReviseStruct->id_segment = $this->id_segment;
-        $_dbReviseStruct                = $reviseDao->read( $searchReviseStruct );
-
-        if ( count( $_dbReviseStruct ) > 0 ) {
-            $_dbReviseStruct = $_dbReviseStruct[ 0 ];
-        } else {
-            $_dbReviseStruct = Revise_ReviseStruct::getStruct();
-        }
-
-        $_dbReviseStruct = Revise_ReviseStruct::setDefaultValues( $_dbReviseStruct );
-        $dbReviseStruct  = self::prepareReviseStructReturnValues( $_dbReviseStruct );
-
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-
         $this->result[ 'nextSegmentId' ] = $nextSegmentId;
-        $this->result[ 'error_data' ]    = $dbReviseStruct;
-        $this->result[ 'original' ]      = MateCatFilter::getInstance( $featureSet, $job_data->source, $job_data->target, [] )->fromLayer0ToLayer2( $_dbReviseStruct->original_translation );
 
     }
 

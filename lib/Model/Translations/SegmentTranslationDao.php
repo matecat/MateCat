@@ -949,8 +949,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $versionToMove
+     * @param $events
      *
      * @return int
      */

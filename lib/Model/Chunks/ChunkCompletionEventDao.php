@@ -126,7 +126,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      */
     public static function lastCompletionRecord( Chunks_ChunkStruct $chunk, array $params = array() ) {
         $params = Utils::ensure_keys($params, array('is_review'));
-        $is_review = $params['is_review'] || false;
+        $is_review = $params['is_review'];
 
         /**
          * This query takes into account the fact that completion records are never deleted.
@@ -149,11 +149,11 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array(
+        $stmt->execute( [
                         'id_job'    => $chunk->id,
                         'password'  => $chunk->password,
                         'is_review' => $is_review
-                )
+                ]
         );
 
         // TODO: change this returned object to be a Struct

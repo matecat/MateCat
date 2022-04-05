@@ -10,6 +10,7 @@ use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use Exception;
 use FeatureSet;
+use INIT;
 use Users_UserDao;
 
 /**
@@ -173,7 +174,7 @@ abstract class KleinController implements IController {
         $this->api_secret = $headers[ 'x-matecat-secret' ];
 
         if ( FALSE !== strpos( $this->api_key, '-' ) ) {
-            list( $this->api_key, $this->api_secret ) = explode('-', $this->api_key ) ;
+            [ $this->api_key, $this->api_secret ] = explode('-', $this->api_key ) ;
         }
 
         if ( !$this->validKeys() ) {
@@ -269,13 +270,16 @@ abstract class KleinController implements IController {
             $cookieContent = $tokenContent;
         }
 
-        setcookie(
-                $this->downloadToken,
+        setcookie( $this->downloadToken,
                 $cookieContent,
-                time() + 3600            // expires in 1 hour
-                , '/; samesite=None',
-                \INIT::$COOKIE_DOMAIN,
-                true
+                [
+                        'expires'  => time() + 3600,            // expires in 1 hour
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
         );
 
         $this->downloadToken = null;

@@ -17,8 +17,18 @@ class AuthCookie {
 
     //set a cookie with a username
     public static function setCredentials( $username, $uid ) {
-        list( $new_cookie_data, $new_expire_date ) = static::generateSignedAuthCookie( $username, $uid );
-        setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/; samesite=None', \INIT::$COOKIE_DOMAIN, true  );
+        [ $new_cookie_data, $new_expire_date ] = static::generateSignedAuthCookie( $username, $uid );
+        setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data,
+                [
+                        'expires'  => $new_expire_date,
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
+
     }
 
     public static function generateSignedAuthCookie( $username, $uid ) {
@@ -30,12 +40,18 @@ class AuthCookie {
 
         $JWT->setTimeToLive( INIT::$AUTHCOOKIEDURATION );
 
-        return array( $JWT->jsonSerialize(), $JWT->getExpireDate() );
+        return [ $JWT->jsonSerialize(), $JWT->getExpireDate() ];
     }
 
     public static function destroyAuthentication() {
         unset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
-        setcookie( INIT::$AUTHCOOKIENAME, '', 0, '/', \INIT::$COOKIE_DOMAIN  );
+        setcookie( INIT::$AUTHCOOKIENAME, '',
+                [
+                        'expires' => 0,
+                        'path'    => '/',
+                        'domain'  => INIT::$COOKIE_DOMAIN
+                ]
+        );
         session_destroy();
     }
 

@@ -196,12 +196,12 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Revise_ReviseStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
      * @return bool|void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( Revise_ReviseStruct $obj ) {
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
 
         /**
          * @var $obj Revise_ReviseStruct

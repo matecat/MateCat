@@ -6,6 +6,9 @@ use API\V2\KleinController;
 use Bootstrap;
 use Constants;
 use Exception;
+use Google_Service_Exception;
+use INIT;
+use Log;
 use Utils;
 
 class GDriveController extends KleinController {
@@ -93,14 +96,23 @@ class GDriveController extends KleinController {
     private function doImport() {
 
         $state = json_decode( $this->request->param( 'state' ), true );
-        \Log::doJsonLog( $state );
+        Log::doJsonLog( $state );
 
         // TODO: check why this is necessary here.
         if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid, time() + 86400, '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
+            setcookie( "upload_session", $this->guid,
+                    [
+                            'expires'  => time() + 86400,
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'None',
+                    ]
+            );
             $_SESSION[ "upload_session" ] = $this->guid;
 
             $this->gdriveUserSession->clearFileListFromSession();
@@ -121,7 +133,7 @@ class GDriveController extends KleinController {
         for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
             try {
                 $this->gdriveUserSession->importFile( $listOfIds[ $i ] );
-            } catch (\Exception $e){
+            } catch ( Exception $e){
                 $this->isImportingSuccessful = false;
                 $this->error = [
                         'code' => $e->getCode(),
@@ -138,11 +150,11 @@ class GDriveController extends KleinController {
      *
      * @return string
      */
-    private function getExceptionMessage(\Exception $e){
+    private function getExceptionMessage( Exception $e){
         $rawMessage = $e->getMessage();
 
         // parse Google APIs errors
-        if($e instanceof \Google_Service_Exception and $jsonDecodedMessage = json_decode($rawMessage, true)) {
+        if($e instanceof Google_Service_Exception and $jsonDecodedMessage = json_decode($rawMessage, true)) {
             if (isset($jsonDecodedMessage['error']['message'])) {
                 return $jsonDecodedMessage['error']['message'];
             }
@@ -173,8 +185,16 @@ class GDriveController extends KleinController {
 
     private function doRedirect() {
         // set a cookie to allow the frontend to call list endpoint
-        setcookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ], time() + 86400, '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
-
+        setcookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ],
+                [
+                        'expires'  => time() + 86400,
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
         header( "Location: /", true, 302 );
         exit;
     }
@@ -196,7 +216,16 @@ class GDriveController extends KleinController {
         $this->response->json( $response );
 
         // delete the cookie
-        setcookie( $this->gdriveListCookieName, "", time() - 3600 );
+        setcookie( $this->gdriveListCookieName, "",
+                [
+                        'expires'  => time() - 3600,
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
     }
 
     /**
@@ -221,7 +250,7 @@ class GDriveController extends KleinController {
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteImportedFile() {
         $fileId  = $this->request->fileId;
