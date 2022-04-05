@@ -62,7 +62,7 @@ const tagSignatures = {
   },
   g: {
     type: 'g',
-    regex: /&lt;g .*?id="(.*?)".*?&gt;/gi,
+    regex: /&lt;g .*?id="(.*?)".*?&gt;/g,
     selfClosing: false,
     isClosure: false,
     placeholder: null,
@@ -78,7 +78,7 @@ const tagSignatures = {
   },
   gCl: {
     type: 'g',
-    regex: /&lt;(\/g)&gt;/gi,
+    regex: /&lt;(\/g)&gt;/g,
     selfClosing: false,
     isClosure: true,
     placeholder: '</g>',
@@ -94,7 +94,7 @@ const tagSignatures = {
   },
   bx: {
     type: 'bx',
-    regex: /&lt;bx .*?id="(.*?)".*?\/&gt;/gi,
+    regex: /&lt;bx .*?id="(.*?)".*?\/&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
@@ -109,7 +109,7 @@ const tagSignatures = {
   },
   ex: {
     type: 'ex',
-    regex: /&lt;ex .*?id="(.*?)".*?\/&gt;/gi,
+    regex: /&lt;ex .*?id="(.*?)".*?\/&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
@@ -124,7 +124,7 @@ const tagSignatures = {
   },
   x: {
     type: 'x',
-    regex: /&lt;x .*?id="(.*?)".*?&gt;/gi,
+    regex: /&lt;x .*?id="(.*?)".*?&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
