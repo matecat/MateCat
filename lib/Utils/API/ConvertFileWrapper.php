@@ -1,5 +1,7 @@
 <?php
 
+use Conversion\ConvertFileModel;
+
 /**
  * Created by PhpStorm.
  * User: domenico
@@ -46,27 +48,24 @@ class ConvertFileWrapper extends convertFileController {
 
     /**
      * Check on executed conversion results
-     *
-     * @throws Exception
+     * @return ConvertFileModel[]
      */
     public function checkResult() {
 
-//        Log::doJsonLog( $this->resultStack );
-
         $failure = false;
+
+        /** @var ConvertFileModel $res */
         foreach ( $this->resultStack as $res ) {
-            if ( $res[ 'code' ] <= 0 ) {
+            if ( $res->hasAnErrorCode() ) {
                 $failure = true;
             }
         }
 
-        $result = array( 'errors' => array() );
         if ( $failure ) {
-            $result = end( $this->resultStack );
+            return end( $this->resultStack );
         }
-        $this->resultStack = $result[ 'errors' ];
 
-        return $this->resultStack;
+        return [];
 
     }
 
