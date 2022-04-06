@@ -9,7 +9,9 @@
 namespace Features\ReviewExtended\Model;
 
 use ArrayObject;
+use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
+use Database;
 use Features\ReviewExtended\IChunkReviewModel;
 use LQA\ChunkReviewDao;
 use RecursiveArrayObject;
@@ -187,13 +189,13 @@ class QualityReportModel {
      * @return string
      */
     protected function getReviewerName() {
-        $completion_event = \Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+        $completion_event = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
                 $this->chunk, [ 'is_review' => true ]
         );
         $name             = '';
 
-        if ( !empty( $completion_event ) && $completion_event[ 'uid' ] != null ) {
-            $userDao = new Users_UserDao( \Database::obtain() );
+        if ( !empty( $completion_event ) && isset( $completion_event[ 'uid' ] ) ) {
+            $userDao = new Users_UserDao( Database::obtain() );
             $user    = $userDao->getByUid( $completion_event[ 'uid' ] );
             $name    = $user->fullName();
         }

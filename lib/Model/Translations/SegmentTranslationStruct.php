@@ -1,7 +1,6 @@
 <?php
 
 use DataAccess\ArrayAccessTrait;
-use Translations_SegmentTranslationValidator;
 
 class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
 

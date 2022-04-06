@@ -29,6 +29,7 @@
         "ext-dom": "*",
         "ext-pdo": "*",
         "ext-pdo_mysql": "*",
-        "ext-posix": "*"
+        "ext-posix": "*",
+        "ext-zip": "*"
     }
 }

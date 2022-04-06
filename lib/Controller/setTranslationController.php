@@ -3,6 +3,7 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Exceptions\ControllerReturnException;
+use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
@@ -12,6 +13,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
 use Matecat\SubFiltering\Filters\SprintfToPH;
+use TaskRunner\Commons\QueueElement;
 
 class setTranslationController extends ajaxController {
 
@@ -209,7 +211,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
+        [ $__translation, $this->split_chunk_lengths ] = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
@@ -380,7 +382,7 @@ class setTranslationController extends ajaxController {
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
-        if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+        if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
             $new_translation->time_to_edit = $this->time_to_edit;
         }
 
@@ -398,11 +400,7 @@ class setTranslationController extends ajaxController {
          * - get $_jobTotalPEE
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
-
         $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
-
-        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
-        $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
         // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
         $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
@@ -556,7 +554,7 @@ class setTranslationController extends ajaxController {
             if ( !self::isRevision() ) {
 
                 $tte = 0;
-                if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+                if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
                     $tte = $this->time_to_edit;
                 }
 
@@ -574,9 +572,9 @@ class setTranslationController extends ajaxController {
         $project   = $this->project;
 
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
-                ? true : false );
+                $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+                $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+        );
 
         $file_stats = [];
 
@@ -722,7 +720,7 @@ class setTranslationController extends ajaxController {
     protected function _getOldTranslation() {
         $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->id_segment, $this->id_job );
 
-        if ( false === $old_translation ) {
+        if ( empty( $old_translation ) ) {
             $old_translation = new Translations_SegmentTranslationStruct();
         } // $old_translation if `false` sometimes
 
@@ -923,7 +921,7 @@ class setTranslationController extends ajaxController {
      * @param $old_translation
      *
      * @throws Exception
-     * @throws Exceptions_RecordNotFound
+     * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
@@ -990,7 +988,7 @@ class setTranslationController extends ajaxController {
 
         /** TODO Remove , is only for debug purposes */
         try {
-            $element         = new \TaskRunner\Commons\QueueElement();
+            $element         = new QueueElement();
             $element->params = $contributionStruct;
             $element->__toString();
             Utils::raiseJsonExceptionError( true );

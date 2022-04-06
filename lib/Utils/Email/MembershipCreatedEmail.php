@@ -9,11 +9,12 @@
 namespace Email;
 
 use Teams\MembershipStruct;
+use Users_UserStruct;
 
 class MembershipCreatedEmail extends AbstractEmail {
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user;
 
@@ -25,17 +26,17 @@ class MembershipCreatedEmail extends AbstractEmail {
     protected $title;
 
     /**
-     * @var  \Users_UserStruct
+     * @var  Users_UserStruct
      */
     protected $sender;
 
     /**
      * MembershipCreatedEmail constructor.
      *
-     * @param \Users_UserStruct $sender
+     * @param Users_UserStruct $sender
      * @param MembershipStruct  $membership
      */
-    public function __construct( \Users_UserStruct $sender, MembershipStruct $membership ) {
+    public function __construct( Users_UserStruct $sender, MembershipStruct $membership ) {
         $this->user = $membership->getUser();
         $this->_setlayout( 'skeleton.html' );
         $this->_settemplate( 'Team/membership_created_content.html' );
@@ -58,7 +59,7 @@ class MembershipCreatedEmail extends AbstractEmail {
         return parent::_getDefaultMailConf();
     }
 
-    public function _getLayoutVariables() {
+    public function _getLayoutVariables($messageBody = null) {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 

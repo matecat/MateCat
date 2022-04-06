@@ -21,7 +21,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     /**
      * @param     $id_segment
      * @param     $id_job
-     *
      * @param int $ttl
      *
      * @return Translations_SegmentTranslationStruct
@@ -38,10 +37,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), [
+        /**
+         * @var $result Translations_SegmentTranslationStruct[]
+         */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment
-        ] )[ 0 ];
+        ] );
+
+        return !empty( $result ) ? $result[ 0 ] : null;
     }
 
     /**
