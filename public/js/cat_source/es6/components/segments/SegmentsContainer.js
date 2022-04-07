@@ -574,7 +574,7 @@ function SegmentsContainer({
       return 0
     }
     // set inline style
-    listRef.current.style.paddingTop = `${getPadding()}px`
+    listRef.current.firstChild.style.marginTop = `${getPadding()}px`
   }, [isSideOpen, segments, addedComment])
 
   // reset scrollTo
