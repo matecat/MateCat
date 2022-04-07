@@ -292,17 +292,21 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $revision                 = $chunkReviewsWithFinalRevisions[ $this->_model->getEventModel()->getOriginSourcePage() ];
 
         $serialized_issues = [];
-        /** @var EntryWithCategoryStruct $issue */
-        foreach ( $this->_issuesDeletionList[ $this->_model->getEventModel()->getOriginSourcePage() ] as $k => $issue ) {
-            $serialized               = $issue->toArray();
-            $serialized[ 'comments' ] = [];
+        if( isset( $this->_issuesDeletionList[ $this->_model->getEventModel()->getOriginSourcePage() ] ) ){
 
-            /** @var EntryCommentStruct $comment */
-            foreach ( $issue->getComments() as $comment ) {
-                $serialized[ 'comments' ][] = $comment->toArray();
+            /** @var EntryWithCategoryStruct $issue */
+            foreach ( $this->_issuesDeletionList[ $this->_model->getEventModel()->getOriginSourcePage() ] as $k => $issue ) {
+                $serialized               = $issue->toArray();
+                $serialized[ 'comments' ] = [];
+
+                /** @var EntryCommentStruct $comment */
+                foreach ( $issue->getComments() as $comment ) {
+                    $serialized[ 'comments' ][] = $comment->toArray();
+                }
+
+                $serialized_issues [] = $serialized;
             }
 
-            $serialized_issues [] = $serialized;
         }
 
         $segmentInfo = [

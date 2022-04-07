@@ -13,7 +13,10 @@ use Features\ReviewExtended\Model\ChunkReviewDao ;
 class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
 
     /**
-     * Used only in AbstractRevisionFeature::postJobMerged and AbstractRevisionFeature::postJobSplitted
+     *
+     * Used to recount total in qa_chunk reviews in case of: [ split/merge/chunk record created/disaster recovery ]
+     *
+     * Used in AbstractRevisionFeature::postJobMerged and AbstractRevisionFeature::postJobSplitted
      *
      * @param \Projects_ProjectStruct $project
      *
@@ -30,7 +33,7 @@ class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
         $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page ) ;
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page ) ;
 
-        $this->updatePassFailResult( $project );
+        $this->_updatePassFailResult( $project );
     }
 
 }
