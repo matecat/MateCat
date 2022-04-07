@@ -22,16 +22,20 @@ function useResizeObserver(ref, {actualWidth = 0, actualHeight = 0} = {}) {
     if (!ref?.current) return
     const {current} = ref
     const resizeObserver = new ResizeObserver((entries) => {
-      const {borderBoxSize} = entries[0]
+      const {borderBoxSize, target} = entries[0]
 
-      const width = Array.isArray(borderBoxSize)
-        ? borderBoxSize[0]?.inlineSize
-        : borderBoxSize.inlineSize
+      const width = borderBoxSize
+        ? Array.isArray(borderBoxSize)
+          ? borderBoxSize[0]?.inlineSize
+          : borderBoxSize.inlineSize
+        : target.offsetWidth
       !wasCleaned && setWidth(width ? width : actualWidth)
 
-      const height = Array.isArray(borderBoxSize)
-        ? borderBoxSize[0]?.blockSize
-        : borderBoxSize.blockSize
+      const height = borderBoxSize
+        ? Array.isArray(borderBoxSize)
+          ? borderBoxSize[0]?.blockSize
+          : borderBoxSize.blockSize
+        : target.offsetHeight
       !wasCleaned && setHeight(height ? height : actualHeight)
     })
     resizeObserver.observe(current)
