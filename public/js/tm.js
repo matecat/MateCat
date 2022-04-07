@@ -73,7 +73,7 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
         $('.mgmt-table-options').show()
       })
 
-      $('.mgmt-mt').click(function (e) {
+      $('li.mgmt-mt').click(function (e) {
         e.preventDefault()
         $(this).addClass('active')
         $('.mgmt-tm,.mgmt-opt').removeClass('active')
