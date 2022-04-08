@@ -1,7 +1,7 @@
 <?php
 
 use Constants\ConversionHandlerStatus;
-use Conversion\ConvertFileModel;
+use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use LQA\ModelDao;
@@ -437,7 +437,7 @@ class NewController extends ajaxController {
 
                         $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
-                        $this->result = new ConvertFileModel( $fileError->error[ 'code' ] );
+                        $this->result = new ConvertedFileModel( $fileError->error[ 'code' ] );
                         $this->result->addError($fileError->error[ 'message' ], $brokenFileName);
                     }
 
@@ -505,7 +505,7 @@ class NewController extends ajaxController {
                 $status = $errors = $converter->checkResult();
                 if ( count( $errors ) > 0 ) {
 
-                    $this->result = new ConvertFileModel(ConversionHandlerStatus::ZIP_ERRORS);
+                    $this->result = new ConvertedFileModel(ConversionHandlerStatus::ZIP_HANDLING);
                     foreach ( $errors as $__err ) {
 
                         $savedErrors = $this->result->getErrors();

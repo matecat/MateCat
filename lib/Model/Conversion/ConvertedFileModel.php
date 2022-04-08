@@ -4,7 +4,7 @@ namespace Conversion ;
 
 use Constants\ConversionHandlerStatus;
 
-class ConvertFileModel implements \JsonSerializable
+class ConvertedFileModel implements \JsonSerializable
 {
     /**
      * @var int
@@ -15,6 +15,11 @@ class ConvertFileModel implements \JsonSerializable
      * @var array
      */
     private $errors;
+
+    /**
+     * @var array
+     */
+    private $data;
 
     /**
      * ConvertFileModel constructor.
@@ -32,6 +37,7 @@ class ConvertFileModel implements \JsonSerializable
         }
 
         $this->errors = [];
+        $this->data = [];
     }
 
     /**
@@ -42,6 +48,7 @@ class ConvertFileModel implements \JsonSerializable
     private function validateCode($code)
     {
         $allowed = [
+            ConversionHandlerStatus::ZIP_HANDLING,
             ConversionHandlerStatus::OK ,
             ConversionHandlerStatus::NOT_CONVERTED,
             ConversionHandlerStatus::INVALID_FILE,
@@ -130,11 +137,28 @@ class ConvertFileModel implements \JsonSerializable
     /**
      * @return array
      */
+    public function getData() {
+        return $this->data;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    public function addData( $key, $value )
+    {
+        $this->data[$key] = $value;
+    }
+
+    /**
+     * @return array
+     */
     public function jsonSerialize()
     {
         return [
             'code' => $this->getCode(),
             'errors' => $this->getErrors(),
+            'data' => $this->getData(),
         ];
     }
 }

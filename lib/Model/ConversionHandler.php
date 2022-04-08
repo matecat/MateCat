@@ -1,7 +1,7 @@
 <?php
 
 use Constants\ConversionHandlerStatus;
-use Conversion\ConvertFileModel;
+use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\Exceptions\FileSystemException;
@@ -10,7 +10,7 @@ use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 class ConversionHandler {
 
     /**
-     * @var ConvertFileModel
+     * @var ConvertedFileModel
      */
     protected $result;
 
@@ -36,7 +36,7 @@ class ConversionHandler {
      * ConversionHandler constructor.
      */
     public function __construct() {
-        $this->result = new ConvertFileModel(ConversionHandlerStatus::OK);
+        $this->result = new ConvertedFileModel(ConversionHandlerStatus::OK);
     }
 
     public function doAction() {
@@ -309,7 +309,7 @@ class ConversionHandler {
 
 
     /**
-     * @return ConvertFileModel
+     * @return ConvertedFileModel
      */
     public function getResult() {
         return $this->result;

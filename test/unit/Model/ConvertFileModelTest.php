@@ -1,12 +1,12 @@
 <?php
 
 use Constants\ConversionHandlerStatus;
-use Conversion\ConvertFileModel;
+use Conversion\ConvertedFileModel;
 
 class ConvertFileModelTest extends PHPUnit_Framework_TestCase {
 
     function test_model() {
-        $model = new ConvertFileModel();
+        $model = new ConvertedFileModel();
         $this->assertEquals($model->getCode(), ConversionHandlerStatus::NOT_CONVERTED);
         $this->assertFalse($model->hasErrors());
 

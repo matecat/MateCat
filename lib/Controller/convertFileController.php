@@ -3,11 +3,16 @@
 use Constants\ConversionHandlerStatus;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
-use Conversion\ConvertFileModel;
+use Conversion\ConvertedFileModel;
 
 set_time_limit( 0 );
 
 class convertFileController extends ajaxController {
+
+    /**
+     * @var ConvertedFileModel
+     */
+    protected $result;
 
     protected $file_name;
     protected $source_lang;
@@ -74,7 +79,7 @@ class convertFileController extends ajaxController {
 
     public function doAction() {
 
-        $this->result = new ConvertFileModel();
+        $this->result = new ConvertedFileModel();
 
         $this->lang_handler = Langs_Languages::getInstance();
         $this->validateSourceLang();
@@ -209,7 +214,7 @@ class convertFileController extends ajaxController {
             ];
         }
 
-        $this->result[ 'data' ][ 'zipFiles' ] = json_encode( $realFileNames );
+        $this->result->addData('zipFiles', json_encode( $realFileNames ));
 
         $stdFileObjects = [];
 
@@ -225,7 +230,9 @@ class convertFileController extends ajaxController {
             $errors = $conversionHandler->getResult();
             $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors[ 'errors' ] );
 
-            $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
+            foreach ($errors as $error){
+                $this->result->addError( $error );
+            }
 
             return false;
         }
@@ -242,11 +249,12 @@ class convertFileController extends ajaxController {
 
         $errors = $converter->checkResult();
 
-        $this->result->changeCode(ConversionHandlerStatus::ZIP_ERRORS);
+        $this->result->changeCode(ConversionHandlerStatus::ZIP_HANDLING);
 
-        /** @var ConvertFileModel $__err */
+        /** @var ConvertedFileModel $__err */
         foreach ( $errors as $__err ) {
 
+            $this->result->changeCode($__err[ 'message' ]);
             $savedErrors = $this->result->getErrors();
             $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
