@@ -4,16 +4,20 @@
 
 RewriteEngine On
 
+ErrorDocument 401 /lib/View/401.html
+ErrorDocument 403 /lib/View/403.html
+ErrorDocument 404 /lib/View/404.html
+ErrorDocument 409 /lib/View/409.html
+ErrorDocument 503 /lib/View/503.html
+ErrorDocument 500 /lib/View/500.html
+
 # If the file does not exist on path, then point to router.php in the parent directory.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteBase /
 RewriteRule ^(.*)$ router.php [QSA,L]
-
-# If the file exists, serve it only if it is included in the whitelist.
+#
+## If the file exists, serve it only if it is included in the whitelist.
 RewriteCond %{REQUEST_FILENAME} !^(.*)static/build(.*)\.(json|gif|png|css|jpeg|js)$
 RewriteCond %{REQUEST_FILENAME} !^(.*)static/src(.*)\.(json|gif|png|css|jpeg|js)$
 RewriteRule ^(.*)$ "-"  [F,L]
-
-
-

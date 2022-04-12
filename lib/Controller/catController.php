@@ -372,6 +372,7 @@ class catController extends viewController {
 
             return;
 
+
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->source_code         = $this->source_code;
