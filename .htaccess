@@ -67,9 +67,17 @@ RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile
 RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
 RedirectMatch 404 /\.git
+RedirectMatch 404 /vendor
+RedirectMatch 404 /storage
+
 </IfModule>
 
-ErrorDocument 404 /support/404.php
+ErrorDocument 401 /lib/View/401.html
+ErrorDocument 403 /lib/View/403.html
+ErrorDocument 404 /lib/View/404.html
+ErrorDocument 409 /lib/View/409.html
+ErrorDocument 503 /lib/View/503.html
+ErrorDocument 500 /lib/View/500.html
 
 <IfModule mod_expires.c>
 ExpiresActive On

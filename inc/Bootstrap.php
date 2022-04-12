@@ -221,6 +221,12 @@ class Bootstrap {
         } elseif ( INIT::$PRINT_ERRORS ) {
             echo $exception->getMessage() . "\n";
             echo $exception->getTraceAsString() . "\n";
+        } else {
+            $controllerInstance = new CustomPage();
+            $controllerInstance->setTemplate( "$code.html" );
+            $controllerInstance->setCode( $code );
+            $controllerInstance->doAction();
+            die(); // do not complete the response and set the header
         }
 
     }
