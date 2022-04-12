@@ -217,7 +217,7 @@ class QualitySummaryTable extends React.Component {
         )
         if (cat.get('label') === 'Kudos') {
           let issues = 0
-          if (totalIssues > 0) {
+          if (totalIssues.size > 0) {
             cat.get('severities').forEach((sev) => {
               issues += totalIssues.get('founds').get(sev.get('label'))
             })
