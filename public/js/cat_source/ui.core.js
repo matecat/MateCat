@@ -133,12 +133,10 @@ window.UI = {
 
     if (this.autopropagateConfirmNeeded(opts.propagation)) {
       var text = !_.isUndefined(segment.alternatives)
-        ? 'There are other identical segments with <b>translation conflicts</b>. <br><br>Would you ' +
-          'like to propagate the translation and the status to all of them, ' +
-          'or keep this translation only for this segment?'
-        : 'There are other identical segments. <br><br>Would you ' +
-          'like to propagate the translation and the status to all of them, ' +
-          'or keep this translation only for this segment?'
+        ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
+          'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
+        : 'The translation you are confirming for this segment is different from the version confirmed for other identical segments. <br><br>Would you ' +
+          'like to propagate this translation to all other identical segments and replace the other version or keep it only for this segment?'
       // var optionsStr = opts;
       var props = {
         text: text,
