@@ -78,9 +78,7 @@ class QALocalWarning extends QAWarning {
             }
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
-
-            $featureSet = new \FeatureSet();
-            $Filter = MateCatFilter::getInstance( $featureSet, $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
+            $Filter = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
             ($this->id_segment) );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {

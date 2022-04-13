@@ -34,9 +34,10 @@ abstract class controller implements IController {
 
     /**
      * @return FeatureSet
+     * @throws Exception
      */
     public function getFeatureSet() {
-        return $this->featureSet;
+        return ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
     }
 
     /**

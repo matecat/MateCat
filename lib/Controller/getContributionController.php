@@ -165,7 +165,7 @@ class getContributionController extends ajaxController {
      */
     protected function _getContexts($source, $target) {
 
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new \FeatureSet();
+        $featureSet = $this->getFeatureSet();
 
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(

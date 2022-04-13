@@ -105,8 +105,7 @@ class getTagProjectionController extends ajaxController {
         $engine->setFeatureSet( $this->featureSet );
 
         $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment );
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $this->source_lang, $this->target_lang, $dataRefMap );
+        $Filter     = MateCatFilter::getInstance( $this->getFeatureSet(), $this->source_lang, $this->target_lang, $dataRefMap );
 
         $config                  = [];
         $config[ 'dataRefMap' ]  = $dataRefMap;
