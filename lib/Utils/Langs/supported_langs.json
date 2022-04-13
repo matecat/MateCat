@@ -340,7 +340,7 @@
             "isocode":"ch",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"cha-GU"
+            "rfc3066code":"ch-GU"
         }
     ,
         {
@@ -431,7 +431,7 @@
             "isocode":"cop",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"cop-XNA"
+            "rfc3066code":"cop-EG"
         }
     ,
         {
@@ -441,7 +441,7 @@
             "isocode":"pov",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"pov-POV"
+            "rfc3066code":"pov-GW"
         }
     ,
         {
@@ -501,7 +501,7 @@
             "isocode":"dz",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"dzo-BT"
+            "rfc3066code":"dz-BT"
         }
     ,
         {
@@ -582,6 +582,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"en-SG"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"English South Africa"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-ZA"
         }
     ,
         {
@@ -851,7 +861,7 @@
             "isocode":"HAW",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"US-HI"
+            "rfc3066code":"haw-US"
         }
     ,
         {
@@ -970,7 +980,7 @@
             "isocode":"kal",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"kal-GL"
+            "rfc3066code":"kl-GL"
         }
     ,
         {
@@ -1180,7 +1190,7 @@
             "isocode":"run",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"run-RN"
+            "rfc3066code":"rn-BI"
         }
     ,
         {
@@ -1230,7 +1240,7 @@
             "isocode":"ku",
             "enabled":true,
             "rtl":true,
-            "rfc3066code":"ku-CKB"
+            "rfc3066code":"ckb-IQ"
         }
     ,
         {
@@ -1310,7 +1320,7 @@
             "isocode":"lug",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"lug-UG"
+            "rfc3066code":"lg-UG"
         }
     ,
         {
@@ -1370,7 +1380,7 @@
             "isocode":"mg",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"mg-MLG"
+            "rfc3066code":"mg-MG"
         }
     ,
         {
@@ -1400,7 +1410,7 @@
             "isocode":"div",
             "enabled":true,
             "rtl":true,
-            "rfc3066code":"div-DV"
+            "rfc3066code":"dv-MV"
         }
     ,
         {
@@ -1465,6 +1475,16 @@
     ,
         {
             "localized":[{
+                "en":"Moroccan Arabic"
+            }],
+            "isocode":"ar",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ar-MA"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Maori"
             }],
             "isocode":"mi",
@@ -1500,7 +1520,7 @@
             "isocode":"men",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"men-MEN"
+            "rfc3066code":"men-SL"
         }
     ,
         {
@@ -1602,7 +1622,17 @@
             "isocode":"niu",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"niu-NIU"
+            "rfc3066code":"niu-NU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Northern Sotho"
+            }],
+            "isocode":"nso",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"nso-ZA"
         }
     ,
         {
@@ -1642,7 +1672,7 @@
             "isocode":"ny",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"ny-NYA"
+            "rfc3066code":"ny-MW"
         }
     ,
         {
@@ -1717,6 +1747,16 @@
     ,
         {
             "localized":[{
+                "en":"Pakistani"
+            }],
+            "isocode":"ur",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ur-PK"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Papiamentu"
             }],
             "isocode":"pap",
@@ -1753,7 +1793,7 @@
             "isocode":"pis",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"pis-PIS"
+            "rfc3066code":"pis-SB"
         }
     ,
         {
@@ -1883,7 +1923,7 @@
             "isocode":"smo",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"smo-WS"
+            "rfc3066code":"sm-WS"
         }
     ,
         {
@@ -1893,7 +1933,7 @@
             "isocode":"sg",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"sg-SG"
+            "rfc3066code":"sg-CF"
         }
     ,
 	{
@@ -1984,7 +2024,7 @@
             "isocode":"sna",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"sna-ZW"
+            "rfc3066code":"sn-ZW"
         }
     ,
         {
@@ -2044,7 +2084,7 @@
             "isocode":"st",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"st-ST"
+            "rfc3066code":"st-LS"
         }
     ,
         {
@@ -2114,7 +2154,7 @@
             "isocode":"srn",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"srn-SRN"
+            "rfc3066code":"srn-SR"
         }
     ,
         {
@@ -2247,7 +2287,7 @@
             "isocode":"tet",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"tet-TET"
+            "rfc3066code":"tet-TL"
         }
     ,
         {
@@ -2277,7 +2317,7 @@
             "isocode":"bod",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"bod-CN"
+            "rfc3066code":"bo-CN"
         }
     ,
         {
@@ -2297,7 +2337,7 @@
             "isocode":"tkl",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"tkl-TKL"
+            "rfc3066code":"tkl-TK"
         }
     ,
         {
@@ -2317,7 +2357,7 @@
             "isocode":"ton",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"ton-TO"
+            "rfc3066code":"to-TO"
         }
     ,
         {
@@ -2377,7 +2417,7 @@
             "isocode":"tvl",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"tvl-TVL"
+            "rfc3066code":"tvl-TV"
         }
     ,
         {
@@ -2477,7 +2517,7 @@
             "isocode":"wls",
             "enabled":false,
             "rtl":false,
-            "rfc3066code":"wls-WLS"
+            "rfc3066code":"wls-WF"
         }
     ,
         {
