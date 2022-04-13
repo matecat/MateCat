@@ -128,7 +128,32 @@ const createNewEntitiesFromMap = (
       }
     })
   })
-  return {contentState: plainContentState, tagRange}
+  return {
+    contentState: plainContentState,
+    tagRange: addIncrementalIndex(tagRange),
+  }
 }
+
+const addIncrementalIndex = (tagRange) =>
+  tagRange.reduce((acc, cur) => {
+    const {decodedText, encodedText} = cur.data
+    const reversed = [...acc].reverse()
+    const lastIndex =
+      reversed.find(({data}) => data.decodedText === decodedText)?.data
+        ?.index ?? -1
+    return [
+      ...acc,
+      {
+        ...cur,
+        data: {
+          ...cur.data,
+          ...(isXliff2(encodedText) && {index: lastIndex + 1}),
+        },
+      },
+    ]
+  }, [])
+
+const isXliff2 = (encodedText) =>
+  /\bph\b/.test(encodedText) && !/id=\\"mtc_/.test(encodedText)
 
 export default createNewEntitiesFromMap
