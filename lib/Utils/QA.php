@@ -1090,7 +1090,7 @@ class QA {
      * @return FeatureSet
      * @throws Exception
      */
-    protected function getFeatureSet() {
+    public function getFeatureSet() {
         if ( $this->featureSet == null ) {
             $this->featureSet = new FeatureSet();
         }

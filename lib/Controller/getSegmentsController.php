@@ -63,7 +63,7 @@ class getSegmentsController extends ajaxController {
         $this->job     = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         $this->project = $this->job->getProject();
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = $this->getFeatureSet();
 
         $featureSet->loadForProject( $this->project );
 

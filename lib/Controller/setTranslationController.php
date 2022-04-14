@@ -195,7 +195,7 @@ class setTranslationController extends ajaxController {
 
             $this->project = $this->chunk->getProject();
 
-            $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+            $featureSet = $this->getFeatureSet();
             $featureSet->loadForProject( $this->project );
 
             /** @var MateCatFilter filter */
