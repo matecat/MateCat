@@ -54,7 +54,7 @@ interface IChunkReviewModel {
      * @param \Projects_ProjectStruct $project
      *
      */
-    public function updatePassFailResult( \Projects_ProjectStruct $project );
+    public function _updatePassFailResult( \Projects_ProjectStruct $project );
 
     /**
      * This method invokes the recount of reviewed_words_count and
