@@ -178,7 +178,7 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'total' ] = 0;
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = $this->getFeatureSet();
         $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
