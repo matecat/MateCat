@@ -131,8 +131,7 @@ class getSearchController extends ajaxController {
         $this->job_data = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
 
         /** @var MateCatFilter $filter */
-        $featureSet        = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $filter            = MateCatFilter::getInstance( $featureSet, $this->job_data->source, $this->job_data->target, [] );
+        $filter            = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target, [] );
         $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
@@ -406,8 +405,7 @@ class getSearchController extends ajaxController {
                 }
             }
 
-            $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-            $filter              = MateCatFilter::getInstance( $featureSet, $this->job_data->source, $this->job_data->target, [] );
+            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target, [] );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 

@@ -99,6 +99,7 @@ function SegmentFooter({sid, segment}) {
         segment: segment,
       },
       getMetadataNoteTemplate: () => segment.metadata,
+      allowHTML: () => '',
     }
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)

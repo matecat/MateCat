@@ -11,6 +11,7 @@ namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\ChunkReviewStruct;
 
 class ChunkReviewDao extends \LQA\ChunkReviewDao {
@@ -153,20 +154,57 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
     }
 
     /**
+     *
      * @param ChunkReviewStruct $chunkReview
      * @param array             $data
      *
-     * @return bool
+     * @return ChunkReviewStruct
      * @throws \Exception
      */
-    public function passFailCountsAtomicUpdate( ChunkReviewStruct $chunkReview, $data = [] ) {
 
-        $chunkReview->is_pass              = $data[ 'is_pass' ];
-        $chunkReview->penalty_points       = $chunkReview->penalty_points + $data[ 'penalty_points' ];
-        $chunkReview->reviewed_words_count = $chunkReview->reviewed_words_count + $data[ 'reviewed_words_count' ];
-        $chunkReview->advancement_wc       = $chunkReview->advancement_wc + $data[ 'advancement_wc' ];
-        $chunkReview->total_tte            = $chunkReview->total_tte + $data[ 'total_tte' ];
+    public function passFailCountsAtomicUpdate( $chunkReviewID, $data = [] ) {
 
-        return ChunkReviewDao::updateStruct( $chunkReview, [ 'fields' => [ 'is_pass', 'penalty_points', 'reviewed_words_count', 'advancement_wc', 'total_tte' ] ] );
+        /**
+         * @var $chunkReview_partial ChunkReviewStruct
+         */
+        $chunkReview_partial = $data[ 'chunkReview_partials' ];
+        $data[ 'force_pass_at' ]        = ReviewUtils::filterLQAModelLimit( $chunkReview_partial->getChunk()->getProject()->getLqaModel(), $chunkReview_partial->source_page );
+
+        $sql = "INSERT INTO 
+            qa_chunk_reviews ( id, id_job, password, penalty_points, reviewed_words_count, advancement_wc, total_tte ) 
+        VALUES( 
+            :id,
+            :id_job,
+            :password,
+            :penalty_points,
+            :reviewed_words_count,
+            :advancement_wc,
+            :total_tte
+        ) ON DUPLICATE KEY UPDATE
+        penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + VALUES( penalty_points ), 0 ),
+        reviewed_words_count = GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ),
+        advancement_wc = GREATEST( advancement_wc + VALUES( advancement_wc ), 0 ),
+        total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 ),        
+        is_pass = IF( 
+				( GREATEST( COALESCE( penalty_points, 0 ) + VALUES( penalty_points ), 0 ) ) 
+                / GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ) * 1000 
+                <= {$data[ 'force_pass_at' ]}, 1, 0
+		);";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+                'id'                   => $chunkReviewID,
+                'id_job'               => $chunkReview_partial->id_job,
+                'password'             => $chunkReview_partial->password,
+                'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
+                'reviewed_words_count' => $data[ 'reviewed_words_count' ],
+                'advancement_wc'       => $data[ 'advancement_wc' ],
+                'total_tte'            => $data[ 'total_tte' ],
+        ] );
+
+        return ChunkReviewDao::findById( $chunkReviewID );
+
     }
+
 }

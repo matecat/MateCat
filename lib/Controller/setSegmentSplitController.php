@@ -104,7 +104,7 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment = $this->id_segment;
         $translationStruct->id_job     = $this->id_job;
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = $this->getFeatureSet();
 
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $this->jobStruct->source, $this->jobStruct->target, [] );
