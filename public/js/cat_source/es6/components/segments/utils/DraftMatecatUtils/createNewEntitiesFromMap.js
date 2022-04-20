@@ -26,8 +26,10 @@ const createNewEntitiesFromMap = (
   const offsetWithEntities = []
   let slicedLength = 0
 
+  const tagRangeWithIndexes = addIncrementalIndex(tagRange)
+
   // Executre replace with placeholder and adapt offsets
-  tagRange.forEach((tagEntity) => {
+  tagRangeWithIndexes.forEach((tagEntity) => {
     const {name: tagName, placeholder, encodedText} = tagEntity.data
     if (!excludedTagsType.includes(tagName)) {
       const start = tagEntity.offset - slicedLength
@@ -130,7 +132,7 @@ const createNewEntitiesFromMap = (
   })
   return {
     contentState: plainContentState,
-    tagRange: addIncrementalIndex(tagRange),
+    tagRange: tagRangeWithIndexes,
   }
 }
 
