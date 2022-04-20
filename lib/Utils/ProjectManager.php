@@ -873,14 +873,6 @@ class ProjectManager {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
         }
 
-        Projects_ProjectDao::updateAnalysisStatus(
-                $this->projectStructure[ 'id_project' ],
-                $this->projectStructure[ 'status' ],
-                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
-        );
-
-        $this->pushActivityLog();
-
         Database::obtain()->begin();
 
         //pre-fetch Analysis page in transaction and store in cache
@@ -888,6 +880,14 @@ class ProjectManager {
         ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
 
         $featureSet->run( 'postProjectCreate', $this->projectStructure );
+
+        Projects_ProjectDao::updateAnalysisStatus(
+                $this->projectStructure[ 'id_project' ],
+                $this->projectStructure[ 'status' ],
+                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
+        );
+
+        $this->pushActivityLog();
 
         Database::obtain()->commit();
 
