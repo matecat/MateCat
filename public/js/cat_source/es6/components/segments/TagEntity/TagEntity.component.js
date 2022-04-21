@@ -199,7 +199,7 @@ class TagEntity extends Component {
     return (
       <>
         {this.props.children}
-        {index >= 0 && <span>{index + 1}</span>}
+        {index >= 0 && <span className="index-counter">{index + 1}</span>}
       </>
     )
   }

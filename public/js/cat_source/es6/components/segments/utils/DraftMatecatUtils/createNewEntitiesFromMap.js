@@ -143,13 +143,19 @@ const addIncrementalIndex = (tagRange) =>
     const lastIndex =
       reversed.find(({data}) => data.decodedText === decodedText)?.data
         ?.index ?? -1
+
+    const haveMultipleMatches =
+      tagRange.filter(({data}) => data.decodedText === cur.data.decodedText)
+        .length > 1
+
     return [
       ...acc,
       {
         ...cur,
         data: {
           ...cur.data,
-          ...(isXliff2(encodedText) && {index: lastIndex + 1}),
+          ...(isXliff2(encodedText) &&
+            haveMultipleMatches && {index: lastIndex + 1}),
         },
       },
     ]
