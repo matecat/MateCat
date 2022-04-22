@@ -211,7 +211,7 @@ class QualityReportSegmentModel {
             $seg->dataRefMap = $dataRefMap;
 
             $this->_commonSegmentAssignments( $seg, $Filter, $featureSet, $this->chunk, $isForUI );
-            $this->_assignIssues( $seg, $issues, $issue_comments );
+            $this->_assignIssues( $seg, isset( $issues ) ? $issues : [], $issue_comments );
             $this->_assignComments( $seg, $comments );
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
 

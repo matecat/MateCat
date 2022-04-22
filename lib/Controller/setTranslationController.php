@@ -211,7 +211,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        [ $__translation, $this->split_chunk_lengths ] = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
+        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );

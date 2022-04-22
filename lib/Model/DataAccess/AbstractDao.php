@@ -90,7 +90,7 @@ abstract class DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct The input object, sanitized.
      * @throws Exception This function throws exception input is not a DataAccess_IDaoStruct object
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 

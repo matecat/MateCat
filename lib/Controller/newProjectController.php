@@ -129,7 +129,7 @@ class newProjectController extends viewController {
         } else {
 
             if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
-                setcookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
+                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
                         [
                                 'expires'  => time() + ( 86400 * 365 ),
                                 'path'     => '/',
@@ -175,7 +175,7 @@ class newProjectController extends viewController {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid,
+            CookieManager::setCookie( "upload_session", $this->guid,
                     [
                             'expires'  => time() + 86400,
                             'path'     => '/',
@@ -365,7 +365,7 @@ class newProjectController extends viewController {
             $this->noTargetLangHistory = true;
         } else {
             if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
-                setcookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
+                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
                         [
                                 'expires'  => time() + ( 86400 * 365 ),
                                 'path'     => '/',

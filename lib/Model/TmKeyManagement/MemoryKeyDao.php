@@ -314,14 +314,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
     /**
      * See parent definition
-     * @see DataAccess_AbstractDao::sanitize
      *
      * @param TmKeyManagement_MemoryKeyStruct $input
      *
-     * @return TmKeyManagement_MemoryKeyStruct
+     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct
      * @throws Exception
+     * @see DataAccess_AbstractDao::sanitize
+     *
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 

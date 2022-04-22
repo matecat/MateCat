@@ -174,14 +174,14 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
     /**
      * @param Revise_ReviseStruct $input
      *
-     * @return Revise_ReviseStruct
+     * @return DataAccess_IDaoStruct|Revise_ReviseStruct
      * @throws Exception
      */
-    public function sanitize( Revise_ReviseStruct $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
-    protected function _validateNotNullFields( Revise_ReviseStruct $obj ) {
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
         /**
          * @var $obj Revise_ReviseStruct
          */

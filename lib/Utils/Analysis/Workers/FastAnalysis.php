@@ -455,7 +455,7 @@ class FastAnalysis extends AbstractDaemon {
 
             $list_id_jobs_password = $jid_pass[ 1 ];
 
-            [ $eq_word, $standard_words, $match_type ] = $this->_getWordCountForSegment( $v, $equivalentWordMapping );
+            list( $eq_word, $standard_words, $match_type ) = $this->_getWordCountForSegment( $v, $equivalentWordMapping );
 
             $total_eq_wc       += $eq_word;
             $total_standard_wc += $standard_words;
@@ -463,7 +463,7 @@ class FastAnalysis extends AbstractDaemon {
             $list_id_jobs_password = explode( ',', $list_id_jobs_password );
             foreach ( $list_id_jobs_password as $id_job ) {
 
-                [ $id_job, $job_pass ] = explode( ":", $id_job );
+                list( $id_job, $job_pass ) = explode( ":", $id_job );
 
                 $segment = (new \Segments_SegmentDao())->getById($v[ 'id' ]);
 
@@ -630,7 +630,7 @@ class FastAnalysis extends AbstractDaemon {
                     //send in queue every element * number of languages
                     foreach ( $languages_job as $_language ) {
 
-                        [ $id_job, $language ] = explode( ":", $_language );
+                        list( $id_job, $language ) = explode( ":", $_language );
 
                         $queue_element[ 'target' ]        = $language;
                         $queue_element[ 'id_job' ]        = $id_job;

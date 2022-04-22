@@ -109,7 +109,7 @@ abstract class downloadController extends controller {
     protected function unlockToken( $tokenContent = null ) {
 
         if ( isset( $this->downloadToken ) && !empty( $this->downloadToken ) ) {
-            setcookie( $this->downloadToken,
+            CookieManager::setCookie( $this->downloadToken,
                     ( empty( $tokenContent ) ? json_encode( [
                             "code"    => 0,
                             "message" => "Download complete."

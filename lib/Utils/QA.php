@@ -770,9 +770,11 @@ class QA {
     public static function JSONtoExceptionList( $jsonString ) {
         $that      = new static( null, null );
         $jsonValue = json_decode( $jsonString, true );
-        array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
-            $that->addError( $errArray[ 'outcome' ] );
-        } );
+        if( is_array( $jsonValue ) ){
+            array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
+                $that->addError( $errArray[ 'outcome' ] );
+            } );
+        }
 
         return $that->exceptionList;
     }

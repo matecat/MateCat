@@ -144,11 +144,13 @@ class catController extends viewController {
 
         if ( $lastUpdate < $oneMonthAgo && !$this->job_cancelled ) {
 
-            $lastTranslationInJob = new Datetime( ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->jid )->translation_date );
-
-            if ( $lastTranslationInJob < $oneMonthAgo ) {
-                Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
-                $this->job_archived = true;
+            $lastTranslationDate = ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->chunk );
+            if( !empty( $lastTranslationDate ) ){
+                $lastTranslationInJob = new Datetime( $lastTranslationDate->translation_date );
+                if ( $lastTranslationInJob < $oneMonthAgo ) {
+                    Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
+                    $this->job_archived = true;
+                }
             }
 
         }

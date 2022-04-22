@@ -17,8 +17,8 @@ class AuthCookie {
 
     //set a cookie with a username
     public static function setCredentials( $username, $uid ) {
-        [ $new_cookie_data, $new_expire_date ] = static::generateSignedAuthCookie( $username, $uid );
-        setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data,
+        list( $new_cookie_data, $new_expire_date ) = static::generateSignedAuthCookie( $username, $uid );
+        CookieManager::setCookie( INIT::$AUTHCOOKIENAME, $new_cookie_data,
                 [
                         'expires'  => $new_expire_date,
                         'path'     => '/',
@@ -45,7 +45,7 @@ class AuthCookie {
 
     public static function destroyAuthentication() {
         unset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
-        setcookie( INIT::$AUTHCOOKIENAME, '',
+        CookieManager::setCookie( INIT::$AUTHCOOKIENAME, '',
                 [
                         'expires' => 0,
                         'path'    => '/',

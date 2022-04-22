@@ -30,6 +30,7 @@
         "ext-pdo": "*",
         "ext-pdo_mysql": "*",
         "ext-posix": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-fileinfo": "*"
     }
 }

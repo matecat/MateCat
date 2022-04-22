@@ -320,7 +320,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             if ( $tm_data[ 'match_type' ] == "ICE" ) {
 
-                [ $lang, ] = explode( '-', $queueElementParams->target );
+                list( $lang, ) = explode( '-', $queueElementParams->target );
 
                 //i found this language in the list of disabled target language??
                 if ( array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ) {

@@ -69,7 +69,7 @@ class ajaxUtilsController extends ajaxController {
                 } catch ( Exception $e ) {
                     Log::doJsonLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() );
                 }
-                setcookie( "upload_session", null,
+                CookieManager::setCookie( "upload_session", null,
                         [
                                 'expires' => -1,
                                 'path'    => '/',

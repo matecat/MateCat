@@ -8,6 +8,7 @@ use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use CookieManager;
 use Exception;
 use FeatureSet;
 use INIT;
@@ -174,7 +175,7 @@ abstract class KleinController implements IController {
         $this->api_secret = $headers[ 'x-matecat-secret' ];
 
         if ( FALSE !== strpos( $this->api_key, '-' ) ) {
-            [ $this->api_key, $this->api_secret ] = explode('-', $this->api_key ) ;
+            list( $this->api_key, $this->api_secret ) = explode('-', $this->api_key ) ;
         }
 
         if ( !$this->validKeys() ) {
@@ -270,7 +271,7 @@ abstract class KleinController implements IController {
             $cookieContent = $tokenContent;
         }
 
-        setcookie( $this->downloadToken,
+        CookieManager::setCookie( $this->downloadToken,
                 $cookieContent,
                 [
                         'expires'  => time() + 3600,            // expires in 1 hour

@@ -43,7 +43,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      *
      * @param int $ttl
      *
-     * @return MetadataStruct
+     * @return DataAccess_IDaoStruct|MetadataStruct
      */
     public function get( $id_project, $id_file, $key, $ttl = 0 ) {
 
@@ -58,7 +58,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'id_project' => $id_project,
                 'id_file'    => $id_file,
                 'key'        => $key
-        ] )[ 0 ];
+        ] );
 
         return !empty( $result ) ? $result[ 0 ] : null;
 

@@ -5,6 +5,7 @@ namespace ConnectedServices\GDrive;
 use API\V2\KleinController;
 use Bootstrap;
 use Constants;
+use CookieManager;
 use Exception;
 use Google_Service_Exception;
 use INIT;
@@ -103,7 +104,7 @@ class GDriveController extends KleinController {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid,
+            CookieManager::setCookie( "upload_session", $this->guid,
                     [
                             'expires'  => time() + 86400,
                             'path'     => '/',
@@ -185,7 +186,7 @@ class GDriveController extends KleinController {
 
     private function doRedirect() {
         // set a cookie to allow the frontend to call list endpoint
-        setcookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ],
+        CookieManager::setCookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ],
                 [
                         'expires'  => time() + 86400,
                         'path'     => '/',
@@ -216,7 +217,7 @@ class GDriveController extends KleinController {
         $this->response->json( $response );
 
         // delete the cookie
-        setcookie( $this->gdriveListCookieName, "",
+        CookieManager::setCookie( $this->gdriveListCookieName, "",
                 [
                         'expires'  => time() - 3600,
                         'path'     => '/',

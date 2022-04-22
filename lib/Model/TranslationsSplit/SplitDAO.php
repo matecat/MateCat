@@ -91,7 +91,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      * @return TranslationsSplit_SplitStruct
      * @throws Exception
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

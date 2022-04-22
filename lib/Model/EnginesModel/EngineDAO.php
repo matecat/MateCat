@@ -330,7 +330,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @return EnginesModel_EngineStruct
      * @throws Exception
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
         $input->name                    = ( $input->name !== null ) ?  $input->name  : null;
@@ -356,7 +356,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @return bool|void
      * @throws Exception
      */
-    protected function _validateNotNullFields( $obj ) {
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
         /**
          * @var $obj EnginesModel_EngineStruct
          */
