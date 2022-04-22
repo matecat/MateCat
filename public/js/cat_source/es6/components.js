@@ -4,12 +4,12 @@
 import classnames from 'classnames'
 
 import JobMetadata from './components/header/cattol/JobMetadata'
-import {ModalWindow} from './components/modals/ModalWindow'
 import SegmentStore from './stores/SegmentStore'
 import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
 import AnalyzeActions from './actions/AnalyzeActions'
 import CatToolActions from './actions/CatToolActions'
 import SegmentActions from './actions/SegmentActions'
+import ModalsActions from './actions/ModalsActions'
 import CommonUtils from './utils/commonUtils'
 import Header from './components/header/Header'
 import ConfirmMessageModal from './components/modals/ConfirmMessageModal'
@@ -39,6 +39,7 @@ window.SegmentFilter = SegmentFilter
 window.AnalyzeActions = AnalyzeActions
 window.CatToolActions = CatToolActions
 window.SegmentActions = SegmentActions
+window.ModalsActions = ModalsActions
 
 window.SegmentStore = SegmentStore
 
@@ -67,7 +68,3 @@ window.Shortcuts = Shortcuts
 window.SegmentUtils = SegmentUtils
 
 window.SegmentFooterTabMatches = SegmentFooterTabMatches
-
-document.addEventListener('DOMContentLoaded', function (event) {
-  window.ModalWindow = ModalWindow
-})

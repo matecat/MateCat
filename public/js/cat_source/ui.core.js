@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import Cookies from 'js-cookie'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-// import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
@@ -19,9 +18,9 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
 import AlertModal from './es6/components/modals/AlertModal'
 import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
+import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
   /**
@@ -145,20 +144,20 @@ window.UI = {
           opts.propagation = false
           opts.autoPropagation = false
           UI.preExecChangeStatus(opts)
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         cancelText: 'Propagate to All',
         cancelCallback: function () {
           opts.propagation = true
           opts.autoPropagation = false
           UI.execChangeStatus(opts)
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         onClose: function () {
           UI.preExecChangeStatus(opts)
         },
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required ',
@@ -410,7 +409,6 @@ window.UI = {
             startSegmentId: this.startSegmentId,
             firstJobSegment: config.first_job_segment,
           }),
-          mountPoint,
         )
         SegmentActions.renderSegments(segments, this.startSegmentId)
       } else {
@@ -563,7 +561,7 @@ window.UI = {
     )
   },
   showFixWarningsOnDownload: function (continueDownloadFunction) {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       {
         cancelText: 'Fix errors',
@@ -998,7 +996,7 @@ window.UI = {
 
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             AlertModal,
             {
               text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
@@ -1009,7 +1007,7 @@ window.UI = {
       }
 
       if (codeInt === -10 && operation !== 'getSegments') {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Job canceled or assigned to another translator',
@@ -1024,7 +1022,7 @@ window.UI = {
       }
 
       if (codeInt <= -2000 && !_.isUndefined(this.message)) {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: this.message,
@@ -1201,7 +1199,7 @@ window.UI = {
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
       UI.selectingReadonly = setTimeout(function () {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: UI.messageForClickOnIceMatch(),
@@ -1217,7 +1215,7 @@ window.UI = {
     }, 200)
   },
   readonlyClickDisplay: function () {
-    ModalWindow.showModalComponent(AlertModal, {
+    ModalsActions.showModalComponent(AlertModal, {
       text: UI.messageForClickOnReadonly(),
     })
   },
@@ -1264,5 +1262,6 @@ $(window).resize(function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  ReactDOM.render(<NotificationBox />, mountPoint)
+  const root = createRoot(mountPoint)
+  root.render(<NotificationBox />)
 })

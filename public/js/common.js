@@ -3,7 +3,7 @@ import _ from 'lodash'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
-import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
 
 window.APP = null
 
@@ -290,10 +290,10 @@ window.APP = {
             ' grant Google Drive privileges to MateCat.',
           successText: 'Ok',
           successCallback: function () {
-            ModalWindow.onCloseModal()
+            ModalsActions.onCloseModal()
           },
         }
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           ConfirmMessageModal,
           props,
           'Download fail',
@@ -340,10 +340,10 @@ window.APP = {
             text: cookie.message,
             successText: 'Ok',
             successCallback: function () {
-              ModalWindow.onCloseModal()
+              ModalsActions.onCloseModal()
             },
           }
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             ConfirmMessageModal,
             props,
             'Download fail',

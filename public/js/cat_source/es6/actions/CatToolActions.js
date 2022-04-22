@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 import $ from 'jquery'
 import _ from 'lodash'
@@ -15,7 +15,7 @@ import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
-import {ModalWindow} from '../components/modals/ModalWindow'
+import ModalsActions from './ModalsActions'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -106,15 +106,14 @@ let CatToolActions = {
         vote: config.overall_quality_class,
         quality_report_href: config.quality_report_href + qrParam,
       }),
-      $('#quality-report-button')[0],
     )
   },
   renderSubHeader() {
-    ReactDOM.render(
+    const mountPoint = createRoot($('#header-bars-wrapper')[0])
+    mountPoint.render(
       React.createElement(SubHeaderContainer, {
         filtersEnabled: SegmentFilter.enabled(),
       }),
-      $('#header-bars-wrapper')[0],
     )
   },
 
@@ -142,8 +141,8 @@ let CatToolActions = {
     config.firstSegmentOfFiles = data.files
   },
   renderFooter: function () {
-    var mountPoint = $('footer.stats-foo')[0]
-    ReactDOM.render(
+    var mountPoint = createRoot($('footer.stats-foo')[0])
+    mountPoint.render(
       React.createElement(CattolFooter, {
         idProject: config.id_project,
         idJob: config.job_id,
@@ -154,7 +153,6 @@ let CatToolActions = {
         isCJK: config.isCJK,
         languagesArray: config.languages_array,
       }),
-      mountPoint,
     )
   },
   updateFooterStatistics: function () {
@@ -209,10 +207,10 @@ let CatToolActions = {
         CommonUtils.addInSessionStorage('feedback-modal', 1, 'feedback-modal')
       },
       successCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       RevisionFeedbackModal,
       props,
       'Feedback submission',

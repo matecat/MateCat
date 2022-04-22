@@ -2,7 +2,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import LXQ from './cat_source/es6/utils/lxq.main'
 import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 import Speech2Text from './cat_source/es6/utils/speech2text'
-import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 ;(function ($, UI) {
   $.extend(UI, {
@@ -17,7 +16,7 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
         .val(config.segmentation_rule)
         .attr('disabled', true)
       $('.mgmt-table-options .options-box.seg_rule').on('click', function () {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Segment rules settings can only be edited when creating the project.',
@@ -102,7 +101,7 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
           .find('.option-s2t-box-chrome-label')
           .css('display', 'inline')
         speech2textContainer.find('.onoffswitch').on('click', function () {
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             AlertModal,
             {
               text: 'This options is only available on your browser.',

@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
 import _ from 'lodash'
 
@@ -18,7 +18,6 @@ import {getProjects} from '../../api/getProjects'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
-import {ModalWindow} from '../modals/ModalWindow'
 import NotificationBox from '../notificationsComponent/NotificationBox'
 
 class Dashboard extends React.Component {
@@ -260,20 +259,20 @@ class Dashboard extends React.Component {
 
     if (project.remote_file_service == 'gdrive') {
       continueDownloadFunction = function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadGDriveFile(null, job.id, job.password, callback)
       }
     } else {
       continueDownloadFunction = function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadFile(job.id, job.password, callback)
       }
     }
 
     const openUrl = function () {
-      ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
       ManageActions.enableDownloadButton(job.id)
       window.open(urlWarnings, '_blank')
     }
@@ -292,7 +291,7 @@ class Dashboard extends React.Component {
         warningText: 'Fix errors',
         warningCallback: openUrl,
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required',
@@ -497,12 +496,12 @@ class Dashboard extends React.Component {
 export default Dashboard
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementById('manage-container')
-  ReactDOM.render(React.createElement(Dashboard, {}), mountPoint)
+  const mountPoint = createRoot(document.getElementById('manage-container'))
+  mountPoint.render(React.createElement(Dashboard, {}))
 
   //Toast Notifications
-  const mountPointNotifications = document.getElementsByClassName(
-    'notifications-wrapper',
-  )[0]
-  ReactDOM.render(<NotificationBox />, mountPointNotifications)
+  const mountPointNotifications = createRoot(
+    document.getElementsByClassName('notifications-wrapper')[0],
+  )
+  mountPointNotifications.render(<NotificationBox />)
 })

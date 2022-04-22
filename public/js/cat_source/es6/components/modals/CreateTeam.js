@@ -2,7 +2,6 @@ import React from 'react'
 
 import ManageActions from '../../actions/ManageActions'
 import CommonUtils from '../../utils/commonUtils'
-import {ModalWindow} from './ModalWindow'
 
 class CreateTeam extends React.Component {
   constructor(props) {
@@ -101,7 +100,7 @@ class CreateTeam extends React.Component {
           ? $(this.usersInput).dropdown('get value').split(',')
           : []
       ManageActions.createTeam(this.inputNewOrg.value, members)
-      ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
       this.inputNewOrg.value = ''
     } else if (this.inputNewOrg.value.length == 0) {
       this.setState({

@@ -1,6 +1,6 @@
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import SegmentActions from './es6/actions/SegmentActions'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
+import ModalsActions from './es6/actions/ModalsActions'
 
 window.Review = {
   enabled: function () {
@@ -22,7 +22,7 @@ $.extend(window.UI, {
 })
 
 window.alertNotTranslatedYet = function (sid) {
-  ModalWindow.showModalComponent(ConfirmMessageModal, {
+  ModalsActions.showModalComponent(ConfirmMessageModal, {
     cancelText: 'Close',
     successCallback: () => UI.openNextTranslated(sid),
     successText: 'Open next translated segment',
@@ -35,10 +35,10 @@ window.alertNoTranslatedSegments = function () {
     text: 'There are no translated segments to revise in this job.',
     successText: 'Ok',
     successCallback: function () {
-      ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
     },
   }
-  ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
+  ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
 }
 
 if (config.enableReview && config.isReview) {

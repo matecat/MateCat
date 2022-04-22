@@ -4,6 +4,7 @@ import _ from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
+import ModalsConstants from '../constants/ModalsConstants'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -130,6 +131,22 @@ AppDispatcher.register(function (action) {
     case CatToolConstants.REMOVE_ALL_NOTIFICATION:
       CatToolStore.emitChange(CatToolConstants.REMOVE_ALL_NOTIFICATION)
       break
+    case ModalsConstants.SHOW_MODAL: {
+      const {component, props, title, style, onCloseCallback} = action
+      CatToolStore.emitChange(
+        ModalsConstants.SHOW_MODAL,
+        component,
+        props,
+        title,
+        style,
+        onCloseCallback,
+      )
+      break
+    }
+    case ModalsConstants.CLOSE_MODAL: {
+      CatToolStore.emitChange(ModalsConstants.CLOSE_MODAL)
+      break
+    }
   }
 })
 
