@@ -387,12 +387,13 @@
     }
   }
   .index-counter {
-    margin-left: 3px;
+    margin-left: 2px;
     margin-right: -3px;
     background-color: #444c54;
-    border-radius: 50%;
+    border-radius: 10px;
     padding-left: 5px;
     padding-right: 5px;
+    box-shadow: inset 0px 0px 0px 1px #788190;
   }
 }
 
@@ -619,7 +620,7 @@
           margin: 0 12px 0 0;
         }
         &.tag-placeholder {
-          span {
+          span:not(.index-counter) {
             display: block;
             white-space: nowrap;
             text-overflow: ellipsis;

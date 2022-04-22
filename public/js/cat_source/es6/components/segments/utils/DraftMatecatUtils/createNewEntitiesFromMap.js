@@ -162,6 +162,6 @@ const addIncrementalIndex = (tagRange) =>
   }, [])
 
 const isXliff2 = (encodedText) =>
-  /\bph\b/.test(encodedText) && !/id=\\"mtc_/.test(encodedText)
+  /\bph\b/.test(encodedText) && !/id=\"mtc_/.test(encodedText) //eslint-disable-line
 
 export default createNewEntitiesFromMap
