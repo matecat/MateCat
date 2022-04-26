@@ -32,10 +32,12 @@ class Dashboard extends React.Component {
     this.state = {
       teams: [],
       selectedTeam: undefined,
-      showProjects: false,
+      fetchingProjects: true,
       selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
+  }
 
+  getData = () => {
     getUserData().then((data) => {
       TeamsActions.renderTeams(data.teams)
       const selectedTeam = APP.getLastTeamSelected(data.teams)
@@ -50,8 +52,10 @@ class Dashboard extends React.Component {
 
         getProjects({team: selectedTeam, searchFilter: this.Search})
           .then((res) => {
-            this.setState({showProjects: true})
-            ManageActions.renderProjects(res.data, selectedTeam, teams)
+            this.setState({fetchingProjects: false})
+            setTimeout(() =>
+              ManageActions.renderProjects(res.data, selectedTeam, teams),
+            )
             ManageActions.storeSelectedTeam(selectedTeam)
           })
           .catch((err) => {
@@ -367,6 +371,7 @@ class Dashboard extends React.Component {
   /*********************************/
 
   componentDidMount() {
+    this.getData()
     window.addEventListener('scroll', this.scrollDebounceFn())
     let self = this
     $(window).on('blur focus', function (e) {
@@ -474,14 +479,13 @@ class Dashboard extends React.Component {
             loggedUser={true}
           />
         </DashboardHeader>
-        {this.state.selectedTeam &&
-        this.state.teams &&
-        this.state.showProjects ? (
+        {this.state.selectedTeam && this.state.teams ? (
           <ProjectsContainer
             downloadTranslationFn={this.downloadTranslation}
             teams={Immutable.fromJS(this.state.teams)}
             team={Immutable.fromJS(this.state.selectedTeam)}
             selectedUser={this.state.selectedUser}
+            fetchingProjects={this.state.fetchingProjects}
           />
         ) : (
           <div className="ui active inverted dimmer">

@@ -1,8 +1,6 @@
 import React from 'react'
 import TagsInput from 'react-tagsinput'
 
-import Header from '../header/Header'
-
 class LanguageSelectorSearch extends React.Component {
   constructor(props) {
     super(props)

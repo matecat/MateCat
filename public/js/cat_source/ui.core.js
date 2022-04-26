@@ -363,10 +363,9 @@ window.UI = {
    * react components, closing side panel etc.
    */
   unmountSegments: function () {
-    $('.article-segments-container').each(function (index, value) {
-      ReactDOM.unmountComponentAtNode(value)
-      delete UI.SegmentsContainers
-    })
+    this.segmentsMountPoint.unmount()
+    UI.segmentsRendered = false
+
     this.removeCacheObjects()
     SegmentStore.removeAllSegments()
     SegmentActions.closeSideSegments()
@@ -395,10 +394,12 @@ window.UI = {
       !this.split_points_source.length ||
       justCreated
     ) {
-      if (!this.SegmentsContainers) {
-        this.SegmentsContainers = []
-        var mountPoint = $('.article-segments-container')[0]
-        this.SegmentsContainers[0] = ReactDOM.render(
+      if (!this.segmentsRendered) {
+        this.segmentsRendered = true
+        this.segmentsMountPoint = createRoot(
+          $('.article-segments-container')[0],
+        )
+        this.segmentsMountPoint.render(
           React.createElement(SegmentsContainer, {
             // fid: fid,
             isReview: Review.enabled(),

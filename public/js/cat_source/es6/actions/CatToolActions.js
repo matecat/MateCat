@@ -101,7 +101,8 @@ let CatToolActions = {
     var qrParam = config.secondRevisionsCount
       ? '?revision_type=' + revision_number
       : ''
-    window.quality_report_btn_component = ReactDOM.render(
+    const mountPoint = createRoot($('#quality-report-button')[0])
+    mountPoint.render(
       React.createElement(QualityReportButton, {
         vote: config.overall_quality_class,
         quality_report_href: config.quality_report_href + qrParam,
@@ -229,12 +230,11 @@ let CatToolActions = {
     var review = qr.chunk.reviews.find(function (value) {
       return value.revision_number === revNumber
     })
-    AppDispatcher.dispatch({
-      actionType: CattolConstants.UPDATE_QR,
-      qr: qr,
-    })
+
     if (review) {
-      window.quality_report_btn_component.setState({
+      AppDispatcher.dispatch({
+        actionType: CattolConstants.UPDATE_QR,
+        qr: qr,
         is_pass: review.is_pass,
         score: review.score,
         feedback: review.feedback,

@@ -4,7 +4,7 @@ import React from 'react'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+
 import {
   clearDqfCredentials as clearDqfCredentialsApi,
   submitDqfCredentials as submitDqfCredentialsApi,

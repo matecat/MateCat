@@ -17,7 +17,7 @@ const initialState = {
   onCloseCallback: false,
 }
 
-export class ModalWindowComponent extends React.Component {
+export class ModalWindow extends React.Component {
   state = initialState
 
   onCloseModal = () => {
@@ -93,5 +93,5 @@ export class ModalWindowComponent extends React.Component {
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountPoint = createRoot(document.getElementById('modal'))
-  mountPoint.render(React.createElement(ModalWindowComponent, {}))
+  mountPoint.render(React.createElement(ModalWindow, {}))
 })

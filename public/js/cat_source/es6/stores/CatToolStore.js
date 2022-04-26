@@ -111,6 +111,12 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.UPDATE_QR:
       CatToolStore.updateQR(action.qr)
+      CatToolStore.emitChange(
+        action.actionType,
+        action.is_pass,
+        action.score,
+        action.feedback,
+      )
       break
     case CatToolConstants.CLIENT_CONNECT:
       CatToolStore.clientConnect(action.clientId)

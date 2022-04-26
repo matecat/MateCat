@@ -29,6 +29,7 @@ import OfflineUtils from './utils/offlineUtils'
 import Shortcuts from './utils/shortcuts'
 import SegmentUtils from './utils/segmentUtils'
 import SegmentFooterTabMatches from './components/segments/SegmentFooterTabMatches'
+import {ModalWindow} from './components/modals/ModalWindow'
 
 window.MC = {}
 
@@ -66,5 +67,6 @@ window.CursorUtils = CursorUtils
 window.OfflineUtils = OfflineUtils
 window.Shortcuts = Shortcuts
 window.SegmentUtils = SegmentUtils
+window.ModalWindow = ModalWindow
 
 window.SegmentFooterTabMatches = SegmentFooterTabMatches

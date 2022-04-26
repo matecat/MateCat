@@ -774,7 +774,7 @@ $.extend(UI.UPLOAD_PAGE, {
           languagesList: config.languages_array,
           fromLanguage: sourceLang,
           onClose: function () {
-            ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+            mountPoint.unmount()
           },
           onConfirm: function (data) {
             if (data) {
@@ -800,7 +800,7 @@ $.extend(UI.UPLOAD_PAGE, {
                 `<span class="extra">(${vals.length} languages)</span>`,
               )
             }
-            ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+            mountPoint.unmount()
           },
         }),
       )
