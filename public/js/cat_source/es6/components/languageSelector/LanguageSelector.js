@@ -12,6 +12,7 @@ class LanguageSelector extends React.Component {
       initialLanguages: null,
       fromLanguage: null,
       querySearch: '',
+      filteredLanguages: [],
     }
   }
 
@@ -35,7 +36,19 @@ class LanguageSelector extends React.Component {
     document.removeEventListener('keydown', this.pressEscKey)
   }
 
-  componentDidUpdate() {}
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.querySearch !== this.state.querySearch) {
+      const filteredLanguages = this.state.querySearch
+        ? this.props.languagesList.filter(
+            (e) =>
+              e.name
+                .toLowerCase()
+                .indexOf(this.state.querySearch.toLowerCase()) === 0,
+          )
+        : []
+      this.setState({filteredLanguages})
+    }
+  }
 
   render() {
     const {
@@ -45,9 +58,11 @@ class LanguageSelector extends React.Component {
       preventDismiss,
       onRestore,
       onReset,
+      onResetResults,
     } = this
     const {languagesList, onClose} = this.props
-    const {selectedLanguages, querySearch, fromLanguage} = this.state
+    const {selectedLanguages, querySearch, fromLanguage, filteredLanguages} =
+      this.state
     return (
       <div
         id="matecat-modal-languages"
@@ -83,6 +98,14 @@ class LanguageSelector extends React.Component {
                     onQueryChange={onQueryChange}
                   />
                 </div>
+                {filteredLanguages.length > 0 && (
+                  <button
+                    className={'modal-btn secondary gray button-all-languages'}
+                    onClick={onResetResults}
+                  >
+                    All languages
+                  </button>
+                )}
               </div>
             </div>
 
@@ -182,8 +205,18 @@ class LanguageSelector extends React.Component {
     } else {
       newSelectedLanguages.push(language)
     }
+
+    const areAllResultsSelected =
+      this.state.filteredLanguages.filter(({code}) =>
+        newSelectedLanguages.find((selected) => selected.code === code),
+      ).length === this.state.filteredLanguages.length
+
+    const shouldResetQuery =
+      this.state.filteredLanguages.length < 2 || areAllResultsSelected
+
     this.setState({
       selectedLanguages: newSelectedLanguages,
+      ...(shouldResetQuery && {querySearch: ''}),
     })
     //when add a language, restore query search.
   }
@@ -200,6 +233,9 @@ class LanguageSelector extends React.Component {
       selectedLanguages: [],
       querySearch: '',
     })
+  }
+  onResetResults = () => {
+    this.setState({querySearch: ''})
   }
 
   pressEscKey = (event) => {
