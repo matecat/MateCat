@@ -1,6 +1,5 @@
 import React from 'react'
 
-import Header from '../header/Header'
 import LanguageSelectorList from './LanguageSelectorList'
 import LanguageSelectorSearch from './LanguageSelectorSearch'
 
@@ -113,7 +112,6 @@ class LanguageSelector extends React.Component {
               languagesList={languagesList}
               selectedLanguages={selectedLanguages}
               querySearch={querySearch}
-              changeQuerySearch={onQueryChange}
               onToggleLanguage={onToggleLanguage}
             />
           </div>

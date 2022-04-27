@@ -1,7 +1,5 @@
 import React from 'react'
 
-import Header from '../header/Header'
-
 class LanguageSelectorList extends React.Component {
   constructor(props) {
     super(props)
@@ -196,7 +194,6 @@ LanguageSelectorList.defaultProps = {
   selectedLanguages: false,
   languagesList: true,
   onToggleLanguage: true,
-  changeQuerySearch: true,
   querySearch: true,
 }
 
