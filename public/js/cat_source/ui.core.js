@@ -1,7 +1,7 @@
 import _ from 'lodash'
+import React, {useEffect} from 'react'
 import Cookies from 'js-cookie'
 import {createRoot} from 'react-dom/client'
-import React from 'react'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
@@ -399,19 +399,24 @@ window.UI = {
         this.segmentsMountPoint = createRoot(
           $('.article-segments-container')[0],
         )
-        this.segmentsMountPoint.render(
-          React.createElement(SegmentsContainer, {
+        const AppWithCallbackAfterRender = () => {
+          useEffect(() => {
+            SegmentActions.renderSegments(segments, UI.startSegmentId)
+          })
+          return React.createElement(SegmentsContainer, {
             // fid: fid,
             isReview: Review.enabled(),
             isReviewExtended: ReviewExtended.enabled(),
             reviewType: Review.type,
             enableTagProjection: UI.enableTagProjection,
             tagModesEnabled: UI.tagModesEnabled,
-            startSegmentId: this.startSegmentId,
+            startSegmentId: UI.startSegmentId,
             firstJobSegment: config.first_job_segment,
-          }),
-        )
-        SegmentActions.renderSegments(segments, this.startSegmentId)
+          })
+        }
+
+        this.segmentsMountPoint.render(<AppWithCallbackAfterRender />)
+        // SegmentActions.renderSegments(segments, this.startSegmentId)
       } else {
         SegmentActions.addSegments(segments, where)
       }
