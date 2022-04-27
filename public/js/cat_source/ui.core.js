@@ -399,7 +399,7 @@ window.UI = {
         this.segmentsMountPoint = createRoot(
           $('.article-segments-container')[0],
         )
-        const AppWithCallbackAfterRender = () => {
+        const CallbackAfterRender = () => {
           useEffect(() => {
             SegmentActions.renderSegments(segments, UI.startSegmentId)
           })
@@ -415,7 +415,7 @@ window.UI = {
           })
         }
 
-        this.segmentsMountPoint.render(<AppWithCallbackAfterRender />)
+        this.segmentsMountPoint.render(<CallbackAfterRender />)
         // SegmentActions.renderSegments(segments, this.startSegmentId)
       } else {
         SegmentActions.addSegments(segments, where)
