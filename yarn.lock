@@ -3932,9 +3932,9 @@ grunt-browserify@^6.0.0:
     resolve "^1.1.6"
     watchify "^4.0.0"
 
-grunt-cli@~1.4.2:
+grunt-cli@~1.4.3:
   version "1.4.3"
-  resolved "https://registry.npmjs.org/grunt-cli/-/grunt-cli-1.4.3.tgz"
+  resolved "https://registry.yarnpkg.com/grunt-cli/-/grunt-cli-1.4.3.tgz#22c9f1a3d2780bf9b0d206e832e40f8f499175ff"
   integrity sha512-9Dtx/AhVeB4LYzsViCjUQkd0Kw0McN2gYpdmGYKtE2a5Yt7v1Q+HYZVWhqXc/kGnxlMtqKDxSwotiGeFmkrCoQ==
   dependencies:
     grunt-known-options "~2.0.0"
@@ -3970,11 +3970,6 @@ grunt-curl@^2.5.1:
     grunt-retro "~0.7.0"
     lodash "~4.17.11"
     request "~2.83.0"
-
-grunt-known-options@~1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/grunt-known-options/-/grunt-known-options-1.1.1.tgz"
-  integrity sha512-cHwsLqoighpu7TuYj5RonnEuxGVFnztcUqTqp5rXFGYL4OuPFofwC4Ycg7n9fYwvK6F5WbYgeVOwph9Crs2fsQ==
 
 grunt-known-options@~2.0.0:
   version "2.0.0"
@@ -4034,18 +4029,18 @@ grunt-text-replace@^0.4.0:
   resolved "https://registry.npmjs.org/grunt-text-replace/-/grunt-text-replace-0.4.0.tgz"
   integrity sha1-252c5Z4v5J2id+nbwZXD4Rz7FsI=
 
-grunt@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/grunt/-/grunt-1.4.0.tgz"
-  integrity sha512-yRFc0GVCDu9yxqOFzpuXQ2pEdgtLDnFv5Qz54jfIcNnpJ8Z7B7P7kPkT4VMuRvm+N+QOsI8C4v/Q0DSaoj3LgQ==
+grunt@^1.5.2:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/grunt/-/grunt-1.5.2.tgz#46b014e28d17c85baac19d5e891bb3f04923c098"
+  integrity sha512-XCtfaIu72OyDqK24MjWiGC9SwlkuhkS1mrULr1xzuJ2XqAFhP3ZAchZGHJeSCY6mkaOXU4F7SbmmCF7xIVoC9w==
   dependencies:
     dateformat "~3.0.3"
     eventemitter2 "~0.4.13"
     exit "~0.1.2"
     findup-sync "~0.3.0"
     glob "~7.1.6"
-    grunt-cli "~1.4.2"
-    grunt-known-options "~1.1.1"
+    grunt-cli "~1.4.3"
+    grunt-known-options "~2.0.0"
     grunt-legacy-log "~3.0.0"
     grunt-legacy-util "~2.0.1"
     iconv-lite "~0.4.13"
