@@ -131,12 +131,15 @@
           }
         }
       }
+    }
 
-      .button-all-languages {
-        min-width: 120px;
-        padding-top: 14px;
-        padding-bottom: 14px;
-        margin: 0 0 0 8px;
+    .button-all-languages {
+      display: flex;
+      flex-direction: row-reverse;
+
+      button span {
+        display: inline-block;
+        margin: 2px 4px 0 0;
       }
     }
   }

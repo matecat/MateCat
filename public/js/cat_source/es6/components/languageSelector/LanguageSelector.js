@@ -97,15 +97,19 @@ class LanguageSelector extends React.Component {
                     onQueryChange={onQueryChange}
                   />
                 </div>
-                {filteredLanguages.length > 0 && (
+              </div>
+              {(filteredLanguages.length > 0 ||
+                (querySearch && !filteredLanguages.length)) && (
+                <div className="button-all-languages">
                   <button
-                    className={'modal-btn secondary gray button-all-languages'}
+                    className={'modal-btn secondary gray'}
                     onClick={onResetResults}
                   >
+                    <span className="icon-undo2"></span>
                     All languages
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <LanguageSelectorList
