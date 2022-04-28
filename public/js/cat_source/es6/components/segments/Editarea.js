@@ -95,6 +95,7 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
       },
+      previousSourceTagMap: null,
     }
     const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
       DraftMatecatUtils.cleanSegmentString(translation),
@@ -204,6 +205,7 @@ class Editarea extends React.Component {
       const contentEncoded = DraftMatecatUtils.encodeContent(
         editorState,
         DraftMatecatUtils.unescapeHTMLLeaveTags(translation),
+        this.props.segment.sourceTagMap,
       )
       // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
       let {editorState: newEditorState} = contentEncoded
@@ -474,6 +476,18 @@ class Editarea extends React.Component {
       !editorSync.onComposition
     ) {
       this.checkDecorators(prevProps)
+    }
+
+    // update editor state when receive prop of segment "sourceTagMap"
+    if (
+      this.props.segment.sourceTagMap?.length &&
+      !_.isEqual(
+        this.state.previousSourceTagMap,
+        this.props.segment.sourceTagMap,
+      )
+    ) {
+      this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
+      this.setNewTranslation(this.props.segment.sid, this.props.translation)
     }
   }
 

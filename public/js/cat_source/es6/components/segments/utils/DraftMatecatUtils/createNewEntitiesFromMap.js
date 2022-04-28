@@ -13,6 +13,7 @@ const createNewEntitiesFromMap = (
   editorState,
   excludedTagsType,
   plainText = '',
+  sourceTagMap,
 ) => {
   const excludeReplaceZWSP = ['nbsp']
   // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
@@ -26,7 +27,22 @@ const createNewEntitiesFromMap = (
   const offsetWithEntities = []
   let slicedLength = 0
 
-  const tagRangeWithIndexes = addIncrementalIndex(tagRange)
+  const shouldCompareWithSourceTagMap = sourceTagMap?.length && tagRange.length
+
+  const tagRangeWithIndexes = shouldCompareWithSourceTagMap
+    ? tagRange.map((tag) => {
+        const tagSource = sourceTagMap.find(({data}) => data.id === tag.data.id)
+        return {
+          ...tag,
+          data: {
+            ...tag.data,
+            ...(tagSource?.data?.index !== undefined && {
+              index: tagSource.data.index,
+            }),
+          },
+        }
+      })
+    : addIncrementalIndex(tagRange)
 
   // Executre replace with placeholder and adapt offsets
   tagRangeWithIndexes.forEach((tagEntity) => {
