@@ -356,7 +356,7 @@ let ManageActions = {
         passwordProject: passwordProject,
         idJob: idJob,
         passwordJob: passwordJob,
-        secondPAssPassword: data.chunk_review.review_password,
+        secondPassPassword: data.chunk_review.review_password,
       })
     })
   },

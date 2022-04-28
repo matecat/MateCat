@@ -2,6 +2,7 @@ import React from 'react'
 import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
 import _ from 'lodash'
+import {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
@@ -49,7 +50,7 @@ class Dashboard extends React.Component {
       this.getTeamStructure(selectedTeam).then(() => {
         TeamsActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
-
+        this.setState({fetchingProjects: true})
         getProjects({team: selectedTeam, searchFilter: this.Search})
           .then((res) => {
             this.setState({fetchingProjects: false})
@@ -80,9 +81,11 @@ class Dashboard extends React.Component {
   }
 
   updateTeams = (teams) => {
-    this.setState({
-      teams: teams.toJS(),
-    })
+    flushSync(() =>
+      this.setState({
+        teams: teams.toJS(),
+      }),
+    )
   }
 
   updateProjects = (id) => {

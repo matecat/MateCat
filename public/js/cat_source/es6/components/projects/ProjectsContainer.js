@@ -1,4 +1,5 @@
 import React from 'react'
+import {flushSync} from 'react-dom'
 import ProjectContainer from './ProjectContainer'
 import TeamConstants from '../../constants/TeamConstants'
 import ManageConstants from '../../constants/ManageConstants'
@@ -11,7 +12,7 @@ class ProjectsContainer extends React.Component {
     super(props)
     this.state = {
       projects: Immutable.fromJS([]),
-      more_projects: true,
+      more_projects: false,
       reloading_projects: false,
       team: this.props.team,
       teams: this.props.teams,
@@ -58,9 +59,11 @@ class ProjectsContainer extends React.Component {
   }
 
   updateProjects(projects) {
-    this.setState({
-      projects: projects,
-    })
+    flushSync(() =>
+      this.setState({
+        projects: projects,
+      }),
+    )
   }
 
   hideSpinner() {
