@@ -63,7 +63,7 @@ class FilterSegments extends React.Component {
       filter: filter,
     })
 
-    this.props.applyFilter(this.state.filter)
+    this.props.applyFilter(filter)
   }
 
   resetStatusFilter() {

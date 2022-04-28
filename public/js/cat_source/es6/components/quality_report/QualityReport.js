@@ -269,7 +269,6 @@ if (config.isLoggedIn) {
         user: data,
       }),
     )
-    const mountPoint = createRoot(document.getElementById('qr-root'))
     mountPoint.render(React.createElement(QualityReport))
   })
 } else {
