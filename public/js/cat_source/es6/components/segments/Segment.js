@@ -119,6 +119,8 @@ class Segment extends React.Component {
         null,
         document.location.pathname + '#' + this.props.segment.sid,
       )
+
+      UI.updateJobMenu(this.props.segment)
     }
   }
 
