@@ -218,6 +218,22 @@ const tagSignatures = {
     showTooltip: false,
     replaceForLexiqa: false,
   },
+  NoBreak: {
+    type: 'NoBreak',
+    regex: /&NoBreak;/g,
+    selfClosing: true,
+    isClosure: false,
+    placeholder: '\u00B0', //'°',
+    placeholderRegex: null,
+    decodeNeeded: false,
+    errorCheckAvailable: false,
+    lexiqaAvailable: false,
+    glossaryAvailable: false,
+    style: 'tag-selfclosed tag-nbsp',
+    showTooltip: false,
+    replaceForLexiqa: true,
+    lexiqaText: ' ',
+  },
 }
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {
