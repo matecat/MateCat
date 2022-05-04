@@ -146,7 +146,7 @@
                 "en":"Balkan Gipsy"
             }],
             "isocode":"rm",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"rm-RO"
         }
@@ -429,7 +429,7 @@
                 "en":"Coptic"
             }],
             "isocode":"cop",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"cop-EG"
         }
@@ -439,7 +439,7 @@
                 "en":"Crioulo Upper Guinea"
             }],
             "isocode":"pov",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"pov-GW"
         }
@@ -629,7 +629,7 @@
                 "en":"Fanagalo"
             }],
             "isocode":"fn",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"fn-FNG"
         }
@@ -1068,7 +1068,7 @@
                 "en":"Kabylian"
             }],
             "isocode":"kab",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"kab-DZ"
         }
@@ -1448,7 +1448,7 @@
                 "en":"Manx Gaelic"
             }],
             "isocode":"gv",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"gv-IM"
         }
@@ -1518,7 +1518,7 @@
                 "en":"Mende"
             }],
             "isocode":"men",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"men-SL"
         }
@@ -1620,7 +1620,7 @@
                 "en":"Niuean"
             }],
             "isocode":"niu",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"niu-NU"
         }
@@ -1640,7 +1640,7 @@
                 "en":"Norwegian"
             }],
             "isocode":"no",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"no-NO"
         }
@@ -1791,7 +1791,7 @@
                 "en":"Pijin"
             }],
             "isocode":"pis",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"pis-SB"
         }
@@ -1831,7 +1831,7 @@
                 "en":"Potawatomi"
             }],
             "isocode":"pot",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"pot-US"
         }
@@ -1931,7 +1931,7 @@
                 "en":"Sango"
             }],
             "isocode":"sg",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"sg-CF"
         }
@@ -2082,7 +2082,7 @@
                 "en":"Sotho Southern"
             }],
             "isocode":"st",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"st-LS"
         }
@@ -2152,7 +2152,7 @@
                 "en":"Sranan Tongo"
             }],
             "isocode":"srn",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"srn-SR"
         }
@@ -2285,7 +2285,7 @@
                 "en":"Tetum"
             }],
             "isocode":"tet",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"tet-TL"
         }
@@ -2335,7 +2335,7 @@
                 "en":"Tokelauan"
             }],
             "isocode":"tkl",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"tkl-TK"
         }
@@ -2415,7 +2415,7 @@
                 "en":"Tuvaluan"
             }],
             "isocode":"tvl",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"tvl-TV"
         }
@@ -2455,7 +2455,7 @@
                 "en":"Uma"
             }],
             "isocode":"ppk",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"ppk-ID"
         }
@@ -2515,7 +2515,7 @@
                 "en":"Wallisian"
             }],
             "isocode":"wls",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"wls-WF"
         }
