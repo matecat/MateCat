@@ -218,12 +218,13 @@ const tagSignatures = {
     showTooltip: false,
     replaceForLexiqa: false,
   },
-  NoBreak: {
-    type: 'NoBreak',
-    regex: /&NoBreak;/g,
+  wordJoiner: {
+    type: 'wordJoiner',
+    regex: /\u2060/g,
     selfClosing: true,
     isClosure: false,
-    placeholder: '\u00B0', //'°',
+    placeholder: '\u00B6', //'¶',
+    encodedPlaceholder: '⁠',
     placeholderRegex: null,
     decodeNeeded: false,
     errorCheckAvailable: false,

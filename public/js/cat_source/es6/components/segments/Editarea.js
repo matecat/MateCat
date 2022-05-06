@@ -653,6 +653,8 @@ class Editarea extends React.Component {
       }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
+    } else if (!e.shiftKey && e.altKey && e.keyCode === 50) {
+      return 'insert-word-joiner-tag'
     }
     return getDefaultKeyBinding(e)
   }
@@ -709,6 +711,9 @@ class Editarea extends React.Component {
         insertTagAtSelection('nbsp')
         return 'handled'
       case 'add-issue':
+        return 'handled'
+      case 'insert-word-joiner-tag':
+        insertTagAtSelection('wordJoiner')
         return 'handled'
       case 'translate':
         return 'not-handled'
