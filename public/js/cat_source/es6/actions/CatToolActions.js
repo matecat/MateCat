@@ -109,14 +109,6 @@ let CatToolActions = {
       $('#quality-report-button')[0],
     )
   },
-  renderSubHeader() {
-    ReactDOM.render(
-      React.createElement(SubHeaderContainer, {
-        filtersEnabled: SegmentFilter.enabled(),
-      }),
-      $('#header-bars-wrapper')[0],
-    )
-  },
 
   showHeaderTooltip: function () {
     var closedPopup = localStorage.getItem(this.popupInfoUserMenu())

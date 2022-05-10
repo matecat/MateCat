@@ -104,7 +104,6 @@ $.extend(window.UI, {
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
     // Temporary js for header action menu
     UI.initHeader()
-    CatToolActions.renderSubHeader()
     CatToolActions.renderFooter()
   },
   init: function () {

@@ -1,9 +1,7 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 import ReactDOM from 'react-dom'
 import React from 'react'
 
-import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 import {getJobFileInfo} from './es6/api/getJobFileInfo'
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
@@ -18,28 +16,45 @@ import {getJobMetadata} from './es6/api/getJobMetadata'
 import {logoutUser} from './es6/api/logoutUser'
 import {reloadQualityReport} from './es6/api/reloadQualityReport'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
+import $ from 'jquery'
+import {Header} from './es6/components/header/cattol/Header'
 
 $.extend(window.UI, {
   initHeader: function () {
-    if (SearchUtils.searchEnabled)
-      $('#action-search').show(100, function () {
-        APP.fitText($('#pname-container'), $('#pname'), 25)
-      })
-
-    if ($('#action-three-dots').length) {
-      $('#action-three-dots').dropdown()
-    }
-    if ($('#user-menu-dropdown').length) {
-      $('#user-menu-dropdown').dropdown()
-    }
-
-    if (config.isLoggedIn) {
-      setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 3000)
-    }
-    this.renderQualityReportButton()
-    this.createJobMenu()
+    ReactDOM.render(
+      React.createElement(Header, {
+        pid: config.id_project,
+        jid: config.job_id,
+        password: config.password,
+        pname: 'test', //TODO
+        source_code: config.source_rfc,
+        target_code: config.target_rfc,
+        isReview: config.isReview,
+        revisionNumber: config.revisionNumber,
+        stats: UI.projectStats, //TODO
+        user: {}, //TODO
+      }),
+      $('header')[0],
+    )
+    // if (SearchUtils.searchEnabled)
+    //   $('#action-search').show(100, function () {
+    //     APP.fitText($('#pname-container'), $('#pname'), 25)
+    //   })
+    //
+    // if ($('#action-three-dots').length) {
+    //   $('#action-three-dots').dropdown()
+    // }
+    // if ($('#user-menu-dropdown').length) {
+    //   $('#user-menu-dropdown').dropdown()
+    // }
+    //
+    // if (config.isLoggedIn) {
+    //   setTimeout(function () {
+    //     CatToolActions.showHeaderTooltip()
+    //   }, 3000)
+    // }
+    //this.renderQualityReportButton()
+    //this.createJobMenu()
   },
   logoutAction: function () {
     logoutUser().then(() => {
