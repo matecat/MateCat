@@ -28,6 +28,7 @@ import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import TagUtils from '../../utils/tagUtils'
+import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -37,6 +38,9 @@ const editorSync = {
   clickedOnTag: false,
   onComposition: false,
 }
+
+// typing chars sequence
+const typingWordJoiner = matchTypingSequence([50, 48, 54, 48], 2000)
 
 class Editarea extends React.Component {
   constructor(props) {
@@ -653,9 +657,21 @@ class Editarea extends React.Component {
       }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
-    } else if (!e.shiftKey && e.altKey && e.keyCode === 50) {
+    } else if (
+      (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+      (e.ctrlKey || e.metaKey) &&
+      e.altKey
+    ) {
       return 'insert-word-joiner-tag'
+    } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
+      if (e.key !== 'Shift') {
+        const result = typingWordJoiner.get(e.keyCode)
+        if (result) {
+          return 'insert-word-joiner-tag'
+        }
+      }
     }
+    if (!e.ctrlKey || !e.shiftKey) typingWordJoiner.reset()
     return getDefaultKeyBinding(e)
   }
 

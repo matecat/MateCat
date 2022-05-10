@@ -192,6 +192,9 @@
     &.tag-nbsp {
       font-size: 14px;
     }
+    &.tag-word-joiner {
+      font-size: 14px;
+    }
     &.tag-lf {
       &:after {
         font-size: 12px;
@@ -298,6 +301,23 @@
     margin: 0 2px;
     color: #08beec;
     background: transparent;
+    &:before {
+      border: none;
+    }
+    &:after {
+      border: none;
+    }
+    span {
+      &::selection {
+        color: #002b5c;
+      }
+    }
+  }
+
+  &.tag-word-joiner {
+    font-size: 16px;
+    margin: 0;
+    background: #08beec;
     &:before {
       border: none;
     }
