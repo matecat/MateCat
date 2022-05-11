@@ -51,3 +51,22 @@ test('Match typing sequence', async () => {
   })
   expect(result).toBeFalsy()
 })
+
+test('Match typing sequence with multiple options', () => {
+  const {get: checkSequence} = matchTypingSequence(
+    [
+      [50, 98],
+      [48, 96],
+      [54, 102],
+      [48, 96],
+    ],
+    1000,
+  )
+
+  checkSequence(98)
+  checkSequence(48)
+  checkSequence(54)
+  let result = checkSequence(96)
+
+  expect(result).toBeTruthy()
+})

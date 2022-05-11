@@ -15,8 +15,10 @@ export default (sequence, delay = 1000) => {
       if (tmOut) clearTimeout(tmOut)
       if (!keyIdentifier) throw new Error('keyIdentifier prop is not defined.')
       typingCollection.push(keyIdentifier)
-      const hasBeenMatched = sequence.every(
-        (key, index) => key === typingCollection[index],
+      const hasBeenMatched = sequence.every((key, index) =>
+        Array.isArray(key)
+          ? !!key.find((nestedKey) => nestedKey === typingCollection[index])
+          : key === typingCollection[index],
       )
       if (!hasBeenMatched) {
         if (typingCollection.length >= sequence.length) {

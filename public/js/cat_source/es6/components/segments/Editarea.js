@@ -40,7 +40,15 @@ const editorSync = {
 }
 
 // typing chars sequence
-const typingWordJoiner = matchTypingSequence([50, 48, 54, 48], 2000)
+const typingWordJoiner = matchTypingSequence(
+  [
+    [50, 98],
+    [48, 96],
+    [54, 102],
+    [48, 96],
+  ],
+  2000,
+)
 
 class Editarea extends React.Component {
   constructor(props) {
@@ -663,15 +671,18 @@ class Editarea extends React.Component {
       e.altKey
     ) {
       return 'insert-word-joiner-tag'
-    } else if (e.ctrlKey && e.shiftKey && !e.altKey) {
-      if (e.key !== 'Shift') {
-        const result = typingWordJoiner.get(e.keyCode)
+    } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
+      e.preventDefault()
+      const {get, reset} = typingWordJoiner
+      if (e.key !== 'Alt') {
+        const result = get(e.keyCode)
         if (result) {
           return 'insert-word-joiner-tag'
         }
+      } else {
+        reset()
       }
     }
-    if (!e.ctrlKey || !e.shiftKey) typingWordJoiner.reset()
     return getDefaultKeyBinding(e)
   }
 
