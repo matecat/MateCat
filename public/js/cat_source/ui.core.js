@@ -24,52 +24,6 @@ import AlertModal from './es6/components/modals/AlertModal'
 import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
 
 window.UI = {
-  /**
-   * Open file menu in Header
-   * @returns {boolean}
-   */
-  toggleFileMenu: function () {
-    var jobMenu = $('#jobMenu')
-    if (jobMenu.is(':animated')) {
-      return false
-    } else {
-      var segment = SegmentStore.getCurrentSegment()
-      var currSegment = jobMenu.find('.currSegment')
-      if (segment) {
-        currSegment.removeClass('disabled')
-      } else {
-        currSegment.addClass('disabled')
-      }
-      var menuHeight = jobMenu.height()
-      if (LXQ.enabled()) {
-        var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible')
-        var lxqBoxHeight = lexiqaBoxIsOpen
-          ? $('#lexiqa-popup').outerHeight() + 8
-          : 0
-        jobMenu.css('top', lxqBoxHeight + 43 - menuHeight + 'px')
-      } else {
-        jobMenu.css('top', 43 - menuHeight + 'px')
-      }
-
-      if (jobMenu.hasClass('open')) {
-        jobMenu
-          .animate({top: '-=' + menuHeight + 'px'}, 500)
-          .removeClass('open')
-      } else {
-        jobMenu
-          .animate({top: '+=' + menuHeight + 'px'}, 300, function () {
-            $('body').on('click', function () {
-              if (jobMenu.hasClass('open')) {
-                UI.toggleFileMenu()
-              }
-            })
-          })
-          .addClass('open')
-      }
-      return true
-    }
-  },
-
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 

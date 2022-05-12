@@ -145,6 +145,7 @@ let CatToolActions = {
         isReview: config.isReview,
         isCJK: config.isCJK,
         languagesArray: config.languages_array,
+        projectName: config.project_name,
       }),
       mountPoint,
     )

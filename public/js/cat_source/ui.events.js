@@ -356,12 +356,6 @@ $.extend(window.UI, {
     $('#navSwitcher').on('click', function (e) {
       e.preventDefault()
     })
-
-    $('.file-list').on('click', function (e) {
-      UI.closeAllMenus(e)
-      e.preventDefault()
-      UI.toggleFileMenu()
-    })
     $('#jobNav .currseg').on('click', function (e) {
       e.preventDefault()
       var current = SegmentStore.getCurrentSegment()

@@ -3,12 +3,13 @@ import SubHeaderContainer from './SubHeaderContainer'
 import SegmentFilter from './segment_filter/segment_filter'
 import SearchUtils from './search/searchUtils'
 import CatToolActions from '../../../actions/CatToolActions'
+import {FilesMenu} from './FilesMenu'
 
 export const Header = ({
   jid,
   pid,
   password,
-  pname,
+  projectName,
   source_code,
   target_code,
   revisionNumber,
@@ -23,22 +24,22 @@ export const Header = ({
     const initDropdown = () => {
       dropdownInitialized.current = true
       if (SearchUtils.searchEnabled)
-        $(searchRef.current).show(100, function () {
-          APP.fitText($('#pname-container'), $('#pname'), 25)
-        })
+        if ($(dropdownMenuRef.current).length) {
+          $(searchRef.current).show(100, function () {
+            APP.fitText($('#pname-container'), $('#pname'), 25)
+          })
 
-      if ($(dropdownMenuRef.current).length) {
-        $(dropdownMenuRef.current).dropdown()
-      }
+          $(dropdownMenuRef.current).dropdown()
+        }
       if ($(userMenuRef.current).length) {
         $('#user-menu-dropdown').dropdown()
       }
 
-      // if (config.isLoggedIn) {
-      //   setTimeout(function () {
-      //     CatToolActions.showHeaderTooltip()
-      //   }, 3000)
-      // }
+      if (config.isLoggedIn) {
+        setTimeout(function () {
+          CatToolActions.showHeaderTooltip()
+        }, 3000)
+      }
     }
     !dropdownInitialized.current && initDropdown()
   }, [])
@@ -63,19 +64,7 @@ export const Header = ({
         </div>
 
         {/*Files Menu*/}
-        <div className="breadcrumbs file-list" title="File list">
-          <div className="icon-container">
-            <span id="project-badge">
-              <span></span>
-            </span>
-            <img src="/public/img/icons/icon-folder.svg" alt="" />
-          </div>
-          <p id="pname-container">
-            <a href="#" id="pname">
-              Project
-            </a>
-          </p>
-        </div>
+        <FilesMenu projectName={projectName} />
 
         {/*Icons header*/}
         <div className="action-menu">
@@ -363,7 +352,7 @@ export const Header = ({
               {!config.isReview && (
                 <li className="item" title="Revise" data-value="revise">
                   <a
-                    href={`/revise/${pname}/${source_code}-${target_code}/${jid}-${password}`}
+                    href={`/revise/${projectName}/${source_code}-${target_code}/${jid}-${password}`}
                   >
                     Revise
                   </a>
@@ -372,7 +361,7 @@ export const Header = ({
               {config.isReview && (
                 <li className="item" title="Translate" data-value="translate">
                   <a
-                    href={`/translate/${pname}/${source_code}-${target_code}/${jid}-${password}`}
+                    href={`/translate/${projectName}/${source_code}-${target_code}/${jid}-${password}`}
                   >
                     Translate
                   </a>
