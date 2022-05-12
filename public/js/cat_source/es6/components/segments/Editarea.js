@@ -297,6 +297,8 @@ class Editarea extends React.Component {
       this.props.updateCounter(cleanTranslation.length)
       // console.log('updatingTranslationInStore');
       UI.registerQACheck()
+    } else {
+      this.props.updateCounter(0)
     }
   }
 
