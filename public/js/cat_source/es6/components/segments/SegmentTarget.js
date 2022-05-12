@@ -17,19 +17,10 @@ class SegmentTarget extends React.Component {
     this.state = {
       showFormatMenu: false,
       charactersCounter: 0,
-      charactersCounterEnabled: false,
+      charactersCounterEnabled: true,
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
-  }
-
-  enableCharacterCounterLimit = (sid, limit, enable = true) => {
-    if (sid === this.props.segment.sid) {
-      this.setState({
-        charactersCounterLimit: limit,
-        charactersCounterEnabled: enable,
-      })
-    }
   }
 
   onClickEvent(event) {
@@ -330,10 +321,6 @@ class SegmentTarget extends React.Component {
       SegmentConstants.FILL_TAGS_IN_TARGET,
       this.autoFillTagsInTarget,
     )
-    SegmentStore.addListener(
-      SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
-      this.enableCharacterCounterLimit,
-    )
   }
 
   componentWillUnmount() {
@@ -341,10 +328,21 @@ class SegmentTarget extends React.Component {
       SegmentConstants.FILL_TAGS_IN_TARGET,
       this.autoFillTagsInTarget,
     )
-    SegmentStore.removeListener(
-      SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
-      this.enableCharacterCounterLimit,
-    )
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const charactersCounterLimit = this.props.segment.metadata.find(
+      (meta) => meta.id_segment === this.props.segment.sid,
+    )?.meta_value
+
+    if (
+      charactersCounterLimit &&
+      charactersCounterLimit !== prevState.charactersCounterLimit
+    ) {
+      this.setState({
+        charactersCounterLimit,
+      })
+    }
   }
 
   render() {
@@ -370,24 +368,27 @@ class SegmentTarget extends React.Component {
         <p className="warnings" />
 
         <SegmentButtons disabled={buttonsDisabled} {...this.props} />
-        {charactersCounterEnabled &&
-          charactersCounter > charactersCounterLimit - 20 && (
-            <div
-              className={`segment-counter ${
-                charactersCounter > charactersCounterLimit
-                  ? `segment-counter-limit-error`
-                  : ``
-              }`}
-            >
-              <span className={'segment-counter-current'}>
-                {charactersCounter}
-              </span>
-              /
-              <span className={'segment-counter-limit'}>
-                {charactersCounterLimit}
-              </span>
-            </div>
-          )}
+        {charactersCounterEnabled && (
+          <div
+            className={`segment-counter ${
+              charactersCounter > charactersCounterLimit
+                ? `segment-counter-limit-error`
+                : charactersCounter > charactersCounterLimit - 20
+                ? 'segment-counter-limit-warning'
+                : ''
+            }`}
+          >
+            <span className="segment-counter-current">{charactersCounter}</span>
+            {charactersCounterLimit > 0 && (
+              <>
+                /
+                <span className={'segment-counter-limit'}>
+                  {charactersCounterLimit}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {this.props.segment.warnings ? (
           <SegmentWarnings warnings={this.props.segment.warnings} />
         ) : null}

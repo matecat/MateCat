@@ -260,11 +260,17 @@ section {
   margin-top: 5px;
   font-size: 15px;
   .segment-counter-current {
-    color: $notification-warning;
-    margin-right: 2px;
+    color: black;
   }
   .segment-counter-limit {
     margin-left: 2px;
+  }
+
+  &.segment-counter-limit-warning {
+    .segment-counter-current {
+      color: $notification-warning;
+      margin-right: 2px;
+    }
   }
 
   &.segment-counter-limit-error {
