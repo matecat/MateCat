@@ -32,7 +32,8 @@ $.extend(window.UI, {
         isReview: config.isReview,
         revisionNumber: config.revisionNumber,
         stats: UI.projectStats, //TODO
-        user: {}, //TODO
+        user: {}, //TODO,
+        projectName: config.project_name,
       }),
       $('header')[0],
     )
@@ -226,7 +227,7 @@ $.extend(window.UI, {
       UI.body.append(menu)
 
       initEvents()
-      UI.detectStartSegment()
+
       var segment = SegmentStore.getCurrentSegment()
       if (segment) {
         UI.updateJobMenu(segment)
@@ -326,15 +327,4 @@ var initEvents = function () {
       SegmentFilter.open = false
     }
   })
-
-  $('#jobMenu')
-    .on('click', '.jobmenu-list li', function (e) {
-      e.preventDefault()
-      UI.renderAndScrollToSegment($(this).attr('data-segment'))
-    })
-    .on('click', 'li.currSegment:not(.disabled)', function (e) {
-      e.preventDefault()
-      SegmentActions.scrollToCurrentSegment()
-      SegmentActions.setFocusOnEditArea()
-    })
 }

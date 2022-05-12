@@ -25,10 +25,6 @@ export const Header = ({
       dropdownInitialized.current = true
       if (SearchUtils.searchEnabled)
         if ($(dropdownMenuRef.current).length) {
-          $(searchRef.current).show(100, function () {
-            APP.fitText($('#pname-container'), $('#pname'), 25)
-          })
-
           $(dropdownMenuRef.current).dropdown()
         }
       if ($(userMenuRef.current).length) {

@@ -1211,11 +1211,6 @@ $(document).ready(function () {
   UI.start()
 })
 
-$(window).resize(function () {
-  // UI.fixHeaderHeightChange();
-  APP.fitText($('#pname-container'), $('#pname'), 25)
-})
-
 document.addEventListener('DOMContentLoaded', () => {
   const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
   ReactDOM.render(<NotificationBox />, mountPoint)

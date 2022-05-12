@@ -120,10 +120,6 @@ $.extend(window.UI, {
 
     Customizations.loadCustomization()
     $('html').trigger('init')
-    if (SearchUtils.searchEnabled)
-      $('#filterSwitch').show(100, function () {
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30)
-      })
     this.warningStopped = false
     this.unsavedSegmentsToRecover = []
     this.recoverUnsavedSegmentsTimer = false
