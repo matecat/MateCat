@@ -1116,6 +1116,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
     return
   },
+  getGlobalWarnings() {
+    return this._globalWarnings
+  },
   isSidePanelToOpen: function () {
     const commentOpen = this._segments.findIndex(
       (segment) => segment.get('openComments') === true,

@@ -38,6 +38,13 @@ const SegmentActions = {
       idToOpen: idToOpen,
     })
   },
+  reloadSegments: function (sidToOpen) {
+    UI.unmountSegments()
+    UI.render({
+      firstLoad: false,
+      segmentToOpen: sidToOpen,
+    })
+  },
   splitSegments: function (oldSid, newSegments, splitGroup, fid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SPLIT_SEGMENT,
@@ -140,7 +147,6 @@ const SegmentActions = {
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
       })
-      UI.updateJobMenu(segment)
     } else {
       UI.unmountSegments()
       UI.render({

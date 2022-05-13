@@ -9,7 +9,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} [options.lastCompletionEventId=config.last_completion_event_id]
  * @returns {Promise<object>}
  */
-export const deleteCompletionEvents = async () => {
+export const deleteCompletionEvents = async (completi) => {
   const idJob = config.id_job
   const password = config.password
   const lastCompletionEventId = config.last_completion_event_id

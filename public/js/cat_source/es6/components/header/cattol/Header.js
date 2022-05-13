@@ -4,6 +4,7 @@ import SegmentFilter from './segment_filter/segment_filter'
 import SearchUtils from './search/searchUtils'
 import CatToolActions from '../../../actions/CatToolActions'
 import {FilesMenu} from './FilesMenu'
+import {MarkAsCompleteButton} from './MarkAsCompleteButton'
 
 export const Header = ({
   jid,
@@ -15,6 +16,8 @@ export const Header = ({
   revisionNumber,
   stats,
   user,
+  projectCompletionEnabled,
+  isReview,
 }) => {
   const dropdownInitialized = useRef(false)
   const searchRef = useRef()
@@ -64,20 +67,13 @@ export const Header = ({
 
         {/*Icons header*/}
         <div className="action-menu">
-          {/*Mark as complete*/}
-          {config.project_completion_feature_enabled && (
-            <button
-              className={`action-submenu ui floating dropdown ${
-                config.job_marked_complete
-                  ? 'isMarkedComplete'
-                  : config.mark_as_complete_button_enabled
-                  ? 'isMarkableAsComplete'
-                  : 'notMarkedComplete'
-              }`}
-              id="markAsCompleteButton"
-              disabled={!config.mark_as_complete_button_enabled}
+          {projectCompletionEnabled && (
+            <MarkAsCompleteButton
+              featureEnabled={projectCompletionEnabled}
+              isReview={isReview}
             />
           )}
+
           {/*Files instructions*/}
           <div
             className="action-submenu"

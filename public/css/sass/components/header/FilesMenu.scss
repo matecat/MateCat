@@ -5,6 +5,7 @@
   position: relative;
   .icon-container {
     position: relative;
+
     span#project-badge {
       position: absolute;
       left: -10px;
@@ -13,42 +14,19 @@
       color: #fff;
     }
   }
-
-  #pname {
+  #pname-container {
+    margin: 0 10px 0 0;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .project-name {
     color: #fff;
-
-    &::before {
-      content: '' !important ;
+    display: block;
+    text-decoration: underline;
+    &:hover {
+      text-decoration: none;
     }
   }
-}
-
-.breadcrumbs a:hover {
-  text-decoration: none;
-}
-#pname-container {
-  margin: 0 10px 0 0;
-  width: 70%;
-  overflow: hidden;
-}
-.breadcrumbs #pname {
-  word-break: break-all;
-  text-decoration: underline;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-.breadcrumbs #pname:hover {
-  text-decoration: none;
-}
-
-.breadcrumbs #pname .details {
-  float: left;
-}
-.breadcrumbs #pname {
-  word-break: break-all;
-  text-decoration: underline;
 }
 
 /*scrollbar*/
@@ -65,7 +43,6 @@
 }
 
 .job-menu-files {
-  max-height: 60vh;
   top: 50px;
   display: block;
   width: 315px;
@@ -104,6 +81,8 @@
     }
   }
   .file-list-container {
+    overflow-y: auto;
+    max-height: 60vh;
     .file-list-label {
       padding: 6px 16px;
       display: block;

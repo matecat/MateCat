@@ -5,6 +5,7 @@ import Shortcuts from '../../../utils/shortcuts'
 import CommonUtils from '../../../utils/commonUtils'
 import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
+import {FilenameLabel} from '../../common/FilenameLabel'
 
 function useOutsideAlerter(ref, fun) {
   useEffect(() => {
@@ -73,65 +74,12 @@ export const FilesMenu = ({projectName}) => {
             <img src="/public/img/icons/icon-folder.svg" alt="" />
           </div>
           <div id="pname-container">
-            <span id="pname">{projectName}</span>
+            <FilenameLabel cssClassName={'project-name'}>
+              {projectName}
+            </FilenameLabel>
           </div>
         </>
       )}
-      {/*Menu File*/}
-      {/*{menuVisible && (*/}
-      {/*  <nav id="jobMenu" className="topMenu open">*/}
-      {/*    <ul className="gotocurrentsegment">*/}
-      {/*      <li*/}
-      {/*        className="currSegment"*/}
-      {/*        onClick={goToCurrentSegment}*/}
-      {/*        disabled={!currentSegment}*/}
-      {/*      >*/}
-      {/*        <a>Go to current segment</a>*/}
-      {/*        <span>*/}
-      {/*          {Shortcuts.cattol.events.gotoCurrent.keystrokes[*/}
-      {/*            Shortcuts.shortCutsKeyType*/}
-      {/*          ].toUpperCase()}*/}
-      {/*        </span>*/}
-      {/*      </li>*/}
-      {/*      <li className="firstSegment">*/}
-      {/*        <span className="label">Go to first segment of the file:</span>*/}
-      {/*      </li>*/}
-      {/*    </ul>*/}
-      {/*    <div className="separator" />*/}
-      {/*    <ul className="jobmenu-list">*/}
-      {/*      {files.map((file) => {*/}
-      {/*        return (*/}
-      {/*          <li*/}
-      {/*            key={file.id}*/}
-      {/*            onClick={() => goToSegment(file.first_segment)}*/}
-      {/*            className={currentFile === file.id ? 'current' : ''}*/}
-      {/*          >*/}
-      {/*            <span*/}
-      {/*              className={CommonUtils.getIconClass(*/}
-      {/*                file.file_name.split('.')[*/}
-      {/*                  file.file_name.split('.').length - 1*/}
-      {/*                ],*/}
-      {/*              )}*/}
-      {/*            />*/}
-      {/*            <span title={file.file_name}>*/}
-      {/*              {file.file_name.substring(0, 20)}*/}
-      {/*              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">*/}
-      {/*                <path*/}
-      {/*                  fill="#FFF"*/}
-      {/*                  fillRule="evenodd"*/}
-      {/*                  stroke="none"*/}
-      {/*                  strokeWidth="1"*/}
-      {/*                  d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z"*/}
-      {/*                  transform="translate(-266 -10) translate(266 8) translate(0 2)"*/}
-      {/*                />*/}
-      {/*              </svg>*/}
-      {/*            </span>*/}
-      {/*          </li>*/}
-      {/*        )*/}
-      {/*      })}*/}
-      {/*    </ul>*/}
-      {/*  </nav>*/}
-      {/*)}*/}
       {menuVisible && (
         <div className="job-menu-files">
           <div
@@ -159,6 +107,7 @@ export const FilesMenu = ({projectName}) => {
                   className={`file-list-item ${
                     currentFile === file.id ? 'current' : ''
                   }`}
+                  title={'Click to go to the first segment'}
                 >
                   <span
                     className={

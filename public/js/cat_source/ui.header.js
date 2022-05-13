@@ -34,6 +34,7 @@ $.extend(window.UI, {
         stats: UI.projectStats, //TODO
         user: {}, //TODO,
         projectName: config.project_name,
+        projectCompletionEnabled: config.project_completion_feature_enabled,
       }),
       $('header')[0],
     )
@@ -183,84 +184,27 @@ $.extend(window.UI, {
     }
   },
   createJobMenu: function () {
-    getJobFileInfo(config.id_job, config.password).then((response) => {
-      CatToolActions.storeFilesInfo(response)
-      var menu =
-        '<nav id="jobMenu" class="topMenu">' +
-        '<ul class="gotocurrentsegment">' +
-        '<li class="currSegment" data-segment="' +
-        UI.currentSegmentId +
-        '"><a>Go to current segment</a><span>' +
-        Shortcuts.cattol.events.gotoCurrent.keystrokes[
-          Shortcuts.shortCutsKeyType
-        ].toUpperCase() +
-        '</span></li>' +
-        '<li class="firstSegment" ><span class="label">Go to first segment of the file:</span></li>' +
-        '</ul>' +
-        '<div class="separator"></div>' +
-        '<ul class="jobmenu-list">'
-      var iconTick =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">' +
-        '<path fill="#FFF" fillRule="evenodd" stroke="none" strokeWidth="1" d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z" transform="translate(-266 -10) translate(266 8) translate(0 2)" />' +
-        '</svg>'
-
-      _.forEach(response.files, function (file) {
-        menu +=
-          '<li data-file="' +
-          file.id +
-          '" data-segment="' +
-          file.first_segment +
-          '"><span class="' +
-          CommonUtils.getIconClass(
-            file.file_name.split('.')[file.file_name.split('.').length - 1],
-          ) +
-          '"></span><a href="javascript: void(0)" title="' +
-          file.file_name +
-          '" >' +
-          file.file_name.substring(0, 20) +
-          iconTick +
-          '</a></li>'
-      })
-
-      menu += '</ul>' + '</nav>'
-      UI.body.find('#project-badge span').text(response.files.length)
-      UI.body.append(menu)
-
-      initEvents()
-
-      var segment = SegmentStore.getCurrentSegment()
-      if (segment) {
-        UI.updateJobMenu(segment)
-      }
-      getJobMetadata(config.id_job, config.password).then(function (
-        jobMetadata,
-      ) {
-        var fileInstructions = response.files.find(
-          (file) =>
-            file.metadata &&
-            file.metadata.instructions &&
-            file.metadata.instructions !== '',
+    getJobMetadata(config.id_job, config.password).then(function (jobMetadata) {
+      var fileInstructions = response.files.find(
+        (file) =>
+          file.metadata &&
+          file.metadata.instructions &&
+          file.metadata.instructions !== '',
+      )
+      var projectInfo =
+        jobMetadata.project && jobMetadata.project.project_info
+          ? jobMetadata.project.project_info
+          : undefined
+      if (fileInstructions || projectInfo) {
+        ReactDOM.render(
+          React.createElement(JobMetadata, {
+            files: response.files,
+            projectInfo: projectInfo,
+          }),
+          document.getElementById('files-instructions'),
         )
-        var projectInfo =
-          jobMetadata.project && jobMetadata.project.project_info
-            ? jobMetadata.project.project_info
-            : undefined
-        if (fileInstructions || projectInfo) {
-          ReactDOM.render(
-            React.createElement(JobMetadata, {
-              files: response.files,
-              projectInfo: projectInfo,
-            }),
-            document.getElementById('files-instructions'),
-          )
-        }
-      })
+      }
     })
-  },
-  updateJobMenu: function (segment) {
-    var fileId = segment.id_file
-    $('#jobMenu .jobmenu-list li').removeClass('current')
-    $('#jobMenu .jobmenu-list li[data-file=' + fileId + ']').addClass('current')
   },
   renderQualityReportButton: function () {
     CatToolActions.renderQualityReportButton()
