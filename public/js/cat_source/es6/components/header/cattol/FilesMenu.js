@@ -148,9 +148,9 @@ export const FilesMenu = ({projectName}) => {
             </span>
           </div>
           <div className="file-list-container">
-            <span className="file-list-label">
-              Go to first segment of the file:
-            </span>
+            {/*<span className="file-list-label">*/}
+            {/*  Go to first segment of the file:*/}
+            {/*</span>*/}
             {files.map((file) => {
               return (
                 <div
@@ -161,15 +161,18 @@ export const FilesMenu = ({projectName}) => {
                   }`}
                 >
                   <span
-                    className={CommonUtils.getIconClass(
-                      file.file_name.split('.')[
-                        file.file_name.split('.').length - 1
-                      ],
-                    )}
+                    className={
+                      'file-icon ' +
+                      CommonUtils.getIconClass(
+                        file.file_name.split('.')[
+                          file.file_name.split('.').length - 1
+                        ],
+                      )
+                    }
                   />
-                  <span>
-                    {file.file_name}
-                    {currentFile === file.id && (
+                  <span className="file-name">{file.file_name}</span>
+                  {currentFile === file.id && (
+                    <span className="current-icon">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 16 12"
@@ -185,8 +188,8 @@ export const FilesMenu = ({projectName}) => {
                           transform="translate(-266 -10) translate(266 8) translate(0 2)"
                         />
                       </svg>
-                    )}
-                  </span>
+                    </span>
+                  )}
                 </div>
               )
             })}
