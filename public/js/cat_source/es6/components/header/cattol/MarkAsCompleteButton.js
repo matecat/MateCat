@@ -59,7 +59,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
   }
 
   const showTranslateWarningMessage = () => {
-    if (!lastCompletionEventId) return
+    // if (!lastCompletionEventId) return
     let message =
       'All segments are in <b>read-only mode</b> because this job is under review.'
 

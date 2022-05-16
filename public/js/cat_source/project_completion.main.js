@@ -162,29 +162,29 @@ if (ProjectCompletion.enabled()) {
     //   return !config.isReview && config.job_completion_current_phase == 'revise'
     // }
 
-    var messageForClickOnReadonly = function () {
-      if (UI.translateAndReadonly()) {
-        return 'This job is currently under review. Segments are in read-only mode.'
-      } else {
-        return original_messageForClickOnReadonly()
-      }
-    }
+    // var messageForClickOnReadonly = function () {
+    //   if (UI.translateAndReadonly()) {
+    //     return 'This job is currently under review. Segments are in read-only mode.'
+    //   } else {
+    //     return original_messageForClickOnReadonly()
+    //   }
+    // }
 
-    var isReadonlySegment = function (segment) {
-      return UI.translateAndReadonly() || original_isReadonlySegment(segment)
-    }
+    // var isReadonlySegment = function (segment) {
+    //   return UI.translateAndReadonly() || original_isReadonlySegment(segment)
+    // }
 
-    var original_isReadonlySegment = UI.isReadonlySegment
-    var original_messageForClickOnReadonly = UI.messageForClickOnReadonly
-    var original_handleClickOnReadOnly = UI.handleClickOnReadOnly
-
-    var handleClickOnReadOnly = function () {
-      if (!config.isReview && config.job_completion_current_phase == 'revise') {
-        showTranslateWarningMessage()
-      } else {
-        original_handleClickOnReadOnly.apply(undefined, arguments)
-      }
-    }
+    // var original_isReadonlySegment = UI.isReadonlySegment
+    // var original_messageForClickOnReadonly = UI.messageForClickOnReadonly
+    // var original_handleClickOnReadOnly = UI.handleClickOnReadOnly
+    //
+    // var handleClickOnReadOnly = function () {
+    //   if (!config.isReview && config.job_completion_current_phase == 'revise') {
+    //     showTranslateWarningMessage()
+    //   } else {
+    //     original_handleClickOnReadOnly.apply(undefined, arguments)
+    //   }
+    // }
 
     // var markJobAsComplete = function () {
     //   if (config.isReview) {
@@ -234,9 +234,9 @@ if (ProjectCompletion.enabled()) {
     $.extend(UI, {
       // This is necessary because of the way APP.popup works
       // markAsCompleteSubmit: markAsCompleteSubmit,
-      isReadonlySegment: isReadonlySegment,
-      messageForClickOnReadonly: messageForClickOnReadonly,
-      handleClickOnReadOnly: handleClickOnReadOnly,
+      // isReadonlySegment: isReadonlySegment,
+      // messageForClickOnReadonly: messageForClickOnReadonly,
+      // handleClickOnReadOnly: handleClickOnReadOnly,
       // markJobAsComplete: markJobAsComplete,
       // isMarkedAsCompleteClickable: isClickableStatus,
       // translateAndReadonly: translateAndReadonly,
