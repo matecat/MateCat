@@ -17,7 +17,6 @@ class SegmentTarget extends React.Component {
     this.state = {
       showFormatMenu: false,
       charactersCounter: 0,
-      charactersCounterEnabled: true,
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
@@ -343,14 +342,20 @@ class SegmentTarget extends React.Component {
         charactersCounterLimit,
       })
     }
+
+    // dispatch characterCounter action
+    if (
+      this.state.charactersCounterLimit !== prevState.charactersCounterLimit ||
+      this.state.charactersCounter !== prevState.charactersCounter
+    ) {
+      SegmentActions.characterCounter({
+        counter: this.state.charactersCounter,
+        limit: this.state.charactersCounterLimit,
+      })
+    }
   }
 
   render() {
-    const {
-      charactersCounter,
-      charactersCounterEnabled,
-      charactersCounterLimit,
-    } = this.state
     let buttonsDisabled = false
     let translation = this.props.segment.translation
 
@@ -368,27 +373,6 @@ class SegmentTarget extends React.Component {
         <p className="warnings" />
 
         <SegmentButtons disabled={buttonsDisabled} {...this.props} />
-        {charactersCounterEnabled && (
-          <div
-            className={`segment-counter ${
-              charactersCounter > charactersCounterLimit
-                ? `segment-counter-limit-error`
-                : charactersCounter > charactersCounterLimit - 20
-                ? 'segment-counter-limit-warning'
-                : ''
-            }`}
-          >
-            <span className="segment-counter-current">{charactersCounter}</span>
-            {charactersCounterLimit > 0 && (
-              <>
-                /
-                <span className={'segment-counter-limit'}>
-                  {charactersCounterLimit}
-                </span>
-              </>
-            )}
-          </div>
-        )}
         {this.props.segment.warnings ? (
           <SegmentWarnings warnings={this.props.segment.warnings} />
         ) : null}

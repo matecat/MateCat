@@ -15,6 +15,7 @@ class SegmentHeader extends React.PureComponent {
       classname: '',
       createdBy: '',
       visible: false,
+      charactersCounter: {},
     }
     this.changePercentuage = this.changePercentuage.bind(this)
     this.hideHeader = this.hideHeader.bind(this)
@@ -50,6 +51,10 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.HIDE_SEGMENT_HEADER,
       this.hideHeader,
     )
+    SegmentStore.addListener(
+      SegmentConstants.CHARACTER_COUNTER,
+      this.onCharacterCounter,
+    )
   }
 
   componentWillUnmount() {
@@ -61,6 +66,16 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.HIDE_SEGMENT_HEADER,
       this.hideHeader,
     )
+    SegmentStore.removeListener(
+      SegmentConstants.CHARACTER_COUNTER,
+      this.onCharacterCounter,
+    )
+  }
+
+  onCharacterCounter = (charactersCounter) => {
+    this.setState({
+      charactersCounter,
+    })
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -103,9 +118,35 @@ class SegmentHeader extends React.PureComponent {
         <span>Saving</span>
       </div>
     )
+    const {charactersCounter} = this.state
     return segmentOpened ? (
       <div className="header toggle" id={'segment-' + sid + '-header'}>
         {autopropagated ? autopropagatedHtml : percentageHtml}
+        {/* Characters counter */}
+        {!autopropagated && !saving && charactersCounter && (
+          <div
+            className={`segment-counter ${
+              charactersCounter.counter > charactersCounter.limit
+                ? `segment-counter-limit-error`
+                : charactersCounter > charactersCounter.limit - 20
+                ? 'segment-counter-limit-warning'
+                : ''
+            }`}
+          >
+            <span>Character count:</span>
+            <span className="segment-counter-current">
+              {charactersCounter.counter}
+            </span>
+            {charactersCounter.limit > 0 && (
+              <>
+                /
+                <span className={'segment-counter-limit'}>
+                  {charactersCounter.limit}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {saving ? savingHtml : null}{' '}
       </div>
     ) : autopropagated || repetition ? (
