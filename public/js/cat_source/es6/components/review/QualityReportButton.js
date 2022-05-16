@@ -22,9 +22,15 @@ export class QualityReportButton extends React.Component {
     this.state = {
       is_pass: null,
       score: null,
-      vote: this.props.vote,
+      vote: this.props.overallQualityClass,
       progress: null,
     }
+    const {revisionNumber, secondRevisionsCount, qualityReportHref} = this.props
+    const revision_number = revisionNumber ? revisionNumber : '1'
+    const qrParam = secondRevisionsCount
+      ? '?revision_type=' + revision_number
+      : ''
+    this.quality_report_href = qualityReportHref + qrParam
   }
 
   getVote = () => {
@@ -46,7 +52,10 @@ export class QualityReportButton extends React.Component {
   openFeedbackModal = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    CatToolActions.openFeedbackModal(this.state.feedback, config.revisionNumber)
+    CatToolActions.openFeedbackModal(
+      this.state.feedback,
+      this.props.revisionNumber,
+    )
   }
 
   componentDidMount() {
@@ -61,19 +70,19 @@ export class QualityReportButton extends React.Component {
   }
 
   render() {
-    const {quality_report_href} = this.props
+    const {quality_report_href} = this
     const {progress, feedback} = this.state
 
     let classes, label, menu, alert
-    if (progress && config.isReview) {
-      if (config.revisionNumber === 1 || config.revisionNumber === 2) {
+    if (progress && this.props.isReview) {
+      if (this.props.revisionNumber === 1 || this.props.revisionNumber === 2) {
         classes = classnames({
           'ui simple pointing top center floating dropdown': true,
         })
 
         label = !feedback
-          ? `Write feedback (R${config.revisionNumber})`
-          : `Edit feedback (R${config.revisionNumber})`
+          ? `Write feedback (R${this.props.revisionNumber})`
+          : `Edit feedback (R${this.props.revisionNumber})`
 
         menu = (
           <ul className="menu" id="qualityReportMenu">

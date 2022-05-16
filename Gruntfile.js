@@ -129,7 +129,7 @@ module.exports = function (grunt) {
           basePath + 'cat_source/ui.init.js',
           basePath + 'cat_source/ui.events.js',
           basePath + 'cat_source/ui.header.js',
-          basePath + 'cat_source/project_completion.*.js',
+          basePath + 'cat_source/ui.headerTooltips.js',
           basePath + 'cat_source/ui.review.js',
           basePath + 'cat_source/review/review_simple.js',
           basePath + 'cat_source/review_extended/review_extended.default.js',

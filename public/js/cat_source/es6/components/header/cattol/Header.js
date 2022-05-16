@@ -5,6 +5,8 @@ import SearchUtils from './search/searchUtils'
 import CatToolActions from '../../../actions/CatToolActions'
 import {FilesMenu} from './FilesMenu'
 import {MarkAsCompleteButton} from './MarkAsCompleteButton'
+import JobMetadata from './JobMetadata'
+import {QualityReportButton} from '../../review/QualityReportButton'
 
 export const Header = ({
   jid,
@@ -18,6 +20,9 @@ export const Header = ({
   user,
   projectCompletionEnabled,
   isReview,
+  secondRevisionsCount,
+  overallQualityClass,
+  qualityReportHref,
 }) => {
   const dropdownInitialized = useRef(false)
   const searchRef = useRef()
@@ -75,11 +80,7 @@ export const Header = ({
           )}
 
           {/*Files instructions*/}
-          <div
-            className="action-submenu"
-            id="files-instructions"
-            title="Instructions"
-          ></div>
+          <JobMetadata idJob={jid} password={password} />
 
           {/*Download Menu*/}
           <div
@@ -168,7 +169,15 @@ export const Header = ({
             className="action-submenu ui floating ${header_quality_report_item_class}"
             id="quality-report-button"
             title="Quality Report"
-          />
+          >
+            <QualityReportButton
+              isReview={isReview}
+              revisionNumber={revisionNumber}
+              overallQualityClass={overallQualityClass}
+              qualityReportHref={qualityReportHref}
+              secondRevisionsCount={secondRevisionsCount}
+            />
+          </div>
 
           {/*Segments Issues*/}
           <div className="action-submenu ui floating" id="notifbox">

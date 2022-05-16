@@ -5,18 +5,15 @@ import React from 'react'
 import {getJobFileInfo} from './es6/api/getJobFileInfo'
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-import JobMetadata from './es6/components/header/cattol/JobMetadata'
 import ShortCutsModal from './es6/components/modals/ShortCutsModal'
 import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 import Shortcuts from './es6/utils/shortcuts'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
-import {getJobMetadata} from './es6/api/getJobMetadata'
 import {logoutUser} from './es6/api/logoutUser'
 import {reloadQualityReport} from './es6/api/reloadQualityReport'
 import {ModalWindow} from './es6/components/modals/ModalWindow'
-import $ from 'jquery'
 import {Header} from './es6/components/header/cattol/Header'
 
 $.extend(window.UI, {
@@ -35,6 +32,9 @@ $.extend(window.UI, {
         user: {}, //TODO,
         projectName: config.project_name,
         projectCompletionEnabled: config.project_completion_feature_enabled,
+        secondRevisionsCount: config.secondRevisionsCount,
+        overallQualityClass: config.overall_quality_class,
+        qualityReportHref: config.quality_report_href,
       }),
       $('header')[0],
     )
@@ -67,147 +67,32 @@ $.extend(window.UI, {
       }
     })
   },
-  showProfilePopUp: function (openProfileTooltip) {
-    if (openProfileTooltip) {
-      var self = this
-      var tooltipTex =
-        "<h4 class='header'>Manage your projects</h4>" +
-        "<div class='content'>" +
-        '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in MateCat.</p>' +
-        "<a class='close-popup-teams'>Next</a>" +
-        '</div>'
-      $('header .user-menu-container')
-        .popup({
-          on: 'click',
-          onHidden: function () {
-            $('header .user-menu-container').popup('destroy')
-            CatToolActions.setPopupUserMenuCookie()
-            return true
-          },
-          html: tooltipTex,
-          closable: false,
-          onCreate: function () {
-            $('.close-popup-teams').on('click', function () {
-              $('header .user-menu-container').popup('hide')
-              self.openPopupThreePoints()
-            })
-          },
-          className: {
-            popup: 'ui popup user-menu-tooltip',
-          },
-        })
-        .popup('show')
-    } else {
-      this.openPopupThreePoints()
-    }
-  },
-  openPopupThreePoints: function () {
-    var closedPopup = localStorage.getItem(
-      'infoThreeDotsMenu-' + config.userMail,
-    )
-    if (!closedPopup) {
-      var self = this
-      var tooltipTex =
-        "<h4 class='header'>Easier tool navigation and new shortcuts</h4>" +
-        "<div class='content'>" +
-        '<p>Click here to navigate to:</br>' +
-        '- Translate/Revise mode</br>' +
-        '- Volume analysis</br>' +
-        '- XLIFF-to-target converter</br>' +
-        '- Shortcut guide</p>' +
-        "<a class='close-popup-teams'>Got it!</a>" +
-        '</div>'
-      $('#action-three-dots')
-        .popup({
-          on: 'click',
-          onHidden: function () {
-            $('#action-three-dots').popup('destroy')
-            CommonUtils.addInStorage(
-              'infoThreeDotsMenu-' + config.userMail,
-              true,
-              'infoThreeDotsMenu',
-            )
-            return true
-          },
-          html: tooltipTex,
-          closable: false,
-          onCreate: function () {
-            $('.close-popup-teams').on('click', function () {
-              $('#action-three-dots').popup('hide')
-              self.openPopupInstructions()
-            })
-          },
-          className: {
-            popup: 'ui popup three-dots-menu-tooltip',
-          },
-        })
-        .popup('show')
-    } else {
-      this.openPopupInstructions()
-    }
-  },
-  openPopupInstructions: function () {
-    var closedPopup = localStorage.getItem(
-      'infoInstructions-' + config.userMail,
-    )
-    if (!closedPopup && $('#files-instructions > div').length > 0) {
-      var tooltipTex =
-        "<h4 class='header'>Instructions and references</h4>" +
-        "<div class='content'>" +
-        '<p>You can view the instructions and references any time by clicking here.</p>' +
-        "<a class='close-popup-teams'>Got it!</a>" +
-        '</div>'
-      $('#files-instructions')
-        .popup({
-          on: 'click',
-          onHidden: function () {
-            $('#files-instructions').popup('destroy')
-            CommonUtils.addInStorage(
-              'infoInstructions-' + config.userMail,
-              true,
-              'infoInstructions',
-            )
-            return true
-          },
-          html: tooltipTex,
-          closable: false,
-          onCreate: function () {
-            $('.close-popup-teams').on('click', function () {
-              $('#files-instructions').popup('hide')
-            })
-          },
-          className: {
-            popup: 'ui popup files-instructions-tooltip',
-          },
-        })
-        .popup('show')
-    }
-  },
-  createJobMenu: function () {
-    getJobMetadata(config.id_job, config.password).then(function (jobMetadata) {
-      var fileInstructions = response.files.find(
-        (file) =>
-          file.metadata &&
-          file.metadata.instructions &&
-          file.metadata.instructions !== '',
-      )
-      var projectInfo =
-        jobMetadata.project && jobMetadata.project.project_info
-          ? jobMetadata.project.project_info
-          : undefined
-      if (fileInstructions || projectInfo) {
-        ReactDOM.render(
-          React.createElement(JobMetadata, {
-            files: response.files,
-            projectInfo: projectInfo,
-          }),
-          document.getElementById('files-instructions'),
-        )
-      }
-    })
-  },
+
+  // createJobMenu: function () {
+  //   getJobMetadata(config.id_job, config.password).then(function (jobMetadata) {
+  //     var fileInstructions = response.files.find(
+  //       (file) =>
+  //         file.metadata &&
+  //         file.metadata.instructions &&
+  //         file.metadata.instructions !== '',
+  //     )
+  //     var projectInfo =
+  //       jobMetadata.project && jobMetadata.project.project_info
+  //         ? jobMetadata.project.project_info
+  //         : undefined
+  //     if (fileInstructions || projectInfo) {
+  //       ReactDOM.render(
+  //         React.createElement(JobMetadata, {
+  //           files: response.files,
+  //           projectInfo: projectInfo,
+  //         }),
+  //         document.getElementById('files-instructions'),
+  //       )
+  //     }
+  //   })
+  // },
   renderQualityReportButton: function () {
-    CatToolActions.renderQualityReportButton()
+    // CatToolActions.renderQualityReportButton()
     if (config.isReview) {
       UI.reloadQualityReport()
     }
@@ -217,19 +102,19 @@ $.extend(window.UI, {
       CatToolActions.updateQualityReport(data['quality-report'])
     })
   },
-  renderAndScrollToSegment: function (sid) {
-    var segment = SegmentStore.getSegmentByIdToJS(sid)
-    if (segment) {
-      SegmentActions.openSegment(sid)
-    } else {
-      UI.unmountSegments()
-      this.render({
-        caller: 'link2file',
-        segmentToOpen: sid,
-        scrollToFile: true,
-      })
-    }
-  },
+  // renderAndScrollToSegment: function (sid) {
+  //   var segment = SegmentStore.getSegmentByIdToJS(sid)
+  //   if (segment) {
+  //     SegmentActions.openSegment(sid)
+  //   } else {
+  //     UI.unmountSegments()
+  //     this.render({
+  //       caller: 'link2file',
+  //       segmentToOpen: sid,
+  //       scrollToFile: true,
+  //     })
+  //   }
+  // },
 })
 
 var initEvents = function () {
