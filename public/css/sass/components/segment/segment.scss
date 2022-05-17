@@ -258,11 +258,13 @@ section {
   line-height: 16px;
   font-size: 15px;
   margin-top: 3px;
-  margin-right: 24px;
+  margin-right: 23px;
+  font-size: 14px;
 
-  .segment-counter-current {
-    color: black;
+  > span:first-of-type {
+    font-weight: bold;
   }
+
   .segment-counter-limit {
     margin-left: 2px;
   }
