@@ -290,19 +290,19 @@ section.opened .warnings {
 .cattool #quality-report[data-vote='excellent'],
 .cattool #quality-report[data-vote='verygood'],
 .cattool #quality-report[data-vote='good'] {
-  border-right: 10px solid #3c9423;
+  background-color: #3c9423 !important;
 }
 
 .cattool #quality-report[data-vote='poor'] {
-  border-right: 10px solid #ffa935;
+  background-color: #ffa935 !important;
 }
 
 .cattool #quality-report[data-vote='acceptable'] {
-  border-right: 10px solid #eaba22;
+  background-color: #eaba22 !important;
 }
 
 .cattool #quality-report[data-vote='fail'] {
-  border-right: 10px solid #e7504d;
+  background-color: #e7504d !important;
 }
 
 .logo {

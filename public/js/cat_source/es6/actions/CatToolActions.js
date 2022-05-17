@@ -205,22 +205,16 @@ let CatToolActions = {
       text,
     )
   },
-  updateQualityReport: function (qr) {
-    var revNumber = config.revisionNumber ? config.revisionNumber : 1
-    var review = qr.chunk.reviews.find(function (value) {
-      return value.revision_number === revNumber
+  reloadQualityReport: function () {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.RELOAD_QR,
     })
+  },
+  updateQualityReport: function (qr) {
     AppDispatcher.dispatch({
       actionType: CattolConstants.UPDATE_QR,
       qr: qr,
     })
-    if (review) {
-      window.quality_report_btn_component.setState({
-        is_pass: review.is_pass,
-        score: review.score,
-        feedback: review.feedback,
-      })
-    }
   },
 
   /**

@@ -19,7 +19,8 @@ class RevisionFeedbackModal extends React.Component {
     })
     CatToolActions.sendRevisionFeedback(this.state.feedback)
       .then(() => {
-        UI.reloadQualityReport()
+        setTimeout(() => CatToolActions.reloadQualityReport())
+
         ModalWindow.onCloseModal()
         var notification = {
           title: 'Feedback submitted',

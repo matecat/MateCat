@@ -91,17 +91,17 @@ $.extend(window.UI, {
   //     }
   //   })
   // },
-  renderQualityReportButton: function () {
-    // CatToolActions.renderQualityReportButton()
-    if (config.isReview) {
-      UI.reloadQualityReport()
-    }
-  },
-  reloadQualityReport: function () {
-    reloadQualityReport().then((data) => {
-      CatToolActions.updateQualityReport(data['quality-report'])
-    })
-  },
+  // renderQualityReportButton: function () {
+  //   // CatToolActions.renderQualityReportButton()
+  //   if (config.isReview) {
+  //     UI.reloadQualityReport()
+  //   }
+  // },
+  // reloadQualityReport: function () {
+  //   reloadQualityReport().then((data) => {
+  //     CatToolActions.updateQualityReport(data['quality-report'])
+  //   })
+  // },
   // renderAndScrollToSegment: function (sid) {
   //   var segment = SegmentStore.getSegmentByIdToJS(sid)
   //   if (segment) {

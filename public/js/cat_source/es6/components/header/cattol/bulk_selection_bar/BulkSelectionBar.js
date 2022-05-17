@@ -3,6 +3,7 @@ import React from 'react'
 import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -80,7 +81,7 @@ class BulkSelectionBar extends React.Component {
       SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
         () => {
           this.onClickBack()
-          UI.reloadQualityReport()
+          CatToolActions.reloadQualityReport()
         },
       )
     } else {
