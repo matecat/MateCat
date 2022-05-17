@@ -349,10 +349,7 @@ $.extend(window.UI, {
           SegmentActions.gotoNextUntranslatedSegment()
         }
       })
-    $('#point2seg').bind('mousedown', function (e) {
-      e.preventDefault()
-      CatToolActions.toggleQaIssues()
-    })
+
     $('#navSwitcher').on('click', function (e) {
       e.preventDefault()
     })

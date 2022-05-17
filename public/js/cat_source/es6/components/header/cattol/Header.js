@@ -7,17 +7,26 @@ import {FilesMenu} from './FilesMenu'
 import {MarkAsCompleteButton} from './MarkAsCompleteButton'
 import JobMetadata from './JobMetadata'
 import {QualityReportButton} from '../../review/QualityReportButton'
+import {logoutUser} from '../../../api/logoutUser'
+import {ModalWindow} from '../../modals/ModalWindow'
+import ShortCutsModal from '../../modals/ShortCutsModal'
+import {DownloadMenu} from './DownloadMenu'
+import {SegmentsQAButton} from './SegmetsQAButton'
+import {SearchButton} from './SearchButton'
+import {CommentsButton} from './CommentsButton'
 
 export const Header = ({
   jid,
   pid,
   password,
+  reviewPassword,
   projectName,
   source_code,
   target_code,
   revisionNumber,
   stats,
   user,
+  userLogged,
   projectCompletionEnabled,
   isReview,
   secondRevisionsCount,
@@ -25,9 +34,47 @@ export const Header = ({
   qualityReportHref,
 }) => {
   const dropdownInitialized = useRef(false)
-  const searchRef = useRef()
   const dropdownMenuRef = useRef()
   const userMenuRef = useRef()
+
+  const logoutUserFn = () => {
+    logoutUser().then(() => {
+      if ($('body').hasClass('manage')) {
+        location.href = config.hostpath + config.basepath
+      } else {
+        window.location.reload()
+      }
+    })
+  }
+  const loginUser = () => {
+    APP.openLoginModal()
+  }
+  const openOptionsPanel = (event) => {
+    event.preventDefault()
+    UI.openOptionsPanel()
+  }
+  const openPreferences = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    $('#modal').trigger('openpreferences')
+  }
+
+  const openSegmetsFilters = (event) => {
+    event.preventDefault()
+    if (!SegmentFilter.open) {
+      SegmentFilter.openFilter()
+    } else {
+      SegmentFilter.closeFilter()
+      SegmentFilter.open = false
+    }
+  }
+
+  const openShortcutsModal = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    ModalWindow.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
+  }
+
   useEffect(() => {
     const initDropdown = () => {
       dropdownInitialized.current = true
@@ -39,7 +86,7 @@ export const Header = ({
         $('#user-menu-dropdown').dropdown()
       }
 
-      if (config.isLoggedIn) {
+      if (userLogged) {
         setTimeout(function () {
           CatToolActions.showHeaderTooltip()
         }, 3000)
@@ -83,194 +130,25 @@ export const Header = ({
           <JobMetadata idJob={jid} password={password} />
 
           {/*Download Menu*/}
-          <div
-            className="action-submenu ui simple pointing top center floating dropdown"
-            id="action-download"
-            title="Download"
-          >
-            <div className="dropdown-menu-overlay"></div>
-            <ul
-              className="menu"
-              id="previewDropdown"
-              data-download={
-                stats &&
-                stats['TODO_FORMATTED'] == 0 &&
-                stats['ANALYSIS_COMPLETE']
-                  ? 'true'
-                  : 'false'
-              }
-            >
-              <li className="item previewLink" data-value="draft">
-                <a title="Draft" alt="Draft" href="#">
-                  Draft
-                </a>
-              </li>
-
-              <li className="item downloadTranslation" data-value="translation">
-                <a title="Translation" alt="Translation" href="#">
-                  Download Translation
-                </a>
-              </li>
-              {config.isGDriveProject && (
-                <>
-                  <li className="item" data-value="original">
-                    <a
-                      className="originalDownload"
-                      title="Original"
-                      alt="Original"
-                      data-href={`/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all`}
-                      target="_blank"
-                    >
-                      Original
-                    </a>
-                  </li>
-
-                  <li className="item">
-                    <a
-                      className="originalsGDrive"
-                      title="Original in Google Drive"
-                      alt="Original in Google Drive"
-                      href="javascript:void(0)"
-                    >
-                      Original in Google Drive
-                    </a>
-                  </li>
-                </>
-              )}
-              <li className="item" data-value="xlif">
-                <a
-                  className="sdlxliff"
-                  title="Export XLIFF"
-                  alt="Export XLIFF"
-                  data-href={`/SDLXLIFF/${jid}/${password}/${jid}.zip`}
-                  target="_blank"
-                >
-                  Export XLIFF
-                </a>
-              </li>
-
-              <li className="item" data-value="tmx">
-                <a
-                  rel="noreferrer"
-                  className="tmx"
-                  title="Export job TMX for QA"
-                  alt="Export job TMX for QA"
-                  href={`/TMX/${jid}/${password}`}
-                  target="_blank"
-                >
-                  Export Job TMX
-                </a>
-              </li>
-            </ul>
-          </div>
+          <DownloadMenu password={password} jid={jid} stats={stats} />
 
           {/*Quality Report*/}
-          <div
-            className="action-submenu ui floating ${header_quality_report_item_class}"
-            id="quality-report-button"
-            title="Quality Report"
-          >
-            <QualityReportButton
-              isReview={isReview}
-              revisionNumber={revisionNumber}
-              overallQualityClass={overallQualityClass}
-              qualityReportHref={qualityReportHref}
-              secondRevisionsCount={secondRevisionsCount}
-            />
-          </div>
+          <QualityReportButton
+            isReview={isReview}
+            revisionNumber={revisionNumber}
+            overallQualityClass={overallQualityClass}
+            qualityReportHref={qualityReportHref}
+            secondRevisionsCount={secondRevisionsCount}
+          />
 
           {/*Segments Issues*/}
-          <div className="action-submenu ui floating" id="notifbox">
-            <a id="point2seg">
-              <span className="numbererror"></span>
-            </a>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              x="0"
-              y="0"
-              enableBackground="new 0 0 42 42"
-              version="1.1"
-              viewBox="0 0 42 42"
-              xmlSpace="preserve"
-            >
-              <g className="st0">
-                <path
-                  fill="#fff"
-                  className="st1"
-                  d="M18.5 26.8l1.8 2.1-1.8 1.5-1.9-2.3c-1 .5-2.2.7-3.5.7-4.9 0-7.9-3.6-7.9-8.3 0-4.7 3-8.3 7.9-8.3s7.9 3.6 7.9 8.3c0 2.6-.9 4.8-2.5 6.3zm-5.4-11.9c-3.2 0-5 2.4-5 5.7 0 3.3 1.8 5.7 5 5.7.6 0 1.2-.1 1.7-.4L13.2 24l1.8-1.4 1.8 2.1c.9-1 1.4-2.4 1.4-4.1-.1-3.3-2-5.7-5.1-5.7z"
-                />
-                <path
-                  d="M34.7 28.5l-1.5-4.1h-6.6L25 28.5h-3l6.3-16h3.3l6.3 16h-3.2zM29.9 15l-2.6 7.1h5.1L29.9 15z"
-                  className="st1"
-                  fill="#fff"
-                />
-              </g>
-            </svg>
-          </div>
+          <SegmentsQAButton />
 
           {/*Search*/}
-          <div
-            className="action-submenu ui floating dropdown"
-            id="action-search"
-            style={{display: 'none'}}
-            title="Search or Filter results"
-            ref={searchRef}
-          >
-            <svg
-              width="30px"
-              height="30px"
-              viewBox="-4 -4 31 31"
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g
-                id="Icon/Search/Active"
-                stroke="none"
-                strokeWidth="1"
-                fill="none"
-                fillRule="evenodd"
-              >
-                <path
-                  d="M23.3028148,20.1267654 L17.8057778,14.629284 C16.986716,15.9031111 15.9027654,16.9865185 14.6289383,17.8056296 L20.1264198,23.3031111 C21.0040494,24.1805432 22.4270123,24.1805432 23.3027654,23.3031111 C24.1804444,22.4271111 24.1804444,21.0041481 23.3028148,20.1267654 Z"
-                  id="Path"
-                  fill="#FFFFFF"
-                />
-                <circle
-                  id="Oval"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.5"
-                  cx="9"
-                  cy="9"
-                  r="8.25"
-                />
-                <path
-                  className="st1"
-                  d="M9,16 C5.13400675,16 2,12.8659932 2,9 C2,5.13400675 5.13400675,2 9,2 C12.8659932,2 16,5.13400675 16,9 C16,12.8659932 12.8659932,16 9,16 Z M3.74404938,8.9854321 L5.2414321,8.9854321 C5.2414321,6.92108642 6.9211358,5.24153086 8.9854321,5.24153086 L8.9854321,3.744 C6.0957037,3.744 3.74404938,6.09565432 3.74404938,8.9854321 Z"
-                  id="Combined-Shape"
-                  fill="#FFFFFF"
-                />
-              </g>
-            </svg>
-          </div>
+          <SearchButton />
 
           {/*Comments*/}
-          {config.comments_enabled && (
-            <div
-              id="mbc-history"
-              title="View comments"
-              className="mbc-history-balloon-icon-has-no-comments"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="3 3 36 36">
-                <path
-                  fill="#fff"
-                  fillRule="evenodd"
-                  stroke="none"
-                  strokeWidth="1"
-                  d="M33.125 13.977c-1.25-1.537-2.948-2.75-5.093-3.641C25.886 9.446 23.542 9 21 9c-2.541 0-4.885.445-7.031 1.336-2.146.89-3.844 2.104-5.094 3.64C7.625 15.514 7 17.188 7 19c0 1.562.471 3.026 1.414 4.39.943 1.366 2.232 2.512 3.867 3.439-.114.416-.25.812-.406 1.187-.156.375-.297.683-.422.922-.125.24-.294.505-.508.797a8.15 8.15 0 01-.484.617 249.06 249.06 0 00-1.023 1.133 1.1 1.1 0 00-.126.141l-.109.132-.094.141c-.052.078-.075.127-.07.148a.415.415 0 01-.031.156c-.026.084-.024.146.007.188v.016c.042.177.125.32.25.43a.626.626 0 00.422.163h.079a11.782 11.782 0 001.78-.344c2.73-.697 5.126-1.958 7.189-3.781.78.083 1.536.125 2.265.125 2.542 0 4.886-.445 7.032-1.336 2.145-.891 3.843-2.104 5.093-3.64C34.375 22.486 35 20.811 35 19c0-1.812-.624-3.487-1.875-5.023z"
-                ></path>
-              </svg>
-            </div>
-          )}
+          <CommentsButton />
 
           {/*Segments filter*/}
           {config.segmentFilterEnabled && (
@@ -278,6 +156,7 @@ export const Header = ({
               className="action-submenu ui floating"
               id="action-filter"
               title="Filter segments"
+              onClick={openSegmetsFilters}
             >
               <svg
                 width="30px"
@@ -311,6 +190,7 @@ export const Header = ({
             className="action-submenu ui floating"
             id="action-settings"
             title="Settings"
+            onClick={openOptionsPanel}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -353,7 +233,7 @@ export const Header = ({
               {!config.isReview && (
                 <li className="item" title="Revise" data-value="revise">
                   <a
-                    href={`/revise/${projectName}/${source_code}-${target_code}/${jid}-${password}`}
+                    href={`/revise/${projectName}/${source_code}-${target_code}/${jid}-${reviewPassword}`}
                   >
                     Revise
                   </a>
@@ -397,6 +277,7 @@ export const Header = ({
                 className="item shortcuts"
                 title="Shortcuts"
                 data-value="shortcuts"
+                onClick={openShortcutsModal}
               >
                 <a>Shortcuts</a>
               </li>
@@ -409,8 +290,8 @@ export const Header = ({
 
         {/*Profile menu*/}
         <div className="profile-menu">
-          {!config.isLoggedIn && (
-            <div className="position-sing-in">
+          {!userLogged && (
+            <div className="position-sing-in" onClick={loginUser}>
               <div className="ui user-nolog label open-login-modal sing-in-header">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42">
                   <path
@@ -425,7 +306,7 @@ export const Header = ({
               </div>
             </div>
           )}
-          {config.isLoggedIn && user && (
+          {userLogged && user && (
             <div
               className="user-menu-container ui floating pointing top right dropdown"
               id="user-menu-dropdown"
@@ -434,13 +315,28 @@ export const Header = ({
               <div className="ui user circular image ui-user-top-image"></div>
               <div className="organization-name"></div>
               <div className="menu">
-                <div className="item" data-value="manage" id="manage-item">
+                <a
+                  className="item"
+                  data-value="manage"
+                  id="manage-item"
+                  href="/manage"
+                >
                   My Projects
-                </div>
-                <div className="item" data-value="profile" id="profile-item">
+                </a>
+                <div
+                  className="item"
+                  data-value="profile"
+                  id="profile-item"
+                  onClick={openPreferences}
+                >
                   Profile
                 </div>
-                <div className="item" data-value="logout" id="logout-item">
+                <div
+                  className="item"
+                  data-value="logout"
+                  id="logout-item"
+                  onClick={logoutUserFn}
+                >
                   Logout
                 </div>
               </div>

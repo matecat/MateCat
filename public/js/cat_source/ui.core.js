@@ -442,7 +442,7 @@ window.UI = {
     tte.data('raw-time-to-edit', this.totalTime)
   },
   goToFirstError: function () {
-    $('#point2seg').trigger('mousedown')
+    CatToolActions.toggleQaIssues()
     setTimeout(function () {
       $('.qa-issues-container ').first().click()
     }, 300)

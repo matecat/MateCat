@@ -181,7 +181,7 @@ $.extend(window.UI, {
         case 'warnings':
           interval = setInterval(function () {
             if ($('#notifbox.warningbox')) {
-              $('#point2seg').trigger('mousedown')
+              CatToolActions.toggleQaIssues()
               clearInterval(interval)
             }
           }, 500)

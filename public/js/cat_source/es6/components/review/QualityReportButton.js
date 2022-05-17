@@ -82,47 +82,55 @@ export const QualityReportButton = ({
 
   return (
     <div
-      id="quality-report"
-      className={
-        progress && isReview && (revisionNumber === 1 || revisionNumber === 2)
-          ? 'ui simple pointing top center floating dropdown'
-          : ''
-      }
-      data-vote={vote}
-      data-testid="report-button"
-      onClick={() => {
-        window.open(quality_report_href.current, '_blank')
-      }}
+      className="action-submenu ui floating ${header_quality_report_item_class}"
+      id="quality-report-button"
+      title="Quality Report"
     >
-      <IconQR width={30} height={30} />
+      <div
+        id="quality-report"
+        className={
+          progress && isReview && (revisionNumber === 1 || revisionNumber === 2)
+            ? 'ui simple pointing top center floating dropdown'
+            : ''
+        }
+        data-vote={vote}
+        data-testid="report-button"
+        onClick={() => {
+          window.open(quality_report_href.current, '_blank')
+        }}
+      >
+        <IconQR width={30} height={30} />
 
-      {isReview && !feedback && progress && <div className="feedback-alert" />}
+        {isReview && !feedback && progress && (
+          <div className="feedback-alert" />
+        )}
 
-      <div className="dropdown-menu-overlay" />
-      {progress &&
-      isReview &&
-      (revisionNumber === 1 || revisionNumber === 2) ? (
-        <ul className="menu" id="qualityReportMenu">
-          <li className="item">
-            <a
-              title="Open QR"
-              onClick={(event) => {
-                event.stopPropagation()
-                window.open(quality_report_href.current, '_blank')
-              }}
-            >
-              Open QR
-            </a>
-          </li>
-          <li className="item">
-            <a title="Revision Feedback" onClick={openFeedbackModal}>
-              {!feedback
-                ? `Write feedback (R${revisionNumber})`
-                : `Edit feedback (R${revisionNumber})`}
-            </a>
-          </li>
-        </ul>
-      ) : null}
+        <div className="dropdown-menu-overlay" />
+        {progress &&
+        isReview &&
+        (revisionNumber === 1 || revisionNumber === 2) ? (
+          <ul className="menu" id="qualityReportMenu">
+            <li className="item">
+              <a
+                title="Open QR"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  window.open(quality_report_href.current, '_blank')
+                }}
+              >
+                Open QR
+              </a>
+            </li>
+            <li className="item">
+              <a title="Revision Feedback" onClick={openFeedbackModal}>
+                {!feedback
+                  ? `Write feedback (R${revisionNumber})`
+                  : `Edit feedback (R${revisionNumber})`}
+              </a>
+            </li>
+          </ul>
+        ) : null}
+      </div>
     </div>
   )
 }
