@@ -252,12 +252,13 @@ section {
 }
 
 .segment-counter {
-  display: inline-block;
-  position: relative;
-  float: right;
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  top: 0;
   line-height: 16px;
   font-size: 15px;
-  margin-top: 3px;
+  margin-top: 2px;
   margin-right: 2%;
   font-size: 14px;
 
