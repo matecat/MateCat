@@ -128,15 +128,15 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
             text: 'If you want to add an MT engine for use in your projects, please login first.',
             successText: 'Login',
             successCallback: function () {
-              ModalWindow.onCloseModal()
+              ModalsActions.onCloseModal()
               $('#modal').trigger('openlogin')
             },
             warningText: 'Cancel',
             warningCallback: function () {
-              ModalWindow.onCloseModal()
+              ModalsActions.onCloseModal()
             },
           }
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             ConfirmMessageModal,
             props,
             'Add MT Engine',
