@@ -255,10 +255,11 @@ section {
   display: inline-block;
   position: relative;
   float: right;
-  padding: 4px;
   line-height: 16px;
-  margin-top: 5px;
   font-size: 15px;
+  margin-top: 3px;
+  margin-right: 24px;
+
   .segment-counter-current {
     color: black;
   }

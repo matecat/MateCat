@@ -70,6 +70,9 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.CHARACTER_COUNTER,
       this.onCharacterCounter,
     )
+    this.setState({
+      charactersCounter: {},
+    })
   }
 
   onCharacterCounter = (charactersCounter) => {
@@ -123,7 +126,7 @@ class SegmentHeader extends React.PureComponent {
       <div className="header toggle" id={'segment-' + sid + '-header'}>
         {autopropagated ? autopropagatedHtml : percentageHtml}
         {/* Characters counter */}
-        {!autopropagated && !saving && charactersCounter && (
+        {!autopropagated && !saving && charactersCounter?.sid === sid && (
           <div
             className={`segment-counter ${
               charactersCounter.counter > charactersCounter.limit
@@ -133,7 +136,7 @@ class SegmentHeader extends React.PureComponent {
                 : ''
             }`}
           >
-            <span>Character count:</span>
+            <span>Character count: </span>
             <span className="segment-counter-current">
               {charactersCounter.counter}
             </span>

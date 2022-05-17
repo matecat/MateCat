@@ -1776,6 +1776,7 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.CHARACTER_COUNTER:
       SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
+        sid: action.sid,
         counter: action.counter,
         limit: action.limit,
       })

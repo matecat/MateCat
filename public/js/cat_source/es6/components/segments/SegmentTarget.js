@@ -348,9 +348,12 @@ class SegmentTarget extends React.Component {
       this.state.charactersCounterLimit !== prevState.charactersCounterLimit ||
       this.state.charactersCounter !== prevState.charactersCounter
     ) {
-      SegmentActions.characterCounter({
-        counter: this.state.charactersCounter,
-        limit: this.state.charactersCounterLimit,
+      setTimeout(() => {
+        SegmentActions.characterCounter({
+          sid: this.props.segment.sid,
+          counter: this.state.charactersCounter,
+          limit: this.state.charactersCounterLimit,
+        })
       })
     }
   }

@@ -1202,9 +1202,10 @@ const SegmentActions = {
       isTarget,
     })
   },
-  characterCounter: ({counter, limit}) => {
+  characterCounter: ({sid, counter, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
+      sid,
       counter,
       limit,
     })
