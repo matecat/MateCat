@@ -17,13 +17,15 @@ $.extend(window.UI, {
         isReview: config.isReview,
         revisionNumber: config.revisionNumber,
         stats: UI.projectStats, //TODO
-        user: {}, //TODO,
         userLogged: config.isLoggedIn,
         projectName: config.project_name,
         projectCompletionEnabled: config.project_completion_feature_enabled,
         secondRevisionsCount: config.secondRevisionsCount,
         overallQualityClass: config.overall_quality_class,
         qualityReportHref: config.quality_report_href,
+        allowLinkToAnalysis: config.allow_link_to_analysis,
+        analysisEnabled: config.analysis_enabled,
+        isGDriveProject: config.isGDriveProject,
       }),
       $('header')[0],
     )

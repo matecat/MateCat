@@ -1,6 +1,16 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
+import CommonUtils from '../../../utils/commonUtils'
 
-export const DownloadMenu = ({password, jid, stats}) => {
+export const DownloadMenu = ({password, jid, stats, isGDriveProject}) => {
+  const [downloadTranslationAvailable, setDownloadTranslationAvailable] =
+    useState(false)
+  useEffect(() => {
+    if (stats) {
+      const t = CommonUtils.getTranslationStatus(stats)
+      const downloadable = t === 'translated' || t.indexOf('approved') > -1
+      setDownloadTranslationAvailable(downloadable)
+    }
+  }, [stats])
   return (
     <div
       className="action-submenu ui simple pointing top center floating dropdown"
@@ -17,43 +27,47 @@ export const DownloadMenu = ({password, jid, stats}) => {
             : 'false'
         }
       >
-        <li className="item previewLink" data-value="draft">
-          <a title="Draft" alt="Draft" href="#">
-            Draft
-          </a>
-        </li>
-
-        <li className="item downloadTranslation" data-value="translation">
-          <a title="Translation" alt="Translation" href="#">
-            Download Translation
-          </a>
-        </li>
-        {config.isGDriveProject && (
-          <>
-            <li className="item" data-value="original">
-              <a
-                className="originalDownload"
-                title="Original"
-                alt="Original"
-                data-href={`/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all`}
-                target="_blank"
-              >
-                Original
-              </a>
-            </li>
-
-            <li className="item">
-              <a
-                className="originalsGDrive"
-                title="Original in Google Drive"
-                alt="Original in Google Drive"
-                href="javascript:void(0)"
-              >
-                Original in Google Drive
-              </a>
-            </li>
-          </>
+        {downloadTranslationAvailable ? (
+          <li className="item downloadTranslation" data-value="translation">
+            <a title="Translation" alt="Translation" href="#">
+              {isGDriveProject
+                ? 'Open in Google Drive'
+                : 'Download Translation'}
+            </a>
+          </li>
+        ) : (
+          <li className="item previewLink" data-value="draft">
+            <a title="Draft" alt="Draft" href="#">
+              {isGDriveProject ? 'Preview in Google Drive' : 'Draft'}
+            </a>
+          </li>
         )}
+        {!isGDriveProject && (
+          <li className="item" data-value="original">
+            <a
+              className="originalDownload"
+              title="Original"
+              alt="Original"
+              data-href={`/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all`}
+              target="_blank"
+            >
+              Original
+            </a>
+          </li>
+        )}
+        {isGDriveProject && (
+          <li className="item">
+            <a
+              className="originalsGDrive"
+              title="Original in Google Drive"
+              alt="Original in Google Drive"
+              href="javascript:void(0)"
+            >
+              Original in Google Drive
+            </a>
+          </li>
+        )}
+
         <li className="item" data-value="xlif">
           <a
             className="sdlxliff"
