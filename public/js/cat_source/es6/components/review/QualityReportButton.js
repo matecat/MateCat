@@ -5,6 +5,7 @@ import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CatToolActions from '../../actions/CatToolActions'
+import CatToolConstants from '../../constants/CatToolConstants'
 
 /**
  * @NOTE because the state of this component is manipulated
@@ -43,6 +44,14 @@ export class QualityReportButton extends React.Component {
     })
   }
 
+  updateButton = (is_pass, score, feedback) => {
+    this.setState({
+      is_pass,
+      score,
+      feedback,
+    })
+  }
+
   openFeedbackModal = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -51,6 +60,7 @@ export class QualityReportButton extends React.Component {
 
   componentDidMount() {
     CatToolStore.addListener(CattoolConstants.SET_PROGRESS, this.updateProgress)
+    CatToolStore.addListener(CatToolConstants.UPDATE_QR, this.updateButton)
   }
 
   componentWillUnmount() {
@@ -58,6 +68,7 @@ export class QualityReportButton extends React.Component {
       CattoolConstants.SET_PROGRESS,
       this.updateProgress,
     )
+    CatToolStore.removeListener(CatToolConstants.UPDATE_QR, this.updateButton)
   }
 
   render() {

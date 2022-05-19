@@ -1,7 +1,5 @@
 import React from 'react'
 
-import Header from '../header/Header'
-
 class LanguageSelectorList extends React.Component {
   constructor(props) {
     super(props)
@@ -162,7 +160,7 @@ class LanguageSelectorList extends React.Component {
   navigateLanguagesList = (event) => {
     const {getFilteredLanguages} = this
     const {position} = this.state
-    const {querySearch, onToggleLanguage, changeQuerySearch} = this.props
+    const {querySearch, onToggleLanguage} = this.props
     const keyCode = event.keyCode
     if (keyCode === 38 || keyCode === 40) {
       event.preventDefault()
@@ -187,7 +185,6 @@ class LanguageSelectorList extends React.Component {
       } else if (keyCode === 13 && filteredLanguages.length) {
         //enter with 1 language filtered
         onToggleLanguage(filteredLanguages[position])
-        changeQuerySearch('')
       }
     }
   }
@@ -197,7 +194,6 @@ LanguageSelectorList.defaultProps = {
   selectedLanguages: false,
   languagesList: true,
   onToggleLanguage: true,
-  changeQuerySearch: true,
   querySearch: true,
 }
 

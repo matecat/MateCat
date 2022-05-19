@@ -161,7 +161,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
     )
   },
 
-  setSecondPassUrl: function (prId, jobId, jobPassword, secondPAssPassword) {
+  setSecondPassUrl: function (prId, jobId, jobPassword, secondPassPassword) {
     let project = this.projects.find(function (prj) {
       return prj.get('id') == prId
     })
@@ -170,10 +170,10 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
       return j.get('id') == jobId && j.get('password') === jobPassword
     })
     let indexJob = project.get('jobs').indexOf(job)
-    // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPAssPassword;
+    // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPassPassword;
     this.projects = this.projects.setIn(
       [indexProject, 'jobs', indexJob, 'revise_passwords', 1],
-      Immutable.fromJS({revision_number: 2, password: secondPAssPassword}),
+      Immutable.fromJS({revision_number: 2, password: secondPassPassword}),
     )
   },
 
@@ -299,7 +299,7 @@ AppDispatcher.register(function (action) {
         action.idProject,
         action.idJob,
         action.passwordJob,
-        action.secondPAssPassword,
+        action.secondPassPassword,
       )
       ProjectsStore.emitChange(
         ManageConstants.UPDATE_PROJECTS,

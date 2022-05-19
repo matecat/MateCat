@@ -1,9 +1,7 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 
-import {getMatecatApiDomain} from './es6/utils/getMatecatApiDomain'
 import {getJobFileInfo} from './es6/api/getJobFileInfo'
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
@@ -17,7 +15,7 @@ import SegmentFilter from './es6/components/header/cattol/segment_filter/segment
 import {getJobMetadata} from './es6/api/getJobMetadata'
 import {logoutUser} from './es6/api/logoutUser'
 import {reloadQualityReport} from './es6/api/reloadQualityReport'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
+import ModalsActions from './es6/actions/ModalsActions'
 
 $.extend(window.UI, {
   initHeader: function () {
@@ -230,12 +228,12 @@ $.extend(window.UI, {
             ? jobMetadata.project.project_info
             : undefined
         if (fileInstructions || projectInfo) {
-          ReactDOM.render(
+          const root = createRoot(document.getElementById('files-instructions'))
+          root.render(
             React.createElement(JobMetadata, {
               files: response.files,
               projectInfo: projectInfo,
             }),
-            document.getElementById('files-instructions'),
           )
         }
       })
@@ -298,7 +296,7 @@ var initEvents = function () {
   $('#action-three-dots .shortcuts').on('click', function (e) {
     e.preventDefault()
     e.stopPropagation()
-    ModalWindow.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
+    ModalsActions.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
     return false
   })
 

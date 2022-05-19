@@ -10,7 +10,6 @@ import ShortCutsModal from '../modals/ShortCutsModal'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
-import {ModalWindow} from '../modals/ModalWindow'
 
 class ReviewExtendedPanel extends React.Component {
   constructor(props) {
@@ -139,7 +138,7 @@ class ReviewExtendedPanel extends React.Component {
               <br />
               <a
                 onClick={() =>
-                  ModalWindow.showModalComponent(
+                  ModalsActions.showModalComponent(
                     ShortCutsModal,
                     null,
                     'Shortcuts',

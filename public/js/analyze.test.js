@@ -1,6 +1,6 @@
-import {screen, waitForElementToBeRemoved} from '@testing-library/react'
+import {act, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import {rest} from 'msw'
-import {unmountComponentAtNode} from 'react-dom'
+import {createRoot} from 'react-dom/client'
 
 import {mswServer} from '../mocks/mswServer'
 
@@ -261,8 +261,9 @@ test('renders properly', async () => {
   document.body.appendChild(elModal)
 
   await import('./analyze')
-
-  UI.init()
+  act(() => {
+    UI.init()
+  })
 
   const elLoadingText = screen.getByText('Loading Volume Analysis')
   expect(elLoadingText).toBeVisible()
@@ -277,8 +278,12 @@ test('renders properly', async () => {
   ).toBeVisible()
 
   expect(screen.getByRole('heading', {name: 'Show Details'})).toBeVisible()
-
-  unmountComponentAtNode(elHeader)
-  unmountComponentAtNode(elAnalyzeContainer)
-  unmountComponentAtNode(elModal)
+  act(() => {
+    const headerMountPoint = createRoot(elHeader)
+    headerMountPoint.unmount()
+    const analyzeMountPoint = createRoot(elAnalyzeContainer)
+    analyzeMountPoint.unmount()
+    const modalMountPoint = createRoot(elModal)
+    modalMountPoint.unmount()
+  })
 })

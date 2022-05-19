@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 import $ from 'jquery'
 import _ from 'lodash'
@@ -15,7 +15,7 @@ import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
-import {ModalWindow} from '../components/modals/ModalWindow'
+import ModalsActions from './ModalsActions'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -101,20 +101,20 @@ let CatToolActions = {
     var qrParam = config.secondRevisionsCount
       ? '?revision_type=' + revision_number
       : ''
-    window.quality_report_btn_component = ReactDOM.render(
+    const mountPoint = createRoot($('#quality-report-button')[0])
+    mountPoint.render(
       React.createElement(QualityReportButton, {
         vote: config.overall_quality_class,
         quality_report_href: config.quality_report_href + qrParam,
       }),
-      $('#quality-report-button')[0],
     )
   },
   renderSubHeader() {
-    ReactDOM.render(
+    const mountPoint = createRoot($('#header-bars-wrapper')[0])
+    mountPoint.render(
       React.createElement(SubHeaderContainer, {
         filtersEnabled: SegmentFilter.enabled(),
       }),
-      $('#header-bars-wrapper')[0],
     )
   },
 
@@ -142,8 +142,8 @@ let CatToolActions = {
     config.firstSegmentOfFiles = data.files
   },
   renderFooter: function () {
-    var mountPoint = $('footer.stats-foo')[0]
-    ReactDOM.render(
+    var mountPoint = createRoot($('footer.stats-foo')[0])
+    mountPoint.render(
       React.createElement(CattolFooter, {
         idProject: config.id_project,
         idJob: config.job_id,
@@ -154,7 +154,6 @@ let CatToolActions = {
         isCJK: config.isCJK,
         languagesArray: config.languages_array,
       }),
-      mountPoint,
     )
   },
   updateFooterStatistics: function () {
@@ -209,10 +208,10 @@ let CatToolActions = {
         CommonUtils.addInSessionStorage('feedback-modal', 1, 'feedback-modal')
       },
       successCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       RevisionFeedbackModal,
       props,
       'Feedback submission',
@@ -231,12 +230,11 @@ let CatToolActions = {
     var review = qr.chunk.reviews.find(function (value) {
       return value.revision_number === revNumber
     })
-    AppDispatcher.dispatch({
-      actionType: CattolConstants.UPDATE_QR,
-      qr: qr,
-    })
+
     if (review) {
-      window.quality_report_btn_component.setState({
+      AppDispatcher.dispatch({
+        actionType: CattolConstants.UPDATE_QR,
+        qr: qr,
         is_pass: review.is_pass,
         score: review.score,
         feedback: review.feedback,
