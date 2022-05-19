@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
@@ -13,7 +13,6 @@ import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_sou
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 import {createProject} from './cat_source/es6/api/createProject'
-import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 
 APP.openOptionsPanel = function (tab, elem) {
@@ -324,7 +323,7 @@ APP.checkForSpeechToText = function () {
       .find('.onoffswitch')
       .off('click')
       .on('click', function () {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'This options is only available on your browser.',
@@ -403,16 +402,15 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   render: function () {
-    var headerMountPoint = $('header')[0]
+    const headerMountPoint = createRoot($('header')[0])
     if (config.isLoggedIn) {
-      ReactDOM.render(
+      headerMountPoint.render(
         React.createElement(Header, {
           showFilterProjects: false,
           showModals: false,
           showLinks: true,
           user: APP.USER.STORE,
         }),
-        headerMountPoint,
       )
       TeamsStore.addListener(TeamConstants.UPDATE_USER, () => {
         this.initDropdowns()
@@ -422,14 +420,13 @@ $.extend(UI.UPLOAD_PAGE, {
         CatToolActions.showHeaderTooltip()
       }, 2000)
     } else {
-      ReactDOM.render(
+      headerMountPoint.render(
         React.createElement(Header, {
           showSubHeader: false,
           showModals: false,
           loggedUser: false,
           showLinks: true,
         }),
-        headerMountPoint,
       )
       this.initDropdowns()
     }
@@ -668,7 +665,7 @@ $.extend(UI.UPLOAD_PAGE, {
       var src = $('#source-lang').dropdown('get value')
       var trg = $('#target-lang').dropdown('get value')
       if (trg.split(',').length > 1) {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Cannot swap languages when multiple target languages are selected!',
@@ -684,7 +681,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
       if ($('.template-download').length) {
         if (UI.conversionsAreToRestart()) {
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             AlertModal,
             {
               text: 'Source language changed. The files must be reimported.',
@@ -694,7 +691,7 @@ $.extend(UI.UPLOAD_PAGE, {
           )
         }
       } else if ($('.template-gdrive').length) {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Source language changed. The files must be reimported.',
@@ -770,14 +767,14 @@ $.extend(UI.UPLOAD_PAGE, {
 
       var tlAr = $('#target-lang').dropdown('get value').split(',')
       var sourceLang = $('#source-lang').dropdown('get value')
-
-      ReactDOM.render(
+      const mountPoint = createRoot($('#languageSelector')[0])
+      mountPoint.render(
         React.createElement(LanguageSelector, {
           selectedLanguagesFromDropdown: tlAr,
           languagesList: config.languages_array,
           fromLanguage: sourceLang,
           onClose: function () {
-            ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+            mountPoint.unmount()
           },
           onConfirm: function (data) {
             if (data) {
@@ -803,10 +800,9 @@ $.extend(UI.UPLOAD_PAGE, {
                 `<span class="extra">(${vals.length} languages)</span>`,
               )
             }
-            ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+            mountPoint.unmount()
           },
         }),
-        $('#languageSelector')[0],
       )
     })
 
@@ -835,7 +831,7 @@ $.extend(UI.UPLOAD_PAGE, {
     if ($('.template-download').length) {
       //.template-download is present when jquery file upload is used and a file is found
       if (UI.conversionsAreToRestart()) {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Source language changed. The files must be reimported.',
@@ -848,7 +844,7 @@ $.extend(UI.UPLOAD_PAGE, {
         UI.delTMXLangFailure()
       }
     } else if ($('.template-gdrive').length) {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Source language changed. The files must be reimported.',
@@ -951,7 +947,7 @@ APP.postProjectCreation = function (d) {
       if (d.status == 'EMPTY') {
         console.log('EMPTY')
         $('body').removeClass('creating')
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',

@@ -1,9 +1,11 @@
-import {screen} from '@testing-library/react'
+import {render, screen, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 
-import {ModalWindow, ModalWindowComponent} from './ModalWindow'
+import {ModalWindow} from './ModalWindow'
+import AppDispatcher from '../../stores/AppDispatcher'
+import ModalsConstants from '../../constants/ModalsConstants'
 
 const DummyComponent = () => {
   return <div>something</div>
@@ -18,21 +20,20 @@ beforeAll(() => {
 })
 
 test('works properly', () => {
-  const modalWindow = ReactDOM.render(
-    <ModalWindowComponent />,
-    screen.getByTestId('modal'),
-  )
-
+  act(() => {
+    render(<ModalWindow />)
+  })
   const onClose = jest.fn()
   const onCloseCallback = jest.fn()
-
-  modalWindow.showModalComponent(
-    DummyComponent,
-    {onCloseCallback},
-    'Random title',
-    null,
-    onClose,
-  )
+  act(() => {
+    AppDispatcher.dispatch({
+      actionType: ModalsConstants.SHOW_MODAL,
+      component: DummyComponent,
+      props: {onCloseCallback},
+      title: 'Random title',
+      onCloseCallback: onClose,
+    })
+  })
 
   const elTitle = screen.getByRole('heading', {name: 'Random title'})
   expect(elTitle).toBeVisible()
@@ -49,28 +50,31 @@ test('works properly', () => {
   const elButtonClose = screen.getByTestId('close-button')
   expect(elButtonClose).toBeVisible()
 
-  userEvent.click(elButtonClose)
+  act(() => {
+    AppDispatcher.dispatch({
+      actionType: ModalsConstants.CLOSE_MODAL,
+    })
+  })
 
   expect(onCloseCallback).toHaveBeenCalledTimes(1)
   expect(elButtonClose).not.toBeVisible()
 })
 
 test('works properly ModalOverlay version', () => {
-  const modalWindow = ReactDOM.render(
-    <ModalWindowComponent />,
-    screen.getByTestId('modal'),
-  )
-
+  act(() => {
+    render(<ModalWindow />)
+  })
   const onClose = jest.fn()
   const onCloseCallback = jest.fn()
-
-  modalWindow.showModalComponent(
-    DummyComponent,
-    {onCloseCallback, overlay: true},
-    'Random title',
-    null,
-    onClose,
-  )
+  act(() => {
+    AppDispatcher.dispatch({
+      actionType: ModalsConstants.SHOW_MODAL,
+      component: DummyComponent,
+      props: {onCloseCallback, overlay: true},
+      title: 'Random title',
+      onCloseCallback: onClose,
+    })
+  })
 
   const elTitle = screen.getByRole('heading', {name: 'Random title'})
   expect(elTitle).toBeVisible()
@@ -87,7 +91,11 @@ test('works properly ModalOverlay version', () => {
   const elButtonClose = screen.getByTestId('close-button')
   expect(elButtonClose).toBeVisible()
 
-  userEvent.click(elButtonClose)
+  act(() => {
+    AppDispatcher.dispatch({
+      actionType: ModalsConstants.CLOSE_MODAL,
+    })
+  })
 
   expect(onCloseCallback).toHaveBeenCalledTimes(1)
   expect(elButtonClose).not.toBeVisible()

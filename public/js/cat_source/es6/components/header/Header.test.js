@@ -1,8 +1,8 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import {rest} from 'msw'
+import {createRoot} from 'react-dom/client'
 
 import {mswServer} from '../../../../../mocks/mswServer'
 import Header from './Header'
@@ -11,8 +11,8 @@ import Header from './Header'
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
-
-afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
+const mountPoint = createRoot(modalElement)
+afterAll(() => mountPoint.unmount())
 
 window.config = {
   isLoggedIn: 1,

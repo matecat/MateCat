@@ -9,8 +9,8 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
-import {ModalWindow} from '../../../modals/ModalWindow'
 import AlertModal from '../../../modals/AlertModal'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 class Search extends React.Component {
   constructor(props) {
@@ -225,7 +225,7 @@ class Search extends React.Component {
             })
           })
           .catch((errors) => {
-            ModalWindow.showModalComponent(
+            ModalsActions.showModalComponent(
               AlertModal,
               {
                 text: errors[0].message,
@@ -233,7 +233,7 @@ class Search extends React.Component {
               'Replace All Alert',
             )
           })
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         CatToolActions.storeSearchResults({
           total: 0,
           searchResults: [],
@@ -244,10 +244,10 @@ class Search extends React.Component {
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       props,
       'Confirmation required',
@@ -256,7 +256,7 @@ class Search extends React.Component {
 
   handleReplaceClick() {
     if (this.state.search.searchTarget === this.state.search.replaceTarget) {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Attention: you are replacing the same text!',

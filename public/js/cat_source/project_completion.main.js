@@ -1,9 +1,9 @@
 import {deleteCompletionEvents} from './es6/api/deleteCompletionEvents'
 import {setChunkComplete} from './es6/api/setChunkComplete'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
 import AlertModal from './es6/components/modals/AlertModal'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import CatToolActions from './es6/actions/CatToolActions'
+import ModalsActions from './es6/actions/ModalsActions'
 
 var ProjectCompletion = {
   enabled: function () {
@@ -68,7 +68,7 @@ if (ProjectCompletion.enabled()) {
           UI.render(false)
         })
         .catch((errors) => {
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             AlertModal,
             {
               text:
@@ -127,7 +127,7 @@ if (ProjectCompletion.enabled()) {
     }
 
     var clickMarkAsCompleteForReview = function () {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         {
           text:
@@ -143,7 +143,7 @@ if (ProjectCompletion.enabled()) {
     }
 
     var clickMarkAsCompleteForTranslate = function () {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         {
           text:
@@ -213,7 +213,7 @@ if (ProjectCompletion.enabled()) {
     }
 
     var showFixWarningsModal = function () {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         {
           text:

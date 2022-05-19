@@ -1,17 +1,18 @@
+import React from 'react'
+import {flushSync} from 'react-dom'
 import ProjectContainer from './ProjectContainer'
 import TeamConstants from '../../constants/TeamConstants'
 import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageActions from '../../actions/ManageActions'
-import React from 'react'
 import Immutable from 'immutable'
 class ProjectsContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       projects: Immutable.fromJS([]),
-      more_projects: true,
+      more_projects: false,
       reloading_projects: false,
       team: this.props.team,
       teams: this.props.teams,
@@ -58,9 +59,11 @@ class ProjectsContainer extends React.Component {
   }
 
   updateProjects(projects) {
-    this.setState({
-      projects: projects,
-    })
+    flushSync(() =>
+      this.setState({
+        projects: projects,
+      }),
+    )
   }
 
   hideSpinner() {
@@ -244,7 +247,7 @@ class ProjectsContainer extends React.Component {
       spinner = (
         <div className="ui one column grid">
           <div className="one column spinner" style={{height: '100px'}}>
-            <div className="ui active inverted dimmer">
+            <div className="ui active inverted dimmer more">
               <div className="ui medium text loader">Loading more projects</div>
             </div>
           </div>
@@ -292,9 +295,17 @@ class ProjectsContainer extends React.Component {
       <div>
         <div className="project-list">
           <div className="ui container">
-            {spinnerReloadProjects}
-            {items}
-            {spinner}
+            {this.props.fetchingProjects ? (
+              <div className="ui active inverted dimmer">
+                <div className="ui massive text loader">Loading Projects</div>
+              </div>
+            ) : (
+              <React.Fragment>
+                {spinnerReloadProjects}
+                {items}
+                {spinner}
+              </React.Fragment>
+            )}
           </div>
         </div>
       </div>

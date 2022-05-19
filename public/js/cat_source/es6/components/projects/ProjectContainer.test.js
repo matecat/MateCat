@@ -1,6 +1,6 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import React from 'react'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import ProjectContainer from './ProjectContainer'
 import Immutable from 'immutable'
 import {rest} from 'msw'
@@ -11,8 +11,8 @@ import {mswServer} from '../../../../../mocks/mswServer'
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
-
-afterAll(() => ReactDOM.unmountComponentAtNode(modalElement))
+const mountPoint = createRoot(modalElement)
+afterAll(() => mountPoint.unmount())
 
 require('../../../../common')
 require('../../../../login')

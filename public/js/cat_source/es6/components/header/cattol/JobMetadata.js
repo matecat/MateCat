@@ -2,7 +2,7 @@ import React from 'react'
 
 import JobMetadataModal from '../../modals/JobMetadataModal'
 import SegmentStore from '../../../stores/SegmentStore'
-import {ModalWindow} from '../../modals/ModalWindow'
+import ModalsActions from '../../../actions/ModalsActions'
 
 class JobMetadata extends React.Component {
   constructor(props) {
@@ -22,7 +22,7 @@ class JobMetadata extends React.Component {
       minHeight: 400,
       maxWidth: 900,
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       JobMetadataModal,
       props,
       'Job instructions and references',

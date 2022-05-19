@@ -1,7 +1,8 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
 import _ from 'lodash'
+import {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
@@ -18,7 +19,6 @@ import {getProjects} from '../../api/getProjects'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
-import {ModalWindow} from '../modals/ModalWindow'
 import NotificationBox from '../notificationsComponent/NotificationBox'
 
 class Dashboard extends React.Component {
@@ -33,10 +33,12 @@ class Dashboard extends React.Component {
     this.state = {
       teams: [],
       selectedTeam: undefined,
-      showProjects: false,
+      fetchingProjects: true,
       selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
+  }
 
+  getData = () => {
     getUserData().then((data) => {
       TeamsActions.renderTeams(data.teams)
       const selectedTeam = APP.getLastTeamSelected(data.teams)
@@ -48,11 +50,13 @@ class Dashboard extends React.Component {
       this.getTeamStructure(selectedTeam).then(() => {
         TeamsActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
-
+        this.setState({fetchingProjects: true})
         getProjects({team: selectedTeam, searchFilter: this.Search})
           .then((res) => {
-            this.setState({showProjects: true})
-            ManageActions.renderProjects(res.data, selectedTeam, teams)
+            this.setState({fetchingProjects: false})
+            setTimeout(() =>
+              ManageActions.renderProjects(res.data, selectedTeam, teams),
+            )
             ManageActions.storeSelectedTeam(selectedTeam)
           })
           .catch((err) => {
@@ -77,9 +81,11 @@ class Dashboard extends React.Component {
   }
 
   updateTeams = (teams) => {
-    this.setState({
-      teams: teams.toJS(),
-    })
+    flushSync(() =>
+      this.setState({
+        teams: teams.toJS(),
+      }),
+    )
   }
 
   updateProjects = (id) => {
@@ -260,20 +266,20 @@ class Dashboard extends React.Component {
 
     if (project.remote_file_service == 'gdrive') {
       continueDownloadFunction = function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadGDriveFile(null, job.id, job.password, callback)
       }
     } else {
       continueDownloadFunction = function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadFile(job.id, job.password, callback)
       }
     }
 
     const openUrl = function () {
-      ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
       ManageActions.enableDownloadButton(job.id)
       window.open(urlWarnings, '_blank')
     }
@@ -292,7 +298,7 @@ class Dashboard extends React.Component {
         warningText: 'Fix errors',
         warningCallback: openUrl,
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required',
@@ -368,6 +374,7 @@ class Dashboard extends React.Component {
   /*********************************/
 
   componentDidMount() {
+    this.getData()
     window.addEventListener('scroll', this.scrollDebounceFn())
     let self = this
     $(window).on('blur focus', function (e) {
@@ -475,14 +482,13 @@ class Dashboard extends React.Component {
             loggedUser={true}
           />
         </DashboardHeader>
-        {this.state.selectedTeam &&
-        this.state.teams &&
-        this.state.showProjects ? (
+        {this.state.selectedTeam && this.state.teams ? (
           <ProjectsContainer
             downloadTranslationFn={this.downloadTranslation}
             teams={Immutable.fromJS(this.state.teams)}
             team={Immutable.fromJS(this.state.selectedTeam)}
             selectedUser={this.state.selectedUser}
+            fetchingProjects={this.state.fetchingProjects}
           />
         ) : (
           <div className="ui active inverted dimmer">
@@ -497,12 +503,12 @@ class Dashboard extends React.Component {
 export default Dashboard
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementById('manage-container')
-  ReactDOM.render(React.createElement(Dashboard, {}), mountPoint)
+  const mountPoint = createRoot(document.getElementById('manage-container'))
+  mountPoint.render(React.createElement(Dashboard, {}))
 
   //Toast Notifications
-  const mountPointNotifications = document.getElementsByClassName(
-    'notifications-wrapper',
-  )[0]
-  ReactDOM.render(<NotificationBox />, mountPointNotifications)
+  const mountPointNotifications = createRoot(
+    document.getElementsByClassName('notifications-wrapper')[0],
+  )
+  mountPointNotifications.render(<NotificationBox />)
 })

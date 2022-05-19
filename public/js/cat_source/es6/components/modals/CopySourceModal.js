@@ -1,6 +1,6 @@
 import React from 'react'
 import Cookies from 'js-cookie'
-import {ModalWindow} from './ModalWindow'
+import ModalsActions from '../../actions/ModalsActions'
 
 class CopySourceModal extends React.Component {
   constructor(props) {
@@ -10,13 +10,13 @@ class CopySourceModal extends React.Component {
   copyAllSources() {
     this.props.confirmCopyAllSources()
     this.checkCheckbox()
-    ModalWindow.onCloseModal()
+    ModalsActions.onCloseModal()
   }
 
   copySegmentOnly() {
     this.props.abortCopyAllSources()
     this.checkCheckbox()
-    ModalWindow.onCloseModal()
+    ModalsActions.onCloseModal()
   }
 
   checkCheckbox() {
