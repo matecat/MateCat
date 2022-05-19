@@ -28,6 +28,7 @@ class JobMetadataModal extends React.Component {
             <div className={'title ' + currentClass}>
               <i className="dropdown icon" />
               <span
+                title={file.file_name}
                 className={
                   'fileFormat ' +
                   CommonUtils.getIconClass(
