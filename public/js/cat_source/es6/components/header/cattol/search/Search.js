@@ -68,7 +68,9 @@ class Search extends React.Component {
     }
     this.setState({
       funcFindButton: false,
-      previousIsTagProjectionEnabled: config.tag_projection_enabled === 1,
+      ...(config.tag_projection_enabled === 1 && {
+        previousIsTagProjectionEnabled: true,
+      }),
     })
     // disable tag projection
     if (config.tag_projection_enabled === 1) {
