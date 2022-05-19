@@ -379,7 +379,6 @@ class Search extends React.Component {
       this.props.active !== prevProps.active &&
       this.state.previousIsTagProjectionEnabled
     ) {
-      console.log('####', 'enableTagProjectionInJob')
       UI.enableTagProjectionInJob()
       UI.setTagProjectionChecked(true)
     }
