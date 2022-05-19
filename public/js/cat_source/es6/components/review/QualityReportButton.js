@@ -70,10 +70,7 @@ export const QualityReportButton = ({
     CatToolStore.addListener(CattoolConstants.SET_PROGRESS, updateProgress)
     CatToolStore.addListener(CattoolConstants.RELOAD_QR, reloadQualityReportFn)
     return () => {
-      CatToolStore.removeListener(
-        CattoolConstants.SET_PROGRESS,
-        this.updateProgress,
-      )
+      CatToolStore.removeListener(CattoolConstants.SET_PROGRESS, updateProgress)
       CatToolStore.removeListener(
         CattoolConstants.RELOAD_QR,
         reloadQualityReportFn,
