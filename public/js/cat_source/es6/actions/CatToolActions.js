@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 import $ from 'jquery'
 import _ from 'lodash'
@@ -12,7 +12,7 @@ import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
-import {ModalWindow} from '../components/modals/ModalWindow'
+import ModalsActions from './ModalsActions'
 import {Header} from '../components/header/cattol/Header'
 
 let CatToolActions = {
@@ -145,8 +145,8 @@ let CatToolActions = {
     )
   },
   renderFooter: function () {
-    var mountPoint = $('footer.stats-foo')[0]
-    ReactDOM.render(
+    var mountPoint = createRoot($('footer.stats-foo')[0])
+    mountPoint.render(
       React.createElement(CattolFooter, {
         idProject: config.id_project,
         idJob: config.job_id,
@@ -157,7 +157,6 @@ let CatToolActions = {
         isCJK: config.isCJK,
         languagesArray: config.languages_array,
       }),
-      mountPoint,
     )
   },
   updateFooterStatistics: function () {
@@ -212,10 +211,10 @@ let CatToolActions = {
         CommonUtils.addInSessionStorage('feedback-modal', 1, 'feedback-modal')
       },
       successCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       RevisionFeedbackModal,
       props,
       'Feedback submission',

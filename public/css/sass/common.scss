@@ -1475,6 +1475,7 @@ form.add-TM-Form {
   border-radius: 2px;
   font-size: 18px;
   margin-right: 0px;
+  cursor: pointer;
 }
 
 .btn-cancel.in-popup {
@@ -4183,7 +4184,7 @@ a.resume-project:after {
 .add-tm:before {
   content: '\f067';
   padding: 0 10px 0 0;
-  vertical-align: text-top;
+  vertical-align: middle;
 }
 
 .uploadkey:before {

@@ -56,6 +56,14 @@ const TAGS_UTILS = {
           tagSignatures['nbsp'].placeholder,
         )}</span>`,
       )
+      .replace(
+        tagSignatures['wordJoiner'].regex,
+        `<span class="tag small ${
+          tagSignatures['wordJoiner'].style
+        }" contenteditable="false">${this.encodeToHtml(
+          tagSignatures['wordJoiner'].placeholder,
+        )}</span>`,
+      )
   },
 
   encodeToHtml: (str) => {

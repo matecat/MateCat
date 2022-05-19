@@ -5,6 +5,7 @@ import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CatToolActions from '../../actions/CatToolActions'
+import CatToolConstants from '../../constants/CatToolConstants'
 import {reloadQualityReport} from '../../api/reloadQualityReport'
 
 /**
@@ -57,6 +58,37 @@ export const QualityReportButton = ({
     }
     CatToolActions.updateQualityReport(qr)
   }
+
+  // updateButton = (is_pass, score, feedback) => {
+  //   this.setState({
+  //     is_pass,
+  //     score,
+  //     feedback,
+  //   })
+  // }
+  //
+  // openFeedbackModal = (e) => {
+  //   e.preventDefault()
+  //   e.stopPropagation()
+  //   CatToolActions.openFeedbackModal(this.state.feedback, config.revisionNumber)
+  // }
+  //
+  // componentDidMount() {
+  //   CatToolStore.addListener(CattoolConstants.SET_PROGRESS, this.updateProgress)
+  //   CatToolStore.addListener(CatToolConstants.UPDATE_QR, this.updateButton)
+  // }
+  //
+  // componentWillUnmount() {
+  //   CatToolStore.removeListener(
+  //       CattoolConstants.SET_PROGRESS,
+  //       this.updateProgress,
+  //   )
+  //   CatToolStore.removeListener(CatToolConstants.UPDATE_QR, this.updateButton)
+  // }
+  //
+  // render() {
+  //   const {quality_report_href} = this.props
+  //   const {progress, feedback} = this.state
 
   const reloadQualityReportFn = () => {
     reloadQualityReport().then((data) => {

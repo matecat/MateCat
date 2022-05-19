@@ -28,6 +28,7 @@ import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import TagUtils from '../../utils/tagUtils'
+import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -37,6 +38,17 @@ const editorSync = {
   clickedOnTag: false,
   onComposition: false,
 }
+
+// typing chars sequence
+const typingWordJoiner = matchTypingSequence(
+  [
+    [50, 98],
+    [48, 96],
+    [54, 102],
+    [48, 96],
+  ],
+  2000,
+)
 
 class Editarea extends React.Component {
   constructor(props) {
@@ -95,6 +107,7 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
       },
+      previousSourceTagMap: null,
     }
     const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
       DraftMatecatUtils.cleanSegmentString(translation),
@@ -204,6 +217,7 @@ class Editarea extends React.Component {
       const contentEncoded = DraftMatecatUtils.encodeContent(
         editorState,
         DraftMatecatUtils.unescapeHTMLLeaveTags(translation),
+        this.props.segment.sourceTagMap,
       )
       // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
       let {editorState: newEditorState} = contentEncoded
@@ -475,6 +489,18 @@ class Editarea extends React.Component {
     ) {
       this.checkDecorators(prevProps)
     }
+
+    // update editor state when receive prop of segment "sourceTagMap"
+    if (
+      this.props.segment.sourceTagMap?.length &&
+      !_.isEqual(
+        this.state.previousSourceTagMap,
+        this.props.segment.sourceTagMap,
+      )
+    ) {
+      this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
+      this.setNewTranslation(this.props.segment.sid, this.props.translation)
+    }
   }
 
   render() {
@@ -653,6 +679,22 @@ class Editarea extends React.Component {
       }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
+    } else if (
+      (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+      (e.ctrlKey || e.metaKey) &&
+      e.altKey
+    ) {
+      return 'insert-word-joiner-tag'
+    } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
+      const {get, reset} = typingWordJoiner
+      if (e.key !== 'Alt') {
+        const result = get(e.keyCode)
+        if (result) {
+          return 'insert-word-joiner-tag'
+        }
+      } else {
+        reset()
+      }
     }
     return getDefaultKeyBinding(e)
   }
@@ -709,6 +751,9 @@ class Editarea extends React.Component {
         insertTagAtSelection('nbsp')
         return 'handled'
       case 'add-issue':
+        return 'handled'
+      case 'insert-word-joiner-tag':
+        insertTagAtSelection('wordJoiner')
         return 'handled'
       case 'translate':
         return 'not-handled'

@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react'
+import {render, screen, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import Immutable from 'immutable'
@@ -1214,9 +1214,9 @@ const addOnceListenerStoreFilterProjects = (() => {
 
 test('Rendering elements', () => {
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
-
-  render(<FilterProjects {...props} />)
-
+  act(() => {
+    render(<FilterProjects {...props} />)
+  })
   expect(screen.getByTestId('input-search-projects')).toBeInTheDocument()
   expect(screen.getByTestId('status-filter')).toBeInTheDocument()
 })
@@ -1225,16 +1225,17 @@ test('Searching with no result', async () => {
   executeMswServer(apiGetProjects.noResult)
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
-
-  render(<FilterProjects {...props} />)
-
+  act(() => {
+    render(<FilterProjects {...props} />)
+  })
   const searchTerm = 'my project'
 
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({searchTerm}))
 
   const input = screen.getByTestId('input-search-projects')
-  userEvent.type(input, searchTerm)
-
+  act(() => {
+    userEvent.type(input, searchTerm)
+  })
   const projects = await projectsListPromise()
 
   expect(projects.size).toBe(0)
@@ -1244,16 +1245,17 @@ test('Searching result', async () => {
   executeMswServer(apiGetProjects.result)
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
-
-  render(<FilterProjects {...props} />)
-
+  act(() => {
+    render(<FilterProjects {...props} />)
+  })
   const searchTerm = 'tesla'
 
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({searchTerm}))
 
   const input = screen.getByTestId('input-search-projects')
-  userEvent.type(input, searchTerm)
-
+  act(() => {
+    userEvent.type(input, searchTerm)
+  })
   const projects = await projectsListPromise()
 
   expect(projects.size).toBe(1)
@@ -1264,14 +1266,14 @@ test('Click on archived status', async () => {
   executeMswServer(apiGetProjects.archived)
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
-
-  render(<FilterProjects {...props} />)
-
+  act(() => {
+    render(<FilterProjects {...props} />)
+  })
   const status = 'archived'
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({status}))
-
-  userEvent.click(screen.getByTestId('item-archived'))
-
+  act(() => {
+    userEvent.click(screen.getByTestId('item-archived'))
+  })
   const projects = await projectsListPromise()
 
   expect(projects.size).toBe(1)
@@ -1283,14 +1285,14 @@ test('Click on cancelled status', async () => {
   executeMswServer(apiGetProjects.cancelled)
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
-
-  render(<FilterProjects {...props} />)
-
+  act(() => {
+    render(<FilterProjects {...props} />)
+  })
   const status = 'cancelled'
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({status}))
-
-  userEvent.click(screen.getByTestId('item-archived'))
-
+  act(() => {
+    userEvent.click(screen.getByTestId('item-archived'))
+  })
   const projects = await projectsListPromise()
 
   expect(projects.size).toBe(2)

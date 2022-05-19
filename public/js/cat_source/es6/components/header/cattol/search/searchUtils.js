@@ -7,7 +7,7 @@ import TextUtils from '../../../../utils/textUtils'
 import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
 import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
-import {ModalWindow} from '../../../modals/ModalWindow'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -62,7 +62,7 @@ let SearchUtils = {
       _.isUndefined(this.searchParams.target) &&
       this.searchParams.status == 'all'
     ) {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Enter text in source or target input boxes or select a status.',
@@ -351,7 +351,7 @@ let SearchUtils = {
     if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'You must specify the Target value to replace.',
@@ -366,7 +366,7 @@ let SearchUtils = {
     if (replaceTarget !== '') {
       this.searchParams.replace = replaceTarget
     } else {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'You must specify the replacement value.',

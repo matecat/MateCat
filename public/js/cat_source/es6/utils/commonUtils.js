@@ -6,7 +6,6 @@ import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
-import {ModalWindow} from '../components/modals/ModalWindow'
 import AlertModal from '../components/modals/AlertModal'
 
 const CommonUtils = {
@@ -139,7 +138,7 @@ const CommonUtils = {
    * @returns {*}
    */
   genericErrorAlertMessage() {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       AlertModal,
       {
         text:

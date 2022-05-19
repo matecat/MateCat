@@ -2,9 +2,8 @@ import React, {useEffect, useState} from 'react'
 
 import JobMetadataModal from '../../modals/JobMetadataModal'
 import SegmentStore from '../../../stores/SegmentStore'
-import {ModalWindow} from '../../modals/ModalWindow'
+import ModalsActions from '../../../actions/ModalsActions'
 import {getJobMetadata} from '../../../api/getJobMetadata'
-import CommonUtils from '../../../utils/commonUtils'
 
 export const JobMetadata = ({idJob, password}) => {
   const [files, setFiles] = useState()
@@ -25,7 +24,7 @@ export const JobMetadata = ({idJob, password}) => {
       minHeight: 400,
       maxWidth: 900,
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       JobMetadataModal,
       props,
       'Job instructions and references',

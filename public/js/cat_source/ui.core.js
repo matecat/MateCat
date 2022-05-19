@@ -1,11 +1,10 @@
 import _ from 'lodash'
+import React, {useEffect} from 'react'
 import Cookies from 'js-cookie'
-import ReactDOM from 'react-dom'
-import React from 'react'
+import {createRoot} from 'react-dom/client'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-// import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
@@ -19,9 +18,9 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
 import AlertModal from './es6/components/modals/AlertModal'
 import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
+import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {
@@ -99,20 +98,20 @@ window.UI = {
           opts.propagation = false
           opts.autoPropagation = false
           UI.preExecChangeStatus(opts)
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         cancelText: 'Propagate to All',
         cancelCallback: function () {
           opts.propagation = true
           opts.autoPropagation = false
           UI.execChangeStatus(opts)
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         onClose: function () {
           UI.preExecChangeStatus(opts)
         },
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required ',
@@ -318,10 +317,9 @@ window.UI = {
    * react components, closing side panel etc.
    */
   unmountSegments: function () {
-    $('.article-segments-container').each(function (index, value) {
-      ReactDOM.unmountComponentAtNode(value)
-      delete UI.SegmentsContainers
-    })
+    this.segmentsMountPoint.unmount()
+    UI.segmentsRendered = false
+
     this.removeCacheObjects()
     SegmentStore.removeAllSegments()
     SegmentActions.closeSideSegments()
@@ -350,23 +348,29 @@ window.UI = {
       !this.split_points_source.length ||
       justCreated
     ) {
-      if (!this.SegmentsContainers) {
-        this.SegmentsContainers = []
-        var mountPoint = $('.article-segments-container')[0]
-        this.SegmentsContainers[0] = ReactDOM.render(
-          React.createElement(SegmentsContainer, {
+      if (!this.segmentsRendered) {
+        this.segmentsRendered = true
+        this.segmentsMountPoint = createRoot(
+          $('.article-segments-container')[0],
+        )
+        const CallbackAfterRender = () => {
+          useEffect(() => {
+            SegmentActions.renderSegments(segments, UI.startSegmentId)
+          })
+          return React.createElement(SegmentsContainer, {
             // fid: fid,
             isReview: Review.enabled(),
             isReviewExtended: ReviewExtended.enabled(),
             reviewType: Review.type,
             enableTagProjection: UI.enableTagProjection,
             tagModesEnabled: UI.tagModesEnabled,
-            startSegmentId: this.startSegmentId,
+            startSegmentId: UI.startSegmentId,
             firstJobSegment: config.first_job_segment,
-          }),
-          mountPoint,
-        )
-        SegmentActions.renderSegments(segments, this.startSegmentId)
+          })
+        }
+
+        this.segmentsMountPoint.render(<CallbackAfterRender />)
+        // SegmentActions.renderSegments(segments, this.startSegmentId)
       } else {
         SegmentActions.addSegments(segments, where)
       }
@@ -517,7 +521,7 @@ window.UI = {
     )
   },
   showFixWarningsOnDownload: function (continueDownloadFunction) {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       {
         cancelText: 'Fix errors',
@@ -952,7 +956,7 @@ window.UI = {
 
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             AlertModal,
             {
               text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
@@ -963,7 +967,7 @@ window.UI = {
       }
 
       if (codeInt === -10 && operation !== 'getSegments') {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Job canceled or assigned to another translator',
@@ -978,7 +982,7 @@ window.UI = {
       }
 
       if (codeInt <= -2000 && !_.isUndefined(this.message)) {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: this.message,
@@ -1180,7 +1184,7 @@ window.UI = {
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
       UI.selectingReadonly = setTimeout(function () {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: UI.messageForClickOnIceMatch(),
@@ -1196,7 +1200,7 @@ window.UI = {
     }, 200)
   },
   readonlyClickDisplay: function () {
-    ModalWindow.showModalComponent(AlertModal, {
+    ModalsActions.showModalComponent(AlertModal, {
       text: UI.messageForClickOnReadonly(),
     })
   },
@@ -1245,5 +1249,6 @@ $(document).ready(function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  ReactDOM.render(<NotificationBox />, mountPoint)
+  const root = createRoot(mountPoint)
+  root.render(<NotificationBox />)
 })

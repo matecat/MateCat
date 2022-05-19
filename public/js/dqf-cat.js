@@ -1,7 +1,7 @@
 import {dqfConfirmAssignment as dqfConfirmAssignmentApi} from './cat_source/es6/api/dqfConfirmAssignment'
-import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
 
 if (config.dqf_enabled === 1) {
   ;(function (UI) {
@@ -16,7 +16,7 @@ if (config.dqf_enabled === 1) {
     var original_readonlyClickDisplay = UI.readonlyClickDisplay
 
     function readonlyClickDisplay() {
-      ModalWindow.showModalComponent(AlertModal, {
+      ModalsActions.showModalComponent(AlertModal, {
         text: UI.messageForClickOnReadonly(),
         successCallback: () => dqfConfirmSignin,
       })
@@ -27,7 +27,7 @@ if (config.dqf_enabled === 1) {
     }
 
     function showAssignmentModal() {
-      ModalWindow.showModalComponent(ConfirmMessageModal, {
+      ModalsActions.showModalComponent(ConfirmMessageModal, {
         text: 'This DQF project is not assigned yet, do you want to assign it yourself?',
         successText: 'Yes, assign this project to me',
         cancelText: 'No, leave it unassigned',

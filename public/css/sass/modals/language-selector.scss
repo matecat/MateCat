@@ -132,6 +132,16 @@
         }
       }
     }
+
+    .button-all-languages {
+      display: flex;
+      margin-left: 48px;
+
+      button span {
+        display: inline-block;
+        margin: 2px 4px 0 0;
+      }
+    }
   }
 
   /* Modal Body */

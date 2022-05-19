@@ -5,7 +5,7 @@ import ShortCutsModal from './es6/components/modals/ShortCutsModal'
 import SegmentStore from './es6/stores/SegmentStore'
 import CommonUtils from './es6/utils/commonUtils'
 import Shortcuts from './es6/utils/shortcuts'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
+import ModalsActions from './es6/actions/ModalsActions'
 
 $.extend(window.UI, {
   bindShortcuts: function () {
@@ -17,7 +17,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')
+          ModalsActions.showModalComponent(ShortCutsModal, null, 'Shortcuts')
         },
       )
       .on(
