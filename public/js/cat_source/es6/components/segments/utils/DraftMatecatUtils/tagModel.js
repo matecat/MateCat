@@ -218,6 +218,23 @@ const tagSignatures = {
     showTooltip: false,
     replaceForLexiqa: false,
   },
+  wordJoiner: {
+    type: 'wordJoiner',
+    regex: /\u2060/g,
+    selfClosing: true,
+    isClosure: false,
+    placeholder: '\u2060',
+    encodedPlaceholder: '⁠',
+    placeholderRegex: null,
+    decodeNeeded: false,
+    errorCheckAvailable: false,
+    lexiqaAvailable: false,
+    glossaryAvailable: false,
+    style: 'tag-selfclosed tag-word-joiner',
+    showTooltip: false,
+    replaceForLexiqa: true,
+    lexiqaText: ' ',
+  },
 }
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {
