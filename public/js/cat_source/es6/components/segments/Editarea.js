@@ -686,7 +686,6 @@ class Editarea extends React.Component {
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
-      e.preventDefault()
       const {get, reset} = typingWordJoiner
       if (e.key !== 'Alt') {
         const result = get(e.keyCode)
