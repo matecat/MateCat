@@ -1,5 +1,4 @@
 /*
- * TodoStore
  * Segment structure example
  * {
      "last_opened_segment":"61079",
@@ -51,12 +50,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     matecat: {
       ERROR: {
         Categories: [],
+        total: 0,
       },
       WARNING: {
         Categories: [],
+        total: 0,
       },
       INFO: {
         Categories: [],
+        total: 0,
       },
     },
   },
@@ -783,14 +785,45 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
   },
   updateGlobalWarnings: function (warnings) {
+    let totalWarnings = []
     Object.keys(warnings).map((key) => {
+      let totalCategoryWarnings = []
       Object.keys(warnings[key].Categories).map((key2) => {
+        totalCategoryWarnings.push(...warnings[key].Categories[key2])
+        totalWarnings.push(...warnings[key].Categories[key2])
+        warnings[key].total = totalCategoryWarnings.filter(
+          (value, index, self) => {
+            return self.indexOf(value) === index
+          },
+        ).length
         warnings[key].Categories[key2] = warnings[key].Categories[key2].filter(
           this.filterGlobalWarning.bind(this, key2),
         )
       })
     })
     this._globalWarnings.matecat = warnings
+    this._globalWarnings.matecat.total = totalWarnings.filter(
+      (value, index, self) => {
+        return self.indexOf(value) === index
+      },
+    ).length
+    //lexiqa
+    if (this._globalWarnings.lexiqa && this._globalWarnings.lexiqa.length > 0) {
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(
+        this._globalWarnings.lexiqa,
+      )
+      this._globalWarnings.matecat.INFO.total =
+        this._globalWarnings.lexiqa.length
+    }
+  },
+  updateLexiqaWarnings: function (warnings) {
+    this._globalWarnings.lexiqa = warnings.filter(
+      this.filterGlobalWarning.bind(this, 'LXQ'),
+    )
+    if (warnings && warnings.length > 0) {
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings)
+      this._globalWarnings.matecat.INFO.total = warnings.length
+    }
   },
   addSearchResult: function (
     occurrencesList,
@@ -866,11 +899,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   closeSegmentsSplit: function () {
     this._segments = this._segments.map((segment) =>
       segment.set('openSplit', false),
-    )
-  },
-  updateLexiqaWarnings: function (warnings) {
-    this._globalWarnings.lexiqa = warnings.filter(
-      this.filterGlobalWarning.bind(this, 'LXQ'),
     )
   },
   hasSegmentTagProjectionEnabled: function (segment) {
