@@ -193,7 +193,7 @@
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
-        <header metal:use-macro="header.html/main_header"/>
+        <header/>
 
         <div class="main-container">
             <div data-mount="review-side-panel"></div>
