@@ -125,12 +125,10 @@ let CatToolActions = {
         jid: config.job_id,
         password: config.password,
         reviewPassword: config.review_password,
-        pname: 'test', //TODO
         source_code: config.source_rfc,
         target_code: config.target_rfc,
         isReview: config.isReview,
         revisionNumber: config.revisionNumber,
-        stats: UI.projectStats, //TODO
         userLogged: config.isLoggedIn,
         projectName: config.project_name,
         projectCompletionEnabled: config.project_completion_feature_enabled,

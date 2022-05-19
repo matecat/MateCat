@@ -1,9 +1,12 @@
 import React, {useEffect, useState} from 'react'
 import CommonUtils from '../../../utils/commonUtils'
+import CatToolStore from '../../../stores/CatToolStore'
+import CattolConstants from '../../../constants/CatToolConstants'
 
-export const DownloadMenu = ({password, jid, stats, isGDriveProject}) => {
+export const DownloadMenu = ({password, jid, isGDriveProject}) => {
   const [downloadTranslationAvailable, setDownloadTranslationAvailable] =
     useState(false)
+  const [stats, setStats] = useState()
   useEffect(() => {
     if (stats) {
       const t = CommonUtils.getTranslationStatus(stats)
@@ -11,6 +14,14 @@ export const DownloadMenu = ({password, jid, stats, isGDriveProject}) => {
       setDownloadTranslationAvailable(downloadable)
     }
   }, [stats])
+
+  useEffect(() => {
+    const updateStats = (stats) => setStats(stats)
+    CatToolStore.addListener(CattolConstants.SET_PROGRESS, updateStats)
+    return () => {
+      CatToolStore.removeListener(CattolConstants.SET_PROGRESS, updateStats)
+    }
+  }, [])
   return (
     <div
       className="action-submenu ui simple pointing top center floating dropdown"

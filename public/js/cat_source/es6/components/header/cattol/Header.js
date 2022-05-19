@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import SubHeaderContainer from './SubHeaderContainer'
 import SegmentFilter from './segment_filter/segment_filter'
 import CatToolActions from '../../../actions/CatToolActions'
@@ -26,7 +26,6 @@ export const Header = ({
   source_code,
   target_code,
   revisionNumber,
-  stats,
   userLogged,
   projectCompletionEnabled,
   isReview,
@@ -94,7 +93,6 @@ export const Header = ({
           <DownloadMenu
             password={password}
             jid={jid}
-            stats={stats}
             isGDriveProject={isGDriveProject}
           />
 
