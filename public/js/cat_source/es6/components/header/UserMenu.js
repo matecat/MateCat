@@ -1,9 +1,12 @@
-import React, {useRef, useEffect} from 'react'
+import React, {useEffect, useRef} from 'react'
 import IconUserLogout from '../icons/IconUserLogout'
 import {logoutUser} from '../../api/logoutUser'
+import CatToolStore from '../../stores/CatToolStore'
+import CatToolConstants from '../../constants/CatToolConstants'
 
 export const UserMenu = ({user, userLogged}) => {
   const dropdownProfile = useRef()
+  const showPopup = useRef(true)
 
   const openLoginModal = () => {
     APP.openLoginModal()
@@ -28,8 +31,53 @@ export const UserMenu = ({user, userLogged}) => {
   }
 
   useEffect(() => {
+    const initMyProjectsPopup = () => {
+      if (showPopup.current) {
+        const tooltipTex =
+          "<h4 class='header'>Manage your projects</h4>" +
+          "<div class='content'>" +
+          '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in MateCat.</p>' +
+          "<a class='close-popup-teams'>Got it!</a>" +
+          '</div>'
+        $(dropdownProfile.current)
+          .popup({
+            on: 'click',
+            onHidden: () => removePopup(),
+            html: tooltipTex,
+            closable: false,
+            onCreate: () => onCreatePopup(),
+            className: {
+              popup: 'ui popup user-menu-tooltip',
+            },
+          })
+          .popup('show')
+        showPopup.cuurent = false
+      }
+    }
+
+    const removePopup = () => {
+      $(dropdownProfile.current).popup('destroy')
+      CatToolActions.setPopupUserMenuCookie()
+      return true
+    }
+
+    const onCreatePopup = () => {
+      $('.close-popup-teams').on('click', () => {
+        $(dropdownProfile.current).popup('hide')
+      })
+    }
     if ($(dropdownProfile.current).length) {
       $(dropdownProfile.current).dropdown()
+    }
+    CatToolStore.addListener(
+      CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
+      initMyProjectsPopup,
+    )
+    return () => {
+      CatToolStore.removeListener(
+        CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
+        initMyProjectsPopup,
+      )
     }
   }, [])
 

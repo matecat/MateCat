@@ -11,11 +11,11 @@ $.extend(window.UI, {
         '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in MateCat.</p>' +
         "<a class='close-popup-teams'>Next</a>" +
         '</div>'
-      $('header .user-menu-container')
+      $('header #profile-menu')
         .popup({
           on: 'click',
           onHidden: function () {
-            $('header .user-menu-container').popup('destroy')
+            $('header #profile-menu').popup('destroy')
             CatToolActions.setPopupUserMenuCookie()
             return true
           },
@@ -23,7 +23,7 @@ $.extend(window.UI, {
           closable: false,
           onCreate: function () {
             $('.close-popup-teams').on('click', function () {
-              $('header .user-menu-container').popup('hide')
+              $('header #profile-menu').popup('hide')
               self.openPopupThreePoints()
             })
           },

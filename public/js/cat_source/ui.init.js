@@ -103,7 +103,7 @@ $.extend(window.UI, {
     CatToolActions.startNotifications()
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
     // Temporary js for header action menu
-    UI.initHeader()
+    CatToolActions.renderHeader()
     CatToolActions.renderFooter()
   },
   init: function () {

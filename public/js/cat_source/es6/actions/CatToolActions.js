@@ -6,9 +6,6 @@ import _ from 'lodash'
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
 import Notifications from '../sse/sse'
-import {QualityReportButton} from '../components/review/QualityReportButton'
-import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
-import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
@@ -16,6 +13,7 @@ import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import {ModalWindow} from '../components/modals/ModalWindow'
+import {Header} from '../components/header/cattol/Header'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -119,6 +117,32 @@ let CatToolActions = {
 
     config.last_job_segment = data.last_segment
     config.firstSegmentOfFiles = data.files
+  },
+  renderHeader: () => {
+    ReactDOM.render(
+      React.createElement(Header, {
+        pid: config.id_project,
+        jid: config.job_id,
+        password: config.password,
+        reviewPassword: config.review_password,
+        pname: 'test', //TODO
+        source_code: config.source_rfc,
+        target_code: config.target_rfc,
+        isReview: config.isReview,
+        revisionNumber: config.revisionNumber,
+        stats: UI.projectStats, //TODO
+        userLogged: config.isLoggedIn,
+        projectName: config.project_name,
+        projectCompletionEnabled: config.project_completion_feature_enabled,
+        secondRevisionsCount: config.secondRevisionsCount,
+        overallQualityClass: config.overall_quality_class,
+        qualityReportHref: config.quality_report_href,
+        allowLinkToAnalysis: config.allow_link_to_analysis,
+        analysisEnabled: config.analysis_enabled,
+        isGDriveProject: config.isGDriveProject,
+      }),
+      $('header')[0],
+    )
   },
   renderFooter: function () {
     var mountPoint = $('footer.stats-foo')[0]

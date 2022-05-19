@@ -23,7 +23,6 @@ class Header extends React.Component {
     this.updateTeams = this.updateTeams.bind(this)
     this.chooseTeams = this.chooseTeams.bind(this)
     this.updateUser = this.updateUser.bind(this)
-    this.showPopup = true
   }
 
   componentDidMount = () => {
@@ -32,14 +31,9 @@ class Header extends React.Component {
     TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
     TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
     TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser)
-    // CatToolStore.addListener(
-    //   CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
-    //   this.initMyProjectsPopup,
-    // )
     if (this.props.isQualityReport) {
       QRStore.addListener(QRConstants.RENDER_REPORT, this.storeJobUrls)
     }
-    // this.initProfileDropdown()
   }
 
   componentWillUnmount = () => {
@@ -48,10 +42,6 @@ class Header extends React.Component {
     TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
     TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
     TeamsStore.removeListener(TeamConstants.UPDATE_USER, this.updateUser)
-    // CatToolStore.removeListener(
-    //   CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
-    //   this.initMyProjectsPopup,
-    // )
     if (this.props.isQualityReport) {
       QRStore.removeListener(QRConstants.RENDER_REPORT, this.storeJobUrls)
     }
@@ -93,44 +83,7 @@ class Header extends React.Component {
       user: user,
       loggedUser: true,
     })
-    // setTimeout(this.initProfileDropdown)
   }
-
-  // initMyProjectsPopup = () => {
-  //   if (this.showPopup) {
-  //     var tooltipTex =
-  //       "<h4 class='header'>Manage your projects</h4>" +
-  //       "<div class='content'>" +
-  //       '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in MateCat.</p>' +
-  //       "<a class='close-popup-teams'>Got it!</a>" +
-  //       '</div>'
-  //     $(this.dropdownProfile)
-  //       .popup({
-  //         on: 'click',
-  //         onHidden: () => this.removePopup(),
-  //         html: tooltipTex,
-  //         closable: false,
-  //         onCreate: () => this.onCreatePopup(),
-  //         className: {
-  //           popup: 'ui popup user-menu-tooltip',
-  //         },
-  //       })
-  //       .popup('show')
-  //     this.showPopup = false
-  //   }
-  // }
-
-  // removePopup = () => {
-  //   $(this.dropdownProfile).popup('destroy')
-  //   CatToolActions.setPopupUserMenuCookie()
-  //   return true
-  // }
-  //
-  // onCreatePopup = () => {
-  //   $('.close-popup-teams').on('click', () => {
-  //     $(this.dropdownProfile).popup('hide')
-  //   })
-  // }
 
   getHeaderComponentToShow = () => {
     if (this.props.showFilterProjects) {
