@@ -14,7 +14,6 @@ import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import ModalsActions from './ModalsActions'
 import {Header} from '../components/header/cattol/Header'
-
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
@@ -119,7 +118,8 @@ let CatToolActions = {
     config.firstSegmentOfFiles = data.files
   },
   renderHeader: () => {
-    ReactDOM.render(
+    const mountPoint = createRoot($('header')[0])
+    mountPoint.render(
       React.createElement(Header, {
         pid: config.id_project,
         jid: config.job_id,
@@ -141,7 +141,6 @@ let CatToolActions = {
         analysisEnabled: config.analysis_enabled,
         isGDriveProject: config.isGDriveProject,
       }),
-      $('header')[0],
     )
   },
   renderFooter: function () {

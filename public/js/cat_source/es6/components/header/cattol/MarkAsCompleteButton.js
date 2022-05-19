@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState} from 'react'
-import {ModalWindow} from '../../modals/ModalWindow'
 import ConfirmMessageModal from '../../modals/ConfirmMessageModal'
 import {setChunkComplete} from '../../../api/setChunkComplete'
 import AlertModal from '../../modals/AlertModal'
@@ -8,6 +7,7 @@ import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {deleteCompletionEvents} from '../../../api/deleteCompletionEvents'
+import ModalsActions from '../../../actions/ModalsActions'
 export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
   const button = useRef()
   const [markedAsComplete, setMarkedAsComplete] = useState(
@@ -31,7 +31,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
     'Are you sure you want to mark the job as complete?'
 
   const showFixWarningsModal = () => {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       {
         text:
@@ -46,7 +46,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
   }
 
   const clickMarkAsCompleteModal = () => {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       {
         text: isReview ? reviewMessage : translateMessage,
@@ -109,7 +109,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
         location.reload()
       })
       .catch(() => {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text:

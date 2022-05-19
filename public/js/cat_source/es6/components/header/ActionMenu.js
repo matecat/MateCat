@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 
 import Icon3Dots from '../icons/Icon3Dots'
 import {exportQualityReport} from '../../api/exportQualityReport'
 import CatToolActions from '../../actions/CatToolActions'
-import {ModalWindow} from '../modals/ModalWindow'
 import ShortCutsModal from '../modals/ShortCutsModal'
+import ModalsActions from '../../actions/ModalsActions'
 
 export const ActionMenu = ({
   jobUrls,
@@ -34,7 +34,7 @@ export const ActionMenu = ({
   const openShortcutsModal = (event) => {
     event.preventDefault()
     event.stopPropagation()
-    ModalWindow.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
+    ModalsActions.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
   }
 
   const getQualityReportMenu = () => {
