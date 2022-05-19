@@ -123,6 +123,24 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
       })
       $('.add-mt-engine').click(function () {
         if ($(this).hasClass('disabled')) {
+          var props = {
+            modalName: 'mmt-message-modal-not-logged-in',
+            text: 'If you want to add an MT engine for use in your projects, please login first.',
+            successText: 'Login',
+            successCallback: function () {
+              ModalWindow.onCloseModal()
+              $('#modal').trigger('openlogin')
+            },
+            warningText: 'Cancel',
+            warningCallback: function () {
+              ModalWindow.onCloseModal()
+            },
+          }
+          ModalWindow.showModalComponent(
+            ConfirmMessageModal,
+            props,
+            'Add MT Engine',
+          )
           return false
         }
         $(this).hide()
