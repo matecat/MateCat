@@ -33,6 +33,7 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
           id: idSourceTag,
           name: nameSourceTag,
           decodedText: decodedTextSourceTag,
+          index,
         },
       } = sourceEl
       const idxToRemove = arr2Copy.findIndex((targetEl) => {
@@ -43,7 +44,7 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
             decodedText: decodedTextTargetTag,
           },
         } = targetEl
-        return nameTargetTag === 'ph'
+        return nameTargetTag === 'ph' && index === undefined
           ? decodedTextSourceTag === decodedTextTargetTag &&
               nameSourceTag === nameTargetTag
           : idTargetTag === idSourceTag && nameSourceTag === nameTargetTag
