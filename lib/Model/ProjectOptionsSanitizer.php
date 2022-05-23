@@ -14,6 +14,7 @@ class ProjectOptionsSanitizer {
             'af-ZA',
             'sq-AL',
             'ar-SA',
+            'asm-IN',
             'fr-BE',
             'bn-IN',
             'bs-BA',
@@ -41,6 +42,7 @@ class ProjectOptionsSanitizer {
             'fr-CA',
             'fr-CH',
             'de-DE',
+            'ka-GE',
             'el-GR',
             'gu-IN',
             'hi-IN',
@@ -48,6 +50,7 @@ class ProjectOptionsSanitizer {
             'id-ID',
             'it-IT',
             'ja-JP',
+            'jv-ID',
             'ha-NG',
             'he-IL',
             'ko-KR',
@@ -65,6 +68,7 @@ class ProjectOptionsSanitizer {
             'ru-RU',
             'sr-Latn-RS',
             'sr-Cyrl-RS',
+            'si-LK',
             'sk-SK',
             'sl-SI',
             'es-ES',
@@ -82,6 +86,7 @@ class ProjectOptionsSanitizer {
             'tr-TR',
             'uk-UA',
             'ur-PK',
+            'uz-UZ',
             'vi-VN'
 
     ];
