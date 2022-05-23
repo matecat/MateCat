@@ -16,10 +16,19 @@
     <br/>
     <img src="/public/img/jobcancelled.png"/>
     <br/>
-    <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br/>
-        If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.
-    </p>
+
+    <tal:block tal:condition="php: isset(owner) and owner == owner_email">
+        <p>If you need to access it, go to your "My projects" page to reactivate it.</p>
+    </tal:block>
+
+    <tal:block tal:condition="php: !isset(owner) or owner !== owner_email">
+        <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br/>
+            If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.
+        </p>
+    </tal:block>
+
 </div>
 <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>
 </html>
+
