@@ -131,7 +131,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
             "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +
               'If the option is enabled, ModernMT is used during the analysis phase.' +
               '<br/> This makes downloading drafts from the translation interface quicker, ' +
-              '<br/>but may lead to additional charges plans other than the "Professional" one.' +
+              '<br/>but may lead to additional charges for plans other than the "Professional" one.' +
               '<br>If the option is not enabled, ModernMT is only used to provide adaptive ' +
               '<br/>suggestions when opening segments.</div>',
           )
