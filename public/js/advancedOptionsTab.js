@@ -4,6 +4,7 @@ import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 import Speech2Text from './cat_source/es6/utils/speech2text'
 import {ModalWindow} from './cat_source/es6/components/modals/ModalWindow'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import SegmentActions from './cat_source/es6/actions/SegmentActions'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -131,6 +132,11 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
           ModalsActions.openDQFModal()
         })
       }
+
+      // Check character counter
+      const charscounterCheck = document.getElementById('charscounter_check')
+      charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
+      charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
     },
 
     toggleLexiqaOption: function () {
