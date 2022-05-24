@@ -35,6 +35,7 @@ export const Header = ({
   allowLinkToAnalysis,
   analysisEnabled,
   isGDriveProject,
+  showReviseLink,
 }) => {
   const [user, setUser] = useState()
 
@@ -133,6 +134,7 @@ export const Header = ({
             reviewPassword={reviewPassword}
             allowLinkToAnalysis={allowLinkToAnalysis}
             analysisEnabled={analysisEnabled}
+            showReviseLink={showReviseLink}
           />
         </div>
 

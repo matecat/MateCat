@@ -17,11 +17,11 @@ export const SegmentsQAButton = () => {
       setTotalIssues(warnings.matecat.total)
       setWarnings(warnings)
       const iconClass =
-        warnings.matecat.ERROR || warnings.matecat.ERROR.total > 0
+        warnings.matecat.ERROR.total && warnings.matecat.ERROR.total > 0
           ? ''
-          : warnings.matecat.WARNING && warnings.matecat.WARNING.total > 0
+          : warnings.matecat.WARNING.total && warnings.matecat.WARNING.total > 0
           ? 'numberwarning'
-          : warnings.matecat.INFO && warnings.matecat.INFO.total > 0
+          : warnings.matecat.INFO.total && warnings.matecat.INFO.total > 0
           ? 'numberinfo'
           : ''
       setNumberClass(iconClass)

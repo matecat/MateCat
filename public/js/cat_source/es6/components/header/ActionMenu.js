@@ -20,6 +20,7 @@ export const ActionMenu = ({
   allowLinkToAnalysis,
   analysisEnabled,
   pid,
+  showReviseLink = true,
 }) => {
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const dropdownThreeDots = useRef()
@@ -62,7 +63,7 @@ export const ActionMenu = ({
   const getCattoolMenu = () => {
     return (
       <ul className="menu">
-        {!isReview && (
+        {!isReview && showReviseLink && (
           <li className="item" title="Revise" data-value="revise">
             <a
               href={`/revise/${projectName}/${source_code}-${target_code}/${jid}-${reviewPassword}`}

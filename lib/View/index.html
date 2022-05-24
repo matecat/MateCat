@@ -43,6 +43,7 @@
                 id_project: '${pid}',
                 allow_link_to_analysis: '${allow_link_to_analysis}',
                 analysis_enabled: '${analysis_enabled}',
+                footer_show_revise_link: ${footer_show_revise_link || string: false},
                 get job_id() {
                   console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
@@ -109,17 +110,16 @@
                 ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
                 revisionNumber : ${revisionNumber | string:null},
                 secondRevisionsCount : ${ secondRevisionsCount | string: 0},
-                project_name: '${pname | string: 0}'
+                project_name: '${pname | string: 0}',
+                review_password: '${review_password}'
             };
 
             var renderStart = new Date();
             /*]]>*/
         </script>
 
-        <script tal:condition="true:isReview" type="text/javascript">
-            config.review_password = '${review_password}';
 
-        </script>
+
 
         <script tal:condition="true:review_extended" type="text/javascript">
 

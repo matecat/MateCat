@@ -138,6 +138,7 @@ let CatToolActions = {
         allowLinkToAnalysis: config.allow_link_to_analysis,
         analysisEnabled: config.analysis_enabled,
         isGDriveProject: config.isGDriveProject,
+        showReviseLink: config.footer_show_revise_link,
       }),
     )
   },

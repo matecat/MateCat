@@ -94,8 +94,8 @@ class QAComponent extends React.Component {
   }
 
   receiveGlobalWarnings(warnings) {
-    const category = warnings[this.state.currentPriority]
-      ? warnings[this.state.currentPriority].Categories[
+    const category = warnings.matecat[this.state.currentPriority]
+      ? warnings.matecat[this.state.currentPriority].Categories[
           this.state.currentCategory
         ]
       : null
