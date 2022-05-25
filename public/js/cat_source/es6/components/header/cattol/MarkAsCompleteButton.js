@@ -150,12 +150,11 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
          * Review step
          *
          * In this case the job is markable as complete when 'DRAFT' count is 0
-         * and 'TRANSLATED' is < 0 and 'APPROVED' + 'REJECTED' > 0.
+         *  and 'APPROVED' + 'REJECTED' > 0.
          */
         return (
           jobCompletionCurrentPhase.current == 'revise' &&
-          stats.DRAFT <= 0 &&
-          stats.APPROVED + stats.REJECTED > 0
+          stats.APPROVED + stats.REJECTED + stats.TRANSLATED > 0
         )
       } else {
         /**
@@ -167,7 +166,6 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
          */
         return (
           jobCompletionCurrentPhase.current == 'translate' &&
-          parseInt(stats.DRAFT) == 0 &&
           parseInt(stats.REJECTED) == 0
         )
       }
