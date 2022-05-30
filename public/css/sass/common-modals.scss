@@ -889,7 +889,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   display: block;
   width: 200%;
   margin-left: -100%;
-  transition: margin 0.3s ease-in 0s;
+  transition: margin 0.2s ease-out 0s;
 }
 
 .onoffswitch-inner:before,
@@ -905,6 +905,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: white;
   font-weight: bold;
   box-sizing: border-box;
+  border-radius: 16px;
 }
 
 .onoffswitch-inner:before {
@@ -912,6 +913,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding-left: 10px;
   background-color: $linkBlue;
   color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.3s ease-in 0s;
 }
 
 .onoffswitch-inner:after {
@@ -933,7 +936,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   right: 25px;
   border: 2px solid #ccc;
   border-radius: 20px;
-  transition: all 0.3s ease-in 0s;
+  transition: all 0.2s ease-out 0s;
 }
 
 .onoffswitch-label-status-active {
@@ -998,6 +1001,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
   margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner:before {
+  opacity: 1;
 }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {

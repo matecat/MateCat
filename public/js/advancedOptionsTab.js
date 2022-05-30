@@ -153,5 +153,7 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
     checkDqfIsActive: function () {
       return config.dqf_active_on_project
     },
+    setTagProjectionChecked: (value) =>
+      ($('.tagp #tagp_check')[0].checked = value),
   })
 })(jQuery, UI)
