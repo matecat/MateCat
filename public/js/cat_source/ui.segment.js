@@ -200,7 +200,15 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
     },
     //Overridden by  plugin
     isReadonlySegment: function (segment) {
-      return segment.readonly == 'true' || UI.body.hasClass('archived')
+      const projectCompletionCheck =
+        config.project_completion_feature_enabled &&
+        !config.isReview &&
+        config.job_completion_current_phase == 'revise'
+      return (
+        projectCompletionCheck ||
+        segment.readonly == 'true' ||
+        UI.body.hasClass('archived')
+      )
     },
     //Overridden by  plugin
     getStatusForAutoSave: function (segment) {

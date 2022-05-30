@@ -43,6 +43,7 @@
                 id_project: '${pid}',
                 allow_link_to_analysis: '${allow_link_to_analysis}',
                 analysis_enabled: '${analysis_enabled}',
+                footer_show_revise_link: ${footer_show_revise_link || string: false},
                 get job_id() {
                   console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
@@ -73,6 +74,7 @@
                 splitSegmentEnabled: ${splitSegmentEnabled},
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
+                mark_as_complete_button_enabled : ${mark_as_complete_button_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
                 isGDriveProject : ${isGDriveProject|string:false},
@@ -107,17 +109,17 @@
                 enableMultiDomainApi: ${enableMultiDomainApi | string:false},
                 ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
                 revisionNumber : ${revisionNumber | string:null},
-                secondRevisionsCount : ${ secondRevisionsCount | string: 0}
+                secondRevisionsCount : ${ secondRevisionsCount | string: 0},
+                project_name: '${pname | string: 0}',
+                review_password: '${review_password}'
             };
 
             var renderStart = new Date();
             /*]]>*/
         </script>
 
-        <script tal:condition="true:isReview" type="text/javascript">
-            config.review_password = '${review_password}';
 
-        </script>
+
 
         <script tal:condition="true:review_extended" type="text/javascript">
 
@@ -191,7 +193,7 @@
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
-        <header metal:use-macro="header.html/main_header"/>
+        <header/>
 
         <div class="main-container">
             <div data-mount="review-side-panel"></div>

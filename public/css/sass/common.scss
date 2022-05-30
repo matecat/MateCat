@@ -578,38 +578,6 @@ footer #statistics {
   line-height: 27px;
 }
 
-.topMenu.open {
-  max-height: 64%;
-  overflow-y: scroll;
-  top: 48px !important;
-  display: block;
-  box-shadow: 0 0 4px #cecccc;
-}
-
-.topMenu ul.gotocurrentsegment {
-  position: fixed;
-  width: 400px;
-}
-
-.topMenu ul.jobmenu-list {
-  margin-top: 45px;
-}
-
-/*scrollbar*/
-
-.topMenu ::-webkit-scrollbar {
-  width: 16px;
-}
-
-.topMenu ::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-.topMenu ::-webkit-scrollbar-thumb {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-}
-
-/*end-scrollbar*/
 /* mgmt panel  */
 
 .mgmt-panel-tm .tablestats,
@@ -723,10 +691,6 @@ footer #statistics {
   background-size: 24px;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
-}
-
-.currSegment a {
-  background: #efefef;
 }
 
 .topMenu ul li.current a {
@@ -3546,25 +3510,6 @@ section.currSearchSegment mark.searchMarker {
 
 /* Google Sheet */
 
-#jobMenu span {
-  height: 30px;
-  padding: 5px;
-  margin: 0 8px 0 0;
-  width: 30px;
-  float: left;
-  background-size: 25px !important;
-}
-.currSegment span {
-  position: absolute;
-  top: 4px;
-  color: #757472;
-  visibility: hidden;
-  left: 200px;
-}
-.currSegment:hover span {
-  visibility: visible;
-}
-
 @media (max-height: 500px) {
   .register-modal {
     overflow-x: hidden;
@@ -3845,7 +3790,7 @@ p.tm-warning-message {
 /*
 /* mbc extend iconmoon set with icons for matecat chat
 */
-
+icon-iconmoon:before,
 .tagLockCustomize,
 #logoutlink:before,
 .btn-confirm-small .text:before,
@@ -4087,14 +4032,6 @@ header .filter:before {
 
 #swaplang:after {
   content: '\f0ec';
-}
-
-.review .breadcrumbs #pname:before,
-.cattool .breadcrumbs #pname:before {
-  content: '\f0dd';
-  font-size: 18px;
-  display: inline-block;
-  margin-right: 10px;
 }
 
 .more:before,
