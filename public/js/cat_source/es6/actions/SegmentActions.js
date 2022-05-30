@@ -1202,10 +1202,16 @@ const SegmentActions = {
       isTarget,
     })
   },
-  setSegmentCharacterLimit: (sid, limit) => {
+  toggleCharacterCounter: () => {
     AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+    })
+  },
+  characterCounter: ({sid, counter, limit}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHARACTER_COUNTER,
       sid,
+      counter,
       limit,
     })
   },

@@ -1767,19 +1767,19 @@ AppDispatcher.register(function (action) {
         action.isTarget,
       )
       break
-    case SegmentConstants.SET_SEGMENT_CHAR_LIMIT:
-      SegmentStore.emitChange(
-        SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
-        action.sid,
-        action.limit,
-      )
-      break
     case SegmentConstants.SET_SEGMENT_SAVING:
       SegmentStore.setSegmentSaving(action.sid, action.saving)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
       )
+      break
+    case SegmentConstants.CHARACTER_COUNTER:
+      SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
+        sid: action.sid,
+        counter: action.counter,
+        limit: action.limit,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

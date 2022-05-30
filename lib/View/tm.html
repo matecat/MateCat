@@ -519,6 +519,27 @@
                                 </div>
                             </div>
 
+                            <tal:block tal:condition="php: page == 'cattool'">
+                                <div class="options-box tagp">
+                                    <h3>Character counter</h3>
+                                    <p>                                        
+                                        Enabling this option makes a counter appear that counts the number of characters in the target section of each segment.
+                                    </p>
+                                    <div class="onoffswitch-container">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="charscounter_check" checked="checked" />
+                                            <label class="onoffswitch-label" for="charscounter_check">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                                <span class="onoffswitch-label-status-active">Active</span>
+                                                <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                                <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tal:block>
+
                             <div class="options-box multi-match">
                                 <h3>Cross-language Matches</h3>
                                 <p>Get translation suggestions in other target languages you know as reference.</p>
