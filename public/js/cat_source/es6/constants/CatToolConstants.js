@@ -11,6 +11,7 @@ module.exports = keyMirror({
   STORE_FILES_INFO: null,
   SET_PROGRESS: null,
   UPDATE_QR: null,
+  RELOAD_QR: null,
   STORE_SEARCH_RESULT: null,
   CLIENT_CONNECT: null,
   ADD_NOTIFICATION: null,

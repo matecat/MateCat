@@ -349,18 +349,9 @@ $.extend(window.UI, {
           SegmentActions.gotoNextUntranslatedSegment()
         }
       })
-    $('#point2seg').bind('mousedown', function (e) {
-      e.preventDefault()
-      CatToolActions.toggleQaIssues()
-    })
+
     $('#navSwitcher').on('click', function (e) {
       e.preventDefault()
-    })
-
-    $('.file-list').on('click', function (e) {
-      UI.closeAllMenus(e)
-      e.preventDefault()
-      UI.toggleFileMenu()
     })
     $('#jobNav .currseg').on('click', function (e) {
       e.preventDefault()

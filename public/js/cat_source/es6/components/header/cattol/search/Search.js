@@ -27,6 +27,7 @@ class Search extends React.Component {
         selectStatus: 'all',
         searchTarget: '',
         searchSource: '',
+        previousIsTagProjectionEnabled: false,
       },
       focus: true,
       funcFindButton: true, // true=find / false=next
@@ -67,7 +68,15 @@ class Search extends React.Component {
     }
     this.setState({
       funcFindButton: false,
+      ...(config.tag_projection_enabled === 1 && {
+        previousIsTagProjectionEnabled: true,
+      }),
     })
+    // disable tag projection
+    if (config.tag_projection_enabled === 1) {
+      UI.disableTagProjectionInJob()
+      UI.setTagProjectionChecked(false)
+    }
   }
 
   setResults(data) {
@@ -359,6 +368,21 @@ class Search extends React.Component {
         })
       }
       this.dropdownInit = false
+    }
+
+    // reset tag projection
+    if (!this.props.active && prevProps.active) {
+      this.setState({
+        previousIsTagProjectionEnabled: false,
+      })
+    }
+    if (
+      !this.props.active &&
+      this.props.active !== prevProps.active &&
+      this.state.previousIsTagProjectionEnabled
+    ) {
+      UI.enableTagProjectionInJob()
+      UI.setTagProjectionChecked(true)
     }
   }
   getResultsHtml() {

@@ -1,6 +1,4 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
-import moment from 'moment'
 
 import CommonUtils from '../es6/utils/commonUtils'
 import SegmentActions from '../es6/actions/SegmentActions'
@@ -9,6 +7,7 @@ import {getSegmentVersionsIssues} from '../es6/api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssue} from '../es6/api/sendSegmentVersionIssue'
 import {sendSegmentVersionIssueComment} from '../es6/api/sendSegmentVersionIssueComment'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../es6/api/deleteSegmentIssue'
+import CatToolActions from '../es6/actions/CatToolActions'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
@@ -20,7 +19,7 @@ if (ReviewExtended.enabled()) {
       })
       promise.then(() => {
         UI.getSegmentVersionsIssues(sid, fid)
-        UI.reloadQualityReport()
+        CatToolActions.reloadQualityReport()
       })
 
       return promise
@@ -74,7 +73,7 @@ if (ReviewExtended.enabled()) {
         idIssue,
       }).then(() => {
         UI.deleteSegmentIssues(fid, idSegment, idIssue)
-        UI.reloadQualityReport()
+        CatToolActions.reloadQualityReport()
       })
     },
     /**

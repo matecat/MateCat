@@ -460,8 +460,6 @@ MBC.init = function () {
           openSegmentComment(lastAsked.segmentId)
         }
       })
-      //New icon inserted in the header -> resize file name
-      APP.fitText($('#pname-container'), $('#pname'), 25)
     })
 
     $(document).on('click', '.mbc-show-comment-btn', function (e) {

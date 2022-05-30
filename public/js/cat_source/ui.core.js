@@ -23,52 +23,6 @@ import NotificationBox from './es6/components/notificationsComponent/Notificatio
 import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
-  /**
-   * Open file menu in Header
-   * @returns {boolean}
-   */
-  toggleFileMenu: function () {
-    var jobMenu = $('#jobMenu')
-    if (jobMenu.is(':animated')) {
-      return false
-    } else {
-      var segment = SegmentStore.getCurrentSegment()
-      var currSegment = jobMenu.find('.currSegment')
-      if (segment) {
-        currSegment.removeClass('disabled')
-      } else {
-        currSegment.addClass('disabled')
-      }
-      var menuHeight = jobMenu.height()
-      if (LXQ.enabled()) {
-        var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible')
-        var lxqBoxHeight = lexiqaBoxIsOpen
-          ? $('#lexiqa-popup').outerHeight() + 8
-          : 0
-        jobMenu.css('top', lxqBoxHeight + 43 - menuHeight + 'px')
-      } else {
-        jobMenu.css('top', 43 - menuHeight + 'px')
-      }
-
-      if (jobMenu.hasClass('open')) {
-        jobMenu
-          .animate({top: '-=' + menuHeight + 'px'}, 500)
-          .removeClass('open')
-      } else {
-        jobMenu
-          .animate({top: '+=' + menuHeight + 'px'}, 300, function () {
-            $('body').on('click', function () {
-              if (jobMenu.hasClass('open')) {
-                UI.toggleFileMenu()
-              }
-            })
-          })
-          .addClass('open')
-      }
-      return true
-    }
-  },
-
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 
@@ -492,7 +446,7 @@ window.UI = {
     tte.data('raw-time-to-edit', this.totalTime)
   },
   goToFirstError: function () {
-    $('#point2seg').trigger('mousedown')
+    CatToolActions.toggleQaIssues()
     setTimeout(function () {
       $('.qa-issues-container ').first().click()
     }, 300)
@@ -1201,6 +1155,31 @@ window.UI = {
 
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      let message =
+        'All segments are in <b>read-only mode</b> because this job is under review.'
+
+      if (config.chunk_completion_undoable && config.last_completion_event_id) {
+        message =
+          message +
+          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
+      }
+
+      CatToolActions.addNotification({
+        uid: 'translate-warning',
+        autoDismiss: false,
+        dismissable: true,
+        position: 'tc',
+        text: message,
+        title: 'Warning',
+        type: 'warning',
+        allowHtml: true,
+      })
+    }
     if (TextUtils.justSelecting('readonly')) return
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
@@ -1226,8 +1205,15 @@ window.UI = {
     })
   },
   messageForClickOnReadonly: function () {
-    var msgArchived = 'Job has been archived and cannot be edited.'
-    var msgOther = 'This part has not been assigned to you.'
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      return 'This job is currently under review. Segments are in read-only mode.'
+    }
+    const msgArchived = 'Job has been archived and cannot be edited.'
+    const msgOther = 'This part has not been assigned to you.'
     return UI.body.hasClass('archived') ? msgArchived : msgOther
   },
   messageForClickOnIceMatch: function () {
@@ -1259,11 +1245,6 @@ window.UI = {
 
 $(document).ready(function () {
   UI.start()
-})
-
-$(window).resize(function () {
-  // UI.fixHeaderHeightChange();
-  APP.fitText($('#pname-container'), $('#pname'), 25)
 })
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -38,6 +38,13 @@ const SegmentActions = {
       idToOpen: idToOpen,
     })
   },
+  reloadSegments: function (sidToOpen) {
+    UI.unmountSegments()
+    UI.render({
+      firstLoad: false,
+      segmentToOpen: sidToOpen,
+    })
+  },
   splitSegments: function (oldSid, newSegments, splitGroup, fid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SPLIT_SEGMENT,
@@ -140,7 +147,6 @@ const SegmentActions = {
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
       })
-      UI.updateJobMenu(segment)
     } else {
       UI.unmountSegments()
       UI.render({
@@ -1202,10 +1208,16 @@ const SegmentActions = {
       isTarget,
     })
   },
-  setSegmentCharacterLimit: (sid, limit) => {
+  toggleCharacterCounter: () => {
     AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+    })
+  },
+  characterCounter: ({sid, counter, limit}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHARACTER_COUNTER,
       sid,
+      counter,
       limit,
     })
   },

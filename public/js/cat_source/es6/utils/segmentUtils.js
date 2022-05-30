@@ -63,6 +63,32 @@ const SegmentUtils = {
   isUnlockedSegment: function (segment) {
     return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
   },
+
+  /**
+   * Characters counter local storage
+   */
+  isCharacterCounterEnable: () =>
+    !!JSON.parse(window.localStorage.getItem('characterCounter'))?.find(
+      (item) => Object.keys(item)[0] === config.id_job,
+    ),
+  setCharacterCounterOptionValue: (isActive) => {
+    const MAX_ITEMS = 2000
+
+    const cachedItems =
+      JSON.parse(window.localStorage.getItem('characterCounter')) ?? []
+    if (cachedItems.length > MAX_ITEMS) cachedItems.shift()
+    const prevValue = cachedItems.filter(
+      (item) => Object.keys(item)[0] !== config.id_job,
+    )
+
+    window.localStorage.setItem(
+      'characterCounter',
+      JSON.stringify([
+        ...prevValue,
+        ...(isActive ? [{[config.id_job]: true}] : []),
+      ]),
+    )
+  },
 }
 
 export default SegmentUtils

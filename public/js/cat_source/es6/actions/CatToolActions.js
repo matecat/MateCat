@@ -6,9 +6,6 @@ import _ from 'lodash'
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
 import Notifications from '../sse/sse'
-import {QualityReportButton} from '../components/review/QualityReportButton'
-import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer'
-import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
@@ -16,7 +13,7 @@ import CatToolStore from '../stores/CatToolStore'
 import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import ModalsActions from './ModalsActions'
-
+import {Header} from '../components/header/cattol/Header'
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
@@ -96,27 +93,6 @@ let CatToolActions = {
       clientId,
     })
   },
-  renderQualityReportButton() {
-    var revision_number = config.revisionNumber ? config.revisionNumber : '1'
-    var qrParam = config.secondRevisionsCount
-      ? '?revision_type=' + revision_number
-      : ''
-    const mountPoint = createRoot($('#quality-report-button')[0])
-    mountPoint.render(
-      React.createElement(QualityReportButton, {
-        vote: config.overall_quality_class,
-        quality_report_href: config.quality_report_href + qrParam,
-      }),
-    )
-  },
-  renderSubHeader() {
-    const mountPoint = createRoot($('#header-bars-wrapper')[0])
-    mountPoint.render(
-      React.createElement(SubHeaderContainer, {
-        filtersEnabled: SegmentFilter.enabled(),
-      }),
-    )
-  },
 
   showHeaderTooltip: function () {
     var closedPopup = localStorage.getItem(this.popupInfoUserMenu())
@@ -140,6 +116,31 @@ let CatToolActions = {
 
     config.last_job_segment = data.last_segment
     config.firstSegmentOfFiles = data.files
+  },
+  renderHeader: () => {
+    const mountPoint = createRoot($('header')[0])
+    mountPoint.render(
+      React.createElement(Header, {
+        pid: config.id_project,
+        jid: config.job_id,
+        password: config.password,
+        reviewPassword: config.review_password,
+        source_code: config.source_rfc,
+        target_code: config.target_rfc,
+        isReview: config.isReview,
+        revisionNumber: config.revisionNumber,
+        userLogged: config.isLoggedIn,
+        projectName: config.project_name,
+        projectCompletionEnabled: config.project_completion_feature_enabled,
+        secondRevisionsCount: config.secondRevisionsCount,
+        overallQualityClass: config.overall_quality_class,
+        qualityReportHref: config.quality_report_href,
+        allowLinkToAnalysis: config.allow_link_to_analysis,
+        analysisEnabled: config.analysis_enabled,
+        isGDriveProject: config.isGDriveProject,
+        showReviseLink: config.footer_show_revise_link,
+      }),
+    )
   },
   renderFooter: function () {
     var mountPoint = createRoot($('footer.stats-foo')[0])
@@ -225,21 +226,16 @@ let CatToolActions = {
       text,
     )
   },
-  updateQualityReport: function (qr) {
-    var revNumber = config.revisionNumber ? config.revisionNumber : 1
-    var review = qr.chunk.reviews.find(function (value) {
-      return value.revision_number === revNumber
+  reloadQualityReport: function () {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.RELOAD_QR,
     })
-
-    if (review) {
-      AppDispatcher.dispatch({
-        actionType: CattolConstants.UPDATE_QR,
-        qr: qr,
-        is_pass: review.is_pass,
-        score: review.score,
-        feedback: review.feedback,
-      })
-    }
+  },
+  updateQualityReport: function (qr) {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.UPDATE_QR,
+      qr: qr,
+    })
   },
 
   /**
