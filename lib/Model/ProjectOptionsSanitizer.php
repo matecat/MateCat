@@ -14,7 +14,7 @@ class ProjectOptionsSanitizer {
             'af-ZA',
             'sq-AL',
             'ar-SA',
-            'asm-IN',
+            'as-IN',
             'fr-BE',
             'bn-IN',
             'bs-BA',
