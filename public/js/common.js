@@ -20,7 +20,7 @@ window.APP = {
       })
     }
     this.isCattool = $('body').hasClass('cattool')
-    this.checkGlobalMassages()
+    setTimeout(() => this.checkGlobalMassages(), 1000)
   },
 
   fitText: function (

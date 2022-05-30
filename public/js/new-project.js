@@ -14,6 +14,7 @@ import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 import {createProject} from './cat_source/es6/api/createProject'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -1039,4 +1040,8 @@ APP.postProjectCreation = function (d) {
 
 $(document).ready(function () {
   UI.UPLOAD_PAGE.init()
+  //TODO: REMOVE
+  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
+  const root = createRoot(mountPoint)
+  root.render(<NotificationBox />)
 })
