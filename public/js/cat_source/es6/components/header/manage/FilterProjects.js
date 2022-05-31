@@ -24,6 +24,7 @@ class FilterProjects extends React.Component {
   componentDidUpdate() {
     let self = this
     if (this.props.selectedTeam) {
+      2297
       if (this.teamChanged) {
         if (
           !this.dropDownUsersInitialized &&
@@ -113,11 +114,7 @@ class FilterProjects extends React.Component {
 
   filterByStatus(status) {
     this.setState({currentStatus: status})
-    ManageActions.filterProjects(
-      this.selectedUser,
-      this.currentText,
-      this.state.currentStatus,
-    )
+    ManageActions.filterProjects(this.selectedUser, this.currentText, status)
   }
 
   getUserFilter() {

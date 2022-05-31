@@ -249,9 +249,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     private function validateComment( $obj ) {
-        if ( empty( $obj->message ) && $obj->message_type == self::TYPE_COMMENT ) {
+
+        if ( ( $obj->message === null or $obj->message === '' )  and $obj->message_type == self::TYPE_COMMENT ) {
             throw new Exception( "Comment message can't be blank." );
         }
+
         if ( empty( $obj->full_name ) ) {
             throw new Exception( "Full name can't be blank." );
         }

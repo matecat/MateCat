@@ -14,6 +14,7 @@
 @import 'components/header/segmentsFilter';
 @import 'revise';
 //components
+@import 'commons/nav-bar';
 @import 'components/segment/segment';
 @import 'components/segment/segmentFooter';
 @import 'components/segment/issuesContainer';
@@ -27,6 +28,8 @@
 @import 'components/header/qaComponent';
 @import 'components/header/header';
 @import 'components/SegmentsContainer.scss';
+@import 'components/header/FilesMenu';
+@import 'components/common/FilenameLabel';
 
 @import 'cattool';
 

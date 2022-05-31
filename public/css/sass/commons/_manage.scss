@@ -65,8 +65,10 @@ body.manage {
 .project-list {
   padding-top: 100px;
   padding-bottom: 160px;
-  .ui.inverted.dimmer {
-    background-color: $grey5;
+  .container {
+    .ui.inverted.dimmer.more {
+      background-color: $grey5;
+    }
   }
 
   .project {

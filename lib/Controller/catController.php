@@ -302,9 +302,11 @@ class catController extends viewController {
             $this->template->support_mail        = INIT::$SUPPORT_MAIL;
             $this->template->owner_email         = INIT::$SUPPORT_MAIL;
 
+            if($this->user){
+                $this->template->owner = $this->user->getEmail();
+            }
+
             $team = $this->project->getTeam();
-
-
 
             if( !empty( $team ) ){
 
@@ -453,21 +455,21 @@ class catController extends viewController {
         $this->decorator->decorate();
 
         $this->featureSet->appendDecorators(
-            'CatDecorator',
-            $this,
-            $this->template
+                'CatDecorator',
+                $this,
+                $this->template
         );
     }
 
     public function getJobStats() {
-      return $this->job_stats ;
+        return $this->job_stats ;
     }
 
     /**
      * @return Chunks_ChunkStruct
      */
     public function getChunk() {
-      return $this->chunk ;
+        return $this->chunk ;
     }
 
     /**
@@ -489,7 +491,7 @@ class catController extends viewController {
      */
     public function getRevisionNumber() {
         return catController::isRevision() ? (
-                $this->revision == null ? 1 : $this->revision
+        $this->revision == null ? 1 : $this->revision
         ) : null ;
     }
 

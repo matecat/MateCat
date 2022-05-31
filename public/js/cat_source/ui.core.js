@@ -1,11 +1,10 @@
 import _ from 'lodash'
+import React, {useEffect} from 'react'
 import Cookies from 'js-cookie'
-import ReactDOM from 'react-dom'
-import React from 'react'
+import {createRoot} from 'react-dom/client'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-// import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
@@ -19,57 +18,11 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
-import {ModalWindow} from './es6/components/modals/ModalWindow'
 import AlertModal from './es6/components/modals/AlertModal'
 import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
+import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
-  /**
-   * Open file menu in Header
-   * @returns {boolean}
-   */
-  toggleFileMenu: function () {
-    var jobMenu = $('#jobMenu')
-    if (jobMenu.is(':animated')) {
-      return false
-    } else {
-      var segment = SegmentStore.getCurrentSegment()
-      var currSegment = jobMenu.find('.currSegment')
-      if (segment) {
-        currSegment.removeClass('disabled')
-      } else {
-        currSegment.addClass('disabled')
-      }
-      var menuHeight = jobMenu.height()
-      if (LXQ.enabled()) {
-        var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible')
-        var lxqBoxHeight = lexiqaBoxIsOpen
-          ? $('#lexiqa-popup').outerHeight() + 8
-          : 0
-        jobMenu.css('top', lxqBoxHeight + 43 - menuHeight + 'px')
-      } else {
-        jobMenu.css('top', 43 - menuHeight + 'px')
-      }
-
-      if (jobMenu.hasClass('open')) {
-        jobMenu
-          .animate({top: '-=' + menuHeight + 'px'}, 500)
-          .removeClass('open')
-      } else {
-        jobMenu
-          .animate({top: '+=' + menuHeight + 'px'}, 300, function () {
-            $('body').on('click', function () {
-              if (jobMenu.hasClass('open')) {
-                UI.toggleFileMenu()
-              }
-            })
-          })
-          .addClass('open')
-      }
-      return true
-    }
-  },
-
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 
@@ -133,12 +86,10 @@ window.UI = {
 
     if (this.autopropagateConfirmNeeded(opts.propagation)) {
       var text = !_.isUndefined(segment.alternatives)
-        ? 'There are other identical segments with <b>translation conflicts</b>. <br><br>Would you ' +
-          'like to propagate the translation and the status to all of them, ' +
-          'or keep this translation only for this segment?'
-        : 'There are other identical segments. <br><br>Would you ' +
-          'like to propagate the translation and the status to all of them, ' +
-          'or keep this translation only for this segment?'
+        ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
+          'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
+        : 'The translation you are confirming for this segment is different from the version confirmed for other identical segments. <br><br>Would you ' +
+          'like to propagate this translation to all other identical segments and replace the other version or keep it only for this segment?'
       // var optionsStr = opts;
       var props = {
         text: text,
@@ -147,20 +98,20 @@ window.UI = {
           opts.propagation = false
           opts.autoPropagation = false
           UI.preExecChangeStatus(opts)
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         cancelText: 'Propagate to All',
         cancelCallback: function () {
           opts.propagation = true
           opts.autoPropagation = false
           UI.execChangeStatus(opts)
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         onClose: function () {
           UI.preExecChangeStatus(opts)
         },
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required ',
@@ -366,10 +317,9 @@ window.UI = {
    * react components, closing side panel etc.
    */
   unmountSegments: function () {
-    $('.article-segments-container').each(function (index, value) {
-      ReactDOM.unmountComponentAtNode(value)
-      delete UI.SegmentsContainers
-    })
+    this.segmentsMountPoint.unmount()
+    UI.segmentsRendered = false
+
     this.removeCacheObjects()
     SegmentStore.removeAllSegments()
     SegmentActions.closeSideSegments()
@@ -398,23 +348,29 @@ window.UI = {
       !this.split_points_source.length ||
       justCreated
     ) {
-      if (!this.SegmentsContainers) {
-        this.SegmentsContainers = []
-        var mountPoint = $('.article-segments-container')[0]
-        this.SegmentsContainers[0] = ReactDOM.render(
-          React.createElement(SegmentsContainer, {
+      if (!this.segmentsRendered) {
+        this.segmentsRendered = true
+        this.segmentsMountPoint = createRoot(
+          $('.article-segments-container')[0],
+        )
+        const CallbackAfterRender = () => {
+          useEffect(() => {
+            SegmentActions.renderSegments(segments, UI.startSegmentId)
+          })
+          return React.createElement(SegmentsContainer, {
             // fid: fid,
             isReview: Review.enabled(),
             isReviewExtended: ReviewExtended.enabled(),
             reviewType: Review.type,
             enableTagProjection: UI.enableTagProjection,
             tagModesEnabled: UI.tagModesEnabled,
-            startSegmentId: this.startSegmentId,
+            startSegmentId: UI.startSegmentId,
             firstJobSegment: config.first_job_segment,
-          }),
-          mountPoint,
-        )
-        SegmentActions.renderSegments(segments, this.startSegmentId)
+          })
+        }
+
+        this.segmentsMountPoint.render(<CallbackAfterRender />)
+        // SegmentActions.renderSegments(segments, this.startSegmentId)
       } else {
         SegmentActions.addSegments(segments, where)
       }
@@ -490,7 +446,7 @@ window.UI = {
     tte.data('raw-time-to-edit', this.totalTime)
   },
   goToFirstError: function () {
-    $('#point2seg').trigger('mousedown')
+    CatToolActions.toggleQaIssues()
     setTimeout(function () {
       $('.qa-issues-container ').first().click()
     }, 300)
@@ -565,7 +521,7 @@ window.UI = {
     )
   },
   showFixWarningsOnDownload: function (continueDownloadFunction) {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       {
         cancelText: 'Fix errors',
@@ -1000,7 +956,7 @@ window.UI = {
 
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
-          ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             AlertModal,
             {
               text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
@@ -1011,7 +967,7 @@ window.UI = {
       }
 
       if (codeInt === -10 && operation !== 'getSegments') {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Job canceled or assigned to another translator',
@@ -1026,7 +982,7 @@ window.UI = {
       }
 
       if (codeInt <= -2000 && !_.isUndefined(this.message)) {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: this.message,
@@ -1199,11 +1155,36 @@ window.UI = {
 
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      let message =
+        'All segments are in <b>read-only mode</b> because this job is under review.'
+
+      if (config.chunk_completion_undoable && config.last_completion_event_id) {
+        message =
+          message +
+          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
+      }
+
+      CatToolActions.addNotification({
+        uid: 'translate-warning',
+        autoDismiss: false,
+        dismissable: true,
+        position: 'tc',
+        text: message,
+        title: 'Warning',
+        type: 'warning',
+        allowHtml: true,
+      })
+    }
     if (TextUtils.justSelecting('readonly')) return
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
       UI.selectingReadonly = setTimeout(function () {
-        ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           AlertModal,
           {
             text: UI.messageForClickOnIceMatch(),
@@ -1219,13 +1200,20 @@ window.UI = {
     }, 200)
   },
   readonlyClickDisplay: function () {
-    ModalWindow.showModalComponent(AlertModal, {
+    ModalsActions.showModalComponent(AlertModal, {
       text: UI.messageForClickOnReadonly(),
     })
   },
   messageForClickOnReadonly: function () {
-    var msgArchived = 'Job has been archived and cannot be edited.'
-    var msgOther = 'This part has not been assigned to you.'
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      return 'This job is currently under review. Segments are in read-only mode.'
+    }
+    const msgArchived = 'Job has been archived and cannot be edited.'
+    const msgOther = 'This part has not been assigned to you.'
     return UI.body.hasClass('archived') ? msgArchived : msgOther
   },
   messageForClickOnIceMatch: function () {
@@ -1259,12 +1247,8 @@ $(document).ready(function () {
   UI.start()
 })
 
-$(window).resize(function () {
-  // UI.fixHeaderHeightChange();
-  APP.fitText($('#pname-container'), $('#pname'), 25)
-})
-
 document.addEventListener('DOMContentLoaded', () => {
   const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  ReactDOM.render(<NotificationBox />, mountPoint)
+  const root = createRoot(mountPoint)
+  root.render(<NotificationBox />)
 })

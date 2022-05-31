@@ -22,22 +22,23 @@ class JobMetadataModal extends React.Component {
       let currentClass = currentFile && currentFile === file.id ? 'current' : ''
       currentClass =
         this.props.files.lenght > 1 ? currentClass + ' active' : currentClass
-      if (file.metadata && file.metadata.instructions) {
+      if (file.data && file.data.instructions) {
         return (
           <div key={'file' + file.id}>
             <div className={'title ' + currentClass}>
               <i className="dropdown icon" />
               <span
+                title={file.file_name}
                 className={
                   'fileFormat ' +
                   CommonUtils.getIconClass(
-                    file.file_name.split('.')[
-                      file.file_name.split('.').length - 1
+                    file.filename.split('.')[
+                      file.filename.split('.').length - 1
                     ],
                   )
                 }
               >
-                {file.file_name}
+                {file.filename}
               </span>
               {currentFile && currentFile === file.id && (
                 <div className="current-icon">
@@ -49,7 +50,7 @@ class JobMetadataModal extends React.Component {
               <div
                 className="transition"
                 dangerouslySetInnerHTML={{
-                  __html: this.getHtml(file.metadata.instructions),
+                  __html: this.getHtml(file.data.instructions),
                 }}
               />
             </div>
@@ -73,7 +74,7 @@ class JobMetadataModal extends React.Component {
         <div className="instructions-container">
           <p
             dangerouslySetInnerHTML={{
-              __html: this.getHtml(file.metadata.instructions),
+              __html: this.getHtml(file.data.instructions),
             }}
           />
         </div>
@@ -110,7 +111,7 @@ class JobMetadataModal extends React.Component {
                 </div>
               )}
               {this.props.files &&
-                this.props.files.find((file) => file.metadata.instructions) && (
+                this.props.files.find((file) => file.data.instructions) && (
                   <div>
                     <h2>Files instructions</h2>
                     <div

@@ -26,8 +26,8 @@ import {approveSegments} from '../api/approveSegments'
 import {translateSegments} from '../api/translateSegments'
 import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
-import {ModalWindow} from '../components/modals/ModalWindow'
 import AlertModal from '../components/modals/AlertModal'
+import ModalsActions from './ModalsActions'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -36,6 +36,13 @@ const SegmentActions = {
       actionType: SegmentConstants.RENDER_SEGMENTS,
       segments: segments,
       idToOpen: idToOpen,
+    })
+  },
+  reloadSegments: function (sidToOpen) {
+    UI.unmountSegments()
+    UI.render({
+      firstLoad: false,
+      segmentToOpen: sidToOpen,
     })
   },
   splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -140,7 +147,6 @@ const SegmentActions = {
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
       })
-      UI.updateJobMenu(segment)
     } else {
       UI.unmountSegments()
       UI.render({
@@ -443,7 +449,7 @@ const SegmentActions = {
         abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this),
       }
 
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         CopySourceModal,
         props,
         'Copy source to ALL segments',
@@ -591,7 +597,7 @@ const SegmentActions = {
   /************ SPLIT ****************/
   openSplitSegment: function (sid) {
     if (OfflineUtils.offline) {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Split is disabled in Offline Mode',
@@ -1003,20 +1009,20 @@ const SegmentActions = {
       text: 'It was not possible to approve all segments. There are some segments that have not been translated.',
       successText: 'Ok',
       successCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
+    ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
   },
   showTranslateAllModalWarnirng: function () {
     var props = {
       text: 'It was not possible to translate all segments.',
       successText: 'Ok',
       successCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning')
+    ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
   },
   approveFilteredSegments: function (segmentsArray) {
     if (segmentsArray.length >= 500) {
@@ -1202,10 +1208,16 @@ const SegmentActions = {
       isTarget,
     })
   },
-  setSegmentCharacterLimit: (sid, limit) => {
+  toggleCharacterCounter: () => {
     AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
+      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+    })
+  },
+  characterCounter: ({sid, counter, limit}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHARACTER_COUNTER,
       sid,
+      counter,
       limit,
     })
   },

@@ -14,7 +14,7 @@ class CatDecorator extends AbstractDecorator {
     private $stats;
 
     private $current_phase  ;
-    
+
     public function decorate() {
         $job = $this->controller->getChunk();
 
@@ -58,7 +58,6 @@ class CatDecorator extends AbstractDecorator {
 
     private function varsForUncomplete() {
         $this->template->job_marked_complete = false;
-        $this->template->header_main_button_label = 'Mark as complete';
         $this->template->header_main_button_class = 'notMarkedComplete' ;
 
         if ( $this->completable()  ) {
@@ -73,9 +72,9 @@ class CatDecorator extends AbstractDecorator {
 
     private function varsForComplete() {
         $this->template->job_marked_complete = true ;
-        $this->template->header_main_button_label = 'Marked as complete';
         $this->template->header_main_button_class = 'isMarkedComplete' ;
         $this->template->header_main_button_enabled =  false ;
+        $this->template->mark_as_complete_button_enabled = false;
     }
 
     private function completable() {

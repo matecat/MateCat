@@ -20,7 +20,7 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
-import {ModalWindow} from '../modals/ModalWindow'
+import ModalsActions from '../../actions/ModalsActions'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -73,9 +73,9 @@ class Segment extends React.Component {
     if (!this.$section.length) return
     if (!this.checkIfCanOpenSegment()) {
       if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
-        alertNoTranslatedSegments()
+        this.alertNoTranslatedSegments()
       } else {
-        alertNotTranslatedYet(this.props.segment.sid)
+        this.alertNotTranslatedYet(this.props.segment.sid)
       }
     } else {
       if (this.props.segment.translation.length !== 0) {
@@ -120,6 +120,30 @@ class Segment extends React.Component {
         document.location.pathname + '#' + this.props.segment.sid,
       )
     }
+  }
+
+  alertNotTranslatedYet = (sid) => {
+    setTimeout(() =>
+      ModalsActions.showModalComponent(ConfirmMessageModal, {
+        cancelText: 'Close',
+        successCallback: () => UI.openNextTranslated(sid),
+        successText: 'Open next translated segment',
+        text: UI.alertNotTranslatedMessage,
+      }),
+    )
+  }
+
+  alertNoTranslatedSegments = () => {
+    var props = {
+      text: 'There are no translated segments to revise in this job.',
+      successText: 'Ok',
+      successCallback: function () {
+        ModalsActions.onCloseModal()
+      },
+    }
+    setTimeout(() =>
+      ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning'),
+    )
   }
 
   openSegmentFromAction(sid) {
@@ -362,10 +386,10 @@ class Segment extends React.Component {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
-          ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Modify locked and approved segment ',

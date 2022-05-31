@@ -9,8 +9,8 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
-import {ModalWindow} from '../../../modals/ModalWindow'
 import AlertModal from '../../../modals/AlertModal'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 class Search extends React.Component {
   constructor(props) {
@@ -27,6 +27,7 @@ class Search extends React.Component {
         selectStatus: 'all',
         searchTarget: '',
         searchSource: '',
+        previousIsTagProjectionEnabled: false,
       },
       focus: true,
       funcFindButton: true, // true=find / false=next
@@ -67,7 +68,15 @@ class Search extends React.Component {
     }
     this.setState({
       funcFindButton: false,
+      ...(config.tag_projection_enabled === 1 && {
+        previousIsTagProjectionEnabled: true,
+      }),
     })
+    // disable tag projection
+    if (config.tag_projection_enabled === 1) {
+      UI.disableTagProjectionInJob()
+      UI.setTagProjectionChecked(false)
+    }
   }
 
   setResults(data) {
@@ -225,7 +234,7 @@ class Search extends React.Component {
             })
           })
           .catch((errors) => {
-            ModalWindow.showModalComponent(
+            ModalsActions.showModalComponent(
               AlertModal,
               {
                 text: errors[0].message,
@@ -233,7 +242,7 @@ class Search extends React.Component {
               'Replace All Alert',
             )
           })
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         CatToolActions.storeSearchResults({
           total: 0,
           searchResults: [],
@@ -244,10 +253,10 @@ class Search extends React.Component {
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       props,
       'Confirmation required',
@@ -256,7 +265,7 @@ class Search extends React.Component {
 
   handleReplaceClick() {
     if (this.state.search.searchTarget === this.state.search.replaceTarget) {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Attention: you are replacing the same text!',
@@ -359,6 +368,21 @@ class Search extends React.Component {
         })
       }
       this.dropdownInit = false
+    }
+
+    // reset tag projection
+    if (!this.props.active && prevProps.active) {
+      this.setState({
+        previousIsTagProjectionEnabled: false,
+      })
+    }
+    if (
+      !this.props.active &&
+      this.props.active !== prevProps.active &&
+      this.state.previousIsTagProjectionEnabled
+    ) {
+      UI.enableTagProjectionInJob()
+      UI.setTagProjectionChecked(true)
     }
   }
   getResultsHtml() {

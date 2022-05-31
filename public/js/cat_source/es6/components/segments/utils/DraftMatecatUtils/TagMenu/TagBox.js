@@ -99,9 +99,8 @@ class TagBox extends React.Component {
       prevProps.focusedTagIndex !== focusedTagIndex
     ) {
       const tabBoxClientRect = this.tagBox.current.getBoundingClientRect()
-      const activeElementClientRect = this.childRefs[
-        focusedTagIndex
-      ].current.getBoundingClientRect()
+      const activeElementClientRect =
+        this.childRefs[focusedTagIndex].current.getBoundingClientRect()
       if (
         activeElementClientRect.top < tabBoxClientRect.top ||
         activeElementClientRect.bottom > tabBoxClientRect.bottom
