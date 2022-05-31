@@ -1637,16 +1637,6 @@
     ,
         {
             "localized":[{
-                "en":"Norwegian"
-            }],
-            "isocode":"no",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"no-NO"
-        }
-    ,
-        {
-            "localized":[{
                 "en":"Norwegian Bokmål"
             }],
             "isocode":"nb",
