@@ -74,7 +74,7 @@ class JobMetadataModal extends React.Component {
         <div className="instructions-container">
           <p
             dangerouslySetInnerHTML={{
-              __html: this.getHtml(file.data.instructions),
+              __html: this.getHtml(file.metadata.instructions),
             }}
           />
         </div>
