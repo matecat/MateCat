@@ -1,15 +1,17 @@
 <?php
 
-namespace ChunkReviewTransition;
+namespace Features\ReviewExtended;
 
-use SegmentTranslationChangeVector;
+use Features\TranslationVersions\Model\TranslationEvent;
+use LQA\ChunkReviewStruct;
+use LQA\EntryWithCategoryStruct;
 
-class ChunkReviewTransitionModel {
+class ChunkReviewTranslationEventTransition {
 
     /**
-     * @var SegmentTranslationChangeVector
+     * @var TranslationEvent
      */
-    private $changeVector;
+    private $translationEvent;
 
     /**
      * @var array
@@ -17,29 +19,29 @@ class ChunkReviewTransitionModel {
     private $unsetFinalRevision;
 
     /**
-     * @var \LQA\ChunkReviewStruct[]
+     * @var ChunkReviewStruct[]
      */
     private $chunk_reviews = [];
 
     /**
-     * @var \LQA\EntryWithCategoryStruct[]
+     * @var EntryWithCategoryStruct[]
      */
     private $issues_to_delete = [];
 
     /**
      * ChunkReviewTransitionDao_ChunkReviewTransitionModel constructor.
      *
-     * @param SegmentTranslationChangeVector $changeVector
+     * @param TranslationEvent $changeVector
      */
-    public function __construct( SegmentTranslationChangeVector $changeVector ) {
-        $this->changeVector = $changeVector;
+    public function __construct( TranslationEvent $changeVector ) {
+        $this->translationEvent = $changeVector;
     }
 
     /**
-     * @return SegmentTranslationChangeVector
+     * @return TranslationEvent
      */
-    public function getChangeVector() {
-        return $this->changeVector;
+    public function getTranslationEvent() {
+        return $this->translationEvent;
     }
 
     /**
@@ -57,32 +59,32 @@ class ChunkReviewTransitionModel {
     }
 
     /**
-     * @return \LQA\ChunkReviewStruct[]
+     * @return ChunkReviewStruct[]
      */
     public function getChunkReviews() {
         return $this->chunk_reviews;
     }
 
     /**
-     * @param \LQA\ChunkReviewStruct $chunk_review
+     * @param ChunkReviewStruct $chunk_review
      */
-    public function addChunkReview( \LQA\ChunkReviewStruct $chunk_review ) {
+    public function addChunkReview( ChunkReviewStruct $chunk_review ) {
         if ( false === isset( $this->chunk_reviews[ $chunk_review->id ] ) ) {
             $this->chunk_reviews[ $chunk_review->id ] = $chunk_review;
         }
     }
 
     /**
-     * @return \LQA\EntryWithCategoryStruct[]
+     * @return EntryWithCategoryStruct[]
      */
     public function getIssuesToDelete() {
         return $this->issues_to_delete;
     }
 
     /**
-     * @param \LQA\EntryWithCategoryStruct $issue
+     * @param EntryWithCategoryStruct $issue
      */
-    public function addIssueToDelete( \LQA\EntryWithCategoryStruct $issue ) {
+    public function addIssueToDelete( EntryWithCategoryStruct $issue ) {
         if ( false === isset( $this->issues_to_delete[ $issue->id ] ) ) {
             $this->issues_to_delete[ $issue->id ] = $issue;
         }

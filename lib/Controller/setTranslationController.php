@@ -6,8 +6,7 @@ use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
-use Features\TranslationVersions\SegmentTranslationVersionHandler;
-use Matecat\Finder\WholeTextFinder;
+use Features\TranslationVersions\TranslationVersionsHandler;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -77,7 +76,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var SegmentTranslationVersionHandler|TranslationVersions\EmptySegmentTranslationVersionHandler
+     * @var TranslationVersionsHandler|TranslationVersions\DummyTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -614,6 +613,13 @@ class setTranslationController extends ajaxController {
 
         }
 
+
+        /*
+         * Hooked by TranslationVersions which manage translation versions
+         *
+         * This is also the init handler of all R1/R2 handling and Qr score calculation by
+         *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
+         */
         $this->featureSet->run( 'preSetTranslationCommitted', [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,

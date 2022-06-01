@@ -12,7 +12,7 @@ namespace Features\TranslationVersions\Model;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 
-class SegmentTranslationEventStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct  {
+class TranslationEventStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct  {
 
     public $id ;
     public $uid ;

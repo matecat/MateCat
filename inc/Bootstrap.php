@@ -463,7 +463,7 @@ class Bootstrap {
 
         Features::setIncludePath();
 
-    }
+     }
 
     /**
      * Check if all mandatory keys are present

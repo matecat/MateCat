@@ -17,7 +17,7 @@ use Features;
 use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
@@ -101,7 +101,7 @@ class SecondPassReview extends BaseFeature {
             $lastSegment = end( $lastFile[ 'segments' ] );
             $lastSid     = $lastSegment[ 'sid' ];
 
-            $segment_translation_events = ( new SegmentTranslationEventDao() )->getLatestEventsInSegmentInterval(
+            $segment_translation_events = ( new TranslationEventDao() )->getLatestEventsInSegmentInterval(
                     $chunk->id, $firstSid, $lastSid );
 
             $by_id_segment = [];

@@ -1,8 +1,8 @@
 <?php
 
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\BatchEventCreator;
-use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+use Features\TranslationVersions\Model\TranslationEventsHandler;
+use Features\TranslationVersions\Model\TranslationEvent;
 
 /**
  * Created by PhpStorm.
@@ -105,7 +105,7 @@ class copyAllSource2TargetController extends ajaxController {
         $chunk    = Chunks_ChunkDao::getByJobID( $job_id )[ 0 ];
         $features = $chunk->getProject()->getFeaturesSet();
 
-        $batchEventCreator = new BatchEventCreator( $chunk );
+        $batchEventCreator = new TranslationEventsHandler( $chunk );
         $batchEventCreator->setFeatureSet( $features );
         $batchEventCreator->setProject( $chunk->getProject() );
 
@@ -142,8 +142,8 @@ class copyAllSource2TargetController extends ajaxController {
             }
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                $segmentTranslationEventModel = new SegmentTranslationEventModel( $old_translation, $new_translation, $this->user, $source_page );
-                $batchEventCreator->addEventModel( $segmentTranslationEventModel );
+                $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
+                $batchEventCreator->addEvent( $segmentTranslationEventModel );
             }
         }
 

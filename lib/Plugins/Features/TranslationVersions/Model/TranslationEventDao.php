@@ -11,10 +11,10 @@ namespace Features\TranslationVersions\Model;
 use DataAccess\ShapelessConcreteStruct;
 use PDO;
 
-class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
+class TranslationEventDao extends \DataAccess_AbstractDao {
 
     const TABLE       = "segment_translation_events";
-    const STRUCT_TYPE = "\Features\TranslationVersions\Model\SegmentTranslationEventStruct";
+    const STRUCT_TYPE = "\Features\TranslationVersions\Model\TranslationEventStruct";
 
     protected static $auto_increment_field = [ 'id' ];
     protected static $primary_keys         = [ 'id' ];
@@ -24,7 +24,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
      * @param $min_segment
      * @param $max_segment
      *
-     * @return \Features\TranslationVersions\Model\SegmentTranslationEventStruct[]
+     * @return TranslationEventStruct[]
      */
     public function getLatestEventsInSegmentInterval( $id_job, $min_segment, $max_segment ) {
 
@@ -108,7 +108,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
      * @param $id_job
      * @param $id_segment
      *
-     * @return SegmentTranslationEventStruct|null
+     * @return TranslationEventStruct|null
      */
     public function getLatestEventForSegment( $id_job, $id_segment ) {
         $latest_events = $this->getLatestEventsInSegmentInterval( $id_job, $id_segment, $id_segment );

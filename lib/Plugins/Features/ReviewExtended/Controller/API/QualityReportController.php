@@ -16,7 +16,7 @@ use Constants_JobStatus;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
 use Projects_ProjectStruct;
@@ -91,7 +91,7 @@ class QualityReportController extends BaseChunkController {
 
         if ( count( $segments_ids ) > 0 ) {
 
-            $segmentTranslationEventDao = new SegmentTranslationEventDao();
+            $segmentTranslationEventDao = new TranslationEventDao();
             $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
