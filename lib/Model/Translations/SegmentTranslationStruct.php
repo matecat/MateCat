@@ -36,6 +36,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     }
 
     public function isICE() {
+        // in some cases ICEs are not locked ( translations from bilingual xliff ). Only consider locked ICEs
         return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
     }
 

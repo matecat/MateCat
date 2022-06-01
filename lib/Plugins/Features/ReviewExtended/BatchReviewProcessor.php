@@ -85,7 +85,7 @@ class BatchReviewProcessor {
             $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $chunkReviews[] = $chunkReview;
 
-            \Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $chunk->id );
+            Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $chunk->id );
 
             $alertEmail = new BatchReviewProcessorAlertEmail( $chunk, $chunkReview );
             $alertEmail->send();
@@ -97,9 +97,11 @@ class BatchReviewProcessor {
         $segmentTranslationModels           = [];
 
         foreach ( $this->_translationEventsHandler->getPersistedEvents() as $translationEvent ) {
-            $segmentTranslationModel              = $revisionFactory->getSegmentTranslationModel( $translationEvent, $chunkReviews );
-            $this->segmentTransitionPhasesModel[] = $segmentTranslationModel->getChunkReviewTransitionModel();
-            $segmentTranslationModels[]           = $translationEvent;
+            $segmentTranslationModel    = $revisionFactory->getSegmentTranslationModel( $translationEvent, $chunkReviews );
+            $segmentTranslationModels[] = $segmentTranslationModel;
+
+            // here we process and count the reviewed word count and
+            $this->segmentTransitionPhasesModel[] = $segmentTranslationModel->evaluateAndGetChunkReviewTranslationEventTransition();
         }
 
         // uow
@@ -113,8 +115,8 @@ class BatchReviewProcessor {
     }
 
     /**
-     * @throws Exception
      * @return boolean
+     * @throws Exception
      */
     public function commit() {
 

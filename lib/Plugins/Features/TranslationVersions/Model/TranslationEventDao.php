@@ -39,7 +39,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
         $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
         $stmt->execute( [
                 'id_job'      => $id_job,
                 'min_segment' => $min_segment,
@@ -59,7 +59,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
         $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
         $stmt->execute( [
                 'id_job'      => $id_job,
                 'id_segment'  => $id_segment,
@@ -78,7 +78,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
         $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment
@@ -101,7 +101,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
                 'id_job' => $id_job,
         ] );
 
-        return $stmt->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        return $stmt->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_CLASS, TranslationEventStruct::class );
     }
 
     /**

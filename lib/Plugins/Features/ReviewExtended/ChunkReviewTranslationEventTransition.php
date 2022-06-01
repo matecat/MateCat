@@ -52,9 +52,9 @@ class ChunkReviewTranslationEventTransition {
     }
 
     /**
-     * @param array $unsetFinalRevision
+     * @param integer[] $unsetFinalRevision
      */
-    public function setUnsetFinalRevision( $unsetFinalRevision ) {
+    public function unsetFinalRevision( $unsetFinalRevision ) {
         $this->unsetFinalRevision = $unsetFinalRevision;
     }
 

@@ -24,7 +24,7 @@ class TranslationEvent {
     /**
      * @var Translations_SegmentTranslationStruct
      */
-    protected $translation;
+    protected $wanted_translation;
 
     protected $user;
 
@@ -33,7 +33,7 @@ class TranslationEvent {
     /**
      * @var TranslationEventStruct
      */
-    protected $prior_event;
+    protected $previous_event;
 
     /**
      * @var TranslationEventStruct
@@ -51,21 +51,21 @@ class TranslationEvent {
                                  Translations_SegmentTranslationStruct $translation,
                                                                        $user, $source_page_code ) {
 
-        $this->old_translation = $old_translation;
-        $this->translation     = $translation;
-        $this->user            = $user;
-        $this->source_page     = $source_page_code;
-        $this->chunk           = $this->translation->getChunk();
+        $this->old_translation    = $old_translation;
+        $this->wanted_translation = $translation;
+        $this->user               = $user;
+        $this->source_page        = $source_page_code;
+        $this->chunk              = $this->wanted_translation->getChunk();
 
-        $this->getPriorEvent();
+        $this->getPreviousEvent();
     }
 
 
     /**
      * @return Translations_SegmentTranslationStruct
      */
-    public function getTranslation() {
-        return $this->translation;
+    public function getWantedTranslation() {
+        return $this->wanted_translation;
     }
 
     /**
@@ -101,13 +101,13 @@ class TranslationEvent {
      */
     public function isBeingUpperReviewed() {
         return $this->old_translation->isReviewedStatus() &&
-                $this->translation->isReviewedStatus() &&
+                $this->wanted_translation->isReviewedStatus() &&
                 $this->isUpperRevision();
     }
 
     public function isBeingLowerReviewed() {
         return $this->old_translation->isReviewedStatus() &&
-                $this->translation->isReviewedStatus() &&
+                $this->wanted_translation->isReviewedStatus() &&
                 $this->isLowerRevision();
     }
 
@@ -121,8 +121,8 @@ class TranslationEvent {
      * @return int
      */
     public function getSourcePageDirection() {
-        $originSourcePage      = $this->getOriginSourcePage();
-        $destinationSourcePage = $this->getDestinationSourcePage();
+        $originSourcePage      = $this->getPreviousEventSourcePage();
+        $destinationSourcePage = $this->getCurrentEventSourcePage();
 
         return $originSourcePage < $destinationSourcePage ? 1 : (
         $originSourcePage == $destinationSourcePage ? null : -1
@@ -133,32 +133,40 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function isEnteringReviewedState() {
+    public function ICE_IsEnteringReviewedState() {
         return (
                         $this->old_translation->isTranslationStatus() &&
-                        $this->translation->isReviewedStatus() &&
-                        !$this->isUnmodifiedICE()
+                        $this->wanted_translation->isReviewedStatus() &&
+                        $this->isAlreadyModifiedIce()
                 )
                 ||
                 (
+                        // we are moving an ICE from R1 to R2
+                        $this->old_translation->isICE() &&
                         $this->old_translation->isReviewedStatus() &&
-                        $this->translation->isReviewedStatus() &&
-                        $this->isModifyingICEFromTranslation()
+                        $this->wanted_translation->isReviewedStatus() &&
+                        $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
+                        $this->getCurrentEventSourcePage() > Constants::SOURCE_PAGE_REVISION
                 );
     }
 
     /**
-     * This method returns true when we are changing and ICE 'APPROVED' to TRANSLATE
+     * This should happen only with Ebay because is not possible anymore to change the status to "translated" from rev1 page
+     *
+     * WHEN we are changing an ICE 'APPROVED' to TRANSLATE
+     * AND we are in Revision 1 ( NOT Revision 2 )
+     * AND the content IS changed FOR THE FIRST TIME ( old version_number == 0 )
+     *
      *
      * @return bool
      * @throws Exception
      */
-    public function isModifyingICEFromTranslation() {
+    public function isModifyingICEFromTranslationForTheFirstTime() {
         return $this->old_translation->isICE() &&
                 $this->old_translation->isReviewedStatus() &&
-                $this->translation->isTranslationStatus() &&
-                $this->getOriginSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation !== $this->translation->translation &&
+                $this->wanted_translation->isTranslationStatus() &&
+                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                $this->old_translation->translation !== $this->wanted_translation->translation &&
                 $this->old_translation->version_number == 0;
     }
 
@@ -169,9 +177,9 @@ class TranslationEvent {
     public function isModifyingICEFromRevisionOne() {
         return $this->old_translation->isICE() &&
                 $this->old_translation->isReviewedStatus() &&
-                $this->translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
-                $this->getOriginSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation !== $this->translation->translation &&
+                $this->wanted_translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
+                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                $this->old_translation->translation !== $this->wanted_translation->translation &&
                 $this->old_translation->version_number == 0;
     }
 
@@ -181,11 +189,20 @@ class TranslationEvent {
      *
      * @return bool
      */
-    protected function isUnmodifiedICE() {
+    protected function isAlreadyModifiedIce() {
         return $this->old_translation->isICE() &&               // segment is ICE
-                $this->translation->version_number == 0 &&      // version number is not changing
-                $this->old_translation->locked == 1             // in some cases ICEs are not locked. Only consider locked ICEs
+                $this->wanted_translation->version_number > 0   // version number is not changing
                 ;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFirstTimeIceChange() {
+        return ( $this->old_translation->isICE() &&
+                $this->old_translation->version_number == 0 &&
+                $this->wanted_translation->version_number == 1
+        );
     }
 
     /**
@@ -194,26 +211,16 @@ class TranslationEvent {
      */
     public function isExitingReviewedState() {
         return $this->old_translation->isReviewedStatus() &&
-                $this->translation->isTranslationStatus() &&
-                !$this->isEditingICEforTheFirstTime() &&
-                !$this->_isChangingICEtoTranslatedWithNoChange();
+                $this->wanted_translation->isTranslationStatus() &&
+                !$this->isFirstTimeIceChange() &&
+                !$this->isChangingICEtoTranslatedWithNoChange();
     }
 
-    /**
-     * @return bool
-     */
-    public function isEditingICEforTheFirstTime() {
-        return ( $this->old_translation->isICE() &&
-                $this->old_translation->version_number == 0 &&
-                $this->translation->version_number == 1
-        );
-    }
-
-    protected function _isChangingICEtoTranslatedWithNoChange() {
+    protected function isChangingICEtoTranslatedWithNoChange() {
         return $this->old_translation->isICE() &&
-                $this->translation->isTranslationStatus() &&
+                $this->wanted_translation->isTranslationStatus() &&
                 $this->old_translation->isReviewedStatus() &&
-                $this->old_translation->version_number == $this->translation->version_number;
+                $this->old_translation->version_number == $this->wanted_translation->version_number;
     }
 
     /**
@@ -225,7 +232,7 @@ class TranslationEvent {
         return $dao->getByChunkIdAndSegmentId(
                 $this->chunk->id,
                 $this->chunk->password,
-                $this->translation->id_segment
+                $this->wanted_translation->id_segment
         );
     }
 
@@ -241,8 +248,8 @@ class TranslationEvent {
      * @throws Exception
      */
     public function isEditingCurrentRevision() {
-        return $this->getDestinationSourcePage() == $this->getOriginSourcePage() &&
-                $this->translation->translation != $this->old_translation->translation;
+        return $this->getCurrentEventSourcePage() == $this->getPreviousEventSourcePage() &&
+                $this->wanted_translation->translation != $this->old_translation->translation;
     }
 
     /**
@@ -250,7 +257,7 @@ class TranslationEvent {
      * @throws Exception
      */
     public function isUpperRevision() {
-        return $this->getOriginSourcePage() < $this->getDestinationSourcePage();
+        return $this->getPreviousEventSourcePage() < $this->getCurrentEventSourcePage();
     }
 
     /**
@@ -258,15 +265,15 @@ class TranslationEvent {
      * @throws Exception
      */
     public function isLowerRevision() {
-        return $this->getOriginSourcePage() > $this->getDestinationSourcePage();
+        return $this->getPreviousEventSourcePage() > $this->getCurrentEventSourcePage();
     }
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function isChangingSourcePage(): bool {
-        return $this->getOriginSourcePage() != $this->getDestinationSourcePage();
+    public function isChangingSourcePage() {
+        return $this->getPreviousEventSourcePage() != $this->getCurrentEventSourcePage();
     }
 
     public function isPersisted() {
@@ -284,14 +291,14 @@ class TranslationEvent {
         }
 
         if (
-                in_array( $this->translation[ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) &&
+                in_array( $this->wanted_translation[ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) &&
                 $this->source_page < Constants::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting revised state from translation is not allowed.', -2000 );
         }
 
         if (
-                in_array( $this->translation[ 'status' ], Constants_TranslationStatus::$TRANSLATION_STATUSES ) &&
+                in_array( $this->wanted_translation[ 'status' ], Constants_TranslationStatus::$TRANSLATION_STATUSES ) &&
                 $this->source_page >= Constants::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );
@@ -302,15 +309,15 @@ class TranslationEvent {
         }
 
         $this->current_event                 = new TranslationEventStruct();
-        $this->current_event->id_job         = $this->translation[ 'id_job' ];
-        $this->current_event->id_segment     = $this->translation[ 'id_segment' ];
+        $this->current_event->id_job         = $this->wanted_translation[ 'id_job' ];
+        $this->current_event->id_segment     = $this->wanted_translation[ 'id_segment' ];
         $this->current_event->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
-        $this->current_event->status         = $this->translation[ 'status' ];
-        $this->current_event->version_number = $this->translation[ 'version_number' ];
+        $this->current_event->status         = $this->wanted_translation[ 'status' ];
+        $this->current_event->version_number = $this->wanted_translation[ 'version_number' ];
         $this->current_event->source_page    = $this->source_page;
 
         if ( $this->isPropagationSource() ) {
-            $this->current_event->time_to_edit = $this->translation[ 'time_to_edit' ];
+            $this->current_event->time_to_edit = $this->wanted_translation[ 'time_to_edit' ];
         }
 
         $this->current_event->setTimestamp( 'create_date', time() );
@@ -325,9 +332,9 @@ class TranslationEvent {
      */
     protected function _saveRequired() {
         return (
-                $this->old_translation->translation != $this->translation->translation ||
-                $this->old_translation->status != $this->translation->status ||
-                $this->source_page != $this->getOriginSourcePage()
+                $this->old_translation->translation != $this->wanted_translation->translation ||
+                $this->old_translation->status != $this->wanted_translation->status ||
+                $this->source_page != $this->getPreviousEventSourcePage()
         );
     }
 
@@ -336,15 +343,15 @@ class TranslationEvent {
      *
      * @return TranslationEventStruct|null
      */
-    public function getPriorEvent() {
-        if ( !isset( $this->prior_event ) ) {
-            $this->prior_event = ( new TranslationEventDao() )->getLatestEventForSegment(
+    public function getPreviousEvent() {
+        if ( !isset( $this->previous_event ) ) {
+            $this->previous_event = ( new TranslationEventDao() )->getLatestEventForSegment(
                     $this->old_translation->id_job,
                     $this->old_translation->id_segment
             );
         }
 
-        return $this->prior_event;
+        return $this->previous_event;
     }
 
     /**
@@ -363,8 +370,8 @@ class TranslationEvent {
      * @return mixed
      * @throws Exception
      */
-    public function getOriginSourcePage() {
-        if ( !$this->getPriorEvent() ) {
+    public function getPreviousEventSourcePage() {
+        if ( !$this->getPreviousEvent() ) {
             if (
                     in_array( $this->getOldTranslation()->status,
                             array_merge(
@@ -376,19 +383,20 @@ class TranslationEvent {
             } elseif ( Constants_TranslationStatus::isReviewedStatus( $this->getOldTranslation()->status ) ) {
                 $source_page = Constants::SOURCE_PAGE_REVISION;
             } else {
-                throw new \Exception( 'Unable to guess source_page for missing prior event' );
+                throw new Exception( 'Unable to guess source_page for missing prior event' );
             }
 
             return $source_page;
         } else {
-            return $this->getPriorEvent()->source_page;
+            return $this->getPreviousEvent()->source_page;
         }
     }
 
     /**
      * @return int
+     * @throws Exception
      */
-    public function getDestinationSourcePage() {
+    public function getCurrentEventSourcePage() {
         return $this->getCurrentEvent()->source_page;
     }
 

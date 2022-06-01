@@ -14,6 +14,7 @@ use Exceptions\NotFoundException;
 use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
+use Features\ReviewExtended\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\Model\QualityReportModel;
