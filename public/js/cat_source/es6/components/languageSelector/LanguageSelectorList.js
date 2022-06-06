@@ -56,7 +56,7 @@ class LanguageSelectorList extends React.Component {
                   selectedLanguages &&
                   selectedLanguages.map((e) => e.code).indexOf(e.code) > -1
                 ) {
-                  elementClass = 'selected'
+                  elementClass = `selected ${isHover ? 'hover' : ''}`
                 } else if (isHover) {
                   elementClass = 'hover'
                 }

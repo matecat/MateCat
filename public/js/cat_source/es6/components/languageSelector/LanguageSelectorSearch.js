@@ -14,6 +14,8 @@ class LanguageSelectorSearch extends React.Component {
     document.addEventListener('mousedown', () => {
       this.setState({highlightDelete: false})
     })
+
+    this.tagsInput.focus()
   }
 
   componentWillUnmount() {
@@ -62,6 +64,8 @@ class LanguageSelectorSearch extends React.Component {
         renderTag={defaultRenderTag}
         value={selectedLanguages ? selectedLanguages.map((e) => e.name) : []}
         onChange={this.handleChange}
+        autofocus={true}
+        ref={(tagsInput) => (this.tagsInput = tagsInput)}
       />
     )
   }
