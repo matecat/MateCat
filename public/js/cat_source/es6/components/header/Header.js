@@ -153,7 +153,7 @@ class Header extends React.Component {
                     </li>
                     <li>
                       <a href="https://site.matecat.com/open-source/">
-                        Opensource
+                        Open source
                       </a>
                     </li>
                     <li>
