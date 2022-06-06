@@ -13,7 +13,7 @@ use Chunks_ChunkStruct;
 use Database;
 use Features;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationEventsHandler;
+use Features\TranslationVersions\Handlers\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationEvent;
 use INIT;
 use Stomp;

@@ -133,18 +133,18 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function ICE_IsEnteringReviewedState() {
+    public function isEnteringReviewedState() {
         return (
                         $this->old_translation->isTranslationStatus() &&
                         $this->wanted_translation->isReviewedStatus() &&
-                        $this->isAlreadyModifiedIce()
+                        !$this->isUnmodifiedICE()
                 )
                 ||
                 (
-                        // we are moving an ICE from R1 to R2
                         $this->old_translation->isICE() &&
                         $this->old_translation->isReviewedStatus() &&
                         $this->wanted_translation->isReviewedStatus() &&
+                        // we are moving an ICE directly from T to R2 ( previous sourcePage is equal to current )
                         $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
                         $this->getCurrentEventSourcePage() > Constants::SOURCE_PAGE_REVISION
                 );
@@ -184,14 +184,14 @@ class TranslationEvent {
     }
 
     /**
-     * We need to know if the record is an umodified ICE
+     * We need to know if the record is an unmodified ICE
      * Unmodified ICEs are locked ICEs which have new version number equal to 0.
      *
      * @return bool
      */
-    protected function isAlreadyModifiedIce() {
+    protected function isUnmodifiedICE() {
         return $this->old_translation->isICE() &&               // segment is ICE
-                $this->wanted_translation->version_number > 0   // version number is not changing
+                $this->wanted_translation->version_number == 0  // version number is not changing
                 ;
     }
 

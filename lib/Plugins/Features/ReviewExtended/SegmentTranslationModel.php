@@ -127,7 +127,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
 
             // we are entering in reviewed state, and we are iterating on the destination chunk
-            if ( $this->_event->ICE_IsEnteringReviewedState() && $currentEventSourcePage == $chunkReview->source_page ) {
+            if ( $this->_event->isEnteringReviewedState() && $currentEventSourcePage == $chunkReview->source_page ) {
                 // expect the first chunk review record to be the final
                 // add revised words and advancement
                 $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
