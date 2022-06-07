@@ -32,6 +32,7 @@ const COMMENTS_PADDING_TOP = [
   {empty: 40, filled: 140},
   {filled: 50},
 ]
+const SEARCH_BAR_OPENED_PADDING_TOP = 80
 
 export const SegmentsContext = createContext({})
 const listRef = createRef()
@@ -61,6 +62,7 @@ function SegmentsContainer({
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -298,6 +300,10 @@ function SegmentsContainer({
     const closeSide = () => setIsSideOpen(false)
     const storeJobInfo = (files) => setFiles(files)
     const onAddComment = (sid) => setAddedComment({sid})
+    const toggleSearchBar = (container) =>
+      container === 'search' && setIsSearchBarOpen((prevState) => !prevState)
+    const closeSubHeader = () => setIsSearchBarOpen(false)
+
     const mousedownHandler = () =>
       (persistenceVariables.current.isUserDraggingCursor = true)
     const mouseupHandler = () =>
@@ -316,6 +322,8 @@ function SegmentsContainer({
     SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, closeSide)
     CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, storeJobInfo)
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
+    CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, toggleSearchBar)
+    CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, closeSubHeader)
 
     document.addEventListener('mousedown', mousedownHandler)
     document.addEventListener('mouseup', mouseupHandler)
@@ -339,6 +347,14 @@ function SegmentsContainer({
         storeJobInfo,
       )
       CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, onAddComment)
+      CatToolStore.removeListener(
+        CatToolConstants.TOGGLE_CONTAINER,
+        toggleSearchBar,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.CLOSE_SUBHEADER,
+        closeSubHeader,
+      )
 
       document.removeEventListener('mousedown', mousedownHandler)
       document.removeEventListener('mouseup', mouseupHandler)
@@ -540,7 +556,7 @@ function SegmentsContainer({
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  // set padding top to list ref (Comments padding)
+  // set padding top to list ref (Comments padding or Search bar opened)
   useEffect(() => {
     if (!segments.size || !listRef?.current) return
     const getPadding = () => {
@@ -573,9 +589,15 @@ function SegmentsContainer({
       }
       return 0
     }
+    // padding top when search bar is open
+    const paddingTopSearchBarOpened = isSearchBarOpen
+      ? SEARCH_BAR_OPENED_PADDING_TOP
+      : 0
     // set inline style
-    listRef.current.firstChild.style.marginTop = `${getPadding()}px`
-  }, [isSideOpen, segments, addedComment])
+    listRef.current.firstChild.style.marginTop = `${
+      getPadding() + paddingTopSearchBarOpened
+    }px`
+  }, [isSideOpen, segments, addedComment, isSearchBarOpen])
 
   // reset scrollTo
   useEffect(() => {
