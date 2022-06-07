@@ -4,7 +4,7 @@ const Shortcuts = {
     label: 'Formatting characters',
     events: {
       nonBreakingSpace: {
-        label: 'Non breaking space',
+        label: 'Non-breaking space',
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+alt+space',
