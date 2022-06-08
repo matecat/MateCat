@@ -1,6 +1,7 @@
 <?php
 
 use BxExG\Mapper;
+use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 use Matecat\SubFiltering\MateCatFilter;
@@ -1611,9 +1612,6 @@ class QA {
      */
     protected function _checkTagPositions() {
 
-//        Log::doJsonLog( $this->source_seg );
-//        Log::doJsonLog( $this->target_seg );
-
         preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
         $complete_malformedSrcStruct   = $matches[ 1 ];
         $open_malformedXmlSrcStruct    = $matches[ 2 ];
@@ -1624,30 +1622,12 @@ class QA {
         $open_malformedXmlTrgStruct    = $matches[ 2 ];
         $closing_malformedXmlTrgStruct = $matches[ 3 ];
 
-//        Log::doJsonLog($complete_malformedSrcStruct);
-//        Log::doJsonLog($open_malformedXmlSrcStruct);
-//        Log::doJsonLog($closing_malformedXmlSrcStruct);
-//
-//        Log::doJsonLog($complete_malformedTrgStruct);
-//        Log::doJsonLog($open_malformedXmlTrgStruct);
-//        Log::doJsonLog($closing_malformedXmlTrgStruct);
-
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
-            if ( str_replace( " ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
-
-                return;
-            }
+            $this->_checkForIdMismatchOrEquivTextMismatch($open_malformedXmlSrcStruct[ $pos ], $tag, $complete_malformedTrgStruct[ $pos ]);
         }
 
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
-            if ( str_replace( " ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
-
-                return;
-            }
+            $this->_checkForIdMismatchOrEquivTextMismatch($closing_malformedXmlSrcStruct[ $pos ], $tag, $complete_malformedTrgStruct[ $pos ]);
         }
 
         /*
@@ -1658,14 +1638,58 @@ class QA {
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
-            if ( str_replace( " ", "", $selfClosingTags_src[ $pos ] ) != str_replace( " ", "", $tag ) ) {
+            $this->_checkForIdMismatchOrEquivTextMismatch($selfClosingTags_src[ $pos ], $tag, $selfClosingTags_trg[ $pos ]);
+        }
+    }
+
+    /**
+     * This function checks for:
+     *
+     * - id mismatch. Example: <ph id="mtc_1" .../> vs <ph id="mtc_2" .../>
+     * - equiv-text mismatch. Example: <ph id="mtc_1" equiv-text="base64:xxx" /> vs <ph id="mtc_1" equiv-text="base64:yyy" />
+     *
+     * If no one of those conditions is true the default behaviour is to check the mere difference between the two tags
+     *
+     * @param $source
+     * @param $target
+     * @param $completeTarget
+     */
+    private function _checkForIdMismatchOrEquivTextMismatch($source, $target, $completeTarget) {
+
+        // Check for difference in id, in this case throw a ERR_TAG_MISMATCH
+        preg_match_all('/id\s*=\s*["\']([^"\']+)["\']\s*/', $source, $idSourceMatch);
+        preg_match_all('/id\s*=\s*["\']([^"\']+)["\']\s*/', $target, $idTargetMatch);
+
+        if(!empty($idSourceMatch[1]) and !empty($idTargetMatch[1]) ){
+            if($idSourceMatch[1] !== $idTargetMatch[1]){
                 $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $selfClosingTags_trg[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $completeTarget );
 
                 return;
             }
         }
 
+        // Check for difference in equiv-text, in this case throw a TAG MISMATCH
+        preg_match_all('/equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/', $source, $equivTextSourceMatch);
+        preg_match_all('/equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/', $target, $equivTextTargetMatch);
+
+        if(!empty($equivTextSourceMatch[1]) and !empty($equivTextTargetMatch[1]) ){
+            if($equivTextSourceMatch[1] !== $equivTextTargetMatch[1]){
+                $this->addError( self::ERR_TAG_MISMATCH );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $completeTarget );
+
+                return;
+            }
+        }
+
+        // Default behaviour: check for mere difference between $source and $target
+        if ( str_replace( " ", "", $source ) != str_replace( " ", "", $target ) ) {
+
+            $this->addError( self::ERR_TAG_ORDER );
+            $this->tagPositionError[] = ( new LtGtEncode() )->transform( $completeTarget );
+
+            return;
+        }
     }
 
     /**
