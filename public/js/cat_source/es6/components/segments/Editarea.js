@@ -413,9 +413,11 @@ class Editarea extends React.Component {
 
     if (changedDecorator) {
       const decorator = new CompositeDecorator(this.decoratorsStructure)
-      this.setState({
-        editorState: EditorState.set(editorState, {decorator}),
-        activeDecorators,
+      setTimeout(() => {
+        this.setState({
+          editorState: EditorState.set(editorState, {decorator}),
+          activeDecorators,
+        })
       })
     }
   }
