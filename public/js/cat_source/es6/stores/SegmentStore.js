@@ -171,6 +171,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             updatedSource: splittedSourceAr[i],
             openComments: false,
             openSplit: false,
+            metadata: segment.metadata,
           }
           newSegments.push(segData)
           segData = null
