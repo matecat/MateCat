@@ -119,7 +119,7 @@ abstract class downloadController extends controller {
                             'path'     => '/',
                             'domain'   => INIT::$COOKIE_DOMAIN,
                             'secure'   => true,
-                            'httponly' => true,
+                            'httponly' => false,
                             'samesite' => 'None',
                     ]
             );
