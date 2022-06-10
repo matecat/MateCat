@@ -1630,6 +1630,7 @@ class QA {
             $this->_checkForIdMismatchOrEquivTextMismatch($selfClosingTags_src[ $pos ], $tag, $selfClosingTags_trg[ $pos ]);
         }
 
+        // If there are errors get tag diff for the UI
         if ( $this->thereAreErrors() ) {
             $this->_getTagDiff();
         }
