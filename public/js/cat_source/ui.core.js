@@ -538,6 +538,7 @@ window.UI = {
   },
 
   runDownload: function () {
+    const globalWarnings = SegmentStore.getGlobalWarnings()
     var continueDownloadFunction
 
     if ($('#downloadProject').hasClass('disabled')) return false
@@ -550,9 +551,8 @@ window.UI = {
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
     if (
-      $('#notifbox').hasClass('warningbox') &&
-      UI.globalWarnings.ERROR &&
-      UI.globalWarnings.ERROR.total > 0
+      globalWarnings.matecat.ERROR &&
+      globalWarnings.matecat.ERROR.total > 0
     ) {
       UI.showFixWarningsOnDownload(continueDownloadFunction)
     } else {
@@ -594,9 +594,6 @@ window.UI = {
       .then((data) => {
         //console.log('check warnings success');
         UI.startWarning()
-
-        UI.globalWarnings = data.details
-        //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
 
         //check for errors
         if (data.details) {
