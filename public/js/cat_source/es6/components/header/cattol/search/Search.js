@@ -11,6 +11,7 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
+import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 
 class Search extends React.Component {
   constructor(props) {
@@ -210,6 +211,21 @@ class Search extends React.Component {
       this.setState(_.cloneDeep(this.defaultState))
       SegmentActions.removeSearchResultToSegments()
     })
+  }
+
+  handleKeyDown(e, name) {
+    if (e.code == 'Space' && e.ctrlKey && e.shiftKey) {
+      let textToInsert = tagSignatures.nbsp.placeholder
+      let cursorPosition = e.target.selectionStart
+      let textBeforeCursorPosition = e.target.value.substring(0, cursorPosition)
+      let textAfterCursorPosition = e.target.value.substring(
+        cursorPosition,
+        e.target.value.length,
+      )
+      e.target.value =
+        textBeforeCursorPosition + textToInsert + textAfterCursorPosition
+      this.handleInputChange(name, e)
+    }
   }
 
   resetStatusFilter() {
@@ -535,7 +551,7 @@ class Search extends React.Component {
     }
   }
   componentDidMount() {
-    document.addEventListener('keydown', this.handelKeydownFunction, false)
+    document.addEventListener('keydown', this.handelKeydownFunction, true)
     CatToolStore.addListener(
       CattolConstants.STORE_SEARCH_RESULT,
       this.setResults.bind(this),
@@ -547,7 +563,7 @@ class Search extends React.Component {
     SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch)
   }
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handelKeydownFunction, false)
+    document.removeEventListener('keydown', this.handelKeydownFunction)
     CatToolStore.removeListener(
       CattolConstants.STORE_SEARCH_RESULT,
       this.setResults,
@@ -637,6 +653,7 @@ class Search extends React.Component {
                       tabIndex={1}
                       value={this.state.search.searchSource}
                       placeholder="Find in source"
+                      onKeyDown={(e) => this.handleKeyDown(e, 'searchSource')}
                       onChange={this.handleInputChange.bind(
                         this,
                         'searchSource',
@@ -660,6 +677,7 @@ class Search extends React.Component {
                     </div>
                     <div className="exact-match">
                       <input
+                        ref={(ref) => (this.sourceInput = ref)}
                         type="checkbox"
                         tabIndex={4}
                         checked={this.state.search.exactMatch}
@@ -676,6 +694,7 @@ class Search extends React.Component {
                   <div className="find-element ui input">
                     <div className="find-in-target">
                       <input
+                        ref={(ref) => (this.targetInput = ref)}
                         type="text"
                         tabIndex={2}
                         placeholder="Find in target"
@@ -684,6 +703,7 @@ class Search extends React.Component {
                           this,
                           'searchTarget',
                         )}
+                        onKeyDown={(e) => this.handleKeyDown(e, 'searchTarget')}
                         className={
                           !this.state.search.searchTarget &&
                           this.state.search.enableReplace
