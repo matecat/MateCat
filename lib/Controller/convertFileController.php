@@ -135,8 +135,8 @@ class convertFileController extends ajaxController {
         }
 
         if ( $this->result->hasErrors() ) {
-            foreach (array_values( $this->result[ 'errors' ] ) as $error){
-                $this->result->addError($error);
+            foreach (array_values( $this->result->getErrors() ) as $error){
+                $this->result->addError($error['message']);
             }
         }
     }
