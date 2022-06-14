@@ -582,7 +582,7 @@ class AnalyzeChunksResume extends React.Component {
               <p />
             </div>
             <div className="titles-compare">
-              {!config.isCJK ? (
+              {config.isCJK ? (
                 <div className="title-total-words">
                   <h5>Total word count</h5>
                 </div>
