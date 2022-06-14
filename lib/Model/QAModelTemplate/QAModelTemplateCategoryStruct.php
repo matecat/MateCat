@@ -25,9 +25,9 @@ class QAModelTemplateCategoryStruct extends DataAccess_AbstractDaoSilentStruct i
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'id_template' => $this->id_template,
-            'id_parent' => $this->id_parent,
+            'id' => (int)$this->id,
+            'id_template' => (int)$this->id_template,
+            'id_parent' => (int)$this->id_parent,
             'label' => $this->category_label,
             'code' => $this->code,
             'sort' => $this->sort,
