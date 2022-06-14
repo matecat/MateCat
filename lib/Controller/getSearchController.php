@@ -269,7 +269,8 @@ class getSearchController extends ajaxController {
                 $this->queryParams->replacement,
                 true,
                 $this->queryParams->isExactMatchRequested,
-                $this->queryParams->isMatchCaseRequested
+                $this->queryParams->isMatchCaseRequested,
+                true
         );
 
         return ( !empty( $replacedSegmentTranslation ) ) ? $replacedSegmentTranslation[ 'replacement' ] : $translation;
