@@ -292,17 +292,23 @@ button#exec-replace {
           }
           .find-exact-match {
             display: flex;
+            gap: 12px;
             .exact-match {
-              &:first-child {
-                margin-right: 13px;
-              }
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              line-height: 21px;
             }
           }
           .find-in-target {
-            input {
-              margin-bottom: 5px;
-            }
-            .enable-replace-check.disable {
+            margin-bottom: 5px;
+          }
+          .enable-replace-check {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 21px;
+            &.disable {
               opacity: 0.5;
             }
           }

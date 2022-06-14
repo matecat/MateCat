@@ -57,6 +57,8 @@ let SearchUtils = {
     }
     this.searchParams['match-case'] = params.matchCase
     this.searchParams['exact-match'] = params.exactMatch
+    this.searchParams['strict_mode'] = !params.entireJob
+
     if (
       _.isUndefined(this.searchParams.source) &&
       _.isUndefined(this.searchParams.target) &&
@@ -105,6 +107,7 @@ let SearchUtils = {
         status: this.searchParams.status,
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
+        strictMode: this.searchParams['strict_mode'],
         replace,
       }).then((data) => {
         SearchUtils.execFind_success(data)

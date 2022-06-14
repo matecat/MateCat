@@ -23,6 +23,7 @@ class Search extends React.Component {
         enableReplace: false,
         matchCase: false,
         exactMatch: false,
+        entireJob: false,
         replaceTarget: '',
         selectStatus: 'all',
         searchTarget: '',
@@ -49,6 +50,7 @@ class Search extends React.Component {
     this.handelKeydownFunction = this.handelKeydownFunction.bind(this)
     this.updateSearch = this.updateSearch.bind(this)
     this.dropdownInit = false
+    this.jobIsSplitted = false
   }
 
   resetSearch() {
@@ -340,6 +342,7 @@ class Search extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.active) {
+      this.jobIsSplitted = SegmentStore.isSplittedJob()
       if (!prevProps.active) {
         if (this.sourceEl && this.state.focus) {
           this.sourceEl.focus()
@@ -670,6 +673,20 @@ class Search extends React.Component {
                       />
                       <label> Whole word</label>
                     </div>
+                    {this.jobIsSplitted && (
+                      <div className="exact-match">
+                        <input
+                          type="checkbox"
+                          tabIndex={5}
+                          checked={this.state.search.entireJob}
+                          onChange={this.handleInputChange.bind(
+                            this,
+                            'entireJob',
+                          )}
+                        />
+                        <label> Search entire job</label>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="find-element-container">
@@ -691,25 +708,25 @@ class Search extends React.Component {
                             : null
                         }
                       />
-                      {this.state.showReplaceOptionsInSearch ? (
-                        <div
-                          className={
-                            'enable-replace-check ' + replaceCheckboxClass
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            tabIndex={5}
-                            checked={this.state.search.enableReplace}
-                            onChange={this.handleInputChange.bind(
-                              this,
-                              'enableReplace',
-                            )}
-                          />
-                          <label> Replace with</label>
-                        </div>
-                      ) : null}
                     </div>
+                    {this.state.showReplaceOptionsInSearch ? (
+                      <div
+                        className={
+                          'enable-replace-check ' + replaceCheckboxClass
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          tabIndex={5}
+                          checked={this.state.search.enableReplace}
+                          onChange={this.handleInputChange.bind(
+                            this,
+                            'enableReplace',
+                          )}
+                        />
+                        <label> Replace with</label>
+                      </div>
+                    ) : null}
                   </div>
                   {this.state.showReplaceOptionsInSearch &&
                   this.state.search.enableReplace ? (
