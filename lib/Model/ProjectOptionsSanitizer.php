@@ -232,34 +232,30 @@ class ProjectOptionsSanitizer {
      * If Lexiqa is requested to be enabled, then check if language is in combination
      */
     private function sanitizeLexiQA() {
-        if ( $this->options[ 'lexiqa' ] == true && $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
-            $this->sanitized[ 'lexiqa' ] = true;
-        } else {
-            $this->sanitized[ 'lexiqa' ] = false;
-        }
+        $this->sanitized[ 'lexiqa' ] = ( $this->options[ 'lexiqa' ] == true and $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) );
     }
 
     /**
      * If tag project is requested to be enabled, check if language combination is allowed.
      */
     private function sanitizeTagProjection() {
-        if ( $this->options[ 'tag_projection' ] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
-            $this->sanitized[ 'tag_projection' ] = true;
-        } else {
-            $this->sanitized[ 'tag_projection' ] = false;
-
-        }
+        $this->sanitized[ 'tag_projection' ] = ( $this->options[ 'tag_projection' ] == true and $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) );
     }
 
+    /**
+     * @param $langs
+     *
+     * @return bool
+     * @throws Exception
+     */
     private function checkSourceAndTargetAreInCombination( $langs ) {
         $this->__ensureLanguagesAreSet();
 
         $all_langs = array_merge( $this->target_lang, [ $this->source_lang ] );
-
         $all_langs = array_unique( $all_langs );
-
         $found = count( array_intersect( $langs, $all_langs ) );
-        return $found == 2;
+
+        return $found >= 2;
     }
 
     private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {
