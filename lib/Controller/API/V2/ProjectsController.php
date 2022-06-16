@@ -88,10 +88,6 @@ class ProjectsController extends KleinController {
         return $this->changeStatus(\Constants_JobStatus::STATUS_CANCELLED );
     }
 
-    public function delete() {
-        return $this->changeStatus(\Constants_JobStatus::STATUS_DELETED );
-    }
-
     public function archive() {
         return $this->changeStatus(\Constants_JobStatus::STATUS_ARCHIVED );
     }
@@ -100,7 +96,7 @@ class ProjectsController extends KleinController {
         return $this->changeStatus(\Constants_JobStatus::STATUS_ACTIVE );
     }
 
-    private function changeStatus($status){
+    protected function changeStatus($status){
 
         $chunks = $this->project->getJobs();
         Jobs_JobDao::updateAllJobsStatusesByProjectId( $this->project->id, $status );
