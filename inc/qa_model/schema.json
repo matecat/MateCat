@@ -19,7 +19,7 @@
         },
         "categories": {
           "type": "array",
-          "maxItems": 7,
+          "maxItems": 9,
           "items": {
             "$ref": "#/definitions/category"
           }
