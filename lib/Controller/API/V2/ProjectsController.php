@@ -88,6 +88,10 @@ class ProjectsController extends KleinController {
         return $this->changeStatus(\Constants_JobStatus::STATUS_CANCELLED );
     }
 
+    public function delete() {
+        return $this->changeStatus(\Constants_JobStatus::STATUS_DELETED );
+    }
+
     public function archive() {
         return $this->changeStatus(\Constants_JobStatus::STATUS_ARCHIVED );
     }
