@@ -307,11 +307,12 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null ) {
+    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null ) {
         return $this->send( 'GET', "$this->baseUrl/translate", [
                 'source'  => $source, 'target' => $target, 'q' => $text, 'context_vector' => $contextVector,
                 'hints'   => ( $hints ? implode( ',', $hints ) : null ), 'project_id' => $projectId,
-                'timeout' => ( $timeout ? ( $timeout * 1000 ) : null )
+                'timeout' => ( $timeout ? ( $timeout * 1000 ) : null ),
+                'priority' => ( $priority ?: 'normal' )
         ], false, $timeout );
     }
 
