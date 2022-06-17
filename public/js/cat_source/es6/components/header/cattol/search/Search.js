@@ -673,20 +673,6 @@ class Search extends React.Component {
                       />
                       <label> Whole word</label>
                     </div>
-                    {this.jobIsSplitted && (
-                      <div className="exact-match">
-                        <input
-                          type="checkbox"
-                          tabIndex={5}
-                          checked={this.state.search.entireJob}
-                          onChange={this.handleInputChange.bind(
-                            this,
-                            'entireJob',
-                          )}
-                        />
-                        <label> Search all chunks</label>
-                      </div>
-                    )}
                   </div>
                 </div>
                 <div className="find-element-container">
@@ -786,27 +772,45 @@ class Search extends React.Component {
                 </div>
               </div>
               {this.state.showReplaceOptionsInSearch ? (
-                <div className="find-actions">
-                  <button
-                    className={
-                      'ui basic tiny button ' + findButtonClassDisabled
-                    }
-                    onClick={this.handleSubmit.bind(this)}
-                  >
-                    FIND
-                  </button>
-                  <button
-                    className={'ui basic tiny button ' + replaceButtonsClass}
-                    onClick={this.handleReplaceClick.bind(this)}
-                  >
-                    REPLACE
-                  </button>
-                  <button
-                    className={'ui basic tiny button ' + replaceAllButtonsClass}
-                    onClick={this.handleReplaceAllClick.bind(this)}
-                  >
-                    REPLACE ALL
-                  </button>
+                <div>
+                  <div className="find-actions">
+                    <button
+                      className={
+                        'ui basic tiny button ' + findButtonClassDisabled
+                      }
+                      onClick={this.handleSubmit.bind(this)}
+                    >
+                      FIND
+                    </button>
+                    <button
+                      className={'ui basic tiny button ' + replaceButtonsClass}
+                      onClick={this.handleReplaceClick.bind(this)}
+                    >
+                      REPLACE
+                    </button>
+                    <button
+                      className={
+                        'ui basic tiny button ' + replaceAllButtonsClass
+                      }
+                      onClick={this.handleReplaceAllClick.bind(this)}
+                    >
+                      REPLACE ALL
+                    </button>
+                  </div>
+                  {this.jobIsSplitted && (
+                    <div className="find-option">
+                      <input
+                        type="checkbox"
+                        tabIndex={5}
+                        checked={this.state.search.entireJob}
+                        onChange={this.handleInputChange.bind(
+                          this,
+                          'entireJob',
+                        )}
+                      />
+                      <label> Search all chunks</label>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="find-actions">
