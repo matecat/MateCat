@@ -1639,6 +1639,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.arrows-enter:after {
                   content: 'Arrows/Enter';
                 }
+                &.space:after {
+                  content: 'Space';
+                }
               }
             }
           }
