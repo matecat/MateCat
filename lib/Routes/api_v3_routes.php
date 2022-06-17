@@ -12,6 +12,7 @@ $klein->with( '/api/v3/projects', function () {
 
 $klein->with('/api/v3/projects/[:id_project]/[:password]', function() {
     route( '/cancel', 'POST', 'API\V3\ChangeProjectStatusController', 'cancel' );
+    route( '/delete', 'POST', 'API\V3\ChangeProjectStatusController', 'delete' );
     route( '/archive', 'POST', 'API\V3\ChangeProjectStatusController', 'archive' );
     route( '/active', 'POST', 'API\V3\ChangeProjectStatusController', 'active' );
 });

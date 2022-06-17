@@ -14,6 +14,10 @@ class ChangeProjectStatusController extends ProjectsControllerV2
         return $this->changeStatus(\Constants_JobStatus::STATUS_ARCHIVED );
     }
 
+    public function delete() {
+        return $this->changeStatus(\Constants_JobStatus::STATUS_DELETED );
+    }
+
     public function active() {
         return $this->changeStatus(\Constants_JobStatus::STATUS_ACTIVE );
     }
