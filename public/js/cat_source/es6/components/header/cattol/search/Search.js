@@ -684,7 +684,7 @@ class Search extends React.Component {
                             'entireJob',
                           )}
                         />
-                        <label> Search entire job</label>
+                        <label> Search all chunks</label>
                       </div>
                     )}
                   </div>
