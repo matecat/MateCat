@@ -44,10 +44,6 @@ $.extend(window.UI, {
      * Global Translation mismatches array definition.
      */
     this.translationMismatches = []
-    /**
-     * Global Warnings array definition.
-     */
-    this.globalWarnings = []
 
     this.readonly = this.body.hasClass('archived') ? true : false
 
