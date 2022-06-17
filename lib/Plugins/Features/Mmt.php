@@ -88,6 +88,8 @@ class Mmt extends BaseFeature {
      */
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
+        //gestire il flag synca tutto o no
+
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
             return $newCreatedDbRowStruct;
         }
@@ -402,6 +404,8 @@ class Mmt extends BaseFeature {
      */
     public function postPushTMX( stdClass $file, $user, $tm_key ) {
 
+        // chiedo tutte le chiavi di mymemory ( list o get singola chiave ) e se questa key c'è mando la tmx altrimenti no
+
         //Project is not anonymous
         if ( !empty( $user ) ) {
 
@@ -485,6 +489,8 @@ class Mmt extends BaseFeature {
      * @internal param Users_UserStruct $userStruct
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ){
+
+        //usare solo se c'è la flag sync
 
         if( empty( $memoryKeyStructs ) || empty( $uid ) ){
             return;

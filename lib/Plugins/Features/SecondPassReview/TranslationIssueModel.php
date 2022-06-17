@@ -11,7 +11,7 @@ namespace Features\SecondPassReview;
 
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\SecondPassReview\Model\SegmentTranslationEventDao;
+use Features\SecondPassReview\Model\TranslationEventDao;
 use LQA\EntryDao;
 
 class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueModel {
@@ -30,7 +30,7 @@ class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueMod
         // $this->chunkReview may not refer to the chunk review associated to issue source page
         //
         $chunkReview    = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
-        $final_revision = ( new SegmentTranslationEventDao() )
+        $final_revision = ( new TranslationEventDao() )
                 ->getFinalRevisionForSegmentAndSourcePage(
                         $chunkReview->id_job,
                         $this->issue->id_segment,

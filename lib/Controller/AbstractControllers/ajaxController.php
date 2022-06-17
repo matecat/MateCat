@@ -26,6 +26,8 @@ abstract class ajaxController extends controller {
      */
     protected $received_password;
 
+    protected $api_output = [];
+
     /**
      * Carry the result from Executed Controller Action and returned in json format to the Client
      *
@@ -53,7 +55,7 @@ abstract class ajaxController extends controller {
             $output           = INIT::$CONFIG_VERSION_ERR_MESSAGE;
             $this->result     = [ "errors" => [ [ "code" => -1000, "message" => $output ] ], "data" => [] ];
             $this->api_output = [ "errors" => [ [ "code" => -1000, "message" => $output ] ], "data" => [] ];
-            \Log::doJsonLog( "Error: " . INIT::$CONFIG_VERSION_ERR_MESSAGE );
+            Log::doJsonLog( "Error: " . INIT::$CONFIG_VERSION_ERR_MESSAGE );
             $this->finalize();
             exit;
         }

@@ -13,8 +13,8 @@ use Chunks_ChunkStruct;
 use Database;
 use Features;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\BatchEventCreator;
-use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+use Features\TranslationVersions\Handlers\TranslationEventsHandler;
+use Features\TranslationVersions\Model\TranslationEvent;
 use INIT;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
@@ -60,7 +60,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $database = Database::obtain() ;
         $database->begin() ;
 
-        $batchEventCreator = new BatchEventCreator( $chunk ) ;
+        $batchEventCreator = new TranslationEventsHandler( $chunk ) ;
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() ) ;
         $batchEventCreator->setProject( $chunk->getProject() );
 
@@ -80,8 +80,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                $segmentTransaltionEvent = new SegmentTranslationEventModel( $old_translation, $new_translation, $user, $source_page ) ;
-                $batchEventCreator->addEventModel( $segmentTransaltionEvent ) ;
+                $segmentTransaltionEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page ) ;
+                $batchEventCreator->addEvent( $segmentTransaltionEvent ) ;
             }
         }
 

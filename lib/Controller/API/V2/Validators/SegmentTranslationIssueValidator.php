@@ -7,7 +7,7 @@ use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
@@ -85,7 +85,7 @@ class SegmentTranslationIssueValidator extends Base {
      */
     protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber() {
 
-        $latestSegmentEvent = ( new SegmentTranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
+        $latestSegmentEvent = ( new TranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
 
         if ( !$latestSegmentEvent && $this->translation->isICE() ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );
