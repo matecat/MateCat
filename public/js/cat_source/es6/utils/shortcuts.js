@@ -1,7 +1,28 @@
 const Shortcuts = {
   shortCutsKeyType: navigator.platform === 'MacIntel' ? 'mac' : 'standard',
+  cattol_formatting_characters: {
+    label: 'Formatting characters',
+    events: {
+      nonBreakingSpace: {
+        label: 'Non-breaking space',
+        equivalent: '',
+        keystrokes: {
+          standard: 'ctrl+shift+space',
+          mac: 'ctrl+shift+space',
+        },
+      },
+      wordJoiner: {
+        label: 'Word joiner',
+        equivalent: '',
+        keystrokes: {
+          standard: 'ctrl+alt+space',
+          mac: 'meta+alt+space',
+        },
+      },
+    },
+  },
   cattol: {
-    label: 'Translate/Revise',
+    label: 'Edit page operations',
     events: {
       openShortcutsModal: {
         label: 'Open shortcuts window',
@@ -168,7 +189,7 @@ const Shortcuts = {
         },
       },
       navigateTabs: {
-        label: 'Navigate segments Tabs',
+        label: 'Navigate segment tabs',
         equivalent: '',
         keystrokes: {
           standard: 'alt+s',

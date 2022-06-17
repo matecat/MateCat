@@ -1639,6 +1639,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.arrows-enter:after {
                   content: 'Arrows/Enter';
                 }
+                &.space:after {
+                  content: 'Space';
+                }
               }
             }
           }
@@ -1673,13 +1676,6 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     .btn-cancel {
       margin-right: 16px;
       font-weight: 100;
-    }
-    .notes-action {
-      padding-left: 196px;
-      position: relative;
-      top: 2px;
-      font-size: 12px;
-      margin-top: 12px;
     }
   }
   .boxed {
