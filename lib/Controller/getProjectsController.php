@@ -143,9 +143,14 @@ class getProjectsController extends ajaxController {
             $assignee = $this->filterAssignee( $team );
         }
 
-        $projects = ManageUtils::getProjects( $this->user, $this->start, $this->step,
+        $projects = ManageUtils::getProjects(
+            $this->user,
+            $this->start,
+            $this->step,
             $this->search_in_pname,
-            $this->search_source, $this->search_target, $this->search_status,
+            $this->search_source,
+            $this->search_target,
+            $this->search_status,
             $this->search_only_completed, $this->project_id,
             $team, $assignee,
             $this->no_assignee
