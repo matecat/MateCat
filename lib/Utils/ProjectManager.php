@@ -129,7 +129,7 @@ class ProjectManager {
                             'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
-                            'array_files_meta'             => [], //list of file names
+                            'array_files_meta'             => [], //list of file meta data
                             'file_id_list'                 => [],
                             'source_language'              => null,
                             'target_language'              => null,
