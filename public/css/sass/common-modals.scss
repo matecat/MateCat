@@ -206,6 +206,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
     }
   }
+  .user-api-text-confirm-delete {
+    label {
+      color: $black;
+    }
+  }
   .user-api-buttons {
     order: 2;
   }
@@ -231,6 +236,22 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       line-height: 30px;
     }
   }
+  &.user-api-created {
+    align-items: baseline;
+
+    .user-api-text {
+      display: flex;
+      flex-direction: row;
+      > div input {
+        height: 38px;
+        border-radius: 2px;
+      }
+      > :last-child {
+        margin-left: 3px;
+      }
+    }
+  }
+
   &.user-api-created textarea,
   &.user-api-created label {
     color: $black;
