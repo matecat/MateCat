@@ -19,7 +19,7 @@
         },
         "categories": {
           "type": "array",
-          "maxItems": 7,
+          "maxItems": 9,
           "items": {
             "$ref": "#/definitions/category"
           }
@@ -84,7 +84,7 @@
         },
         "thresholds": {
           "type": "array",
-          "maxItems": 3,
+          "maxItems": 2,
           "items": {
             "$ref": "#/definitions/passfailThreshold"
           }
@@ -98,7 +98,7 @@
         "label": {
           "type": "string",
           "enum": [
-            "T", "R1", "R2"
+            "R1", "R2"
           ]
         },
         "value": {

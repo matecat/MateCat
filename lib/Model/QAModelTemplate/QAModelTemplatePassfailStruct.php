@@ -22,8 +22,8 @@ class QAModelTemplatePassfailStruct extends DataAccess_AbstractDaoSilentStruct i
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'id_template' => $this->id_template,
+            'id' => (int)$this->id,
+            'id_template' => (int)$this->id_template,
             'type' => $this->passfail_type,
             'thresholds' => $this->thresholds,
         ];

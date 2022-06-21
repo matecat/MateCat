@@ -368,7 +368,9 @@ header {
       }
     }
   }
-
+  .user-nolog {
+    background-color: transparent;
+  }
   .ui-user-top-image {
     float: right;
     margin: 0 10px;
