@@ -73,7 +73,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   clipboardFragment: '',
   clipboardPlainText: '',
   sideOpen: false,
-  splitJob: false,
   /**
    * Update all
    */
@@ -102,9 +101,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
     $.each(segments, (i, segment) => {
-      if (segment.readonly == 'true') {
-        this.splitJob = true
-      }
       let splittedSourceAr = segment.segment.split(
         UI.splittedTranslationPlaceholder,
       )
@@ -1153,9 +1149,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   getGlobalWarnings() {
     return this._globalWarnings
-  },
-  isSplittedJob() {
-    return this.splitJob
   },
   isSidePanelToOpen: function () {
     const commentOpen = this._segments.findIndex(
