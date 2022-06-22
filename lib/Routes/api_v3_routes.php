@@ -13,8 +13,9 @@ $klein->with( '/api/v3/projects', function () {
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this do not show some info like teams and translators
     route( '/quality-report/segments', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments' );
-    route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
+    route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' ); // @TODO info su file_parts ----> la chiama la UI check con Fede
     route( '/file/[:id_file]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructions' );
+    // @TODO aggiungere /file/[:id_file]/[:id_file_part_id]instructions
     route( '/file/[:id_file]/instructions', 'POST', '\API\V3\FileInfoController', 'setInstructions' );
     route( '/metadata', 'GET', '\API\V3\MetaDataController', 'index' );
 } );

@@ -52,6 +52,7 @@ class FileInfoController extends BaseChunkController {
     }
 
     /**
+     * @TODO chi la chiama??
      * @throws NotFoundException
      */
     public function getInstructions() {
