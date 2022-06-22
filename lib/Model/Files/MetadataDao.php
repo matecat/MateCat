@@ -69,6 +69,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params )[ 0 ];
     }
 
+
     public function insert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
 
         $sql = "INSERT INTO file_metadata " .

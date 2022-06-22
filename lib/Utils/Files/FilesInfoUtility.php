@@ -40,25 +40,43 @@ class FilesInfoUtility {
         $metadataDao = new Files_MetadataDao;
         foreach ( $fileInfo as &$file ) {
             $metadata = [];
+            $filePartsIdArray = [];
             foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
-                $metadata[ $metadatum->key ] = $metadatum->value;
+
+                if($metadatum->files_parts_id !== null){
+                    $metadata[ 'files_parts' ][ (int)$metadatum->files_parts_id ][ $metadatum->key ] = $metadatum->value;
+
+                    if(!in_array($metadatum->files_parts_id, $filePartsIdArray)){
+                        $filePartsIdArray[] = (int)$metadatum->files_parts_id;
+                    }
+
+                } else {
+                    $metadata[ $metadatum->key ] = $metadatum->value;
+                }
             }
 
             $file->metadata = $metadata;
+            $file->files_parts_ids = $filePartsIdArray;
         }
 
         return ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment );
     }
 
     /**
-     * @param $id_file
+     * @param      $id_file
+     * @param null $filePartsId
      *
      * @return array|null
      */
-    public function getInstructions($id_file) {
+    public function getInstructions($id_file, $filePartsId = null) {
+
         if(\Files_FileDao::isFileInProject($id_file, $this->project->id)){
             $metadataDao = new Files_MetadataDao;
-            $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 );
+            $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions', $filePartsId, 60 * 5 );
+
+            if(!$instructions){
+                $instructions = $metadataDao->get( $this->project->id, $id_file, 'mtc:instructions', $filePartsId, 60 * 5 );
+            }
 
             if(!$instructions){
                 return null;
