@@ -43,6 +43,7 @@ class FilesInfoUtility {
 
             $metadata = [];
             $filePartsIdArray = [];
+
             foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
 
                 if($metadatum->files_parts_id !== null){
@@ -68,7 +69,9 @@ class FilesInfoUtility {
                 }
             }
 
-
+            if(!isset($metadata['files_parts'])){
+                $metadata['files_parts'] = [];
+            }
 
             if(!isset($metadata['instructions'])){
                 $metadata['instructions'] = null;
