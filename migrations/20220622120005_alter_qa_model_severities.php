@@ -3,7 +3,7 @@
 class AlterQAModelSeverities extends AbstractMatecatMigration {
 
     public $sql_up = [ '
-        ALTER TABLE `qa_model_template_severities` CHANGE COLUMN `penalty` `penalty` FLOAT(10,2) NOT NULL ;
+        ALTER TABLE `qa_model_template_severities` CHANGE COLUMN `penalty` `penalty` FLOAT(11,2) NOT NULL ;
     ' ];
 
     public $sql_down = [ '
