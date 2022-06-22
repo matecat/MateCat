@@ -90,6 +90,10 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return $this->get( $id_project, $id_file, $key, $filePartsId );
     }
 
+    public function bulkInsert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
+
+    }
+
 
     public function update( $id_project, $id_file, $key, $value, $filePartsId = null ) {
 

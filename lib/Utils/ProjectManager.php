@@ -1868,9 +1868,16 @@ class ProjectManager {
                 // @TODO BULK
                 // save custom meta data
                 if(isset($xliff_file[ 'attr' ][ 'custom' ]) and !empty($xliff_file[ 'attr' ][ 'custom' ])){
+
+
+
+
                     foreach ($xliff_file[ 'attr' ][ 'custom' ] as $key => $value) {
                         $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, $key, $value, $filePartsId );
                     }
+
+
+
                 }
             }
 
