@@ -101,6 +101,11 @@ class ProjectManager {
     protected $filter;
 
     /**
+     * @var \Files\MetadataDao
+     */
+    protected $metadataDao;
+
+    /**
      * ProjectManager constructor.
      *
      * @param ArrayObject|null $projectStructure
@@ -220,6 +225,8 @@ class ProjectManager {
         }
 
         $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
+
+        $this->metadataDao = new \Files\MetadataDao();
     }
 
     protected function _log( $_msg ) {
@@ -1857,6 +1864,13 @@ class ProjectManager {
                 $filesPartsStruct->value = $xliff_file[ 'attr' ][ 'original' ];
 
                 $filePartsId = (new \Files\FilesPartsDao())->insert($filesPartsStruct);
+
+                // save custom meta data
+                if(isset($xliff_file[ 'attr' ][ 'custom' ]) and !empty($xliff_file[ 'attr' ][ 'custom' ])){
+                    foreach ($xliff_file[ 'attr' ][ 'custom' ] as $key => $value) {
+                        $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, $key, $value, $filePartsId );
+                    }
+                }
             }
 
             foreach ( $xliff_file[ 'trans-units' ] as $xliff_trans_unit ) {
@@ -2309,9 +2323,7 @@ class ProjectManager {
 
 
     protected function _insertInstructions( $fid, $value ) {
-        $metadataDao = new \Files\MetadataDao();
-        $metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
-
+        $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
     }
 
     protected function _storeSegments( $fid ) {
