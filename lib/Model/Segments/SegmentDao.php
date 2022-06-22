@@ -662,6 +662,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $query = "SELECT j.id AS jid,
                 s.id_file,
+                s.id_file_part,
                 files.filename,
                 s.id AS sid,
                 s.segment,

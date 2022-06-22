@@ -38,7 +38,9 @@ class FilesInfoUtility {
 
         $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
         $metadataDao = new Files_MetadataDao;
+
         foreach ( $fileInfo as &$file ) {
+
             $metadata = [];
             $filePartsIdArray = [];
             foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
@@ -53,6 +55,23 @@ class FilesInfoUtility {
                 } else {
                     $metadata[ $metadatum->key ] = $metadatum->value;
                 }
+            }
+
+            $index = 0;
+            if(isset($metadata[ 'files_parts' ])){
+                foreach ($metadata[ 'files_parts' ] as $id => $filesPart){
+
+                    $filesPart['id'] = $id;
+                    $metadata[ 'files_parts' ][$index] = $filesPart;
+                    unset( $metadata[ 'files_parts' ][$id]);
+                    $index++;
+                }
+            }
+
+
+
+            if(!isset($metadata['instructions'])){
+                $metadata['instructions'] = null;
             }
 
             $file->metadata = $metadata;

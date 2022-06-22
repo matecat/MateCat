@@ -38,7 +38,6 @@ class FilesInfo {
                     'weighted_words' => $fileInfo->weighted_words,
                     'standard_words' => $fileInfo->standard_words,
                     'metadata'       => $fileInfo->metadata,
-                    'files_parts_ids'=> $fileInfo->files_parts_ids,
             ];
         }
 
