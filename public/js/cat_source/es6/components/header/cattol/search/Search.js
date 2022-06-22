@@ -12,6 +12,7 @@ import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import CommonUtils from '../../../../utils/commonUtils'
 
 class Search extends React.Component {
   constructor(props) {
@@ -358,7 +359,7 @@ class Search extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.active) {
-      this.jobIsSplitted = SegmentStore.isSplittedJob()
+      this.jobIsSplitted = CommonUtils.checkJobIsSplitted()
       if (!prevProps.active) {
         if (this.sourceEl && this.state.focus) {
           this.sourceEl.focus()
