@@ -71,7 +71,7 @@
 </body>
 
 <body tal:condition="php:supportedBrowser EQ -2">
-<div metal:use-macro="unsupported_browser.html/index"/>
+<div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 
 <body tal:condition="php:supportedBrowser EQ 1" class="started xliff-to-target-page">

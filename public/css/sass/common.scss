@@ -312,11 +312,12 @@ footer #statistics {
     flex-direction: column;
     align-items: center;
     padding-top: 40px;
-
+    height: 100%;
     .logoblack {
       background-size: 200px auto;
       width: 200px;
       height: 50px;
+      margin: 0 auto;
     }
 
     .container {
@@ -325,14 +326,15 @@ footer #statistics {
       align-items: center;
       width: 100%;
       max-width: 1024px;
-
+      padding-top: 20px;
       > h2 {
         margin-bottom: 0;
       }
 
       > p {
         color: gray;
-        margin-bottom: 60px;
+        margin-bottom: 20px;
+        text-align: center;
       }
 
       .browsers-list {
@@ -342,7 +344,9 @@ footer #statistics {
         width: 100%;
         color: gray;
       }
-
+      .link-more {
+        padding-bottom: 20px;
+      }
       .browsers-list > li {
         display: flex;
         justify-content: center;
@@ -389,47 +393,6 @@ footer #statistics {
         > :last-child {
           border-top-right-radius: 8px;
           border-bottom-right-radius: 8px;
-        }
-      }
-    }
-    /* homepage */
-    .homepage {
-      > h2 {
-        color: gray;
-        margin-bottom: 40px;
-      }
-
-      .boxes {
-        display: flex;
-        flex-direction: row;
-        color: gray;
-        > div {
-          padding: 10px;
-          margin-left: 10px;
-          margin-right: 1px;
-          border-radius: 4px;
-          > h4 {
-            font-weight: normal;
-          }
-        }
-        .browsers-box {
-          h4 {
-            text-align: center;
-          }
-        }
-
-        .browsers-list > li {
-          max-width: 120px;
-          height: 120px;
-
-          img {
-            width: 80px;
-            height: auto;
-          }
-        }
-
-        > :last-child > :last-child {
-          margin-top: 105px;
         }
       }
     }
