@@ -117,6 +117,7 @@ class LanguageSelector extends React.Component {
               selectedLanguages={selectedLanguages}
               querySearch={querySearch}
               onToggleLanguage={onToggleLanguage}
+              onResetResults={onResetResults}
             />
           </div>
 

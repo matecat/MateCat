@@ -65,7 +65,9 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
      * @var array
      */
     public $extra_parameters = [
-            'MMT-License' => "",
+        'MMT-License' => "",
+        'MMT-pretranslate' => "",
+        'MMT-preimport' => "",
     ];
 
     /**

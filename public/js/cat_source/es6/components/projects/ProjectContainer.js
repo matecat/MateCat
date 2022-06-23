@@ -136,15 +136,19 @@ class ProjectContainer extends React.Component {
   }
 
   removeProject() {
-    ManageActions.updateStatusProject(this.props.project, 'cancelled')
+    ManageActions.updateStatusProject(this.props.project, 'cancel')
   }
 
   archiveProject() {
-    ManageActions.updateStatusProject(this.props.project, 'archived')
+    ManageActions.updateStatusProject(this.props.project, 'archive')
   }
 
   activateProject() {
     ManageActions.updateStatusProject(this.props.project, 'active')
+  }
+
+  deleteProject() {
+    ManageActions.updateStatusProject(this.props.project, 'delete')
   }
 
   changeUser(value) {
@@ -251,6 +255,9 @@ class ProjectContainer extends React.Component {
             <a className="item" onClick={this.activateProject.bind(this)}>
               <i className="icon-drawer unarchive-project icon" /> Resume
               Project
+            </a>
+            <a className="item" onClick={this.deleteProject.bind(this)}>
+              <i className="icon-drawer icon-trash-o icon" /> Permanently Delete
             </a>
           </div>
         </div>
@@ -709,8 +716,20 @@ class ProjectContainer extends React.Component {
                     >
                       {this.state.projectName}
                     </div>
-                    {state}
                   </div>
+                  {(state !== '' || this.props.project.get('is_cancelled')) && (
+                    <div className="project-header-more">
+                      {state}
+                      {this.props.project.get('is_cancelled') && (
+                        <div
+                          className="ui button red"
+                          onClick={this.deleteProject.bind(this)}
+                        >
+                          Permanently Delete
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {this.moreProjectInfo()}
                 </div>
               </div>
