@@ -69,7 +69,15 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params )[ 0 ];
     }
 
-
+    /**
+     * @param      $id_project
+     * @param      $id_file
+     * @param      $key
+     * @param      $value
+     * @param null $filePartsId
+     *
+     * @return MetadataStruct
+     */
     public function insert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
 
         $sql = "INSERT INTO file_metadata " .
@@ -90,11 +98,15 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return $this->get( $id_project, $id_file, $key, $filePartsId );
     }
 
-    public function bulkInsert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
-
-    }
-
-
+    /**
+     * @param      $id_project
+     * @param      $id_file
+     * @param      $key
+     * @param      $value
+     * @param null $filePartsId
+     *
+     * @return MetadataStruct
+     */
     public function update( $id_project, $id_file, $key, $value, $filePartsId = null ) {
 
         $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
@@ -110,5 +122,38 @@ class MetadataDao extends \DataAccess_AbstractDao {
         ] );
 
         return $this->get( $id_project, $id_file, $key, $filePartsId );
+    }
+
+    /**
+     * @param       $id_project
+     * @param       $id_file
+     * @param array $metadata
+     * @param null  $filePartsId
+     *
+     * @return bool
+     */
+    public function bulkInsert( $id_project, $id_file, array $metadata = [], $filePartsId = null ) {
+
+        $sql = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
+        $bind_values   = [];
+
+        foreach ($metadata as $key => $value){
+            $sql .= "(?,?,?,?,?)";
+
+            if($value !== end($metadata)){
+                $sql .= ',';
+            }
+
+            $bind_values[] = $id_project;
+            $bind_values[] = $id_file;
+            $bind_values[] = $key;
+            $bind_values[] = $value;
+            $bind_values[] = $filePartsId;
+        }
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        return $stmt->execute( $bind_values );
     }
 }

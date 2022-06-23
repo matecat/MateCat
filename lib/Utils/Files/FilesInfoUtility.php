@@ -78,7 +78,6 @@ class FilesInfoUtility {
             }
 
             $file->metadata = $metadata;
-            $file->files_parts_ids = $filePartsIdArray;
         }
 
         return ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment );
