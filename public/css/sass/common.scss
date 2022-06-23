@@ -393,7 +393,6 @@ footer #statistics {
       }
     }
     /* homepage */
-
     .homepage {
       > h2 {
         color: gray;
@@ -406,12 +405,16 @@ footer #statistics {
         color: gray;
         > div {
           padding: 10px;
-          background-color: #f1f1f1;
           margin-left: 10px;
           margin-right: 1px;
           border-radius: 4px;
           > h4 {
             font-weight: normal;
+          }
+        }
+        .browsers-box {
+          h4 {
+            text-align: center;
           }
         }
 
@@ -4680,11 +4683,24 @@ body.side-popup {
 }
 
 @media only screen and (max-device-width: 1023px) {
+  body {
+    min-width: unset;
+  }
   .unsupported-device {
     display: block;
   }
   .unsupported-browser {
     display: none;
+  }
+  .unsupported-browser,
+  .unsupported-device {
+    .wrapper {
+      min-width: unset !important;
+      .boxes {
+        flex-direction: column !important;
+        gap: 30px;
+      }
+    }
   }
   header,
   .wrapper-claim,
