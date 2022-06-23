@@ -23,7 +23,7 @@
 
 <!-- msg to show in homepage -->
 
-<div class="unsupported-browser" metal:define-macro="indexie">
+<div class="unsupported-browser" metal:define-macro="index">
     <div class="wrapper">
         <a href="${basepath}" class="logoblack"></a>
 
@@ -49,6 +49,38 @@
                     <h4>Learn more about MateCat</h4>
                     <p>       
             <a class="button-learn-2" href="https://site.matecat.com/benefits/"><img src="/public/img/master_matecat.png" />Visit the website</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="unsupported-device" metal:define-macro="devices">
+    <div class="wrapper">
+        <a href="${basepath}" class="logoblack"></a>
+
+        <div class="container homepage">
+            <h1>Use MateCat from your desktop</h1>
+            <h2>There are 2 options for you!</h2>
+            <div class="boxes">
+                <div>
+                    <h4>Use the tool by visiting MateCat.com from your desktop<br />MateCat works great with the following browsers</h4>
+                    <ul class="browsers-list">
+                        <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
+                            <li><a href="https://www.google.com/intl/en/chrome/browser/"><img src="/public/img/chrome.jpg" /><span>Chrome</span></a></li>
+                        </tal:block>
+                        <tal:block tal:condition="php: in_array('safari', enabledBrowsers) AND platform EQ 'mac'">
+                            <li><a href="http://www.apple.com/it/safari/"><img src="/public/img/safari.jpg" /><span>Safari</span></a></li>
+                        </tal:block>
+                        <tal:block tal:condition="php: in_array('edge', enabledBrowsers)">
+                            <li><a href="https://www.microsoft.com/en-us/edge"><img src="/public/img/edge.jpg" /><span>Edge</span></a></li>
+                        </tal:block>
+                    </ul>
+                </div>
+                <div class="col-2 col-b">
+                    <h4>Learn more about MateCat</h4>
+                    <p>
+                        <a class="button-learn-2" href="https://site.matecat.com/benefits/"><img src="/public/img/master_matecat.png" />Visit the website</a></p>
                 </div>
             </div>
         </div>
