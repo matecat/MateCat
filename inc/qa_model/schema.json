@@ -19,7 +19,7 @@
         },
         "categories": {
           "type": "array",
-          "maxItems": 7,
+          "maxItems": 9,
           "items": {
             "$ref": "#/definitions/category"
           }
@@ -68,7 +68,14 @@
           "type": "integer"
         },
         "penalty": {
-          "type": "number"
+          "type": "number",
+          "format": "currency",
+          "examples": [
+            "0",
+            "0.00",
+            "0.05",
+            "19.95"
+          ]
         }
       },
       "required": ["code", "label", "penalty"]
