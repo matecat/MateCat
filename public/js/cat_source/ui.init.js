@@ -1,6 +1,9 @@
+import {createRoot} from 'react-dom/client'
+import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import SearchUtils from './es6/components/header/cattol/search/searchUtils'
 import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
+import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
 import Customizations from './es6/utils/customizations'
 import LXQ from './es6/utils/lxq.main'
@@ -63,7 +66,12 @@ $.extend(window.UI, {
         hash && hash != '' ? hash : config.last_opened_segment
     }
 
-    return UI.getSegments(options)
+    CatToolActions.onRender({
+      ...options,
+      ...(this.startSegmentId && {startSegmentId: this.startSegmentId}),
+    })
+
+    // return UI.getSegments(options)
   },
   start: function () {
     // TODO: the following variables used to be set in UI.init() which is called
@@ -77,30 +85,39 @@ $.extend(window.UI, {
       APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30)
     })
 
-    var initialRenderPromise = UI.render()
-
-    initialRenderPromise.then(function () {
-      if (
-        SegmentFilter.enabled() &&
-        SegmentFilter.getStoredState().reactState
-      ) {
-        SegmentFilter.openFilter()
-      }
-      setTimeout(function () {
-        UI.checkWarnings(true)
-      }, 1000)
-    })
-
-    $('html').trigger('start')
-
-    if (LXQ.enabled()) {
-      LXQ.initPopup()
+    // page content mount point
+    const CallbackAfterRender = () => {
+      React.useEffect(() => {
+        onPageMounted()
+      }, [])
+      return React.createElement(CatTool)
     }
-    CatToolActions.startNotifications()
-    UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
-    // Temporary js for header action menu
-    CatToolActions.renderHeader()
-    CatToolActions.renderFooter()
+    const mountPoint = createRoot($('.page-content')[0])
+    mountPoint.render(<CallbackAfterRender />)
+
+    const onPageMounted = () => {
+      const initialRenderPromise = UI.render()
+
+      /* initialRenderPromise.then(function () {
+        if (
+          SegmentFilter.enabled() &&
+          SegmentFilter.getStoredState().reactState
+        ) {
+          SegmentFilter.openFilter()
+        }
+        setTimeout(function () {
+          UI.checkWarnings(true)
+        }, 1000)
+      }) */
+
+      $('html').trigger('start')
+
+      if (LXQ.enabled()) {
+        LXQ.initPopup()
+      }
+      CatToolActions.startNotifications()
+      UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
+    }
   },
   init: function () {
     this.isMac = navigator.platform == 'MacIntel' ? true : false

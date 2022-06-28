@@ -225,6 +225,8 @@ window.UI = {
       $('#outer').addClass('loadingAfter')
     }
 
+    console.log('@ getMoreSegments ->', 'segment', segId, 'where', where)
+
     getSegments({
       jid: config.id_job,
       password: config.password,
@@ -268,6 +270,8 @@ window.UI = {
     var seg = options.segmentToOpen
       ? options.segmentToOpen
       : this.startSegmentId
+
+    console.log('# getSegments ->', 'segment', seg, 'where', where)
 
     return getSegments({
       jid: config.id_job,
@@ -317,6 +321,7 @@ window.UI = {
    * react components, closing side panel etc.
    */
   unmountSegments: function () {
+    return
     this.segmentsMountPoint.unmount()
     UI.segmentsRendered = false
 
@@ -331,9 +336,15 @@ window.UI = {
       this.unmountSegments()
     }
     var segments = []
+    console.log(
+      Object.entries(files)
+        .map(([, value]) => value.segments)
+        .flat(),
+    )
     $.each(files, function () {
       segments = segments.concat(this.segments)
     })
+    console.log('------------------------', segments)
     UI.renderSegments(segments, false, where)
     $(document).trigger('files:appended')
 
@@ -374,7 +385,7 @@ window.UI = {
       } else {
         SegmentActions.addSegments(segments, where)
       }
-      UI.registerFooterTabs()
+      // UI.registerFooterTabs()
     }
   },
 
@@ -1242,10 +1253,4 @@ window.UI = {
 
 $(document).ready(function () {
   UI.start()
-})
-
-document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  const root = createRoot(mountPoint)
-  root.render(<NotificationBox />)
 })

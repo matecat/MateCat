@@ -8,6 +8,12 @@ body.cattool {
   padding: unset;
   background-color: $grey5;
 
+  .page-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   /*header*/
   header {
     top: 0;
