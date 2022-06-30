@@ -243,7 +243,7 @@ class ProjectOptionsSanitizer {
     }
 
     /**
-     * @param $langs
+     * @param array $langs
      *
      * @return bool
      * @throws Exception
@@ -255,7 +255,7 @@ class ProjectOptionsSanitizer {
         $all_langs = array_unique( $all_langs );
         $found = count( array_intersect( $langs, $all_langs ) );
 
-        return $found === count($all_langs);
+        return $found >= 2;
     }
 
     private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {
