@@ -11,6 +11,7 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
+import CommonUtils from '../../../../utils/commonUtils'
 
 class Search extends React.Component {
   constructor(props) {
@@ -23,6 +24,7 @@ class Search extends React.Component {
         enableReplace: false,
         matchCase: false,
         exactMatch: false,
+        entireJob: false,
         replaceTarget: '',
         selectStatus: 'all',
         searchTarget: '',
@@ -49,6 +51,7 @@ class Search extends React.Component {
     this.handelKeydownFunction = this.handelKeydownFunction.bind(this)
     this.updateSearch = this.updateSearch.bind(this)
     this.dropdownInit = false
+    this.jobIsSplitted = false
   }
 
   resetSearch() {
@@ -340,6 +343,7 @@ class Search extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.active) {
+      this.jobIsSplitted = CommonUtils.checkJobIsSplitted()
       if (!prevProps.active) {
         if (this.sourceEl && this.state.focus) {
           this.sourceEl.focus()
@@ -691,25 +695,25 @@ class Search extends React.Component {
                             : null
                         }
                       />
-                      {this.state.showReplaceOptionsInSearch ? (
-                        <div
-                          className={
-                            'enable-replace-check ' + replaceCheckboxClass
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            tabIndex={5}
-                            checked={this.state.search.enableReplace}
-                            onChange={this.handleInputChange.bind(
-                              this,
-                              'enableReplace',
-                            )}
-                          />
-                          <label> Replace with</label>
-                        </div>
-                      ) : null}
                     </div>
+                    {this.state.showReplaceOptionsInSearch ? (
+                      <div
+                        className={
+                          'enable-replace-check ' + replaceCheckboxClass
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          tabIndex={5}
+                          checked={this.state.search.enableReplace}
+                          onChange={this.handleInputChange.bind(
+                            this,
+                            'enableReplace',
+                          )}
+                        />
+                        <label> Replace with</label>
+                      </div>
+                    ) : null}
                   </div>
                   {this.state.showReplaceOptionsInSearch &&
                   this.state.search.enableReplace ? (
@@ -769,27 +773,45 @@ class Search extends React.Component {
                 </div>
               </div>
               {this.state.showReplaceOptionsInSearch ? (
-                <div className="find-actions">
-                  <button
-                    className={
-                      'ui basic tiny button ' + findButtonClassDisabled
-                    }
-                    onClick={this.handleSubmit.bind(this)}
-                  >
-                    FIND
-                  </button>
-                  <button
-                    className={'ui basic tiny button ' + replaceButtonsClass}
-                    onClick={this.handleReplaceClick.bind(this)}
-                  >
-                    REPLACE
-                  </button>
-                  <button
-                    className={'ui basic tiny button ' + replaceAllButtonsClass}
-                    onClick={this.handleReplaceAllClick.bind(this)}
-                  >
-                    REPLACE ALL
-                  </button>
+                <div>
+                  <div className="find-actions">
+                    <button
+                      className={
+                        'ui basic tiny button ' + findButtonClassDisabled
+                      }
+                      onClick={this.handleSubmit.bind(this)}
+                    >
+                      FIND
+                    </button>
+                    <button
+                      className={'ui basic tiny button ' + replaceButtonsClass}
+                      onClick={this.handleReplaceClick.bind(this)}
+                    >
+                      REPLACE
+                    </button>
+                    <button
+                      className={
+                        'ui basic tiny button ' + replaceAllButtonsClass
+                      }
+                      onClick={this.handleReplaceAllClick.bind(this)}
+                    >
+                      REPLACE ALL
+                    </button>
+                  </div>
+                  {this.jobIsSplitted && (
+                    <div className="find-option">
+                      <input
+                        type="checkbox"
+                        tabIndex={5}
+                        checked={this.state.search.entireJob}
+                        onChange={this.handleInputChange.bind(
+                          this,
+                          'entireJob',
+                        )}
+                      />
+                      <label> Search all chunks</label>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="find-actions">

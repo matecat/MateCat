@@ -292,17 +292,23 @@ button#exec-replace {
           }
           .find-exact-match {
             display: flex;
+            gap: 12px;
             .exact-match {
-              &:first-child {
-                margin-right: 13px;
-              }
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              line-height: 21px;
             }
           }
           .find-in-target {
-            input {
-              margin-bottom: 5px;
-            }
-            .enable-replace-check.disable {
+            margin-bottom: 5px;
+          }
+          .enable-replace-check {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 21px;
+            &.disable {
               opacity: 0.5;
             }
           }
@@ -348,7 +354,6 @@ button#exec-replace {
           justify-content: flex-end;
           align-items: flex-start;
           margin-top: 4px;
-
           button {
             border-radius: 2px;
             &:hover,
@@ -365,6 +370,12 @@ button#exec-replace {
               box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
             }
           }
+        }
+        .find-option {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-top: 7px;
         }
       }
       .search-display {
