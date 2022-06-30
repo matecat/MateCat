@@ -52,9 +52,13 @@ class JobUrlBuilder {
 
         // 5. add segment id only if belongs to the job
         $segmentId = null;
-        if ( isset( $options[ 'id_segment' ] ) ) {
-            if ( ( $job->job_first_segment <= $options[ 'id_segment' ] ) and ( $options[ 'id_segment' ] <= $job->job_last_segment ) ) {
-                $segmentId = $options[ 'id_segment' ];
+        if(isset( $options[ 'id_segment' ] )){
+            if(isset( $options[ 'skip_check_segment' ] ) and isset( $options[ 'skip_check_segment' ] ) === true){
+                $segmentId = (isset( $options[ 'id_segment' ] ) ) ? $options[ 'id_segment' ] : null;
+            } else {
+                if ( ( $job->job_first_segment <= $options[ 'id_segment' ] ) and ( $options[ 'id_segment' ] <= $job->job_last_segment ) ) {
+                    $segmentId = $options[ 'id_segment' ];
+                }
             }
         }
 
