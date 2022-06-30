@@ -24,19 +24,27 @@ class ManageUtils {
      *
      * @return array
      */
-    protected static function _getProjects( Users_UserStruct $user, $start, $step,
-                                            $search_in_pname, $search_source, $search_target,
-                                            $search_status, $search_only_completed,
-                                            $project_id,
-                                            \Teams\TeamStruct $team = null,
-                                            Users_UserStruct $assignee = null,
-                                            $no_assignee
-
+    protected static function _getProjects(
+        Users_UserStruct $user,
+        $start,
+        $step,
+        $search_in_pname,
+        $search_source,
+        $search_target,
+        $search_status,
+        $search_only_completed,
+        $project_id,
+        \Teams\TeamStruct $team = null,
+        Users_UserStruct $assignee = null,
+        $no_assignee
     ) {
 
         list( $conditions, $data ) = static::conditionsForProjectsQuery(
-                $search_in_pname, $search_source, $search_target,
-                $search_status, $search_only_completed
+            $search_in_pname,
+            $search_source,
+            $search_target,
+            $search_status,
+            $search_only_completed
         );
 
         if ( $project_id ) {
@@ -96,25 +104,40 @@ class ManageUtils {
      * @throws Exception
      */
     public static function getProjects(
-            Users_UserStruct $user, $start, $step, $search_in_pname,
-            $search_source, $search_target, $search_status, $search_only_completed,
+            Users_UserStruct $user,
+            $start,
+            $step,
+            $search_in_pname,
+            $search_source,
+            $search_target,
+            $search_status,
+            $search_only_completed,
             $project_id,
             \Teams\TeamStruct $team = null,
             Users_UserStruct $assignee = null,
             $no_assignee = false
     ) {
-
         $id_list = static::_getProjects(
-            $user, $start, $step, $search_in_pname, $search_source, $search_target,
-            $search_status, $search_only_completed, $project_id, $team,
-            $assignee, $no_assignee
+            $user,
+            $start,
+            $step,
+            $search_in_pname,
+            $search_source,
+            $search_target,
+            $search_status,
+            $search_only_completed,
+            $project_id,
+            $team,
+            $assignee,
+            $no_assignee
         );
 
         $_projects = new Projects_ProjectDao();
         $projects = $_projects->getByIdList( $id_list );
 
-        $projectRenderer = new Project( $projects );
+        $projectRenderer = new Project( $projects, $search_status );
         $projectRenderer->setUser( $user );
+
         return $projectRenderer->render();
 
     }
