@@ -331,6 +331,24 @@ class Mmt extends BaseFeature {
                 $result = $engine->getContext( $tmpFileObject, $source, $targets );
 
                 $jMetadataDao = new \Jobs\MetadataDao();
+
+                // @TODO salvare chiavi MMT dell'utente sulla base del progetto
+
+                //retrieve OWNER MMT License
+                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+                if ( !empty( $ownerMmtEngineMetaData ) ) {
+
+                    /**
+                     * @var Engines_MMT $MMTEngine
+                     */
+                    $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                    $MMTEngine->activate( $memoryKeyStructs );
+
+                }
+
+
+
+
                 Database::obtain()->begin();
                 foreach( $result as $langPair => $context ){
                     $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
@@ -415,6 +433,12 @@ class Mmt extends BaseFeature {
             try {
 
                 if ( !empty( $ownerMmtEngineMetaData ) ) {
+
+                    // @TODO import tmx: chiamare mmt solo se la tmx è importata su una chiave esistente in MMT ( CHIAMARE API PER LA LISTA  chiedere a Davide l'api )
+
+
+
+
                     /**
                      * @var Engines_MMT $MMTEngine
                      */
@@ -467,6 +491,8 @@ class Mmt extends BaseFeature {
             $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ] = $data->engineData[ 'pretranslate' ];
             $newEngineStruct->extra_parameters[ 'MMT-preimport' ]    = $data->engineData[ 'preimport' ];
 
+            // @TODO hook sul plugin di Translated: se l'utente di Translated MMT-preimport deve essere false
+
             return $newEngineStruct;
         }
 
@@ -474,7 +500,9 @@ class Mmt extends BaseFeature {
 
     }
 
-    /**
+
+    /** // @TODO togliere questo metodo
+     *
      * Called in @see \ProjectManager::setPrivateTMKeys()
      * Called in @see \userKeysController::doAction()
      *
@@ -486,6 +514,8 @@ class Mmt extends BaseFeature {
      * @internal param Users_UserStruct $userStruct
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ){
+
+
 
         if( empty( $memoryKeyStructs ) || empty( $uid ) ){
             return;
