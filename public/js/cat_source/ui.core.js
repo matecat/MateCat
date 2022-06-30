@@ -385,7 +385,7 @@ window.UI = {
       } else {
         SegmentActions.addSegments(segments, where)
       }
-      // UI.registerFooterTabs()
+      UI.registerFooterTabs()
     }
   },
 

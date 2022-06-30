@@ -19,23 +19,22 @@ function CatTool() {
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
 
-  // actions listener
+  // action listeners
   useEffect(() => {
-    const onRenderOptions = (options) => {
+    const onRenderHandler = (options) => {
       const {actionType, startSegmentId, ...restOptions} = options // eslint-disable-line
       setOptions((prevState) => ({...prevState, ...restOptions}))
       if (startSegmentId) startSegmentIdRef.current = startSegmentId
       console.log(options)
     }
-
-    CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderOptions)
+    CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
 
     return () => {
-      CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderOptions)
+      CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
     }
   }, [])
 
-  // load segments
+  // get segments
   useEffect(() => {
     let wasCleaned = false
 
@@ -44,7 +43,12 @@ function CatTool() {
     const openCurrentSegmentAfter = options?.openCurrentSegmentAfter
     const where = startSegmentId ? 'center' : 'after'
 
-    const parseData = (data) => {
+    // handle data segments init
+    const parseDataInit = (data) => {
+      // TODO: da verificare se serve: $(document).trigger('segments:load', data.data)
+      $(document).trigger('segments:load', data.data)
+      if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
+
       const where = data.where
 
       if (!startSegmentId) {
@@ -66,30 +70,32 @@ function CatTool() {
           )
       }
       CatToolActions.updateFooterStatistics()
+      // TODO: da verificare se serve: $(document).trigger('getSegments_success')
       $(document).trigger('getSegments_success')
+
+      setIsLoadingSegments(false)
+      setWasSegmentsInit(true)
+    }
+    // handle errors segments init
+    const onErrorInit = (errors) => {
+      if (errors.length) UI.processErrors(errors, 'getSegments')
+      OfflineUtils.failedConnection(0, 'getSegments')
     }
 
     getSegments({
       jid: config.id_job,
       password: config.password,
-      step: 40,
+      step: where === 'center' ? 40 : UI.moreSegNum,
       segment: segmentToOpen ? segmentToOpen : startSegmentId,
       where,
     })
       .then((data) => {
         if (wasCleaned) return
-
-        // TODO: da verificare se serve: $(document).trigger('segments:load', data.data)
-        $(document).trigger('segments:load', data.data)
-        if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
-        parseData(data.data)
-        setIsLoadingSegments(false)
-        setWasSegmentsInit(true)
+        parseDataInit(data.data)
       })
       .catch((errors) => {
         if (wasCleaned) return
-        if (errors.length) UI.processErrors(errors, 'getSegments')
-        OfflineUtils.failedConnection(0, 'getSegments')
+        onErrorInit(errors)
       })
 
     setIsLoadingSegments(true)
