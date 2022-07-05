@@ -51,7 +51,10 @@ class NewController extends ajaxController {
     const MAX_NUM_KEYS = 6;
 
     private static $allowed_seg_rules = [
-            'standard', 'patent', ''
+            'standard',
+            'patent',
+            'paragraph',
+            ''
     ];
 
     protected $api_output = [
