@@ -31,6 +31,8 @@ use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use stdClass;
 use TaskRunner\Commons\QueueElement;
+use TmKeyManagement\UserKeysModel;
+use TmKeyManagement_Filter;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -96,6 +98,24 @@ class Mmt extends BaseFeature {
 
         try {
 
+            $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
+            $preImport = $extraParams['MMT-preimport'];
+
+            $preImport = true;
+
+            // if the MMT-preimport flag is enabled,
+            // then all the user's MyMemory keys must be sent to MMT
+            // when the engine is created
+            if($preImport === true){
+
+                $engineMmt = new Engines_MMT($newCreatedDbRowStruct);
+
+                /** @var TmKeyManagement_MemoryKeyStruct $key */
+                foreach (self::getKeyList($userStruct->uid) as $key){
+                    $engineMmt->createMemory($key->tm_key->name, null, $key->tm_key->key);
+                }
+            }
+
             /**
              * @var $newTestCreatedMT Engines_MMT
              */
@@ -118,6 +138,20 @@ class Mmt extends BaseFeature {
 
         return $newCreatedDbRowStruct;
 
+    }
+
+    /**
+     * @param $uid
+     *
+     * @return array|void
+     * @throws Exception
+     */
+    private static function getKeyList($uid) {
+
+        $_keyDao = new TmKeyManagement_MemoryKeyDao();
+        $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
+
+        return $_keyDao->read( $dh );
     }
 
     /**
@@ -332,22 +366,21 @@ class Mmt extends BaseFeature {
 
                 $jMetadataDao = new \Jobs\MetadataDao();
 
-                // @TODO salvare chiavi MMT dell'utente sulla base del progetto
+                // Save user MMT keys on a project basis
+                if( isset( $_SESSION[ 'uid' ] ) and !empty($_SESSION[ 'uid' ] ) ){
 
-                //retrieve OWNER MMT License
-                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
-                if ( !empty( $ownerMmtEngineMetaData ) ) {
+                    // retrieve OWNER MMT License
+                    $uid = $_SESSION[ 'uid' ];
+                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+                    if ( !empty( $ownerMmtEngineMetaData ) ) {
 
-                    /**
-                     * @var Engines_MMT $MMTEngine
-                     */
-                    $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                    $MMTEngine->activate( $memoryKeyStructs );
-
+                        /**
+                         * @var Engines_MMT $MMTEngine
+                         */
+                        $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                        $MMTEngine->activate( $memoryKeyStructs );
+                    }
                 }
-
-
-
 
                 Database::obtain()->begin();
                 foreach( $result as $langPair => $context ){
@@ -420,7 +453,7 @@ class Mmt extends BaseFeature {
      */
     public function postPushTMX( stdClass $file, $user, $tm_key ) {
 
-        //Project is not anonymous
+        // Project is not anonymous
         if ( !empty( $user ) ) {
 
             $uStruct = $user;
@@ -435,9 +468,6 @@ class Mmt extends BaseFeature {
                 if ( !empty( $ownerMmtEngineMetaData ) ) {
 
                     // @TODO import tmx: chiamare mmt solo se la tmx è importata su una chiave esistente in MMT ( CHIAMARE API PER LA LISTA  chiedere a Davide l'api )
-
-
-
 
                     /**
                      * @var Engines_MMT $MMTEngine
@@ -460,9 +490,8 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see engineController::add()
+     * Called in @param $isValid
      *
-     * @param $isValid
      * @param $data             (object)[
      *                          'providerName' => '',
      *                          'logged_user'  => Users_UserStruct,
@@ -470,10 +499,22 @@ class Mmt extends BaseFeature {
      *                          ]
      *
      * @return EnginesModel_EngineStruct|bool
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @see engineController::add()
+     *
      */
     public function buildNewEngineStruct( $isValid, $data ){
 
         if( strtolower( Constants_Engines::MMT ) == $data->providerName ){
+
+            /**
+             * @var $featureSet FeatureSet
+             */
+            $featureSet = $data->featureSet;
 
             /**
              * @var $logged_user Users_UserStruct
@@ -491,7 +532,10 @@ class Mmt extends BaseFeature {
             $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ] = $data->engineData[ 'pretranslate' ];
             $newEngineStruct->extra_parameters[ 'MMT-preimport' ]    = $data->engineData[ 'preimport' ];
 
-            // @TODO hook sul plugin di Translated: se l'utente di Translated MMT-preimport deve essere false
+            $newEngineStruct = $featureSet->filter( 'disableMMTPreimport', (object)[
+                'logged_user'  => $logged_user,
+                'newEngineStruct'   => $newEngineStruct
+            ] );
 
             return $newEngineStruct;
         }
@@ -530,10 +574,7 @@ class Mmt extends BaseFeature {
              */
             $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
             $MMTEngine->activate( $memoryKeyStructs );
-
         }
-
-
     }
 
 }

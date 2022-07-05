@@ -61,10 +61,19 @@ class Engines_MMT extends Engines_AbstractEngine {
             'LanguagePairNotSupportedException' => self::LanguagePairNotSupportedException
     ];
 
+    /**
+     * Get MMTServiceApi client
+     *
+     * @return MMTServiceApi
+     */
     protected function _getClient() {
+
+        $extraParams = $this->engineRecord->getExtraParamsAsArray();
+        $license = $extraParams[ 'MMT-License' ];
+
         return Engines\MMT\MMTServiceApi::newInstance()
                 ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
-                ->setLicense( $this->engineRecord->extra_parameters[ 'MMT-License' ] );
+                ->setLicense( $license );
     }
 
     /**
@@ -324,6 +333,14 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         return $this->result;
 
+    }
+
+    public function createMemory($name, $description = null, $externalId = null) {
+
+        $client       = $this->_getClient();
+        $this->result = $client->createMemory( $name, $description, $externalId );
+
+        return $this->result;
     }
 
     /**

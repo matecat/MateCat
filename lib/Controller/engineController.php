@@ -285,10 +285,12 @@ class engineController extends ajaxController {
 
             default:
 
+                // MMT
                 $validEngine = $newEngineStruct = $this->featureSet->filter( 'buildNewEngineStruct', false, (object)[
-                        'providerName' => $this->provider,
-                        'logged_user'  => $this->user,
-                        'engineData'   => $this->engineData
+                    'featureSet'   => $this->featureSet,
+                    'providerName' => $this->provider,
+                    'logged_user'  => $this->user,
+                    'engineData'   => $this->engineData
                 ] );
                 break;
 
@@ -305,6 +307,7 @@ class engineController extends ajaxController {
         $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
         $newTestCreatedMT      = null;
+
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
         }
