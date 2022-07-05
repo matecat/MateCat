@@ -69,6 +69,7 @@ $.extend(window.UI, {
     CatToolActions.onRender({
       ...options,
       ...(this.startSegmentId && {startSegmentId: this.startSegmentId}),
+      where: 'center',
     })
 
     // return UI.getSegments(options)

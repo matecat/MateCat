@@ -189,6 +189,8 @@ window.UI = {
   },
 
   getMoreSegments: function (where) {
+    SegmentActions.getMoreSegments({where})
+    return
     if (where == 'after' && this.noMoreSegmentsAfter) {
       return
     }

@@ -1221,6 +1221,12 @@ const SegmentActions = {
       limit,
     })
   },
+  getMoreSegments: ({where}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.GET_MORE_SEGMENTS,
+      where,
+    })
+  },
 }
 
 export default SegmentActions

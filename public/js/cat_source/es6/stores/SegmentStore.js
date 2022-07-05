@@ -1817,6 +1817,11 @@ AppDispatcher.register(function (action) {
         limit: action.limit,
       })
       break
+    case SegmentConstants.GET_MORE_SEGMENTS:
+      SegmentStore.emitChange(SegmentConstants.GET_MORE_SEGMENTS, {
+        where: action.where,
+      })
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }
