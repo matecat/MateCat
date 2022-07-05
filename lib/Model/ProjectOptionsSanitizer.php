@@ -243,7 +243,11 @@ class ProjectOptionsSanitizer {
     }
 
     /**
+<<<<<<< HEAD
      * @param $langs
+=======
+     * @param array $langs
+>>>>>>> master-fix-segmentation_rule
      *
      * @return bool
      * @throws Exception
