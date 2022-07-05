@@ -878,8 +878,11 @@ class NewController extends ajaxController {
             $this->metadata[ 'project_completion' ] = $this->postInput[ 'project_completion' ];
         }
 
-        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
+        if ( !empty( $this->postInput[ 'segmentation_rule' ] ) ) {
+            $this->metadata[ 'segmentation_rule' ] = $this->postInput[ 'segmentation_rule' ];
+        }
 
+        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
         $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
                 'input' => $this->postInput
         ] );
