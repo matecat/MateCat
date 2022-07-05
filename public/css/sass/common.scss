@@ -58,7 +58,7 @@ ul {
   float: left;
   border: 0;
   background: url(../../img/logo_matecat.png) 0px 0px no-repeat;
-  width: 180px;
+  width: 185px;
   height: 38px;
   background-size: cover;
   //margin-top: 5px;
@@ -4619,7 +4619,7 @@ body.side-popup {
   color: #3aa9dd;
 }
 
-@media only screen and (max-device-width: 1023px) {
+@media (max-device-width: 1023px) {
   body {
     min-width: unset;
     background-color: #f5f6f7;
