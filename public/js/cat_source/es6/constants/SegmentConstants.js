@@ -102,4 +102,5 @@ module.exports = keyMirror({
   TOGGLE_CHARACTER_COUNTER: null,
   CHARACTER_COUNTER: null,
   GET_MORE_SEGMENTS: null,
+  REMOVE_ALL_SEGMENTS: null,
 })

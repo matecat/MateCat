@@ -1822,6 +1822,13 @@ AppDispatcher.register(function (action) {
         where: action.where,
       })
       break
+    case SegmentConstants.REMOVE_ALL_SEGMENTS:
+      SegmentStore.removeAllSegments()
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }

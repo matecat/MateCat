@@ -181,7 +181,7 @@ function SegmentsContainer({
   )
 
   const onScroll = useCallback(() => {
-    if (!listRef?.current || scrollToSid) return
+    if (!listRef?.current || scrollToSid || !essentialRows.length) return
 
     const scrollValue = listRef.current.scrollTop
     const scrollBottomValue =
@@ -197,7 +197,7 @@ function SegmentsContainer({
     }
     persistance.lastScrollTop = scrollValue
     setScrollTopVisible(scrollValue > 400)
-  }, [scrollToSid])
+  }, [scrollToSid, essentialRows])
 
   // segments details - ex. div collection type ecc.
   const segmentsDetails = useMemo(() => {
@@ -286,7 +286,13 @@ function SegmentsContainer({
 
   // add actions listener
   useEffect(() => {
-    const renderSegments = (segments) => setSegments(segments)
+    const renderSegments = (segments) => {
+      setSegments(segments)
+      if (!segments.size) {
+        setRows([])
+        setEssentialRows([])
+      }
+    }
     const scrollToSegment = (sid) => {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)

@@ -21,8 +21,8 @@ function CatTool() {
 
   const {isLoading: isLoadingSegments, result: segmentsResult} =
     useSegmentsLoader({
-      segmentToOpen: options?.segmentToOpen
-        ? options?.segmentToOpen
+      segmentId: options?.segmentId
+        ? options?.segmentId
         : startSegmentIdRef.current,
       where: options?.where ? options?.where : 'after',
     })
@@ -45,14 +45,37 @@ function CatTool() {
     // CatTool onRender action
     const onRenderHandler = (options) => {
       const {actionType, startSegmentId, ...restOptions} = options // eslint-disable-line
-      setOptions((prevState) => ({...prevState, ...restOptions}))
+      setOptions((prevState) => ({
+        ...prevState,
+        ...(options.segmentToOpen && {segmentId: options.segmentToOpen}),
+        ...restOptions,
+      }))
       if (startSegmentId) startSegmentIdRef.current = startSegmentId
       console.log(options)
     }
     CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
 
-    // Segments getMoreSegments action
-    const getMoreSegments = ({where}) => console.log('where', where)
+    // getMoreSegments action
+    const getMoreSegments = ({where}) => {
+      const segmentId =
+        where === 'after'
+          ? SegmentStore.getLastSegmentId()
+          : where === 'before'
+          ? SegmentStore.getFirstSegmentId()
+          : ''
+
+      setOptions((prevState) => ({...prevState, segmentId, where}))
+
+      // TODO old code
+      if (where == 'before') {
+        $('section').each(function () {
+          if ($(this).offset().top > $(window).scrollTop()) {
+            UI.segMoving = UI.getSegmentId($(this))
+            return false
+          }
+        })
+      }
+    }
     SegmentStore.addListener(
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
@@ -84,9 +107,9 @@ function CatTool() {
       return
     }
 
-    const {segmentToOpen, data} = segmentsResult
-    // Init segments
+    const {segmentId, data} = segmentsResult
     if (where === 'center') {
+      // Init segments
       const startSegmentId = startSegmentIdRef?.current
       // TODO: da verificare se serve: $(document).trigger('segments:load', data)
       $(document).trigger('segments:load', data)
@@ -100,7 +123,7 @@ function CatTool() {
       $('body').addClass('loaded')
 
       if (typeof data.files !== 'undefined') {
-        if (options?.openCurrentSegmentAfter && !segmentToOpen)
+        if (options?.openCurrentSegmentAfter && !segmentId)
           SegmentActions.openSegment(
             UI.firstLoad ? UI.currentSegmentId : startSegmentId,
           )
@@ -112,6 +135,8 @@ function CatTool() {
       onInitSegments()
     } else {
       // more segments
+      // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
+      $(window).trigger('segmentsAdded', {resp: data.files})
     }
   }, [segmentsResult, options?.openCurrentSegmentAfter, onInitSegments])
 
@@ -140,7 +165,18 @@ function CatTool() {
 
       <div className="main-container">
         <div data-mount="review-side-panel"></div>
-        <div id="outer" className={isLoadingSegments ? 'loading' : ''}>
+        <div
+          id="outer"
+          className={
+            isLoadingSegments
+              ? options?.where === 'before'
+                ? 'loadingBefore'
+                : options?.where === 'after'
+                ? 'loadingAfter'
+                : 'loading'
+              : ''
+          }
+        >
           <article id="file" className="loading mbc-commenting-closed">
             <div className="article-segments-container">
               <SegmentsContainer

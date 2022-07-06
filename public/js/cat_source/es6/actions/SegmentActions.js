@@ -1227,6 +1227,11 @@ const SegmentActions = {
       where,
     })
   },
+  removeAllSegments: () => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.REMOVE_ALL_SEGMENTS,
+    })
+  },
 }
 
 export default SegmentActions

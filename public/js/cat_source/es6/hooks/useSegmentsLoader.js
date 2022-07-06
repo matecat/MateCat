@@ -1,10 +1,11 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {getSegments} from '../api/getSegments'
 import SegmentActions from '../actions/SegmentActions'
+import SegmentStore from '../stores/SegmentStore'
 
 function useSegmentsLoader({
-  segmentToOpen,
+  segmentId,
   where = 'center',
   idJob = config.id_job,
   password = config.password,
@@ -12,15 +13,29 @@ function useSegmentsLoader({
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(undefined)
 
+  const loadingInfo = useRef({
+    isLoading: false,
+    thereAreNoItemsBefore: false,
+    thereAreNoItemsAfter: false,
+  })
+
   useEffect(() => {
-    if (!segmentToOpen) return
+    const {current} = loadingInfo
+    if (
+      !segmentId ||
+      current.isLoading ||
+      (where === 'before' && current.thereAreNoItemsBefore) ||
+      (where === 'after' && current.thereAreNoItemsAfter)
+    )
+      return
 
     let wasCleaned = false
+
     getSegments({
       jid: idJob,
       password,
       step: where === 'center' ? 40 : UI.moreSegNum,
-      segment: segmentToOpen,
+      segment: segmentId,
       where,
     })
       .then(({data}) => {
@@ -31,27 +46,41 @@ function useSegmentsLoader({
             .map(([, value]) => value.segments)
             .flat()
           SegmentActions.addSegments(segments, where)
+
+          const isFilesObjectEmpty = Object.keys(data.files).length === 0
+          if (isFilesObjectEmpty && where === 'before')
+            current.thereAreNoItemsBefore = true
+          if (
+            isFilesObjectEmpty &&
+            SegmentStore.getLastSegmentId() === config.last_job_segment &&
+            where === 'after'
+          )
+            current.thereAreNoItemsAfter = true
         }
-        setResult({data, segmentToOpen, where: data.where})
+        setResult({data, segmentId, where: data.where})
       })
       .catch((errors) => {
         if (wasCleaned) return
         setResult({errors, where})
       })
-      .finally(() => setIsLoading(false))
+      .finally(() => {
+        setIsLoading(false)
+        current.isLoading = false
+      })
 
     setIsLoading(true)
+    current.isLoading = true
 
     return () => {
       wasCleaned = true
     }
-  }, [segmentToOpen, where, idJob, password])
+  }, [segmentId, where, idJob, password])
 
   return {isLoading, result}
 }
 
 useSegmentsLoader.propTypes = {
-  segmentToOpen: PropTypes.string.isRequired,
+  segmentId: PropTypes.string.isRequired,
   where: PropTypes.string,
   idJob: PropTypes.string,
   password: PropTypes.string,
