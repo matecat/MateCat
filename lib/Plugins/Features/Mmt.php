@@ -16,6 +16,7 @@ use Constants_Engines;
 use Contribution\ContributionSetStruct;
 use Database;
 use Engine;
+use Engines\MMT\MMTServiceApi;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use EnginesModel_EngineDAO;
@@ -109,7 +110,7 @@ class Mmt extends BaseFeature {
                 $engineMmt = new Engines_MMT($newCreatedDbRowStruct);
 
                 /** @var TmKeyManagement_MemoryKeyStruct $key */
-                foreach ( self::getCompleteKeyListForUser($userStruct->uid) as $key){
+                foreach ( self::_getKeyringOwnerKeysByUid($userStruct->uid) as $key){
                     $engineMmt->createMemory($key->tm_key->name, null, $key->tm_key->key);
                 }
             }
@@ -139,20 +140,6 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param $uid
-     *
-     * @return array|void
-     * @throws Exception
-     */
-    private static function getCompleteKeyListForUser( $uid) {
-
-        $_keyDao = new TmKeyManagement_MemoryKeyDao();
-        $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
-
-        return $_keyDao->read( $dh );
-    }
-
-    /**
      * Called in @see engineController::add()
      *
      * @param $errorObject
@@ -168,9 +155,9 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see engineController::disable()
-     *
-     * @param EnginesModel_EngineStruct $engineStruct
+     * Called in @param EnginesModel_EngineStruct $engineStruct
+     * @throws Exception
+     * @see engineController::disable()
      */
     public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
 
@@ -181,10 +168,19 @@ class Mmt extends BaseFeature {
 
             if( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ){
                 $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
+
+                // @TODO Devo controllare il parametro MMT-preimport?
+                $extraParams = $engineStruct->getExtraParamsAsArray();
+                $extraParams['MMT-preimport'];
+
+                $mmt = new Engines_MMT($engineStruct);
+                $memories = $mmt->getAllMemories();
+
+                foreach ($memories as $memory){
+                    $mmt->deleteMemory($memory['externalId']);
+                }
             }
-
         }
-
     }
 
     /**
@@ -241,18 +237,19 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param Users_UserStruct $LoggedUser
+     * @param $uid
      *
      * @return TmKeyManagement_MemoryKeyStruct[]
+     * @throws Exception
      */
-    protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
+    private static function _getKeyringOwnerKeysByUid( $uid) {
 
         /*
          * Take the keys of the user
          */
         try {
             $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $LoggedUser->uid ] );
+            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
             $keyList = [];
@@ -260,7 +257,17 @@ class Mmt extends BaseFeature {
         }
 
         return $keyList;
+    }
 
+    /**
+     * @param Users_UserStruct $LoggedUser
+     *
+     * @return TmKeyManagement_MemoryKeyStruct[]
+     * @throws Exception
+     */
+    protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
+
+        return self::_getKeyringOwnerKeysByUid($LoggedUser->uid);
     }
 
     /**
@@ -560,39 +567,6 @@ class Mmt extends BaseFeature {
 
         return $isValid;
 
-    }
-
-
-    /** // @TODO togliere questo metodo
-     *
-     * Called in @see \ProjectManager::setPrivateTMKeys()
-     * Called in @see \userKeysController::doAction()
-     *
-     * @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
-     * @param                  $uid              integer
-     *
-     * @throws Exception
-     * @throws \Engines\MMT\MMTServiceApiException
-     * @internal param Users_UserStruct $userStruct
-     */
-    public function postTMKeyCreation( $memoryKeyStructs, $uid ){
-
-
-
-        if( empty( $memoryKeyStructs ) || empty( $uid ) ){
-            return;
-        }
-
-        //retrieve OWNER MMT License
-        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
-        if ( !empty( $ownerMmtEngineMetaData ) ) {
-
-            /**
-             * @var Engines_MMT $MMTEngine
-             */
-            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-            $MMTEngine->activate( $memoryKeyStructs );
-        }
     }
 
 }

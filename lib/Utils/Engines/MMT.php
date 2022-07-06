@@ -398,4 +398,34 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function deleteMemory($id)
+    {
+        $client = $this->_getClient();
+
+        return $client->deleteMemory($id);
+    }
+
+    /**
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function getAllMemories()
+    {
+        $client = $this->_getClient();
+
+        return $client->getAllMemories();
+    }
+
+    public function getMemory($id)
+    {
+        $client = $this->_getClient();
+
+       // return $client->getMemory($id);
+    }
 }
