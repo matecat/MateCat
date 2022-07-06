@@ -101,8 +101,6 @@ class Mmt extends BaseFeature {
             $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
             $preImport = $extraParams['MMT-preimport'];
 
-            $preImport = true;
-
             // if the MMT-preimport flag is enabled,
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
@@ -111,7 +109,7 @@ class Mmt extends BaseFeature {
                 $engineMmt = new Engines_MMT($newCreatedDbRowStruct);
 
                 /** @var TmKeyManagement_MemoryKeyStruct $key */
-                foreach (self::getKeyList($userStruct->uid) as $key){
+                foreach ( self::getCompleteKeyListForUser($userStruct->uid) as $key){
                     $engineMmt->createMemory($key->tm_key->name, null, $key->tm_key->key);
                 }
             }
@@ -146,7 +144,7 @@ class Mmt extends BaseFeature {
      * @return array|void
      * @throws Exception
      */
-    private static function getKeyList($uid) {
+    private static function getCompleteKeyListForUser( $uid) {
 
         $_keyDao = new TmKeyManagement_MemoryKeyDao();
         $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
@@ -334,6 +332,7 @@ class Mmt extends BaseFeature {
      */
     public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
 
+        $pid = $projectRows[ 'id' ];
         $engine = Engine::getInstance( $projectRows[ 'id_mt_engine' ] );
 
         if( $engine instanceof Engines_MMT ){
@@ -366,19 +365,38 @@ class Mmt extends BaseFeature {
 
                 $jMetadataDao = new \Jobs\MetadataDao();
 
-                // Save user MMT keys on a project basis
-                if( isset( $_SESSION[ 'uid' ] ) and !empty($_SESSION[ 'uid' ] ) ){
+                //
+                // ==============================================
+                // If the MMT-preimport flag is disabled
+                // and user is logged in
+                // send user keys on a project basis
+                // ==============================================
+                //
+
+                $preimportIsDisabled = $engine->getEngineRecord()->extra_parameters[ 'MMT-preimport' ] === false;
+                $userIsLogged = isset( $_SESSION[ 'uid' ] ) and !empty($_SESSION[ 'uid' ] );
+
+                if( $preimportIsDisabled and $userIsLogged ){
 
                     // retrieve OWNER MMT License
                     $uid = $_SESSION[ 'uid' ];
-                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE );
                     if ( !empty( $ownerMmtEngineMetaData ) ) {
 
-                        /**
-                         * @var Engines_MMT $MMTEngine
-                         */
-                        $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                        $MMTEngine->activate( $memoryKeyStructs );
+                        // get jobs keys
+                        $user = (new Users_UserDao)->getByUid($uid);
+                        $project = \Projects_ProjectDao::findById($pid);
+
+                        foreach ($project->getJobs() as $job){
+                            $jStruct = \Jobs_JobDao::getByIdAndPassword($job->id, $job->password);
+                            $memoryKeyStructs = $jStruct->getClientKeys( $user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+
+                            /**
+                             * @var Engines_MMT $MMTEngine
+                             */
+                            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                            $MMTEngine->activate( $memoryKeyStructs );
+                        }
                     }
                 }
 

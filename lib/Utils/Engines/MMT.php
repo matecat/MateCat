@@ -52,6 +52,14 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRecord()
+    {
+        return $this->engineRecord;
+    }
+
+    /**
      * MMT exception name from tag_projection call
      * @see Engines_MMT::_decode
      */

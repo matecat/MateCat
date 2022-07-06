@@ -244,6 +244,12 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         }) ;
     }
 
+    /**
+     * @param Users_UserStruct $user
+     * @param                  $role
+     *
+     * @return array
+     */
     public function getClientKeys( Users_UserStruct $user, $role ){
         $uKModel = new \TmKeyManagement\UserKeysModel( $user, $role );
         return $uKModel->getKeys( $this->tm_keys );
