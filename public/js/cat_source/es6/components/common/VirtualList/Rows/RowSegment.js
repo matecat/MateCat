@@ -66,9 +66,10 @@ function RowSegment({
     }
 
     const {segment, files, sideOpen} = restProps
-    if (segment.id_file !== currentFileId) {
+    const idFileSegment = SegmentUtils.getSegmentFileId(segment)
+    if (idFileSegment !== currentFileId) {
       const file = files
-        ? files.find((file) => file.id == segment.id_file)
+        ? files.find((file) => file.id == idFileSegment)
         : false
       let classes = sideOpen ? 'slide-right' : ''
       const isFirstSegment = files && segment.sid === files[0].first_segment
@@ -102,7 +103,7 @@ function RowSegment({
           {file && file.metadata && file.metadata.instructions ? (
             <div
               className={'button-notes'}
-              onClick={() => openInstructionsModal(segment.id_file)}
+              onClick={() => openInstructionsModal(idFileSegment)}
             >
               <LinkIcon />
               <span>View notes</span>
