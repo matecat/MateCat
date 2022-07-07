@@ -189,7 +189,6 @@ window.UI = {
   },
 
   getMoreSegments: function (where) {
-    console.log('Get more segments', where)
     SegmentActions.getMoreSegments({where})
   },
   /**

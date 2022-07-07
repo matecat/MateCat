@@ -16,6 +16,7 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 
 function CatTool() {
   const [options, setOptions] = useState({})
+  const [wasInitSegments, setWasInitSegments] = useState(false)
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
 
@@ -24,21 +25,8 @@ function CatTool() {
       segmentId: options?.segmentId
         ? options?.segmentId
         : startSegmentIdRef.current,
-      where: options?.where ? options?.where : 'after',
+      where: options?.where,
     })
-
-  const onInitSegments = useCallback(() => {
-    UI.init()
-    if (SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState)
-      SegmentFilter.openFilter()
-    setTimeout(function () {
-      UI.checkWarnings(true)
-    }, 1000)
-    UI.registerFooterTabs()
-
-    if (startSegmentIdRef?.current)
-      SegmentActions.openSegment(startSegmentIdRef.current)
-  }, [])
 
   // listeners
   useEffect(() => {
@@ -122,23 +110,39 @@ function CatTool() {
       // TODO: da verificare se serve: this.body.addClass('loaded')
       $('body').addClass('loaded')
 
-      if (typeof data.files !== 'undefined') {
+      /* if (typeof data.files !== 'undefined') {
         if (options?.openCurrentSegmentAfter && !segmentId)
           SegmentActions.openSegment(
             UI.firstLoad ? UI.currentSegmentId : startSegmentId,
           )
-      }
+      } */
       CatToolActions.updateFooterStatistics()
       // TODO: da verificare se serve: $(document).trigger('getSegments_success')
       $(document).trigger('getSegments_success')
 
-      onInitSegments()
+      // Open segment
+      if (startSegmentIdRef?.current)
+        SegmentActions.openSegment(startSegmentIdRef.current)
+
+      setWasInitSegments(true)
     } else {
       // more segments
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       $(window).trigger('segmentsAdded', {resp: data.files})
     }
-  }, [segmentsResult, options?.openCurrentSegmentAfter, onInitSegments])
+  }, [segmentsResult, options?.openCurrentSegmentAfter])
+
+  // call UI.init execute after first segments request
+  useEffect(() => {
+    if (!wasInitSegments) return
+    UI.init()
+    if (SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState)
+      SegmentFilter.openFilter()
+    setTimeout(function () {
+      UI.checkWarnings(true)
+    }, 1000)
+    UI.registerFooterTabs()
+  }, [wasInitSegments])
 
   return (
     <>

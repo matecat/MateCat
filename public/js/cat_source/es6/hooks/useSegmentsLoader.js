@@ -9,6 +9,7 @@ function useSegmentsLoader({
   where = 'center',
   idJob = config.id_job,
   password = config.password,
+  lastJobSegmentId = config.last_job_segment,
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(undefined)
@@ -28,6 +29,8 @@ function useSegmentsLoader({
       (where === 'after' && current.thereAreNoItemsAfter)
     )
       return
+
+    if (where !== 'center') console.log('Get more segments', where)
 
     let wasCleaned = false
 
@@ -52,7 +55,7 @@ function useSegmentsLoader({
             current.thereAreNoItemsBefore = true
           if (
             isFilesObjectEmpty &&
-            SegmentStore.getLastSegmentId() === config.last_job_segment &&
+            SegmentStore.getLastSegmentId() === lastJobSegmentId &&
             where === 'after'
           )
             current.thereAreNoItemsAfter = true
@@ -74,7 +77,7 @@ function useSegmentsLoader({
     return () => {
       wasCleaned = true
     }
-  }, [segmentId, where, idJob, password])
+  }, [segmentId, where, idJob, password, lastJobSegmentId])
 
   return {isLoading, result}
 }
@@ -84,6 +87,7 @@ useSegmentsLoader.propTypes = {
   where: PropTypes.string,
   idJob: PropTypes.string,
   password: PropTypes.string,
+  lastJobSegmentId: PropTypes.string,
 }
 
 export default useSegmentsLoader
