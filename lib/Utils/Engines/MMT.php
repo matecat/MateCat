@@ -399,6 +399,9 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * Delete a memory associated to an MMT account
+     * (id can be an external account)
+     *
      * @param $id
      *
      * @return mixed
@@ -412,6 +415,9 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * Get all memories associated to an MMT account
+     * (id can be an external account)
+     *
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
@@ -422,10 +428,19 @@ class Engines_MMT extends Engines_AbstractEngine {
         return $client->getAllMemories();
     }
 
+    /**
+     * Get a memory associated to an MMT account
+     * (id can be an external account)
+     *
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
     public function getMemory($id)
     {
         $client = $this->_getClient();
 
-       // return $client->getMemory($id);
+        return $client->getMemory($id);
     }
 }

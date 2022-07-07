@@ -492,19 +492,30 @@ class Mmt extends BaseFeature {
 
                 if ( !empty( $ownerMmtEngineMetaData ) ) {
 
-                    // @TODO import tmx: chiamare mmt solo se la tmx è importata su una chiave esistente in MMT ( CHIAMARE API PER LA LISTA  chiedere a Davide l'api )
-
                     /**
                      * @var Engines_MMT $MMTEngine
                      */
                     $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                    $fileName = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
-                    $result = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
 
-                    if( $result->responseStatus >= 400 ){
-                        throw new Exception( $result->error->message );
+                    //
+                    // ==============================================
+                    // Call MMT only if the tmx is already imported
+                    // over an existing key in MMT
+                    // ==============================================
+                    //
+
+                    $associatedMemories = $MMTEngine->getAllMemories();
+                    foreach ($associatedMemories as $memory){
+
+                        if('x_mm-' . trim( $tm_key ) === $memory['externalId']){
+                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                            $result = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
+
+                            if( $result->responseStatus >= 400 ){
+                                throw new Exception( $result->error->message );
+                            }
+                        }
                     }
-
                 }
 
             } catch ( Exception $e ){
