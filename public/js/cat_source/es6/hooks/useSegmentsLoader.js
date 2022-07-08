@@ -9,7 +9,6 @@ function useSegmentsLoader({
   where = 'center',
   idJob = config.id_job,
   password = config.password,
-  lastJobSegmentId = config.last_job_segment,
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(undefined)
@@ -21,9 +20,19 @@ function useSegmentsLoader({
   })
 
   useEffect(() => {
+    if (where === 'center') {
+      const {current} = loadingInfo
+      current.thereAreNoItemsBefore = false
+      current.thereAreNoItemsAfter = false
+    }
+  }, [where])
+
+  useEffect(() => {
     const {current} = loadingInfo
+    const segmentIdValue =
+      typeof segmentId === 'symbol' ? segmentId.description : segmentId
     if (
-      !segmentId ||
+      !segmentIdValue ||
       current.isLoading ||
       (where === 'before' && current.thereAreNoItemsBefore) ||
       (where === 'after' && current.thereAreNoItemsAfter)
@@ -32,13 +41,14 @@ function useSegmentsLoader({
 
     if (where !== 'center') console.log('Get more segments', where)
 
+    console.log('----> Request getSegments (segmentId', segmentId, ')')
     let wasCleaned = false
 
     getSegments({
       jid: idJob,
       password,
       step: where === 'center' ? 40 : UI.moreSegNum,
-      segment: segmentId,
+      segment: segmentIdValue,
       where,
     })
       .then(({data}) => {
@@ -55,12 +65,12 @@ function useSegmentsLoader({
             current.thereAreNoItemsBefore = true
           if (
             isFilesObjectEmpty &&
-            SegmentStore.getLastSegmentId() === lastJobSegmentId &&
+            SegmentStore.getLastSegmentId() === config.last_job_segment &&
             where === 'after'
           )
             current.thereAreNoItemsAfter = true
         }
-        setResult({data, segmentId, where: data.where})
+        setResult({data, segmentIdValue, where: data.where})
       })
       .catch((errors) => {
         if (wasCleaned) return
@@ -76,18 +86,18 @@ function useSegmentsLoader({
 
     return () => {
       wasCleaned = true
+      current.isLoading = false
     }
-  }, [segmentId, where, idJob, password, lastJobSegmentId])
+  }, [segmentId, where, idJob, password])
 
   return {isLoading, result}
 }
 
 useSegmentsLoader.propTypes = {
-  segmentId: PropTypes.string.isRequired,
+  segmentId: PropTypes.oneOfType([PropTypes.symbol, PropTypes.string]),
   where: PropTypes.string,
   idJob: PropTypes.string,
   password: PropTypes.string,
-  lastJobSegmentId: PropTypes.string,
 }
 
 export default useSegmentsLoader

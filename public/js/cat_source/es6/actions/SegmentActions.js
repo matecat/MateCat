@@ -38,13 +38,6 @@ const SegmentActions = {
       idToOpen: idToOpen,
     })
   },
-  reloadSegments: function (sidToOpen) {
-    UI.unmountSegments()
-    UI.render({
-      firstLoad: false,
-      segmentToOpen: sidToOpen,
-    })
-  },
   splitSegments: function (oldSid, newSegments, splitGroup, fid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SPLIT_SEGMENT,
@@ -200,9 +193,9 @@ const SegmentActions = {
       UI.render({
         firstLoad: false,
         segmentToOpen: sid,
-      }).then(
-        () => callback && setTimeout(() => callback.apply(this, [sid]), 1000),
-      )
+        callbackAfterSegmentsResponse: () =>
+          callback && setTimeout(() => callback.apply(this, [sid]), 1000),
+      })
     }
   },
   addClassToSegment: function (sid, newClass) {
@@ -466,7 +459,6 @@ const SegmentActions = {
 
     copyAllSourceToTarget()
       .then(() => {
-        UI.unmountSegments()
         UI.render({
           segmentToOpen: UI.currentSegmentId,
         })

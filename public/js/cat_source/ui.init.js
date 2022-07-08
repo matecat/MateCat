@@ -95,20 +95,7 @@ $.extend(window.UI, {
     mountPoint.render(<CallbackAfterRender />)
 
     const onPageMounted = () => {
-      const initialRenderPromise = UI.render()
-
-      /* initialRenderPromise.then(function () {
-        if (
-          SegmentFilter.enabled() &&
-          SegmentFilter.getStoredState().reactState
-        ) {
-          SegmentFilter.openFilter()
-        }
-        setTimeout(function () {
-          UI.checkWarnings(true)
-        }, 1000)
-      }) */
-
+      UI.render()
       $('html').trigger('start')
 
       if (LXQ.enabled()) {
@@ -147,10 +134,6 @@ $.extend(window.UI, {
     this.checkQueryParams()
 
     UI.firstLoad = false
-  },
-  restart: function () {
-    UI.unmountSegments()
-    this.start()
   },
 
   detectStartSegment: function () {

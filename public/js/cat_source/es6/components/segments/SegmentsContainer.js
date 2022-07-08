@@ -71,6 +71,7 @@ function SegmentsContainer({
     segmentsWithCollectionType: [],
     haveBeenAddedSegmentsBefore: false,
     isUserDraggingCursor: false,
+    wasClearedSegments: false,
   })
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
@@ -287,12 +288,21 @@ function SegmentsContainer({
   // add actions listener
   useEffect(() => {
     const renderSegments = (segments) => {
+      if (!segments.size) return
       setSegments(segments)
-      if (!segments.size) {
+      const {current} = persistenceVariables
+      if (current.wasClearedSegments) {
+        current.wasClearedSegments = false
         setRows([])
         setEssentialRows([])
       }
+      /* if (!segments.size) {
+        setRows([])
+        setEssentialRows([])
+      } */
     }
+    const removeAllSegments = () =>
+      (persistenceVariables.current.wasClearedSegments = true)
     const scrollToSegment = (sid) => {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
@@ -317,6 +327,10 @@ function SegmentsContainer({
 
     SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, renderSegments)
     SegmentStore.addListener(
+      SegmentConstants.REMOVE_ALL_SEGMENTS,
+      removeAllSegments,
+    )
+    SegmentStore.addListener(
       SegmentConstants.SCROLL_TO_SEGMENT,
       scrollToSegment,
     )
@@ -337,6 +351,10 @@ function SegmentsContainer({
       SegmentStore.removeListener(
         SegmentConstants.RENDER_SEGMENTS,
         renderSegments,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.REMOVE_ALL_SEGMENTS,
+        removeAllSegments,
       )
       SegmentStore.removeListener(
         SegmentConstants.SCROLL_TO_SEGMENT,
@@ -621,9 +639,11 @@ function SegmentsContainer({
 
   // single segment props to move down RowSegment component
   const getSegmentPropsBySid = (sid) => {
-    const {currentFileId, collectionTypeSeparator} = segmentsDetails.find(
+    const details = segmentsDetails.find(
       ({sid: iteratedSid}) => iteratedSid === sid,
     )
+    if (!details) return
+    const {currentFileId, collectionTypeSeparator} = details
     const {segment, segImmutable} = cachedSegmentsToJS.current.get(sid)
     return {
       segment,
@@ -662,17 +682,25 @@ function SegmentsContainer({
           overscan={OVERSCAN}
           width={widthArea}
           height={heightArea}
-          onRender={(index) => (
-            <RowSegment
-              {...{
-                ...essentialRows[index],
-                ...getSegmentPropsBySid(essentialRows[index].id),
-                ...(index === essentialRows.length - 1 && {isLastRow: true}),
-              }}
-            />
-          )}
+          onRender={(index) => {
+            const props = getSegmentPropsBySid(essentialRows[index].id)
+            return (
+              props && (
+                <RowSegment
+                  {...{
+                    ...essentialRows[index],
+                    ...getSegmentPropsBySid(essentialRows[index].id),
+                    ...(index === essentialRows.length - 1 && {
+                      isLastRow: true,
+                    }),
+                  }}
+                />
+              )
+            )
+          }}
           onScroll={onScroll}
           itemStyle={(index) =>
+            segments.get(index) &&
             segments.get(index).get('opened') && {zIndex: 1}
           }
           renderedRange={renderedRange}

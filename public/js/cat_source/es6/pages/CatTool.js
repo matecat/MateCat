@@ -19,6 +19,7 @@ function CatTool() {
   const [wasInitSegments, setWasInitSegments] = useState(false)
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
+  const callbackAfterSegmentsResponseRef = useRef()
 
   const {isLoading: isLoadingSegments, result: segmentsResult} =
     useSegmentsLoader({
@@ -32,14 +33,22 @@ function CatTool() {
   useEffect(() => {
     // CatTool onRender action
     const onRenderHandler = (options) => {
-      const {actionType, startSegmentId, ...restOptions} = options // eslint-disable-line
+      const {
+        actionType, // eslint-disable-line
+        startSegmentId,
+        callbackAfterSegmentsResponse,
+        ...restOptions
+      } = options
       setOptions((prevState) => ({
         ...prevState,
-        ...(options.segmentToOpen && {segmentId: options.segmentToOpen}),
+        ...(options.segmentToOpen && {
+          segmentId: Symbol(options.segmentToOpen),
+        }),
         ...restOptions,
       }))
       if (startSegmentId) startSegmentIdRef.current = startSegmentId
-      console.log(options)
+      if (callbackAfterSegmentsResponse)
+        callbackAfterSegmentsResponseRef.current = callbackAfterSegmentsResponse
     }
     CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
 
@@ -85,52 +94,65 @@ function CatTool() {
     // Dispatch error get segments
     if (errors) {
       const {type, ...errors} = segmentsResult // eslint-disable-line
-      if (where === 'center') {
-        if (errors.length) UI.processErrors(errors, 'getSegments')
-        OfflineUtils.failedConnection(0, 'getSegments')
-      } else {
-        if (errors.length) this.processErrors(errors, 'getMoreSegments')
-        OfflineUtils.failedConnection(where, 'getMoreSegments')
-      }
+      if (errors.length)
+        UI.processErrors(
+          errors,
+          where === 'center' ? 'getSegments' : 'getMoreSegments',
+        )
+      OfflineUtils.failedConnection(
+        where,
+        where === 'center' ? 'getSegments' : 'getMoreSegments',
+      )
       return
     }
 
     const {segmentId, data} = segmentsResult
     if (where === 'center') {
       // Init segments
-      const startSegmentId = startSegmentIdRef?.current
       // TODO: da verificare se serve: $(document).trigger('segments:load', data)
       $(document).trigger('segments:load', data)
       if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
 
-      if (!startSegmentId) {
+      if (!startSegmentIdRef?.current) {
         const firstFile = data.files[Object.keys(data.files)[0]]
         startSegmentIdRef.current = firstFile.segments[0].sid
       }
       // TODO: da verificare se serve: this.body.addClass('loaded')
       $('body').addClass('loaded')
 
-      /* if (typeof data.files !== 'undefined') {
+      if (typeof data.files !== 'undefined') {
         if (options?.openCurrentSegmentAfter && !segmentId)
           SegmentActions.openSegment(
-            UI.firstLoad ? UI.currentSegmentId : startSegmentId,
+            UI.firstLoad ? UI.currentSegmentId : startSegmentIdRef?.current,
           )
-      } */
+      }
       CatToolActions.updateFooterStatistics()
       // TODO: da verificare se serve: $(document).trigger('getSegments_success')
       $(document).trigger('getSegments_success')
 
       // Open segment
       if (startSegmentIdRef?.current)
-        SegmentActions.openSegment(startSegmentIdRef.current)
+        SegmentActions.openSegment(startSegmentIdRef?.current)
 
       setWasInitSegments(true)
+      startSegmentIdRef.current = undefined
     } else {
       // more segments
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       $(window).trigger('segmentsAdded', {resp: data.files})
     }
   }, [segmentsResult, options?.openCurrentSegmentAfter])
+
+  // execute callback option from onRender action
+  useEffect(() => {
+    if (
+      !segmentsResult ||
+      !segmentsResult?.data ||
+      !callbackAfterSegmentsResponseRef?.current
+    )
+      return
+    callbackAfterSegmentsResponseRef.current()
+  }, [segmentsResult])
 
   // call UI.init execute after first segments request
   useEffect(() => {
