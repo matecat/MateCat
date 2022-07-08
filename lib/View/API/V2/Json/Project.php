@@ -144,11 +144,6 @@ class Project {
         $metadataDao = new \Projects_MetadataDao();
         $projectInfo = $metadataDao->get((int)$project->id,'project_info');
 
-        $outsourceAvailable = $featureSet->filter( 'outsourceAvailable', $project->getTargetLanguages() );
-        if(is_array($outsourceAvailable)){
-            $outsourceAvailable = true;
-        }
-
         return [
                 'id'                   => (int)$project->id,
                 'password'             => $project->password,
@@ -167,7 +162,6 @@ class Project {
                 'remote_file_service'  => $project->getRemoteFileServiceName(),
                 'due_date'             => Utils::api_timestamp( $project->due_date ),
                 'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
-                'outsource_available'  => $outsourceAvailable,
         ];
     }
 
