@@ -116,11 +116,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       }
       if (splittedSourceAr.length > 1) {
         var splitGroup = []
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           splitGroup.push(segment.sid + '-' + (i + 1))
         })
 
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           let translation = segment.translation.split(
             UI.splittedTranslationPlaceholder,
           )[i]
