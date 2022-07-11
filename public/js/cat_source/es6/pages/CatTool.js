@@ -17,6 +17,7 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 function CatTool() {
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
+  const [isFreezingSegments, setIsFreezingSegments] = useState(false)
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -33,6 +34,7 @@ function CatTool() {
   useEffect(() => {
     // CatTool onRender action
     const onRenderHandler = (options) => {
+      console.log(options)
       const {
         actionType, // eslint-disable-line
         startSegmentId,
@@ -52,7 +54,8 @@ function CatTool() {
     }
     CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
 
-    // getMoreSegments action
+    // segments action
+    const freezingSegments = (isFreezing) => setIsFreezingSegments(isFreezing)
     const getMoreSegments = ({where}) => {
       const segmentId =
         where === 'after'
@@ -74,12 +77,20 @@ function CatTool() {
       }
     }
     SegmentStore.addListener(
+      SegmentConstants.FREEZING_SEGMENTS,
+      freezingSegments,
+    )
+    SegmentStore.addListener(
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
 
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
+      SegmentStore.removeListener(
+        SegmentConstants.FREEZING_SEGMENTS,
+        freezingSegments,
+      )
       SegmentStore.removeListener(
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
@@ -113,7 +124,7 @@ function CatTool() {
       $(document).trigger('segments:load', data)
       if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
 
-      if (!startSegmentIdRef?.current) {
+      if (!SegmentStore.getSegmentByIdToJS(startSegmentIdRef?.current)) {
         const firstFile = data.files[Object.keys(data.files)[0]]
         startSegmentIdRef.current = firstFile.segments[0].sid
       }
@@ -135,7 +146,6 @@ function CatTool() {
         SegmentActions.openSegment(startSegmentIdRef?.current)
 
       setWasInitSegments(true)
-      startSegmentIdRef.current = undefined
     } else {
       // more segments
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
@@ -219,6 +229,7 @@ function CatTool() {
           <div id="loader-getMoreSegments" />
         </div>
         <div id="plugin-mount-point"></div>
+        {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
 
       <div className="notifications-wrapper">

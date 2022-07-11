@@ -71,7 +71,6 @@ function SegmentsContainer({
     segmentsWithCollectionType: [],
     haveBeenAddedSegmentsBefore: false,
     isUserDraggingCursor: false,
-    wasClearedSegments: false,
   })
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
@@ -287,12 +286,13 @@ function SegmentsContainer({
 
   // add actions listener
   useEffect(() => {
+    let wasRemovedAllSegments = false
+
     const renderSegments = (segments) => {
       if (!segments.size) return
       setSegments(segments)
-      const {current} = persistenceVariables
-      if (current.wasClearedSegments) {
-        current.wasClearedSegments = false
+      if (wasRemovedAllSegments) {
+        wasRemovedAllSegments = false
         setRows([])
         setEssentialRows([])
       }
@@ -301,8 +301,7 @@ function SegmentsContainer({
         setEssentialRows([])
       } */
     }
-    const removeAllSegments = () =>
-      (persistenceVariables.current.wasClearedSegments = true)
+    const removeAllSegments = () => (wasRemovedAllSegments = true)
     const scrollToSegment = (sid) => {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
@@ -469,7 +468,9 @@ function SegmentsContainer({
     const {current} = persistenceVariables
 
     const hasAddedSegmentsBefore =
-      rows.length > essentialRows.length && essentialRows[0]?.id !== rows[0]?.id
+      rows.length > essentialRows.length &&
+      essentialRows[0]?.id !== rows[0]?.id &&
+      rows[0]?.id !== config.first_job_segment
     if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
@@ -689,7 +690,7 @@ function SegmentsContainer({
                 <RowSegment
                   {...{
                     ...essentialRows[index],
-                    ...getSegmentPropsBySid(essentialRows[index].id),
+                    ...props,
                     ...(index === essentialRows.length - 1 && {
                       isLastRow: true,
                     }),

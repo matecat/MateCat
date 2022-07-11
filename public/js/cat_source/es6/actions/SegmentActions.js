@@ -48,6 +48,10 @@ const SegmentActions = {
     })
   },
   splitSegment: function (sid, text) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FREEZING_SEGMENTS,
+      isFreezing: true,
+    })
     splitSegment(sid, text)
       .then(() => {
         UI.unmountSegments()
@@ -62,6 +66,10 @@ const SegmentActions = {
           type: 'error',
         }
         CatToolActions.addNotification(notification)
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.FREEZING_SEGMENTS,
+          isFreezing: false,
+        })
       })
   },
   addSegments: function (segments, where) {
@@ -119,7 +127,7 @@ const SegmentActions = {
     })
   },
 
-  openSegment: function (sid) {
+  openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
 
     if (segment) {
@@ -139,6 +147,7 @@ const SegmentActions = {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
+        wasOriginatedFromBrowserHistory,
       })
     } else {
       UI.unmountSegments()
@@ -1222,6 +1231,12 @@ const SegmentActions = {
   removeAllSegments: () => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.REMOVE_ALL_SEGMENTS,
+    })
+  },
+  freezingSegments: (isFreezing) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FREEZING_SEGMENTS,
+      isFreezing,
     })
   },
 }

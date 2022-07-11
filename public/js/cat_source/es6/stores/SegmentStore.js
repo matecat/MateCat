@@ -1203,7 +1203,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_SEGMENT:
       SegmentStore.openSegment(action.sid)
-      SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid)
+      SegmentStore.emitChange(
+        SegmentConstants.OPEN_SEGMENT,
+        action.sid,
+        action.wasOriginatedFromBrowserHistory,
+      )
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
     case SegmentConstants.SELECT_SEGMENT: {
@@ -1234,6 +1238,8 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.ADD_SEGMENTS:
       SegmentStore.updateAll(action.segments, action.where)
+      if (SegmentStore._segments.size)
+        SegmentStore.emitChange(SegmentConstants.FREEZING_SEGMENTS, false)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1829,6 +1835,12 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
       ) */
       SegmentStore.emitChange(SegmentConstants.REMOVE_ALL_SEGMENTS)
+      break
+    case SegmentConstants.FREEZING_SEGMENTS:
+      SegmentStore.emitChange(
+        SegmentConstants.FREEZING_SEGMENTS,
+        action.isFreezing,
+      )
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

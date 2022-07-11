@@ -69,7 +69,7 @@ class Segment extends React.Component {
     this.timeoutScroll
   }
 
-  openSegment() {
+  openSegment(wasOriginatedFromBrowserHistory) {
     if (!this.$section.length) return
     if (!this.checkIfCanOpenSegment()) {
       if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
@@ -114,11 +114,14 @@ class Segment extends React.Component {
         )
       }
 
-      history.replaceState(
-        null,
-        null,
-        document.location.pathname + '#' + this.props.segment.sid,
-      )
+      const hashUrl = document.location.pathname + '#' + this.props.segment.sid
+      if (wasOriginatedFromBrowserHistory) {
+        history.replaceState(null, null, hashUrl)
+      } else {
+        history.pushState(null, document.title, hashUrl)
+      }
+      var historyChangeStateEvent = new Event('historyChangeState')
+      window.dispatchEvent(historyChangeStateEvent)
     }
   }
 
@@ -146,7 +149,7 @@ class Segment extends React.Component {
     )
   }
 
-  openSegmentFromAction(sid) {
+  openSegmentFromAction(sid, wasOriginatedFromBrowserHistory) {
     sid = sid + ''
     if (
       (sid === this.props.segment.sid ||
@@ -154,7 +157,7 @@ class Segment extends React.Component {
           this.props.segment.firstOfSplit)) &&
       !this.props.segment.opened
     ) {
-      this.openSegment()
+      this.openSegment(wasOriginatedFromBrowserHistory)
     }
   }
 

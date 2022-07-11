@@ -63,7 +63,6 @@ $.extend(window.UI, {
       this.startSegmentId =
         hash && hash != '' ? hash : config.last_opened_segment
     }
-
     CatToolActions.onRender({
       ...options,
       ...(this.startSegmentId && {startSegmentId: this.startSegmentId}),
