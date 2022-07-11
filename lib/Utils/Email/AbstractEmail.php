@@ -35,6 +35,10 @@ abstract class AbstractEmail {
         $this->_layout_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $layout;
     }
 
+    protected function _setLayoutByPath( $path ) {
+        $this->_layout_path = $path ;
+    }
+
     protected function _setTemplate( $template ) {
         $this->_template_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $template;
     }
