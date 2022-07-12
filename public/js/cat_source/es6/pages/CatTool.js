@@ -124,7 +124,13 @@ function CatTool() {
       $(document).trigger('segments:load', data)
       if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
 
-      if (!SegmentStore.getSegmentByIdToJS(startSegmentIdRef?.current)) {
+      // if (!SegmentStore.getSegmentByIdToJS(startSegmentIdRef?.current)) {
+      if (
+        !Object.entries(data.files)
+          .map(([, value]) => value.segments)
+          .flat()
+          .find((segment) => segment.sid === startSegmentIdRef?.current)
+      ) {
         const firstFile = data.files[Object.keys(data.files)[0]]
         startSegmentIdRef.current = firstFile.segments[0].sid
       }

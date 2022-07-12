@@ -296,10 +296,6 @@ function SegmentsContainer({
         setRows([])
         setEssentialRows([])
       }
-      /* if (!segments.size) {
-        setRows([])
-        setEssentialRows([])
-      } */
     }
     const removeAllSegments = () => (wasRemovedAllSegments = true)
     const scrollToSegment = (sid) => {

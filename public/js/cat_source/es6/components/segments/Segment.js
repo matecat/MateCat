@@ -79,7 +79,7 @@ class Segment extends React.Component {
       }
     } else {
       if (this.props.segment.translation.length !== 0) {
-        UI.segmentQA(this.$section)
+        SegmentActions.getSegmentsQa(this.props.segment)
       }
 
       // TODO Remove this block
@@ -484,8 +484,7 @@ class Segment extends React.Component {
         this.props.segment.opened &&
         !this.props.segment.openComments &&
         !this.props.segment.openIssues &&
-        !UI.body.hasClass('search-open') &&
-        !UI.tagMenuOpen
+        !UI.body.hasClass('search-open')
       ) {
         if (!this.props.segment.openSplit) {
           SegmentActions.closeSegment(this.props.segment.sid)

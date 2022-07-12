@@ -28,6 +28,7 @@ import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
+import {getLocalWarnings} from '../api/getLocalWarnings'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -420,7 +421,7 @@ const SegmentActions = {
       source = unescapeHTMLLeaveTags(source)
       SegmentActions.replaceEditAreaTextContent(sid, source)
       SegmentActions.modifiedTranslation(sid, true)
-      UI.segmentQA(UI.currentSegment)
+      SegmentActions.getSegmentsQa(currentSegment)
 
       if (config.translation_matches_enabled) {
         SegmentActions.setChoosenSuggestion(sid, null)
@@ -1238,6 +1239,42 @@ const SegmentActions = {
       actionType: SegmentConstants.FREEZING_SEGMENTS,
       isFreezing,
     })
+  },
+  getSegmentsQa: (segment) => {
+    if (!segment) return
+
+    var segment_status = segment.status
+
+    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
+    const trg_content = TagUtils.prepareTextToSend(segment.translation)
+
+    getLocalWarnings({
+      id: segment.sid,
+      id_job: config.id_job,
+      password: config.password,
+      src_content: src_content,
+      trg_content: trg_content,
+      segment_status: segment_status,
+    })
+      .then((data) => {
+        if (data.details && data.details.id_segment) {
+          SegmentActions.setSegmentWarnings(
+            data.details.id_segment,
+            data.details.issues_info,
+            data.details.tag_mismatch,
+          )
+        } else {
+          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
+        }
+        $(document).trigger('getWarning:local:success', {
+          resp: data,
+          segment: segment,
+        })
+        SegmentActions.updateGlossaryData(data.data, segment.sid)
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
 }
 
