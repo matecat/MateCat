@@ -1833,9 +1833,7 @@ AppDispatcher.register(function (action) {
       })
       break
     case SegmentConstants.GET_MORE_SEGMENTS:
-      SegmentStore.emitChange(SegmentConstants.GET_MORE_SEGMENTS, {
-        where: action.where,
-      })
+      SegmentStore.emitChange(SegmentConstants.GET_MORE_SEGMENTS, action.where)
       break
     case SegmentConstants.REMOVE_ALL_SEGMENTS:
       SegmentStore.removeAllSegments()

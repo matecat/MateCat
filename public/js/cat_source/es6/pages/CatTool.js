@@ -56,7 +56,7 @@ function CatTool() {
 
     // segments action
     const freezingSegments = (isFreezing) => setIsFreezingSegments(isFreezing)
-    const getMoreSegments = ({where}) => {
+    const getMoreSegments = (where) => {
       const segmentId =
         where === 'after'
           ? SegmentStore.getLastSegmentId()

@@ -189,7 +189,7 @@ window.UI = {
   },
 
   getMoreSegments: function (where) {
-    SegmentActions.getMoreSegments({where})
+    SegmentActions.getMoreSegments(where)
   },
   /**
    * removed the #outer div, taking care of extra cleaning needed, like unmounting
