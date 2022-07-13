@@ -11,7 +11,6 @@ $.extend(window.UI, {
   render: function (options) {
     options = options || {}
     var seg = options.segmentToOpen || false
-    this.segmentToScrollAtRender = seg ? seg : false
 
     this.isSafari =
       navigator.userAgent.search('Safari') >= 0 &&
@@ -25,8 +24,6 @@ $.extend(window.UI, {
     this.initSegNum = 100 // number of segments initially loaded
     this.moreSegNum = 25
     this.numOpenedSegments = 0
-    this.maxMinutesBeforeRerendering = 60
-    this.loadingMore = false
     this.noMoreSegmentsAfter = false
     this.noMoreSegmentsBefore = false
     this.nextUntranslatedSegmentIdByServer = null
@@ -52,8 +49,8 @@ $.extend(window.UI, {
     this.debug = false
 
     options.openCurrentSegmentAfter = !!(!seg && !this.firstLoad)
-    if (this.segmentToScrollAtRender) {
-      this.startSegmentId = this.segmentToScrollAtRender
+    if (options.segmentToOpen) {
+      this.startSegmentId = options.segmentToOpen
     } else {
       var hash = CommonUtils.parsedHash.segmentId
       config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
@@ -133,20 +130,6 @@ $.extend(window.UI, {
     this.checkQueryParams()
 
     UI.firstLoad = false
-  },
-
-  detectStartSegment: function () {
-    if (this.segmentToScrollAtRender) {
-      this.startSegmentId = this.segmentToScrollAtRender
-    } else {
-      var hash = CommonUtils.parsedHash.segmentId
-      config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
-      if (!config.last_opened_segment) {
-        config.last_opened_segment = config.first_job_segment
-      }
-      this.startSegmentId =
-        hash && hash != '' ? hash : config.last_opened_segment
-    }
   },
   checkQueryParams: function () {
     var action = CommonUtils.getParameterByName('action')
