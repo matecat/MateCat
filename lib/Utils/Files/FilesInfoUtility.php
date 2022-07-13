@@ -37,14 +37,16 @@ class FilesInfoUtility {
     public function getInfo() {
 
         $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
-        $metadataDao = new Files_MetadataDao;
+        $fileMetadataDao = new Files_MetadataDao;
 
+        $metadata = [];
+
+        // File parts
         foreach ( $fileInfo as &$file ) {
 
-            $metadata = [];
             $filePartsIdArray = [];
 
-            foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
+            foreach ( $fileMetadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
 
                 if($metadatum->files_parts_id !== null){
                     $metadata[ 'files_parts' ][ (int)$metadatum->files_parts_id ][ $metadatum->key ] = $metadatum->value;

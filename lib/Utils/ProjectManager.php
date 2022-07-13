@@ -155,6 +155,7 @@ class ProjectManager {
                             'segments_metadata'            => [], //array of segments_metadata
                             'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
                             'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
+                            'file-metadata'                => [], //array of files metadata
                             'translations'                 => [],
                             'notes'                        => [],
                             'context-group'                => [],
@@ -1823,6 +1824,7 @@ class ProjectManager {
 
         $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
+        $jobsMetadataDao    = new \Jobs\MetadataDao();
 
         // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
@@ -1851,6 +1853,15 @@ class ProjectManager {
 
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
+
+            // save x-jsont* datatype
+            if(isset( $xliff_file[ 'attr' ][ 'data-type' ] )){
+                $dataType = $xliff_file[ 'attr' ][ 'data-type' ];
+
+                if (strpos($dataType, 'x-jsont' ) !== false) {
+                    $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'data-type', $dataType );
+                }
+            }
 
             if ( !array_key_exists( 'trans-units', $xliff_file ) ) {
                 continue;
