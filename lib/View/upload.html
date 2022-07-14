@@ -39,10 +39,6 @@
     <link id="tildemt_link" rel="import" href="https://www.letsmt.eu/ws/tildemt-selector.html"/>
     <!-- Tilde MT -->
 
-    <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-
     <script type="text/javascript" src="${basepath}public/js/build/libs_upload.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/upload.js"></script>
 
@@ -84,8 +80,10 @@
 </body>
 
 <body tal:condition="php:supportedBrowser EQ -2">
-<div metal:use-macro="unsupported_browser.html/indexie"/>
+<div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
+
+<div metal:use-macro="unsupported_browser.html/devices"/>
 
 <body tal:condition="php:supportedBrowser EQ 1" class="started">
 <div class="reloading-upload-page" style="position: absolute;height: 85%;width: 100%;background-color: rgba(76, 69, 69, 0.3);top: 170px;left: 0;z-index: 3;display: none;">
@@ -98,12 +96,6 @@
 
 <div class="wrapper-claim">
     <div class="wrapper-claim-content">
-<!--        <svg id="Livello_1" data-name="Livello 1"  viewBox="0 0 178.95 279.41">-->
-<!--            <defs>-->
-<!--                <style>.cls-1{fill:#00bef0;}.cls-2{fill:#fff;}.cls-3{fill:#006fa7;}.cls-4{fill:#006da8;}.cls-5{fill:#fdfffd;}</style>-->
-<!--            </defs>-->
-<!--            <path class="cls-1" d="M83.22,29C80.1,29,74.44,6.84,70.49,7.73c0,0-4.44-2-5.43,21.81l-2,44.52-12.83-.51s-1.58.5,0,1.29l12.43,1.58-.19,1.87s-8.22.1-12.94,2.47c0,0-1.18,1,1.49.79,0,0,10.26-1.19,11.54-.5.1,25.47-13.71,27.17-28.32,36.62C-13.49,146.88-4.41,218.13,64.86,231.16c9.4,1.19,26.42,6.39,24.41,15.52-2.5,11.32-22.93.48-29.14,8.95-6.52,8.88,7.47,12.6,19.93,12,3.76-.17,23.49-5.33,24.67-21.91.1-16.49-16.26-22.27-30.67-26-10.33-2.69-9-11.67,21.69-11,.69,1.48-11.88,3.5-7.4,11.74,6.12,11.25,27.24,4.34,21.76-12.43,0,0,13.57-1,23-8.49,2,2.76-.37,16.87,3.15,21.31,9.08,11.45,33.56-.19,11.85-11.25,0,0-3.56-21.9,3.94-35.33s8.29-47.17,8.29-47.17.4-33.55-.39-45.39l-.06-.71c1.28-.71,11.17.34,11.17.34,2.67.17,1.49-.8,1.49-.8-4.76-2.32-12.79-2.29-12.79-2.29l-.09-2,10.79-1.53c1.57-.8,0-1.28,0-1.28L159,74l-2.48-44.49c-1.25-23.78-5.67-21.75-5.67-21.75-4-.85-9.37,21.32-12.49,21.36S86.34,29,83.22,29Z"/><ellipse class="cls-2" cx="85.58" cy="63.43" rx="11.32" ry="10.62"/><circle class="cls-3" cx="85.58" cy="63.43" r="4.22"/><ellipse class="cls-2" cx="138.57" cy="63.43" rx="11.32" ry="10.62"/><circle class="cls-3" cx="138.57" cy="63.43" r="4.22"/><path class="cls-2" d="M82.66,51.79h0a1.5,1.5,0,0,0,1-1.88L80.63,39.37a.27.27,0,0,0-.53.09l.64,11A1.51,1.51,0,0,0,82.66,51.79Z"/><path class="cls-2" d="M87.29,51.63h0a1.05,1.05,0,0,0,1-1.08L88.11,43a.19.19,0,0,0-.37,0l-1.49,7.45A1,1,0,0,0,87.29,51.63Z"/><path class="cls-2" d="M138.86,51.79h0a1.52,1.52,0,0,1-1.05-1.88l3.08-10.54a.27.27,0,0,1,.52.09l-.64,11A1.5,1.5,0,0,1,138.86,51.79Z"/><path class="cls-2" d="M134.22,51.63h0a1.06,1.06,0,0,1-1-1.08l.22-7.59a.19.19,0,0,1,.37,0l1.49,7.45A1.05,1.05,0,0,1,134.22,51.63Z"/><path class="cls-4" d="M105.86,86.39a7,7,0,0,1-6.6-4.08.85.85,0,1,1,1.57-.64,5.46,5.46,0,0,0,5.22,3h3.74a.56.56,0,0,0,.56-.55V73.5a.85.85,0,1,1,1.69,0V84.14a2.25,2.25,0,0,1-2.25,2.25h-3.93Z"/><path class="cls-4" d="M112.35,75.29A11.69,11.69,0,0,1,105.26,73,1.27,1.27,0,0,1,106.88,71c.22.17,4.91,3.87,11.57-.12a1.28,1.28,0,1,1,1.31,2.19A14.36,14.36,0,0,1,112.35,75.29Z"/><path class="cls-5" d="M113.79,118.11l6.44-11.59H99.8l6.35,11.69a8.44,8.44,0,0,1,.52,6.93l-7.3,20a4.85,4.85,0,0,0,.72,4.63L109,161.19a1.19,1.19,0,0,0,1.86,0l9.21-11.32a4.84,4.84,0,0,0,.77-4.77l-7.55-19.93A8.43,8.43,0,0,1,113.79,118.11Z"/>-->
-<!--        </svg>-->
         <h1>The CAT tool that works for you</h1>
     </div>
 </div>
