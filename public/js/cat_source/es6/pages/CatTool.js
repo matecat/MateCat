@@ -64,16 +64,6 @@ function CatTool() {
           : ''
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
-
-      // TODO old code
-      if (where == 'before') {
-        $('section').each(function () {
-          if ($(this).offset().top > $(window).scrollTop()) {
-            UI.segMoving = UI.getSegmentId($(this))
-            return false
-          }
-        })
-      }
     }
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
