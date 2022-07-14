@@ -34,7 +34,6 @@ function CatTool() {
   useEffect(() => {
     // CatTool onRender action
     const onRenderHandler = (options) => {
-      console.log(options)
       const {
         actionType, // eslint-disable-line
         startSegmentId,
@@ -124,12 +123,14 @@ function CatTool() {
       $(document).trigger('segments:load', data)
       if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
 
-      // if (!SegmentStore.getSegmentByIdToJS(startSegmentIdRef?.current)) {
       if (
         !Object.entries(data.files)
           .map(([, value]) => value.segments)
           .flat()
-          .find((segment) => segment.sid === startSegmentIdRef?.current)
+          .find(
+            (segment) =>
+              segment.sid === startSegmentIdRef?.current.split('-')[0],
+          )
       ) {
         const firstFile = data.files[Object.keys(data.files)[0]]
         startSegmentIdRef.current = firstFile.segments[0].sid

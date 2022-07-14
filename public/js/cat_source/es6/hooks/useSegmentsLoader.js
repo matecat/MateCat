@@ -41,7 +41,6 @@ function useSegmentsLoader({
 
     if (where !== 'center') console.log('Get more segments', where)
 
-    console.log('----> Request getSegments (segmentId', segmentId, ')')
     let wasCleaned = false
 
     getSegments({
