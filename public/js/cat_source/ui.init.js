@@ -24,8 +24,6 @@ $.extend(window.UI, {
     this.initSegNum = 100 // number of segments initially loaded
     this.moreSegNum = 25
     this.numOpenedSegments = 0
-    this.noMoreSegmentsAfter = false
-    this.noMoreSegmentsBefore = false
     this.nextUntranslatedSegmentIdByServer = null
     this.checkUpdatesEvery = 180000
     this.tagModesEnabled =

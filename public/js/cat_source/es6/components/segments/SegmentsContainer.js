@@ -93,13 +93,13 @@ function SegmentsContainer({
         }
       })
 
-      const {current: persistance} = persistenceVariables
+      const {current: persistence} = persistenceVariables
       let scrollTo
       if (scrollToSelected) {
         scrollTo =
-          scrollToSid < persistance.lastScrolled ? index - 1 : index + 1
+          scrollToSid < persistence.lastScrolled ? index - 1 : index + 1
         scrollTo = index > ROWS_LENGTH - 2 || index === 0 ? index : scrollTo
-        persistance.lastScrolled = scrollToSid
+        persistence.lastScrolled = scrollToSid
         return {scrollTo: scrollTo, position: position}
       }
       scrollTo = index >= 2 ? index - 2 : index === 0 ? 0 : index - 1
@@ -181,23 +181,23 @@ function SegmentsContainer({
   )
 
   const onScroll = useCallback(() => {
-    if (!listRef?.current || scrollToSid || !essentialRows.length) return
+    if (!listRef?.current || !essentialRows.length) return
 
     const scrollValue = listRef.current.scrollTop
     const scrollBottomValue =
       listRef.current.firstChild.offsetHeight -
       (scrollValue + listRef.current.offsetHeight)
 
-    const {current: persistance} = persistenceVariables
-    persistance.scrollDirectionTop = scrollValue < persistance.lastScrollTop
-    if (scrollBottomValue < 700 && !persistance.scrollDirectionTop) {
+    const {current: persistence} = persistenceVariables
+    persistence.scrollDirectionTop = scrollValue < persistence.lastScrollTop
+    if (scrollBottomValue < 700 && !persistence.scrollDirectionTop) {
       UI.getMoreSegments('after')
-    } else if (scrollValue < 500 && persistance.scrollDirectionTop) {
+    } else if (scrollValue < 500 && persistence.scrollDirectionTop) {
       UI.getMoreSegments('before')
     }
-    persistance.lastScrollTop = scrollValue
+    persistence.lastScrollTop = scrollValue
     setScrollTopVisible(scrollValue > 400)
-  }, [scrollToSid, essentialRows])
+  }, [essentialRows])
 
   // segments details - ex. div collection type ecc.
   const segmentsDetails = useMemo(() => {

@@ -183,18 +183,10 @@ const SegmentActions = {
   scrollToSegment: function (sid, callback) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
-      if (
-        SegmentStore.segmentScrollableToCenter(sid) ||
-        UI.noMoreSegmentsAfter ||
-        config.last_job_segment == sid ||
-        SegmentStore._segments.size < UI.moreSegNum ||
-        SegmentStore.getLastSegmentId() === config.last_job_segment
-      ) {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SCROLL_TO_SEGMENT,
-          sid: sid,
-        })
-      }
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
       if (callback) {
         setTimeout(() => callback.apply(this, [sid]))
       }
