@@ -226,12 +226,14 @@ class QualityReportSegmentModel {
                     $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
                 }
 
+                // this means the job has a bilingual file
                 if ( '' === $seg->suggestion ) {
                     if ( $isForUI ) {
                         $seg->suggestion = $Filter->fromLayer0ToLayer2( $seg->translation );
                     }
-                    $seg->is_pre_translated = true;
                 }
+
+                $seg->is_pre_translated = true;
             }
 
             // If the segment was APPROVED
@@ -239,19 +241,24 @@ class QualityReportSegmentModel {
             if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ) {
 
                 $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
+                $translation = ($first_version) ? $first_version->translation : $seg->translation;
 
-                if ( $first_version ) {
-                    $translation = $first_version->translation;
-                } else {
-                    $translation = $seg->translation;
+                if($isForUI){
+                    $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
                 }
 
+                // this means the job has a bilingual file
                 if ( '' === $seg->suggestion ) {
                     if ( $isForUI ) {
                         $seg->suggestion = $Filter->fromLayer0ToLayer2( $translation );
                     }
-                    $seg->is_pre_translated = true;
                 }
+
+                if(null === $seg->last_translation){
+                    $seg->last_translation = $seg->suggestion;
+                }
+
+                $seg->is_pre_translated = true;
 
                 //
                 // -------------------------------
