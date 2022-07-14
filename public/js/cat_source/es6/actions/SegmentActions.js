@@ -30,6 +30,7 @@ import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 
+
 const SegmentActions = {
   /********* SEGMENTS *********/
   renderSegments: function (segments, idToOpen) {
@@ -133,7 +134,7 @@ const SegmentActions = {
 
     if (segment) {
       //Check first if the segment is in the view
-      if (UI.isReadonlySegment(segment)) {
+      if (UI.isReadonlySegment(segment) && !SearchUtils.searchEnabled) {
         UI.readonlyClickDisplay()
         return
       }

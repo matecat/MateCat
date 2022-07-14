@@ -11,29 +11,12 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} status
  * @returns {Promise<object>}
  */
-export const changeJobsOrProjectStatus = async (
-  type,
-  {id, password},
-  status,
-) => {
-  const dataParams = {
-    new_status: status,
-    res: type, //Project or Job:
-    id: id, // Job or Project Id
-    password: password, // Job or Project Password
-  }
-
-  const formData = new FormData()
-  Object.keys(dataParams).forEach((key) => {
-    formData.append(key, dataParams[key])
-  })
-
+export const changeProjectStatus = async (pid, password, status) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=changeJobsStatus`,
+    `${getMatecatApiDomain()}api/v3/projects/${pid}/${password}/${status}`,
     {
       method: 'POST',
       credentials: 'include',
-      body: formData,
     },
   )
 
