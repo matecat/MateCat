@@ -771,9 +771,11 @@ class QA {
     public static function JSONtoExceptionList( $jsonString ) {
         $that      = new static( null, null );
         $jsonValue = json_decode( $jsonString, true );
-        array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
-            $that->addError( $errArray[ 'outcome' ] );
-        } );
+        if( is_array( $jsonValue ) ){
+            array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
+                $that->addError( $errArray[ 'outcome' ] );
+            } );
+        }
 
         return $that->exceptionList;
     }
@@ -1624,27 +1626,26 @@ class QA {
         // Compare the tag ids and equiv-text content
         // ===========================================
         //
-        // In case of any mismatch add a ERR_TAG_ORDER (for id mismatch)
-        // or ERR_TAG_MISMATCH in case of equiv-text mismatch
+        // 1. id
+        //
+        // In this case check for id order mismatch and throw a ERR_TAG_ORDER Warning
+        //
+        // 2. equiv-text
+        //
+        // In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
+        //
+        // 3. whole content
+        //
+        // In this case check for whole content mismatch and throw a ERR_TAG_MISMATCH Error
         //
 
-        $this->compareArraysAndAddTagError($this->extractIdAttributes($open_malformedXmlSrcStruct), $this->extractIdAttributes($open_malformedXmlTrgStruct), self::ERR_TAG_ORDER);
-        $this->compareArraysAndAddTagError($this->extractIdAttributes($closing_malformedXmlSrcStruct), $this->extractIdAttributes($closing_malformedXmlTrgStruct), self::ERR_TAG_ORDER);
-        $this->compareArraysAndAddTagError($this->extractEquivTextAttributes($open_malformedXmlSrcStruct), $this->extractEquivTextAttributes($open_malformedXmlTrgStruct), self::ERR_TAG_MISMATCH);
-        $this->compareArraysAndAddTagError($this->extractEquivTextAttributes($closing_malformedXmlSrcStruct), $this->extractEquivTextAttributes($closing_malformedXmlTrgStruct), self::ERR_TAG_MISMATCH);
-        $this->compareArraysAndAddTagError($this->extractIdAttributes($selfClosingTags_src), $this->extractIdAttributes($selfClosingTags_trg), self::ERR_TAG_ORDER);
-        $this->compareArraysAndAddTagError($this->extractEquivTextAttributes($selfClosingTags_src), $this->extractEquivTextAttributes($selfClosingTags_trg), self::ERR_TAG_MISMATCH);
-
-        // Check the whole content of the tags
-
-        foreach ($complete_malformedTrgStruct as $pos => $value){
-
-            if(!in_array($value, $complete_malformedSrcStruct)){
-                $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $value );
-                return;
-            }
-        }
+        $this->checkTagPositionsAddTagOrderError($this->extractIdAttributes($open_malformedXmlSrcStruct), $this->extractIdAttributes($open_malformedXmlTrgStruct), self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        $this->checkTagPositionsAddTagOrderError($this->extractIdAttributes($closing_malformedXmlSrcStruct), $this->extractIdAttributes($closing_malformedXmlTrgStruct), self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($this->extractEquivTextAttributes($open_malformedXmlSrcStruct), $this->extractEquivTextAttributes($open_malformedXmlTrgStruct), self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($this->extractEquivTextAttributes($closing_malformedXmlSrcStruct), $this->extractEquivTextAttributes($closing_malformedXmlTrgStruct), self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkTagPositionsAddTagOrderError($this->extractIdAttributes($selfClosingTags_src), $this->extractIdAttributes($selfClosingTags_trg), self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($this->extractEquivTextAttributes($selfClosingTags_src), $this->extractEquivTextAttributes($selfClosingTags_trg), self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // If there are errors get tag diff for the UI
         if ( $this->thereAreErrors() ) {
@@ -1653,6 +1654,8 @@ class QA {
     }
 
     /**
+     * This function extracts id attributes from a tag array
+     *
      * @param array $tags
      *
      * @return array|mixed
@@ -1673,6 +1676,8 @@ class QA {
     }
 
     /**
+     * This function extracts equiv-text attributes from a tag array
+     *
      * @param array $tags
      *
      * @return array|mixed
@@ -1693,16 +1698,42 @@ class QA {
     }
 
     /**
+     * This function performs a positional check and throw a ERR_TAG_ORDER Warning
+     *
      * @param array  $src
      * @param array  $trg
      * @param string $error
+     * @param array  $originalTargetValues
      */
-    private function compareArraysAndAddTagError(array $src, array $trg, $error) {
+    private function checkTagPositionsAddTagOrderError( array $src, array $trg, $error, array $originalTargetValues) {
 
-        if(!empty(array_diff($src, $trg))){
-            $this->addError( $error );
+        foreach ($trg as $pos => $value){
+            if($value !== $src[$pos]){
+                $this->addError( $error );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
 
-            return;
+                return;
+            }
+        }
+    }
+
+    /**
+     * This function performs a content check and throw a ERR_TAG_MISMATCH Error
+     *
+     * @param array  $src
+     * @param array  $trg
+     * @param string $error
+     * @param array  $originalTargetValues
+     */
+    private function checkContentAddTagMismatchError( array $src, array $trg, $error, array $originalTargetValues) {
+
+        foreach ($trg as $pos => $value){
+            if(!in_array($value, $src)){
+                $this->addError( $error );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
+
+                return;
+            }
         }
     }
 
@@ -2460,10 +2491,10 @@ class QA {
         if($has_blacklist){
             $data = [];
             $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                'src_content' => $this->source_seg,
-                'trg_content' => $this->target_seg,
-                'project'     => $this->chunk->getProject(),
-                'chunk'       => $this->chunk
+                    'src_content' => $this->source_seg,
+                    'trg_content' => $this->target_seg,
+                    'project'     => $this->chunk->getProject(),
+                    'chunk'       => $this->chunk
             ] );
 
             if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
