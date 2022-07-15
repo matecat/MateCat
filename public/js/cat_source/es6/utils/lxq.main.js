@@ -21,6 +21,7 @@ const LXQ = {
           SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
         }
         UI.render()
+        SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
       })
     }
   },

@@ -37,7 +37,6 @@ export const FilesMenu = ({projectName}) => {
       CatToolActions.storeFilesInfo(response)
       setFiles(response.files)
       firstJobSegment.current = response.first_segment
-      UI.detectStartSegment() //TODO: remove
     })
   }, [])
 

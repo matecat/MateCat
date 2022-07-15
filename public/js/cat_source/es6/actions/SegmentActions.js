@@ -28,7 +28,8 @@ import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
-import SearchUtils from '../components/header/cattol/search/searchUtils'
+import {getLocalWarnings} from '../api/getLocalWarnings'
+
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -37,13 +38,6 @@ const SegmentActions = {
       actionType: SegmentConstants.RENDER_SEGMENTS,
       segments: segments,
       idToOpen: idToOpen,
-    })
-  },
-  reloadSegments: function (sidToOpen) {
-    UI.unmountSegments()
-    UI.render({
-      firstLoad: false,
-      segmentToOpen: sidToOpen,
     })
   },
   splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -56,6 +50,10 @@ const SegmentActions = {
     })
   },
   splitSegment: function (sid, text) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FREEZING_SEGMENTS,
+      isFreezing: true,
+    })
     splitSegment(sid, text)
       .then(() => {
         UI.unmountSegments()
@@ -70,6 +68,10 @@ const SegmentActions = {
           type: 'error',
         }
         CatToolActions.addNotification(notification)
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.FREEZING_SEGMENTS,
+          isFreezing: false,
+        })
       })
   },
   addSegments: function (segments, where) {
@@ -127,7 +129,7 @@ const SegmentActions = {
     })
   },
 
-  openSegment: function (sid) {
+  openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
 
     if (segment) {
@@ -147,6 +149,7 @@ const SegmentActions = {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
+        wasOriginatedFromBrowserHistory,
       })
     } else {
       UI.unmountSegments()
@@ -181,18 +184,10 @@ const SegmentActions = {
   scrollToSegment: function (sid, callback) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
-      if (
-        SegmentStore.segmentScrollableToCenter(sid) ||
-        UI.noMoreSegmentsAfter ||
-        config.last_job_segment == sid ||
-        SegmentStore._segments.size < UI.moreSegNum ||
-        SegmentStore.getLastSegmentId() === config.last_job_segment
-      ) {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SCROLL_TO_SEGMENT,
-          sid: sid,
-        })
-      }
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
       if (callback) {
         setTimeout(() => callback.apply(this, [sid]))
       }
@@ -201,9 +196,9 @@ const SegmentActions = {
       UI.render({
         firstLoad: false,
         segmentToOpen: sid,
-      }).then(
-        () => callback && setTimeout(() => callback.apply(this, [sid]), 1000),
-      )
+        callbackAfterSegmentsResponse: () =>
+          callback && setTimeout(() => callback.apply(this, [sid]), 1000),
+      })
     }
   },
   addClassToSegment: function (sid, newClass) {
@@ -419,7 +414,7 @@ const SegmentActions = {
       source = unescapeHTMLLeaveTags(source)
       SegmentActions.replaceEditAreaTextContent(sid, source)
       SegmentActions.modifiedTranslation(sid, true)
-      UI.segmentQA(UI.currentSegment)
+      SegmentActions.getSegmentsQa(currentSegment)
 
       if (config.translation_matches_enabled) {
         SegmentActions.setChoosenSuggestion(sid, null)
@@ -467,7 +462,6 @@ const SegmentActions = {
 
     copyAllSourceToTarget()
       .then(() => {
-        UI.unmountSegments()
         UI.render({
           segmentToOpen: UI.currentSegmentId,
         })
@@ -1221,6 +1215,59 @@ const SegmentActions = {
       counter,
       limit,
     })
+  },
+  getMoreSegments: (where) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.GET_MORE_SEGMENTS,
+      where,
+    })
+  },
+  removeAllSegments: () => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.REMOVE_ALL_SEGMENTS,
+    })
+  },
+  freezingSegments: (isFreezing) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FREEZING_SEGMENTS,
+      isFreezing,
+    })
+  },
+  getSegmentsQa: (segment) => {
+    if (!segment) return
+
+    var segment_status = segment.status
+
+    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
+    const trg_content = TagUtils.prepareTextToSend(segment.translation)
+
+    getLocalWarnings({
+      id: segment.sid,
+      id_job: config.id_job,
+      password: config.password,
+      src_content: src_content,
+      trg_content: trg_content,
+      segment_status: segment_status,
+    })
+      .then((data) => {
+        if (data.details && data.details.id_segment) {
+          SegmentActions.setSegmentWarnings(
+            data.details.id_segment,
+            data.details.issues_info,
+            data.details.tag_mismatch,
+          )
+        } else {
+          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
+        }
+        $(document).trigger('getWarning:local:success', {
+          resp: data,
+          segment: segment,
+        })
+        SegmentActions.updateGlossaryData(data.data, segment.sid)
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
 }
 
