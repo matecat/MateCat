@@ -271,6 +271,12 @@ let CatToolActions = {
       actionType: CattolConstants.REMOVE_ALL_NOTIFICATION,
     })
   },
+  onRender: (props) => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.ON_RENDER,
+      ...props,
+    })
+  },
 }
 
 export default CatToolActions

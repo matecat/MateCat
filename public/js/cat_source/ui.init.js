@@ -1,6 +1,7 @@
+import {createRoot} from 'react-dom/client'
+import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
-import SearchUtils from './es6/components/header/cattol/search/searchUtils'
-import SegmentFilter from './es6/components/header/cattol/segment_filter/segment_filter'
+import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
 import Customizations from './es6/utils/customizations'
 import LXQ from './es6/utils/lxq.main'
@@ -10,7 +11,6 @@ $.extend(window.UI, {
   render: function (options) {
     options = options || {}
     var seg = options.segmentToOpen || false
-    this.segmentToScrollAtRender = seg ? seg : false
 
     this.isSafari =
       navigator.userAgent.search('Safari') >= 0 &&
@@ -24,10 +24,6 @@ $.extend(window.UI, {
     this.initSegNum = 100 // number of segments initially loaded
     this.moreSegNum = 25
     this.numOpenedSegments = 0
-    this.maxMinutesBeforeRerendering = 60
-    this.loadingMore = false
-    this.noMoreSegmentsAfter = false
-    this.noMoreSegmentsBefore = false
     this.nextUntranslatedSegmentIdByServer = null
     this.checkUpdatesEvery = 180000
     this.tagModesEnabled =
@@ -51,8 +47,8 @@ $.extend(window.UI, {
     this.debug = false
 
     options.openCurrentSegmentAfter = !!(!seg && !this.firstLoad)
-    if (this.segmentToScrollAtRender) {
-      this.startSegmentId = this.segmentToScrollAtRender
+    if (options.segmentToOpen) {
+      this.startSegmentId = options.segmentToOpen
     } else {
       var hash = CommonUtils.parsedHash.segmentId
       config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
@@ -62,8 +58,13 @@ $.extend(window.UI, {
       this.startSegmentId =
         hash && hash != '' ? hash : config.last_opened_segment
     }
+    CatToolActions.onRender({
+      ...options,
+      ...(this.startSegmentId && {startSegmentId: this.startSegmentId}),
+      where: 'center',
+    })
 
-    return UI.getSegments(options)
+    // return UI.getSegments(options)
   },
   start: function () {
     // TODO: the following variables used to be set in UI.init() which is called
@@ -77,30 +78,26 @@ $.extend(window.UI, {
       APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30)
     })
 
-    var initialRenderPromise = UI.render()
-
-    initialRenderPromise.then(function () {
-      if (
-        SegmentFilter.enabled() &&
-        SegmentFilter.getStoredState().reactState
-      ) {
-        SegmentFilter.openFilter()
-      }
-      setTimeout(function () {
-        UI.checkWarnings(true)
-      }, 1000)
-    })
-
-    $('html').trigger('start')
-
-    if (LXQ.enabled()) {
-      LXQ.initPopup()
+    // page content mount point
+    const CallbackAfterRender = () => {
+      React.useEffect(() => {
+        onPageMounted()
+      }, [])
+      return React.createElement(CatTool)
     }
-    CatToolActions.startNotifications()
-    UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
-    // Temporary js for header action menu
-    CatToolActions.renderHeader()
-    CatToolActions.renderFooter()
+    const mountPoint = createRoot($('.page-content')[0])
+    mountPoint.render(<CallbackAfterRender />)
+
+    const onPageMounted = () => {
+      UI.render()
+      $('html').trigger('start')
+
+      if (LXQ.enabled()) {
+        LXQ.initPopup()
+      }
+      CatToolActions.startNotifications()
+      UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
+    }
   },
   init: function () {
     this.isMac = navigator.platform == 'MacIntel' ? true : false
@@ -131,24 +128,6 @@ $.extend(window.UI, {
     this.checkQueryParams()
 
     UI.firstLoad = false
-  },
-  restart: function () {
-    UI.unmountSegments()
-    this.start()
-  },
-
-  detectStartSegment: function () {
-    if (this.segmentToScrollAtRender) {
-      this.startSegmentId = this.segmentToScrollAtRender
-    } else {
-      var hash = CommonUtils.parsedHash.segmentId
-      config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
-      if (!config.last_opened_segment) {
-        config.last_opened_segment = config.first_job_segment
-      }
-      this.startSegmentId =
-        hash && hash != '' ? hash : config.last_opened_segment
-    }
   },
   checkQueryParams: function () {
     var action = CommonUtils.getParameterByName('action')
