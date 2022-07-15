@@ -30,7 +30,6 @@ import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 
-
 const SegmentActions = {
   /********* SEGMENTS *********/
   renderSegments: function (segments, idToOpen) {
@@ -50,10 +49,7 @@ const SegmentActions = {
     })
   },
   splitSegment: function (sid, text) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.FREEZING_SEGMENTS,
-      isFreezing: true,
-    })
+    SegmentActions.freezingSegments(true)
     splitSegment(sid, text)
       .then(() => {
         UI.unmountSegments()
@@ -68,10 +64,7 @@ const SegmentActions = {
           type: 'error',
         }
         CatToolActions.addNotification(notification)
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.FREEZING_SEGMENTS,
-          isFreezing: false,
-        })
+        SegmentActions.freezingSegments(false)
       })
   },
   addSegments: function (segments, where) {
