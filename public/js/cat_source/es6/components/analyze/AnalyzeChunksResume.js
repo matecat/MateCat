@@ -134,8 +134,11 @@ class AnalyzeChunksResume extends React.Component {
   getOutsourceButton = (chunk, index) => {
     const {openOutsourceModal} = this
     return (
-      <div className={'outsource-translation'}>
-        <a onClick={openOutsourceModal(index, chunk)}>Buy Translation</a>
+      <div
+        className={'outsource-translation'}
+        onClick={openOutsourceModal(index, chunk)}
+      >
+        <a>Buy Translation</a>
         <span>
           By
           <svg
