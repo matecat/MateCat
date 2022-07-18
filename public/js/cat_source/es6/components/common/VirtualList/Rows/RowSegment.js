@@ -93,7 +93,7 @@ function RowSegment({
               </span>
             </div>
           ) : null}
-          {file ? (
+          {file && file.weighted_words > 0 ? (
             <div className="projectbar-wordcounter">
               <span>
                 Payable Words: <strong>{file.weighted_words}</strong>
