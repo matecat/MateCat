@@ -183,7 +183,6 @@ const OfflineUtils = {
       if (operation === 'getSegments') {
         UI[operation]()
       } else if (operation === 'getMoreSegments') {
-        UI.loadingMore = false
         UI[operation](args)
       }
     })

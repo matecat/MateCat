@@ -308,7 +308,7 @@ class SegmentTarget extends React.Component {
           this.props.segment.sid,
           newTranslation,
         )
-        UI.segmentQA(UI.getSegmentById(this.props.segment.sid))
+        SegmentActions.getSegmentsQa(this.props.segment)
       }, 100)
       // TODO: Change code with this (?)
       // this.editArea.addMissingSourceTagsToTarget()

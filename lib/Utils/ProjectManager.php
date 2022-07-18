@@ -2577,7 +2577,7 @@ class ProjectManager {
 
         $this->_cleanSegmentsMetadata();
 
-        $status = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $status = Constants_TranslationStatus::STATUS_APPROVED;
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
                 $status,
@@ -2682,10 +2682,6 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
-
-    }
-
-    private function fdsfdsfd(){
 
     }
 
