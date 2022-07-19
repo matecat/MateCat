@@ -662,9 +662,9 @@ class Editarea extends React.Component {
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       !e.shiftKey &&
       e.altKey &&
-      (isOptionKeyCommand(e) || isChromeBook)
+      isChromeBook
     ) {
-      return 'insert-nbsp-tag' // MacOS && Chromebook
+      return 'insert-nbsp-tag' // Chromebook
     } else if (e.key === 'ArrowLeft' && !e.altKey) {
       if (e.shiftKey) {
         if (handleCursorMovement(-1, true, config.isTargetRTL))
@@ -685,7 +685,7 @@ class Editarea extends React.Component {
       return 'tm-search'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      (e.ctrlKey || e.metaKey) &&
+      e.ctrlKey &&
       e.altKey
     ) {
       return 'insert-word-joiner-tag'
