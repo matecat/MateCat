@@ -3043,6 +3043,7 @@ class ProjectManager {
      * @throws \Exception
      */
     private function insertSegmentNotesForFile() {
+
         $this->projectStructure = $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
         ProjectManagerModel::bulkInsertSegmentNotes( $this->projectStructure[ 'notes' ] );
         ProjectManagerModel::bulkInsertSegmentMetaDataFromAttributes( $this->projectStructure[ 'notes' ] );
