@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
 
 import OfflineUtils from './offlineUtils'
@@ -522,6 +521,11 @@ const CommonUtils = {
     return timezoneToShow % 1 === 0
       ? 'GMT ' + timezoneToShow + ':00'
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
+  },
+
+  parseFiles: (files) => {
+    console.log('Matecat')
+    return files
   },
 }
 
