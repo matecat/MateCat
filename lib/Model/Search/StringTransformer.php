@@ -33,8 +33,6 @@ class StringTransformer
             $string = self::replaceOriginalMap($string, $originalMap);
         }
 
-        $string = self::trimExtraSpaces($string);
-
         return $string;
     }
 
