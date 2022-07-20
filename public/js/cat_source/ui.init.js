@@ -4,7 +4,6 @@ import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
 import Customizations from './es6/utils/customizations'
-import LXQ from './es6/utils/lxq.main'
 
 $.extend(window.UI, {
   start: function () {
@@ -20,25 +19,8 @@ $.extend(window.UI, {
     })
 
     // page content mount point
-    const CallbackAfterRender = () => {
-      React.useEffect(() => {
-        onPageMounted()
-      }, [])
-      return React.createElement(CatTool)
-    }
     const mountPoint = createRoot($('.page-content')[0])
-    mountPoint.render(<CallbackAfterRender />)
-
-    const onPageMounted = () => {
-      CatToolActions.onRender()
-      $('html').trigger('start')
-
-      if (LXQ.enabled()) {
-        LXQ.initPopup()
-      }
-      CatToolActions.startNotifications()
-      UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
-    }
+    mountPoint.render(<CatTool />)
   },
   init: function () {
     this.isMac = navigator.platform == 'MacIntel' ? true : false

@@ -13,6 +13,7 @@ import SegmentFilter from '../components/header/cattol/segment_filter/segment_fi
 import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
+import LXQ from '../utils/lxq.main'
 
 function CatTool() {
   const [options, setOptions] = useState({})
@@ -30,7 +31,7 @@ function CatTool() {
       where: options?.where,
     })
 
-  // listeners
+  // actions listener
   useEffect(() => {
     // CatTool onRender action
     const onRenderHandler = (options) => {
@@ -85,6 +86,15 @@ function CatTool() {
         getMoreSegments,
       )
     }
+  }, [])
+
+  // on mount dispatch some actions
+  useEffect(() => {
+    CatToolActions.onRender()
+    $('html').trigger('start')
+    if (LXQ.enabled()) LXQ.initPopup()
+    CatToolActions.startNotifications()
+    UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
   }, [])
 
   // handle getSegments result
