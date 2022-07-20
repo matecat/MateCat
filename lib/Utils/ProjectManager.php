@@ -2990,6 +2990,9 @@ class ProjectManager {
                 }
 
                 if ( !$this->projectStructure[ 'notes' ][ $internal_id ]->offsetExists( 'entries' ) ) {
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'from', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'entries', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'entries', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json_segment_ids', [] );
@@ -2997,6 +3000,11 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'notes' ][ $internal_id ][ $noteKey ]->append( $noteContent );
+
+                // import segments metadata from the `from` attribute
+                if(isset($note[ 'from' ])){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( $note[ 'from' ] );
+                }
 
             }
 
@@ -3016,6 +3024,7 @@ class ProjectManager {
      *
      */
     private function __setSegmentIdForNotes( $row ) {
+
         $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
@@ -3036,6 +3045,7 @@ class ProjectManager {
     private function insertSegmentNotesForFile() {
         $this->projectStructure = $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
         ProjectManagerModel::bulkInsertSegmentNotes( $this->projectStructure[ 'notes' ] );
+        ProjectManagerModel::bulkInsertSegmentMetaDataFromAttributes( $this->projectStructure[ 'notes' ] );
     }
 
     /**
