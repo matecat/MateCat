@@ -191,7 +191,7 @@ class Search extends React.Component {
     if (UI.segmentIsLoaded(UI.currentSegmentId)) {
       setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId))
     } else {
-      UI.render({
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: UI.currentSegmentId,
       })
@@ -230,8 +230,8 @@ class Search extends React.Component {
         SearchUtils.execReplaceAll(self.state.search)
           .then(() => {
             const currentId = SegmentStore.getCurrentSegmentId()
-            UI.unmountSegments()
-            UI.render({
+            SegmentActions.removeAllSegments()
+            CatToolActions.onRender({
               firstLoad: false,
               segmentToOpen: currentId,
             })

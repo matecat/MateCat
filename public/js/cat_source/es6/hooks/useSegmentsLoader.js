@@ -4,6 +4,9 @@ import {getSegments} from '../api/getSegments'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 
+const INIT_NUM_SEGMENTS = 40
+const MORE_NUM_SEGMENTS = 25
+
 function useSegmentsLoader({
   segmentId,
   where = 'center',
@@ -46,7 +49,7 @@ function useSegmentsLoader({
     getSegments({
       jid: idJob,
       password,
-      step: where === 'center' ? 40 : UI.moreSegNum,
+      step: where === 'center' ? INIT_NUM_SEGMENTS : MORE_NUM_SEGMENTS,
       segment: segmentIdValue,
       where,
     })

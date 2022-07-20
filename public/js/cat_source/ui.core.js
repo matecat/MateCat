@@ -188,19 +188,6 @@ window.UI = {
     }
   },
 
-  getMoreSegments: function (where) {
-    SegmentActions.getMoreSegments(where)
-  },
-  /**
-   * removed the #outer div, taking care of extra cleaning needed, like unmounting
-   * react components, closing side panel etc.
-   */
-  unmountSegments: function () {
-    this.removeCacheObjects()
-    SegmentActions.removeAllSegments()
-    SegmentActions.closeSideSegments()
-  },
-
   getTranslationMismatches: function (id_segment) {
     getTranslationMismatches({
       password: config.password,

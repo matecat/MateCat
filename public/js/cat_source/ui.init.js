@@ -5,67 +5,8 @@ import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
 import Customizations from './es6/utils/customizations'
 import LXQ from './es6/utils/lxq.main'
-import SegmentUtils from './es6/utils/segmentUtils'
 
 $.extend(window.UI, {
-  render: function (options) {
-    options = options || {}
-    var seg = options.segmentToOpen || false
-
-    this.isSafari =
-      navigator.userAgent.search('Safari') >= 0 &&
-      navigator.userAgent.search('Chrome') < 0
-    this.isChrome = typeof window.chrome != 'undefined'
-    this.isFirefox = typeof navigator.mozApps != 'undefined'
-
-    this.isMac = navigator.platform === 'MacIntel'
-    this.body = $('body')
-    // this.firstLoad = (options.firstLoad || false);
-    this.initSegNum = 100 // number of segments initially loaded
-    this.moreSegNum = 25
-    this.numOpenedSegments = 0
-    this.nextUntranslatedSegmentIdByServer = null
-    this.checkUpdatesEvery = 180000
-    this.tagModesEnabled =
-      typeof options.tagModesEnabled != 'undefined'
-        ? options.tagModesEnabled
-        : true
-    if (this.tagModesEnabled && !SegmentUtils.checkTPEnabled()) {
-      UI.body.addClass('tagModes')
-    } else {
-      UI.body.removeClass('tagModes')
-    }
-
-    /**
-     * Global Translation mismatches array definition.
-     */
-    this.translationMismatches = []
-
-    this.readonly = this.body.hasClass('archived') ? true : false
-
-    this.setTagLockCustomizeCookie(true)
-    this.debug = false
-
-    options.openCurrentSegmentAfter = !!(!seg && !this.firstLoad)
-    if (options.segmentToOpen) {
-      this.startSegmentId = options.segmentToOpen
-    } else {
-      var hash = CommonUtils.parsedHash.segmentId
-      config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
-      config.last_opened_segment = config.last_opened_segment
-        ? config.last_opened_segment
-        : config.first_job_segment
-      this.startSegmentId =
-        hash && hash != '' ? hash : config.last_opened_segment
-    }
-    CatToolActions.onRender({
-      ...options,
-      ...(this.startSegmentId && {startSegmentId: this.startSegmentId}),
-      where: 'center',
-    })
-
-    // return UI.getSegments(options)
-  },
   start: function () {
     // TODO: the following variables used to be set in UI.init() which is called
     // during rendering. Those have been moved here because of the init change
@@ -89,7 +30,7 @@ $.extend(window.UI, {
     mountPoint.render(<CallbackAfterRender />)
 
     const onPageMounted = () => {
-      UI.render()
+      CatToolActions.onRender()
       $('html').trigger('start')
 
       if (LXQ.enabled()) {

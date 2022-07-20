@@ -52,10 +52,8 @@ const SegmentActions = {
     SegmentActions.freezingSegments(true)
     splitSegment(sid, text)
       .then(() => {
-        UI.unmountSegments()
-        UI.render({
-          segmentToOpen: sid.split('-')[0],
-        })
+        SegmentActions.removeAllSegments()
+        CatToolActions.onRender({segmentToOpen: sid.split('-')[0]})
       })
       .catch((errors) => {
         var notification = {
@@ -145,8 +143,8 @@ const SegmentActions = {
         wasOriginatedFromBrowserHistory,
       })
     } else {
-      UI.unmountSegments()
-      UI.render({
+      SegmentActions.removeAllSegments()
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: sid,
       })
@@ -185,8 +183,8 @@ const SegmentActions = {
         setTimeout(() => callback.apply(this, [sid]))
       }
     } else {
-      UI.unmountSegments()
-      UI.render({
+      SegmentActions.removeAllSegments()
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: sid,
         callbackAfterSegmentsResponse: () =>
@@ -450,12 +448,12 @@ const SegmentActions = {
   continueCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
 
-    UI.unmountSegments() //TODO
+    SegmentActions.removeAllSegments() //TODO
     $('#outer').addClass('loading')
 
     copyAllSourceToTarget()
       .then(() => {
-        UI.render({
+        CatToolActions.onRender({
           segmentToOpen: UI.currentSegmentId,
         })
       })
@@ -1216,6 +1214,7 @@ const SegmentActions = {
     })
   },
   removeAllSegments: () => {
+    UI.removeCacheObjects()
     AppDispatcher.dispatch({
       actionType: SegmentConstants.REMOVE_ALL_SEGMENTS,
     })
