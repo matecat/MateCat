@@ -226,11 +226,13 @@ class ProjectManagerModel {
             foreach ( $segments as $id_segment ) {
                 foreach ( $entries as $index => $note ) {
 
-                    $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
-                    $metaValue = strip_tags(html_entity_decode($note));
+                    if(isset($attributes['entries'][$index])){
+                        $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
+                        $metaValue = strip_tags(html_entity_decode($note));
 
-                    if($metaKey !== 'notes'){
-                        $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        if($metaKey !== 'notes'){
+                            $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        }
                     }
                 }
             }
@@ -238,11 +240,13 @@ class ProjectManagerModel {
             foreach ( $json_segment_ids as $id_segment ) {
                 foreach ( $json_entries as $index => $json ) {
 
-                    $metaKey = $attributes['json'][$index];
-                    $metaValue = $json;
+                    if(isset($attributes['entries'][$index])){
+                        $metaKey = $attributes['json'][$index];
+                        $metaValue = $json;
 
-                    if($metaKey !== 'notes'){
-                        $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        if($metaKey !== 'notes'){
+                            $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        }
                     }
                 }
             }
