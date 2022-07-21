@@ -686,6 +686,7 @@ class Segment extends React.Component {
         reviewType,
         segImmutable,
         segment,
+        files,
         speech2textEnabledFn,
         tagModesEnabled,
       } = this.props
@@ -696,6 +697,7 @@ class Segment extends React.Component {
         reviewType,
         segImmutable,
         segment,
+        files,
         speech2textEnabledFn,
         tagModesEnabled,
         readonly: this.state.readonly,
@@ -815,7 +817,7 @@ class Segment extends React.Component {
           <div className="segment-side-buttons">
             {config.comments_enabled &&
             (!this.props.segment.openComments || !this.props.segment.opened) ? (
-              <SegmentsCommentsIcon {...this.props} />
+              <SegmentsCommentsIcon />
             ) : null}
 
             {this.props.isReview && (
@@ -830,7 +832,7 @@ class Segment extends React.Component {
           </div>
           <div className="segment-side-container">
             {config.comments_enabled && this.props.segment.openComments ? (
-              <SegmentCommentsContainer {...this.props} />
+              <SegmentCommentsContainer />
             ) : null}
             {this.props.isReviewExtended &&
             this.props.segment.openIssues &&

@@ -6,10 +6,13 @@ import SegmentActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import MBC from '../../utils/mbc.main'
 import Shortcuts from '../../utils/shortcuts'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentsCommentsIcon extends React.Component {
-  constructor(props) {
-    super(props)
+  static contextType = SegmentContext
+
+  constructor(props, context) {
+    super(props, context)
     this.state = {
       comments: null,
     }
@@ -19,9 +22,9 @@ class SegmentsCommentsIcon extends React.Component {
   }
 
   updateComments(sid) {
-    if (_.isUndefined(sid) || sid === this.props.segment.sid) {
+    if (_.isUndefined(sid) || sid === this.context.segment.sid) {
       const comments = CommentsStore.getCommentsCountBySegment(
-        this.props.segment.original_sid,
+        this.context.segment.original_sid,
       )
       this.setState({
         comments: comments,
@@ -31,14 +34,14 @@ class SegmentsCommentsIcon extends React.Component {
 
   openComments(event) {
     event.stopPropagation()
-    SegmentActions.openSegmentComment(this.props.segment.sid)
-    if (!UI.isReadonlySegment(this.props.segment))
-      SegmentActions.openSegment(this.props.segment.sid)
+    SegmentActions.openSegmentComment(this.context.segment.sid)
+    if (!UI.isReadonlySegment(this.context.segment))
+      SegmentActions.openSegment(this.context.segment.sid)
     localStorage.setItem(MBC.localStorageCommentsClosed, false)
   }
 
   componentDidMount() {
-    this.updateComments(this.props.segment.sid)
+    this.updateComments(this.context.segment.sid)
     CommentsStore.addListener(
       CommentsConstants.ADD_COMMENT,
       this.updateComments,
@@ -63,8 +66,8 @@ class SegmentsCommentsIcon extends React.Component {
   render() {
     //if is not splitted or is the first of the splitted group
     if (
-      (!this.props.segment.splitted ||
-        this.props.segment.sid.split('-')[1] === '1') &&
+      (!this.context.segment.splitted ||
+        this.context.segment.sid.split('-')[1] === '1') &&
       this.state.comments
     ) {
       let html
