@@ -523,8 +523,8 @@ const CommonUtils = {
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
   },
 
+  //Plugins
   parseFiles: (files) => {
-    console.log('Matecat')
     return files
   },
 }
