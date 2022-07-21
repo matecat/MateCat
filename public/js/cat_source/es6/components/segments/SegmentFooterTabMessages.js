@@ -99,10 +99,10 @@ class SegmentFooterTabMessages extends React.Component {
   }
 
   getMetadataNoteTemplate() {
-    let metadadaNotes = []
+    let metadataNotes = []
     for (const [index, item] of this.props.metadata.entries()) {
       const {meta_key: label, meta_value: body} = item
-      metadadaNotes.push(
+      metadataNotes.push(
         <div className="note" key={`meta-${index}`}>
           <span className="note-label">{label}: </span>
           <span>{body}</span>
@@ -111,7 +111,7 @@ class SegmentFooterTabMessages extends React.Component {
     }
     return (
       <div className="metadata-notes" key="metadata-notes">
-        {metadadaNotes}
+        {metadataNotes}
       </div>
     )
   }
