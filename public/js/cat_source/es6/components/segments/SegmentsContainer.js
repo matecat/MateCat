@@ -191,9 +191,9 @@ function SegmentsContainer({
     const {current: persistence} = persistenceVariables
     persistence.scrollDirectionTop = scrollValue < persistence.lastScrollTop
     if (scrollBottomValue < 700 && !persistence.scrollDirectionTop) {
-      UI.getMoreSegments('after')
+      SegmentActions.getMoreSegments('after')
     } else if (scrollValue < 500 && persistence.scrollDirectionTop) {
-      UI.getMoreSegments('before')
+      SegmentActions.getMoreSegments('before')
     }
     persistence.lastScrollTop = scrollValue
     setScrollTopVisible(scrollValue > 400)
