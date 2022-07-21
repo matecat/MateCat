@@ -101,6 +101,11 @@ class ProjectManager {
     protected $filter;
 
     /**
+     * @var \Files\MetadataDao
+     */
+    protected $metadataDao;
+
+    /**
      * ProjectManager constructor.
      *
      * @param ArrayObject|null $projectStructure
@@ -129,7 +134,7 @@ class ProjectManager {
                             'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
-                            'array_files_meta'             => [], //list of file names
+                            'array_files_meta'             => [], //list of file meta data
                             'file_id_list'                 => [],
                             'source_language'              => null,
                             'target_language'              => null,
@@ -150,6 +155,7 @@ class ProjectManager {
                             'segments_metadata'            => [], //array of segments_metadata
                             'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
                             'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
+                            'file-metadata'                => [], //array of files metadata
                             'translations'                 => [],
                             'notes'                        => [],
                             'context-group'                => [],
@@ -220,6 +226,8 @@ class ProjectManager {
         }
 
         $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
+
+        $this->metadataDao = new \Files\MetadataDao();
     }
 
     protected function _log( $_msg ) {
@@ -1816,6 +1824,7 @@ class ProjectManager {
 
         $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
+        $jobsMetadataDao    = new \Jobs\MetadataDao();
 
         // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
@@ -1845,6 +1854,15 @@ class ProjectManager {
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
 
+            // save x-jsont* datatype
+            if(isset( $xliff_file[ 'attr' ][ 'data-type' ] )){
+                $dataType = $xliff_file[ 'attr' ][ 'data-type' ];
+
+                if (strpos($dataType, 'x-jsont' ) !== false) {
+                    $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'data-type', $dataType );
+                }
+            }
+
             if ( !array_key_exists( 'trans-units', $xliff_file ) ) {
                 continue;
             }
@@ -1857,6 +1875,11 @@ class ProjectManager {
                 $filesPartsStruct->value = $xliff_file[ 'attr' ][ 'original' ];
 
                 $filePartsId = (new \Files\FilesPartsDao())->insert($filesPartsStruct);
+
+                // save `custom` meta data
+                if(isset($xliff_file[ 'attr' ][ 'custom' ]) and !empty($xliff_file[ 'attr' ][ 'custom' ])){
+                    $this->metadataDao->bulkInsert( $this->projectStructure[ 'id_project' ], $fid, $xliff_file[ 'attr' ][ 'custom' ], $filePartsId );
+                }
             }
 
             foreach ( $xliff_file[ 'trans-units' ] as $xliff_trans_unit ) {
@@ -2309,9 +2332,7 @@ class ProjectManager {
 
 
     protected function _insertInstructions( $fid, $value ) {
-        $metadataDao = new \Files\MetadataDao();
-        $metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
-
+        $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
     }
 
     protected function _storeSegments( $fid ) {
@@ -2965,6 +2986,9 @@ class ProjectManager {
                 }
 
                 if ( !$this->projectStructure[ 'notes' ][ $internal_id ]->offsetExists( 'entries' ) ) {
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'from', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'entries', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'entries', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json_segment_ids', [] );
@@ -2972,6 +2996,11 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'notes' ][ $internal_id ][ $noteKey ]->append( $noteContent );
+
+                // import segments metadata from the `from` attribute
+                if(isset($note[ 'from' ])){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( $note[ 'from' ] );
+                }
 
             }
 
@@ -2991,6 +3020,7 @@ class ProjectManager {
      *
      */
     private function __setSegmentIdForNotes( $row ) {
+
         $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
@@ -3009,8 +3039,10 @@ class ProjectManager {
      * @throws \Exception
      */
     private function insertSegmentNotesForFile() {
+
         $this->projectStructure = $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
         ProjectManagerModel::bulkInsertSegmentNotes( $this->projectStructure[ 'notes' ] );
+        ProjectManagerModel::bulkInsertSegmentMetaDataFromAttributes( $this->projectStructure[ 'notes' ] );
     }
 
     /**

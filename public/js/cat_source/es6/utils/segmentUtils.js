@@ -89,6 +89,14 @@ const SegmentUtils = {
       ]),
     )
   },
+  /**
+   * Retrieve the file id of a segment
+   * NOTE: used by plugins
+   * @param segment
+   */
+  getSegmentFileId: (segment) => {
+    return segment.id_file
+  },
 }
 
 export default SegmentUtils

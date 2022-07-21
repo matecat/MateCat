@@ -86,7 +86,6 @@ function SegmentFooter({sid, segment}) {
 
   // Check tab messages has notes
   const hasNotes = useMemo(() => {
-    if (!segment.notes) return false
     const tabMessagesContext = {
       props: {
         active_class: 'open',
@@ -106,7 +105,10 @@ function SegmentFooter({sid, segment}) {
     return (
       Array.isArray(notes) ||
       (!Array.isArray(notes) &&
-        !/\bThere are no notes available\b/i.test(notes?.props?.children ?? ''))
+        !/\bThere are no notes available\b/i.test(
+          notes?.props?.children ?? '',
+        )) ||
+      segment.metadata.length > 0
     )
   }, [segment])
 
@@ -190,7 +192,10 @@ function SegmentFooter({sid, segment}) {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasNotes = Boolean(segment.notes && segment.notes.length > 0)
+    const hasNotes = Boolean(
+      (segment.notes && segment.notes.length > 0) ||
+        segment.metadata.length > 0,
+    )
     const hasMultiMatches = Boolean(
       UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
     )

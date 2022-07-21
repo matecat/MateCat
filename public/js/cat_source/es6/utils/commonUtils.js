@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
 
 import OfflineUtils from './offlineUtils'
@@ -530,6 +529,10 @@ const CommonUtils = {
   },
   checkJobIsSplitted: function () {
     return config.job_is_splitted
+  },
+  //Plugins
+  parseFiles: (files) => {
+    return files
   },
 }
 
