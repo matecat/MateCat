@@ -1,4 +1,10 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {isUndefined, size} from 'lodash'
 import Cookies from 'js-cookie'
@@ -11,6 +17,7 @@ import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import {SegmentContext} from './SegmentContext'
 
 const TAB_ITEMS = {
   matches: {
@@ -46,7 +53,7 @@ const TAB_ITEMS = {
 }
 const DELAY_MESSAGE = 7000
 
-function SegmentFooter({sid, segment}) {
+function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
@@ -68,6 +75,8 @@ function SegmentFooter({sid, segment}) {
   const [activeTab, setActiveTab] = useState(undefined)
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
+
+  const {segment} = useContext(SegmentContext)
 
   const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
@@ -134,12 +143,12 @@ function SegmentFooter({sid, segment}) {
     const modifyTabVisibility = (name, visible) =>
       setTabStateChanges({name, visible})
     const openTab = (sidProp, name) =>
-      sid === sidProp && setActiveTab({name, forceOpen: true})
+      segment.sid === sidProp && setActiveTab({name, forceOpen: true})
     const addTabIndex = (sidProp, name, index) =>
-      sid === sidProp && setTabStateChanges({name, index})
+      segment.sid === sidProp && setTabStateChanges({name, index})
     const closeAllTabs = () => setTabStateChanges({visible: false})
     const showMessage = (sidProp, message) =>
-      sid === sidProp && setMessage(message)
+      segment.sid === sidProp && setMessage(message)
 
     document.addEventListener('keydown', handleShortcutsKeyDown)
     SegmentStore.addListener(SegmentConstants.REGISTER_TAB, registerTab)
@@ -167,7 +176,7 @@ function SegmentFooter({sid, segment}) {
         showMessage,
       )
     }
-  }, [sid, segment?.opened, nextTab])
+  }, [segment?.sid, segment?.opened, nextTab])
 
   // merge with configurations
   useEffect(() => {
@@ -256,9 +265,9 @@ function SegmentFooter({sid, segment}) {
       userChangedTab &&
       userChangedTab[Object.getOwnPropertySymbols(userChangedTab)[0]]
     if (!name) return
-    setTimeout(() => SegmentActions.setTabOpen(sid, name))
+    setTimeout(() => SegmentActions.setTabOpen(segment.sid, name))
     setActiveTab({name: name})
-  }, [userChangedTab, sid])
+  }, [userChangedTab, segment?.sid])
 
   // update tab state changes
   useEffect(() => {
@@ -336,7 +345,7 @@ function SegmentFooter({sid, segment}) {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={sid}
+            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -347,7 +356,7 @@ function SegmentFooter({sid, segment}) {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={sid}
+            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -358,7 +367,7 @@ function SegmentFooter({sid, segment}) {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={sid}
+            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -370,7 +379,7 @@ function SegmentFooter({sid, segment}) {
             active_class={openClass}
             tab_class={tab.tabClass}
             segment={segment}
-            id_segment={sid}
+            id_segment={segment.sid}
           />
         )
       case 'notes':
@@ -380,7 +389,7 @@ function SegmentFooter({sid, segment}) {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={sid}
+            id_segment={segment.sid}
             notes={segment.notes}
             metadata={segment.metadata}
             context_groups={segment.context_groups}
@@ -395,7 +404,7 @@ function SegmentFooter({sid, segment}) {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={sid}
+            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -415,7 +424,7 @@ function SegmentFooter({sid, segment}) {
         } tab-switcher tab-switcher-${tab.code} ${
           isLoading ? 'loading-tab' : ''
         }`}
-        id={'segment-' + sid + tab.code}
+        id={'segment-' + segment.sid + tab.code}
         data-tab-class={tab.tabClass}
         data-code={tab.code}
         onClick={() => setUserChangedTab({[Symbol()]: tab.name})}
@@ -462,11 +471,6 @@ function SegmentFooter({sid, segment}) {
       </div>
     </div>
   )
-}
-
-SegmentFooter.propTypes = {
-  sid: PropTypes.string,
-  segment: PropTypes.object,
 }
 
 export default SegmentFooter

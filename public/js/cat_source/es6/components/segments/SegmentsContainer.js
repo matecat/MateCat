@@ -1,5 +1,4 @@
 import React, {
-  createContext,
   createRef,
   useCallback,
   useEffect,
@@ -34,7 +33,6 @@ const COMMENTS_PADDING_TOP = [
 ]
 const SEARCH_BAR_OPENED_PADDING_TOP = 80
 
-export const SegmentsContext = createContext({})
 const listRef = createRef()
 
 function SegmentsContainer({
@@ -641,45 +639,41 @@ function SegmentsContainer({
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
   return (
-    <SegmentsContext.Provider
-      value={{onChangeRowHeight, minRowHeight: ROW_HEIGHT}}
-    >
-      <>
-        <VirtualList
-          ref={listRef}
-          className="virtual-list"
-          items={essentialRows}
-          scrollToIndex={{
-            value: scrollToParams.scrollTo,
-            align: scrollToParams.position,
-          }}
-          overscan={OVERSCAN}
-          width={widthArea}
-          height={heightArea}
-          onRender={(index) => (
-            <RowSegment
-              {...{
-                ...essentialRows[index],
-                ...getSegmentPropsBySid(essentialRows[index].id),
-                ...(index === essentialRows.length - 1 && {isLastRow: true}),
-              }}
-            />
-          )}
-          onScroll={onScroll}
-          itemStyle={(index) =>
-            segments.get(index).get('opened') && {zIndex: 1}
-          }
-          renderedRange={renderedRange}
-        />
-        {scrollTopVisible && (
-          <div
-            className={'pointer-first-segment'}
-            title="Go to first segment"
-            onClick={goToFirstSegment}
-          ></div>
+    <>
+      <VirtualList
+        ref={listRef}
+        className="virtual-list"
+        items={essentialRows}
+        scrollToIndex={{
+          value: scrollToParams.scrollTo,
+          align: scrollToParams.position,
+        }}
+        overscan={OVERSCAN}
+        width={widthArea}
+        height={heightArea}
+        onRender={(index) => (
+          <RowSegment
+            {...{
+              minRowHeight: ROW_HEIGHT,
+              onChangeRowHeight,
+              ...essentialRows[index],
+              ...getSegmentPropsBySid(essentialRows[index].id),
+              ...(index === essentialRows.length - 1 && {isLastRow: true}),
+            }}
+          />
         )}
-      </>
-    </SegmentsContext.Provider>
+        onScroll={onScroll}
+        itemStyle={(index) => segments.get(index).get('opened') && {zIndex: 1}}
+        renderedRange={renderedRange}
+      />
+      {scrollTopVisible && (
+        <div
+          className={'pointer-first-segment'}
+          title="Go to first segment"
+          onClick={goToFirstSegment}
+        ></div>
+      )}
+    </>
   )
 }
 

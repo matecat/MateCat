@@ -3,10 +3,19 @@ import React from 'react'
 import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SearchUtils from '../header/cattol/search/searchUtils'
+import {SegmentContext} from './SegmentContext'
 
 class SimpleEditor extends React.Component {
+  static contextType = SegmentContext
+
+  constructor(props, context) {
+    super(props, context)
+  }
+
   render() {
-    const {isTarget, sid, text, segment} = this.props
+    const {isTarget, text} = this.props
+    const {segment} = this.context
+    const sid = segment.sid
 
     let htmlText = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
       ? TagUtils.removeAllTags(text)
