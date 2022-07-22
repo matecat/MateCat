@@ -37,6 +37,20 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
         return 0;
     }
 
+    public function getFirstAndLastSegment($id, $ttl = 3600)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $sql = "SELECT max(s.id) as last_segment, min(s.id) as first_segment FROM 
+            files_parts fp
+            left join segments s on fp.id = s.id_file_part
+            where fp.id = :id
+            group by fp.id";
+        $stmt    = $conn->prepare( $sql );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id' => $id ] )[ 0 ];
+    }
+
     /**
      * @param int $id
      * @param int $ttl
