@@ -841,12 +841,9 @@ class Segment extends React.Component {
               <div className="review-balloon-container">
                 {!this.props.segment.versions ? null : (
                   <ReviewExtendedPanel
-                    reviewType={this.props.reviewType}
                     segment={this.props.segment}
-                    sid={this.props.segment.sid}
                     isReview={config.isReview}
                     selectionObj={this.state.selectedTextObj}
-                    removeSelection={this.removeSelection.bind(this)}
                   />
                 )}
               </div>

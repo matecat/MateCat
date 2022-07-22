@@ -11,7 +11,7 @@ class SegmentBody extends React.Component {
   static contextType = SegmentContext
 
   constructor(props, context) {
-    super(props, context)
+    super(props)
     this.openStatusSegmentMenu = this.openStatusSegmentMenu.bind(this)
     this.handleClickOutside = this.handleClickOutside.bind(this)
     this.state = {
@@ -20,7 +20,7 @@ class SegmentBody extends React.Component {
       clickedTagText: null,
       tagClickedInSource: false,
     }
-    this.isReviewExtended = this.context.reviewType === 'extended'
+    this.isReviewExtended = context.reviewType === 'extended'
   }
 
   statusHandleTitleAttr(status) {

@@ -54,8 +54,8 @@ const typingWordJoiner = matchTypingSequence(
 class Editarea extends React.Component {
   static contextType = SegmentContext
 
-  constructor(props, context) {
-    super(props, context)
+  constructor(props) {
+    super(props)
     const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
 
     this.decoratorsStructure = [

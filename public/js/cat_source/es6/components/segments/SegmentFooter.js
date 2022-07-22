@@ -345,7 +345,6 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -356,7 +355,6 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -367,7 +365,6 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={segment.sid}
             segment={segment}
           />
         )
@@ -379,7 +376,6 @@ function SegmentFooter() {
             active_class={openClass}
             tab_class={tab.tabClass}
             segment={segment}
-            id_segment={segment.sid}
           />
         )
       case 'notes':
@@ -389,7 +385,6 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={segment.sid}
             notes={segment.notes}
             metadata={segment.metadata}
             context_groups={segment.context_groups}
@@ -404,7 +399,6 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
-            id_segment={segment.sid}
             segment={segment}
           />
         )

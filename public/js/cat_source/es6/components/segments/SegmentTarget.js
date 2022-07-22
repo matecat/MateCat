@@ -15,8 +15,8 @@ import {SegmentContext} from './SegmentContext'
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
 
-  constructor(props, context) {
-    super(props, context)
+  constructor(props) {
+    super(props)
     this.state = {
       showFormatMenu: false,
       charactersCounter: 0,

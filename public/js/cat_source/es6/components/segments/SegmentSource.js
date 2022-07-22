@@ -20,8 +20,8 @@ import {SegmentContext} from './SegmentContext'
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
 
-  constructor(props, context) {
-    super(props, context)
+  constructor(props) {
+    super(props)
     const {onEntityClick, getUpdatedSegmentInfo} = this
     this.originalSource = this.props.segment.segment
     this.openConcordance = this.openConcordance.bind(this)

@@ -8,8 +8,8 @@ import SimpleEditor from './SimpleEditor'
 class SegmentWrapper extends React.Component {
   static contextType = SegmentContext
 
-  constructor(props, context) {
-    super(props, context)
+  constructor(props) {
+    super(props)
   }
 
   render() {

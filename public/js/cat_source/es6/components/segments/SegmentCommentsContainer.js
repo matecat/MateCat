@@ -16,10 +16,10 @@ class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
 
   constructor(props, context) {
-    super(props, context)
+    super(props)
     this.state = {
       comments: CommentsStore.getCommentsBySegment(
-        this.context.segment.original_sid,
+        context.segment.original_sid,
       ),
       user: CommentsStore.getUser(),
       teamUsers: CommentsStore.getTeamUsers(),
