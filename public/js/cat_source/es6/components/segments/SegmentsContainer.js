@@ -680,6 +680,8 @@ function SegmentsContainer({
             props && (
               <RowSegment
                 {...{
+                  minRowHeight: ROW_HEIGHT,
+                  onChangeRowHeight,
                   ...essentialRows[index],
                   ...props,
                   ...(index === essentialRows.length - 1 && {
