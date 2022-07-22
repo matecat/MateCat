@@ -30,6 +30,8 @@ class FilesInfoUtility {
     }
 
     /**
+     * @TODO QUI METTERE fist segment and last segment per file parts!!!!
+     *
      * get info for every file
      *
      * @return array
@@ -37,7 +39,8 @@ class FilesInfoUtility {
     public function getInfo() {
 
         $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
-        $fileMetadataDao = new Files_MetadataDao;
+        $fileMetadataDao = new Files_MetadataDao();
+        $filesPartsDao = new FilesPartsDao();
 
         $metadata = [];
 
@@ -63,9 +66,11 @@ class FilesInfoUtility {
             $index = 0;
             if(isset($metadata[ 'files_parts' ])){
                 foreach ($metadata[ 'files_parts' ] as $id => $filesPart){
-
+                    $firstAndLastSegment = $filesPartsDao->getFirstAndLastSegment($id);
                     $filesPart['id'] = $id;
                     $metadata[ 'files_parts' ][$index] = $filesPart;
+                    $metadata[ 'files_parts' ][$index]['first_segment'] = (int)$firstAndLastSegment['first_segment'];
+                    $metadata[ 'files_parts' ][$index]['last_segment'] = (int)$firstAndLastSegment['last_segment'];
                     unset( $metadata[ 'files_parts' ][$id]);
                     $index++;
                 }

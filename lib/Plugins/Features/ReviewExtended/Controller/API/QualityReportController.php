@@ -204,7 +204,7 @@ class QualityReportController extends BaseChunkController {
 
             // add fileInfo
             foreach ( $filesInfo[ 'files' ] as $file ) {
-                if ( $file[ 'id' ] === $segment->id_file ) {
+                if ( $file[ 'id' ] == $segment->id_file ) {
                     $seg[ 'file' ] = $file;
                 }
             }
