@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React, {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
-import {SegmentsContext} from '../../../segments/SegmentsContainer'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
 import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
@@ -30,13 +29,14 @@ const LinkIcon = () => {
 function RowSegment({
   id,
   height,
+  minRowHeight,
+  onChangeRowHeight,
   hasRendered,
   isLastRow = false,
   currentFileId,
   collectionTypeSeparator,
   ...restProps
 }) {
-  const {onChangeRowHeight, minRowHeight} = useContext(SegmentsContext)
   const ref = useRef()
   const {height: newHeight} = useResizeObserver(ref)
 
@@ -126,6 +126,8 @@ function RowSegment({
 RowSegment.propTypes = {
   id: PropTypes.string.isRequired,
   height: PropTypes.number.isRequired,
+  minRowHeight: PropTypes.number.isRequired,
+  onChangeRowHeight: PropTypes.func.isRequired,
   hasRendered: PropTypes.bool,
   isLastRow: PropTypes.bool,
   currentFileId: PropTypes.string,

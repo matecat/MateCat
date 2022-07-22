@@ -147,7 +147,7 @@ class SegmentFooterTabMessages extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           <div className="segment-notes-container">
