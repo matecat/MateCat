@@ -6,6 +6,7 @@ import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarning
 import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
+import CatToolActions from '../actions/CatToolActions'
 
 const LXQ = {
   enabled: function () {
@@ -20,7 +21,7 @@ const LXQ = {
         } else {
           SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
         }
-        UI.render()
+        CatToolActions.onRender()
         SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
       })
     }
@@ -29,7 +30,7 @@ const LXQ = {
     if (config.lxq_enabled) {
       config.lxq_enabled = 0
       toggleTagLexica({enabled: false}).then(() => {
-        UI.render()
+        CatToolActions.onRender()
         SegmentActions.qaComponentsetLxqIssues([])
       })
     }

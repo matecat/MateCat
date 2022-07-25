@@ -34,8 +34,13 @@ export const FilesMenu = ({projectName}) => {
 
   useEffect(() => {
     getJobFileInfo(config.id_job, config.password).then((response) => {
-      CatToolActions.storeFilesInfo(response)
-      setFiles(response.files)
+      const files = CommonUtils.parseFiles(response.files)
+      CatToolActions.storeFilesInfo(
+        files,
+        response.first_segment,
+        response.last_segment,
+      )
+      setFiles(files)
       firstJobSegment.current = response.first_segment
     })
   }, [])

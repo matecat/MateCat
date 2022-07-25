@@ -29,6 +29,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
+import {SegmentContext} from './SegmentContext'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -51,6 +52,8 @@ const typingWordJoiner = matchTypingSequence(
 )
 
 class Editarea extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
@@ -534,13 +537,13 @@ class Editarea extends React.Component {
     if (this.props.segment) {
       lang = config.target_rfc.toLowerCase()
       readonly =
-        this.props.readonly ||
-        this.props.locked ||
+        this.context.readonly ||
+        this.context.locked ||
         this.props.segment.muted ||
         !this.props.segment.opened
     }
     let classes = this.state.editAreaClasses.slice()
-    if (this.props.locked || this.props.readonly) {
+    if (this.context.locked || this.context.readonly) {
       classes.push('area')
     } else {
       classes.push('editarea')

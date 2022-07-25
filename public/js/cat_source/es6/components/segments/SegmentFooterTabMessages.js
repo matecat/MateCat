@@ -37,7 +37,9 @@ class SegmentFooterTabMessages extends React.Component {
           Object.keys(item.json).forEach(function (key, index) {
             let html = (
               <div className="note" key={'note-json' + index}>
-                <span className="note-label">{key.toUpperCase()}: </span>
+                <span className="note-label">
+                  {key.charAt(0).toUpperCase() + key.slice(1)}:{' '}
+                </span>
                 <span> {item.json[key]} </span>
               </div>
             )
@@ -82,10 +84,7 @@ class SegmentFooterTabMessages extends React.Component {
 
     // metadata notes
     if (this.props.metadata) {
-      for (const [index, item] of this.props.metadata.entries()) {
-        const {meta_key: label, meta_value: body} = item
-        notesHtml.push(this.getMetadataNoteTemplate({index, label, body}))
-      }
+      notesHtml.push(this.getMetadataNoteTemplate())
     }
 
     if (notesHtml.length === 0) {
@@ -99,11 +98,20 @@ class SegmentFooterTabMessages extends React.Component {
     return notesHtml
   }
 
-  getMetadataNoteTemplate({index = 0, label, body}) {
+  getMetadataNoteTemplate() {
+    let metadataNotes = []
+    for (const [index, item] of this.props.metadata.entries()) {
+      const {meta_key: label, meta_value: body} = item
+      metadataNotes.push(
+        <div className="note" key={`meta-${index}`}>
+          <span className="note-label">{label}: </span>
+          <span>{body}</span>
+        </div>,
+      )
+    }
     return (
-      <div className="note" key={`meta-${index}`}>
-        <span className="note-label">{label}: </span>
-        <span>{body}</span>
+      <div className="metadata-notes" key="metadata-notes">
+        {metadataNotes}
       </div>
     )
   }
@@ -139,7 +147,7 @@ class SegmentFooterTabMessages extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           <div className="segment-notes-container">

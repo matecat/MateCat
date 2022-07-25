@@ -14,6 +14,7 @@ import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import ModalsActions from './ModalsActions'
 import {Header} from '../components/header/cattol/Header'
+import SegmentUtils from '../utils/segmentUtils'
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
@@ -108,14 +109,14 @@ let CatToolActions = {
   setPopupUserMenuCookie: function () {
     CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu')
   },
-  storeFilesInfo: function (data) {
+  storeFilesInfo: function (files, firstSegment, lastSegment) {
     AppDispatcher.dispatch({
       actionType: CattolConstants.STORE_FILES_INFO,
-      files: data.files,
+      files: files,
     })
 
-    config.last_job_segment = data.last_segment
-    config.firstSegmentOfFiles = data.files
+    config.last_job_segment = lastSegment
+    config.firstSegmentOfFiles = files
   },
   renderHeader: () => {
     const mountPoint = createRoot($('header')[0])
@@ -271,10 +272,36 @@ let CatToolActions = {
       actionType: CattolConstants.REMOVE_ALL_NOTIFICATION,
     })
   },
-  onRender: (props) => {
+  onRender: (props = {}) => {
+    UI.nextUntranslatedSegmentIdByServer = null
+    UI.tagModesEnabled =
+      typeof props.tagModesEnabled != 'undefined' ? props.tagModesEnabled : true
+
+    if (UI.tagModesEnabled && !SegmentUtils.checkTPEnabled())
+      UI.body.addClass('tagModes')
+    else UI.body.removeClass('tagModes')
+
+    UI.setTagLockCustomizeCookie(true)
+
+    const segmentToOpen = props.segmentToOpen || false
+
+    props.openCurrentSegmentAfter = !!(!segmentToOpen && !UI.firstLoad)
+    if (props.segmentToOpen) {
+      UI.startSegmentId = props.segmentToOpen
+    } else {
+      const hash = CommonUtils.parsedHash.segmentId
+      config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
+        ? CommonUtils.getLastSegmentFromLocalStorage()
+        : config.first_job_segment
+
+      UI.startSegmentId = hash ? hash : config.last_opened_segment
+    }
+
     AppDispatcher.dispatch({
       actionType: CattolConstants.ON_RENDER,
       ...props,
+      ...(UI.startSegmentId && {startSegmentId: UI.startSegmentId}),
+      where: props.where ? props.where : 'center',
     })
   },
 }

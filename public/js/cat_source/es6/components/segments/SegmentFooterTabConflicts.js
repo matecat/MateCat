@@ -164,7 +164,7 @@ class SegmentFooterTabConflicts extends React.Component {
             ' ' +
             this.props.tab_class
           }
-          id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+          id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
         >
           <div className="overflow">{html}</div>
         </div>

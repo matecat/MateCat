@@ -1639,12 +1639,25 @@ class QA {
         // In this case check for whole content mismatch and throw a ERR_TAG_MISMATCH Error
         //
 
-        $this->checkTagPositionsAddTagOrderError($this->extractIdAttributes($open_malformedXmlSrcStruct), $this->extractIdAttributes($open_malformedXmlTrgStruct), self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-        $this->checkTagPositionsAddTagOrderError($this->extractIdAttributes($closing_malformedXmlSrcStruct), $this->extractIdAttributes($closing_malformedXmlTrgStruct), self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($this->extractEquivTextAttributes($open_malformedXmlSrcStruct), $this->extractEquivTextAttributes($open_malformedXmlTrgStruct), self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($this->extractEquivTextAttributes($closing_malformedXmlSrcStruct), $this->extractEquivTextAttributes($closing_malformedXmlTrgStruct), self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkTagPositionsAddTagOrderError($this->extractIdAttributes($selfClosingTags_src), $this->extractIdAttributes($selfClosingTags_trg), self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($this->extractEquivTextAttributes($selfClosingTags_src), $this->extractEquivTextAttributes($selfClosingTags_trg), self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $srcOpIds = $this->extractIdAttributes($open_malformedXmlSrcStruct);
+        $trgOpIds = $this->extractIdAttributes($open_malformedXmlTrgStruct);
+        $srcClIds = $this->extractIdAttributes($closing_malformedXmlSrcStruct);
+        $trgClIds = $this->extractIdAttributes($closing_malformedXmlTrgStruct);
+        $srcOpEquivText = $this->extractEquivTextAttributes($open_malformedXmlSrcStruct);
+        $trgOpEquivText = $this->extractEquivTextAttributes($open_malformedXmlTrgStruct);
+        $srcClEquivText = $this->extractEquivTextAttributes($closing_malformedXmlSrcStruct);
+        $trgClEquivText = $this->extractEquivTextAttributes($closing_malformedXmlTrgStruct);
+        $scrSCIds = $this->extractIdAttributes($selfClosingTags_src);
+        $trgSCIds = $this->extractIdAttributes($selfClosingTags_trg);
+        $srcSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_src);
+        $trgSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_trg);
+
+        $this->checkTagPositionsAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        $this->checkTagPositionsAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
         $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // If there are errors get tag diff for the UI

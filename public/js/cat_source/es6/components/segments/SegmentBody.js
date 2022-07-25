@@ -5,9 +5,12 @@ import Shortcuts from '../../utils/shortcuts'
 import {getXliffRegExpression} from './utils/DraftMatecatUtils/tagModel'
 import SegmentWrapper from './SegmentWrapper'
 import SegmentActions from '../../actions/SegmentActions'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentBody extends React.Component {
-  constructor(props) {
+  static contextType = SegmentContext
+
+  constructor(props, context) {
     super(props)
     this.openStatusSegmentMenu = this.openStatusSegmentMenu.bind(this)
     this.handleClickOutside = this.handleClickOutside.bind(this)
@@ -17,7 +20,7 @@ class SegmentBody extends React.Component {
       clickedTagText: null,
       tagClickedInSource: false,
     }
-    this.isReviewExtended = this.props.reviewType === 'extended'
+    this.isReviewExtended = context.reviewType === 'extended'
   }
 
   statusHandleTitleAttr(status) {
@@ -30,7 +33,7 @@ class SegmentBody extends React.Component {
   checkLockTags() {
     if (config.tagLockCustomizable || !UI.tagLockEnabled) {
       return false
-    } else return this.props.segment.segment.match(/&lt;.*?&gt;/gi)
+    } else return this.context.segment.segment.match(/&lt;.*?&gt;/gi)
   }
 
   openStatusSegmentMenu(e) {
@@ -41,7 +44,7 @@ class SegmentBody extends React.Component {
   }
 
   changeStatus(status) {
-    UI.changeStatus(this.props.segment, status)
+    UI.changeStatus(this.context.segment, status)
     this.setState({
       showStatusMenu: false,
     })
@@ -60,17 +63,17 @@ class SegmentBody extends React.Component {
 
   hasSourceOrTargetTags() {
     var regExp = getXliffRegExpression()
-    var sourceTags = this.props.segment.segment.match(regExp)
+    var sourceTags = this.context.segment.segment.match(regExp)
     return sourceTags && sourceTags.length > 0
   }
 
   hasMissingTargetTags() {
     var regExp = getXliffRegExpression()
-    var sourceTags = this.props.segment.segment.match(regExp)
+    var sourceTags = this.context.segment.segment.match(regExp)
     if (!sourceTags || sourceTags.length === 0) {
       return false
     }
-    var targetTags = this.props.segment.translation.match(regExp)
+    var targetTags = this.context.segment.translation.match(regExp)
 
     return (
       (targetTags && sourceTags.length > targetTags.length) ||
@@ -89,7 +92,7 @@ class SegmentBody extends React.Component {
           <li>
             <a
               className="draftStatusMenu"
-              data-sid={'segment-' + this.props.segment.sid}
+              data-sid={'segment-' + this.context.segment.sid}
               title="set draft as status"
               onClick={this.changeStatus.bind(this, 'draft')}
             >
@@ -99,7 +102,7 @@ class SegmentBody extends React.Component {
           <li>
             <a
               className="translatedStatusMenu"
-              data-sid={'segment-' + this.props.segment.sid}
+              data-sid={'segment-' + this.context.segment.sid}
               title="set translated as status"
               onClick={this.changeStatus.bind(this, 'translated')}
             >
@@ -109,7 +112,7 @@ class SegmentBody extends React.Component {
           <li>
             <a
               className="approvedStatusMenu"
-              data-sid={'segment-' + this.props.segment.sid}
+              data-sid={'segment-' + this.context.segment.sid}
               title="set approved as status"
               onClick={this.changeStatus.bind(this, 'approved')}
             >
@@ -120,7 +123,7 @@ class SegmentBody extends React.Component {
           <li>
             <a
               className="rejectedStatusMenu"
-              data-sid={'segment-' + this.props.segment.sid}
+              data-sid={'segment-' + this.context.segment.sid}
               title="set rejected as status"
               onClick={this.changeStatus.bind(this, 'rejected')}
             >
@@ -135,7 +138,7 @@ class SegmentBody extends React.Component {
   }
   copySource(e) {
     e.preventDefault()
-    SegmentActions.copySourceToTarget(this.props.segment.sid)
+    SegmentActions.copySourceToTarget(this.context.segment.sid)
   }
 
   componentDidMount() {
@@ -148,9 +151,9 @@ class SegmentBody extends React.Component {
 
   render() {
     var status_change_title
-    if (this.props.segment.status) {
+    if (this.context.segment.status) {
       status_change_title = this.statusHandleTitleAttr(
-        this.props.segment.status,
+        this.context.segment.status,
       )
     } else {
       status_change_title = 'Change segment status'
@@ -166,10 +169,7 @@ class SegmentBody extends React.Component {
       >
         <div className="wrap">
           <div className="outersource">
-            <SegmentWrapper
-              segment={this.props.segment}
-              segImmutable={this.props.segImmutable}
-            />
+            <SegmentWrapper />
 
             <div
               className="copy"
@@ -180,22 +180,7 @@ class SegmentBody extends React.Component {
               <p>{copySourceShortcuts.toUpperCase()}</p>
             </div>
 
-            <SegmentWrapper
-              isTarget
-              segment={this.props.segment}
-              segImmutable={this.props.segImmutable}
-              enableTagProjection={this.props.enableTagProjection}
-              isReview={this.props.isReview}
-              isReviewExtended={this.props.isReviewExtended}
-              isReviewImproved={this.props.isReviewImproved}
-              reviewType={this.props.reviewType}
-              tagModesEnabled={this.props.tagModesEnabled}
-              speech2textEnabledFn={this.props.speech2textEnabledFn}
-              locked={this.props.locked}
-              readonly={this.props.readonly}
-              openSegment={this.props.openSegment}
-              removeSelection={this.props.removeSelection}
-            />
+            <SegmentWrapper isTarget />
           </div>
         </div>
         <div className="status-container">
@@ -210,7 +195,7 @@ class SegmentBody extends React.Component {
               href="#"
               title={status_change_title}
               className="status"
-              id={'segment-' + this.props.segment.sid + '-changestatus'}
+              id={'segment-' + this.context.segment.sid + '-changestatus'}
               onClick={this.openStatusSegmentMenu}
             />
           )}
