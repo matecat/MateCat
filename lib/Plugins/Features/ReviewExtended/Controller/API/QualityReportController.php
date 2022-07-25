@@ -96,7 +96,7 @@ class QualityReportController extends BaseChunkController {
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-            $filesInfo        = $filesInfoUtility->getInfo();
+            $filesInfo        = $filesInfoUtility->getInfo(false);
 
             $segments = $this->_formatSegments( $segments, $ttlArray, $filesInfo );
 

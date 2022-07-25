@@ -30,61 +30,65 @@ class FilesInfoUtility {
     }
 
     /**
-     * @TODO QUI METTERE fist segment and last segment per file parts!!!!
-     *
      * get info for every file
+     *
+     * @param bool $showMetadata
      *
      * @return array
      */
-    public function getInfo() {
+    public function getInfo($showMetadata = true) {
 
         $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
         $fileMetadataDao = new Files_MetadataDao();
         $filesPartsDao = new FilesPartsDao();
 
-        $metadata = [];
+        // Show metadata
+        if($showMetadata){
 
-        // File parts
-        foreach ( $fileInfo as &$file ) {
+            $metadata = [];
 
-            $filePartsIdArray = [];
+            // File parts
+            foreach ( $fileInfo as &$file ) {
 
-            foreach ( $fileMetadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
+                $filePartsIdArray = [];
 
-                if($metadatum->files_parts_id !== null){
-                    $metadata[ 'files_parts' ][ (int)$metadatum->files_parts_id ][ $metadatum->key ] = $metadatum->value;
+                foreach ( $fileMetadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
 
-                    if(!in_array($metadatum->files_parts_id, $filePartsIdArray)){
-                        $filePartsIdArray[] = (int)$metadatum->files_parts_id;
+                    if($metadatum->files_parts_id !== null){
+                        $metadata[ 'files_parts' ][ (int)$metadatum->files_parts_id ][ $metadatum->key ] = $metadatum->value;
+
+                        if(!in_array($metadatum->files_parts_id, $filePartsIdArray)){
+                            $filePartsIdArray[] = (int)$metadatum->files_parts_id;
+                        }
+
+                    } else {
+                        $metadata[ $metadatum->key ] = $metadatum->value;
                     }
-
-                } else {
-                    $metadata[ $metadatum->key ] = $metadatum->value;
                 }
-            }
 
-            $index = 0;
-            if(isset($metadata[ 'files_parts' ])){
-                foreach ($metadata[ 'files_parts' ] as $id => $filesPart){
-                    $firstAndLastSegment = $filesPartsDao->getFirstAndLastSegment($id);
-                    $filesPart['id'] = $id;
-                    $metadata[ 'files_parts' ][$index] = $filesPart;
-                    $metadata[ 'files_parts' ][$index]['first_segment'] = (int)$firstAndLastSegment['first_segment'];
-                    $metadata[ 'files_parts' ][$index]['last_segment'] = (int)$firstAndLastSegment['last_segment'];
-                    unset( $metadata[ 'files_parts' ][$id]);
-                    $index++;
+                $index = 0;
+                if(isset($metadata[ 'files_parts' ])){
+                    foreach ($metadata[ 'files_parts' ] as $id => $filesPart){
+                        $firstAndLastSegment = $filesPartsDao->getFirstAndLastSegment($id);
+                        $filesPart['id'] = $id;
+                        $metadata[ 'files_parts' ][$index] = $filesPart;
+                        $metadata[ 'files_parts' ][$index]['first_segment'] = (int)$firstAndLastSegment['first_segment'];
+                        //$metadata[ 'files_parts' ][$index]['last_segment'] = (int)$firstAndLastSegment['last_segment'];
+                        unset( $metadata[ 'files_parts' ][$id]);
+                        $index++;
+                    }
                 }
-            }
 
-            if(!isset($metadata['files_parts'])){
-                $metadata['files_parts'] = [];
-            }
+                if(!isset($metadata['files_parts'])){
+                    $metadata['files_parts'] = [];
+                }
 
-            if(!isset($metadata['instructions'])){
-                $metadata['instructions'] = null;
-            }
+                if(!isset($metadata['instructions'])){
+                    $metadata['instructions'] = null;
+                }
 
-            $file->metadata = $metadata;
+                $file->metadata = $metadata;
+            }
         }
 
         return ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment );
