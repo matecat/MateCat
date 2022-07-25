@@ -20,12 +20,12 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
   const [lastCompletionEventId, setLastCompletionEventId] = useState()
   const jobCompletionCurrentPhase = useRef(config.job_completion_current_phase)
 
-  const reviewMessage =
+  const translateMessage =
     'You are about to mark this job as completed. ' +
     'This will allow reviewers to start revision. After this confirm, ' +
     'the job will no longer become editable again until the review is over. ' +
     'Are you sure you want to mark the job as complete?'
-  const translateMessage =
+  const reviewMessage =
     'You are about to mark this job as completed. ' +
     'This will allow translators to edit the job again. ' +
     'Are you sure you want to mark the job as complete?'
