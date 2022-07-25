@@ -1634,10 +1634,6 @@ class QA {
         //
         // In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
         //
-        // 3. whole content
-        //
-        // In this case check for whole content mismatch and throw a ERR_TAG_MISMATCH Error
-        //
 
         $srcOpIds = $this->extractIdAttributes($open_malformedXmlSrcStruct);
         $trgOpIds = $this->extractIdAttributes($open_malformedXmlTrgStruct);
@@ -1658,7 +1654,7 @@ class QA {
         $this->checkContentAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
         $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
         $this->checkContentAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+       // $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // If there are errors get tag diff for the UI
         if ( $this->thereAreErrors() ) {
