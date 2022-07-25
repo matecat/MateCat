@@ -2088,7 +2088,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         label +
         '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-        '    <input type="file" name="uploaded_file" accept="' +
+        '    <input type="file" name="uploaded_file[]" accept="' +
         format +
         '" multiple/>' +
         '</form>' +
