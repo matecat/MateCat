@@ -1033,16 +1033,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.99",
+            "version": "v1.0.100",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "dcda113d9eed7e8233c9e77cd320f8c20856ff6d"
+                "reference": "b5a83cd77d825db54bf45ca39ad1e92e0c6044c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/dcda113d9eed7e8233c9e77cd320f8c20856ff6d",
-                "reference": "dcda113d9eed7e8233c9e77cd320f8c20856ff6d",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/b5a83cd77d825db54bf45ca39ad1e92e0c6044c8",
+                "reference": "b5a83cd77d825db54bf45ca39ad1e92e0c6044c8",
                 "shasum": ""
             },
             "require": {
@@ -1078,9 +1078,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.99"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.100"
             },
-            "time": "2022-07-20T09:30:38+00:00"
+            "time": "2022-07-26T07:49:28+00:00"
         },
         {
             "name": "monolog/monolog",
