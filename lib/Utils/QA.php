@@ -1648,13 +1648,17 @@ class QA {
         $srcSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_src);
         $trgSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_trg);
 
-        $this->checkTagPositionsAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-        $this->checkTagPositionsAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
         $this->checkContentAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
         $this->checkContentAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
         $this->checkContentAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-       // $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+
+        // check for warnings only if there are no errors
+        if( !$this->thereAreErrors() ){
+            $this->checkTagPositionsAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            // $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        }
 
         // If there are errors get tag diff for the UI
         if ( $this->thereAreErrors() ) {
@@ -1981,9 +1985,10 @@ class QA {
         }
 
         if ( $targetNumDiff == 0 ) {
-            //check for Tag ID MISMATCH
+            // check for Tag ID MISMATCH (double check with content)
+            $innerHtmlArray = array_diff_assoc( $this->srcDomMap[ 'innerHTML' ], $this->trgDomMap[ 'innerHTML' ] );
             $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
-            if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
+            if ( !empty( $innerHtmlArray ) and  !empty( $diffArray ) and !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
                 $this->addError( self::ERR_TAG_ID );
             }
         }
