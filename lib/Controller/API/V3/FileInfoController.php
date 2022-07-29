@@ -45,10 +45,13 @@ class FileInfoController extends BaseChunkController {
 
     public function getInfo() {
 
+        $page = (isset($this->request->page)) ? $this->request->page : 1;
+        $perPage = (isset($this->request->per_page)) ? $this->request->per_page : 200;
+
         $this->return404IfTheJobWasDeleted();
 
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-        $this->response->json( $filesInfoUtility->getInfo() );
+        $this->response->json( $filesInfoUtility->getInfo(true, $page, $perPage) );
     }
 
     /**
