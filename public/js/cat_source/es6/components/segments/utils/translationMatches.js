@@ -44,7 +44,6 @@ let TranslationMatches = {
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
-      segmentObj.id_file,
       data.matches,
       data.errors,
     )
