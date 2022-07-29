@@ -3031,7 +3031,7 @@ class ProjectManager {
 
             if ( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ) {
                 array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
-            } else {
+            } else  {
                 array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
             }
 
