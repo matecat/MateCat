@@ -2066,7 +2066,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
     addFormUpload: function (elem, type) {
       var label, format
       if (type == 'tmx') {
-        label = '<p class="pull-left">Select TMX file to import</p>'
+        label =
+          '<p class="pull-left">Select one or more TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2075,7 +2076,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select glossary in XLSX format ' +
+          '<p class="pull-left">Select one or more glossary in XLSX format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls'
@@ -2086,9 +2087,9 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         label +
         '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-        '    <input type="file" name="uploaded_file" accept="' +
+        '    <input type="file" name="uploaded_file[]" accept="' +
         format +
-        '"/>' +
+        '" multiple/>' +
         '</form>' +
         '   <a class="pull-right btn-grey canceladd' +
         type +
