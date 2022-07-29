@@ -112,7 +112,7 @@ export const formatText = (text, format) => {
       text = text.toLowerCase()
       break
     case 'capitalize':
-      text = text.charAt(0).toUpperCase() + text.substr(1).toLowerCase()
+      text = text.replace(/\b\w/g, (l) => l.toUpperCase())
       break
     default:
       break

@@ -28,6 +28,7 @@ import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
+import SearchUtils from '../components/header/cattol/search/searchUtils'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -131,7 +132,7 @@ const SegmentActions = {
 
     if (segment) {
       //Check first if the segment is in the view
-      if (UI.isReadonlySegment(segment)) {
+      if (UI.isReadonlySegment(segment) && !SearchUtils.searchEnabled) {
         UI.readonlyClickDisplay()
         return
       }

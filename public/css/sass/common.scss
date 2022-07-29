@@ -58,9 +58,9 @@ ul {
   float: left;
   border: 0;
   background: url(../../img/logo_matecat.png) 0px 0px no-repeat;
-  width: 180px;
+  width: 185px;
   height: 38px;
-  background-size: cover;
+  background-size: contain;
   //margin-top: 5px;
   position: relative;
 }
@@ -298,9 +298,11 @@ footer #statistics {
 }
 
 /*new browser supported */
-.unsupported-browser {
-  width: 100%;
-  height: 100%;
+.unsupported-device {
+  display: none;
+}
+.unsupported-browser,
+.unsupported-device {
   background-color: #f5f6f7;
 
   .wrapper {
@@ -308,11 +310,12 @@ footer #statistics {
     flex-direction: column;
     align-items: center;
     padding-top: 40px;
-
+    height: 100%;
     .logoblack {
       background-size: 200px auto;
       width: 200px;
       height: 50px;
+      margin: 0 auto;
     }
 
     .container {
@@ -321,14 +324,18 @@ footer #statistics {
       align-items: center;
       width: 100%;
       max-width: 1024px;
-
+      padding-top: 20px;
       > h2 {
         margin-bottom: 0;
+      }
+      h1 {
+        text-align: center;
       }
 
       > p {
         color: gray;
-        margin-bottom: 60px;
+        margin-bottom: 20px;
+        text-align: center;
       }
 
       .browsers-list {
@@ -338,7 +345,9 @@ footer #statistics {
         width: 100%;
         color: gray;
       }
-
+      .link-more {
+        padding-bottom: 20px;
+      }
       .browsers-list > li {
         display: flex;
         justify-content: center;
@@ -385,45 +394,6 @@ footer #statistics {
         > :last-child {
           border-top-right-radius: 8px;
           border-bottom-right-radius: 8px;
-        }
-      }
-    }
-    /* homepage */
-
-    .homepage {
-      > h2 {
-        color: gray;
-        margin-bottom: 40px;
-      }
-
-      .boxes {
-        display: flex;
-        flex-direction: row;
-        color: gray;
-
-        > div {
-          padding: 10px;
-          background-color: #f1f1f1;
-          margin-left: 1px;
-          margin-right: 1px;
-
-          > h4 {
-            font-weight: normal;
-          }
-        }
-
-        .browsers-list > li {
-          max-width: 120px;
-          height: 120px;
-
-          img {
-            width: 80px;
-            height: auto;
-          }
-        }
-
-        > :last-child > :last-child {
-          margin-top: 105px;
         }
       }
     }
@@ -4649,8 +4619,28 @@ body.side-popup {
   color: #3aa9dd;
 }
 
-@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
-  header,
+@media (max-width: 768px) {
+  body {
+    min-width: unset;
+    background-color: #f5f6f7;
+  }
+  .unsupported-device {
+    display: block;
+  }
+  .unsupported-browser {
+    display: none;
+  }
+  .unsupported-browser,
+  .unsupported-device {
+    .wrapper {
+      min-width: unset !important;
+      .boxes {
+        flex-direction: column !important;
+        gap: 30px;
+      }
+    }
+  }
+  .started header,
   .wrapper-claim,
   .wrapper-upload,
   footer,
