@@ -37,15 +37,65 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
         return 0;
     }
 
-    public function getFirstAndLastSegment($id, $ttl = 3600)
+    /**
+     * @param array $ids
+     * @param int   $ttl
+     *
+     * @return \DataAccess_IDaoStruct[]
+     */
+    public function getFirstAndLastSegmentForArrayOfFilePartsIds(array $ids, $ttl = 86400)
+    {
+        $return = [];
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $sql = "SELECT 
+                min(s.id) as first_segment, 
+                max(s.id) as last_segment, 
+                s.id_file_part as id 
+                FROM
+                files_parts fp
+                left join segments s on fp.id_file = s.id_file
+                where fp.id IN ( " . implode(', ' , $ids ) . " )
+                and s.id_file_part IN ( " . implode(', ' , $ids ) . " )
+                group by s.id_file_part
+            ";
+
+        $stmt = $conn->prepare( $sql );
+
+        $data = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] );
+
+        foreach ($data as $datum){
+            $return[$datum['id']] = $datum;
+        }
+
+        return $return;
+    }
+
+    /**
+     * **********************************
+     * DO NOT USE THIS METHOD IN A LOOP FUNCTION
+     * **********************************
+     *
+     * @param     $id
+     * @param int $ttl
+     *
+     * @return \DataAccess_IDaoStruct
+     */
+    public function getFirstAndLastSegment($id, $ttl = 86400)
     {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $sql = "SELECT max(s.id) as last_segment, min(s.id) as first_segment FROM 
-            files_parts fp
-            left join segments s on fp.id = s.id_file_part
-            where fp.id = :id
-            group by fp.id";
+        $sql = "SELECT 
+                min(s.id) as first_segment, 
+                max(s.id) as last_segment, 
+                s.id_file_part as id 
+                FROM
+                files_parts fp
+                left join segments s on fp.id_file = s.id_file
+                where fp.id = :id
+                and s.id_file_part = :id
+            ";
+
         $stmt    = $conn->prepare( $sql );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id' => $id ] )[ 0 ];

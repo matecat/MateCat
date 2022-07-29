@@ -18,6 +18,7 @@ import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 import {SegmentContext} from './SegmentContext'
+import SegmentUtils from '../../utils/segmentUtils'
 
 const TAB_ITEMS = {
   matches: {
@@ -95,6 +96,7 @@ function SegmentFooter() {
 
   // Check tab messages has notes
   const hasNotes = useMemo(() => {
+    if (!SegmentUtils.segmentHasNote(segment)) return false
     const tabMessagesContext = {
       props: {
         active_class: 'open',
@@ -201,10 +203,7 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasNotes = Boolean(
-      (segment.notes && segment.notes.length > 0) ||
-        segment.metadata.length > 0,
-    )
+    const hasNotes = SegmentUtils.segmentHasNote(segment)
     const hasMultiMatches = Boolean(
       UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
     )

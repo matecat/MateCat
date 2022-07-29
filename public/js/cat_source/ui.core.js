@@ -170,16 +170,6 @@ window.UI = {
     }
   },
 
-  getSegmentFileId: function (segment) {
-    if (typeof segment == 'undefined') return false
-    try {
-      segment = segment.closest('section')
-      return $(segment).attr('data-fid')
-    } catch (e) {
-      return false
-    }
-  },
-
   getTranslationMismatches: function (id_segment) {
     getTranslationMismatches({
       password: config.password,

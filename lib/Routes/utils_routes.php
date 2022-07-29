@@ -71,6 +71,7 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
+route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST',  'API\App\FilesController', 'segments' );
 
 $klein->with( '/api/app/api-key', function () {
     route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );

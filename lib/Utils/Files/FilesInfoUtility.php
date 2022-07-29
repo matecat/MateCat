@@ -33,6 +33,8 @@ class FilesInfoUtility {
      * get info for every file
      *
      * @param bool $showMetadata
+     * @param int $page
+     * @param int $itemsPerPage
      *
      * @return array
      */
@@ -40,7 +42,6 @@ class FilesInfoUtility {
 
         $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
         $fileMetadataDao = new Files_MetadataDao();
-        $filesPartsDao = new FilesPartsDao();
 
         // Show metadata
         if($showMetadata){
@@ -69,11 +70,8 @@ class FilesInfoUtility {
                 $index = 0;
                 if(isset($metadata[ 'files_parts' ])){
                     foreach ($metadata[ 'files_parts' ] as $id => $filesPart){
-                        $firstAndLastSegment = $filesPartsDao->getFirstAndLastSegment($id);
                         $filesPart['id'] = $id;
                         $metadata[ 'files_parts' ][$index] = $filesPart;
-                        $metadata[ 'files_parts' ][$index]['first_segment'] = (int)$firstAndLastSegment['first_segment'];
-                        //$metadata[ 'files_parts' ][$index]['last_segment'] = (int)$firstAndLastSegment['last_segment'];
                         unset( $metadata[ 'files_parts' ][$id]);
                         $index++;
                     }
