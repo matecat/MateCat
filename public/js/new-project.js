@@ -378,6 +378,36 @@ APP.checkForDqf = function () {
 
 UI.UPLOAD_PAGE = {}
 
+// workaround hide dropdown tab navigation
+const getInputElement = function () {
+  return this.getElementsByClassName('menu-dropdown')[0].getElementsByTagName(
+    'input',
+  )[0]
+}
+const onTabKeyDown = (e) => {
+  if (e.key.toLowerCase() === 'tab') {
+    const elements = [
+      document.getElementById('project-team'),
+      document.getElementById('source-lang'),
+      document.getElementById('target-lang'),
+      document.getElementById('project-subject'),
+      document.getElementById('tmx-select'),
+    ]
+
+    elements.forEach((element) => {
+      const input = getInputElement.call(element)
+      if (
+        element.classList.contains('visible') &&
+        element.classList.contains('active') &&
+        document.activeElement &&
+        input === document.activeElement
+      ) {
+        $(element).dropdown('hide')
+      }
+    })
+  }
+}
+
 $.extend(UI.UPLOAD_PAGE, {
   init: function () {
     this.checkLanguagesCookie()
@@ -488,6 +518,10 @@ $.extend(UI.UPLOAD_PAGE, {
         'For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel.</div>',
       position: 'bottom center',
     })
+
+    // add keydown listener workaround hide dropdown tab navigation
+    window.removeEventListener('keydown', onTabKeyDown)
+    window.addEventListener('keydown', onTabKeyDown)
   },
 
   checkLanguagesCookie: function () {
@@ -621,13 +655,6 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
-    $('body').on('keydown', function (e) {
-      if (e.key === 'Enter') {
-        if ($('.menu-dropdown.visible').length == 0) {
-          $('input.uploadbtn').click()
-        }
-      }
-    })
     $('.supported-file-formats').click(function (e) {
       e.preventDefault()
       $('.supported-formats').show()
