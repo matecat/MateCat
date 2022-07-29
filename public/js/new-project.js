@@ -395,6 +395,7 @@ const onTabKeyDown = (e) => {
     ]
 
     elements.forEach((element) => {
+      if (!element) return
       const input = getInputElement.call(element)
       if (
         element.classList.contains('visible') &&
