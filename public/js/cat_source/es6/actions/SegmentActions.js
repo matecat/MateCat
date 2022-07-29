@@ -625,11 +625,10 @@ const SegmentActions = {
       open: open,
     })
   },
-  setSegmentContributions: function (sid, fid, contributions, errors) {
+  setSegmentContributions: function (sid, contributions, errors) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_CONTRIBUTIONS,
       sid: sid,
-      fid: fid,
       matches: contributions,
       errors: errors,
     })
@@ -979,10 +978,9 @@ const SegmentActions = {
     })
   },
 
-  addTranslationIssuesToSegment: function (fid, sid, versions) {
+  addTranslationIssuesToSegment: function (sid, versions) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES,
-      fid: fid,
       sid: sid,
       versions: versions,
     })
