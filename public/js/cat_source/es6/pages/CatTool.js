@@ -48,7 +48,7 @@ function CatTool() {
         }),
         ...restOptions,
       }))
-      if (startSegmentId) startSegmentIdRef.current = startSegmentId
+      if (startSegmentId) startSegmentIdRef.current = startSegmentId.toString()
       if (callbackAfterSegmentsResponse)
         callbackAfterSegmentsResponseRef.current = callbackAfterSegmentsResponse
     }
