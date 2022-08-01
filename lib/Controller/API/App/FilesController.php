@@ -55,7 +55,7 @@ class FilesController extends AbstractStatefulKleinController {
         }
 
         $this->response->json( [
-            'fist_segment' => (int)$firstAndLastSegment->first_segment,
+            'first_segment' => (int)$firstAndLastSegment->first_segment,
             'last_segment' => (int)$firstAndLastSegment->last_segment,
         ] );
         exit();
