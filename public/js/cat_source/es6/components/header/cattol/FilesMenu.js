@@ -6,6 +6,7 @@ import CommonUtils from '../../../utils/commonUtils'
 import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {FilenameLabel} from '../../common/FilenameLabel'
+import {getFileSegments} from '../../../api/getFileSegments'
 
 function useOutsideAlerter(ref, fun) {
   useEffect(() => {
@@ -58,8 +59,19 @@ export const FilesMenu = ({projectName}) => {
   const goToCurrentSegment = () => {
     SegmentActions.scrollToCurrentSegment()
   }
-  const goToSegment = (sid) => {
-    SegmentActions.openSegment(sid)
+  const goToFirstSegment = (file) => {
+    if (file.first_segment) {
+      SegmentActions.openSegment(file.first_segment)
+    } else {
+      getFileSegments({
+        idJob: config.id_job,
+        password: config.password,
+        file_id: file.id,
+        file_type: file.type,
+      }).then((data) => {
+        SegmentActions.openSegment(data.first_segment)
+      })
+    }
   }
 
   return (
@@ -107,7 +119,7 @@ export const FilesMenu = ({projectName}) => {
               return (
                 <div
                   key={file.id}
-                  onClick={() => goToSegment(file.first_segment)}
+                  onClick={() => goToFirstSegment(file)}
                   className={`file-list-item ${
                     currentFile === file.id ? 'current' : ''
                   }`}
