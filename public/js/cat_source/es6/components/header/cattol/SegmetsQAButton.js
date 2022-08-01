@@ -51,7 +51,7 @@ export const SegmentsQAButton = () => {
       }
     >
       <a id="point2seg" onClick={openQA}>
-        {warnings && (
+        {warnings && totalIssues > 0 && (
           <span className={`numbererror ${numberClass}`}>{totalIssues}</span>
         )}
       </a>

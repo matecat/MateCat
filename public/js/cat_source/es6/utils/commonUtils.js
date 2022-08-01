@@ -23,6 +23,7 @@ const CommonUtils = {
     var tra = parseFloat(stats.TRANSLATED)
     var dra = parseFloat(stats.DRAFT)
     var rej = parseFloat(stats.REJECTED)
+    var todo = parseFloat(stats.TODO)
 
     // If second pass enabled
     if (config.secondRevisionsCount && stats.reviews) {
@@ -49,7 +50,7 @@ const CommonUtils = {
     if (dra) t = 'draft'
     if (rej) t = 'draft'
 
-    if (!tra && !dra && !rej && !app) {
+    if (!tra && !dra && !rej && !app && todo > 0) {
       t = 'draft'
     }
 
@@ -521,6 +522,11 @@ const CommonUtils = {
     return timezoneToShow % 1 === 0
       ? 'GMT ' + timezoneToShow + ':00'
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
+  },
+  checkJobIsSplitted: function () {
+    const jobPath = document.location.pathname.split('/').splice(-1)
+    const jobPathArray = jobPath[0].split('-')
+    return jobPathArray.length > 2
   },
 }
 

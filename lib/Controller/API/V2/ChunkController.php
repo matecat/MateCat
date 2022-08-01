@@ -73,7 +73,7 @@ class ChunkController extends BaseChunkController {
         return $this->changeStatus( \Constants_JobStatus::STATUS_ACTIVE );
     }
 
-    private function changeStatus( $status ) {
+    protected function changeStatus( $status ) {
 
         Jobs_JobDao::updateJobStatus( $this->chunk, $status );
         $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );

@@ -28,6 +28,11 @@ use WordCount_Struct;
 class Job {
 
     /**
+     * @var string
+     */
+    protected $status;
+
+    /**
      * @var \Users_UserStruct
      */
     protected $user;
@@ -41,6 +46,13 @@ class Job {
      * @var TmKeyManagement_ClientTmKeyStruct[]
      */
     protected $keyList = [];
+
+    /**
+     * @param mixed $status
+     */
+    public function setStatus( $status ) {
+        $this->status = $status;
+    }
 
     /**
      * @param \Users_UserStruct $user

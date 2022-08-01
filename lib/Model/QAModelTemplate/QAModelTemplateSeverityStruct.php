@@ -21,12 +21,12 @@ class QAModelTemplateSeverityStruct extends DataAccess_AbstractDaoSilentStruct i
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'id_category' => $this->id_category,
+            'id' => (int)$this->id,
+            'id_category' => (int)$this->id_category,
             'code' => $this->severity_code,
             'label' => $this->severity_label,
-            'dqf_id' => $this->dqf_id,
-            'penalty' => (int)$this->penalty,
+            'dqf_id' => (int)$this->dqf_id,
+            'penalty' => floatval($this->penalty),
             'sort' => $this->sort,
         ];
     }

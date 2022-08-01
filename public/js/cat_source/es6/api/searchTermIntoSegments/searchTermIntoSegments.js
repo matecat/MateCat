@@ -25,6 +25,7 @@ export const searchTermIntoSegments = async ({
   status,
   matchcase,
   exactmatch,
+  strictMode,
   replace,
   revisionNumber = config.revisionNumber,
 }) => {
@@ -39,6 +40,7 @@ export const searchTermIntoSegments = async ({
     status,
     matchcase,
     exactmatch,
+    strict_mode: strictMode,
     replace,
     revision_number: revisionNumber,
   }

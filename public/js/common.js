@@ -205,7 +205,7 @@ window.APP = {
            */
           var tokenData = $.parseJSON(token)
           if (parseInt(tokenData.code) < 0) {
-            this.showDownloadErrorMessage()
+            APP.showDownloadErrorMessage()
           }
           if (callback) {
             callback()
