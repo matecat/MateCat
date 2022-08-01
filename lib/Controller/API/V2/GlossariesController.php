@@ -16,8 +16,8 @@ use DateTime;
 use DirectoryIterator;
 use Exception;
 use Log;
-use PHPExcel_IOFactory;
-use PHPExcel_Writer_CSV;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use TMSService;
 use Utils;
 use ZipArchive;
@@ -216,11 +216,11 @@ class GlossariesController extends AbstractStatefulKleinController {
         // not dipendent on the form key name
         foreach ( $stdResult as $fileInfo ) {
 
-            $inputFileType = PHPExcel_IOFactory::identify( $fileInfo->file_path );
-            $objReader     = PHPExcel_IOFactory::createReader( $inputFileType );
+            $inputFileType = IOFactory::identify( $fileInfo->file_path );
+            $objReader     = IOFactory::createReader( $inputFileType );
 
-            $objPHPExcel = $objReader->load( $fileInfo->file_path );
-            $objWriter   = new PHPExcel_Writer_CSV( $objPHPExcel );
+            $objPHPSpreadsheet = $objReader->load( $fileInfo->file_path );
+            $objWriter   = new Csv( $objPHPSpreadsheet );
             $objWriter->save( $tmpFileName );
 
             $oldPath             = $fileInfo->file_path;
@@ -269,13 +269,13 @@ class GlossariesController extends AbstractStatefulKleinController {
                     continue;
                 }
 
-                $fileType  = PHPExcel_IOFactory::identify( $fileInfo->getPathname() );
-                $objReader = PHPExcel_IOFactory::createReader( $fileType );
+                $fileType  = IOFactory::identify( $fileInfo->getPathname() );
+                $objReader = IOFactory::createReader( $fileType );
 
                 $objReader->setReadDataOnly( true );
-                $objPHPExcel = $objReader->load( $fileInfo->getPathname() );
+                $objPHPSpreadsheet = $objReader->load( $fileInfo->getPathname() );
 
-                $objWriter = PHPExcel_IOFactory::createWriter( $objPHPExcel, 'Excel2007' );
+                $objWriter = IOFactory::createWriter( $objPHPSpreadsheet, IOFactory::WRITER_XLSX );
 
                 $fileName = $outDirName . DIRECTORY_SEPARATOR . $fileInfo->getBasename( '.csv' ) . ".xlsx";
                 $objWriter->save( $fileName );
