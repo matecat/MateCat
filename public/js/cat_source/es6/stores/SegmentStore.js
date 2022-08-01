@@ -100,29 +100,27 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
-    let self = this
-    $.each(segments, function () {
-      let splittedSourceAr = this.segment.split(
+    $.each(segments, (i, segment) => {
+      let splittedSourceAr = segment.segment.split(
         UI.splittedTranslationPlaceholder,
       )
-      let segment = this
       let inSearch = false
       let currentInSearch = false
       let occurrencesInSearch = null
       //if search active
-      if (self.searchOccurrences.length > 0) {
-        inSearch = self.searchOccurrences.indexOf(segment.sid) > -1
+      if (this.searchOccurrences.length > 0) {
+        inSearch = this.searchOccurrences.indexOf(segment.sid) > -1
         currentInSearch =
-          segment.sid === self.searchOccurrences[self.currentInSearch]
-        occurrencesInSearch = self.searchResultsDictionary[segment.sid]
+          segment.sid === this.searchOccurrences[this.currentInSearch]
+        occurrencesInSearch = this.searchResultsDictionary[segment.sid]
       }
       if (splittedSourceAr.length > 1) {
         var splitGroup = []
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           splitGroup.push(segment.sid + '-' + (i + 1))
         })
 
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           let translation = segment.translation.split(
             UI.splittedTranslationPlaceholder,
           )[i]
@@ -154,7 +152,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             ),
             warning: '0',
             warnings: {},
-            tagged: !self.hasSegmentTagProjectionEnabled(segment),
+            tagged: !this.hasSegmentTagProjectionEnabled(segment),
             unlocked: false,
             edit_area_locked: false,
             notes: segment.notes,
@@ -167,7 +165,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             inSearch: inSearch,
             currentInSearch: currentInSearch,
             occurrencesInSearch: occurrencesInSearch,
-            searchParams: self.searchParams,
+            searchParams: this.searchParams,
             updatedSource: splittedSourceAr[i],
             openComments: false,
             openSplit: false,
@@ -182,7 +180,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
         segment.warnings = {}
-        segment.tagged = !self.hasSegmentTagProjectionEnabled(segment)
+        segment.tagged = !this.hasSegmentTagProjectionEnabled(segment)
         segment.edit_area_locked = false
         segment.original_sid = segment.sid
         segment.modified = false
@@ -192,7 +190,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.inSearch = inSearch
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
-        segment.searchParams = self.searchParams
+        segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
           DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
         )
@@ -205,7 +203,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.updatedSource = segment.segment
         segment.openComments = false
         segment.openSplit = false
-        newSegments.push(this)
+        newSegments.push(segment)
       }
     })
     return newSegments
@@ -418,7 +416,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments = this._segments.setIn([index, 'tagged'], true)
   },
 
-  addSegmentVersions(fid, sid, versions) {
+  addSegmentVersions(sid, versions) {
     //If is a splitted segment the versions are added to the first of the split
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
@@ -556,7 +554,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(matches),
     )
   },
-  setContributionsToCache: function (sid, fid, contributions, errors) {
+  setContributionsToCache: function (sid, contributions, errors) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
@@ -1371,14 +1369,12 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CONTRIBUTIONS:
       SegmentStore.setContributionsToCache(
         action.sid,
-        action.fid,
         action.matches,
         action.errors,
       )
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     case SegmentConstants.SET_CL_CONTRIBUTIONS:
@@ -1467,18 +1463,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id)
       break
     case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES: {
-      let seg = SegmentStore.addSegmentVersions(
-        action.fid,
-        action.sid,
-        action.versions,
-      )
+      let seg = SegmentStore.addSegmentVersions(action.sid, action.versions)
       if (seg) {
         SegmentStore.emitChange(action.actionType, action.sid, seg.toJS())
       }
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     }

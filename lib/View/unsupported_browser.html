@@ -2,7 +2,9 @@
 
 <div class="unsupported-browser" metal:define-macro="unsupported">
     <div class="wrapper">
-        <a href="${basepath}" class="logoblack"></a>
+        <div>
+            <a href="${basepath}" class="logoblack"></a>
+        </div>
         <div class="container">
             <h2>Sorry, this browser is currently not supported.</h2>
             <p>MateCat works great with the following browsers</p>
@@ -17,40 +19,32 @@
                     <li><a href="https://www.microsoft.com/en-us/edge"><img src="/public/img/edge.jpg" /><span>Edge</span></a></li>
                 </tal:block>
             </ul>
-        </div>   
+            <h3 class="link-more">Learn more about <a href="https://site.matecat.com/benefits/">MateCat</a></h3>
+        </div>
     </div>
 </div>
 
-<!-- msg to show in homepage -->
+<div class="unsupported-device" metal:define-macro="devices">
 
-<div class="unsupported-browser" metal:define-macro="indexie">
     <div class="wrapper">
-        <a href="${basepath}" class="logoblack"></a>
-
-        <div class="container homepage">
-            <h1>Welcome to MateCat!</h1>
-            <h2>There are 2 options for you!</h2>
-            <div class="boxes">
-                <div>
-                    <h4>Use the tool by visiting MateCat.com from your desktop<br />MateCat works great with the following browsers</h4>
-                    <ul class="browsers-list">
-                        <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
-                            <li><a href="https://www.google.com/intl/en/chrome/browser/"><img src="/public/img/chrome.jpg" /><span>Chrome</span></a></li>
-                        </tal:block>
-                        <tal:block tal:condition="php: in_array('safari', enabledBrowsers) AND platform EQ 'mac'">
-                            <li><a href="http://www.apple.com/it/safari/"><img src="/public/img/safari.jpg" /><span>Safari</span></a></li>
-                        </tal:block>
-                        <tal:block tal:condition="php: in_array('edge', enabledBrowsers)">
-                            <li><a href="https://www.microsoft.com/en-us/edge"><img src="/public/img/edge.jpg" /><span>Edge</span></a></li>
-                        </tal:block>
-                    </ul>
-                </div>
-                <div class="col-2 col-b">
-                    <h4>Learn more about MateCat</h4>
-                    <p>       
-            <a class="button-learn-2" href="https://site.matecat.com/benefits/"><img src="/public/img/master_matecat.png" />Visit the website</a></p>
-                </div>
-            </div>
+        <div>
+            <a href="${basepath}" class="logoblack"></a>
+        </div>
+        <div class="container">
+            <h1>Use MateCat from your desktop.</h1>
+            <p>Use the tool by visiting MateCat.com from your desktop<br />MateCat works great with the following browsers</p>
+            <ul class="browsers-list">
+                <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
+                    <li><a href="https://www.google.com/intl/en/chrome/browser/"><img src="/public/img/chrome.jpg" /><span>Chrome</span></a></li>
+                </tal:block>
+                <tal:block tal:condition="php: in_array('safari', enabledBrowsers) AND platform EQ 'mac'">
+                    <li><a href="http://www.apple.com/it/safari/"><img src="/public/img/safari.jpg" /><span>Safari</span></a></li>
+                </tal:block>
+                <tal:block tal:condition="php: in_array('edge', enabledBrowsers)">
+                    <li><a href="https://www.microsoft.com/en-us/edge"><img src="/public/img/edge.jpg" /><span>Edge</span></a></li>
+                </tal:block>
+            </ul>
+            <h3 class="link-more">Learn more about <a href="https://site.matecat.com/benefits/">MateCat</a></h3>
         </div>
     </div>
 </div>

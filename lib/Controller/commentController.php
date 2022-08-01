@@ -182,7 +182,8 @@ class commentController extends ajaxController {
     private function sendEmail() {
 
         $jobUrlStruct = JobUrlBuilder::createFromJobStruct($this->job, [
-                'id_segment'      => $this->struct->id_segment,
+            'id_segment'         => $this->struct->id_segment,
+            'skip_check_segment' => true
         ]);
 
         $url = $jobUrlStruct->getUrlByRevisionNumber($this->struct->revision_number);

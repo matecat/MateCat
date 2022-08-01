@@ -12,13 +12,11 @@ import CatToolActions from '../es6/actions/CatToolActions'
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data) {
-      var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
-
       const promise = sendSegmentVersionIssue(sid, {
         ...data,
       })
       promise.then(() => {
-        UI.getSegmentVersionsIssues(sid, fid)
+        UI.getSegmentVersionsIssues(sid)
         CatToolActions.reloadQualityReport()
       })
 
@@ -28,8 +26,7 @@ if (ReviewExtended.enabled()) {
     submitComment: function (id_segment, id_issue, data) {
       const promise = sendSegmentVersionIssueComment(id_segment, id_issue, data)
       promise.then(() => {
-        var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment))
-        UI.getSegmentVersionsIssues(id_segment, fid)
+        UI.getSegmentVersionsIssues(id_segment)
       })
       return promise
     },
@@ -42,23 +39,16 @@ if (ReviewExtended.enabled()) {
 
     getSegmentVersionsIssuesHandler(sid) {
       var segment = SegmentStore.getSegmentByIdToJS(sid)
-      UI.getSegmentVersionsIssues(segment.original_sid, segment.id_file)
+      UI.getSegmentVersionsIssues(segment.original_sid)
     },
 
-    getSegmentVersionsIssues: function (segmentId, fileId) {
+    getSegmentVersionsIssues: function (segmentId) {
       getSegmentVersionsIssues(segmentId).then((response) => {
-        UI.addIssuesToSegment(fileId, segmentId, response.versions)
+        SegmentActions.addTranslationIssuesToSegment(
+          segmentId,
+          response.versions,
+        )
       })
-    },
-
-    /**
-     * To show the issues in the segment footer
-     * @param fileId
-     * @param segmentId
-     * @param versions
-     */
-    addIssuesToSegment: function (fileId, segmentId, versions) {
-      SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions)
     },
 
     /**
@@ -66,25 +56,14 @@ if (ReviewExtended.enabled()) {
      * @param context
      */
     deleteTranslationIssue: function (idSegment, idIssue) {
-      var fid = UI.getSegmentFileId(UI.getSegmentById(idSegment))
-
       deleteSegmentIssueApi({
         idSegment,
         idIssue,
       }).then(() => {
-        UI.deleteSegmentIssues(fid, idSegment, idIssue)
+        SegmentActions.confirmDeletedIssue(idSegment, idIssue)
+        UI.getSegmentVersionsIssues(idSegment)
         CatToolActions.reloadQualityReport()
       })
-    },
-    /**
-     * To remove Segment issue from the segment footer
-     * @param fid
-     * @param id_segment
-     * @param issue_id
-     */
-    deleteSegmentIssues: function (fid, id_segment, issue_id) {
-      SegmentActions.confirmDeletedIssue(id_segment, issue_id)
-      UI.getSegmentVersionsIssues(id_segment, fid)
     },
     /**
      * To know if a segment has been modified but not yet approved

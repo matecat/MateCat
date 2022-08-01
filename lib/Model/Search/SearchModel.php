@@ -132,7 +132,7 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    public function search($strictMode = false) {
+    public function search($strictMode = true) {
 
         $sql = null;
         switch ( $this->queryParams->key ) {
@@ -143,7 +143,7 @@ class SearchModel {
                 $results = $this->_getQuery( $this->_loadSearchInTargetQuery($strictMode) );
                 break;
             case 'coupled':
-                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery() ), $this->_getQuery( $this->_loadSearchInTargetQuery() ) );
+                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery($strictMode) ), $this->_getQuery( $this->_loadSearchInTargetQuery($strictMode) ) );
                 $results    = [];
 
                 // in this case $results is the merge of the results of two queries,

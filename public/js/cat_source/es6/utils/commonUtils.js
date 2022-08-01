@@ -522,7 +522,9 @@ const CommonUtils = {
       ? 'GMT ' + timezoneToShow + ':00'
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
   },
-
+  checkJobIsSplitted: function () {
+    return config.job_is_splitted
+  },
   //Plugins
   parseFiles: (files) => {
     return files

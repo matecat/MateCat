@@ -44,7 +44,6 @@ let TranslationMatches = {
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
-      segmentObj.id_file,
       data.matches,
       data.errors,
     )
@@ -188,26 +187,12 @@ let TranslationMatches = {
     }
   },
 
-  showContributionError: function (segment) {
-    SegmentActions.setSegmentContributions(
-      UI.getSegmentId(segment),
-      UI.getSegmentFileId(segment),
-      [],
-      [{}],
-    )
-  },
-
   autoCopySuggestionEnabled: function () {
     return !!config.translation_matches_enabled
   },
 
   renderContributionErrors: function (errors, segment) {
-    SegmentActions.setSegmentContributions(
-      UI.getSegmentId(segment),
-      UI.getSegmentFileId(segment),
-      [],
-      errors,
-    )
+    SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id) {

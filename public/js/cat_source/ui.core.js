@@ -178,16 +178,6 @@ window.UI = {
     }
   },
 
-  getSegmentFileId: function (segment) {
-    if (typeof segment == 'undefined') return false
-    try {
-      segment = segment.closest('section')
-      return $(segment).attr('data-fid')
-    } catch (e) {
-      return false
-    }
-  },
-
   getMoreSegments: function (where) {
     if (where == 'after' && this.noMoreSegmentsAfter) {
       return
