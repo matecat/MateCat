@@ -4625,7 +4625,7 @@ header {
     align-items: center;
     justify-content: right;
     column-gap: 15px;
-
+    z-index: 4;
     &.qr-element {
       grid-template-columns: auto;
     }

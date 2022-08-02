@@ -144,7 +144,7 @@ class Project {
         $metadataDao = new \Projects_MetadataDao();
         $projectInfo = $metadataDao->get((int)$project->id,'project_info');
 
-        $projectOutputFields = [
+        return [
                 'id'                   => (int)$project->id,
                 'password'             => $project->password,
                 'name'                 => $project->name,
@@ -161,11 +161,8 @@ class Project {
                 'is_archived'          => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
                 'remote_file_service'  => $project->getRemoteFileServiceName(),
                 'due_date'             => Utils::api_timestamp( $project->due_date ),
-                'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null
+                'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
         ];
-
-        return $projectOutputFields;
-
     }
 
     /**
