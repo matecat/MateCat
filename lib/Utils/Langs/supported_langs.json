@@ -87,7 +87,7 @@
             "isocode":"asm",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"asm-IN"
+            "rfc3066code":"as-IN"
         }
     ,
         {
@@ -146,7 +146,7 @@
                 "en":"Balkan Gipsy"
             }],
             "isocode":"rm",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"rm-RO"
         }
@@ -340,7 +340,7 @@
             "isocode":"ch",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"cha-GU"
+            "rfc3066code":"ch-GU"
         }
     ,
         {
@@ -429,9 +429,9 @@
                 "en":"Coptic"
             }],
             "isocode":"cop",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"cop-XNA"
+            "rfc3066code":"cop-EG"
         }
     ,
         {
@@ -439,9 +439,9 @@
                 "en":"Crioulo Upper Guinea"
             }],
             "isocode":"pov",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"pov-POV"
+            "rfc3066code":"pov-GW"
         }
     ,
         {
@@ -501,7 +501,7 @@
             "isocode":"dz",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"dzo-BT"
+            "rfc3066code":"dz-BT"
         }
     ,
         {
@@ -586,6 +586,16 @@
     ,
         {
             "localized":[{
+                "en":"English South Africa"
+            }],
+            "isocode":"en",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"en-ZA"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Emakhuwa"
             }],
             "isocode":"vmw",
@@ -619,7 +629,7 @@
                 "en":"Fanagalo"
             }],
             "isocode":"fn",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"fn-FNG"
         }
@@ -851,7 +861,7 @@
             "isocode":"HAW",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"US-HI"
+            "rfc3066code":"haw-US"
         }
     ,
         {
@@ -970,7 +980,7 @@
             "isocode":"kal",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"kal-GL"
+            "rfc3066code":"kl-GL"
         }
     ,
         {
@@ -1058,7 +1068,7 @@
                 "en":"Kabylian"
             }],
             "isocode":"kab",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"kab-DZ"
         }
@@ -1180,7 +1190,7 @@
             "isocode":"run",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"run-RN"
+            "rfc3066code":"rn-BI"
         }
     ,
         {
@@ -1230,7 +1240,7 @@
             "isocode":"ku",
             "enabled":true,
             "rtl":true,
-            "rfc3066code":"ku-CKB"
+            "rfc3066code":"ckb-IQ"
         }
     ,
         {
@@ -1310,7 +1320,7 @@
             "isocode":"lug",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"lug-UG"
+            "rfc3066code":"lg-UG"
         }
     ,
         {
@@ -1370,7 +1380,7 @@
             "isocode":"mg",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"mg-MLG"
+            "rfc3066code":"mg-MG"
         }
     ,
         {
@@ -1400,7 +1410,7 @@
             "isocode":"div",
             "enabled":true,
             "rtl":true,
-            "rfc3066code":"div-DV"
+            "rfc3066code":"dv-MV"
         }
     ,
         {
@@ -1438,7 +1448,7 @@
                 "en":"Manx Gaelic"
             }],
             "isocode":"gv",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"gv-IM"
         }
@@ -1461,6 +1471,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"mhr-RU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Moroccan Arabic"
+            }],
+            "isocode":"ar",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ar-MA"
         }
     ,
         {
@@ -1498,9 +1518,9 @@
                 "en":"Mende"
             }],
             "isocode":"men",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"men-MEN"
+            "rfc3066code":"men-SL"
         }
     ,
         {
@@ -1600,19 +1620,19 @@
                 "en":"Niuean"
             }],
             "isocode":"niu",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"niu-NIU"
+            "rfc3066code":"niu-NU"
         }
     ,
         {
             "localized":[{
-                "en":"Norwegian"
+                "en":"Northern Sotho"
             }],
-            "isocode":"no",
-            "enabled":false,
+            "isocode":"nso",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"no-NO"
+            "rfc3066code":"nso-ZA"
         }
     ,
         {
@@ -1642,7 +1662,7 @@
             "isocode":"ny",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"ny-NYA"
+            "rfc3066code":"ny-MW"
         }
     ,
         {
@@ -1717,6 +1737,16 @@
     ,
         {
             "localized":[{
+                "en":"Pakistani"
+            }],
+            "isocode":"ur",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ur-PK"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Papiamentu"
             }],
             "isocode":"pap",
@@ -1751,9 +1781,9 @@
                 "en":"Pijin"
             }],
             "isocode":"pis",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"pis-PIS"
+            "rfc3066code":"pis-SB"
         }
     ,
         {
@@ -1791,7 +1821,7 @@
                 "en":"Potawatomi"
             }],
             "isocode":"pot",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"pot-US"
         }
@@ -1883,7 +1913,7 @@
             "isocode":"smo",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"smo-WS"
+            "rfc3066code":"sm-WS"
         }
     ,
         {
@@ -1891,9 +1921,9 @@
                 "en":"Sango"
             }],
             "isocode":"sg",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"sg-SG"
+            "rfc3066code":"sg-CF"
         }
     ,
 	{
@@ -1984,7 +2014,7 @@
             "isocode":"sna",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"sna-ZW"
+            "rfc3066code":"sn-ZW"
         }
     ,
         {
@@ -2042,9 +2072,9 @@
                 "en":"Sotho Southern"
             }],
             "isocode":"st",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"st-ST"
+            "rfc3066code":"st-LS"
         }
     ,
         {
@@ -2112,9 +2142,9 @@
                 "en":"Sranan Tongo"
             }],
             "isocode":"srn",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"srn-SRN"
+            "rfc3066code":"srn-SR"
         }
     ,
         {
@@ -2245,9 +2275,9 @@
                 "en":"Tetum"
             }],
             "isocode":"tet",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"tet-TET"
+            "rfc3066code":"tet-TL"
         }
     ,
         {
@@ -2277,7 +2307,7 @@
             "isocode":"bod",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"bod-CN"
+            "rfc3066code":"bo-CN"
         }
     ,
         {
@@ -2295,9 +2325,9 @@
                 "en":"Tokelauan"
             }],
             "isocode":"tkl",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"tkl-TKL"
+            "rfc3066code":"tkl-TK"
         }
     ,
         {
@@ -2317,7 +2347,7 @@
             "isocode":"ton",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"ton-TO"
+            "rfc3066code":"to-TO"
         }
     ,
         {
@@ -2375,9 +2405,9 @@
                 "en":"Tuvaluan"
             }],
             "isocode":"tvl",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"tvl-TVL"
+            "rfc3066code":"tvl-TV"
         }
     ,
         {
@@ -2415,7 +2445,7 @@
                 "en":"Uma"
             }],
             "isocode":"ppk",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"ppk-ID"
         }
@@ -2475,9 +2505,9 @@
                 "en":"Wallisian"
             }],
             "isocode":"wls",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"wls-WLS"
+            "rfc3066code":"wls-WF"
         }
     ,
         {

@@ -18,10 +18,10 @@ class QAModelTemplatePassfailThresholdStruct extends DataAccess_AbstractDaoSilen
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'id_passfail' => $this->id_passfail,
+            'id' => (int)$this->id,
+            'id_passfail' => (int)$this->id_passfail,
             'label' => $this->passfail_label,
-            'value' => $this->passfail_value,
+            'value' => (int)$this->passfail_value,
         ];
     }
 }

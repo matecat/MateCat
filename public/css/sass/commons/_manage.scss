@@ -65,8 +65,10 @@ body.manage {
 .project-list {
   padding-top: 100px;
   padding-bottom: 160px;
-  .ui.inverted.dimmer {
-    background-color: $grey5;
+  .container {
+    .ui.inverted.dimmer.more {
+      background-color: $grey5;
+    }
   }
 
   .project {
@@ -1001,17 +1003,23 @@ body.manage {
     min-width: 20% !important;
   }
 }
-
-.status-filter {
-  display: inline-block;
-  position: absolute;
-  right: -70px;
-  background: #d8d8d8;
-  padding: 4px 5px 4px;
-  top: 3px;
-  border-radius: 2px;
-  color: #5d5d5d;
-  font-weight: 100;
+.project-header-more {
+  display: inline-flex;
+  height: 25px;
+  gap: 10px;
+  .status-filter {
+    display: inline-block;
+    background: #d8d8d8;
+    padding: 4px 5px 4px;
+    border-radius: 2px;
+    color: #5d5d5d;
+    font-weight: 100;
+    font-size: 12px;
+  }
+  .ui.button.red {
+    padding: 6px 15px;
+    font-size: 12px;
+  }
 }
 
 .ui.dropdown .scrolling.menu {

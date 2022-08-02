@@ -7,7 +7,8 @@ import TextUtils from '../../../../utils/textUtils'
 import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
 import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
-import {ModalWindow} from '../../../modals/ModalWindow'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -28,13 +29,14 @@ let SearchUtils = {
   execFind: function (params) {
     $('section.currSearchSegment').removeClass('currSearchSegment')
 
-    let searchSource = params.searchSource
+    let nbspRegexp = new RegExp(tagSignatures.nbsp.placeholder, 'g')
+    let searchSource = params.searchSource.replace(nbspRegexp, ' ')
     if (searchSource !== '' && searchSource !== ' ') {
       this.searchParams.source = searchSource
     } else {
       delete this.searchParams.source
     }
-    let searchTarget = params.searchTarget
+    let searchTarget = params.searchTarget.replace(nbspRegexp, ' ')
     if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
@@ -57,12 +59,14 @@ let SearchUtils = {
     }
     this.searchParams['match-case'] = params.matchCase
     this.searchParams['exact-match'] = params.exactMatch
+    this.searchParams['strict_mode'] = !params.entireJob
+
     if (
       _.isUndefined(this.searchParams.source) &&
       _.isUndefined(this.searchParams.target) &&
       this.searchParams.status == 'all'
     ) {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Enter text in source or target input boxes or select a status.',
@@ -105,6 +109,7 @@ let SearchUtils = {
         status: this.searchParams.status,
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
+        strictMode: this.searchParams['strict_mode'],
         replace,
       }).then((data) => {
         SearchUtils.execFind_success(data)
@@ -216,7 +221,12 @@ let SearchUtils = {
       searchResultsDictionary = {}
     let searchParams = {}
     searchParams.source = this.searchParams.source
+      ? this.searchParams.source.replace(/ /g, tagSignatures.nbsp.placeholder)
+      : null
+
     searchParams.target = this.searchParams.target
+      ? this.searchParams.target.replace(/ /g, tagSignatures.nbsp.placeholder)
+      : null
     searchParams.ingnoreCase = !!this.searchParams['match-case']
     searchParams.exactMatch = this.searchParams['exact-match']
     let searchResults = segments.map((sid) => {
@@ -227,14 +237,14 @@ let SearchUtils = {
           let textSource = segment.decodedSource
           const matchesSource = this.getMatchesInText(
             textSource,
-            this.searchParams.source,
+            searchParams.source,
             searchParams.ingnoreCase,
             this.searchParams['exact-match'],
           )
           let textTarget = segment.decodedTranslation
           const matchesTarget = this.getMatchesInText(
             textTarget,
-            this.searchParams.target,
+            searchParams.target,
             searchParams.ingnoreCase,
             this.searchParams['exact-match'],
           )
@@ -265,7 +275,7 @@ let SearchUtils = {
             let text = segment.decodedSource
             const matchesSource = this.getMatchesInText(
               text,
-              this.searchParams.source,
+              searchParams.source,
               searchParams.ingnoreCase,
               this.searchParams['exact-match'],
             )
@@ -281,7 +291,7 @@ let SearchUtils = {
             let text = segment.decodedTranslation
             const matchesTarget = this.getMatchesInText(
               text,
-              this.searchParams.target,
+              searchParams.target,
               searchParams.ingnoreCase,
               this.searchParams['exact-match'],
             )
@@ -351,7 +361,7 @@ let SearchUtils = {
     if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'You must specify the Target value to replace.',
@@ -366,7 +376,7 @@ let SearchUtils = {
     if (replaceTarget !== '') {
       this.searchParams.replace = replaceTarget
     } else {
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'You must specify the replacement value.',

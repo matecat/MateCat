@@ -1,5 +1,7 @@
 <?php
 
+use Constants\ConversionHandlerStatus;
+use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use LQA\ModelDao;
@@ -49,7 +51,10 @@ class NewController extends ajaxController {
     const MAX_NUM_KEYS = 6;
 
     private static $allowed_seg_rules = [
-            'standard', 'patent', ''
+            'standard',
+            'patent',
+            'paragraph',
+            ''
     ];
 
     protected $api_output = [
@@ -435,20 +440,8 @@ class NewController extends ajaxController {
 
                         $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
-                        /*
-                         * TODO
-                         * return error code is 2 because
-                         *      <=0 is for errors
-                         *      1   is OK
-                         *
-                         * In this case, we raise warnings, hence the return code must be a new code
-                         */
-                        $this->result[ 'code' ]                      = 2;
-                        $this->result[ 'errors' ][ $brokenFileName ] = [
-                                'code'    => $fileError->error[ 'code' ],
-                                'message' => $fileError->error[ 'message' ],
-                                'debug'   => $brokenFileName
-                        ];
+                        $this->result = new ConvertedFileModel( $fileError->error[ 'code' ] );
+                        $this->result->addError($fileError->error[ 'message' ], $brokenFileName);
                     }
 
                 }
@@ -514,17 +507,15 @@ class NewController extends ajaxController {
 
                 $status = $errors = $converter->checkResult();
                 if ( count( $errors ) > 0 ) {
-//                    $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
-                    $this->result[ 'code' ] = 2;
+
+                    $this->result = new ConvertedFileModel(ConversionHandlerStatus::ZIP_HANDLING);
                     foreach ( $errors as $__err ) {
+
+                        $savedErrors = $this->result->getErrors();
                         $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
-                        if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
-                            $this->result[ 'errors' ][ $brokenFileName ] = [
-                                    'code'    => $__err[ 'code' ],
-                                    'message' => $__err[ 'message' ],
-                                    'debug'   => $brokenFileName
-                            ];
+                        if( !isset( $savedErrors[$brokenFileName] ) ){
+                            $this->result->addError($__err[ 'message' ], $brokenFileName);
                         }
                     }
                 }
@@ -533,7 +524,7 @@ class NewController extends ajaxController {
                 $conversionHandler->doAction();
 
                 $result = $conversionHandler->getResult();
-                if ( $result[ 'code' ] < 0 ) {
+                if ( $result->getCode() < 0 ) {
                     $status[] = $result;
                 }
 
@@ -890,8 +881,11 @@ class NewController extends ajaxController {
             $this->metadata[ 'project_completion' ] = $this->postInput[ 'project_completion' ];
         }
 
-        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
+        if ( !empty( $this->postInput[ 'segmentation_rule' ] ) ) {
+            $this->metadata[ 'segmentation_rule' ] = $this->postInput[ 'segmentation_rule' ];
+        }
 
+        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
         $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
                 'input' => $this->postInput
         ] );

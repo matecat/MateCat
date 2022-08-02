@@ -1,5 +1,4 @@
 /*
- * TodoStore
  * Segment structure example
  * {
      "last_opened_segment":"61079",
@@ -51,12 +50,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     matecat: {
       ERROR: {
         Categories: [],
+        total: 0,
       },
       WARNING: {
         Categories: [],
+        total: 0,
       },
       INFO: {
         Categories: [],
+        total: 0,
       },
     },
   },
@@ -98,29 +100,27 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
-    let self = this
-    $.each(segments, function () {
-      let splittedSourceAr = this.segment.split(
+    $.each(segments, (i, segment) => {
+      let splittedSourceAr = segment.segment.split(
         UI.splittedTranslationPlaceholder,
       )
-      let segment = this
       let inSearch = false
       let currentInSearch = false
       let occurrencesInSearch = null
       //if search active
-      if (self.searchOccurrences.length > 0) {
-        inSearch = self.searchOccurrences.indexOf(segment.sid) > -1
+      if (this.searchOccurrences.length > 0) {
+        inSearch = this.searchOccurrences.indexOf(segment.sid) > -1
         currentInSearch =
-          segment.sid === self.searchOccurrences[self.currentInSearch]
-        occurrencesInSearch = self.searchResultsDictionary[segment.sid]
+          segment.sid === this.searchOccurrences[this.currentInSearch]
+        occurrencesInSearch = this.searchResultsDictionary[segment.sid]
       }
       if (splittedSourceAr.length > 1) {
         var splitGroup = []
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           splitGroup.push(segment.sid + '-' + (i + 1))
         })
 
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           let translation = segment.translation.split(
             UI.splittedTranslationPlaceholder,
           )[i]
@@ -152,7 +152,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             ),
             warning: '0',
             warnings: {},
-            tagged: !self.hasSegmentTagProjectionEnabled(segment),
+            tagged: !this.hasSegmentTagProjectionEnabled(segment),
             unlocked: false,
             edit_area_locked: false,
             notes: segment.notes,
@@ -165,10 +165,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             inSearch: inSearch,
             currentInSearch: currentInSearch,
             occurrencesInSearch: occurrencesInSearch,
-            searchParams: self.searchParams,
+            searchParams: this.searchParams,
             updatedSource: splittedSourceAr[i],
             openComments: false,
             openSplit: false,
+            metadata: segment.metadata,
           }
           newSegments.push(segData)
           segData = null
@@ -179,7 +180,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
         segment.warnings = {}
-        segment.tagged = !self.hasSegmentTagProjectionEnabled(segment)
+        segment.tagged = !this.hasSegmentTagProjectionEnabled(segment)
         segment.edit_area_locked = false
         segment.original_sid = segment.sid
         segment.modified = false
@@ -189,7 +190,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.inSearch = inSearch
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
-        segment.searchParams = self.searchParams
+        segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
           DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
         )
@@ -202,7 +203,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.updatedSource = segment.segment
         segment.openComments = false
         segment.openSplit = false
-        newSegments.push(this)
+        newSegments.push(segment)
       }
     })
     return newSegments
@@ -783,14 +784,49 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
   },
   updateGlobalWarnings: function (warnings) {
+    let totalWarnings = []
     Object.keys(warnings).map((key) => {
+      let totalCategoryWarnings = []
       Object.keys(warnings[key].Categories).map((key2) => {
+        totalCategoryWarnings.push(...warnings[key].Categories[key2])
+        totalWarnings.push(...warnings[key].Categories[key2])
+        warnings[key].total = totalCategoryWarnings.filter(
+          (value, index, self) => {
+            return self.indexOf(value) === index
+          },
+        ).length
         warnings[key].Categories[key2] = warnings[key].Categories[key2].filter(
           this.filterGlobalWarning.bind(this, key2),
         )
       })
     })
     this._globalWarnings.matecat = warnings
+    this._globalWarnings.matecat.total = totalWarnings.filter(
+      (value, index, self) => {
+        return self.indexOf(value) === index
+      },
+    ).length
+    //lexiqa
+    if (this._globalWarnings.lexiqa && this._globalWarnings.lexiqa.length > 0) {
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(
+        this._globalWarnings.lexiqa,
+      )
+      this._globalWarnings.matecat.INFO.total =
+        this._globalWarnings.lexiqa.length
+      this._globalWarnings.matecat.total =
+        this._globalWarnings.matecat.total + this._globalWarnings.lexiqa.length
+    }
+  },
+  updateLexiqaWarnings: function (warnings) {
+    this._globalWarnings.lexiqa = warnings.filter(
+      this.filterGlobalWarning.bind(this, 'LXQ'),
+    )
+    if (warnings && warnings.length > 0) {
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings)
+      this._globalWarnings.matecat.INFO.total = warnings.length
+      this._globalWarnings.matecat.total =
+        this._globalWarnings.matecat.total + warnings.length
+    }
   },
   addSearchResult: function (
     occurrencesList,
@@ -866,11 +902,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   closeSegmentsSplit: function () {
     this._segments = this._segments.map((segment) =>
       segment.set('openSplit', false),
-    )
-  },
-  updateLexiqaWarnings: function (warnings) {
-    this._globalWarnings.lexiqa = warnings.filter(
-      this.filterGlobalWarning.bind(this, 'LXQ'),
     )
   },
   hasSegmentTagProjectionEnabled: function (segment) {
@@ -1115,6 +1146,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         .toJS()
     }
     return
+  },
+  getGlobalWarnings() {
+    return this._globalWarnings
   },
   isSidePanelToOpen: function () {
     const commentOpen = this._segments.findIndex(
@@ -1767,19 +1801,19 @@ AppDispatcher.register(function (action) {
         action.isTarget,
       )
       break
-    case SegmentConstants.SET_SEGMENT_CHAR_LIMIT:
-      SegmentStore.emitChange(
-        SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
-        action.sid,
-        action.limit,
-      )
-      break
     case SegmentConstants.SET_SEGMENT_SAVING:
       SegmentStore.setSegmentSaving(action.sid, action.saving)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
       )
+      break
+    case SegmentConstants.CHARACTER_COUNTER:
+      SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
+        sid: action.sid,
+        counter: action.counter,
+        limit: action.limit,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

@@ -27,6 +27,11 @@ class Project {
     protected $data = [];
 
     /**
+     * @var string
+     */
+    protected $status;
+
+    /**
      * @var bool
      */
     protected $called_from_api = false;
@@ -62,10 +67,19 @@ class Project {
      * Project constructor.
      *
      * @param Projects_ProjectStruct[] $data
+     * @param string                   $search_status
      */
-    public function __construct( array $data = [] ) {
-        $this->data      = $data;
-        $this->jRenderer = new Job();
+    public function __construct( array $data = [], $search_status = null ) {
+
+        $this->data = $data;
+        $this->status = $search_status;
+        $jRendered = new Job();
+
+        if($search_status){
+            $jRendered->setStatus($search_status);
+        }
+
+        $this->jRenderer = $jRendered;
     }
 
     /**
@@ -93,18 +107,33 @@ class Project {
                 $jobJSON->setUser( $this->user );
             }
 
+            if ( !empty( $this->status ) ) {
+                $jobJSON->setStatus( $this->status );
+            }
+
             if ( $this->called_from_api ) {
                 $jobJSON->setCalledFromApi( true );
             }
 
             foreach ( $jobs as $job ) {
 
-                if(!$job->wasDeleted()){
-                    /**
-                     * @var $jobJSON Job
-                     */
-                    $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
-                    $jobStatuses[] = $job->status_owner;
+                // if status is set, then filter off the jobs by owner_status
+                if($this->status){
+                    if($job->status_owner === $this->status and !$job->wasDeleted()){
+                        /**
+                         * @var $jobJSON Job
+                         */
+                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                        $jobStatuses[] = $job->status;
+                    }
+                } else {
+                    if(!$job->wasDeleted()){
+                        /**
+                         * @var $jobJSON Job
+                         */
+                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                        $jobStatuses[] = $job->status_owner;
+                    }
                 }
             }
 
@@ -115,7 +144,7 @@ class Project {
         $metadataDao = new \Projects_MetadataDao();
         $projectInfo = $metadataDao->get((int)$project->id,'project_info');
 
-        $projectOutputFields = [
+        return [
                 'id'                   => (int)$project->id,
                 'password'             => $project->password,
                 'name'                 => $project->name,
@@ -132,11 +161,8 @@ class Project {
                 'is_archived'          => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
                 'remote_file_service'  => $project->getRemoteFileServiceName(),
                 'due_date'             => Utils::api_timestamp( $project->due_date ),
-                'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null
+                'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
         ];
-
-        return $projectOutputFields;
-
     }
 
     /**
@@ -145,9 +171,10 @@ class Project {
      * @throws \Exceptions\NotFoundException
      */
     public function render() {
+
         $out = [];
-        foreach ( $this->data as $membership ) {
-            $out[] = $this->renderItem( $membership );
+        foreach ( $this->data as $project ) {
+            $out[] = $this->renderItem( $project );
         }
 
         return $out;

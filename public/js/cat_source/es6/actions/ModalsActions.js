@@ -4,19 +4,34 @@ import SplitJobModal from '../components/modals/SplitJob'
 import CreateTeamModal from '../components/modals/CreateTeam'
 import ModifyTeamModal from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
-import {ModalWindow} from '../components/modals/ModalWindow'
+import AppDispatcher from '../stores/AppDispatcher'
+import ModalsConstants from '../constants/ModalsConstants'
 
 let ModalsActions = {
-  openCreateTeamModal: function () {
-    ModalWindow.showModalComponent(CreateTeamModal, {}, 'Create New Team')
+  showModalComponent: (component, props, title, style, onCloseCallback) => {
+    AppDispatcher.dispatch({
+      actionType: ModalsConstants.SHOW_MODAL,
+      component,
+      props,
+      title,
+      style,
+      onCloseCallback,
+    })
   },
-
+  onCloseModal: function () {
+    AppDispatcher.dispatch({
+      actionType: ModalsConstants.CLOSE_MODAL,
+    })
+  },
+  openCreateTeamModal: function () {
+    this.showModalComponent(CreateTeamModal, {}, 'Create New Team')
+  },
   openModifyTeamModal: function (team, hideChangeName) {
     var props = {
       team: team,
       hideChangeName: hideChangeName,
     }
-    ModalWindow.showModalComponent(ModifyTeamModal, props, 'Modify Team')
+    this.showModalComponent(ModifyTeamModal, props, 'Modify Team')
   },
 
   openSplitJobModal: function (job, project, callback) {
@@ -26,7 +41,7 @@ let ModalsActions = {
       callback: callback,
     }
     var style = {width: '670px', maxWidth: '670px'}
-    ModalWindow.showModalComponent(SplitJobModal, props, 'Split Job', style)
+    this.showModalComponent(SplitJobModal, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {
     var props = {
@@ -40,18 +55,14 @@ let ModalsActions = {
             successCallback.call()
           }
         })
-        ModalWindow.onCloseModal()
+        this.onCloseModal()
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        ModalWindow.onCloseModal()
+        this.onCloseModal()
       },
     }
-    ModalWindow.showModalComponent(
-      ConfirmMessageModal,
-      props,
-      'Confirmation required',
-    )
+    this.showModalComponent(ConfirmMessageModal, props, 'Confirmation required')
   },
 
   openDQFModal: function () {
@@ -59,7 +70,7 @@ let ModalsActions = {
       metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
     }
     var style = {width: '670px', maxWidth: '670px'}
-    ModalWindow.showModalComponent(DQFModal, props, 'DQF Preferences', style)
+    this.showModalComponent(DQFModal, props, 'DQF Preferences', style)
   },
 }
 

@@ -29,6 +29,7 @@ class JobContainer extends React.Component {
     this.archiveJob = this.archiveJob.bind(this)
     this.activateJob = this.activateJob.bind(this)
     this.cancelJob = this.cancelJob.bind(this)
+    this.deleteJob = this.deleteJob.bind(this)
   }
 
   getTranslateUrl() {
@@ -249,23 +250,19 @@ class JobContainer extends React.Component {
   }
 
   archiveJob() {
-    ManageActions.changeJobStatus(
-      this.props.project,
-      this.props.job,
-      'archived',
-    )
+    ManageActions.changeJobStatus(this.props.project, this.props.job, 'archive')
   }
 
   cancelJob() {
-    ManageActions.changeJobStatus(
-      this.props.project,
-      this.props.job,
-      'cancelled',
-    )
+    ManageActions.changeJobStatus(this.props.project, this.props.job, 'cancel')
   }
 
   activateJob() {
     ManageActions.changeJobStatus(this.props.project, this.props.job, 'active')
+  }
+
+  deleteJob() {
+    ManageActions.changeJobStatus(this.props.project, this.props.job, 'delete')
   }
 
   downloadTranslation() {
@@ -405,6 +402,7 @@ class JobContainer extends React.Component {
         archiveJobFn={this.archiveJob}
         activateJobFn={this.activateJob}
         cancelJobFn={this.cancelJob}
+        deleteJobFn={this.deleteJob}
       />
     )
   }
@@ -640,14 +638,18 @@ class JobContainer extends React.Component {
   }
 
   openOutsourceModal(showTranslatorBox, extendedView) {
-    if (!this.state.openOutsource) {
-      $(document).trigger('outsource-request')
+    if (this.props.job.get('outsource_available')) {
+      if (!this.state.openOutsource) {
+        $(document).trigger('outsource-request')
+      }
+      this.setState({
+        openOutsource: !this.state.openOutsource,
+        showTranslatorBox: showTranslatorBox,
+        extendedView: extendedView,
+      })
+    } else {
+      window.open('https://translated.com/contact-us', '_blank')
     }
-    this.setState({
-      openOutsource: !this.state.openOutsource,
-      showTranslatorBox: showTranslatorBox,
-      extendedView: extendedView,
-    })
   }
 
   getOutsourceButton() {

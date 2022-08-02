@@ -2,7 +2,7 @@
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
--- Server version	5.7.33-0ubuntu0.18.04.1-log
+-- Server version	5.7.37-40-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -47,7 +47,19 @@ CREATE TABLE `activity_log` (
   KEY `id_project_idx` (`id_project`) USING BTREE,
   KEY `uid_idx` (`uid`) USING BTREE,
   KEY `event_date_idx` (`event_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+/*!50100 PARTITION BY RANGE ( UNIX_TIMESTAMP(event_date))
+(PARTITION p2016 VALUES LESS THAN (1483228800) ENGINE = InnoDB,
+ PARTITION p2017 VALUES LESS THAN (1514764800) ENGINE = InnoDB,
+ PARTITION p2018 VALUES LESS THAN (1546300800) ENGINE = InnoDB,
+ PARTITION p2019 VALUES LESS THAN (1577836800) ENGINE = InnoDB,
+ PARTITION p2020 VALUES LESS THAN (1609459200) ENGINE = InnoDB,
+ PARTITION p2021 VALUES LESS THAN (1640995200) ENGINE = InnoDB,
+ PARTITION p2022 VALUES LESS THAN (1672531200) ENGINE = InnoDB,
+ PARTITION p2023 VALUES LESS THAN (1704067200) ENGINE = InnoDB,
+ PARTITION p2024 VALUES LESS THAN (1735689600) ENGINE = InnoDB,
+ PARTITION p2025 VALUES LESS THAN (1767225600) ENGINE = InnoDB,
+ PARTITION p2026MAX VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,6 +79,28 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `blacklist_files`
+--
+
+DROP TABLE IF EXISTS `blacklist_files`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `blacklist_files` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_job` bigint(20) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `target` varchar(10) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_job_password` (`id_job`,`password`),
+  KEY `uid` (`uid`) USING BTREE,
+  KEY `id_job` (`id_job`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -118,11 +152,11 @@ CREATE TABLE `chunk_completion_updates` (
   `is_review` tinyint(1) NOT NULL,
   `remote_ip_address` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_record` (`id_job`,`password`,`job_first_segment`,`job_last_segment`,`is_review`),
+  UNIQUE KEY `unique_record` (`id_job`,`password`,`job_first_segment`,`job_last_segment`,`is_review`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -193,6 +227,58 @@ CREATE TABLE `context_groups` (
   KEY `id_segment_idx` (`id_segment`) USING BTREE,
   KEY `id_file_idx` (`id_file`) USING BTREE,
   KEY `id_project_idx` (`id_project`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `converters`
+--
+
+DROP TABLE IF EXISTS `converters`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `converters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_converter` varchar(45) NOT NULL,
+  `cpu_weight` int(11) NOT NULL DEFAULT '1',
+  `ip_storage` varchar(45) NOT NULL,
+  `ip_machine_host` varchar(45) NOT NULL,
+  `machine_host_user` varchar(45) NOT NULL,
+  `machine_host_pass` varchar(45) NOT NULL,
+  `instance_name` varchar(45) NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status_active` tinyint(4) NOT NULL DEFAULT '1',
+  `status_offline` tinyint(4) NOT NULL DEFAULT '0',
+  `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
+  `conversion_api_version` varchar(100) DEFAULT '2011',
+  `stable` tinyint(4) NOT NULL DEFAULT '1',
+  `segmentation_rule` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
+  UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
+  UNIQUE KEY `id_UNIQUE` (`id`) USING BTREE,
+  KEY `status_active` (`status_active`),
+  KEY `status_offline` (`status_offline`),
+  KEY `status_reboot` (`status_reboot`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `converters_log`
+--
+
+DROP TABLE IF EXISTS `converters_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `converters_log` (
+  `id_log` int(11) NOT NULL AUTO_INCREMENT,
+  `id_converter` int(11) NOT NULL,
+  `check_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `test_passed` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id_log`),
+  KEY `timestamp_idx` (`check_time`),
+  KEY `outcome_idx` (`test_passed`),
+  KEY `id_converter_idx` (`id_converter`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -320,6 +406,7 @@ CREATE TABLE `files` (
   `source_language` varchar(45) NOT NULL,
   `mime_type` varchar(45) DEFAULT NULL,
   `sha1_original_file` varchar(100) DEFAULT NULL,
+  `segmentation_rule` varchar(512) DEFAULT NULL,
   `is_converted` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
@@ -404,6 +491,7 @@ CREATE TABLE `jobs` (
   `source` varchar(45) DEFAULT NULL,
   `target` varchar(45) DEFAULT NULL,
   `total_time_to_edit` bigint(20) DEFAULT '0',
+  `avg_post_editing_effort` float DEFAULT '0',
   `only_private_tm` int(11) NOT NULL DEFAULT '0',
   `last_opened_segment` int(11) DEFAULT NULL,
   `id_tms` int(11) DEFAULT '1',
@@ -434,9 +522,8 @@ CREATE TABLE `jobs` (
   `revision_stats_language_quality_maj` int(11) NOT NULL DEFAULT '0',
   `revision_stats_style_maj` int(11) NOT NULL DEFAULT '0',
   `dqf_key` varchar(255) DEFAULT NULL,
-  `avg_post_editing_effort` float DEFAULT '0',
   `total_raw_wc` bigint(20) DEFAULT '1',
-  `standard_analysis_wc` double(20,2) DEFAULT '0.00',
+  `standard_analysis_wc` decimal(8,2) unsigned DEFAULT '0.00',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`only_private_tm`),
   KEY `id_project` (`id_project`) USING BTREE,
@@ -447,9 +534,9 @@ CREATE TABLE `jobs` (
   KEY `password` (`password`),
   KEY `source` (`source`),
   KEY `target` (`target`),
-  KEY `status_owner_idx` (`status_owner`),
-  KEY `status_idx` (`status`),
-  KEY `create_date_idx` (`create_date`)
+  KEY `status_owner_idx` (`status_owner`) USING BTREE,
+  KEY `status_idx` (`status`) USING BTREE,
+  KEY `create_date_idx` (`create_date`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -494,9 +581,9 @@ CREATE TABLE `jobs_translators` (
   `source` varchar(10) NOT NULL,
   `target` varchar(10) NOT NULL,
   PRIMARY KEY (`id_job`,`job_password`),
-  KEY `id_translator_idx` (`id_translator_profile`),
-  KEY `added_by_idx` (`added_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `id_translator_idx` (`id_translator_profile`) USING BTREE,
+  KEY `added_by_idx` (`added_by`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -540,9 +627,11 @@ CREATE TABLE `memory_keys` (
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` int(11) DEFAULT '0',
   PRIMARY KEY (`uid`,`key_value`),
-  KEY `uid_idx` (`uid`),
-  KEY `key_value_idx` (`key_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `uid_idx` (`uid`) USING BTREE,
+  KEY `key_value_idx` (`key_value`) USING BTREE,
+  KEY `creation_date` (`creation_date`),
+  KEY `update_date` (`update_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -656,7 +745,7 @@ CREATE TABLE `project_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -670,7 +759,6 @@ CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
   `id_customer` varchar(45) NOT NULL,
-  `id_team` int(11) DEFAULT NULL,
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `id_engine_tm` int(11) DEFAULT NULL,
@@ -683,6 +771,7 @@ CREATE TABLE `projects` (
   `instance_id` tinyint(4) DEFAULT NULL,
   `pretranslate_100` int(1) DEFAULT '0',
   `id_qa_model` int(11) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `id_assignee` int(10) unsigned DEFAULT NULL,
   `due_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -691,8 +780,9 @@ CREATE TABLE `projects` (
   KEY `for_debug` (`instance_id`),
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`),
-  KEY `id_assignee_idx` (`id_assignee`),
-  KEY `id_team_idx` (`id_team`) USING BTREE
+  KEY `id_assignee_idx` (`id_assignee`) USING BTREE,
+  KEY `id_team_idx` (`id_team`) USING BTREE,
+  KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -734,8 +824,8 @@ CREATE TABLE `qa_categories` (
   `severities` text COMMENT 'json field',
   `options` text,
   PRIMARY KEY (`id`),
-  KEY `id_model` (`id_model`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `id_model` (`id_model`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -751,21 +841,21 @@ CREATE TABLE `qa_chunk_reviews` (
   `id_job` bigint(20) NOT NULL,
   `password` varchar(45) NOT NULL,
   `review_password` varchar(45) NOT NULL,
-  `penalty_points` double(20,2) DEFAULT NULL,
-  `source_page` int(11) DEFAULT NULL,
+  `penalty_points` decimal(11,2) DEFAULT NULL,
+  `source_page` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `is_pass` tinyint(4) DEFAULT NULL,
   `force_pass_at` timestamp NULL DEFAULT NULL,
   `reviewed_words_count` int(11) NOT NULL DEFAULT '0',
   `undo_data` text,
-  `advancement_wc` float(10,2) NOT NULL DEFAULT '0.00',
-  `total_tte` bigint(20) NOT NULL DEFAULT '0',
-  `avg_pee` float(10,2) NOT NULL DEFAULT '0.00',
+  `advancement_wc` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `total_tte` int(10) unsigned NOT NULL DEFAULT '0',
+  `avg_pee` decimal(5,2) unsigned NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `job_pw_source_page` (`id_job`,`password`,`source_page`),
-  KEY `id_project` (`id_project`),
-  KEY `review_password` (`review_password`),
-  KEY `id_job` (`id_job`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  UNIQUE KEY `job_pw_src_page_idx` (`id_job`,`password`,`source_page`),
+  KEY `id_project` (`id_project`) USING BTREE,
+  KEY `review_password` (`review_password`) USING BTREE,
+  KEY `id_job` (`id_job`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -789,17 +879,17 @@ CREATE TABLE `qa_entries` (
   `end_offset` int(11) NOT NULL,
   `target_text` varchar(255) DEFAULT NULL,
   `is_full_segment` tinyint(4) NOT NULL,
-  `penalty_points` double(20,2) DEFAULT NULL,
+  `penalty_points` decimal(11,2) DEFAULT NULL,
   `comment` text,
   `replies_count` int(11) NOT NULL DEFAULT '0',
   `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `rebutted_at` datetime DEFAULT NULL,
-  `source_page` int(11) NOT NULL,
+  `source_page` tinyint(3) unsigned NOT NULL,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `job_and_segment` (`id_job`,`id_segment`),
+  KEY `job_and_segment` (`id_job`,`id_segment`) USING BTREE,
   KEY `id_segment_idx` (`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -817,8 +907,93 @@ CREATE TABLE `qa_entry_comments` (
   `comment` text,
   `source_page` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_qa_entry` (`id_qa_entry`),
-  KEY `create_date` (`create_date`)
+  KEY `id_qa_entry` (`id_qa_entry`) USING BTREE,
+  KEY `create_date` (`create_date`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `qa_model_template_categories`
+--
+
+DROP TABLE IF EXISTS `qa_model_template_categories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `qa_model_template_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_template` int(11) NOT NULL,
+  `id_parent` int(11) DEFAULT NULL,
+  `category_label` varchar(45) NOT NULL,
+  `code` varchar(45) NOT NULL,
+  `sort` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `qa_model_template_passfail_options`
+--
+
+DROP TABLE IF EXISTS `qa_model_template_passfail_options`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `qa_model_template_passfail_options` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_passfail` int(11) NOT NULL,
+  `passfail_label` varchar(45) NOT NULL,
+  `passfail_value` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `qa_model_template_passfails`
+--
+
+DROP TABLE IF EXISTS `qa_model_template_passfails`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `qa_model_template_passfails` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_template` int(11) NOT NULL,
+  `passfail_type` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `qa_model_template_severities`
+--
+
+DROP TABLE IF EXISTS `qa_model_template_severities`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `qa_model_template_severities` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_category` int(11) NOT NULL,
+  `severity_code` varchar(45) NOT NULL,
+  `severity_label` varchar(45) NOT NULL,
+  `penalty` int(11) NOT NULL,
+  `dqf_id` int(11) DEFAULT NULL,
+  `sort` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `qa_model_templates`
+--
+
+DROP TABLE IF EXISTS `qa_model_templates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `qa_model_templates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) NOT NULL,
+  `version` int(11) NOT NULL,
+  `label` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `uid` (`uid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -837,8 +1012,9 @@ CREATE TABLE `qa_models` (
   `pass_type` varchar(255) DEFAULT NULL,
   `pass_options` text,
   `hash` int(10) unsigned DEFAULT NULL,
+  `qa_model_template_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -863,46 +1039,6 @@ CREATE TABLE `remote_files` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `replace_events`
---
-
-DROP TABLE IF EXISTS `replace_events`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `replace_events` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `replace_version` bigint(20) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `job_password` varchar(45) NOT NULL,
-  `id_segment` int(11) NOT NULL,
-  `segment_version` int(11) DEFAULT NULL,
-  `translation_before_replacement` text,
-  `translation_after_replacement` text,
-  `source` text,
-  `target` text,
-  `status` varchar(45) NOT NULL,
-  `replacement` text,
-  `created_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `replace_events_current_version`
---
-
-DROP TABLE IF EXISTS `replace_events_current_version`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `replace_events_current_version` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_job` bigint(20) NOT NULL,
-  `version` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `revision_feedbacks`
 --
 
@@ -917,7 +1053,7 @@ CREATE TABLE `revision_feedbacks` (
   `feedback` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `job_unique_key` (`id_job`,`password`,`revision_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -950,7 +1086,22 @@ CREATE TABLE `segment_notes` (
   `json` text,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+/*!50100 PARTITION BY RANGE (id)
+(PARTITION PART01 VALUES LESS THAN (100000000) ENGINE = InnoDB,
+ PARTITION PART02 VALUES LESS THAN (150000000) ENGINE = InnoDB,
+ PARTITION PART03 VALUES LESS THAN (200000000) ENGINE = InnoDB,
+ PARTITION PART04 VALUES LESS THAN (250000000) ENGINE = InnoDB,
+ PARTITION PART05 VALUES LESS THAN (300000000) ENGINE = InnoDB,
+ PARTITION PART06 VALUES LESS THAN (350000000) ENGINE = InnoDB,
+ PARTITION PART07 VALUES LESS THAN (400000000) ENGINE = InnoDB,
+ PARTITION PART08 VALUES LESS THAN (450000000) ENGINE = InnoDB,
+ PARTITION PART09 VALUES LESS THAN (500000000) ENGINE = InnoDB,
+ PARTITION PART10 VALUES LESS THAN (550000000) ENGINE = InnoDB,
+ PARTITION PART11 VALUES LESS THAN (600000000) ENGINE = InnoDB,
+ PARTITION PART12 VALUES LESS THAN (650000000) ENGINE = InnoDB,
+ PARTITION PART13 VALUES LESS THAN (700000000) ENGINE = InnoDB,
+ PARTITION PART14MAX VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -961,8 +1112,8 @@ DROP TABLE IF EXISTS `segment_original_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `segment_original_data` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_segment` int(11) NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_segment` bigint(20) NOT NULL,
   `map` text,
   PRIMARY KEY (`id`),
   KEY `id_segment_idx` (`id_segment`)
@@ -986,7 +1137,7 @@ CREATE TABLE `segment_revisions` (
   `err_language` varchar(512) NOT NULL,
   `err_style` varchar(512) NOT NULL,
   PRIMARY KEY (`id_job`,`id_segment`),
-  KEY `segm_key` (`id_segment`,`id_job`)
+  KEY `segm_key` (`id_segment`,`id_job`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1036,8 +1187,8 @@ CREATE TABLE `segment_translation_versions` (
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
-  KEY `creation_date` (`creation_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `creation_date` (`creation_date`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1073,15 +1224,9 @@ CREATE TABLE `segment_translations` (
   `version_number` int(11) DEFAULT '0',
   `edit_distance` int(11) DEFAULT NULL,
   PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `status` (`status`),
   KEY `id_job` (`id_job`),
   KEY `translation_date` (`translation_date`) USING BTREE,
-  KEY `tm_analysis_status` (`tm_analysis_status`) USING BTREE,
-  KEY `locked` (`locked`) USING BTREE,
-  KEY `id_segment` (`id_segment`) USING BTREE,
-  KEY `warning` (`warning`),
-  KEY `segment_hash` (`segment_hash`) USING HASH,
-  KEY `auto_idx` (`autopropagated_from`) USING BTREE
+  KEY `segment_hash` (`segment_hash`) USING HASH
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1098,7 +1243,7 @@ CREATE TABLE `segment_translations_splits` (
   `source_chunk_lengths` varchar(1024) NOT NULL DEFAULT '[]',
   `target_chunk_lengths` varchar(1024) NOT NULL DEFAULT '{"len":[0],"statuses":["DRAFT"]}',
   PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `id_job` (`id_job`),
+  KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_segment`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1134,6 +1279,24 @@ CREATE TABLE `segments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `segments_comments`
+--
+
+DROP TABLE IF EXISTS `segments_comments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `segments_comments` (
+  `id` int(11) NOT NULL,
+  `id_segment` int(11) NOT NULL,
+  `comment` text,
+  `create_date` datetime DEFAULT NULL,
+  `created_by` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_segment` (`id_segment`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `sequences`
 --
 
@@ -1144,7 +1307,7 @@ CREATE TABLE `sequences` (
   `id_segment` bigint(20) unsigned NOT NULL,
   `id_project` bigint(20) unsigned NOT NULL,
   `id_dqf_project` bigint(20) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1193,7 +1356,7 @@ CREATE TABLE `teams_users` (
   `is_admin` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_team_uid` (`id_team`,`uid`) USING BTREE,
-  KEY `uid` (`uid`)
+  KEY `uid` (`uid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1231,11 +1394,11 @@ CREATE TABLE `translator_profiles` (
   `source` varchar(10) NOT NULL,
   `target` varchar(10) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uid_src_trg_type_idx` (`uid_translator`,`source`,`target`,`is_revision`),
-  KEY `src_idx` (`source`),
-  KEY `trg_idx` (`target`),
-  KEY `src_trg_idx` (`source`,`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  UNIQUE KEY `uid_src_trg_type_idx` (`uid_translator`,`source`,`target`,`is_revision`) USING BTREE,
+  KEY `src_idx` (`source`) USING BTREE,
+  KEY `trg_idx` (`target`) USING BTREE,
+  KEY `src_trg_idx` (`source`,`target`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1296,7 +1459,7 @@ CREATE TABLE `users` (
   `confirmation_token` varchar(50) DEFAULT NULL,
   `confirmation_token_created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `email` (`email`) USING BTREE,
   UNIQUE KEY `confirmation_token` (`confirmation_token`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1319,8 +1482,8 @@ USE `matecat`;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `show_clients` AS select 1 AS `host_short`,1 AS `users`,1 AS `COUNT(*)` */;
+/*!50013 DEFINER=`matecat`@`10.3%` SQL SECURITY DEFINER */
+/*!50001 VIEW `show_clients` AS select substring_index(`information_schema`.`processlist`.`HOST`,':',1) AS `host_short`,group_concat(distinct `information_schema`.`processlist`.`USER` separator ',') AS `users`,count(0) AS `COUNT(*)` from `information_schema`.`processlist` group by substring_index(`information_schema`.`processlist`.`HOST`,':',1) order by count(0),substring_index(`information_schema`.`processlist`.`HOST`,':',1) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1334,7 +1497,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-02 13:12:09
+-- Dump completed on 2022-04-08 14:54:10
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1406,7 +1569,7 @@ USE `matecat`;
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
--- Server version	5.7.33-0ubuntu0.18.04.1-log
+-- Server version	5.7.37-40-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -1528,4 +1691,4 @@ INSERT INTO `phinxlog` VALUES (20200921145329,'2020-10-07 18:30:10','2020-10-07 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-03-02 13:12:09
+-- Dump completed on 2022-04-08 14:54:10

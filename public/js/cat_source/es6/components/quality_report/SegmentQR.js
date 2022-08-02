@@ -312,6 +312,8 @@ class SegmentQR extends React.Component {
 
   decodeTextAndTransformTags(text) {
     if (text) {
+      // Fix for more than 2 followed spaces
+      text = text.replace(/  /gi, '&nbsp; ')
       let decodedText = TagUtils.matchTag(
         TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
       )
@@ -453,7 +455,10 @@ class SegmentQR extends React.Component {
               diffActive={this.state.translateDiffOn}
               showIceMatchInfo={true}
               tte={this.props.segment.get('time_to_edit_translation')}
-              showIsPretranslated={this.props.segment.get('is_pre_translated')}
+              showIsPretranslated={
+                this.props.segment.get('is_pre_translated') &&
+                this.props.segment.get('ice_locked') !== '1'
+              }
             />
           ) : null}
           {!_.isNull(this.props.segment.get('last_revisions')) && revise ? (

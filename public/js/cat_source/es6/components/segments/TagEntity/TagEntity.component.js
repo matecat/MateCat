@@ -195,6 +195,15 @@ class TagEntity extends Component {
     )
   }
 
+  getChildrenContent(index) {
+    return (
+      <>
+        {this.props.children}
+        {index >= 0 && <span className="index-counter">{index + 1}</span>}
+      </>
+    )
+  }
+
   render() {
     const {children, entityKey, contentState, getUpdatedSegmentInfo} =
       this.props
@@ -214,7 +223,7 @@ class TagEntity extends Component {
     const {openSplit} = getUpdatedSegmentInfo()
 
     const {
-      data: {id: entityId, placeholder: entityPlaceholder},
+      data: {id: entityId, placeholder: entityPlaceholder, index},
     } = contentState.getEntity(entityKey)
     const decoratedText = Array.isArray(children)
       ? children[0].props.text
@@ -248,9 +257,11 @@ class TagEntity extends Component {
           )}
           {searchParams.active && markSearch(decoratedText, searchParams)}
           {searchParams.active ? (
-            <span style={{display: 'none'}}>{children}</span>
+            <span style={{display: 'none'}}>
+              {this.getChildrenContent(index)}
+            </span>
           ) : (
-            children
+            this.getChildrenContent(index)
           )}
         </span>
       </div>

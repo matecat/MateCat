@@ -59,6 +59,7 @@ abstract class AbstractDecorator {
 
         $this->template->password        = $this->controller->getPassword();
         $this->template->review_password = $this->controller->getReviewPassword();
+        $this->template->job_is_splitted = var_export($this->controller->isJobSplitted(), true);
 
     }
 
@@ -72,6 +73,7 @@ abstract class AbstractDecorator {
 
         $this->template->password        = $this->controller->getPassword();
         $this->template->review_password = $this->controller->getPassword();
+        $this->template->job_is_splitted = var_export($this->controller->isJobSplitted(), true);
     }
 
     public abstract function decorate();

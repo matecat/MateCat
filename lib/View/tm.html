@@ -323,10 +323,10 @@
 
                             <div class="block pull-right ">
                                 <tal:block tal:condition="php: empty(logged_user)">
-                                    <a class="btn-ok clear add-tm add-mt-engine disabled">Add a MT engine</a>
+                                    <a class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</a>
                                 </tal:block>
                                 <tal:block tal:condition="php: !empty(logged_user)">
-                                    <a class="btn-ok clear add-tm add-mt-engine">Add a MT engine</a>
+                                    <a class="btn-ok clear add-tm add-mt-engine">Add MT engine</a>
                                 </tal:block>
                             </div>
                             <div class="block pull-right ">
@@ -350,9 +350,9 @@
 
                                     <tal:block tal:condition="php: page == 'home'">
                                         <tr class="activemt" data-id="1">
-                                            <td class="mt-provider">MyMemory ( All Pairs )</td>
+                                            <td class="mt-provider">MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)</td>
                                             <td class="engine-name">
-                                                <div>Machine translation from Google Translate and Microsoft Translator.</div>
+                                                <div>Machine translation by the MT engine best suited to your project</div>
                                             </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
@@ -518,6 +518,27 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <tal:block tal:condition="php: page == 'cattool'">
+                                <div class="options-box charscounter">
+                                    <h3>Character counter</h3>
+                                    <p>                                        
+                                        Enabling this option makes a counter appear that counts the number of characters in the target section of each segment.
+                                    </p>
+                                    <div class="onoffswitch-container">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="charscounter_check" checked="checked" />
+                                            <label class="onoffswitch-label" for="charscounter_check">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                                <span class="onoffswitch-label-status-active">Active</span>
+                                                <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                                <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tal:block>
 
                             <div class="options-box multi-match">
                                 <h3>Cross-language Matches</h3>

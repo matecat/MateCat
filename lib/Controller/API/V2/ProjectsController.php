@@ -96,13 +96,19 @@ class ProjectsController extends KleinController {
         return $this->changeStatus(\Constants_JobStatus::STATUS_ACTIVE );
     }
 
-    private function changeStatus($status){
+    protected function changeStatus($status){
 
         $chunks = $this->project->getJobs();
-        Jobs_JobDao::updateAllJobsStatusesByProjectId( $this->project->id, $status );
+
         foreach( $chunks as $chunk ){
-            $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
-            Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+
+            // update a job only if it is NOT deleted
+            if(!$chunk->wasDeleted()){
+                Jobs_JobDao::updateJobStatus($chunk, $status);
+
+                $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
+                Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+            }
         }
 
         $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );

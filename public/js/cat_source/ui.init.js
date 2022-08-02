@@ -44,10 +44,6 @@ $.extend(window.UI, {
      * Global Translation mismatches array definition.
      */
     this.translationMismatches = []
-    /**
-     * Global Warnings array definition.
-     */
-    this.globalWarnings = []
 
     this.readonly = this.body.hasClass('archived') ? true : false
 
@@ -103,8 +99,7 @@ $.extend(window.UI, {
     CatToolActions.startNotifications()
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
     // Temporary js for header action menu
-    UI.initHeader()
-    CatToolActions.renderSubHeader()
+    CatToolActions.renderHeader()
     CatToolActions.renderFooter()
   },
   init: function () {
@@ -121,10 +116,6 @@ $.extend(window.UI, {
 
     Customizations.loadCustomization()
     $('html').trigger('init')
-    if (SearchUtils.searchEnabled)
-      $('#filterSwitch').show(100, function () {
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30)
-      })
     this.warningStopped = false
     this.unsavedSegmentsToRecover = []
     this.recoverUnsavedSegmentsTimer = false
@@ -186,7 +177,7 @@ $.extend(window.UI, {
         case 'warnings':
           interval = setInterval(function () {
             if ($('#notifbox.warningbox')) {
-              $('#point2seg').trigger('mousedown')
+              CatToolActions.toggleQaIssues()
               clearInterval(interval)
             }
           }, 500)

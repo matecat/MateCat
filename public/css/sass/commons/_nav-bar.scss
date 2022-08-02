@@ -330,55 +330,47 @@ header {
     }
   }
 }
-
-.user-teams {
-  //padding-right: 52px !important;
-  display: grid !important;
-  grid-template-columns: auto auto auto auto;
-  justify-content: right;
-  align-items: center;
-  padding-right: 24px;
-
-  #profile-menu {
-    .menu {
-      width: 200px;
-      margin: 0 0 0 -1px;
-      padding: 12px 8px !important;
-      top: 52px !important;
+#profile-menu {
+  .menu {
+    width: 200px;
+    margin: 0 0 0 -1px;
+    padding: 12px 8px !important;
+    top: 45px !important;
+    border-radius: 2px;
+    border: solid 1px #cdd4de;
+    right: 8px !important;
+    &::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 6px solid #ffffff;
+      bottom: 100%;
+      left: auto;
+      right: 12%;
+      transform: translate(90%, 0) !important;
+      position: absolute;
+      pointer-events: none;
+    }
+    .item {
       border-radius: 2px;
-      border: solid 1px #cdd4de;
-      right: 18px !important;
-      &::after {
-        content: '';
-        width: 0;
-        height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-bottom: 6px solid #ffffff;
-        bottom: 100%;
-        left: auto;
-        right: 12%;
-        transform: translate(90%, 0) !important;
-        position: absolute;
-        pointer-events: none;
-      }
-      .item {
-        border-radius: 2px;
-        padding: 8px !important;
-        font-size: 16px !important;
+      padding: 8px !important;
+      font-size: 16px !important;
 
-        &:hover {
-          background-color: #f2f5f7 !important;
-          color: #0055b8 !important;
-        }
-        &.selected {
-          background-color: transparent !important;
-          font-weight: normal !important;
-        }
+      &:hover {
+        background-color: #f2f5f7 !important;
+        color: #0055b8 !important;
+      }
+      &.selected {
+        background-color: transparent !important;
+        font-weight: normal !important;
       }
     }
   }
-
+  .user-nolog {
+    background-color: transparent;
+  }
   .ui-user-top-image {
     float: right;
     margin: 0 10px;
@@ -388,6 +380,15 @@ header {
       margin: 0 -7px;
     }
   }
+}
+
+.user-teams {
+  //padding-right: 52px !important;
+  display: grid !important;
+  grid-template-columns: auto auto auto auto;
+  justify-content: right;
+  align-items: center;
+  padding-right: 24px;
 
   .organization-name {
     color: #fff;

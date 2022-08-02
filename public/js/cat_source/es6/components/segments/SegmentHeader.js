@@ -5,6 +5,7 @@
 import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
+import SegmentUtils from '../../utils/segmentUtils'
 
 class SegmentHeader extends React.PureComponent {
   constructor(props) {
@@ -15,6 +16,8 @@ class SegmentHeader extends React.PureComponent {
       classname: '',
       createdBy: '',
       visible: false,
+      isActiveCharactersCounter: SegmentUtils.isCharacterCounterEnable(),
+      charactersCounter: {},
     }
     this.changePercentuage = this.changePercentuage.bind(this)
     this.hideHeader = this.hideHeader.bind(this)
@@ -50,6 +53,14 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.HIDE_SEGMENT_HEADER,
       this.hideHeader,
     )
+    SegmentStore.addListener(
+      SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+      this.onToggleCharacterCounter,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.CHARACTER_COUNTER,
+      this.onCharacterCounter,
+    )
   }
 
   componentWillUnmount() {
@@ -61,6 +72,31 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.HIDE_SEGMENT_HEADER,
       this.hideHeader,
     )
+    SegmentStore.removeListener(
+      SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+      this.onToggleCharacterCounter,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.CHARACTER_COUNTER,
+      this.onCharacterCounter,
+    )
+    this.setState({
+      charactersCounter: {},
+    })
+  }
+
+  onToggleCharacterCounter = () => {
+    const isActiveCharactersCounter = !this.state.isActiveCharactersCounter
+    this.setState({
+      isActiveCharactersCounter,
+    })
+    SegmentUtils.setCharacterCounterOptionValue(isActiveCharactersCounter)
+  }
+
+  onCharacterCounter = (charactersCounter) => {
+    this.setState({
+      charactersCounter,
+    })
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -103,10 +139,39 @@ class SegmentHeader extends React.PureComponent {
         <span>Saving</span>
       </div>
     )
+    const {isActiveCharactersCounter, charactersCounter} = this.state
+    const shouldDisplayCharactersCounter =
+      charactersCounter?.sid === sid &&
+      (isActiveCharactersCounter || charactersCounter.limit)
+
     return segmentOpened ? (
       <div className="header toggle" id={'segment-' + sid + '-header'}>
-        {autopropagated}
-        {percentageHtml}
+        {autopropagated ? autopropagatedHtml : percentageHtml}
+        {/* Characters counter */}
+        {!autopropagated && !saving && shouldDisplayCharactersCounter && (
+          <div
+            className={`segment-counter ${
+              charactersCounter.counter > charactersCounter.limit
+                ? `segment-counter-limit-error`
+                : charactersCounter > charactersCounter.limit - 20
+                ? 'segment-counter-limit-warning'
+                : ''
+            }`}
+          >
+            <span>Character count: </span>
+            <span className="segment-counter-current">
+              {charactersCounter.counter}
+            </span>
+            {charactersCounter.limit > 0 && (
+              <>
+                /
+                <span className={'segment-counter-limit'}>
+                  {charactersCounter.limit}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {saving ? savingHtml : null}{' '}
       </div>
     ) : autopropagated || repetition ? (

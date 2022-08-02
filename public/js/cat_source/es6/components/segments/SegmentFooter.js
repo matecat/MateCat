@@ -11,6 +11,7 @@ import SegmentTabGlossary from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import SegmentUtils from '../../utils/segmentUtils'
 
 const TAB_ITEMS = {
   matches: {
@@ -84,6 +85,32 @@ function SegmentFooter({sid, segment}) {
     })
   }, [])
 
+  // Check tab messages has notes
+  const hasNotes = useMemo(() => {
+    if (!SegmentUtils.segmentHasNote(segment)) return false
+    const tabMessagesContext = {
+      props: {
+        active_class: 'open',
+        tab_class: 'segment-notes',
+        id_segment: segment.sid,
+        notes: segment.notes,
+        metadata: segment.metadata,
+        context_groups: segment.context_groups,
+        segmentSource: segment.segment,
+        segment: segment,
+      },
+      getMetadataNoteTemplate: () => segment.metadata,
+      allowHTML: () => '',
+    }
+    const notes =
+      SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
+    return (
+      Array.isArray(notes) ||
+      (!Array.isArray(notes) &&
+        !/\bThere are no notes available\b/i.test(notes?.props?.children ?? ''))
+    )
+  }, [segment])
+
   const nextTab = useMemo(() => {
     const tabs = tabItems.filter(({enabled, visible}) => enabled && visible)
     const actualTabIndex = tabs.findIndex(({open}) => open)
@@ -150,16 +177,21 @@ function SegmentFooter({sid, segment}) {
       prevState.map((item) => ({
         ...item,
         ...(configurations[item.name] && {...configurations[item.name]}),
+        open: hasNotes
+          ? item.name === 'messages'
+          : !hasNotes && item.name === 'messages'
+          ? false
+          : configurations[item.name]?.open,
       })),
     )
-  }, [configurations, segment])
+  }, [configurations, segment, hasNotes])
 
   // add items
   useEffect(() => {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasNotes = Boolean(segment.notes && segment.notes.length > 0)
+    const hasNotes = SegmentUtils.segmentHasNote(segment)
     const hasMultiMatches = Boolean(
       UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
     )

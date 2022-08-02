@@ -206,6 +206,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
     }
   }
+  .user-api-text-confirm-delete {
+    label {
+      color: $black;
+    }
+  }
   .user-api-buttons {
     order: 2;
   }
@@ -231,6 +236,22 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       line-height: 30px;
     }
   }
+  &.user-api-created {
+    align-items: baseline;
+
+    .user-api-text {
+      display: flex;
+      flex-direction: row;
+      > div input {
+        height: 38px;
+        border-radius: 2px;
+      }
+      > :last-child {
+        margin-left: 3px;
+      }
+    }
+  }
+
   &.user-api-created textarea,
   &.user-api-created label {
     color: $black;
@@ -889,7 +910,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   display: block;
   width: 200%;
   margin-left: -100%;
-  transition: margin 0.3s ease-in 0s;
+  transition: margin 0.2s ease-out 0s;
 }
 
 .onoffswitch-inner:before,
@@ -905,6 +926,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: white;
   font-weight: bold;
   box-sizing: border-box;
+  border-radius: 16px;
 }
 
 .onoffswitch-inner:before {
@@ -912,6 +934,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding-left: 10px;
   background-color: $linkBlue;
   color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.3s ease-in 0s;
 }
 
 .onoffswitch-inner:after {
@@ -933,7 +957,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   right: 25px;
   border: 2px solid #ccc;
   border-radius: 20px;
-  transition: all 0.3s ease-in 0s;
+  transition: all 0.2s ease-out 0s;
 }
 
 .onoffswitch-label-status-active {
@@ -998,6 +1022,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
   margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner:before {
+  opacity: 1;
 }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
@@ -1633,6 +1660,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.arrows-enter:after {
                   content: 'Arrows/Enter';
                 }
+                &.space:after {
+                  content: 'Space';
+                }
               }
             }
           }
@@ -1667,13 +1697,6 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     .btn-cancel {
       margin-right: 16px;
       font-weight: 100;
-    }
-    .notes-action {
-      padding-left: 196px;
-      position: relative;
-      top: 2px;
-      font-size: 12px;
-      margin-top: 12px;
     }
   }
   .boxed {

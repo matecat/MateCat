@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom'
-import {screen, waitFor} from '@testing-library/react'
+import {createRoot} from 'react-dom/client'
+import {act, screen, waitFor} from '@testing-library/react'
 import {rest} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
@@ -1307,12 +1307,17 @@ test('renders properly', async () => {
 
   await import('./QualityReport')
 
-  expect(screen.getByText('Loading')).toBeVisible()
+  // expect(screen.getByText('Loading')).toBeVisible()
 
   await waitFor(() => {
     expect(screen.getByText('QR Job summary')).toBeVisible()
   })
-  ReactDOM.unmountComponentAtNode(modal)
-  ReactDOM.unmountComponentAtNode(content)
-  ReactDOM.unmountComponentAtNode(header)
+  act(() => {
+    const modalMountPoint = createRoot(modal)
+    modalMountPoint.unmount()
+    const contentMountPoint = createRoot(content)
+    contentMountPoint.unmount()
+    const headerMountPoint = createRoot(header)
+    headerMountPoint.unmount()
+  })
 })

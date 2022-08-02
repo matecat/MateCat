@@ -326,9 +326,11 @@ class catController extends viewController {
             $this->template->support_mail        = INIT::$SUPPORT_MAIL;
             $this->template->owner_email         = INIT::$SUPPORT_MAIL;
 
+            if($this->user){
+                $this->template->owner = $this->user->getEmail();
+            }
+
             $team = $this->project->getTeam();
-
-
 
             if( !empty( $team ) ){
 
@@ -370,7 +372,8 @@ class catController extends viewController {
             $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
             $this->template->password            = $this->password;
 
-            throw new AuthorizationError( "Forbidden, Job archived/cancelled." );
+            return;
+
 
         } else {
             $this->template->pid                 = $this->pid;
@@ -476,21 +479,21 @@ class catController extends viewController {
         $this->decorator->decorate();
 
         $this->featureSet->appendDecorators(
-            'CatDecorator',
-            $this,
-            $this->template
+                'CatDecorator',
+                $this,
+                $this->template
         );
     }
 
     public function getJobStats() {
-      return $this->job_stats ;
+        return $this->job_stats ;
     }
 
     /**
      * @return Chunks_ChunkStruct
      */
     public function getChunk() {
-      return $this->chunk ;
+        return $this->chunk ;
     }
 
     /**
@@ -500,8 +503,18 @@ class catController extends viewController {
         return $this->review_password ;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword(){
-        return $this->password;
+        return ($this->chunk !== null) ? $this->chunk->password : $this->password;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isJobSplitted(){
+        return ($this->chunk !== null) ? $this->chunk->isSplitted() : false;
     }
 
     /**
@@ -512,7 +525,7 @@ class catController extends viewController {
      */
     public function getRevisionNumber() {
         return catController::isRevision() ? (
-                $this->revision == null ? 1 : $this->revision
+        $this->revision == null ? 1 : $this->revision
         ) : null ;
     }
 

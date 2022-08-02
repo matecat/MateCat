@@ -64,7 +64,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      */
     public function addPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct ) {
         $this->chunk_review->penalty_points += $penalty_points;
-        $this->updatePassFailResult( $projectStruct );
+        $this->_updatePassFailResult( $projectStruct );
     }
 
     /**
@@ -78,7 +78,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      */
     public function subtractPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct  ) {
         $this->chunk_review->penalty_points -= $penalty_points;
-        $this->updatePassFailResult( $projectStruct );
+        $this->_updatePassFailResult( $projectStruct );
     }
 
     /**
@@ -101,13 +101,13 @@ class ChunkReviewModel implements IChunkReviewModel {
     }
 
     /**
-     *
+     * WARNING: ( should be protected ) this **MUST** be used only by ChunkReviewModel::[recountAndUpdatePassFailResult, subtractPenaltyPoints, addPenaltyPoints]
      * @param Projects_ProjectStruct $project
      *
      * @return bool
      * @throws \Exception
      */
-    public function updatePassFailResult( Projects_ProjectStruct $project ) {
+    public function _updatePassFailResult( Projects_ProjectStruct $project ) {
 
         $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
 
@@ -159,7 +159,7 @@ class ChunkReviewModel implements IChunkReviewModel {
         $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page );
         $this->chunk_review->total_tte      = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page );
 
-        $this->updatePassFailResult( $project );
+        $this->_updatePassFailResult( $project );
     }
 
 

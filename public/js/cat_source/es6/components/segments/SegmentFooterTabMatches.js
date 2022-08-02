@@ -8,6 +8,7 @@ import TranslationMatches from './utils/translationMatches'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import CommonUtils from '../../utils/commonUtils'
 
 class SegmentFooterTabMatches extends React.Component {
   constructor(props) {
@@ -39,6 +40,7 @@ class SegmentFooterTabMatches extends React.Component {
       item.cb = this.created_by
       item.segment = this.segment
       item.translation = this.translation
+      item.target = this.target
       if (
         'sentence_confidence' in this &&
         this.sentence_confidence !== '' &&
@@ -149,6 +151,11 @@ class SegmentFooterTabMatches extends React.Component {
       <ul className="graysmall-details">
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         <li>{match.suggestion_info}</li>
+        <li className={'graydesc'}>
+          <span className={'bold'} style={{fontSize: '14px'}}>
+            {CommonUtils.getLanguageNameFromLocale(match.target)}
+          </span>
+        </li>
         <li className="graydesc">
           Source:
           <span className="bold" style={{fontSize: '14px'}}>
@@ -156,6 +163,7 @@ class SegmentFooterTabMatches extends React.Component {
             {match.cb}
           </span>
         </li>
+
         {this.getMatchInfoMetadata(match)}
       </ul>
     )

@@ -1,8 +1,10 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 
 import {ModalContainer} from './ModalContainer'
 import {ModalOverlay} from './ModalOverlay'
+import ModalsConstants from '../../constants/ModalsConstants'
+import CatToolStore from '../../stores/CatToolStore'
 
 const initialState = {
   isShowingModal: false,
@@ -15,7 +17,7 @@ const initialState = {
   onCloseCallback: false,
 }
 
-export class ModalWindowComponent extends React.Component {
+export class ModalWindow extends React.Component {
   state = initialState
 
   onCloseModal = () => {
@@ -46,6 +48,22 @@ export class ModalWindowComponent extends React.Component {
     })
   }
 
+  componentDidMount() {
+    CatToolStore.addListener(
+      ModalsConstants.SHOW_MODAL,
+      this.showModalComponent,
+    )
+    CatToolStore.addListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
+  }
+
+  componentWillUnmount() {
+    CatToolStore.removeListener(
+      ModalsConstants.SHOW_MODAL,
+      this.showModalComponent,
+    )
+    CatToolStore.removeListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
+  }
+
   render() {
     const {
       component: InjectedComponent,
@@ -72,12 +90,8 @@ export class ModalWindowComponent extends React.Component {
     )
   }
 }
-export let ModalWindow
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementById('modal')
-  ModalWindow = ReactDOM.render(
-    React.createElement(ModalWindowComponent, {}),
-    mountPoint,
-  )
+  const mountPoint = createRoot(document.getElementById('modal'))
+  mountPoint.render(React.createElement(ModalWindow, {}))
 })

@@ -5,8 +5,8 @@ import {SegmentsContext} from '../../../segments/SegmentsContainer'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
 import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
-import {ModalWindow} from '../../../modals/ModalWindow'
 import CatToolStore from '../../../../stores/CatToolStore'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 const LinkIcon = () => {
   return (
@@ -57,7 +57,7 @@ function RowSegment({
         minHeight: 400,
         maxWidth: 900,
       }
-      ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         JobMetadataModal,
         props,
         'File notes',

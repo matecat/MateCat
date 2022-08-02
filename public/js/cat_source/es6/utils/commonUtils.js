@@ -6,7 +6,6 @@ import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
-import {ModalWindow} from '../components/modals/ModalWindow'
 import AlertModal from '../components/modals/AlertModal'
 
 const CommonUtils = {
@@ -24,6 +23,7 @@ const CommonUtils = {
     var tra = parseFloat(stats.TRANSLATED)
     var dra = parseFloat(stats.DRAFT)
     var rej = parseFloat(stats.REJECTED)
+    var todo = parseFloat(stats.TODO)
 
     // If second pass enabled
     if (config.secondRevisionsCount && stats.reviews) {
@@ -50,7 +50,7 @@ const CommonUtils = {
     if (dra) t = 'draft'
     if (rej) t = 'draft'
 
-    if (!tra && !dra && !rej && !app) {
+    if (!tra && !dra && !rej && !app && todo > 0) {
       t = 'draft'
     }
 
@@ -139,7 +139,7 @@ const CommonUtils = {
    * @returns {*}
    */
   genericErrorAlertMessage() {
-    ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       AlertModal,
       {
         text:
@@ -522,6 +522,9 @@ const CommonUtils = {
     return timezoneToShow % 1 === 0
       ? 'GMT ' + timezoneToShow + ':00'
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
+  },
+  checkJobIsSplitted: function () {
+    return config.job_is_splitted
   },
 }
 

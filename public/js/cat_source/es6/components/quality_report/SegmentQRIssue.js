@@ -5,43 +5,55 @@ import moment from 'moment'
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {
     let array = []
-    let comments = issue.get('comments').toJS(),
-      comment_date
-    for (let n in comments) {
-      let comment = comments[n]
-      comment_date = moment(comment.create_date).format('lll')
+    if (issue.get('comments')) {
+      let comments = issue.get('comments').toJS(),
+        comment_date
+      for (let n in comments) {
+        let comment = comments[n]
+        comment_date = moment(comment.create_date).format('lll')
 
-      if (comment.source_page == 1) {
-        array.push(
-          <p key={comment.id} className="re-comment">
-            <span className="re-translator">Translator </span>
-            <span className="re-comment-date">
-              <i>({comment_date}): </i>
-            </span>
-            {comment.comment}
-          </p>,
-        )
-      } else if (comment.source_page == 2) {
-        array.push(
-          <p key={comment.id} className="re-comment">
-            <span className="re-revisor">Reviewer </span>
-            <span className="re-comment-date">
-              <i>({comment_date}): </i>
-            </span>
-            {comment.comment}
-          </p>,
-        )
-      } else if (comment.source_page == 3) {
-        array.push(
-          <p key={comment.id} className="re-comment">
-            <span className="re-revisor2">Reviewer </span>
-            <span className="re-comment-date">
-              <i>({comment_date}): </i>
-            </span>
-            {comment.comment}
-          </p>,
-        )
+        if (comment.source_page == 1) {
+          array.push(
+            <p key={comment.id} className="re-comment">
+              <span className="re-translator">Translator </span>
+              <span className="re-comment-date">
+                <i>({comment_date}): </i>
+              </span>
+              {comment.comment}
+            </p>,
+          )
+        } else if (comment.source_page == 2) {
+          array.push(
+            <p key={comment.id} className="re-comment">
+              <span className="re-revisor">Reviewer </span>
+              <span className="re-comment-date">
+                <i>({comment_date}): </i>
+              </span>
+              {comment.comment}
+            </p>,
+          )
+        } else if (comment.source_page == 3) {
+          array.push(
+            <p key={comment.id} className="re-comment">
+              <span className="re-revisor2">Reviewer </span>
+              <span className="re-comment-date">
+                <i>({comment_date}): </i>
+              </span>
+              {comment.comment}
+            </p>,
+          )
+        }
       }
+    }
+    if (issue.get('target_text')) {
+      array.push(
+        <p key={issue.get('issue_id')} className="re-comment">
+          <span className="re-selected-text">
+            <b>Selected text: </b>
+          </span>
+          {issue.get('target_text')}
+        </p>,
+      )
     }
     if (array.length > 0) {
       array = array.reverse()
@@ -76,8 +88,9 @@ class SegmentQRIssue extends React.Component {
         <div className="qr-severity" key={'severity-qr' + index}>
           <b key={'sev' + index}>[{issue.get('issue_severity')}]</b>
         </div>
-        {!_.isUndefined(issue.get('comments')) &&
-        issue.get('comments').size > 0 ? (
+        {(!_.isUndefined(issue.get('comments')) &&
+          issue.get('comments').size > 0) ||
+        issue.get('target_text') ? (
           <React.Fragment>
             <div
               className="qr-issue-comments"
