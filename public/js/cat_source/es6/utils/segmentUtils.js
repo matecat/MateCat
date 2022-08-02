@@ -89,6 +89,13 @@ const SegmentUtils = {
       ]),
     )
   },
+  segmentHasNote: (segment) => {
+    return segment.notes ||
+      segment.context_groups?.context_json ||
+      segment.metadata?.lenght > 0
+      ? true
+      : false
+  },
 }
 
 export default SegmentUtils

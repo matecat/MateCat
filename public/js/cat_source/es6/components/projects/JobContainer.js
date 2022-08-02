@@ -638,14 +638,18 @@ class JobContainer extends React.Component {
   }
 
   openOutsourceModal(showTranslatorBox, extendedView) {
-    if (!this.state.openOutsource) {
-      $(document).trigger('outsource-request')
+    if (this.props.job.get('outsource_available')) {
+      if (!this.state.openOutsource) {
+        $(document).trigger('outsource-request')
+      }
+      this.setState({
+        openOutsource: !this.state.openOutsource,
+        showTranslatorBox: showTranslatorBox,
+        extendedView: extendedView,
+      })
+    } else {
+      window.open('https://translated.com/contact-us', '_blank')
     }
-    this.setState({
-      openOutsource: !this.state.openOutsource,
-      showTranslatorBox: showTranslatorBox,
-      extendedView: extendedView,
-    })
   }
 
   getOutsourceButton() {

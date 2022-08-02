@@ -134,9 +134,9 @@ class PreferencesModal extends React.Component {
 
   copyToClipboard(e) {
     e.stopPropagation()
-    this.keys.select()
-    this.keys.setSelectionRange(0, 99999)
-    document.execCommand('copy')
+    navigator.clipboard.writeText(
+      `${this.state.credentials.api_key}-${this.state.credentials.api_secret}`,
+    )
     this.setState({
       credentialsCopied: true,
     })
@@ -148,8 +148,8 @@ class PreferencesModal extends React.Component {
         <h2>API Key</h2>
         {this.state.credentials ? (
           this.state.confirmDelete ? (
-            <div className={'user-api user-api-created'}>
-              <div className={'user-api-text'}>
+            <div className={'user-api'}>
+              <div className={'user-api-text user-api-text-confirm-delete'}>
                 <label>Are you sure you want to delete the token?</label>
                 <label>This action cannot be undone.</label>
               </div>
@@ -170,16 +170,39 @@ class PreferencesModal extends React.Component {
               }
             >
               <div className={'user-api-text'}>
-                <textarea
-                  ref={(keys) => (this.keys = keys)}
-                  rows="1"
-                  readOnly={true}
-                  value={
-                    this.state.credentials.api_key +
-                    '-' +
-                    this.state.credentials.api_secret
-                  }
-                />
+                {this.state.credentialsCreated ? (
+                  <>
+                    <div>
+                      <label>Api Key</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={this.state.credentials.api_key}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </div>
+                    <div>
+                      <label>Api Secret</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={this.state.credentials.api_secret}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <textarea
+                    ref={(keys) => (this.keys = keys)}
+                    rows="1"
+                    readOnly={true}
+                    value={
+                      this.state.credentials.api_key +
+                      '-' +
+                      this.state.credentials.api_secret
+                    }
+                  />
+                )}
               </div>
               {this.state.credentialsCreated ? (
                 <div className={'user-api-buttons'}>
