@@ -33,7 +33,7 @@ class StringTransformer
             $string = self::replaceOriginalMap($string, $originalMap);
         }
 
-        $string = self::trimExtraSpaces($string);
+        //$string = self::trimExtraSpaces($string);
 
         return $string;
     }
@@ -52,17 +52,20 @@ class StringTransformer
             'bx',
             'ex',
             'x',
-        ];;
+        ];
+
+        $temporaryPlaceholder = '###########_____TEMPORARY_PLACEHOLDER_____###########';
 
         foreach ($tags as $tag){
             $regex = '/<'.$tag.' id="(.*)"(.*)>/sU';
             $regex2 = '/<\/'.$tag.'>/sU';
 
-            $string = preg_replace ($regex, '$1 ', $string);
-            $string = preg_replace ($regex2, ' ', $string);
+            $string = preg_replace ($regex, '$1'.$temporaryPlaceholder, $string);
+            $string = preg_replace ($regex2, $temporaryPlaceholder, $string);
         }
 
-        return $string;
+        // with the placeholder trick we avoid the double space insert
+        return str_replace([' '.$temporaryPlaceholder, $temporaryPlaceholder.' ', $temporaryPlaceholder],' ', $string);
     }
 
     /**
