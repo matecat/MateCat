@@ -131,10 +131,18 @@ abstract class Analysis_AbstractStatus {
             $_total_wc_tm_analysis += $eq_words;
             $_total_wc_standard_analysis += $st_word_count;
 
+            // is outsource available?
+            $jobStruct = Jobs_JobDao::getByIdAndPassword($jid, $jpassword);
+            $outsourceAvailable = $this->featureSet->filter( 'outsourceAvailable', $jobStruct->target );
+            if(is_array($outsourceAvailable)){
+                $outsourceAvailable = true;
+            }
+
             //init indexes to avoid notices
             if ( !array_key_exists( $jid, $this->result[ 'data' ][ 'jobs' ] ) ) {
                 $this->result[ 'data' ][ 'jobs' ][ $jid ]             = array();
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ] = array();
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'outsource_available' ] = $outsourceAvailable;
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ] = array();
                 $total_word_counters[ $jid ]                                = array();
             }
