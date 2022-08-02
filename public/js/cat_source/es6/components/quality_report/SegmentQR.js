@@ -312,6 +312,8 @@ class SegmentQR extends React.Component {
 
   decodeTextAndTransformTags(text) {
     if (text) {
+      // Fix for more than 2 followed spaces
+      text = text.replace(/  /gi, '&nbsp; ')
       let decodedText = TagUtils.matchTag(
         TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
       )

@@ -22,7 +22,7 @@ class CountWordController extends KleinController {
 
         $this->language = !empty( $this->request->language ) ? $this->request->language : 'en-US';
 
-        if ( empty( $this->request->text ) ) {
+        if ( $this->request->text === null or $this->request->text === '') {
             throw new ValidationError( "Invalid text field", 400 );
         }
 
