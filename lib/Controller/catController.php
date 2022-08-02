@@ -503,8 +503,18 @@ class catController extends viewController {
         return $this->review_password ;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword(){
-        return $this->password;
+        return ($this->chunk !== null) ? $this->chunk->password : $this->password;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isJobSplitted(){
+        return ($this->chunk !== null) ? $this->chunk->isSplitted() : false;
     }
 
     /**
