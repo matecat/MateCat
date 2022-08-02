@@ -43,6 +43,8 @@ class CopySourceModal extends React.Component {
       <div className="copy-source-modal">
         <h3 className="text-container-top">
           Do you really want to copy source to target for all new segments?
+          <br />
+          This action cannot be undone.
         </h3>
 
         <div className="buttons-popup-container">
@@ -53,9 +55,7 @@ class CopySourceModal extends React.Component {
           <a className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>
             This segment only
           </a>
-          <div className="notes-action">
-            <b>Note</b>: This action cannot be undone.
-          </div>
+          <div className="notes-action"></div>
         </div>
         <div className="boxed">
           <input
