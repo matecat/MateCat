@@ -13,6 +13,8 @@
 
         <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
+
+
         <script type="text/javascript">
             /*<![CDATA[*/
 
@@ -28,6 +30,7 @@
               return obj.stack;
             };
             var config = {
+                job_is_splitted: ${job_is_splitted | string:false},
                 is_cattool : true,
                 basepath: '${basepath | string:/}',
                 maxFileSize: ${maxFileSize},
