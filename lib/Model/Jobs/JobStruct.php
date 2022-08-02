@@ -244,6 +244,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         }) ;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSplitted() {
+
+        return count($this->getChunks()) > 1;
+    }
+
     public function getClientKeys( Users_UserStruct $user, $role ){
         $uKModel = new \TmKeyManagement\UserKeysModel( $user, $role );
         return $uKModel->getKeys( $this->tm_keys );
