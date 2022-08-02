@@ -9,17 +9,19 @@
 namespace Email;
 
 
+use Users_UserStruct;
+
 class WelcomeEmail extends AbstractEmail
 {
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user ;
 
     protected $title = 'Welcome to MateCat!' ;
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( Users_UserStruct $user ) {
         $this->user = $user ;
 
         $this->_setLayout('skeleton.html');
@@ -33,7 +35,7 @@ class WelcomeEmail extends AbstractEmail
         );
     }
 
-    protected function _getLayoutVariables()
+    protected function _getLayoutVariables($messageBody = null)
     {
         $vars = parent::_getLayoutVariables() ;
         $vars['title'] = $this->title ;

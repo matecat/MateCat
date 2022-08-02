@@ -3091,7 +3091,16 @@ class ProjectManager {
                     "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
             ];
             if ( PHP_SAPI != 'cli' ) {
-                setcookie( "upload_session", "", time() - 10000, '/', \INIT::$COOKIE_DOMAIN );
+                CookieManager::setCookie( "upload_session", "",
+                        [
+                                'expires'  => time() - 10000,
+                                'path'     => '/',
+                                'domain'   => INIT::$COOKIE_DOMAIN,
+                                'secure'   => true,
+                                'httponly' => true,
+                                'samesite' => 'None',
+                        ]
+                );
             }
         }
 

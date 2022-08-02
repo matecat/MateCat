@@ -2,6 +2,7 @@
 
 namespace Features\QaCheckBlacklist\Utils;
 
+use Exception;
 use Features\QaCheckBlacklist\AbstractBlacklist;
 use Features\QaCheckBlacklist\BlacklistFromTextFile;
 use Features\QaCheckBlacklist\BlacklistFromZip;
@@ -9,6 +10,9 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Glossary\Blacklist\BlacklistDao;
+use INIT;
+use Jobs_JobStruct;
+use Log;
 use Translations\WarningDao;
 use Translations\WarningModel;
 
@@ -29,7 +33,7 @@ class BlacklistUtils
     /**
      * @param int $id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete($id){
 
@@ -57,7 +61,7 @@ class BlacklistUtils
      * @param $id
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getContent($id)
     {
@@ -81,7 +85,7 @@ class BlacklistUtils
      * @return mixed
      * @throws \Predis\Connection\ConnectionException
      * @throws \ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function save($filePath, \Chunks_ChunkStruct $chunkStruct, $uid = null)
     {
@@ -127,12 +131,12 @@ class BlacklistUtils
     }
 
     /**
-     * @param \Jobs_JobStruct $job
+     * @param Jobs_JobStruct $job
      *
      * @return AbstractBlacklist
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getAbstractBlacklist(\Jobs_JobStruct $job)
+    public function getAbstractBlacklist( Jobs_JobStruct $job)
     {
         if(false === $this->checkIfExists($job->id, $job->password)){
             return new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id, $job->password ) ;
@@ -154,20 +158,20 @@ class BlacklistUtils
             }
 
             $s3Params = [
-                    'bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                    'bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
                     'key' => $blacklistFilePath,
                     'save_as' => "/tmp/glossary/" . md5($job->id . $job->password . 'blacklist').'.txt'
             ];
 
             $content = $s3Client->openItem([
-                    'bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                    'bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
                     'key' => $blacklistFilePath,
             ]);
 
             $s3Client->downloadItem( $s3Params );
             $blacklistFilePath = $s3Params[ 'save_as' ];
         } else {
-            $blacklistFilePath = \INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $job->id . DIRECTORY_SEPARATOR . $job->password . DIRECTORY_SEPARATOR . 'blacklist.txt';
+            $blacklistFilePath = INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $job->id . DIRECTORY_SEPARATOR . $job->password . DIRECTORY_SEPARATOR . 'blacklist.txt';
             $content = file_get_contents($blacklistFilePath);
         }
 
@@ -189,8 +193,8 @@ class BlacklistUtils
         try {
             $this->redis->set( $key, $content );
             $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ; // 1 month
-        } catch (\Exception $exception){
-            \Log::doJsonLog('Error in saving '.$key.' on Redis:' . $exception->getMessage());
+        } catch ( Exception $exception){
+            Log::doJsonLog('Error in saving '.$key.' on Redis:' . $exception->getMessage());
             // do nothing
         }
     }

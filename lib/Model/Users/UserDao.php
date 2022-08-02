@@ -285,7 +285,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct
      * @throws Exception
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

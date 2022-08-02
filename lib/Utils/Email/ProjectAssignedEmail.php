@@ -9,6 +9,12 @@
 namespace Email;
 
 
+use Chunks_ChunkStruct;
+use Projects_ProjectStruct;
+use Routes;
+use Users_UserStruct;
+use WordCount_Struct;
+
 class ProjectAssignedEmail extends AbstractEmail {
 
     protected $user ;
@@ -16,7 +22,7 @@ class ProjectAssignedEmail extends AbstractEmail {
     protected $assignee ;
     protected $title ;
 
-    public  function __construct(\Users_UserStruct $user, \Projects_ProjectStruct $project, \Users_UserStruct $assignee) {
+    public  function __construct( Users_UserStruct $user, Projects_ProjectStruct $project, Users_UserStruct $assignee) {
         $this->user = $user ;
         $this->project = $project ;
         $this->assignee = $assignee ;
@@ -33,8 +39,8 @@ class ProjectAssignedEmail extends AbstractEmail {
     {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
-            $jStruct  = new \Chunks_ChunkStruct( $job->getArrayCopy() );
-            $jobStats = new \WordCount_Struct();
+            $jStruct  = new Chunks_ChunkStruct( $job->getArrayCopy() );
+            $jobStats = new WordCount_Struct();
             $jobStats->setIdJob( $jStruct->id );
             $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords( $jStruct->rejected_words );
@@ -49,7 +55,7 @@ class ProjectAssignedEmail extends AbstractEmail {
                 'sender'      => $this->user->toArray(),
                 'project'     => $this->project->toArray(),
                 'words_count' => number_format( array_sum( $words_count ), 0, ".", "," ),
-                'project_url' => \Routes::analyze( [
+                'project_url' => Routes::analyze( [
                         'project_name' => $this->project->name,
                         'id_project'   => $this->project->id,
                         'password'     => $this->project->password
@@ -57,7 +63,7 @@ class ProjectAssignedEmail extends AbstractEmail {
         ];
     }
 
-    protected function _getLayoutVariables()
+    protected function _getLayoutVariables($messageBody = null)
     {
         $vars = parent::_getLayoutVariables();
         $vars['title'] = $this->title ;

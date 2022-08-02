@@ -70,3 +70,4 @@ mmt_fallback_key.ini
 
 inc/google_translate/mmt_fallback_credentials.json
 .DS_Store
+certs

@@ -12,11 +12,21 @@ namespace Analysis\Workers;
 use Analysis\AnalysisDao;
 use Analysis\Queue\RedisKeys;
 use Constants\Ices;
+use Constants_TranslationStatus;
 use Database;
+use DOMException;
 use Engine;
+use Engines_AbstractEngine;
+use Engines_MyMemory;
+use Engines_Results_AbstractResponse;
+use Engines_Results_MyMemory_Matches;
+use Engines_Results_MyMemory_TMS;
 use Exception;
+use FeatureSet;
 use Jobs_JobDao;
 use PDOException;
+use PostProcess;
+use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
@@ -50,7 +60,7 @@ class TMAnalysisWorker extends AbstractWorker {
     const ERR_WRONG_PROJECT    = 5;
 
     /**
-     * @var \FeatureSet
+     * @var FeatureSet
      */
     protected $featureSet;
 
@@ -123,7 +133,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws EndQueueException
      * @throws ReQueueException
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ConnectionException
      */
     protected function _endQueueCallback( QueueElement $queueElement ) {
         $this->_forceSetSegmentAnalyzed( $queueElement );
@@ -241,7 +251,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
             $message   = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
             $this->_doLog( $message );
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
             throw new ReQueueException( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}", self::ERR_REQUEUE );
         }
@@ -270,10 +280,10 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $source_lang
      * @param $target_lang
      *
-     * @return \PostProcess
+     * @return PostProcess
      */
     private function initPostProcess( $source_seg, $target_seg, $source_lang, $target_lang ) {
-        $check = new \PostProcess( $source_seg, $target_seg );
+        $check = new PostProcess( $source_seg, $target_seg );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $source_lang );
         $check->setTargetSegLang( $target_lang );
@@ -315,14 +325,14 @@ class TMAnalysisWorker extends AbstractWorker {
                 //i found this language in the list of disabled target language??
                 if ( array_search( $lang, ICES::$iceLockDisabledForTargetLangs ) === false ) {
                     //ice lock enabled, language not found
-                    $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_APPROVED;
+                    $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_APPROVED;
                     $tm_data[ 'locked' ] = true;
                 }
 
                 $tm_data = $this->featureSet->filter( 'checkIceLocked', $tm_data, $queueElementParams );
 
             } elseif ( $queueElementParams->pretranslate_100 ) {
-                $tm_data[ 'status' ] = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
                 $tm_data[ 'locked' ] = false;
             }
 
@@ -526,14 +536,14 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
      *
-     * @param              $mtEngine
-     * @param              $_config
+     * @param Engines_AbstractEngine $mtEngine
+     * @param                         $_config
      *
-     * @param QueueElement $queueElement
+     * @param QueueElement            $queueElement
      *
-     * @return bool|\Engines_Results_AbstractResponse
+     * @return bool|Engines_Results_AbstractResponse
      */
-    protected function _getMT( \Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
 
         $mt_result = null;
 
@@ -565,26 +575,27 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * @param \Engines_AbstractEngine $tmsEngine
+     * @param Engines_AbstractEngine  $tmsEngine
      * @param                         $_config
      *
-     * @return \Engines_Results_MyMemory_Matches[]|null
+     * @return Engines_Results_MyMemory_Matches[]|null
+     * @throws EndQueueException
      * @throws NotSupportedMTException
      * @throws ReQueueException
      */
-    protected function _getTM( \Engines_AbstractEngine $tmsEngine, $_config ) {
+    protected function _getTM( Engines_AbstractEngine $tmsEngine, $_config ) {
 
         $tms_match = null;
 
         /**
-         * @var $tmsEngine \Engines_MyMemory
+         * @var $tmsEngine Engines_MyMemory
          */
         $tmsEngine->setFeatureSet( $this->featureSet );
 
         $config = $tmsEngine->getConfigStruct();
         $config = array_merge( $config, $_config );
 
-        /** @var $tms_match \Engines_Results_MyMemory_TMS */
+        /** @var $tms_match Engines_Results_MyMemory_TMS */
         $tms_match = $tmsEngine->get( $config );
 
         /**
@@ -621,7 +632,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @param QueueElement $queueElement
      *
-     * @throws \DOMException
+     * @throws DOMException
      */
     protected function _tryRealignTagID( QueueElement $queueElement ) {
 
@@ -715,7 +726,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $queueElement QueueElement
      * @param $process_pid  int
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ConnectionException
      */
     protected function _initializeTMAnalysis( QueueElement $queueElement, $process_pid ) {
 
@@ -759,7 +770,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $eq_words
      * @param $standard_words
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ConnectionException
      */
     protected function _incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
         $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
@@ -807,11 +818,10 @@ class TMAnalysisWorker extends AbstractWorker {
      * Every time one element of the project is taken from the queue, the worker try to finalize the project.
      * Only the last worker can finalize the project by setting a lock on Redis.
      *
-     * @param $_project_id
+     * @param $_params
      *
      * @throws ReQueueException
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ConnectionException
      */
     protected function _tryToCloseProject( $_params ) {
 
@@ -838,9 +848,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
             try {
                 $this->featureSet->run( 'beforeTMAnalysisCloseProject', $_project_id );
-            } catch ( \Exception $e ) {
+            } catch ( Exception $e ) {
                 $this->_queueHandler->getRedisClient()->del( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id );
-                $this->_doLog( "Requeueing project_id $_project_id because of error {$e->getMessage()}" );
+                $this->_doLog( "Re-queueing project_id $_project_id because of error {$e->getMessage()}" );
                 throw new ReQueueException();
             }
 
@@ -865,7 +875,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $numberOfJobs = count( $jobs );
 
             foreach ( $jobs as $job ) {
-                \Jobs_JobDao::updateFields( [
+                Jobs_JobDao::updateFields( [
                         'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
                 ], [
                         'id' => $job->id
@@ -911,7 +921,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws Exception
      * @throws ReQueueException
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ConnectionException
      */
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 
