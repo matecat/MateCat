@@ -76,9 +76,11 @@ class ProjectCompletionStatusModel {
         if ( $record != false ) {
             $is_completed = true;
             $completed_at = Utils::api_timestamp( $record['create_date'] );
+            $event_id = $record['id_event'];
         } else {
             $is_completed = false;
             $completed_at = null;
+            $event_id = null;
         }
 
         return array(
@@ -86,7 +88,7 @@ class ProjectCompletionStatusModel {
                 'password' => $chunk->password,
                 'completed' => $is_completed,
                 'completed_at' => $completed_at,
-                'event_id' => $record['id_event']
+                'event_id' => $event_id
         );
     }
 

@@ -751,15 +751,15 @@ HD;
      *  $config = array(
      *    'total' => null,
      *    'qid' => null,
-     *    'queueInfo' => @var Context
-     *  )
-     * </pre>
-     *
-     * @param array $config
+     *    'queueInfo' => @param array $config
      *
      * @throws Exception
+     *@var Context
+          *  )
+     * </pre>
+     *
      */
-    protected function _setTotal( $config = [
+    protected function _setTotal( array $config = [
             'total'     => null,
             'pid'       => null,
             'queueInfo' => null

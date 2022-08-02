@@ -243,7 +243,7 @@ class Routes {
      * @throws Exception
      */
     public static function analyze( $params, $options = [] ) {
-        $params = \Utils::ensure_keys( $params,
+        $params = Utils::ensure_keys( $params,
                 [ 'project_name', 'id_project', 'password' ]
         );
 

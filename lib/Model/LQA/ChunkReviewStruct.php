@@ -44,7 +44,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
      */
     public function getReviewedPercentage() {
         return round( ($this->reviewed_words_count /
-        $this->getChunk()->totalWordsCount() *
+                ( empty( $this->getChunk()->totalWordsCount() ) ? 1 : $this->getChunk()->totalWordsCount() ) *
         100), 2 );
     }
 

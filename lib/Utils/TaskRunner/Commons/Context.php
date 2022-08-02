@@ -33,7 +33,7 @@ class Context {
      * List of numerical process IDs in my list
      * @var array
      */
-    public $pid_list     = array();
+    public $pid_list = [];
 
     /**
      * Number of the processes actually tied to that queue
@@ -54,14 +54,19 @@ class Context {
     public $loggerName = 'Executor.log';
 
     /**
+     * @var $redis_key
+     */
+    public $redis_key;
+
+    /**
      * AbstractContext constructor.
      *
      * @param array $queueElement
      */
-    protected function __construct( Array $queueElement ) {
+    protected function __construct( array $queueElement ) {
 
-        foreach( $queueElement as $key => $values ){
-                $this->$key = $values;
+        foreach ( $queueElement as $key => $values ) {
+            $this->$key = $values;
         }
 
     }
@@ -73,7 +78,7 @@ class Context {
      *
      * @return static
      */
-    public static function buildFromArray( Array $context ) {
+    public static function buildFromArray( array $context ) {
         return new static( $context );
     }
 

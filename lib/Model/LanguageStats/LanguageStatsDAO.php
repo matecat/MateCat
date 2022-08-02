@@ -291,7 +291,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct|LanguageStats_LanguageStatsStruct
      * @throws Exception
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
@@ -304,7 +304,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @return array
      * @throws Exception
      */
-    public static function sanitizeArray( $input ) {
+    public static function sanitizeArray( array $input ) {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 

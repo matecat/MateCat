@@ -314,14 +314,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
     /**
      * See parent definition
-     * @see DataAccess_AbstractDao::sanitize
      *
      * @param TmKeyManagement_MemoryKeyStruct $input
      *
-     * @return TmKeyManagement_MemoryKeyStruct
+     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct
      * @throws Exception
+     * @see DataAccess_AbstractDao::sanitize
+     *
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
@@ -333,7 +334,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function sanitizeArray( Array $input ) {
+    public static function sanitizeArray( array $input ) {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 
@@ -346,12 +347,12 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @return void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( TmKeyManagement_MemoryKeyStruct $obj ) {
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
 
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
          */
-        if ( is_null( $obj->uid ) || empty( $obj->uid ) ) {
+        if ( empty( $obj->uid ) ) {
             throw new Exception( "Invalid Uid" );
         }
 
@@ -363,18 +364,19 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
     /**
      * See in DataAccess_AbstractDao::validateNotNullFields
-     * @see DataAccess_AbstractDao::_validateNotNullFields
      *
-     * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param DataAccess_IDaoStruct $obj
      *
      * @return null
      * @throws Exception
+     * @see DataAccess_AbstractDao::_validateNotNullFields
+     *
      */
-    protected function _validateNotNullFields( TmKeyManagement_MemoryKeyStruct $obj ) {
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
          */
-        if ( is_null( $obj->uid ) || empty( $obj->uid ) ) {
+        if ( empty( $obj->uid ) ) {
             throw new Exception( "Uid cannot be null" );
         }
 

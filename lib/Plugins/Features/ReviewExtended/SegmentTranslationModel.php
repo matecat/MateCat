@@ -8,34 +8,30 @@
 
 namespace Features\ReviewExtended;
 
-use ChunkReviewTransition\ChunkReviewTransitionModel;
-use ChunkReviewTransition_ChunkReviewTransitionModel;
-use ChunkReviewTransition_UnitOfWork;
 use Chunks_ChunkStruct;
 use Constants;
-use Features\ISegmentTranslationModel;
+use Exception;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
-use Features\SecondPassReview\Model\SegmentTranslationEventDao;
-use Features\TranslationVersions\Model\SegmentTranslationEventStruct;
+use Features\SecondPassReview\Model\TranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEvent;
+use Features\TranslationVersions\Model\TranslationEventStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;
 use LQA\EntryWithCategoryStruct;
 use Routes;
-use SegmentTranslationChangeVector;
 use TransactionableTrait;
 use Users_UserDao;
-use Users_UserStruct;
 
 class SegmentTranslationModel implements ISegmentTranslationModel {
 
     use TransactionableTrait;
 
     /**
-     * @var SegmentTranslationChangeVector
+     * @var TranslationEvent
      */
-    protected $_model;
+    protected $_event;
 
     /**
      * @var Chunks_ChunkStruct
@@ -69,26 +65,26 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      */
     private $_finalRevisions;
 
-    public function __construct( SegmentTranslationChangeVector $model, array $chunkReviews ) {
-        $this->_model        = $model;
+    public function __construct( TranslationEvent $model, array $chunkReviews ) {
+        $this->_event        = $model;
         $this->_chunkReviews = $chunkReviews;
         $this->_chunk        = $model->getChunk();
         $this->_project      = $this->_chunk->getProject();
 
-        $this->_finalRevisions = ( new SegmentTranslationEventDao() )->getFinalRevisionsForSegment(
-                $this->_chunk->id, $this->_model->getSegmentStruct()->id
+        $this->_finalRevisions = ( new TranslationEventDao() )->getFinalRevisionsForSegment(
+                $this->_chunk->id, $this->_event->getSegmentStruct()->id
         );
 
-        $this->_sourcePagesWithFinalRevisions = array_map( function ( SegmentTranslationEventStruct $event ) {
+        $this->_sourcePagesWithFinalRevisions = array_map( function ( TranslationEventStruct $event ) {
             return $event->source_page;
         }, $this->_finalRevisions );
     }
 
     /**
-     * @return ChunkReviewTransitionModel
+     * @return ChunkReviewTranslationEventTransition
      * @throws \Exception
      */
-    public function getChunkReviewTransitionModel() {
+    public function evaluateAndGetChunkReviewTranslationEventTransition() {
 
         /**
          * here we decide how to move around revised_words and words for advancement.
@@ -110,12 +106,14 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
          *
          */
 
-        $chunkReviews          = [];
-        $unsetFinalRevision    = [];
-        $originSourcePage      = $this->_model->getEventModel()->getOriginSourcePage();
-        $destinationSourcePage = $this->_model->getEventModel()->getDestinationSourcePage();
+        $chunkReviews            = [];
+        $unsetFinalRevision      = [];
 
-        $reviewTransitionModel = new ChunkReviewTransitionModel( $this->_model );
+        // those 2 values are equals even if an ice is approved with no modifications for the first time ( no previous event )
+        $previousEventSourcePage = $this->_event->getPreviousEventSourcePage();
+        $currentEventSourcePage  = $this->_event->getCurrentEventSourcePage();
+
+        $segmentReviewTransitionModel = new ChunkReviewTranslationEventTransition( $this->_event );
 
         // populate structs for current segment and propagations
         for ( $i = 0; $i < count( $this->_chunkReviews ); $i++ ) {
@@ -128,105 +126,109 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             $chunkReview->password    = $this->_chunkReviews[ $i ]->password;
             $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
 
-            if ( $this->_model->isEnteringReviewedState() && $destinationSourcePage == $chunkReview->source_page ) {
+            // we are entering in reviewed state, and we are iterating on the destination chunk
+            if ( $this->_event->isEnteringReviewedState() && $currentEventSourcePage == $chunkReview->source_page ) {
                 // expect the first chunk review record to be the final
                 // add revised words and advancement
-                $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count;
-                $chunkReview->total_tte            += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
+                $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
+                $chunkReview->total_tte            += $this->_event->getCurrentEvent()->time_to_edit;
 
-                if ( $destinationSourcePage != $originSourcePage ) {
-                    $chunkReview->advancement_wc += $this->advancementWordCount();
+                if ( $currentEventSourcePage != $previousEventSourcePage ) {
+                    $chunkReview->advancement_wc += $this->getDeltaWordCount();
                 }
 
                 $chunkReviews[] = $chunkReview;
 
                 break;
-            } elseif ( $this->_model->isExitingReviewedState() ) {
+            } elseif ( $this->_event->isExitingReviewedState() ) {
                 // expect the direction to be downwards from R3 -> R2 -> R1 etc.
+                // here check if the iterating chunk has a final revision for the ice
+                // this means that the ICE already been in this chunk
                 if ( in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions ) ) {
-                    $chunkReview->reviewed_words_count -= $this->_model->getSegmentStruct()->raw_word_count;
+                    $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
                     $this->_addIssuesToDelete( $chunkReview->source_page );
                     $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
                     $unsetFinalRevision []       = $chunkReview->source_page;
                     $chunkReviews[]              = $chunkReview;
                 }
 
-                if ( $chunkReview->source_page == $originSourcePage ) {
-                    $chunkReview->advancement_wc -= $this->advancementWordCount();
+                if ( $chunkReview->source_page == $previousEventSourcePage ) {
+                    $chunkReview->advancement_wc -= $this->getDeltaWordCount();
                     $chunkReviews[]              = $chunkReview;
                 }
-            } // TODO: in the following two cases we should consider if the segment is changed or not.
-            elseif ( $this->_model->isBeingLowerReviewed() ) {
+
+            } elseif ( $this->_event->isBeingLowerReviewed() ) {
+
                 // whenever a revision is lower reviewed we expect the upper revisions to be invalidated.
                 // the reviewed words count is removed from the upper one and moved to the lower one.
-                if ( $originSourcePage == $chunkReview->source_page ) {
-                    $chunkReview->reviewed_words_count -= $this->_model->getSegmentStruct()->raw_word_count;
+                if ( $previousEventSourcePage == $chunkReview->source_page ) {
+                    $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
                     $this->_addIssuesToDelete( $chunkReview->source_page );
                     $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
-                    $chunkReview->advancement_wc -= $this->advancementWordCount();
+                    $chunkReview->advancement_wc -= $this->getDeltaWordCount();
                     $unsetFinalRevision[]        = $chunkReview->source_page;
                     $chunkReviews[]              = $chunkReview;
 
 
-                } elseif ( $destinationSourcePage == $chunkReview->source_page ) {
+                } elseif ( $currentEventSourcePage == $chunkReview->source_page ) {
+
                     // we reached the last record, destination record of the lower revision, add the count
-                    // TODO: evaluate the case in which the destination revision never received a revision before
                     // evaluate $sourcePagesWithFinalRevisions
                     if ( !in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions ) ) {
-                        $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count;
+                        $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
                     }
 
-                    $chunkReview->advancement_wc += $this->advancementWordCount();
-                    $chunkReview->total_tte      += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
+                    $chunkReview->advancement_wc += $this->getDeltaWordCount();
+                    $chunkReview->total_tte      += $this->_event->getCurrentEvent()->time_to_edit;
                     $chunkReviews[]              = $chunkReview;
 
                 } elseif ( in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions ) ) {
                     // this case fits any other intermediate chunkReview record
-                    $chunkReview->reviewed_words_count -= $this->_model->getSegmentStruct()->raw_word_count;
+                    $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
                     $this->_addIssuesToDelete( $chunkReview->source_page );
                     $chunkReview->penalty_points -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
                     $unsetFinalRevision[]        = $chunkReview->source_page;
                     $chunkReviews[]              = $chunkReview;
                 }
 
-            } elseif ( $this->_model->isBeingUpperReviewed() ) {
-                if ( $originSourcePage == $chunkReview->source_page ) {
-                    // TODO: decide wether or not to remove the revised words
+            } elseif ( $this->_event->isBeingUpperReviewed() ) {
+                if ( $previousEventSourcePage == $chunkReview->source_page ) {
+
                     // expect advancement to be assigned to the origin source_page
-                    $chunkReview->advancement_wc -= $this->advancementWordCount();
+                    $chunkReview->advancement_wc -= $this->getDeltaWordCount();
                     $chunkReviews[]              = $chunkReview;
 
-
-                } elseif ( $destinationSourcePage == $chunkReview->source_page ) {
+                } elseif ( $currentEventSourcePage == $chunkReview->source_page ) {
                     // we reached the last record, destination record of the lower revision, add the count
-                    $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count;
-                    $chunkReview->advancement_wc       += $this->advancementWordCount();
-                    $chunkReview->total_tte            += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
+                    $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
+                    $chunkReview->advancement_wc       += $this->getDeltaWordCount();
+                    $chunkReview->total_tte            += $this->_event->getCurrentEvent()->time_to_edit;
                     $chunkReviews[]                    = $chunkReview;
 
                 } elseif ( in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions ) ) {
                     // this case fits any other intermediate chunkReview record
                     // in case of upper revisions this case should never happen because latest state is always
-                    // the current revision state so it's not possible to move from R1 to R3 if an R2 is current
+                    // the current revision state, so it's not possible to move from R1 to R3 if an R2 is current
                     // state.
-                    false;
+                    usleep( 10 ); // for debugging purposes
                 }
+
             } elseif (
-                    $this->_model->isModifyingICEFromTranslation() &&
-                    $this->_model->getEventModel()->getDestinationSourcePage() == Constants::SOURCE_PAGE_TRANSLATE
+                    $this->_event->isModifyingICEFromTranslationForTheFirstTime() &&
+                    $this->_event->getCurrentEventSourcePage() == Constants::SOURCE_PAGE_TRANSLATE
             ) {
                 /**
                  * Enter this condition when we are just changing source page. This change only affects advancement wc.
                  * This is the case of ICE matches moving from R1 to TR.
                  */
-                $chunkReview->advancement_wc -= $this->advancementWordCount();
+                $chunkReview->advancement_wc -= $this->getDeltaWordCount();
                 $chunkReviews[]              = $chunkReview;
 
-            } elseif ( $this->_model->isEditingCurrentRevision() && $destinationSourcePage == $chunkReview->source_page ) {
-                $chunkReview->total_tte += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
+            } elseif ( $this->_event->isEditingCurrentRevision() && $currentEventSourcePage == $chunkReview->source_page ) {
+                $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
 
-                if ( $this->_model->isModifyingICEFromRevisionOne() ) {
-                    $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count;
+                if ( $this->_event->isModifyingICEFromRevisionOne() ) {
+                    $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
                 }
 
                 $chunkReviews[] = $chunkReview;
@@ -234,25 +236,25 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         foreach ( $chunkReviews as $chunkReview ) {
-            $reviewTransitionModel->addChunkReview( $chunkReview );
+            $segmentReviewTransitionModel->addChunkReview( $chunkReview );
         }
 
         foreach ( $this->_issuesDeletionList as $issuesToDelete ) {
             foreach ( $issuesToDelete as $issueToDelete ) {
-                $reviewTransitionModel->addIssueToDelete( $issueToDelete );
+                $segmentReviewTransitionModel->addIssueToDelete( $issueToDelete );
             }
         }
 
-        $reviewTransitionModel->setUnsetFinalRevision( $unsetFinalRevision );
+        $segmentReviewTransitionModel->unsetFinalRevision( $unsetFinalRevision );
 
-        return $reviewTransitionModel;
+        return $segmentReviewTransitionModel;
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendNotificationEmail() {
-        if ( $this->_model->getEventModel()->isPropagationSource() && $this->_model->isBeingLowerReviewedOrTranslated() ) {
+        if ( $this->_event->isPropagationSource() && $this->_event->isBeingLowerReviewedOrTranslated() ) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ( $this->_chunkReviews as $chunkReview ) {
                 if ( in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions ) ) {
@@ -268,7 +270,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @param $source_page
      */
     protected function _addIssuesToDelete( $source_page ) {
-        $issue = EntryDao::findByIdSegmentAndSourcePage( $this->_model->getSegmentStruct()->id, $this->_chunk->id, $source_page );
+        $issue = EntryDao::findByIdSegmentAndSourcePage( $this->_event->getSegmentStruct()->id, $this->_chunk->id, $source_page );
 
         if ( $issue ) {
             $this->_issuesDeletionList[ $source_page ] = $issue;
@@ -288,14 +290,14 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      */
     protected function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
         $emails                   = [];
-        $userWhoChangedTheSegment = $this->_model->getEventUser();
-        $revision                 = $chunkReviewsWithFinalRevisions[ $this->_model->getEventModel()->getOriginSourcePage() ];
+        $userWhoChangedTheSegment = $this->_event->getEventUser();
+        $revision                 = $chunkReviewsWithFinalRevisions[ $this->_event->getPreviousEventSourcePage() ];
 
         $serialized_issues = [];
-        if( isset( $this->_issuesDeletionList[ $this->_model->getEventModel()->getOriginSourcePage() ] ) ){
+        if ( isset( $this->_issuesDeletionList[ $this->_event->getPreviousEventSourcePage() ] ) ) {
 
             /** @var EntryWithCategoryStruct $issue */
-            foreach ( $this->_issuesDeletionList[ $this->_model->getEventModel()->getOriginSourcePage() ] as $k => $issue ) {
+            foreach ( $this->_issuesDeletionList[ $this->_event->getPreviousEventSourcePage() ] as $k => $issue ) {
                 $serialized               = $issue->toArray();
                 $serialized[ 'comments' ] = [];
 
@@ -310,14 +312,14 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         $segmentInfo = [
-                'segment_source'  => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getSegmentStruct()->segment ),
-                'old_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getEventModel()->getOldTranslation()->translation ),
-                'new_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getEventModel()->getTranslation()->translation ),
+                'segment_source'  => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
+                'old_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
+                'new_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
                 'issues'          => $serialized_issues
         ];
 
         foreach ( $finalRevisions as $finalRevision ) {
-            if ( $finalRevision->source_page != $this->_model->getEventModel()->getOriginSourcePage() ) {
+            if ( $finalRevision->source_page != $this->_event->getPreviousEventSourcePage() ) {
                 continue;
             }
 
@@ -350,7 +352,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $url    = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
                 $this->_chunk->source, $this->_chunk->target, [
                         'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),
-                        'id_segment'      => $this->_model->getSegmentStruct()->id
+                        'id_segment'      => $this->_event->getSegmentStruct()->id
                 ] );
 
 
@@ -366,12 +368,15 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
     }
 
-    protected function advancementWordCount() {
-        if ( $this->_model->getEventModel()->getOldTranslation()->isICE() || $this->_model->getEventModel()->getOldTranslation()->isPreTranslated() ) {
-            return $this->_model->getSegmentStruct()->raw_word_count;
+    /**
+     * @throws Exception
+     */
+    protected function getDeltaWordCount() {
+        if ( $this->_event->getOldTranslation()->isICE() || $this->_event->getOldTranslation()->isPreTranslated() ) {
+            return $this->_event->getSegmentStruct()->raw_word_count;
         }
 
-        return $this->_model->getOldTranslation()->eq_word_count;
+        return $this->_event->getOldTranslation()->eq_word_count;
     }
 
     /**
@@ -399,7 +404,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @throws \Exception
      */
     protected function updateFinalRevisionFlag( $unsetFinalRevision ) {
-        $eventStruct = $this->_model->getEventModel()->getCurrentEvent();
+        $eventStruct = $this->_event->getCurrentEvent();
         $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
 
         if ( $is_revision ) {
@@ -407,13 +412,13 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         if ( !empty( $unsetFinalRevision ) ) {
-            ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
-                    $this->_chunk->id, [ $this->_model->getSegmentStruct()->id ], $unsetFinalRevision
+            ( new TranslationEventDao() )->unsetFinalRevisionFlag(
+                    $this->_chunk->id, [ $this->_event->getSegmentStruct()->id ], $unsetFinalRevision
             );
         }
 
         $eventStruct->final_revision = $is_revision;
-        SegmentTranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
+        TranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
     }
 
 }

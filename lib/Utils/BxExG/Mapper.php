@@ -2,6 +2,10 @@
 
 namespace BxExG;
 
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+
 class Mapper {
 
     /**
@@ -15,36 +19,40 @@ class Mapper {
 
         $map = [];
 
-        $dom = new \DOMDocument;
-        libxml_use_internal_errors( true );
+        if ( !empty( $string ) ) {
 
-        @$dom->loadHTML( $string );
-        $html = $dom->getElementsByTagName( 'body' );
+            $dom = new DOMDocument;
+            libxml_use_internal_errors( true );
 
-        for ( $i = 0; $i < $html->length; $i++ ) {
+            @$dom->loadHTML( $string );
+            $html = $dom->getElementsByTagName( 'body' );
 
-            /** @var \DOMElement $node */
-            $node = $html->item( $i );
+            for ( $i = 0; $i < $html->length; $i++ ) {
 
-            for ( $k = 0; $k < $node->childNodes->length; $k++ ) {
+                /** @var DOMElement $node */
+                $node = $html->item( $i );
 
-                $childNode = $node->childNodes->item( $k );
+                for ( $k = 0; $k < $node->childNodes->length; $k++ ) {
 
-                // if the tag is wrapper in <p> a further loop is needed
-                if ( $childNode->nodeName === 'p' ) {
-                    for ( $a = 0; $a < $childNode->childNodes->length; $a++ ) {
-                        $element = self::appendBxExGTagMapElement( $childNode->childNodes->item( $a ) );
+                    $childNode = $node->childNodes->item( $k );
+
+                    // if the tag is wrapper in <p> a further loop is needed
+                    if ( $childNode->nodeName === 'p' ) {
+                        for ( $a = 0; $a < $childNode->childNodes->length; $a++ ) {
+                            $element = self::appendBxExGTagMapElement( $childNode->childNodes->item( $a ) );
+                            if ( $element->name ) {
+                                $map[] = $element;
+                            }
+                        }
+                    } else {
+                        $element = self::appendBxExGTagMapElement( $childNode );
                         if ( $element->name ) {
                             $map[] = $element;
                         }
                     }
-                } else {
-                    $element = self::appendBxExGTagMapElement( $childNode );
-                    if ( $element->name ) {
-                        $map[] = $element;
-                    }
                 }
             }
+
         }
 
         return $map;
@@ -55,7 +63,7 @@ class Mapper {
      *
      * @return Element
      */
-    private static function appendBxExGTagMapElement( \DOMNode $node ) {
+    private static function appendBxExGTagMapElement( DOMNode $node ) {
 
         $element  = new Element();
         $nodeName = $node->nodeName;

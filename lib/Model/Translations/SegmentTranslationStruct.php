@@ -1,7 +1,6 @@
 <?php
 
 use DataAccess\ArrayAccessTrait;
-use Translations_SegmentTranslationValidator;
 
 class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
 
@@ -37,6 +36,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     }
 
     public function isICE() {
+        // in some cases ICEs are not locked ( translations from bilingual xliff ). Only consider locked ICEs
         return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
     }
 
@@ -65,6 +65,9 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
         } );
     }
 
+    /**
+     * @return Jobs_JobStruct[]|null
+     */
     public function getChunk() {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
             return Jobs_JobDao::getById( $id_job )[ 0 ];
