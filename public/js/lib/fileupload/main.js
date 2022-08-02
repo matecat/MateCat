@@ -836,7 +836,8 @@ var isTMXAllowed = function () {
 }
 
 var enableAnalyze = function () {
-    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' ).focus();
+    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' );
+    if(document.activeElement.nodeName.toLowerCase() !== 'input') $( '.uploadbtn' ).focus();
 }
 
 var disableAnalyze = function () {
