@@ -4,6 +4,7 @@ import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 window.APP = null
 
@@ -279,7 +280,7 @@ window.APP = {
       window.googleDriveWindows = {}
     }
 
-    if (UI.isSafari) {
+    if (CommonUtils.isSafari) {
       var windowReference = window.open()
     }
     var driveUpdateDone = function (data) {
@@ -305,7 +306,7 @@ window.APP = {
 
       $.each(data.urls, function (index, item) {
         winName = 'window' + item.localId
-        if (UI.isSafari) {
+        if (CommonUtils.isSafari) {
           windowReference.location = item.alternateLink
         } else if (
           window.googleDriveWindows[winName] &&
