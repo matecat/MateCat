@@ -81,12 +81,14 @@ class BulkSelectionBar extends React.Component {
       SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
         () => {
           this.onClickBack()
+          SegmentActions.reloadSegments()
           CatToolActions.reloadQualityReport()
         },
       )
     } else {
       SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
         () => {
+          SegmentActions.reloadSegments()
           this.onClickBack()
         },
       )
