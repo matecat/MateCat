@@ -138,22 +138,28 @@ class MetadataDao extends \DataAccess_AbstractDao {
         $bind_values   = [];
 
         foreach ($metadata as $key => $value){
-            $sql .= "(?,?,?,?,?)";
+            if($value !== null and $value !== ''){
+                $sql .= "(?,?,?,?,?)";
 
-            if($value !== end($metadata)){
-                $sql .= ',';
+                if($value !== end($metadata)){
+                    $sql .= ',';
+                }
+
+                $bind_values[] = $id_project;
+                $bind_values[] = $id_file;
+                $bind_values[] = $key;
+                $bind_values[] = $value;
+                $bind_values[] = $filePartsId;
             }
-
-            $bind_values[] = $id_project;
-            $bind_values[] = $id_file;
-            $bind_values[] = $key;
-            $bind_values[] = $value;
-            $bind_values[] = $filePartsId;
         }
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        if(!empty($bind_values)){
+            $conn = Database::obtain()->getConnection();
+            $stmt = $conn->prepare( $sql );
 
-        return $stmt->execute( $bind_values );
+            \Log::doJsonLog('PIPPO ---> '. $sql);
+
+            return $stmt->execute( $bind_values );
+        }
     }
 }
