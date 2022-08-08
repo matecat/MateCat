@@ -1,22 +1,23 @@
 <?php
 
-namespace Features\TranslationVersions;
+namespace Features\TranslationVersions\Handlers;
 
 use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use Features;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
+use Features\TranslationVersions\VersionHandlerInterface;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 
 /**
- * Class SegmentTranslationVersionHandler
+ * Class TranslationVersionsHandler
  *
  */
-class SegmentTranslationVersionHandler implements VersionHandlerInterface {
+class TranslationVersionsHandler implements VersionHandlerInterface {
 
     /**
      * @var TranslationVersionDao
@@ -44,7 +45,7 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
     private $uid;
 
     /**
-     * SegmentTranslationVersionHandler constructor.
+     * TranslationVersionsHandler constructor.
      *
      * @param Chunks_ChunkStruct     $chunkStruct
      * @param                        $id_segment

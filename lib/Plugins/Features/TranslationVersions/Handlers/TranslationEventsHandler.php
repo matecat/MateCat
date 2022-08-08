@@ -6,18 +6,19 @@
  * Time: 16:29
  */
 
-namespace Features\TranslationVersions\Model;
+namespace Features\TranslationVersions\Handlers;
 
 use Chunks_ChunkStruct;
+use Features\TranslationVersions\Model\TranslationEvent;
 use FeatureSet;
 use TransactionableTrait;
 
-class BatchEventCreator {
+class TranslationEventsHandler {
 
     use TransactionableTrait;
 
     /**
-     * @var SegmentTranslationEventModel[]
+     * @var TranslationEvent[]
      */
     protected $_events = [];
 
@@ -35,7 +36,7 @@ class BatchEventCreator {
     protected $_project;
 
     /**
-     * BatchEventCreator constructor.
+     * TranslationEventsHandler constructor.
      *
      * @param Chunks_ChunkStruct $chunkStruct
      */
@@ -44,17 +45,17 @@ class BatchEventCreator {
     }
 
     /**
-     * @return SegmentTranslationEventModel[]
+     * @return TranslationEvent[]
      */
     public function getEvents() {
         return $this->_events;
     }
 
     /**
-     * @return SegmentTranslationEventModel[]
+     * @return TranslationEvent[]
      */
     public function getPersistedEvents() {
-        return array_filter( $this->_events, function ( SegmentTranslationEventModel $event ) {
+        return array_filter( $this->_events, function ( TranslationEvent $event ) {
             return $event->isPersisted();
         } );
     }
@@ -67,9 +68,9 @@ class BatchEventCreator {
     }
 
     /**
-     * @param SegmentTranslationEventModel $eventModel
+     * @param TranslationEvent $eventModel
      */
-    public function addEventModel( SegmentTranslationEventModel $eventModel ) {
+    public function addEvent( TranslationEvent $eventModel ) {
         $this->_events[] = $eventModel;
     }
 
@@ -103,7 +104,7 @@ class BatchEventCreator {
             $event->save();
         }
 
-        $this->_featureSet->run( 'batchEventCreationSaved', $this );
+        $this->_featureSet->run( 'translationVersionSaved', $this );
         $this->commitTransaction();
     }
 

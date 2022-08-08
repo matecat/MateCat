@@ -7,12 +7,13 @@
  *
  */
 
-namespace Features\TranslationVersions;
+namespace Features\TranslationVersions\Handlers;
 
 
+use Features\TranslationVersions\VersionHandlerInterface;
 use Translations_SegmentTranslationStruct;
 
-class EmptySegmentTranslationVersionHandler implements VersionHandlerInterface {
+class DummyTranslationVersionHandler implements VersionHandlerInterface {
 
     /**
      * @param Translations_SegmentTranslationStruct $propagation

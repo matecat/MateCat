@@ -7,8 +7,8 @@
  */
 
 
-namespace Features;
+namespace Features\ReviewExtended;
 
 interface ISegmentTranslationModel {
-    public function getChunkReviewTransitionModel();
+    public function evaluateAndGetChunkReviewTranslationEventTransition();
 }

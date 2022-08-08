@@ -516,7 +516,7 @@ class Utils {
                 self::deleteDir( $fileInfo->getPathname() );
             } else {
                 $fileName = $fileInfo->getFilename();
-                if ( $fileName{0} == '.' ) {
+                if ( $fileName[0] == '.' ) {
                     continue;
                 }
                 $outcome = unlink( $fileInfo->getPathname() );

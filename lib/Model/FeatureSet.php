@@ -511,6 +511,9 @@ class FeatureSet implements FeatureSetInterface
         $this->merge( $features );
     }
 
+    /**
+     * @return array
+     */
     private function __getAutoloadPlugins() {
         $features = [];
 

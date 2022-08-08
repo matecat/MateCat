@@ -1,4 +1,7 @@
 <?php
+
+use Email\AbstractEmail;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,7 +11,7 @@
  */
 
 
-class TmKeyManagement_ShareKeyEmail extends \Email\AbstractEmail {
+class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
 
     protected $userMail = [];
 
@@ -58,7 +61,7 @@ class TmKeyManagement_ShareKeyEmail extends \Email\AbstractEmail {
         return $params ;
     }
 
-    protected function _getLayoutVariables() {
+    protected function _getLayoutVariables($messageBody = null) {
         $vars = parent::_getLayoutVariables();
         $vars['showTitle'] = TRUE ;
         $vars['title'] = "MateCat - Resource shared" ;
