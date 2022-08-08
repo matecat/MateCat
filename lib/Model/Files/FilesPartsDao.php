@@ -115,4 +115,20 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id' => $id ] )[ 0 ];
     }
+
+    /**
+     * @param     $fileId
+     * @param int $ttl
+     *
+     * @return \DataAccess_IDaoStruct[]
+     */
+    public function getByFileId($fileId, $ttl = 86400)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $sql     = "SELECT * FROM files_parts  WHERE id_file = :fileId ";
+        $stmt    = $conn->prepare( $sql );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'fileId' => $fileId ] );
+    }
 }
