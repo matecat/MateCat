@@ -42,6 +42,7 @@ class FilesInfoUtility {
 
         $fileInfo    = \Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
         $fileMetadataDao = new Files_MetadataDao();
+        $filePartsDao = new FilesPartsDao();
 
         // Show metadata
         if($showMetadata){
@@ -78,7 +79,16 @@ class FilesInfoUtility {
                 }
 
                 if(!isset($metadata['files_parts'])){
+
                     $metadata['files_parts'] = [];
+
+                    $fileParts = $filePartsDao->getByFileId($file->id_file);
+
+                    foreach ($fileParts as $filePart){
+                        $metadata['files_parts'][] = [
+                            'id' => (int)$filePart->id
+                        ];
+                    }
                 }
 
                 if(!isset($metadata['instructions'])){
