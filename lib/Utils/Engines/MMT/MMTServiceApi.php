@@ -14,7 +14,7 @@ use MultiCurlHandler;
 
 class MMTServiceApi {
 
-    const DEFAULT_BASE_URL = 'https://api.modernmt.eu';
+    const DEFAULT_BASE_URL = 'https://api.modernmt.com';
 
     private $baseUrl;
     private $license;
