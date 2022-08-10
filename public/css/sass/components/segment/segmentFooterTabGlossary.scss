@@ -1,0 +1,86 @@
+@import '../../commons/colors';
+.tab.glossary {
+  .glossary_search {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding: 24px 32px;
+    border-bottom: 1px solid $grey3;
+  }
+
+  .glossary_search-source {
+    display: flex;
+    width: 50%;
+  }
+  .glossary_search-target {
+    width: 50%;
+    display: flex;
+    justify-content: space-between;
+  }
+  input.glossary_search-input {
+    border: 1px solid #aebdcd;
+    border-radius: 2px;
+    padding: 4px 8px;
+    width: 400px;
+    outline: none;
+    font-size: 16px;
+    &:focus,
+    &:focus-visible {
+      border-color: $linkBlueTransparent;
+    }
+  }
+  .glossary__button-add {
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 16px;
+    line-height: 20px;
+    background: $translatedBlue;
+    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+    background: linear-gradient(top, $translatedBlue, #119ec4);
+    user-select: none;
+    border: none;
+    white-space: nowrap;
+    &:hover {
+      background-color: $translatedBlueHover;
+    }
+  }
+  .glossary_items {
+    padding: 24px 32px;
+    .glossary_item {
+      &:nth-child(even) {
+        background: $grey5;
+      }
+      .glossary_item-header {
+        display: flex;
+      }
+      .glossary_badge {
+        color: #666666;
+        font-size: 12px;
+        line-height: 11px;
+        border: 1px solid #666666;
+        border-radius: 12px;
+        padding: 4px;
+        overflow: hidden;
+        margin-right: 8px;
+      }
+
+      .glossary_definition-container {
+        display: flex;
+        width: 100%;
+        background: $grey4;
+        border-radius: 4px;
+        padding: 8px;
+        align-items: center;
+      }
+
+      .glossary_definition {
+        margin-right: auto;
+        margin-left: 8px;
+        font-style: italic;
+      }
+    }
+  }
+}

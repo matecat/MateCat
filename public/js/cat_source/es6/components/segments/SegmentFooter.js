@@ -7,7 +7,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
 import SegmentTabConcordance from './SegmentFooterTabConcordance'
-import SegmentTabGlossary from './SegmentFooterTabGlossary'
+import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
@@ -354,11 +354,10 @@ function SegmentFooter({sid, segment}) {
         )
       case 'gl':
         return (
-          <SegmentTabGlossary
+          <SegmentFooterTabGlossary
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
-            tab_class={tab.tabClass}
             id_segment={sid}
             segment={segment}
           />
