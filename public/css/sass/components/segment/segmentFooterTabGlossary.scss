@@ -18,7 +18,7 @@
     justify-content: space-between;
   }
   input.glossary_search-input {
-    border: 1px solid #aebdcd;
+    border: 1px solid $grey2;
     border-radius: 2px;
     padding: 4px 8px;
     width: 400px;
@@ -57,10 +57,10 @@
         display: flex;
       }
       .glossary_badge {
-        color: #666666;
+        color: $grey6;
         font-size: 12px;
         line-height: 11px;
-        border: 1px solid #666666;
+        border: 1px solid $grey6;
         border-radius: 12px;
         padding: 4px;
         overflow: hidden;
@@ -80,6 +80,35 @@
         margin-right: auto;
         margin-left: 8px;
         font-style: italic;
+      }
+      .glossary_source {
+        color: $grey6;
+        font-size: 12px;
+      }
+      .glossary_item-actions {
+        width: 39px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-left: 16px;
+        span {
+          color: $grey7;
+          cursor: pointer;
+          &:hover {
+            color: $grey6;
+          }
+        }
+      }
+      .glossary_item-body {
+        display: flex;
+        padding: 16px 0;
+      }
+
+      .glossary-item_column {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   }
