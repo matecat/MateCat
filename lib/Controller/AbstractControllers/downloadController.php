@@ -109,16 +109,19 @@ abstract class downloadController extends controller {
     protected function unlockToken( $tokenContent = null ) {
 
         if ( isset( $this->downloadToken ) && !empty( $this->downloadToken ) ) {
-            setcookie(
-                    $this->downloadToken,
+            CookieManager::setCookie( $this->downloadToken,
                     ( empty( $tokenContent ) ? json_encode( [
                             "code"    => 0,
                             "message" => "Download complete."
                     ] ) : json_encode( $tokenContent ) ),
-                    time() + 600            // expires in 5 minutes
-                    , '/; samesite=None',
-                    \INIT::$COOKIE_DOMAIN,
-                    true
+                    [
+                            'expires'  => time() + 600,
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => false,
+                            'samesite' => 'None',
+                    ]
             );
             $this->downloadToken = null;
         }

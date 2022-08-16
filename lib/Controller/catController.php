@@ -144,11 +144,13 @@ class catController extends viewController {
 
         if ( $lastUpdate < $oneMonthAgo && !$this->job_cancelled ) {
 
-            $lastTranslationInJob = new Datetime( ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->jid )->translation_date );
-
-            if ( $lastTranslationInJob < $oneMonthAgo ) {
-                Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
-                $this->job_archived = true;
+            $lastTranslationDate = ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->chunk );
+            if( !empty( $lastTranslationDate ) ){
+                $lastTranslationInJob = new Datetime( $lastTranslationDate->translation_date );
+                if ( $lastTranslationInJob < $oneMonthAgo ) {
+                    Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
+                    $this->job_archived = true;
+                }
             }
 
         }
@@ -173,32 +175,6 @@ class catController extends viewController {
 
         $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
         $this->template->user_keys = $userKeys->getKeys( $this->chunk->tm_keys ) ;
-
-        /**
-         * Retrieve information about job errors
-         * ( Note: these information are fed by the revision process )
-         * @see setRevisionController
-         */
-
-        $reviseClass = new Constants_Revise;
-
-        $jobQA = new Revise_JobQA(
-                $this->jid,
-                $this->password,
-                $this->wStruct->getTotal(),
-                $reviseClass
-        );
-
-        list( $jobQA, $reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $this->jid, $this->password, $this->wStruct->getTotal() );
-
-
-        $jobQA->retrieveJobErrorTotals();
-
-        $this->qa_data = json_encode( $jobQA->getQaData() );
-
-        $jobVote = $jobQA->evalJobVote();
-        $this->qa_overall = $jobVote[ 'minText' ];
-
 
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
 
@@ -503,8 +479,18 @@ class catController extends viewController {
         return $this->review_password ;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword(){
-        return $this->password;
+        return ($this->chunk !== null) ? $this->chunk->password : $this->password;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isJobSplitted(){
+        return ($this->chunk !== null) ? $this->chunk->isSplitted() : false;
     }
 
     /**
