@@ -808,6 +808,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             'status',
                             'translation_date',
                             'autopropagated_from',
+                            'serialized_errors_list',
                             'warning',
                         ];
 
