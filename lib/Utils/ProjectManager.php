@@ -1825,6 +1825,7 @@ class ProjectManager {
 
         $xliffParser = new XliffParser();
 
+        // declare default version
         $xliffVersion = 1;
         try {
             $xliff        = $xliffParser->xliffToArray( $xliff_file_content );
