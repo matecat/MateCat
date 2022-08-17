@@ -11,10 +11,15 @@ import SegmentActions from './cat_source/es6/actions/SegmentActions'
       var speech2textCheck = $('.s2t-box #s2t_check')
       var tagProjectionCheck = $('.tagp #tagp_check')
       var dqfCheck = $('.dqf-box #dqf_switch')
+      var segmentationRule =
+        config.segmentation_rule === '' ||
+        config.segmentation_rule === 'standard'
+          ? ''
+          : config.segmentation_rule
 
       $('.mgmt-table-options .options-box.dqf_options_box').hide()
       $('.mgmt-table-options .options-box.seg_rule select#segm_rule')
-        .val(config.segmentation_rule)
+        .val(segmentationRule)
         .attr('disabled', true)
       $('.mgmt-table-options .options-box.seg_rule').on('click', function () {
         ModalsActions.showModalComponent(
