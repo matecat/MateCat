@@ -6,8 +6,6 @@ use API\V2\Validators\LoginValidator;
 use CatUtils;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
 
@@ -45,8 +43,11 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
         }
 
         $userKeys = new UserKeysModel($this->user, $userRole ) ;
+        $keys = $userKeys->getKeys( $chunk->tm_keys );
 
-        $this->response->json( $userKeys->getKeys( $chunk->tm_keys ) );
+        $this->response->json( [
+            'tm_keys' => $keys['job_keys']
+        ] );
     }
 
     /**
@@ -57,34 +58,5 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
      */
     private function isJobRevision($idJob, $password) {
         return CatUtils::getIsRevisionFromIdJobAndPassword( $idJob, $password );
-    }
-
-    /**
-     * Return all the keys of the user
-     */
-    public function getByUser(){
-
-        try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( \Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->user->uid ) );
-            $keyList = $_keyDao->read( $dh );
-
-            $list = [];
-            foreach ($keyList as $key){
-                $list[] = $key->tm_key;
-            }
-
-            $this->response->json( $list );
-            exit();
-
-        } catch (\Exception $exception){
-            $this->response->status()->setCode( 500 );
-            $this->response->json( [
-                    'errors' => [
-                            $exception->getMessage()
-                    ]
-            ] );
-            exit();
-        }
     }
 }
