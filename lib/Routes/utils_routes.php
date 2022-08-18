@@ -77,3 +77,8 @@ $klein->with( '/api/app/api-key', function () {
     route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
     route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
 } );
+
+$klein->with( '/api/app/tm-key', function () {
+    route( '', 'GET', '\API\App\TmKeyManagementController', 'getByUser' );
+    route( '/[:id_job]/[:password]', 'GET', '\API\App\TmKeyManagementController', 'getByJob' );
+} );
