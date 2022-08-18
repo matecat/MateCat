@@ -490,6 +490,7 @@ class Mmt extends BaseFeature {
             $newEngineStruct->type                                   = Constants_Engines::MT;
             $newEngineStruct->extra_parameters[ 'MMT-License' ]      = $data->engineData[ 'secret' ];
             $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ] = $data->engineData[ 'pretranslate' ];
+            $newEngineStruct->extra_parameters[ 'MMT-preimport' ]    = $data->engineData[ 'preimport' ];
 
             return $newEngineStruct;
         }

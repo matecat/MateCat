@@ -61,9 +61,16 @@
 
                 <br class="clear" />
             </div>
-            <div class="provider-field">
+            <div class="provider-field checkbox first">
+                <input class="required" data-field-name="preimport" type="checkbox" />
+                <label class="checkbox-label">Enable pre-import of TMs </label>
+                <span class="info-icon tooltip-preimport"/>
+                <br class="clear" />
+            </div>
+            <div class="provider-field checkbox">
                 <input class="required" data-field-name="pretranslate" type="checkbox" />
-                <label class="checkbox-label">Enable pre-translation (additional fees may apply)</label>
+                <label class="checkbox-label">Enable pre-translation</label>
+                <span class="info-icon tooltip-pretranslate"/>
                 <br class="clear" />
             </div>
             <div class="mt-error-key">Error message</div>
@@ -71,8 +78,15 @@
     </template>
     <template id="mt-provider-mmt-msg">
         <p><strong>ModernMT</strong> is the first machine translation system that adapts to the context of the document and to your translation style, learning from your corrections for unprecedented quality output and maximum data confidentiality.</p>
-        <p><strong>$25 / month</strong>, unlimited personal use. Monthly billing.</p>
-        <a href="https://www.modernmt.com/license/buy" class="continuebtn btn-ok" target="_blank">Buy Online</a>
+        <strong>Professional plan for translators:</strong>
+        <ul>
+            <li>1-month free trial</li>
+            <li>$25 per month</li>
+            <li>Use-based billing: if you don't use ModernMT during a month, no charge is made</li>
+            <li>Unlimited personal use</li>
+        </ul>
+
+        <a href="https://www.modernmt.com/license/buy/?plan=professional" class="continuebtn btn-ok" target="_blank">Buy Online</a>
     </template>
     <!-- fine blocco mmt -->
 </div>
@@ -164,7 +178,7 @@
                     font-weight: bold !important; } \
                     .cancel-button { background-color: #f26522 !important; }';
             document.getElementById("tildemt").shadowRoot.appendChild( style );
-            
+
             var tildemtConfig = {};
             document.getElementById("tildemt").addEventListener("save", function(details){
                 //console.log(details.detail);

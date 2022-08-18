@@ -1595,6 +1595,33 @@ div.mgmt-container {
   padding-bottom: 150px;
   text-align: left;
   min-height: 400px;
+  .insert-tm {
+    ul {
+      list-style: circle;
+      padding-left: 25px;
+      padding-top: 6px;
+    }
+    .provider-field.checkbox .checkbox-label {
+      margin-top: 4px;
+    }
+    .info-icon {
+      background: url(../../img/info.png);
+      background-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-left: 4px;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+    .provider-field.checkbox {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .provider-field.checkbox.first {
+      margin-top: 10px;
+    }
+  }
 }
 
 .mgmt-tm .priority {
@@ -2348,13 +2375,13 @@ input.email-export-tmx {
 
 /*******************/
 td.download-glossary-container .uploadloader {
-  top: -18px;
+  top: 13px;
   right: 85px;
 }
 
 .download-tmx-container .uploadloader {
   right: 200px;
-  top: -18px;
+  top: 13px;
 }
 
 .export-tmx-button.disabled {

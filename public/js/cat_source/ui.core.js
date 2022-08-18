@@ -1,25 +1,17 @@
 import _ from 'lodash'
-import React, {useEffect} from 'react'
 import Cookies from 'js-cookie'
-import {createRoot} from 'react-dom/client'
-
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
-import {getLocalWarnings} from './es6/api/getLocalWarnings'
-import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
-import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
 import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
@@ -175,206 +167,6 @@ window.UI = {
       return $(segment).attr('id').replace('segment-', '')
     } catch (e) {
       return false
-    }
-  },
-
-  getSegmentFileId: function (segment) {
-    if (typeof segment == 'undefined') return false
-    try {
-      segment = segment.closest('section')
-      return $(segment).attr('data-fid')
-    } catch (e) {
-      return false
-    }
-  },
-
-  getMoreSegments: function (where) {
-    if (where == 'after' && this.noMoreSegmentsAfter) {
-      return
-    }
-    if (where == 'before' && this.noMoreSegmentsBefore) {
-      return
-    }
-    if (this.loadingMore) {
-      return
-    }
-
-    console.log('Get more segments: ', where)
-
-    this.loadingMore = true
-
-    var segId =
-      where === 'after'
-        ? SegmentStore.getLastSegmentId()
-        : where === 'before'
-        ? SegmentStore.getFirstSegmentId()
-        : ''
-
-    if (where == 'before') {
-      $('section').each(function () {
-        if ($(this).offset().top > $(window).scrollTop()) {
-          UI.segMoving = UI.getSegmentId($(this))
-          return false
-        }
-      })
-    }
-
-    if (where == 'before') {
-      $('#outer').addClass('loadingBefore')
-    } else if (where == 'after') {
-      $('#outer').addClass('loadingAfter')
-    }
-
-    getSegments({
-      jid: config.id_job,
-      password: config.password,
-      step: UI.moreSegNum,
-      segment: segId,
-      where: where,
-    })
-      .then((data) => {
-        $(document).trigger('segments:load', data.data)
-        UI.getMoreSegments_success(data)
-      })
-      .catch((errors) => {
-        if (errors.length) this.processErrors(errors, 'getMoreSegments')
-        OfflineUtils.failedConnection(where, 'getMoreSegments')
-      })
-  },
-  getMoreSegments_success: function (d) {
-    var where = d.data.where
-    if (d.data.files && _.size(d.data.files)) {
-      this.renderFiles(d.data.files, where, false)
-
-      $(window).trigger('segmentsAdded', {resp: d.data.files})
-    }
-
-    if (Object.keys(d.data.files).length === 0 && where === 'before')
-      this.noMoreSegmentsBefore = true
-    if (
-      Object.keys(d.data.files).length === 0 &&
-      SegmentStore.getLastSegmentId() === config.last_job_segment &&
-      where === 'after'
-    )
-      this.noMoreSegmentsAfter = true
-
-    $('#outer').removeClass('loading loadingBefore loadingAfter')
-    this.loadingMore = false
-  },
-
-  getSegments: function (options) {
-    var where = this.startSegmentId ? 'center' : 'after'
-    $('#outer').addClass('loading')
-    var seg = options.segmentToOpen
-      ? options.segmentToOpen
-      : this.startSegmentId
-
-    return getSegments({
-      jid: config.id_job,
-      password: config.password,
-      step: 40,
-      segment: seg,
-      where: where,
-    })
-      .then((data) => {
-        $(document).trigger('segments:load', data.data)
-
-        if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
-        UI.getSegments_success(data, options)
-      })
-      .catch((errors) => {
-        if (errors.length) {
-          this.processErrors(errors, 'getSegments')
-        }
-        OfflineUtils.failedConnection(0, 'getSegments')
-      })
-  },
-  getSegments_success: function (d, options) {
-    var where = d.data.where
-
-    if (!this.startSegmentId) {
-      var firstFile = d.data.files[Object.keys(d.data.files)[0]]
-      this.startSegmentId = firstFile.segments[0].sid
-    }
-    this.body.addClass('loaded')
-
-    if (typeof d.data.files !== 'undefined') {
-      this.renderFiles(d.data.files, where, UI.firstLoad)
-      if (options.openCurrentSegmentAfter && !options.segmentToOpen) {
-        var seg = UI.firstLoad ? this.currentSegmentId : UI.startSegmentId
-        SegmentActions.openSegment(seg)
-      }
-    }
-    $('#outer').removeClass('loading loadingBefore loadingAfter')
-
-    this.loadingMore = false
-    CatToolActions.updateFooterStatistics()
-    $(document).trigger('getSegments_success')
-  },
-
-  /**
-   * removed the #outer div, taking care of extra cleaning needed, like unmounting
-   * react components, closing side panel etc.
-   */
-  unmountSegments: function () {
-    this.segmentsMountPoint.unmount()
-    UI.segmentsRendered = false
-
-    this.removeCacheObjects()
-    SegmentStore.removeAllSegments()
-    SegmentActions.closeSideSegments()
-  },
-
-  renderFiles: function (files, where, starting) {
-    // If we are going to re-render the articles first we remove them
-    if (where === 'center' && !starting) {
-      this.unmountSegments()
-    }
-    var segments = []
-    $.each(files, function () {
-      segments = segments.concat(this.segments)
-    })
-    UI.renderSegments(segments, false, where)
-    $(document).trigger('files:appended')
-
-    if (starting) {
-      this.init()
-    }
-  },
-
-  renderSegments: function (segments, justCreated, where) {
-    if (
-      typeof this.split_points_source == 'undefined' ||
-      !this.split_points_source.length ||
-      justCreated
-    ) {
-      if (!this.segmentsRendered) {
-        this.segmentsRendered = true
-        this.segmentsMountPoint = createRoot(
-          $('.article-segments-container')[0],
-        )
-        const CallbackAfterRender = () => {
-          useEffect(() => {
-            SegmentActions.renderSegments(segments, UI.startSegmentId)
-          })
-          return React.createElement(SegmentsContainer, {
-            // fid: fid,
-            isReview: Review.enabled(),
-            isReviewExtended: ReviewExtended.enabled(),
-            reviewType: Review.type,
-            enableTagProjection: UI.enableTagProjection,
-            tagModesEnabled: UI.tagModesEnabled,
-            startSegmentId: UI.startSegmentId,
-            firstJobSegment: config.first_job_segment,
-          })
-        }
-
-        this.segmentsMountPoint.render(<CallbackAfterRender />)
-        // SegmentActions.renderSegments(segments, this.startSegmentId)
-      } else {
-        SegmentActions.addSegments(segments, where)
-      }
-      UI.registerFooterTabs()
     }
   },
 
@@ -663,52 +455,8 @@ window.UI = {
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
-      UI.segmentQA(UI.currentSegment)
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }, config.segmentQACheckInterval)
-  },
-  segmentQA: function ($segment) {
-    if (UI.tagMenuOpen) return
-
-    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment))
-    if (!segment) return
-    var dd = new Date()
-    var ts = dd.getTime()
-    var token = segment.sid + '-' + ts.toString()
-
-    var segment_status = segment.status
-
-    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
-    const trg_content = TagUtils.prepareTextToSend(segment.translation)
-
-    getLocalWarnings({
-      id: segment.sid,
-      token: token,
-      id_job: config.id_job,
-      password: config.password,
-      src_content: src_content,
-      trg_content: trg_content,
-      segment_status: segment_status,
-    })
-      .then((data) => {
-        if (UI.editAreaEditing) return
-        if (data.details && data.details.id_segment) {
-          SegmentActions.setSegmentWarnings(
-            data.details.id_segment,
-            data.details.issues_info,
-            data.details.tag_mismatch,
-          )
-        } else {
-          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
-        }
-        $(document).trigger('getWarning:local:success', {
-          resp: data,
-          segment: segment,
-        })
-        SegmentActions.updateGlossaryData(data.data, segment.sid)
-      })
-      .catch(() => {
-        OfflineUtils.failedConnection(0, 'getWarning')
-      })
   },
 
   translationIsToSave: function (segment) {
@@ -1242,10 +990,4 @@ window.UI = {
 
 $(document).ready(function () {
   UI.start()
-})
-
-document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  const root = createRoot(mountPoint)
-  root.render(<NotificationBox />)
 })

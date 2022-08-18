@@ -113,6 +113,32 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           $('.step3').show()
           $('#add-mt-provider-confirm').removeClass('hide')
         }
+        if (provider === 'mmt') {
+          $('.mgmt-container .tooltip-preimport').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+              'If the option is enabled, all the TMs linked to your Matecat account' +
+              '<br/> will be automatically imported to your ModernMT account for adaptation purposes.' +
+              '<br/>If the option is not enabled, the only TMs imported to your ModernMT account' +
+              '<br/> will be those used on projects that use ModernMT as their MT engine.</div>',
+          )
+          $('.mgmt-container .tooltip-preimport').powerTip({
+            placement: 's',
+          })
+
+          $('.mgmt-container .tooltip-pretranslate').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +
+              'If the option is enabled, ModernMT is used during the analysis phase.' +
+              '<br/> This makes downloading drafts from the translation interface quicker, ' +
+              '<br/>but may lead to additional charges for plans other than the "Professional" one.' +
+              '<br>If the option is not enabled, ModernMT is only used to provide adaptive ' +
+              '<br/>suggestions when opening segments.</div>',
+          )
+          $('.mgmt-container .tooltip-pretranslate').powerTip({
+            placement: 's',
+          })
+        }
         if (provider === 'letsmt') {
           // Tilde MT (letsmt) uses a standalone web component
           // we'll hide the button because it's easier to use the webcomponent's builtin buttons
@@ -156,34 +182,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         if ($(this).hasClass('disabled')) return false
         var provider = $('#mt_engine_int').val()
         var providerName = $('#mt_engine_int option:selected').text()
-        if (provider === 'mmt') {
-          var props = {
-            modalName: 'mmt-message-modal',
-            text:
-              'ModernMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
-              'To provide the best results, <b>the following data will be synchronized with your private ModernMT engine:</b>' +
-              '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
-              '<li>Private translation memories uploaded to MateCat</li>' +
-              '<li>All segments translated or revised in MateCat</li></ul>' +
-              'To stop data from being synchronized, please delete the ModernMT engine from your list of available engines in MateCat.',
-            successText: 'Continue',
-            successCallback: function () {
-              UI.addMTEngine(provider, providerName)
-              ModalsActions.onCloseModal()
-            },
-            warningText: 'Cancel',
-            warningCallback: function () {
-              ModalsActions.onCloseModal()
-            },
-          }
-          ModalsActions.showModalComponent(
-            ConfirmMessageModal,
-            props,
-            'Confirmation required',
-          )
-        } else {
-          UI.addMTEngine(provider, providerName)
-        }
+        UI.addMTEngine(provider, providerName)
       })
       $('#add-mt-provider-cancel').click(function () {
         $('.add-mt-engine').show()
@@ -2067,7 +2066,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
     addFormUpload: function (elem, type) {
       var label, format
       if (type == 'tmx') {
-        label = '<p class="pull-left">Select TMX file to import</p>'
+        label =
+          '<p class="pull-left">Select one or more TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2076,7 +2076,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select glossary in XLSX format ' +
+          '<p class="pull-left">Select one or more glossary in XLSX format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls'
@@ -2087,9 +2087,9 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         label +
         '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-        '    <input type="file" name="uploaded_file" accept="' +
+        '    <input type="file" name="uploaded_file[]" accept="' +
         format +
-        '"/>' +
+        '" multiple/>' +
         '</form>' +
         '   <a class="pull-right btn-grey canceladd' +
         type +

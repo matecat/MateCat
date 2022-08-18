@@ -15,8 +15,11 @@ import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentSource extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     const {onEntityClick, getUpdatedSegmentInfo} = this
@@ -460,7 +463,7 @@ class SegmentSource extends React.Component {
   preventEdit = () => 'handled'
 
   render() {
-    const {segment} = this.props
+    const {segment} = this.context
     const {editorState} = this.state
     const {
       onChange,
@@ -627,7 +630,7 @@ class SegmentSource extends React.Component {
 
   endSplitMode = () => {
     const {editorStateBeforeSplit} = this.state
-    const {segment} = this.props
+    const {segment} = this.context
     this.splitPoint = segment.split_group ? segment.split_group.length - 1 : 0
     // TODO: why so much calls endSplitMode??
     if (segment.openSplit) {
@@ -645,7 +648,7 @@ class SegmentSource extends React.Component {
 
   onEntityClick = (start, end) => {
     const {editorState} = this.state
-    const {segment} = this.props
+    const {segment} = this.context
     const {isSplitPoint} = this
     try {
       // Get latest selection
@@ -749,7 +752,7 @@ class SegmentSource extends React.Component {
         missingTagsInTarget,
         openSplit,
       },
-    } = this.props
+    } = this.context
     const {tagRange, editorState} = this.state
     return {
       sid,
