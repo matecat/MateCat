@@ -147,6 +147,15 @@ class TranslationEvent {
                         // we are moving an ICE directly from T to R2 ( previous sourcePage is equal to current )
                         $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
                         $this->getCurrentEventSourcePage() > Constants::SOURCE_PAGE_REVISION
+                )
+                ||
+                (
+                        $this->old_translation->isPreTranslated() &&
+                        $this->old_translation->isReviewedStatus() &&
+                        $this->wanted_translation->isReviewedStatus() &&
+                        // we are moving an ICE directly from T to R2 ( previous sourcePage is equal to current )
+                        $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
+                        $this->getCurrentEventSourcePage() > Constants::SOURCE_PAGE_REVISION
                 );
     }
 
@@ -175,12 +184,21 @@ class TranslationEvent {
      * @throws Exception
      */
     public function isModifyingICEFromRevisionOne() {
-        return $this->old_translation->isICE() &&
-                $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
-                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation !== $this->wanted_translation->translation &&
-                $this->old_translation->version_number == 0;
+        return ( $this->old_translation->isICE() &&
+                        $this->old_translation->isReviewedStatus() &&
+                        $this->wanted_translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
+                        $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                        $this->old_translation->translation !== $this->wanted_translation->translation &&
+                        $this->old_translation->version_number == 0
+                ) ||
+                (
+                        $this->old_translation->isPreTranslated() &&
+                        $this->old_translation->isReviewedStatus() &&
+                        $this->wanted_translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
+                        $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                        $this->old_translation->translation !== $this->wanted_translation->translation &&
+                        $this->old_translation->version_number == 0
+                );
     }
 
     /**
