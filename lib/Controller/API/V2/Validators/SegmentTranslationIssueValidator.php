@@ -87,7 +87,7 @@ class SegmentTranslationIssueValidator extends Base {
 
         $latestSegmentEvent = ( new TranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
 
-        if ( !$latestSegmentEvent && $this->translation->isICE() ) {
+        if ( !$latestSegmentEvent && ( $this->translation->isICE() || $this->translation->isPreTranslated()) ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );
         } elseif ( $latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on
