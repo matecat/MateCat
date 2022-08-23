@@ -1,5 +1,34 @@
 @import '../../commons/colors';
 .tab.glossary {
+  .input-with-label__wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    label {
+      display: block;
+      margin-bottom: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 16px;
+      color: $grey6;
+    }
+  }
+  input {
+    border: 1px solid $grey2;
+    border-radius: 2px;
+    padding: 4px 8px;
+    outline: none;
+    font-size: 14px;
+    &:focus,
+    &:focus-visible {
+      border-color: $linkBlueTransparent;
+    }
+    &.input-large {
+      height: 64px;
+    }
+  }
+
   .glossary_search {
     display: flex;
     flex-direction: row;
@@ -18,16 +47,8 @@
     justify-content: space-between;
   }
   input.glossary_search-input {
-    border: 1px solid $grey2;
-    border-radius: 2px;
-    padding: 4px 8px;
     width: 400px;
-    outline: none;
     font-size: 16px;
-    &:focus,
-    &:focus-visible {
-      border-color: $linkBlueTransparent;
-    }
   }
   .glossary__button-add {
     color: #fff;
@@ -43,13 +64,35 @@
     user-select: none;
     border: none;
     white-space: nowrap;
+    cursor: pointer;
     &:hover {
       background-color: $translatedBlueHover;
     }
   }
+  .glossary__button-cancel {
+    color: $translatedBlue;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 16px;
+    line-height: 20px;
+    background: $white;
+    user-select: none;
+    border: none;
+    white-space: nowrap;
+    cursor: pointer;
+    &:hover {
+      color: $translatedBlueHover;
+    }
+  }
   .glossary_items {
-    padding: 24px 32px;
+    max-height: 423px;
+    overflow: auto;
     .glossary_item {
+      padding: 24px 32px;
+      color: $grey6;
+      font: 14px/16px calibri, Arial, Helvetica, sans-serif;
       &:nth-child(even) {
         background: $grey5;
       }
@@ -59,44 +102,51 @@
       .glossary_badge {
         color: $grey6;
         font-size: 12px;
-        line-height: 11px;
+        line-height: 15px;
         border: 1px solid $grey6;
         border-radius: 12px;
-        padding: 4px;
+        padding: 0 4px;
         overflow: hidden;
-        margin-right: 8px;
+        margin-left: 8px;
       }
 
       .glossary_definition-container {
         display: flex;
         width: 100%;
-        background: $grey4;
         border-radius: 4px;
-        padding: 8px;
         align-items: center;
+        line-height: 16px;
       }
 
       .glossary_definition {
         margin-right: auto;
-        margin-left: 8px;
         font-style: italic;
+        align-items: center;
+        display: flex;
+        svg {
+          margin-right: 8px;
+        }
       }
       .glossary_source {
-        color: $grey6;
         font-size: 12px;
+        margin-left: 10px;
+        b {
+          margin-right: 10px;
+        }
+        span {
+          color: $grey7;
+        }
       }
       .glossary_item-actions {
-        width: 39px;
+        width: 40px;
         display: flex;
         align-items: center;
         gap: 12px;
         padding-left: 16px;
-        span {
-          color: $grey7;
-          cursor: pointer;
-          &:hover {
-            color: $grey6;
-          }
+        color: $grey7;
+        cursor: pointer;
+        svg:hover {
+          color: $grey6;
         }
       }
       .glossary_item-body {
@@ -109,6 +159,63 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        row-gap: 8px;
+        .glossary_word {
+          font-weight: 700;
+          font-size: 16px;
+          line-height: 20px;
+          color: $black;
+          .glossary_badge {
+            cursor: pointer;
+            color: $grey6;
+          }
+        }
+      }
+    }
+  }
+  .glossary_add-container {
+    padding: 24px;
+    > div {
+      display: flex;
+      align-content: flex-start;
+      gap: 40px;
+      padding-top: 8px;
+      &.more-line {
+        padding-top: 24px;
+      }
+
+      > div {
+        display: flex;
+        width: 50%;
+        column-gap: 24px;
+        .input-with-label__wrapper {
+          width: 100%;
+        }
+      }
+    }
+    .glossary_buttons-container {
+      padding-top: 24px;
+      gap: 0;
+      justify-content: space-between;
+      color: $grey2;
+      > div {
+        width: auto;
+      }
+      div:first-child {
+        width: 128px;
+      }
+      .glossary-more {
+        gap: 8px;
+        align-items: center;
+        cursor: pointer;
+        -webkit-transition: -webkit-transform 0.8s ease-in-out;
+        -ms-transition: -ms-transform 0.8s ease-in-out;
+        transition: transform 0.8s ease-in-out;
+        &.show-less {
+          svg {
+            transform: rotate(180deg);
+          }
+        }
       }
     }
   }
