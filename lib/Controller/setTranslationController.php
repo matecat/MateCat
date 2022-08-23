@@ -76,7 +76,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var TranslationVersionsHandler|TranslationVersions\DummyTranslationVersionHandler
+     * @var TranslationVersions\Handlers\TranslationVersionsHandler|TranslationVersions\Handlers\DummyTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -401,8 +401,8 @@ class setTranslationController extends ajaxController {
          */
         $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
 
-        // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
-        $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+        // if saveVersionAndIncrement() return true it means that it was persisted a new version of the parent segment
+        $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -620,7 +620,7 @@ class setTranslationController extends ajaxController {
          * This is also the init handler of all R1/R2 handling and Qr score calculation by
          *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
          */
-        $this->featureSet->run( 'preSetTranslationCommitted', [
+        $this->VersionsHandler->storeTranslationEvent( [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
                 'propagation'       => $propagationTotal,

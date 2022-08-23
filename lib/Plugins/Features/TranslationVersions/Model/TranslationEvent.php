@@ -91,16 +91,6 @@ class TranslationEvent {
         return $this->old_translation;
     }
 
-    /**
-     * @return mixed
-     * @throws Exception
-     */
-    public function isBeingUpperReviewed() {
-        return $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isReviewedStatus() &&
-                $this->isUpperTransition();
-    }
-
     public function isBeingLowerReviewed() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->wanted_translation->isReviewedStatus() &&
@@ -109,59 +99,6 @@ class TranslationEvent {
 
     public function isBeingLowerReviewedOrTranslated() {
         return $this->isLowerTransition();
-    }
-
-    /**
-     * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
-     *
-     * @return int
-     */
-    public function getSourcePageDirection() {
-        $originSourcePage      = $this->getPreviousEventSourcePage();
-        $destinationSourcePage = $this->getCurrentEventSourcePage();
-
-        return $originSourcePage < $destinationSourcePage ? 1 : (
-        $originSourcePage == $destinationSourcePage ? null : -1
-        );
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function isEnteringReviewedState() {
-        return (
-                $this->old_translation->isTranslationStatus() &&
-                $this->wanted_translation->isReviewedStatus()
-        );
-    }
-
-
-    public function iceIsAboutToBeModified() {
-        return $this->isIceOrPreTranslated() &&
-                $this->old_translation->version_number !== $this->wanted_translation->version_number;
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function iceIsAboutToBeUpperReviewed() {
-        return $this->isIceOrPreTranslated() &&
-                $this->isBeingUpperReviewed(); // we are already in a revision state
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function iceIsAboutToBeDownReviewed() {
-        return $this->isIceOrPreTranslated() &&
-                $this->isBeingLowerReviewed();
-    }
-
-    public function iceIsAboutToBeUpperReviewedWithChanges() {
-
     }
 
     /**
@@ -179,93 +116,24 @@ class TranslationEvent {
                 $this->getCurrentEventSourcePage() >= Constants::SOURCE_PAGE_REVISION;
     }
 
-    /**
-     * Now, ICEs and pre-translated have the same status: self::STATUS_APPROVED
-     * they can be treated as equals
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function iceIsAboutToBeReviewedForTheFirstTimeWithChanges() {
-        return $this->iceIsAboutToBeReviewedForTheFirstTime() &&
-                $this->old_translation->version_number == 0 && // first modification only
-                $this->wanted_translation->version_number == 1;
-    }
-
-    /**
-     * Now, ICEs and pre-translated have the same status: self::STATUS_APPROVED
-     * they can be treated as equals
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function iceIsAboutToBeReviewedForTheFirstTimeWithoutChanges() {
-        return $this->iceIsAboutToBeReviewedForTheFirstTime() &&
-                $this->old_translation->version_number == 0 && // first modification only
-                $this->wanted_translation->version_number == 0; // NO changes on ice
-    }
-
     public function isIceOrPreTranslated() {
         return $this->old_translation->isICE() || $this->old_translation->isPreTranslated();
     }
 
     /**
      * @return bool
+     * @throws Exception
      */
-    public function iceIsDowngradedToTranslated() {
-        return $this->isIceOrPreTranslated() &&
-                $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isTranslationStatus();
-    }
-
-    /**
-     * @return bool
-     */
-    public function iceIsDowngradedToTranslatedForTheFirstTime() {
-        return $this->isIceOrPreTranslated() &&
-                $this->old_translation->isReviewedStatus() &&
+    public function isDowngradedToTranslated() {
+        return $this->old_translation->isReviewedStatus() &&
                 $this->wanted_translation->isTranslationStatus() &&
-                $this->old_translation->version_number == 0;
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function iceIsDowngradedForTheFirstTimeWithChanges() {
-        return $this->iceIsDowngradedToTranslated() &&
-                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation !== $this->wanted_translation->translation &&
-                $this->old_translation->version_number == 0;
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function iceIsDowngradedForTheFirstTimeWithoutChanges() {
-        return $this->iceIsDowngradedToTranslated() &&
-                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation === $this->wanted_translation->translation &&
-                $this->old_translation->version_number == 0;
-    }
-
-    /**
-     * We need to know if the record is an unmodified ICE
-     * Unmodified ICEs are locked ICEs which have new version number equal to 0.
-     *
-     * @return bool
-     */
-    public function isUnmodifiedICE() {
-        return $this->isIceOrPreTranslated() && // segment is ICE
-                $this->wanted_translation->version_number == 0  // version number is not changing
-                ;
+                $this->isLowerTransition();
     }
 
     /**
      * @return bool
      */
-    public function isModifiedIce(){
+    public function isModifiedIce() {
         return $this->isIceOrPreTranslated() && // segment is ICE
                 $this->wanted_translation->version_number != 0  // version number is changing
                 ;
@@ -280,30 +148,30 @@ class TranslationEvent {
                 $this->wanted_translation->version_number == 1;
     }
 
+    /**
+     * @return bool
+     * @throws Exception
+     */
     public function isR1() {
-        return $this->getCurrentEventSourcePage() == 2;
-    }
-
-    public function isR2() {
-        return $this->getCurrentEventSourcePage() == 3;
+        return $this->isRevisionNumber( 2 );
     }
 
     /**
-     * Exits reviewed state when it's not editing an ICE for the first time.
      * @return bool
+     * @throws Exception
      */
-    public function isExitingReviewedState() {
-        return $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isTranslationStatus() &&
-                !$this->iceIsChangingForTheFirstTime() &&
-                !$this->isChangingICEtoTranslatedWithNoChange();
+    public function isR2() {
+        return $this->isRevisionNumber( 3 );
     }
 
-    protected function isChangingICEtoTranslatedWithNoChange() {
-        return $this->isIceOrPreTranslated() &&
-                $this->wanted_translation->isTranslationStatus() &&
-                $this->old_translation->isReviewedStatus() &&
-                $this->old_translation->version_number == $this->wanted_translation->version_number;
+    /**
+     * @param $x
+     *
+     * @return bool
+     * @throws Exception
+     */
+    protected function isRevisionNumber( $x ) {
+        return $this->getCurrentEventSourcePage() == $x;
     }
 
     /**
@@ -360,14 +228,6 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function isUpperTransition() {
-        return $this->getPreviousEventSourcePage() < $this->getCurrentEventSourcePage();
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
     public function isLowerTransition() {
         return $this->getPreviousEventSourcePage() > $this->getCurrentEventSourcePage();
     }
@@ -376,10 +236,13 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function isChangingSourcePage() {
-        return $this->getPreviousEventSourcePage() != $this->getCurrentEventSourcePage();
+    public function isUpperTransition() {
+        return $this->getCurrentEventSourcePage() > $this->getPreviousEventSourcePage();
     }
 
+    /**
+     * @return bool
+     */
     public function isPersisted() {
         return isset( $this->current_event ) && !is_null( $this->current_event->id );
     }
