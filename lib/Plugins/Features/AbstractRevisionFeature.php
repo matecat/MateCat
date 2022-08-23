@@ -103,12 +103,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         return $seg;
     }
 
-    public function filter_get_segments_optional_fields( $options ) {
-        $options[ 'optional_fields' ][] = 'edit_distance';
-
-        return $options;
-    }
-
     /**
      * Performs post project creation tasks for the current project.
      * Evaluates if a qa model is present in the feature options.
@@ -337,7 +331,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws Exception
      * @internal param TranslationEvent $event
      */
-    public function translationVersionSaved( TranslationEventsHandler $eventCreator ) {
+    public function processReviewTransitions( TranslationEventsHandler $eventCreator ) {
         $batchReviewProcessor = new BatchReviewProcessor( $eventCreator );
         $batchReviewProcessor->process();
     }
