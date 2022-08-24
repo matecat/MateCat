@@ -1,0 +1,185 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 09/06/17
+ * Time: 15.40
+ *
+ */
+
+namespace API\App;
+
+use API\V2\KleinController;
+use API\V2\Validators\LoginValidator;
+use Features\ReviewExtended\ReviewUtils;
+use LQA\EntryDao;
+use Url\JobUrlBuilder;
+use Url\JobUrlStruct;
+
+class SegmentAnalysisController extends KleinController {
+
+    /**
+     * @var \Chunks_ChunkStruct
+     */
+    private $chunk;
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    /**
+     * get segment list
+     */
+    public function segments() {
+
+        $page = ($this->request->param('page')) ? (int)$this->request->param('page') : 1;
+        $perPage = ($this->request->param('per_page')) ? (int)$this->request->param('per_page') : 50;
+
+        if($perPage > 100){
+            $perPage = 100;
+        }
+
+        $idJob = $this->request->param('id_job');
+        $password = $this->request->param('password');
+        $segmentsCount = \Chunks_ChunkDao::getSegmentsCount($idJob, $password, 3600);
+
+        try {
+            $this->response->json($this->paginateResponse($idJob, $password, $page, $perPage, $segmentsCount));
+            exit();
+        } catch (\Exception $exception){
+            $this->response->code( 500 );
+            $this->response->json( [
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
+            ] );
+        }
+    }
+
+    /**
+     * @param $idJob
+     * @param $password
+     * @param $page
+     * @param $perPage
+     * @param $segmentsCount
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function paginateResponse($idJob, $password, $page, $perPage, $segmentsCount)
+    {
+        $totalPages = ceil($segmentsCount/$perPage);
+        $isLast = $page === $totalPages;
+
+        if($page > $totalPages or $page <= 0){
+            throw new \Exception('Page number '.$page.' is not valid');
+        }
+
+        $chunk = \Chunks_ChunkDao::getByIdAndPassword($idJob, $password);
+
+        if($chunk === null){
+            throw new \Exception('Job not found');
+        }
+
+        $this->chunk = $chunk;
+
+        $prev = ($page > 1 ) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page-1)."&per_page=".$perPage : null;
+        $next = (!$isLast and $totalPages > 1) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page+1)."&per_page=".$perPage : null;
+        $items = $this->getSegments($idJob, $password, $page, $perPage);
+
+        return [
+            '_links' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => $totalPages,
+                'total_items' => $segmentsCount,
+                'next_page' => $next,
+                'prev_page' => $prev,
+            ],
+            'items' => $items
+        ];
+    }
+
+    /**
+     * @param $idJob
+     * @param $password
+     * @param $page
+     * @param $perPage
+     *
+     * @return array
+     */
+    private function getSegments($idJob, $password, $page, $perPage)
+    {
+        $segments = [];
+        $offset = $perPage;
+        $limit = ($page-1)*$offset;
+
+        $ids = \Segments_SegmentDao::getIds($idJob, $password, $offset, $limit, 3600);
+
+        foreach ($ids as $id){
+
+            // Urls
+            $urls = JobUrlBuilder::createFromCredentials($idJob, $password, [
+                'id_segment' => $id->id
+            ]);
+
+            $segments[] = $this->formatSegment($id->id, $urls);
+        }
+
+        return $segments;
+    }
+
+    /**
+     * @param              $id
+     * @param JobUrlStruct $jobUrlStruct
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function formatSegment($id, JobUrlStruct $jobUrlStruct){
+
+        // analysis
+        $segmentForAnalysis = \Segments_SegmentDao::getSegmentForAnalysis($id, $this->chunk->id, $this->chunk->password, $this->chunk->job_first_segment, $this->chunk->job_last_segment);
+
+        // id_request
+        $idRequest = \Segments_SegmentMetadataDao::get($id, 'id_request');
+
+        // Issues
+        $issues_records = EntryDao::findAllBySegmentId( $id );
+        $issues         = [];
+        foreach ( $issues_records as $issue_record ) {
+
+            $issues[] = [
+                'id'                  => (int)$issue_record->id,
+                'id_category'         => (int)$issue_record->id_category,
+                'is_full_segment'     => $issue_record->is_full_segment,
+                'severity'            => $issue_record->severity,
+                'start_node'          => $issue_record->start_node,
+                'start_offset'        => $issue_record->start_offset,
+                'end_node'            => $issue_record->end_node,
+                'end_offset'          => $issue_record->end_offset,
+                'translation_version' => $issue_record->translation_version,
+                'target_text'         => $issue_record->target_text,
+                'penalty_points'      => $issue_record->penalty_points,
+                'rebutted_at'         => ($issue_record->rebutted_at) ? date( 'c', $issue_record->rebutted_at) : null,
+                'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
+            ];
+        }
+
+
+        return [
+                'id_segment' => (int)$id,
+                'urls' => $jobUrlStruct->getUrls(),
+                'id_request' => ($idRequest) ? $idRequest->meta_value : null,
+                'source' => $segmentForAnalysis->segment,
+                'target' => $segmentForAnalysis->translation,
+                'source_lang' => $segmentForAnalysis->source,
+                'target_lang' => $segmentForAnalysis->target,
+                'source_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
+                'target_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
+                'match_type' => $segmentForAnalysis->match_type,
+                'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
+                'issues' => $issues,
+        ];
+    }
+}
