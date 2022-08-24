@@ -18,6 +18,8 @@ use Url\JobUrlStruct;
 
 class SegmentAnalysisController extends KleinController {
 
+    const MAX_PER_PAGE = 200;
+
     /**
      * @var \Chunks_ChunkStruct
      */
@@ -35,8 +37,8 @@ class SegmentAnalysisController extends KleinController {
         $page = ($this->request->param('page')) ? (int)$this->request->param('page') : 1;
         $perPage = ($this->request->param('per_page')) ? (int)$this->request->param('per_page') : 50;
 
-        if($perPage > 100){
-            $perPage = 100;
+        if($perPage > self::MAX_PER_PAGE){
+            $perPage = self::MAX_PER_PAGE;
         }
 
         $idJob = $this->request->param('id_job');
@@ -70,6 +72,7 @@ class SegmentAnalysisController extends KleinController {
     {
         $totalPages = ceil($segmentsCount/$perPage);
         $isLast = $page === $totalPages;
+
 
         if($page > $totalPages or $page <= 0){
             throw new \Exception('Page number '.$page.' is not valid');
@@ -107,6 +110,7 @@ class SegmentAnalysisController extends KleinController {
      * @param $perPage
      *
      * @return array
+     * @throws \Exception
      */
     private function getSegments($idJob, $password, $page, $perPage)
     {
@@ -130,7 +134,7 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * @param              $id
+     * @param int          $id
      * @param JobUrlStruct $jobUrlStruct
      *
      * @return array
@@ -148,24 +152,14 @@ class SegmentAnalysisController extends KleinController {
         $issues_records = EntryDao::findAllBySegmentId( $id );
         $issues         = [];
         foreach ( $issues_records as $issue_record ) {
-
             $issues[] = [
-                'id'                  => (int)$issue_record->id,
                 'id_category'         => (int)$issue_record->id_category,
-                'is_full_segment'     => $issue_record->is_full_segment,
                 'severity'            => $issue_record->severity,
-                'start_node'          => $issue_record->start_node,
-                'start_offset'        => $issue_record->start_offset,
-                'end_node'            => $issue_record->end_node,
-                'end_offset'          => $issue_record->end_offset,
-                'translation_version' => $issue_record->translation_version,
-                'target_text'         => $issue_record->target_text,
-                'penalty_points'      => $issue_record->penalty_points,
-                'rebutted_at'         => ($issue_record->rebutted_at) ? date( 'c', $issue_record->rebutted_at) : null,
+                'translation_version' => (int)$issue_record->translation_version,
+                'penalty_points'      => floatval($issue_record->penalty_points),
                 'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
             ];
         }
-
 
         return [
                 'id_segment' => (int)$id,
