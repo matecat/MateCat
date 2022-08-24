@@ -181,6 +181,11 @@ export const Select = ({
     (activeOptions && activeOptions.map((v) => v.id).join(',')) || value
 
   const renderSelection = () => {
+    if (multipleSelect !== 'off' && activeOptions && activeOptions.length > 0) {
+      return activeOptions.map((option, index) => {
+        return <span key={`selected${index}`}>{option.name}</span>
+      })
+    }
     return activeOption ? activeOption.name : placeholder
   }
 

@@ -7,7 +7,7 @@ import {Select} from './../common/Select'
 
 const keys = [
   {
-    name: '',
+    name: 'Ciao',
     id: 'a3a708aad524b8fd4468',
   },
   {
@@ -139,8 +139,9 @@ const keys = [
 export const SegmentFooterTabGlossary = ({active_class}) => {
   const [searchSource, setSearchSource] = useState()
   const [searchTarget, setSearchTarget] = useState()
-  const [showAddBox, setShowAddBox] = useState(false)
+  const [showAddBox, setShowAddBox] = useState(true)
   const [showMore, setShowMore] = useState(false)
+  const [activeKeys, setActiveKeys] = useState([keys[0]])
   const openAddTerm = () => {
     setShowAddBox(true)
   }
@@ -155,14 +156,23 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
           </div>
           <div>
             <Select
+              className={'glossary-select'}
               name="glossary-term-tm"
               label="Glossary"
               showSearchBar
               multipleSelect="dropdown"
               options={keys}
-              activeOption={keys[0]}
+              activeOptions={activeKeys}
               onToggleOption={(option) => {
-                console.log('selected', option)
+                if (option) {
+                  if (activeKeys.some((item) => item.id === option.id)) {
+                    setActiveKeys(
+                      activeKeys.filter((item) => item.id !== option.id),
+                    )
+                  } else {
+                    setActiveKeys(activeKeys.concat([option]))
+                  }
+                }
               }}
             />
 
