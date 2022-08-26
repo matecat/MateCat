@@ -21,6 +21,7 @@
     padding: 4px 8px;
     outline: none;
     font-size: 14px;
+    line-height: 16px;
     &:focus,
     &:focus-visible {
       border-color: $linkBlueTransparent;
@@ -94,6 +95,7 @@
       padding: 24px 32px;
       color: $grey6;
       font: 14px/16px calibri, Arial, Helvetica, sans-serif;
+      text-align: left;
       &:nth-child(even) {
         background: $grey5;
       }
@@ -166,9 +168,47 @@
           font-size: 16px;
           line-height: 20px;
           color: $black;
-          .glossary_badge {
-            cursor: pointer;
-            color: $grey6;
+          display: flex;
+          align-items: center;
+          > div {
+            display: flex;
+            align-items: center;
+            svg {
+              cursor: pointer;
+              color: $grey7;
+              margin-left: 8px;
+            }
+
+            .glossary_item-tooltip {
+              padding: 4px 8px;
+              background: $grey4;
+              border-radius: 2px;
+              color: $grey7;
+              visibility: hidden;
+              position: relative;
+              margin-left: 10px;
+              line-height: 14px;
+              font-size: 14px;
+              font-weight: 400;
+              &:before {
+                content: '';
+                display: block;
+                position: absolute;
+                left: -3px;
+                top: 3px;
+                margin-left: -3px;
+                width: 0;
+                height: 0;
+                border-top: 8px solid transparent;
+                border-bottom: 8px solid transparent;
+                border-right: 8px solid $grey4;
+              }
+            }
+          }
+          &:hover {
+            .glossary_item-tooltip {
+              visibility: visible;
+            }
           }
         }
       }
@@ -176,7 +216,7 @@
   }
   .glossary_add-container {
     padding: 24px;
-    > div {
+    .glossary-form-line {
       display: flex;
       align-content: flex-start;
       gap: 40px;
@@ -193,9 +233,13 @@
           width: 100%;
         }
       }
+      .glossary-tm-container > div {
+        width: calc(100% / 3) !important;
+      }
     }
     .glossary_buttons-container {
       padding-top: 24px;
+      display: flex;
       gap: 0;
       justify-content: space-between;
       color: $grey2;
@@ -206,6 +250,7 @@
         width: 128px;
       }
       .glossary-more {
+        display: flex;
         gap: 8px;
         align-items: center;
         cursor: pointer;

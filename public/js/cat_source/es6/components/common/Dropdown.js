@@ -2,11 +2,9 @@ import React, {useState, useRef, useEffect} from 'react'
 import PropTypes from 'prop-types'
 // import useEvent from 'hooks/useEvent'
 
-// import Check from 'icons/Check'
+import Check from '../../../../../img/icons/Check'
 // import Add from 'icons/Add'
-// import Search from 'icons/Search'
-
-// import './Dropdown.scss'
+import Search from '../../../../../img/icons/Search'
 
 export const Dropdown = ({
   className,
@@ -287,7 +285,7 @@ export const Dropdown = ({
         }}
       >
         <span>{option.name}</span>
-        {/*{showActiveOptionIcon && <Check size={20} />}*/}
+        {showActiveOptionIcon && <Check size={16} />}
         {/*{showHighlightedOptionIcon && <Add size={20} />}*/}
       </li>
     )
@@ -322,8 +320,7 @@ export const Dropdown = ({
 
   return (
     <div
-      data-testid="dropdown"
-      className={`dropdown ${className} ${
+      className={`custom-dropdown ${className} ${
         showSearchBar ? 'dropdown--has-search-bar' : ''
       } ${multipleSelect === 'modal' ? 'dropdown--is-multiple-select' : ''}`}
     >
@@ -338,7 +335,7 @@ export const Dropdown = ({
             onChange={updateQueryFilter}
             onFocus={onSearchBarFocus}
           />
-          {/*<Search />*/}
+          <Search size={20} />
         </div>
       )}
       {mostPopularOptions && mostPopularOptions.length > 0 && (

@@ -38,6 +38,7 @@ export const Select = ({
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
+  checkSpaceToReverse = true,
 }) => {
   const listRef = useRef()
   const wrapperRef = useRef()
@@ -106,7 +107,9 @@ export const Select = ({
       if (availableHeight > 128) {
         listNode.style.maxHeight = `${availableHeight}px`
       } else {
-        setDropdownReversed(true)
+        if (checkSpaceToReverse) {
+          setDropdownReversed(true)
+        }
         availableHeight =
           wrapperTopPosition -
           parentScrollTop +
@@ -182,9 +185,10 @@ export const Select = ({
 
   const renderSelection = () => {
     if (multipleSelect !== 'off' && activeOptions && activeOptions.length > 0) {
-      return activeOptions.map((option, index) => {
-        return <span key={`selected${index}`}>{option.name}</span>
+      const array = activeOptions.map((option, index) => {
+        return option.name
       })
+      return array.join(', ')
     }
     return activeOption ? activeOption.name : placeholder
   }
@@ -279,6 +283,7 @@ Select.propTypes = {
   optionsSelectedCopySingular: PropTypes.func,
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
+  checkSpaceToReverse: PropTypes.bool,
 }
 
 const ChevronDown = () => {

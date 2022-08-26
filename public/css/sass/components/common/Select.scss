@@ -45,28 +45,19 @@
   width: 100%;
   background-color: $white;
   white-space: nowrap;
-  color: $black;
+  color: $grey6;
   transition: box-shadow 0.3s cubic-bezier(0.77, 0, 0.175, 1);
   overflow: hidden;
   text-overflow: ellipsis;
-
+  display: block;
   &::placeholder {
     color: $grey1;
     opacity: 1;
   }
 }
 
-.select:not(.select--is-disabled):not(.select--is-focused):hover {
-  box-shadow: inset 0 0 0 1px $grey2;
-}
-
 .select--is-focused {
   box-shadow: inset 0 0 0 2px $white;
-}
-
-.select--is-placeholder:not(.select--is-focused):not(.select--is-disabled) {
-  color: $grey2;
-  box-shadow: inset 0 0 0 1px $grey2;
 }
 
 .select--is-invalid,
@@ -97,7 +88,7 @@
 .input--invisible,
 .select--invisible {
   background: rgba($black, 0) none repeat scroll 0px center;
-  border: 0px none;
+  border: 0px none !important;
   font-size: inherit;
   outline: currentcolor none 0px;
   padding: 0px;
@@ -107,12 +98,11 @@
   opacity: 0;
   position: relative;
   transform: scale(0);
+  padding: 0 !important;
 }
 
 .select--is-multiple:not(.select--is-placeholder) {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 12px 48px 4px 12px;
+  padding-right: 25px;
 }
 
 // Select's dropdown wrapper

@@ -4,7 +4,35 @@
  */
 import React, {useState} from 'react'
 import {Select} from './../common/Select'
-
+import InfoIcon from '../../../../../img/icons/InfoIcon'
+const domains = [
+  {
+    name: 'Uber',
+    id: '1',
+  },
+  {
+    name: 'Patreon',
+    id: '2',
+  },
+  {
+    name: 'ebay',
+    id: '3',
+  },
+]
+const subDomains = [
+  {
+    name: 'Rider',
+    id: '1',
+  },
+  {
+    name: 'Ciccio',
+    id: '2',
+  },
+  {
+    name: 'Franco',
+    id: '3',
+  },
+]
 const keys = [
   {
     name: 'Ciao',
@@ -15,11 +43,11 @@ const keys = [
     id: '9baba936e9624fc4c663',
   },
   {
-    name: '',
+    name: 'No Name',
     id: 'c0a28df1943c5f854f75',
   },
   {
-    name: '',
+    name: 'No Name',
     id: '3e8e2d0de4a63e0272e7',
   },
   {
@@ -27,7 +55,7 @@ const keys = [
     id: '20fb44b40065351c90f1',
   },
   {
-    name: '',
+    name: 'No Name',
     id: '55f7032ecd4f01323fbe',
   },
   {
@@ -111,7 +139,7 @@ const keys = [
     id: 'daf31bb28574f1f79d10',
   },
   {
-    name: '',
+    name: 'No Name',
     id: '821ec669486c553f76a5',
   },
   {
@@ -127,42 +155,55 @@ const keys = [
     id: 'e9ed98bb5137ed81f40f',
   },
   {
-    name: '',
+    name: 'No Name',
     id: 'e7e4e69f2af1fb26834b',
   },
   {
-    name: '',
+    name: 'No Name',
     id: 'b1997669fde460b74375',
   },
 ]
 
+const glossary = [{}]
+
 export const SegmentFooterTabGlossary = ({active_class}) => {
   const [searchSource, setSearchSource] = useState()
   const [searchTarget, setSearchTarget] = useState()
-  const [showAddBox, setShowAddBox] = useState(true)
+  const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [activeKeys, setActiveKeys] = useState([keys[0]])
+  const [activeDomain, setActiveDomain] = useState(domains[0])
+  const [activeSubDomain, setActiveSubDomain] = useState(subDomains[0])
+  const [modifyElement, setModifyElement] = useState()
   const openAddTerm = () => {
-    setShowAddBox(true)
+    setShowForm(true)
   }
 
-  const getAddTermBox = () => {
+  const modifyItem = () => {
+    setShowMore(true)
+    setModifyElement({})
+    setShowForm(true)
+  }
+
+  const getFormBox = () => {
     return (
       <div className={'glossary_add-container'}>
-        <div>
+        <div className={'glossary-form-line'}>
           <div className={'input-with-label__wrapper'}>
             <label>Definition</label>
             <input name="glossary-term-definition" />
           </div>
-          <div>
+          <div className={'glossary-tm-container'}>
             <Select
               className={'glossary-select'}
               name="glossary-term-tm"
               label="Glossary"
+              placeholder={'Select a glossary'}
               showSearchBar
               multipleSelect="dropdown"
               options={keys}
               activeOptions={activeKeys}
+              checkSpaceToReverse={false}
               onToggleOption={(option) => {
                 if (option) {
                   if (activeKeys.some((item) => item.id === option.id)) {
@@ -177,17 +218,43 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
             />
 
             <div className={'input-with-label__wrapper'}>
-              <label>Domain</label>
-              <input name="glossary-term-domain" />
+              <Select
+                className={'glossary-select'}
+                name="glossary-term-domain"
+                label="Domain"
+                placeholder={'Select a domain'}
+                showSearchBar
+                options={domains}
+                activeOption={activeDomain}
+                checkSpaceToReverse={false}
+                onSelect={(option) => {
+                  if (option) {
+                    setActiveDomain(option)
+                  }
+                }}
+              />
             </div>
             <div className={'input-with-label__wrapper'}>
-              <label>Subdomain</label>
-              <input name="glossary-term-subdomani" />
+              <Select
+                className={'glossary-select'}
+                name="glossary-term-subdomain"
+                label="Domain"
+                placeholder={'Select a subdomain'}
+                showSearchBar
+                options={subDomains}
+                activeOption={activeSubDomain}
+                checkSpaceToReverse={false}
+                onSelect={(option) => {
+                  if (option) {
+                    setActiveSubDomain(option)
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
 
-        <div>
+        <div className={'glossary-form-line'}>
           <div className={'input-with-label__wrapper'}>
             <label>Original term*</label>
             <input name="glossary-term-original" />
@@ -198,7 +265,7 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
           </div>
         </div>
         {showMore && (
-          <div className={'more-line'}>
+          <div className={'glossary-form-line more-line'}>
             <div>
               <div className={'input-with-label__wrapper'}>
                 <label>Description</label>
@@ -246,7 +313,7 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
             <button
               className={'glossary__button-cancel'}
               onClick={() => {
-                setShowAddBox(false)
+                setShowForm(false)
                 setShowMore(false)
               }}
             >
@@ -259,56 +326,13 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
     )
   }
   const getGlossaryItemBox = () => {
-    return (
-      <div className={'glossary_item'}>
-        <div className={'glossary_item-header'}>
-          <div className={'glossary_definition-container'}>
-            <span className={'glossary_definition'}>
-              <GlossaryDefinitinIcon />
-              The action or process of paying someone or something or of being
-              paid.
-            </span>
-            <span className={'glossary_badge'}>Uber</span>
-            <span className={'glossary_badge'}>Rider</span>
-            <div className={'glossary_source'}>
-              <b>Uber Glossary</b>
-              <span>2022-07-08</span>
-            </div>
-          </div>
-          <div className={'glossary_item-actions'}>
-            <ModifyIcon />
-            <DeleteIcon />
-          </div>
-        </div>
-
-        <div className={'glossary_item-body'}>
-          <div className={'glossary-item_column'}>
-            <div className={'glossary_word'}>
-              Payment <span className={'glossary_badge'}>Ex</span>
-            </div>
-            <div className={'glossary-description'}>
-              The amount a rider, eater, user of UberRUSH, and other products,
-              pays to get a ride, get a meal or a package delivered, etc.
-            </div>
-          </div>
-          <div className={'glossary-item_column'}>
-            <div className={'glossary_word'}>
-              Pagamento <span className={'glossary_badge'}>Ex</span>
-            </div>
-            <div className={'glossary-description'}>
-              L'importo che un rider, un cliente UberEats, un utente di UberRUSH
-              e di altri prodotti paga per ottenere una corsa, farsi consegnare
-              un pasto o un pacco, ecc
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    const elem = <GlossaryItem modifyElement={(item) => modifyItem(item)} />
+    return [elem, elem, elem, elem, elem, elem]
   }
   return (
     <div className={`tab sub-editor glossary ${active_class}`}>
-      {showAddBox ? (
-        getAddTermBox()
+      {showForm ? (
+        getFormBox()
       ) : (
         <>
           <div className={'glossary_search'}>
@@ -342,6 +366,66 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
   )
 }
 
+const GlossaryItem = ({item, modifyElement}) => {
+  return (
+    <div className={'glossary_item'}>
+      <div className={'glossary_item-header'}>
+        <div className={'glossary_definition-container'}>
+          <span className={'glossary_definition'}>
+            <GlossaryDefinitionIcon />
+            The action or process of paying someone or something or of being
+            paid.
+          </span>
+          <span className={'glossary_badge'}>Uber</span>
+          <span className={'glossary_badge'}>Rider</span>
+          <div className={'glossary_source'}>
+            <b>Uber Glossary</b>
+            <span>2022-07-08</span>
+          </div>
+        </div>
+        <div className={'glossary_item-actions'}>
+          <div onClick={() => modifyElement()}>
+            <ModifyIcon />
+          </div>
+          <div onClick={() => {}}>
+            <DeleteIcon />
+          </div>
+        </div>
+      </div>
+
+      <div className={'glossary_item-body'}>
+        <div className={'glossary-item_column'}>
+          <div className={'glossary_word'}>
+            Payment{' '}
+            <div>
+              <InfoIcon size={16} />
+              <div className={'glossary_item-tooltip'}>Example</div>
+            </div>
+          </div>
+          <div className={'glossary-description'}>
+            The amount a rider, eater, user of UberRUSH, and other products,
+            pays to get a ride, get a meal or a package delivered, etc.
+          </div>
+        </div>
+        <div className={'glossary-item_column'}>
+          <div className={'glossary_word'}>
+            Pagamento{' '}
+            <div>
+              <InfoIcon size={16} />
+              <div className={'glossary_item-tooltip'}>Example</div>
+            </div>
+          </div>
+          <div className={'glossary-description'}>
+            L'importo che un rider, un cliente UberEats, un utente di UberRUSH e
+            di altri prodotti paga per ottenere una corsa, farsi consegnare un
+            pasto o un pacco, ecc
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const DeleteIcon = () => {
   return (
     <svg width="14" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -366,7 +450,7 @@ const ModifyIcon = () => {
   )
 }
 
-const GlossaryDefinitinIcon = () => {
+const GlossaryDefinitionIcon = () => {
   return (
     <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
