@@ -4,6 +4,18 @@ use Validator\GlossaryCSVValidatorObject;
 
 class GlossaryCSVValidatorTest extends PHPUnit_Framework_TestCase {
 
+    public function testMinimalInvalidFile()
+    {
+        $csv = __DIR__ . '/../../support/files/csv/glossary/minimal-invalid.csv';
+
+        $validatorObject = new GlossaryCSVValidatorObject();
+        $validatorObject->csv = $csv;
+        $validator = new \Validator\GlossaryCSVValidator();
+
+        $validator->validate($validatorObject);
+
+        $this->assertFalse($validator->isValid());
+    }
 
     public function testInvalidLanguages()
     {
@@ -34,6 +46,19 @@ class GlossaryCSVValidatorTest extends PHPUnit_Framework_TestCase {
     public function testMinimalValidFile()
     {
         $csv = __DIR__ . '/../../support/files/csv/glossary/minimal-valid.csv';
+
+        $validatorObject = new GlossaryCSVValidatorObject();
+        $validatorObject->csv = $csv;
+        $validator = new \Validator\GlossaryCSVValidator();
+
+        $validator->validate($validatorObject);
+
+        $this->assertTrue($validator->isValid());
+    }
+
+    public function testMixedValidFile()
+    {
+        $csv = __DIR__ . '/../../support/files/csv/glossary/mixed-valid.csv';
 
         $validatorObject = new GlossaryCSVValidatorObject();
         $validatorObject->csv = $csv;
