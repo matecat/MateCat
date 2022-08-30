@@ -439,6 +439,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
+    private function formatStructureDataFromCSV($filePath) {
+        $fileContent = file_get_contents($filePath);
+        // @TODO
+    }
+
     public function import( $file, $key, $name = false ) {
 
         if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 && class_exists( '\\CURLFile' ) ) {

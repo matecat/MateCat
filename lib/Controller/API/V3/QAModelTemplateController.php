@@ -188,10 +188,14 @@ class QAModelTemplateController extends KleinController {
     {
         try {
             $json = $this->request->body();
+
+            $validatorObject = new \Validator\JSONValidatorObject();
+            $validatorObject->json = $json;
             $validator = new \Validator\JSONValidator($this->getQaModelSchema());
-            $validate = $validator->validate($json);
-            $errors = (!empty($validate)) ? $validate : [];
-            $code = (!empty($validate)) ? 500 : 200;
+            $validator->validate($validatorObject);
+
+            $errors = $validator->getErrors();
+            $code = ($validator->isValid()) ? 500 : 200;
 
             $this->response->code($code);
             return $this->response->json([
