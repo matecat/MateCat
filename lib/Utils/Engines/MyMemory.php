@@ -1,5 +1,7 @@
 <?php
 
+use Validator\GlossaryCSVValidatorObject;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -416,10 +418,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             return $this->result;
         }
 
+        // validate the CSV
+        if(!$this->validateCSVFile($file)){
+            throw new \Exception('File CSV is not valid');
+        }
+
         $postFields = [
                 'glossary'    => "@" . realpath( $file ),
-                'source_lang' => $source_lang,
-                'target_lang' => $target_lang,
                 'name'        => $name,
         ];
 
@@ -437,6 +442,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( "glossary_import_relative_url", $postFields, true );
 
         return $this->result;
+    }
+
+    /**
+     * @param $file
+     *
+     * @return bool
+     * @throws Exception
+     */
+    private function validateCSVFile($file)
+    {
+        $validatorObject = new GlossaryCSVValidatorObject();
+        $validatorObject->csv = $file;
+        $validator = new \Validator\GlossaryCSVValidator();
+        $validator->validate($validatorObject);
+
+        return $validator->isValid();
     }
 
     private function formatStructureDataFromCSV($filePath) {
