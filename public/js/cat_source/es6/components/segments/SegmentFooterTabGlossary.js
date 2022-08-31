@@ -5,34 +5,6 @@
 import React, {useState} from 'react'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
-const domains = [
-  {
-    name: 'Uber',
-    id: '1',
-  },
-  {
-    name: 'Patreon',
-    id: '2',
-  },
-  {
-    name: 'ebay',
-    id: '3',
-  },
-]
-const subDomains = [
-  {
-    name: 'Rider',
-    id: '1',
-  },
-  {
-    name: 'Ciccio',
-    id: '2',
-  },
-  {
-    name: 'Franco',
-    id: '3',
-  },
-]
 const keys = [
   {
     name: 'Ciao',
@@ -164,13 +136,44 @@ const keys = [
   },
 ]
 
-const glossary = [{}]
+const initialState = {
+  domains: [
+    {
+      name: 'Uber',
+      id: '1',
+    },
+    {
+      name: 'Patreon',
+      id: '2',
+    },
+    {
+      name: 'ebay',
+      id: '3',
+    },
+  ],
+  subDomains: [
+    {
+      name: 'Rider',
+      id: '1',
+    },
+    {
+      name: 'Ciccio',
+      id: '2',
+    },
+    {
+      name: 'Franco',
+      id: '3',
+    },
+  ],
+}
 
 export const SegmentFooterTabGlossary = ({active_class}) => {
   const [searchSource, setSearchSource] = useState()
   const [searchTarget, setSearchTarget] = useState()
   const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [domains, setDomains] = useState(initialState.domains)
+  const [subDomains, setSubDomains] = useState(initialState.subDomains)
   const [activeKeys, setActiveKeys] = useState([keys[0]])
   const [activeDomain, setActiveDomain] = useState(domains[0])
   const [activeSubDomain, setActiveSubDomain] = useState(subDomains[0])
@@ -215,6 +218,17 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                   }
                 }
               }}
+              optionTemplate={({name, isActive}) => (
+                <div className="glossary-option">
+                  <input
+                    type="checkbox"
+                    name={name}
+                    checked={isActive}
+                    onChange={() => false}
+                  />
+                  <label htmlFor={`${name}`}>{name}</label>
+                </div>
+              )}
             />
 
             <div className={'input-with-label__wrapper'}>
@@ -232,13 +246,40 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                     setActiveDomain(option)
                   }
                 }}
+                optionTemplate={({name}) => (
+                  <div className="domain-option">{name}</div>
+                )}
+                onRenderOption={({
+                  index,
+                  optionsLength,
+                  queryFilter,
+                  resetQueryFilter,
+                }) =>
+                  index === optionsLength - 1 &&
+                  queryFilter && (
+                    <button
+                      onClick={() => {
+                        setDomains((prevState) => [
+                          ...prevState,
+                          {
+                            name: queryFilter,
+                            id: (prevState.length + 1).toString(),
+                          },
+                        ])
+                        resetQueryFilter()
+                      }}
+                    >
+                      + Create a domain name <b>{queryFilter}</b>
+                    </button>
+                  )
+                }
               />
             </div>
             <div className={'input-with-label__wrapper'}>
               <Select
                 className={'glossary-select'}
                 name="glossary-term-subdomain"
-                label="Domain"
+                label="Subdomain"
                 placeholder={'Select a subdomain'}
                 showSearchBar
                 options={subDomains}
@@ -326,8 +367,11 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
     )
   }
   const getGlossaryItemBox = () => {
-    const elem = <GlossaryItem modifyElement={(item) => modifyItem(item)} />
-    return [elem, elem, elem, elem, elem, elem]
+    return new Array(5)
+      .fill({})
+      .map((item, index) => (
+        <GlossaryItem key={index} modifyElement={(item) => modifyItem(item)} />
+      ))
   }
   return (
     <div className={`tab sub-editor glossary ${active_class}`}>

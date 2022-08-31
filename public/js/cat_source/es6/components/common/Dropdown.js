@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect, Fragment} from 'react'
 import PropTypes from 'prop-types'
 // import useEvent from 'hooks/useEvent'
 
@@ -22,6 +22,8 @@ export const Dropdown = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   onClose = () => {},
+  optionTemplate = () => {},
+  onRenderOption = () => {},
 }) => {
   const [queryFilter, setQueryFilter] = useState('')
   const [highlightedOption, setHighlightedOption] = useState()
@@ -270,24 +272,46 @@ export const Dropdown = ({
     const showActiveOptionIcon = isActiveOption || isActiveOptions
     const showHighlightedOptionIcon = !isActiveOption && !isActiveOptions
 
+    const optionNode = optionTemplate({
+      ...option,
+      isActive: isActiveOption || isActiveOptions,
+    })
+
     return (
-      <li
-        key={index}
-        className={`dropdown__option ${
-          isActiveOption || isActiveOptions
-            ? 'dropdown__option--is-active-option'
-            : ''
-        } ${
-          isHighlightedOption ? 'dropdown__option--is-highlighted-option' : ''
-        } ${isNoResultsFound ? 'dropdown__option--is-no-results-found' : ''}`}
-        onClick={() => {
-          if (!isNoResultsFound) handleClick(option)
-        }}
-      >
-        <span>{option.name}</span>
-        {showActiveOptionIcon && <Check size={16} />}
-        {/*{showHighlightedOptionIcon && <Add size={20} />}*/}
-      </li>
+      <Fragment key={index}>
+        <li
+          className={`dropdown__option ${
+            isActiveOption || isActiveOptions
+              ? 'dropdown__option--is-active-option'
+              : ''
+          } ${
+            isHighlightedOption ? 'dropdown__option--is-highlighted-option' : ''
+          } ${isNoResultsFound ? 'dropdown__option--is-no-results-found' : ''}`}
+          onClick={() => {
+            if (!isNoResultsFound) handleClick(option)
+          }}
+        >
+          {optionNode ? (
+            optionNode
+          ) : (
+            <>
+              <span>{option.name}</span>
+              {showActiveOptionIcon && <Check size={16} />}
+              {/*{showHighlightedOptionIcon && <Add size={20} />}*/}
+            </>
+          )}
+        </li>
+        {onRenderOption({
+          index,
+          ...option,
+          optionsLength: !isNoResultsFound ? getFilteredOptions().length : 1,
+          queryFilter,
+          resetQueryFilter: () => {
+            setQueryFilter('')
+            queryFilterRef.current = ''
+          },
+        })}
+      </Fragment>
     )
   }
 
@@ -391,4 +415,6 @@ Dropdown.propTypes = {
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
   onClose: PropTypes.func,
+  optionTemplate: PropTypes.func,
+  onRenderOption: PropTypes.func,
 }

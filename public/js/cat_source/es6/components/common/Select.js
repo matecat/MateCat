@@ -39,6 +39,8 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
+  optionTemplate,
+  onRenderOption,
 }) => {
   const listRef = useRef()
   const wrapperRef = useRef()
@@ -231,19 +233,23 @@ export const Select = ({
           } ${isDropdownReversed ? 'select__dropdown--is-reversed' : ''}`}
         >
           <Dropdown
-            className="select__dropdown"
-            showSearchBar={showSearchBar}
-            listRef={listRef}
-            activeOption={activeOption}
-            activeOptions={activeOptions}
-            options={options}
-            onSelect={handleSelect}
-            onToggleOption={onToggleOption}
-            multipleSelect={multipleSelect}
-            optionsSelectedCopySingular={optionsSelectedCopySingular}
-            optionsSelectedCopyPlural={optionsSelectedCopyPlural}
-            resetSelectedOptions={resetSelectedOptions}
-            onClose={hideDropdown}
+            {...{
+              className: 'select__dropdown',
+              showSearchBar,
+              listRef,
+              activeOption,
+              activeOptions,
+              options,
+              onSelect: handleSelect,
+              onToggleOption,
+              multipleSelect,
+              optionsSelectedCopySingular,
+              optionsSelectedCopyPlural,
+              resetSelectedOptions,
+              onClose: hideDropdown,
+              optionTemplate,
+              onRenderOption,
+            }}
           />
         </div>
       )}
@@ -284,6 +290,8 @@ Select.propTypes = {
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
+  optionTemplate: PropTypes.func,
+  onRenderOption: PropTypes.func,
 }
 
 const ChevronDown = () => {
