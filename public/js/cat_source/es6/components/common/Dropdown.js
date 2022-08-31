@@ -14,6 +14,7 @@ export const Dropdown = ({
   activeOptions,
   mostPopularOptions,
   showSearchBar = false,
+  searchPlaceholder = 'Search...',
   multipleSelect = 'off',
   onSelect = () => {},
   onToggleOption = () => {},
@@ -270,7 +271,6 @@ export const Dropdown = ({
       }).length > 0
     const isNoResultsFound = option.id === 'noResultsFound'
     const showActiveOptionIcon = isActiveOption || isActiveOptions
-    const showHighlightedOptionIcon = !isActiveOption && !isActiveOptions
 
     const optionNode = optionTemplate({
       ...option,
@@ -291,13 +291,12 @@ export const Dropdown = ({
             if (!isNoResultsFound) handleClick(option)
           }}
         >
-          {optionNode ? (
+          {optionNode && !isNoResultsFound ? (
             optionNode
           ) : (
             <>
               <span>{option.name}</span>
               {showActiveOptionIcon && <Check size={16} />}
-              {/*{showHighlightedOptionIcon && <Add size={20} />}*/}
             </>
           )}
         </li>
@@ -352,7 +351,7 @@ export const Dropdown = ({
         <div data-testid="dropdown-search" className="dropdown__search-bar">
           <input
             className="dropdown__search-bar-input"
-            placeholder="Search..."
+            placeholder={searchPlaceholder}
             type="text"
             ref={textInputRef}
             value={queryFilter}
@@ -407,6 +406,7 @@ Dropdown.propTypes = {
     }),
   ),
   showSearchBar: PropTypes.bool,
+  searchPlaceholder: PropTypes.string,
   multipleSelect: PropTypes.oneOf(['off', 'dropdown', 'modal']),
   onSelect: PropTypes.func,
   onToggleOption: PropTypes.func,

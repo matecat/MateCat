@@ -30,6 +30,7 @@ export const Select = ({
   isValid = false,
   showValidation = false,
   showSearchBar = false,
+  searchPlaceholder,
   multipleSelect = 'off',
   isDisabled = false,
   offsetParent,
@@ -236,6 +237,7 @@ export const Select = ({
             {...{
               className: 'select__dropdown',
               showSearchBar,
+              searchPlaceholder,
               listRef,
               activeOption,
               activeOptions,
@@ -281,6 +283,7 @@ Select.propTypes = {
   isValid: PropTypes.bool,
   showValidation: PropTypes.bool,
   showSearchBar: PropTypes.bool,
+  searchPlaceholder: PropTypes.string,
   multipleSelect: PropTypes.oneOf(['off', 'dropdown']),
   isDisabled: PropTypes.bool,
   offsetParent: PropTypes.object,

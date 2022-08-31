@@ -198,11 +198,12 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
           </div>
           <div className={'glossary-tm-container'}>
             <Select
-              className={'glossary-select'}
+              className="glossary-select"
               name="glossary-term-tm"
               label="Glossary"
-              placeholder={'Select a glossary'}
+              placeholder="Select a glossary"
               showSearchBar
+              searchPlaceholder="Find a glossary"
               multipleSelect="dropdown"
               options={keys}
               activeOptions={activeKeys}
@@ -233,11 +234,12 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
 
             <div className={'input-with-label__wrapper'}>
               <Select
-                className={'glossary-select'}
+                className="glossary-select domain-select"
                 name="glossary-term-domain"
                 label="Domain"
-                placeholder={'Select a domain'}
+                placeholder="Select a domain"
                 showSearchBar
+                searchPlaceholder="Find a domain"
                 options={domains}
                 activeOption={activeDomain}
                 checkSpaceToReverse={false}
@@ -256,8 +258,9 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                   resetQueryFilter,
                 }) =>
                   index === optionsLength - 1 &&
-                  queryFilter && (
+                  queryFilter.trim() && (
                     <button
+                      className="button-create-option"
                       onClick={() => {
                         setDomains((prevState) => [
                           ...prevState,
@@ -277,11 +280,12 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
             </div>
             <div className={'input-with-label__wrapper'}>
               <Select
-                className={'glossary-select'}
+                className="glossary-select domain-select"
                 name="glossary-term-subdomain"
                 label="Subdomain"
-                placeholder={'Select a subdomain'}
+                placeholder="Select a subdomain"
                 showSearchBar
+                searchPlaceholder="Find a subdomain"
                 options={subDomains}
                 activeOption={activeSubDomain}
                 checkSpaceToReverse={false}
@@ -290,6 +294,34 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                     setActiveSubDomain(option)
                   }
                 }}
+                optionTemplate={({name}) => (
+                  <div className="domain-option">{name}</div>
+                )}
+                onRenderOption={({
+                  index,
+                  optionsLength,
+                  queryFilter,
+                  resetQueryFilter,
+                }) =>
+                  index === optionsLength - 1 &&
+                  queryFilter.trim() && (
+                    <button
+                      className="button-create-option"
+                      onClick={() => {
+                        setSubDomains((prevState) => [
+                          ...prevState,
+                          {
+                            name: queryFilter,
+                            id: (prevState.length + 1).toString(),
+                          },
+                        ])
+                        resetQueryFilter()
+                      }}
+                    >
+                      + Create a subdomain name <b>{queryFilter}</b>
+                    </button>
+                  )
+                }
               />
             </div>
           </div>
