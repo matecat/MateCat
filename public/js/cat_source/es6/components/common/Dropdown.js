@@ -1,9 +1,7 @@
 import React, {useState, useRef, useEffect, Fragment} from 'react'
 import PropTypes from 'prop-types'
-// import useEvent from 'hooks/useEvent'
 
 import Check from '../../../../../img/icons/Check'
-// import Add from 'icons/Add'
 import Search from '../../../../../img/icons/Search'
 
 export const Dropdown = ({

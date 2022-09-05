@@ -58,7 +58,7 @@
           }
         }
         .domain-option {
-          border: 2px solid $grey7;
+          border: 1px solid $grey7;
           border-radius: 12px;
           padding: 0 6px 0 6px;
         }
@@ -105,7 +105,8 @@
       }
     }
   }
-  input {
+  input,
+  textarea {
     border: 1px solid $grey2;
     border-radius: 4px;
     padding: 4px 8px;
@@ -119,6 +120,10 @@
     &.input-large {
       height: 64px;
     }
+  }
+
+  textarea {
+    resize: none;
   }
 
   .glossary_search {
@@ -357,5 +362,9 @@
         }
       }
     }
+  }
+
+  .select--is-disabled {
+    background-color: $grey4;
   }
 }

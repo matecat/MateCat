@@ -2,141 +2,229 @@
  * React Component .
 
  */
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
-const keys = [
+
+const mockGlossaryTerms = [
   {
-    name: 'Ciao',
-    id: 'a3a708aad524b8fd4468',
+    term_id: 'xxxxxxxx',
+    source_language: 'en-US',
+    target_language: 'it-IT',
+    source: {
+      term: 'Payment',
+      note: 'The amount a Rider ...',
+      sentence: 'Example phrase',
+    },
+    target: {
+      term: 'Pagamento',
+      note: "L'ammontare che un Rider ...",
+      sentence: 'Frase di esempio',
+    },
+    matching_words: ['Pay', 'Payment'],
+    metadata: {
+      definition: 'Non se sa che è ma definisce la parole',
+      key: 'abc-erd-sassdfdd',
+      key_name: 'Uber Glossary',
+      domain: 'Uber',
+      subdomain: 'Eats',
+      create_date: '2022-08-10',
+      last_update: '2022-09-01',
+    },
   },
   {
-    name: 'Concetta',
-    id: '9baba936e9624fc4c663',
+    term_id: 'xxxxxxxx',
+    source_language: 'en-US',
+    target_language: 'it-IT',
+    source: {
+      term: 'Payment',
+      note: 'The amount a Rider ...',
+      sentence: 'Example phrase',
+    },
+    target: {
+      term: 'Pagamento',
+      note: "L'ammontare che un Rider ...",
+      sentence: 'Frase di esempio',
+    },
+    matching_words: ['Pay', 'Payment'],
+    metadata: {
+      definition: 'Non se sa che è ma definisce la parole',
+      key: 'abc-erd-sassdfdd',
+      key_name: 'Uber Glossary',
+      domain: 'Uber',
+      subdomain: 'Eats',
+      create_date: '2022-08-10',
+      last_update: '2022-09-01',
+    },
   },
   {
-    name: 'No Name',
-    id: 'c0a28df1943c5f854f75',
-  },
-  {
-    name: 'No Name',
-    id: '3e8e2d0de4a63e0272e7',
-  },
-  {
-    name: 'Test creazione chiave 1',
-    id: '20fb44b40065351c90f1',
-  },
-  {
-    name: 'No Name',
-    id: '55f7032ecd4f01323fbe',
-  },
-  {
-    name: 'es_XC.tmx',
-    id: '95ec21ba2634a410b0d1',
-  },
-  {
-    name: 'prova',
-    id: '1b5e94f1d67c287509b3',
-  },
-  {
-    name: 'test ',
-    id: 'b6e38ab1e2c8393ded0d',
-  },
-  {
-    name: 'Ms test pl',
-    id: '53d198c4085b5293c798',
-  },
-  {
-    name: 'Micro1 test',
-    id: 'c04a88eaafb2841d1d43',
-  },
-  {
-    name: 'MMMM test',
-    id: '192881653391f54ee955',
-  },
-  {
-    name: 'test1 micro',
-    id: '43dda923f2914ef12350',
-  },
-  {
-    name: 'micro test',
-    id: 'c9889f3bb2cf906486ee',
-  },
-  {
-    name: 'micro test',
-    id: 'edfc29151e12f8ea7382',
-  },
-  {
-    name: 'Micro Test',
-    id: '19f61ecc47d6c4f3d2a6',
-  },
-  {
-    name: 'Private TM and Glossary',
-    id: '08b645519fc29d460437',
-  },
-  {
-    name: 'Microsoft test',
-    id: 'ea8e383ec331c768424a',
-  },
-  {
-    name: 'Microsoft',
-    id: 'eb44d624758710490a92',
-  },
-  {
-    name: 'Micro german',
-    id: '7263f04f9711301dbd35',
-  },
-  {
-    name: 'Micro french',
-    id: '32407df35ad4da726706',
-  },
-  {
-    name: 'Micro',
-    id: '4c9cb9fdc101a8ff24d9',
-  },
-  {
-    name: 'Micro',
-    id: 'fa973db1815c326acb6a',
-  },
-  {
-    name: 'MS',
-    id: 'fa4a22b355baf83394b9',
-  },
-  {
-    name: 'Private TM and Glossary',
-    id: '4849101ed342147449e2',
-  },
-  {
-    name: 'Private TM and Glossary',
-    id: 'daf31bb28574f1f79d10',
-  },
-  {
-    name: 'No Name',
-    id: '821ec669486c553f76a5',
-  },
-  {
-    name: 'guess tag test Finnish',
-    id: '6626a5790f0723a3032c',
-  },
-  {
-    name: 'es_XC.tmx',
-    id: 'cf70b5aad3b8802e4f77',
-  },
-  {
-    name: '1234567812345678123456734567456756565667ssssssssssssss',
-    id: 'e9ed98bb5137ed81f40f',
-  },
-  {
-    name: 'No Name',
-    id: 'e7e4e69f2af1fb26834b',
-  },
-  {
-    name: 'No Name',
-    id: 'b1997669fde460b74375',
+    term_id: 'xxxxxxxx',
+    source_language: 'en-US',
+    target_language: 'it-IT',
+    source: {
+      term: 'Payment',
+      note: 'The amount a Rider ...',
+      sentence: 'Example phrase',
+    },
+    target: {
+      term: 'Pagamento',
+      note: "L'ammontare che un Rider ...",
+      sentence: 'Frase di esempio',
+    },
+    matching_words: ['Pay', 'Payment'],
+    metadata: {
+      definition: 'Non se sa che è ma definisce la parole',
+      key: 'abc-erd-sassdfdd',
+      key_name: 'Uber Glossary',
+      domain: 'Uber',
+      subdomain: 'Eats',
+      create_date: '2022-08-10',
+      last_update: '2022-09-01',
+    },
   },
 ]
 
+const TERM_FORM_FIELDS = {
+  DEFINITION: 'definition',
+  ORIGINAL_TERM: 'originalTerm',
+  ORIGINAL_DESCRIPTION: 'originalDescription',
+  ORIGINAL_EXAMPLE: 'originalExample',
+  TRANSLATED_TERM: 'translatedTerm',
+  TRANSLATED_DESCRIPTION: 'translatedDescription',
+  TRANSLATED_EXAMPLE: 'translatedExample',
+}
+
 const initialState = {
+  keys: [
+    {
+      name: 'Ciao',
+      id: 'a3a708aad524b8fd4468',
+    },
+    {
+      name: 'Uber Glossary',
+      id: 'abc-erd-sassdfdd',
+    },
+    {
+      name: 'No Name',
+      id: 'c0a28df1943c5f854f75',
+    },
+    {
+      name: 'No Name',
+      id: '3e8e2d0de4a63e0272e7',
+    },
+    {
+      name: 'Test creazione chiave 1',
+      id: '20fb44b40065351c90f1',
+    },
+    {
+      name: 'No Name',
+      id: '55f7032ecd4f01323fbe',
+    },
+    {
+      name: 'es_XC.tmx',
+      id: '95ec21ba2634a410b0d1',
+    },
+    {
+      name: 'prova',
+      id: '1b5e94f1d67c287509b3',
+    },
+    {
+      name: 'test ',
+      id: 'b6e38ab1e2c8393ded0d',
+    },
+    {
+      name: 'Ms test pl',
+      id: '53d198c4085b5293c798',
+    },
+    {
+      name: 'Micro1 test',
+      id: 'c04a88eaafb2841d1d43',
+    },
+    {
+      name: 'MMMM test',
+      id: '192881653391f54ee955',
+    },
+    {
+      name: 'test1 micro',
+      id: '43dda923f2914ef12350',
+    },
+    {
+      name: 'micro test',
+      id: 'c9889f3bb2cf906486ee',
+    },
+    {
+      name: 'micro test',
+      id: 'edfc29151e12f8ea7382',
+    },
+    {
+      name: 'Micro Test',
+      id: '19f61ecc47d6c4f3d2a6',
+    },
+    {
+      name: 'Private TM and Glossary',
+      id: '08b645519fc29d460437',
+    },
+    {
+      name: 'Microsoft test',
+      id: 'ea8e383ec331c768424a',
+    },
+    {
+      name: 'Microsoft',
+      id: 'eb44d624758710490a92',
+    },
+    {
+      name: 'Micro german',
+      id: '7263f04f9711301dbd35',
+    },
+    {
+      name: 'Micro french',
+      id: '32407df35ad4da726706',
+    },
+    {
+      name: 'Micro',
+      id: '4c9cb9fdc101a8ff24d9',
+    },
+    {
+      name: 'Micro',
+      id: 'fa973db1815c326acb6a',
+    },
+    {
+      name: 'MS',
+      id: 'fa4a22b355baf83394b9',
+    },
+    {
+      name: 'Private TM and Glossary',
+      id: '4849101ed342147449e2',
+    },
+    {
+      name: 'Private TM and Glossary',
+      id: 'daf31bb28574f1f79d10',
+    },
+    {
+      name: 'No Name',
+      id: '821ec669486c553f76a5',
+    },
+    {
+      name: 'guess tag test Finnish',
+      id: '6626a5790f0723a3032c',
+    },
+    {
+      name: 'es_XC.tmx',
+      id: 'cf70b5aad3b8802e4f77',
+    },
+    {
+      name: '1234567812345678123456734567456756565667ssssssssssssss',
+      id: 'e9ed98bb5137ed81f40f',
+    },
+    {
+      name: 'No Name',
+      id: 'e7e4e69f2af1fb26834b',
+    },
+    {
+      name: 'No Name',
+      id: 'b1997669fde460b74375',
+    },
+  ],
   domains: [
     {
       name: 'Uber',
@@ -147,24 +235,24 @@ const initialState = {
       id: '2',
     },
     {
-      name: 'ebay',
+      name: 'Ebay',
       id: '3',
     },
   ],
-  subDomains: [
+  subdomains: [
     {
       name: 'Rider',
       id: '1',
     },
     {
-      name: 'Ciccio',
+      name: 'Eats',
       id: '2',
     },
-    {
-      name: 'Franco',
-      id: '3',
-    },
   ],
+  termForm: Object.entries(TERM_FORM_FIELDS).reduce(
+    (acc, [, value]) => ({...acc, [value]: ''}),
+    {},
+  ),
 }
 
 export const SegmentFooterTabGlossary = ({active_class}) => {
@@ -172,29 +260,102 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
   const [searchTarget, setSearchTarget] = useState()
   const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [keys, setKeys] = useState(initialState.keys)
   const [domains, setDomains] = useState(initialState.domains)
-  const [subDomains, setSubDomains] = useState(initialState.subDomains)
-  const [activeKeys, setActiveKeys] = useState([keys[0]])
-  const [activeDomain, setActiveDomain] = useState(domains[0])
-  const [activeSubDomain, setActiveSubDomain] = useState(subDomains[0])
+  const [subdomains, setSubdomains] = useState(initialState.subdomains)
+  const [selectsActive, setSelectsActive] = useState({
+    keys: [],
+    domain: undefined,
+    subdomain: undefined,
+  })
+  const [terms, setTerms] = useState(mockGlossaryTerms)
   const [modifyElement, setModifyElement] = useState()
+  const [termForm, setTermForm] = useState(initialState.termForm)
+
+  // set active keys, domain and subdomain
+  useEffect(() => {
+    const defaultKeys = [keys[0]]
+    const defaultDomain = domains[0]
+    const defaultSubdomain = subdomains[0]
+
+    const {metadata} = modifyElement || {}
+
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      keys: keys.find(({id}) => id === metadata?.key)
+        ? [keys.find(({id}) => id === metadata?.key)]
+        : defaultKeys,
+      domain:
+        domains.find(({name}) => name === metadata?.domain) ?? defaultDomain,
+      subdomain:
+        subdomains.find(({name}) => name === metadata?.subdomain) ??
+        defaultSubdomain,
+    }))
+  }, [modifyElement, keys, domains, subdomains])
+
+  // prefill term form
+  useEffect(() => {
+    if (!modifyElement) {
+      setTermForm(initialState.termForm)
+      return
+    }
+    const {
+      DEFINITION,
+      ORIGINAL_TERM,
+      ORIGINAL_DESCRIPTION,
+      ORIGINAL_EXAMPLE,
+      TRANSLATED_TERM,
+      TRANSLATED_DESCRIPTION,
+      TRANSLATED_EXAMPLE,
+    } = TERM_FORM_FIELDS
+    const {metadata, source, target} = modifyElement
+    setTermForm({
+      [DEFINITION]: metadata.definition,
+      [ORIGINAL_TERM]: source.term,
+      [ORIGINAL_DESCRIPTION]: source.note,
+      [ORIGINAL_EXAMPLE]: source.sentence,
+      [TRANSLATED_TERM]: target.term,
+      [TRANSLATED_DESCRIPTION]: target.note,
+      [TRANSLATED_EXAMPLE]: target.sentence,
+    })
+  }, [modifyElement])
+
   const openAddTerm = () => {
+    setModifyElement(undefined)
     setShowForm(true)
   }
 
-  const modifyItem = () => {
+  const modifyItem = (term) => {
     setShowMore(true)
-    setModifyElement({})
+    setModifyElement(term)
     setShowForm(true)
   }
+
+  const updateTermForm = (key, value) =>
+    setTermForm((prevState) => ({...prevState, [key]: value}))
 
   const getFormBox = () => {
+    const {
+      DEFINITION,
+      ORIGINAL_TERM,
+      ORIGINAL_DESCRIPTION,
+      ORIGINAL_EXAMPLE,
+      TRANSLATED_TERM,
+      TRANSLATED_DESCRIPTION,
+      TRANSLATED_EXAMPLE,
+    } = TERM_FORM_FIELDS
     return (
       <div className={'glossary_add-container'}>
         <div className={'glossary-form-line'}>
           <div className={'input-with-label__wrapper'}>
             <label>Definition</label>
-            <input name="glossary-term-definition" />
+            <input
+              name="glossary-term-definition"
+              value={termForm[DEFINITION]}
+              onChange={(event) =>
+                updateTermForm(DEFINITION, event.target.value)
+              }
+            />
           </div>
           <div className={'glossary-tm-container'}>
             <Select
@@ -206,16 +367,22 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
               searchPlaceholder="Find a glossary"
               multipleSelect="dropdown"
               options={keys}
-              activeOptions={activeKeys}
+              activeOptions={selectsActive.keys}
               checkSpaceToReverse={false}
+              isDisabled={!!modifyElement}
               onToggleOption={(option) => {
                 if (option) {
+                  const {keys: activeKeys} = selectsActive
                   if (activeKeys.some((item) => item.id === option.id)) {
-                    setActiveKeys(
-                      activeKeys.filter((item) => item.id !== option.id),
-                    )
+                    setSelectsActive((prevState) => ({
+                      ...prevState,
+                      keys: activeKeys.filter((item) => item.id !== option.id),
+                    }))
                   } else {
-                    setActiveKeys(activeKeys.concat([option]))
+                    setSelectsActive((prevState) => ({
+                      ...prevState,
+                      keys: activeKeys.concat([option]),
+                    }))
                   }
                 }
               }}
@@ -241,11 +408,14 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                 showSearchBar
                 searchPlaceholder="Find a domain"
                 options={domains}
-                activeOption={activeDomain}
+                activeOption={selectsActive.domain}
                 checkSpaceToReverse={false}
                 onSelect={(option) => {
                   if (option) {
-                    setActiveDomain(option)
+                    setSelectsActive((prevState) => ({
+                      ...prevState,
+                      domain: option,
+                    }))
                   }
                 }}
                 optionTemplate={({name}) => (
@@ -286,12 +456,15 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                 placeholder="Select a subdomain"
                 showSearchBar
                 searchPlaceholder="Find a subdomain"
-                options={subDomains}
-                activeOption={activeSubDomain}
+                options={subdomains}
+                activeOption={selectsActive.subdomain}
                 checkSpaceToReverse={false}
                 onSelect={(option) => {
                   if (option) {
-                    setActiveSubDomain(option)
+                    setSelectsActive((prevState) => ({
+                      ...prevState,
+                      subdomain: option,
+                    }))
                   }
                 }}
                 optionTemplate={({name}) => (
@@ -308,7 +481,7 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                     <button
                       className="button-create-option"
                       onClick={() => {
-                        setSubDomains((prevState) => [
+                        setSubdomains((prevState) => [
                           ...prevState,
                           {
                             name: queryFilter,
@@ -330,11 +503,23 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
         <div className={'glossary-form-line'}>
           <div className={'input-with-label__wrapper'}>
             <label>Original term*</label>
-            <input name="glossary-term-original" />
+            <input
+              name="glossary-term-original"
+              value={termForm[ORIGINAL_TERM]}
+              onChange={(event) =>
+                updateTermForm(ORIGINAL_TERM, event.target.value)
+              }
+            />
           </div>
           <div className={'input-with-label__wrapper'}>
             <label>Translated term*</label>
-            <input name="glossary-term-translated" />
+            <input
+              name="glossary-term-translated"
+              value={termForm[TRANSLATED_TERM]}
+              onChange={(event) =>
+                updateTermForm(TRANSLATED_TERM, event.target.value)
+              }
+            />
           </div>
         </div>
         {showMore && (
@@ -342,32 +527,48 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
             <div>
               <div className={'input-with-label__wrapper'}>
                 <label>Description</label>
-                <input
+                <textarea
                   className={'input-large'}
                   name="glossary-term-description-source"
+                  value={termForm[ORIGINAL_DESCRIPTION]}
+                  onChange={(event) =>
+                    updateTermForm(ORIGINAL_DESCRIPTION, event.target.value)
+                  }
                 />
               </div>
               <div className={'input-with-label__wrapper'}>
                 <label>Example phrase</label>
-                <input
+                <textarea
                   className={'input-large'}
                   name="glossary-term-example-source"
+                  value={termForm[ORIGINAL_EXAMPLE]}
+                  onChange={(event) =>
+                    updateTermForm(ORIGINAL_EXAMPLE, event.target.value)
+                  }
                 />
               </div>
             </div>
             <div>
               <div className={'input-with-label__wrapper'}>
                 <label>Description</label>
-                <input
+                <textarea
                   className={'input-large'}
                   name="glossary-term-description-target"
+                  value={termForm[TRANSLATED_DESCRIPTION]}
+                  onChange={(event) =>
+                    updateTermForm(TRANSLATED_DESCRIPTION, event.target.value)
+                  }
                 />
               </div>
               <div className={'input-with-label__wrapper'}>
                 <label>Example phrase</label>
-                <input
+                <textarea
                   className={'input-large'}
                   name="glossary-term-example-target"
+                  value={termForm[TRANSLATED_EXAMPLE]}
+                  onChange={(event) =>
+                    updateTermForm(TRANSLATED_EXAMPLE, event.target.value)
+                  }
                 />
               </div>
             </div>
@@ -388,6 +589,7 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
               onClick={() => {
                 setShowForm(false)
                 setShowMore(false)
+                setModifyElement(undefined)
               }}
             >
               Cancel
@@ -397,13 +599,6 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
         </div>
       </div>
     )
-  }
-  const getGlossaryItemBox = () => {
-    return new Array(5)
-      .fill({})
-      .map((item, index) => (
-        <GlossaryItem key={index} modifyElement={(item) => modifyItem(item)} />
-      ))
   }
   return (
     <div className={`tab sub-editor glossary ${active_class}`}>
@@ -435,7 +630,15 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
               </button>
             </div>
           </div>
-          <div className={'glossary_items'}>{getGlossaryItemBox()}</div>
+          <div className={'glossary_items'}>
+            {terms.map((term, index) => (
+              <GlossaryItem
+                key={index}
+                item={term}
+                modifyElement={() => modifyItem(term)}
+              />
+            ))}
+          </div>
         </>
       )}
     </div>
@@ -443,20 +646,20 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
 }
 
 const GlossaryItem = ({item, modifyElement}) => {
+  const {metadata, source, target} = item
   return (
     <div className={'glossary_item'}>
       <div className={'glossary_item-header'}>
         <div className={'glossary_definition-container'}>
           <span className={'glossary_definition'}>
             <GlossaryDefinitionIcon />
-            The action or process of paying someone or something or of being
-            paid.
+            {metadata.definition}
           </span>
-          <span className={'glossary_badge'}>Uber</span>
-          <span className={'glossary_badge'}>Rider</span>
+          <span className={'glossary_badge'}>{metadata.domain}</span>
+          <span className={'glossary_badge'}>{metadata.subdomain}</span>
           <div className={'glossary_source'}>
-            <b>Uber Glossary</b>
-            <span>2022-07-08</span>
+            <b>{metadata.key_name}</b>
+            <span>{metadata.last_update}</span>
           </div>
         </div>
         <div className={'glossary_item-actions'}>
@@ -472,30 +675,23 @@ const GlossaryItem = ({item, modifyElement}) => {
       <div className={'glossary_item-body'}>
         <div className={'glossary-item_column'}>
           <div className={'glossary_word'}>
-            Payment{' '}
+            {`${source.term} `}
             <div>
               <InfoIcon size={16} />
-              <div className={'glossary_item-tooltip'}>Example</div>
+              <div className={'glossary_item-tooltip'}>{source.sentence}</div>
             </div>
           </div>
-          <div className={'glossary-description'}>
-            The amount a rider, eater, user of UberRUSH, and other products,
-            pays to get a ride, get a meal or a package delivered, etc.
-          </div>
+          <div className={'glossary-description'}>{source.note}</div>
         </div>
         <div className={'glossary-item_column'}>
           <div className={'glossary_word'}>
-            Pagamento{' '}
+            {`${target.term} `}
             <div>
               <InfoIcon size={16} />
-              <div className={'glossary_item-tooltip'}>Example</div>
+              <div className={'glossary_item-tooltip'}>{target.sentence}</div>
             </div>
           </div>
-          <div className={'glossary-description'}>
-            L'importo che un rider, un cliente UberEats, un utente di UberRUSH e
-            di altri prodotti paga per ottenere una corsa, farsi consegnare un
-            pasto o un pacco, ecc
-          </div>
+          <div className={'glossary-description'}>{target.note}</div>
         </div>
       </div>
     </div>
