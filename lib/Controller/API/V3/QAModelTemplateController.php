@@ -215,6 +215,6 @@ class QAModelTemplateController extends KleinController {
      */
     private function getQaModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/qa_model/schema.json' );
+        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
 }

@@ -22,6 +22,7 @@ class GlossaryWorker extends AbstractWorker {
     const GET_ACTION    = 'get';
     const SET_ACTION    = 'set';
     const UPDATE_ACTION = 'update';
+    const DOMAINS_ACTION = 'domains';
 
     /**
      * @param AbstractElement $queueElement
@@ -35,7 +36,7 @@ class GlossaryWorker extends AbstractWorker {
         $action  = $params[ 'action' ];
         $payload = $params[ 'payload' ];
 
-        if ( false === in_array( $action, [ self::DELETE_ACTION, self::GET_ACTION, self::SET_ACTION, self::UPDATE_ACTION ] ) ) {
+        if ( false === in_array( $action, [ self::DELETE_ACTION, self::GET_ACTION, self::SET_ACTION, self::UPDATE_ACTION, self::DOMAINS_ACTION ] ) ) {
             throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
 
@@ -44,6 +45,46 @@ class GlossaryWorker extends AbstractWorker {
         $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
 
         $this->{$action}( $payload );
+    }
+
+    /**
+     * Exposes domains from MyMemory
+     *
+     * @param $payload
+     *
+     * @throws \StompException
+     */
+    private function domains( $payload ) {
+
+        // @TODO HARD-CODED
+        $message = [
+            "entries" => [
+                [
+                    "domain" => "Uber",
+                    "subdomains" => [
+                        "Rider",
+                        "Eats"
+                    ]
+                ],
+                [
+                    "domain" => "Airbnb",
+                    "subdomains" => [
+                        "Tech",
+                        "Marketing",
+                        "Legal"
+                    ]
+                ]
+            ]
+        ];
+
+        $this->publishMessage(
+            $this->setResponsePayload(
+                'glossary_domains',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
+        );
     }
 
     /**

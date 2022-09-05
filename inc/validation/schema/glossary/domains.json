@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "key": {
+      "type": "string"
+    },
+    "id_client": {
+      "type": "string"
+    },
+    "id_job": {
+      "type": "number"
+    },
+    "password": {
+      "type": "string"
+    },
+    "source_language": {
+      "type": "string"
+    },
+    "target_language": {
+      "type": "string"
+    }
+  },
+  "required": ["key","id_client","id_job","password","source_language", "target_language"]
+}

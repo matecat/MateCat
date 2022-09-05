@@ -41,7 +41,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     {
         $validatorObject = new \Validator\JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/qa_model/schema.json' );
+        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/qa_model.json' );
         $validator = new \Validator\JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 

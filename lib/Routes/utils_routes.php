@@ -78,11 +78,12 @@ $klein->with( '/api/app/api-key', function () {
     route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
 } );
 
-$klein->with( '/api/app/glossary/segment', function () {
+$klein->with( '/api/app/glossary', function () {
     route( '/create', 'POST', '\API\App\GlossaryController', 'create' );
     route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
-    route( '/edit', 'POST', '\API\App\GlossaryController', 'edit' );
-    route( '/show', 'POST', '\API\App\GlossaryController', 'show' );
+    route( '/create', 'POST', '\API\App\GlossaryController', 'create' );
+    route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
+    route( '/domains', 'POST', '\API\App\GlossaryController', 'domains' );
+    route( '/segment', 'POST', '\API\App\GlossaryController', 'segment' );
+    route( '/segment/search', 'POST', '\API\App\GlossaryController', 'segmentSearch' );
 } );
-
-route( '/api/app/glossary/search', 'POST', '\API\App\GlossaryController', 'search' );

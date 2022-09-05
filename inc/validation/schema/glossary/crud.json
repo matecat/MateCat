@@ -1,0 +1,97 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_client": {
+      "type": "string"
+    },
+    "id_job": {
+      "type": "integer"
+    },
+    "password": {
+      "type": "string"
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term_id": {
+          "type": "string"
+        },
+        "source_language": {
+          "type": "string"
+        },
+        "target_language": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "term": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            },
+            "sentence": {
+              "type": "string"
+            }
+          },
+          "required": ["term", "note", "sentence"]
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "term": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            },
+            "sentence": {
+              "type": "string"
+            }
+          },
+          "required": ["term", "note", "sentence"]
+        },
+        "matching_words": {
+          "type": "array"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "definition": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string"
+            },
+            "key_name": {
+              "type": "string"
+            },
+            "domain": {
+              "type": "string"
+            },
+            "subdomain": {
+              "type": "string"
+            },
+            "create_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "last_update": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": ["definition", "key", "key_name", "domain", "subdomain", "create_date", "last_update"]
+        }
+      },
+      "required": ["term_id"]
+    }
+  },
+  "required": ["id_client","id_job","password","term"]
+}
