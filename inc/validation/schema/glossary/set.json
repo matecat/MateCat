@@ -90,7 +90,7 @@
           "required": ["definition", "key", "key_name", "domain", "subdomain", "create_date", "last_update"]
         }
       },
-      "required": ["term_id"]
+      "required": ["term_id", "source_language", "target_language", "source", "target", "matching_words", "metadata"]
     }
   },
   "required": ["id_client","id_job","password","term"]

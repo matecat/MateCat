@@ -2,19 +2,10 @@
 
 namespace AsyncTasks\Workers;
 
-use Database;
 use Engine;
 use Stomp;
-use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
-use TmKeyManagement_Filter;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use TMSService;
-use Utils;
 
 class GlossaryWorker extends AbstractWorker {
 
@@ -23,6 +14,7 @@ class GlossaryWorker extends AbstractWorker {
     const SET_ACTION    = 'set';
     const UPDATE_ACTION = 'update';
     const DOMAINS_ACTION = 'domains';
+    const SENTENCE_SEARCH_ACTION = 'sentence_search';
 
     /**
      * @param AbstractElement $queueElement
@@ -36,7 +28,16 @@ class GlossaryWorker extends AbstractWorker {
         $action  = $params[ 'action' ];
         $payload = $params[ 'payload' ];
 
-        if ( false === in_array( $action, [ self::DELETE_ACTION, self::GET_ACTION, self::SET_ACTION, self::UPDATE_ACTION, self::DOMAINS_ACTION ] ) ) {
+        $allowedActions = [
+            self::DELETE_ACTION,
+            self::DOMAINS_ACTION,
+            self::GET_ACTION,
+            self::SENTENCE_SEARCH_ACTION,
+            self::SET_ACTION,
+            self::UPDATE_ACTION,
+        ];
+
+        if ( false === in_array( $action, $allowedActions ) ) {
             throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
 
@@ -45,6 +46,73 @@ class GlossaryWorker extends AbstractWorker {
         $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
 
         $this->{$action}( $payload );
+    }
+
+    /**
+     * Delete a key from MyMemory
+     *
+     * @param $payload
+     *
+     * @throws \Exception
+     */
+    private function delete( $payload ) {
+
+        // @TODO HARD-CODED
+//        "id_client": "XXXXXX"
+//	"id_job": 123456,
+//	"password": "dndndndnd",
+//	"term":
+//	{
+//        "term_id": "xxxxxxxx",
+//		"source_language": "en-US",
+//		"target_language": "it-IT"
+//		"source": null,
+//		"target": null,
+//		"matching_words": null,
+//		"metadata": null
+//	}
+
+        $message =  [
+            "terms" => [
+                [
+                    "term_id" => "123456",
+                    "source_language" => "en-US",
+                    "target_language" => "it-IT",
+                    "source" => [
+                        "term" => "Payment",
+                        "note" => "The amount a Rider ...",
+                        "sentence" => "Example phrase"
+                    ],
+                    "target" => [
+                        "term" => "Pagamento",
+                        "note" => "L'ammontare che un Rider ...",
+                        "sentence" => "Frase di esempio"
+                    ],
+                    "matching_words" => [
+                        "Pay",
+                        "Payment"
+                    ],
+                    "metadata" => [
+                        "definition" => "Non se sa che è ma definisce la parole",
+                        "key" => "abc-erd-sassdfdd",
+                        "key_name" => "Uber Glossary",
+                        "domain" => "Uber",
+                        "subdomain" => "Eats",
+                        "create_date" => "2022-08-10",
+                        "last_update" => "2022-09-01"
+                    ]
+                ]
+            ]
+        ];
+
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        'glossary_delete',
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
     }
 
     /**
@@ -57,99 +125,41 @@ class GlossaryWorker extends AbstractWorker {
     private function domains( $payload ) {
 
         // @TODO HARD-CODED
+        // get domain -> MateCat -> Mymemory
+        // {
+        //   "key": "xxxxx-x-xx-xx-x",
+        //	 "source_language": "en-US",
+        //	 "target_language": "it-IT"
+        // }
+
         $message = [
-            "entries" => [
-                [
-                    "domain" => "Uber",
-                    "subdomains" => [
-                        "Rider",
-                        "Eats"
-                    ]
-                ],
-                [
-                    "domain" => "Airbnb",
-                    "subdomains" => [
-                        "Tech",
-                        "Marketing",
-                        "Legal"
-                    ]
+                "entries" => [
+                        [
+                                "domain" => "Uber",
+                                "subdomains" => [
+                                        "Rider",
+                                        "Eats"
+                                ]
+                        ],
+                        [
+                                "domain" => "Airbnb",
+                                "subdomains" => [
+                                        "Tech",
+                                        "Marketing",
+                                        "Legal"
+                                ]
+                        ]
                 ]
-            ]
         ];
 
         $this->publishMessage(
-            $this->setResponsePayload(
-                'glossary_domains',
-                $payload[ 'id_client' ],
-                $payload[ 'jobData' ],
-                $message
-            )
-        );
-    }
-
-    /**
-     * Delete a key from MyMemory
-     *
-     * @param $payload
-     *
-     * @throws \Exception
-     */
-    private function delete( $payload ) {
-
-        $tm_keys    = $payload[ 'tm_keys' ];
-        $user       = $this->getUser( $payload[ 'user' ] );
-        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
-        $_TMS       = $this->getEngine( $featureSet );
-        $userRole   = $payload[ 'userRole' ];
-        $id_matches = $payload[ 'id_match' ];
-
-        // $payload[ 'config' ] is is a Params class (stdClass), it implements ArrayAccess interface,
-        // but it is defined to allow "_set" only for existing properties
-        // so, trying to set $payload[ 'config' ]['whatever'] will result in a not found key name and the value will be ignored
-        // Fix: reassign an array
-        $config = $payload[ 'config' ]->toArray();
-
-        //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
-
-        $keys_hashes = [];
-        foreach ( $tm_keys as $tm_key ) {
-            $keys_hashes[] = $tm_key->key;
-        }
-
-        $Filter                  = MateCatFilter::getInstance( $featureSet, null, null, [] );
-        $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $config[ 'segment' ] );
-        $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $config[ 'translation' ] );
-
-        //prepare the error report
-        $set_code = [];
-
-        //delete id from the keys
-        if($id_matches !== null){
-            $config[ 'id_user' ]  = $keys_hashes;
-            $config[ 'id_match' ] = $id_matches;
-
-            $TMS_RESULT           = $_TMS->delete( $config );
-            $set_code[]           = $TMS_RESULT;
-        }
-
-        $set_successful = true;
-        if ( array_search( false, $set_code, true ) !== false ) {
-            $set_successful = false;
-        }
-
-        $this->publishMessage(
                 $this->setResponsePayload(
-                        'glossary_delete',
+                        'glossary_domains',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        [
-                                'data'       => ( $set_successful ? 'OK' : 'KO' ),
-                                'id_segment' => $payload[ 'id_segment' ]
-                        ]
+                        $message
                 )
         );
-
     }
 
     /**
@@ -159,116 +169,113 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @throws \Exception
      */
-    private function get( $payload ) {
+    private function get( $payload )
+    {
+        // @TODO HARD-CODED
+        //  "source": $payload['source']
+        //	"source_language": "en-US",
+        //	"target_language": "it-IT",
+        //	"keys": $payload['tm_keys'] ---->  [ "xxx", "yyy" ]
 
-        $user       = $this->getUser( $payload[ 'user' ] );
-        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
-        $_TMS       = $this->getEngine( $featureSet );
-        $tm_keys    = $payload[ 'tm_keys' ];
-        $userRole   = $payload[ 'userRole' ];
-        $jobData    = $payload[ 'jobData' ];
-
-        // $config['id_user'] is is a Params class (stdClass), it implements ArrayAccess interface,
-        // but it is defined to allow "_set" only for existing properties
-        // so, trying to set $config['id_user'][] will result in an empty key name and the value will be ignored
-        // Fix: reassign an array
-        $config = $payload[ 'config' ]->toArray();
-
-        $segment      = $payload[ 'segment' ];
-        $userIsLogged = $payload[ 'userIsLogged' ];
-        $fromtarget   = $payload[ 'fromtarget' ];
-
-        //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $user->uid, $userRole );
-
-        unset( $config[ 'id_user' ] );
-        if ( count( $tm_keys ) ) {
-            $config[ 'id_user' ] = [];
-            foreach ( $tm_keys as $tm_key ) {
-                $config[ 'id_user' ][] = $tm_key->key;
-            }
-        }
-
-        $TMS_RESULT = $_TMS->get( $config )->get_glossary_matches_as_array();
-
-        //check if user is logged. If so, get the uid.
-        $uid = null;
-        if ( $userIsLogged ) {
-            $uid = $user->uid;
-        }
-
-        /**
-         * Return only exact matches in glossary when a search is executed over the entire segment
-         * Reordered by positional status of matches in source
-         *
-         * Example:
-         * Segment: On average, Members of the House of Commons have 4,2 support staff.
-         *
-         * Glossary terms found: House of Commons, House of Lords
-         *
-         * Return: House of Commons
-         *
-         */
-        $tmp_result = [];
-        foreach ( $TMS_RESULT as $k => $val ) {
-            // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-            $tmsMatch = preg_replace( '/([ \t\n\r\0\x0A\xA0]|\xE2\x80\x8B)+$/', '', $k );
-            $res = ($tmsMatch !== null) ? mb_stripos( $segment, $tmsMatch ) : null;
-
-            if ( $res  === false ) {
-                unset( $TMS_RESULT[ $k ] ); // unset glossary terms not contained in the request
-            } else {
-                $tmp_result[ $k ] = $res;
-            }
-        }
-
-        asort( $tmp_result );
-        $tmp_result = array_keys( $tmp_result );
-
-        $matches = [];
-        foreach ( $tmp_result as $glossary_matches ) {
-
-            $current_match = array_pop( $TMS_RESULT[ $glossary_matches ] );
-
-            $current_match[ 'segment' ]         = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'segment' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-            $current_match[ 'raw_segment' ]     = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'raw_segment' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-            $current_match[ 'translation' ]     = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'translation' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-            $current_match[ 'raw_translation' ] = preg_replace( '/\xE2\x80\x8B$/', '', $current_match[ 'raw_translation' ] ); // cleaning 'ZERO WIDTH SPACE' unicode char \xE2\x80\x8B
-
-            $current_match[ 'last_updated_by' ] = Utils::changeMemorySuggestionSource(
-                    $current_match,
-                    $jobData[ 'tm_keys' ],
-                    $jobData[ 'owner' ],
-                    $uid
-            );
-
-            $current_match[ 'created_by' ] = $current_match[ 'last_updated_by' ];
-
-            if ( $fromtarget ) { //Search by target
-                $source                             = $current_match[ 'segment' ];
-                $rawsource                          = $current_match[ 'raw_segment' ];
-                $current_match[ 'segment' ]         = $current_match[ 'translation' ];
-                $current_match[ 'translation' ]     = $source;
-                $current_match[ 'raw_segment' ]     = $current_match[ 'raw_translation' ];
-                $current_match[ 'raw_translation' ] = $rawsource;
-            }
-
-            $matches[] = $current_match;
-
-        }
+        $message =  [
+                "terms" => [
+                        [
+                                "term_id" => "123456",
+                                "source_language" => "en-US",
+                                "target_language" => "it-IT",
+                                "source" => [
+                                        "term" => "Payment",
+                                        "note" => "The amount a Rider ...",
+                                        "sentence" => "Example phrase"
+                                ],
+                                "target" => [
+                                        "term" => "Pagamento",
+                                        "note" => "L'ammontare che un Rider ...",
+                                        "sentence" => "Frase di esempio"
+                                ],
+                                "matching_words" => [
+                                        "Pay",
+                                        "Payment"
+                                ],
+                                "metadata" => [
+                                        "definition" => "Non se sa che è ma definisce la parole",
+                                        "key" => "abc-erd-sassdfdd",
+                                        "key_name" => "Uber Glossary",
+                                        "domain" => "Uber",
+                                        "subdomain" => "Eats",
+                                        "create_date" => "2022-08-10",
+                                        "last_update" => "2022-09-01"
+                                ]
+                        ]
+                ]
+        ];
 
         $this->publishMessage(
                 $this->setResponsePayload(
                         'glossary_get',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        [
-                                'matches'    => $matches,
-                                'id_segment' => $payload[ 'id_segment' ]
-                        ]
+                        $message
                 )
         );
+    }
 
+    /**
+     * Search sentence in MyMemory
+     *
+     * @param $payload
+     *
+     * @throws \StompException
+     */
+    private function sentence_search( $payload )
+    {
+        // @TODO HARD-CODED
+        //  "source": $payload['sentence'],
+        //	"source_language": "en-US",
+        //	"target_language": "it-IT",
+        //	"keys": [ "xxx", "yyy" ]
+
+        $message =  [
+            "terms" => [
+                [
+                    "term_id" => "123456",
+                    "source_language" => "en-US",
+                    "target_language" => "it-IT",
+                    "source" => [
+                        "term" => "Payment",
+                        "note" => "The amount a Rider ...",
+                        "sentence" => "Example phrase"
+                    ],
+                    "target" => [
+                        "term" => "Pagamento",
+                        "note" => "L'ammontare che un Rider ...",
+                        "sentence" => "Frase di esempio"
+                    ],
+                    "matching_words" => [
+                        "Pay",
+                        "Payment"
+                    ],
+                    "metadata" => [
+                        "definition" => "Non se sa che è ma definisce la parole",
+                        "key" => "abc-erd-sassdfdd",
+                        "key_name" => "Uber Glossary",
+                        "domain" => "Uber",
+                        "subdomain" => "Eats",
+                        "create_date" => "2022-08-10",
+                        "last_update" => "2022-09-01"
+                    ]
+                ]
+            ]
+        ];
+
+        $this->publishMessage(
+            $this->setResponsePayload(
+                'glossary_sentence_search',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
+        );
     }
 
     /**
@@ -280,128 +287,79 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function set( $payload ) {
 
-        $user         = $this->getUser( $payload[ 'user' ] );
-        $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
-        $_TMS         = $this->getEngine( $featureSet );
-        $tm_keys      = $payload[ 'tm_keys' ];
-        $userRole     = $payload[ 'userRole' ];
-        $jobData      = $payload[ 'jobData' ];
-        $tmProps      = $payload[ 'tmProps' ];
-        $config       = $payload[ 'config' ];
-        $id_job       = $payload[ 'id_job' ];
-        $password     = $payload[ 'password' ];
-        $userIsLogged = $payload[ 'userIsLogged' ];
+        // @TODO HARD-CODED
+//        {
+//            "id_client": "XXXXXX"
+//	"id_job": 123456,
+//	"password": "dndndndnd",
+//	"term":
+//	{
+//        "term_id": "xxxxxxxx",
+//		"source_language": "en-US",
+//		"target_language": "it-IT"
+//		"source": {
+//        "term": "Payment",
+//			"note": "The amount a Rider ...",
+//			"sentence": "Example phrase"
+//		},
+//		"target": {
+//        "term": "Pagamento",
+//			"note": "L'ammontare che un Rider ...",
+//			"sentence": "Frase di esempio"
+//		},
+//		"matching_words": null,
+//		"metadata": {
+//        "definition": "Non se sa che è ma definisce la parole",
+//			"key": "abc-erd-sassdfdd",
+//			"key_name": "Uber Glossary",
+//			"domain": "Uber",
+//			"subdomain": "Eats",
+//			"create_date": "2022-08-10",
+//			"last_update": "2022-09-01"
+//		}
+//	}
+//}
 
-        //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
-
-        if ( empty( $tm_keys ) ) {
-
-            $APIKeySrv = new TMSService();
-            $newUser   = (object)$APIKeySrv->createMyMemoryKey(); //throws exception
-
-            //fallback
-            $config[ 'id_user' ] = $newUser->id;
-
-            $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
-            $new_key->tm    = 1;
-            $new_key->glos  = 1;
-            $new_key->key   = $newUser->key;
-            $new_key->owner = ( $user->email == $jobData[ 'owner' ] );
-
-            if ( !$new_key->owner ) {
-                $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = 1;
-                $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = 1;
-            } else {
-                $new_key->r = 1;
-                $new_key->w = 1;
-            }
-
-            if ( $new_key->owner ) {
-                //do nothing, this is a greedy if
-            } elseif ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
-                $new_key->uid_transl = $user->uid;
-            } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
-                $new_key->uid_rev = $user->uid;
-            }
-
-            //create an empty array
-            $tm_keys = [];
-            //append new key
-            $tm_keys[] = $new_key;
-
-            //put the key in the job
-            TmKeyManagement_TmKeyManagement::setJobTmKeys( $id_job, $password, $tm_keys );
-
-            //put the key in the user keiring
-            if ( $userIsLogged ) {
-                $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
-                $newMemoryKey->tm_key = $new_key;
-                $newMemoryKey->uid    = $user->uid;
-
-                $mkDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-
-                $mkDao->create( $newMemoryKey );
-            }
-        }
-
-        $config[ 'prop' ] = $tmProps;
-        $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
-        $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
-
-        //prepare the error report
-        $set_code = [];
-        //set the glossary entry for each key with write grants
-        if ( count( $tm_keys ) ) {
-            /**
-             * @var $tm_keys TmKeyManagement_TmKeyStruct[]
-             */
-            foreach ( $tm_keys as $tm_key ) {
-                $config[ 'id_user' ] = $tm_key->key;
-                $TMS_RESULT          = $_TMS->set( $config );
-                $set_code[]          = $TMS_RESULT;
-            }
-        }
-
-        $set_successful = true;
-        if ( array_search( false, $set_code, true ) !== false ) {
-            //There's an error, for now skip, let's assume that are not errors
-            $set_successful = false;
-        }
-
-        $message = [
-                'id_segment' => $payload[ 'id_segment' ],
+        $message =  [
+            "terms" => [
+                [
+                    "term_id" => "123456",
+                    "source_language" => "en-US",
+                    "target_language" => "it-IT",
+                    "source" => [
+                        "term" => "Payment",
+                        "note" => "The amount a Rider ...",
+                        "sentence" => "Example phrase"
+                    ],
+                    "target" => [
+                        "term" => "Pagamento",
+                        "note" => "L'ammontare che un Rider ...",
+                        "sentence" => "Frase di esempio"
+                    ],
+                    "matching_words" => [
+                        "Pay",
+                        "Payment"
+                    ],
+                    "metadata" => [
+                        "definition" => "Non se sa che è ma definisce la parole",
+                        "key" => "abc-erd-sassdfdd",
+                        "key_name" => "Uber Glossary",
+                        "domain" => "Uber",
+                        "subdomain" => "Eats",
+                        "create_date" => "2022-08-10",
+                        "last_update" => "2022-09-01"
+                    ]
+                ]
+            ]
         ];
 
-        if ( $set_successful ) {
-//          Often the get method after a set is not in real time, so return the same values ( FAKE )
-            $message[ 'matches' ] = [
-                    [
-                            'segment'          => $config[ 'segment' ],
-                            'translation'      => $config[ 'translation' ],
-                            'last_update_date' => date_create()->format( 'Y-m-d H:i:m' ),
-                            'last_updated_by'  => "Matecat user",
-                            'created_by'       => "Matecat user",
-                            'target_note'      => $config[ 'tnote' ],
-                            'id_match'         => $set_code
-                    ]
-            ];
-
-            if ( isset( $new_key ) ) {
-                $message[ 'new_tm_key' ] = $new_key->key;
-            }
-
-        } else {
-            $message[ 'error' ] = [ "code" => -1, "message" => "We got an error, please try again." ];
-        }
-
         $this->publishMessage(
-                $this->setResponsePayload(
-                        'glossary_set',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_set',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
         );
     }
 
@@ -414,59 +372,71 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function update( $payload ) {
 
-        $user       = $this->getUser( $payload[ 'user' ] );
-        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
-        $_TMS       = $this->getEngine( $featureSet );
-        $tm_keys    = $payload[ 'tm_keys' ];
-        $userRole   = $payload[ 'userRole' ];
-        $tmProps    = $payload[ 'tmProps' ];
-        $config     = $payload[ 'config' ]->toArray(); // get Array
+        // @TODO HARD-CODED
+//        {
+//            "id_client": "XXXXXX"
+//	"id_job": 123456,
+//	"password": "dndndndnd",
+//	"term":
+//	{
+//        "term_id": "xxxxxxxx",
+//		"source_language": "en-US",
+//		"target_language": "it-IT"
+//		"source": {
+//        "term": "Payment",
+//			"note": "The amount a Rider ...",
+//			"sentence": "Example phrase"
+//		},
+//		"target": {
+//        "term": "Pagamento",
+//			"note": "L'ammontare che un Rider ...",
+//			"sentence": "Frase di esempio"
+//		},
+//		"matching_words": null,
+//		"metadata": {
+//        "definition": "Non se sa che è ma definisce la parole",
+//			"key": "abc-erd-sassdfdd",
+//			"key_name": "Uber Glossary",
+//			"domain": "Uber",
+//			"subdomain": "Eats",
+//			"create_date": "2022-08-10",
+//			"last_update": "2022-09-01"
+//		}
+//	}
+//}
 
-        //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
-
-        $config['id_match'] = $payload['id_segment'];
-
-        $config[ 'prop' ] = $tmProps;
-        $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
-        $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
-
-        //prepare the error report
-        $set_code = [];
-        //set the glossary entry for each key with write grants
-        if ( count( $tm_keys ) ) {
-            /**
-             * @var $tm_key TmKeyManagement_TmKeyStruct
-             */
-
-            foreach ( $tm_keys as $tm_key ) {
-                $config[ 'id_user' ] = $tm_key->key;
-                $TMS_RESULT          = $_TMS->updateGlossary( $config );
-                $set_code[]          = $TMS_RESULT;
-            }
-        }
-
-        $set_successful = true;
-        if ( array_search( false, $set_code, true ) !== false ) {
-            $set_successful = false;
-        }
-
-        //reset key list
-        $config[ 'id_user' ] = [];
-        foreach ( $tm_keys as $tm_key ) {
-            $config[ 'id_user' ][] = $tm_key->key;
-        }
-
-        $message = [];
-        if ( $set_successful ) {
-            //remove ugly structure from mymemory
-            $raw_matches          = $_TMS->get( $config )->get_glossary_matches_as_array();
-            $matches              = array_pop( $raw_matches );
-            $message[ 'matches' ] = array_pop( $matches );
-        } else {
-            $message[ 'error' ] = [ "code" => -1, "message" => "We got an error, please try again." ];
-        }
-        $message[ 'id_segment' ] = $payload[ 'id_segment' ];
+        $message =  [
+                "terms" => [
+                        [
+                                "term_id" => "123456",
+                                "source_language" => "en-US",
+                                "target_language" => "it-IT",
+                                "source" => [
+                                        "term" => "Payment",
+                                        "note" => "The amount a Rider ...",
+                                        "sentence" => "Example phrase"
+                                ],
+                                "target" => [
+                                        "term" => "Pagamento",
+                                        "note" => "L'ammontare che un Rider ...",
+                                        "sentence" => "Frase di esempio"
+                                ],
+                                "matching_words" => [
+                                        "Pay",
+                                        "Payment"
+                                ],
+                                "metadata" => [
+                                        "definition" => "Non se sa che è ma definisce la parole",
+                                        "key" => "abc-erd-sassdfdd",
+                                        "key_name" => "Uber Glossary",
+                                        "domain" => "Uber",
+                                        "subdomain" => "Eats",
+                                        "create_date" => "2022-08-10",
+                                        "last_update" => "2022-09-01"
+                                ]
+                        ]
+                ]
+        ];
 
         $this->publishMessage(
                 $this->setResponsePayload(
@@ -478,15 +448,23 @@ class GlossaryWorker extends AbstractWorker {
         );
     }
 
+    /**
+     * @param $type
+     * @param $id_client
+     * @param $jobData
+     * @param $message
+     *
+     * @return array
+     */
     private function setResponsePayload( $type, $id_client, $jobData, $message ) {
         return [
-                '_type' => $type,
-                'data'  => [
-                        'payload'   => $message,
-                        'id_client' => $id_client,
-                        'id_job'    => $jobData[ 'id' ],
-                        'passwords' => $jobData[ 'password' ]
-                ]
+            '_type' => $type,
+            'data'  => [
+                'payload'   => $message,
+                'id_client' => $id_client,
+                'id_job'    => $jobData[ 'id' ],
+                'passwords' => $jobData[ 'password' ]
+            ]
         ];
 
     }

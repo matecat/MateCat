@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_client": {
+      "type": "string"
+    },
+    "id_job": {
+      "type": "integer"
+    },
+    "password": {
+      "type": "string"
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term_id": {
+          "type": "string"
+        },
+        "source_language": {
+          "type": "string"
+        },
+        "target_language": {
+          "type": "string"
+        },
+        "source": {
+
+        },
+        "target": {
+
+        },
+        "matching_words": {
+
+        },
+        "metadata": {
+
+        }
+      },
+      "required": ["term_id"]
+    }
+  },
+  "required": ["id_client","id_job","password","term"]
+}

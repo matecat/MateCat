@@ -4,9 +4,7 @@ namespace API\App;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
-use TmKeyManagement_Filter;
 use Validator\JSONValidatorObject;
-use AsyncTasks\Workers\GlossaryWorker;
 
 class GlossaryController extends KleinController {
 
@@ -18,72 +16,87 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Create a new glossary item
+     * Set action on MyMemory
      *
      * @throws \ReflectionException
      * @throws \Swaggest\JsonSchema\InvalidValue
      */
-    public function create()
+    public function set()
     {
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../../inc/validation/schema/glossary/crud.json' );
-        $this->validateJson($this->request->body(), $jsonSchema);
-
-        $json = json_decode($this->request->body(), true);
-
-        $this->validateLanguage($json['target_language']);
-        $this->validateLanguage($json['source_language']);
-
-        $job = \CatUtils::getJobFromIdAndAnyPassword($json['id_job'], $json['password']);
-
-        if($job === null){
-            $this->response->code(500);
-            $this->response->json([
-                    'error' => 'Wrong id_job/password combination'
-            ]);
-            die();
-        }
-
-        $this->featureSet->loadForProject( $job->getProject() );
-        $projectFeaturesString = $job->getProject()->getMetadataValue( \Projects_MetadataDao::FEATURES_KEY );
-
-        $config = [];
-
-        $isRevision = \CatUtils::getIsRevisionFromIdJobAndPassword($json['id_job'], $json['password']);
-        $userRole = ($isRevision) ? TmKeyManagement_Filter::ROLE_REVISOR : TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/set.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
 
         $params = [
-            'action'  => GlossaryWorker::SET_ACTION,
-            'payload' => [
-                'id_segment'     => $json['id_segment'],
-                'id_client'      => $json['id_client'],
-                'tm_keys'        => $job->tm_keys,
-                'userRole'       => $userRole,
-                'user'           => $this->user->toArray(),
-                'featuresString' => $projectFeaturesString,
-                'featureSet'     => $this->featureSet,
-                'jobData'        => $job->toArray(),
-                'tmProps'        => $job->getTMProps(),
-                'config'         => $config,
-            ],
+            'action' => 'set',
+            'payload' => $json,
         ];
 
-       // $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
+        $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json([
-            'id_segment' => $json['id_segment'],
-        ]);
+        $this->response->json($json);
     }
 
+    /**
+     * Delete action on MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
     public function delete()
     {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+            'action' => 'delete',
+            'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
+
+        $this->response->json($json);
     }
 
-    public function edit()
+    /**
+     * Update action on MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function update()
     {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/set.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+            'action' => 'update',
+            'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
+
+        $this->response->json($json);
     }
 
-    public function show()
+    /**
+     * Get action on MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function get()
     {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+            'action' => 'get',
+            'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
     }
 
     /**
@@ -94,7 +107,50 @@ class GlossaryController extends KleinController {
      */
     public function domains()
     {
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../../inc/validation/schema/glossary/domains.json' );
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/domains.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+            'action' => 'domains',
+            'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
+     * Search for a specific sentence in MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function sentenceSearch()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/sentence_search.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+            'action' => 'sentence_search',
+            'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
+     * @param $jsonSchemaPath
+     *
+     * @return mixed
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    private function validateThePayload( $jsonSchemaPath)
+    {
+        $jsonSchema = file_get_contents($jsonSchemaPath);
         $this->validateJson($this->request->body(), $jsonSchema);
 
         $json = json_decode($this->request->body(), true);
@@ -113,23 +169,9 @@ class GlossaryController extends KleinController {
         }
 
         $json['jobData'] = $job->toArray();
+        $json['tm_keys'] = $job->tm_keys;
 
-        $params = [
-            'action' => 'domains',
-            'payload' => $json,
-        ];
-
-        $this->enqueueWorker( self::GLOSSARY_READ, $params );
-
-        $this->response->json($json);
-    }
-
-    public function segment()
-    {
-    }
-
-    public function segmentSearch()
-    {
+        return $json;
     }
 
     /**

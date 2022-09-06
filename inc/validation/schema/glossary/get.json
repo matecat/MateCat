@@ -2,13 +2,7 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "sentence": {
-      "type": "string"
-    },
     "source": {
-      "type": "string"
-    },
-    "target": {
       "type": "string"
     },
     "id_segment": {
