@@ -5,6 +5,7 @@
 import React, {useEffect, useState} from 'react'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
+import {SegmentedControl} from '../common/SegmentedControl'
 
 const mockGlossaryTerms = [
   {
@@ -256,8 +257,11 @@ const initialState = {
 }
 
 export const SegmentFooterTabGlossary = ({active_class}) => {
-  const [searchSource, setSearchSource] = useState()
-  const [searchTarget, setSearchTarget] = useState()
+  const [searchTerm, setSearchTerm] = useState()
+  const [searchTypes, setSearchTypes] = useState([
+    {id: '0', name: 'Source', selected: true},
+    {id: '1', name: 'Target'},
+  ])
   const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [keys, setKeys] = useState(initialState.keys)
@@ -331,6 +335,9 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
     setShowForm(true)
   }
 
+  const updateSelectActive = (key, value) =>
+    setSelectsActive((prevState) => ({...prevState, [key]: value}))
+
   const updateTermForm = (key, value) =>
     setTermForm((prevState) => ({...prevState, [key]: value}))
 
@@ -374,15 +381,12 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                 if (option) {
                   const {keys: activeKeys} = selectsActive
                   if (activeKeys.some((item) => item.id === option.id)) {
-                    setSelectsActive((prevState) => ({
-                      ...prevState,
-                      keys: activeKeys.filter((item) => item.id !== option.id),
-                    }))
+                    updateSelectActive(
+                      'keys',
+                      activeKeys.filter((item) => item.id !== option.id),
+                    )
                   } else {
-                    setSelectsActive((prevState) => ({
-                      ...prevState,
-                      keys: activeKeys.concat([option]),
-                    }))
+                    updateSelectActive('keys', activeKeys.concat([option]))
                   }
                 }
               }}
@@ -412,10 +416,7 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                 checkSpaceToReverse={false}
                 onSelect={(option) => {
                   if (option) {
-                    setSelectsActive((prevState) => ({
-                      ...prevState,
-                      domain: option,
-                    }))
+                    updateSelectActive('domain', option)
                   }
                 }}
                 optionTemplate={({name}) => (
@@ -461,10 +462,7 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                 checkSpaceToReverse={false}
                 onSelect={(option) => {
                   if (option) {
-                    setSelectsActive((prevState) => ({
-                      ...prevState,
-                      subdomain: option,
-                    }))
+                    updateSelectActive('subdomain', option)
                   }
                 }}
                 optionTemplate={({name}) => (
@@ -607,28 +605,34 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
       ) : (
         <>
           <div className={'glossary_search'}>
-            <div className={'glossary_search-source'}>
+            <div className={'glossary_search-container'}>
               <input
-                name="search_source"
+                name="search_term"
                 className={'glossary_search-input'}
-                placeholder={'Search source'}
-                onChange={(event) => setSearchSource(event.target.value)}
+                placeholder={'Search term'}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+              <SegmentedControl
+                name="search"
+                className="search-type"
+                options={searchTypes}
+                selectedId={searchTypes.find(({selected}) => selected).id}
+                onChange={(value) => {
+                  setSearchTypes((prevState) =>
+                    prevState.map((tab) => ({
+                      ...tab,
+                      selected: tab.id === value,
+                    })),
+                  )
+                }}
               />
             </div>
-            <div className={'glossary_search-target'}>
-              <input
-                name="search_target"
-                className={'glossary_search-input'}
-                placeholder={'Search target'}
-                onChange={(event) => setSearchTarget(event.target.value)}
-              />
-              <button
-                className={'glossary__button-add'}
-                onClick={() => openAddTerm()}
-              >
-                + Add Term
-              </button>
-            </div>
+            <button
+              className={'glossary__button-add'}
+              onClick={() => openAddTerm()}
+            >
+              + Add Term
+            </button>
           </div>
           <div className={'glossary_items'}>
             {terms.map((term, index) => (

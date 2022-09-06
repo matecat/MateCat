@@ -9,7 +9,6 @@
     label {
       display: block;
       margin-bottom: 4px;
-      cursor: pointer;
       font-size: 14px;
       line-height: 16px;
       color: $grey6;
@@ -105,7 +104,7 @@
       }
     }
   }
-  input,
+  input:not([type='radio']),
   textarea {
     border: 1px solid $grey2;
     border-radius: 4px;
@@ -132,11 +131,11 @@
     flex-wrap: nowrap;
     padding: 24px 32px;
     border-bottom: 1px solid $grey3;
+    justify-content: space-between;
   }
 
-  .glossary_search-source {
+  .glossary_search-container {
     display: flex;
-    width: 50%;
   }
   .glossary_search-target {
     width: 50%;
@@ -366,5 +365,19 @@
 
   .select--is-disabled {
     background-color: $grey4;
+  }
+
+  .search-type {
+    margin-left: 24px;
+  }
+
+  .segmented-control {
+    .segmented-control__cursor {
+      padding: unset;
+    }
+    .segmented-control__label {
+      line-height: 32px;
+      padding: 0 14px 0 14px;
+    }
   }
 }
