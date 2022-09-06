@@ -16,6 +16,90 @@ class GlossaryController extends KleinController {
     }
 
     /**
+     * Delete action on MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function delete()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+                'action' => 'delete',
+                'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
+     * Get the domains from MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function domains()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/domains.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+                'action' => 'domains',
+                'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
+     * Get action on MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function get()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+                'action' => 'get',
+                'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
+     * Search for a specific sentence in MyMemory
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function search()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/search.json' ;
+        $json = $this->validateThePayload($jsonSchemaPath);
+
+        $params = [
+                'action' => 'search',
+                'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
      * Set action on MyMemory
      *
      * @throws \ReflectionException
@@ -28,27 +112,6 @@ class GlossaryController extends KleinController {
 
         $params = [
             'action' => 'set',
-            'payload' => $json,
-        ];
-
-        $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
-
-        $this->response->json($json);
-    }
-
-    /**
-     * Delete action on MyMemory
-     *
-     * @throws \ReflectionException
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     */
-    public function delete()
-    {
-        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
-
-        $params = [
-            'action' => 'delete',
             'payload' => $json,
         ];
 
@@ -79,69 +142,9 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Get action on MyMemory
+     * This function validates the payload
+     * and returns an object ready for GlossaryWorker
      *
-     * @throws \ReflectionException
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     */
-    public function get()
-    {
-        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
-
-        $params = [
-            'action' => 'get',
-            'payload' => $json,
-        ];
-
-        $this->enqueueWorker( self::GLOSSARY_READ, $params );
-
-        $this->response->json($json);
-    }
-
-    /**
-     * Get the domains from MyMemory
-     *
-     * @throws \ReflectionException
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     */
-    public function domains()
-    {
-        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/domains.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
-
-        $params = [
-            'action' => 'domains',
-            'payload' => $json,
-        ];
-
-        $this->enqueueWorker( self::GLOSSARY_READ, $params );
-
-        $this->response->json($json);
-    }
-
-    /**
-     * Search for a specific sentence in MyMemory
-     *
-     * @throws \ReflectionException
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     */
-    public function sentenceSearch()
-    {
-        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/sentence_search.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
-
-        $params = [
-            'action' => 'sentence_search',
-            'payload' => $json,
-        ];
-
-        $this->enqueueWorker( self::GLOSSARY_READ, $params );
-
-        $this->response->json($json);
-    }
-
-    /**
      * @param $jsonSchemaPath
      *
      * @return mixed
@@ -155,8 +158,15 @@ class GlossaryController extends KleinController {
 
         $json = json_decode($this->request->body(), true);
 
-        $this->validateLanguage($json['target_language']);
-        $this->validateLanguage($json['source_language']);
+        if(isset($json['target_language']) and isset($json['source_language'])){
+            $this->validateLanguage($json['target_language']);
+            $this->validateLanguage($json['source_language']);
+        }
+
+        if(isset($json['term']['target_language']) and isset($json['term']['source_language'])){
+            $this->validateLanguage($json['term']['target_language']);
+            $this->validateLanguage($json['term']['source_language']);
+        }
 
         $job = \CatUtils::getJobFromIdAndAnyPassword($json['id_job'], $json['password']);
 

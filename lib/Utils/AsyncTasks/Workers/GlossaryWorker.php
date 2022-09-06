@@ -14,7 +14,7 @@ class GlossaryWorker extends AbstractWorker {
     const SET_ACTION    = 'set';
     const UPDATE_ACTION = 'update';
     const DOMAINS_ACTION = 'domains';
-    const SENTENCE_SEARCH_ACTION = 'sentence_search';
+    const SEARCH_ACTION = 'search';
 
     /**
      * @param AbstractElement $queueElement
@@ -32,7 +32,7 @@ class GlossaryWorker extends AbstractWorker {
             self::DELETE_ACTION,
             self::DOMAINS_ACTION,
             self::GET_ACTION,
-            self::SENTENCE_SEARCH_ACTION,
+            self::SEARCH_ACTION,
             self::SET_ACTION,
             self::UPDATE_ACTION,
         ];
@@ -227,7 +227,7 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @throws \StompException
      */
-    private function sentence_search( $payload )
+    private function search( $payload )
     {
         // @TODO HARD-CODED
         //  "source": $payload['sentence'],

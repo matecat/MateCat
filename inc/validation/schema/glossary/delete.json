@@ -25,16 +25,16 @@
           "type": "string"
         },
         "source": {
-
+          "type": "null"
         },
         "target": {
-
+          "type": "null"
         },
         "matching_words": {
-
+          "type": "null"
         },
         "metadata": {
-
+          "type": "null"
         }
       },
       "required": ["term_id"]

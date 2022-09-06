@@ -79,10 +79,10 @@ $klein->with( '/api/app/api-key', function () {
 } );
 
 $klein->with( '/api/app/glossary', function () {
-    route( '/set', 'POST', '\API\App\GlossaryController', 'set' );
-    route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
-    route( '/update', 'POST', '\API\App\GlossaryController', 'update' );
     route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
     route( '/domains', 'POST', '\API\App\GlossaryController', 'domains' );
-    route( '/sentence-search', 'POST', '\API\App\GlossaryController', 'sentenceSearch' );
+    route( '/get', 'POST', '\API\App\GlossaryController', 'get' );
+    route( '/search', 'POST', '\API\App\GlossaryController', 'search' );
+    route( '/set', 'POST', '\API\App\GlossaryController', 'set' );
+    route( '/update', 'POST', '\API\App\GlossaryController', 'update' );
 } );
