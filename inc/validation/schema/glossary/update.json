@@ -69,23 +69,11 @@
             "definition": {
               "type": "string"
             },
-            "keys": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "key": {
-                    "type": "string"
-                  },
-                  "key_name": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "key",
-                  "key_name"
-                ]
-              }
+            "key": {
+              "type": "string"
+            },
+            "key_name": {
+              "type": "string"
             },
             "domain": {
               "type": "string"
@@ -104,7 +92,8 @@
           },
           "required": [
             "definition",
-            "keys",
+            "key",
+            "key_name",
             "domain",
             "subdomain",
             "create_date",

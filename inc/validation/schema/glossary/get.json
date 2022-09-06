@@ -5,9 +5,6 @@
     "source": {
       "type": "string"
     },
-    "id_segment": {
-      "type": "integer"
-    },
     "id_client": {
       "type": "string"
     },

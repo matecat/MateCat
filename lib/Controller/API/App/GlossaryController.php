@@ -128,7 +128,7 @@ class GlossaryController extends KleinController {
      */
     public function update()
     {
-        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/set.json' ;
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/update.json' ;
         $json = $this->validateThePayload($jsonSchemaPath);
 
         $params = [

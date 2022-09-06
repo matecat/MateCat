@@ -21,5 +21,12 @@
       "type": "string"
     }
   },
-  "required": ["key","id_client","id_job","password","source_language", "target_language"]
+  "required": [
+    "key",
+    "id_client",
+    "id_job",
+    "password",
+    "source_language",
+    "target_language"
+  ]
 }

@@ -5,6 +5,9 @@
     "id_client": {
       "type": "string"
     },
+    "id_segment": {
+      "type": "integer"
+    },
     "id_job": {
       "type": "integer"
     },
