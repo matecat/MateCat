@@ -4,6 +4,8 @@ namespace API\App;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
+use TmKeyManagement\UserKeysModel;
+use TmKeyManagement_Filter;
 use Validator\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
@@ -24,7 +26,7 @@ class GlossaryController extends KleinController {
     public function delete()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
                 'action' => 'delete',
@@ -45,7 +47,7 @@ class GlossaryController extends KleinController {
     public function domains()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/domains.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
                 'action' => 'domains',
@@ -66,7 +68,7 @@ class GlossaryController extends KleinController {
     public function get()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
                 'action' => 'get',
@@ -87,7 +89,7 @@ class GlossaryController extends KleinController {
     public function search()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/search.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
                 'action' => 'search',
@@ -108,11 +110,11 @@ class GlossaryController extends KleinController {
     public function set()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/set.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-            'action' => 'set',
-            'payload' => $json,
+                'action' => 'set',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
@@ -129,17 +131,20 @@ class GlossaryController extends KleinController {
     public function update()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/update.json' ;
-        $json = $this->validateThePayload($jsonSchemaPath);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-            'action' => 'update',
-            'payload' => $json,
+                'action' => 'update',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
         $this->response->json($json);
     }
+
+
+
 
     /**
      * This function validates the payload
@@ -151,7 +156,7 @@ class GlossaryController extends KleinController {
      * @throws \ReflectionException
      * @throws \Swaggest\JsonSchema\InvalidValue
      */
-    private function validateThePayload( $jsonSchemaPath)
+    private function createThePayloadForWorker( $jsonSchemaPath)
     {
         $jsonSchema = file_get_contents($jsonSchemaPath);
         $this->validateJson($this->request->body(), $jsonSchema);
@@ -178,8 +183,22 @@ class GlossaryController extends KleinController {
             die();
         }
 
+        $isRevision = \CatUtils::getIsRevisionFromIdJobAndPassword($json['id_job'], $json['password']);
+
+        if ( $isRevision ) {
+            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif ( $this->user->email == $job->status_owner ) {
+            $userRole = TmKeyManagement_Filter::OWNER;
+        } else {
+            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
+
+        $userKeys = new UserKeysModel($this->user, $userRole ) ;
+
+
         $json['jobData'] = $job->toArray();
         $json['tm_keys'] = $job->tm_keys;
+        $json['jobKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
 
         return $json;
     }
@@ -204,7 +223,7 @@ class GlossaryController extends KleinController {
 
             $this->response->code(500);
             $this->response->json([
-                'error' => $error->getMessage()
+                    'error' => $error->getMessage()
             ]);
             die();
         }
