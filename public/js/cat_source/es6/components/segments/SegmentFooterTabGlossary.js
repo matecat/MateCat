@@ -257,7 +257,7 @@ const initialState = {
 }
 
 export const SegmentFooterTabGlossary = ({active_class}) => {
-  const [searchTerm, setSearchTerm] = useState()
+  const [searchTerm, setSearchTerm] = useState('')
   const [searchTypes, setSearchTypes] = useState([
     {id: '0', name: 'Source', selected: true},
     {id: '1', name: 'Target'},
@@ -323,6 +323,22 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
       [TRANSLATED_EXAMPLE]: target.sentence,
     })
   }, [modifyElement])
+
+  // execute search api
+  const onSubmitSearch = () => {
+    const searchingIn = searchTypes.find(({selected}) => selected).name
+    const data = {
+      sentence: searchTerm,
+      id_client: config.id_client,
+      id_job: config.id_job,
+      password: config.password,
+      source_language:
+        searchingIn === 'Source' ? config.source_code : config.target_code,
+      target_language:
+        searchingIn === 'Source' ? config.target_code : config.source_code,
+    }
+    console.log(data)
+  }
 
   const openAddTerm = () => {
     setModifyElement(undefined)
@@ -610,7 +626,9 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
                 name="search_term"
                 className={'glossary_search-input'}
                 placeholder={'Search term'}
+                value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
+                onKeyDown={(event) => event.key === 'Enter' && onSubmitSearch()}
               />
               <SegmentedControl
                 name="search"
