@@ -86,3 +86,7 @@ $klein->with( '/api/app/glossary', function () {
     route( '/set', 'POST', '\API\App\GlossaryController', 'set' );
     route( '/update', 'POST', '\API\App\GlossaryController', 'update' );
 } );
+// TM Keys
+$klein->with( '/api/app/tm-keys', function () {
+    route( '/[:id_job]/[:password]', 'GET', '\API\App\TmKeyManagementController', 'getByJob' );
+} );
