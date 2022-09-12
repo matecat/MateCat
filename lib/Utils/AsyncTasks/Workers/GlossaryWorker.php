@@ -110,7 +110,8 @@ class GlossaryWorker extends AbstractWorker {
                         'glossary_delete',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        $message
+                        $message,
+                        $payload['id_segment']
                 )
         );
     }
@@ -223,7 +224,8 @@ class GlossaryWorker extends AbstractWorker {
                         'glossary_get',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        $message
+                        $message,
+                        $payload['id_segment']
                 )
         );
     }
@@ -366,7 +368,8 @@ class GlossaryWorker extends AbstractWorker {
                 'glossary_set',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                $message
+                $message,
+                $payload['id_segment']
             )
         );
     }
@@ -451,21 +454,24 @@ class GlossaryWorker extends AbstractWorker {
                         'glossary_update',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        $message
+                        $message,
+                        $payload['id_segment']
                 )
         );
     }
 
     /**
-     * @param $type
-     * @param $id_client
-     * @param $jobData
-     * @param $message
+     * @param      $type
+     * @param      $id_client
+     * @param      $jobData
+     * @param      $message
+     * @param null $id_segment
      *
      * @return array
      */
-    private function setResponsePayload( $type, $id_client, $jobData, $message ) {
-        return [
+    private function setResponsePayload( $type, $id_client, $jobData, $message, $id_segment = null ) {
+
+        $payload = [
             '_type' => $type,
             'data'  => [
                 'payload'   => $message,
@@ -475,6 +481,11 @@ class GlossaryWorker extends AbstractWorker {
             ]
         ];
 
+        if($id_segment){
+            $payload['id_segment'] = $id_segment;
+        }
+
+        return $payload;
     }
 
     /**

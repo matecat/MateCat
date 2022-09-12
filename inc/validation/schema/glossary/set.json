@@ -6,10 +6,10 @@
       "type": "string"
     },
     "id_segment": {
-      "type": "integer"
+      "type": ["integer","string"]
     },
     "id_job": {
-      "type": "integer"
+      "type": ["integer","string"]
     },
     "password": {
       "type": "string"

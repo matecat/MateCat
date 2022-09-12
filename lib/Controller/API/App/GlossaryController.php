@@ -159,7 +159,7 @@ class GlossaryController extends KleinController {
      * @throws \ReflectionException
      * @throws \Swaggest\JsonSchema\InvalidValue
      */
-    private function createThePayloadForWorker( $jsonSchemaPath)
+    private function createThePayloadForWorker($jsonSchemaPath)
     {
         $jsonSchema = file_get_contents($jsonSchemaPath);
         $this->validateJson($this->request->body(), $jsonSchema);
@@ -198,6 +198,7 @@ class GlossaryController extends KleinController {
 
         $userKeys = new UserKeysModel($this->user, $userRole ) ;
 
+        $json['id_segment'] = (isset($json['id_segment'])) ? $json['id_segment'] : null;
         $json['jobData'] = $job->toArray();
         $json['tm_keys'] = $job->tm_keys;
         $json['jobKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];

@@ -6,7 +6,7 @@
       "type": "string"
     },
     "id_segment": {
-      "type": "integer"
+      "type": ["integer","string"]
     },
     "id_job": {
       "type": "integer"
@@ -68,5 +68,11 @@
       "required": ["term_id"]
     }
   },
-  "required": ["id_client", "id_job", "password", "term"]
+  "required": [
+    "id_client",
+    "id_segment",
+    "id_job",
+    "password",
+    "term"
+  ]
 }
