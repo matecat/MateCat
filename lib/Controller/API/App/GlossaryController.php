@@ -52,8 +52,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'domains',
-                'payload' => $json,
+            'action' => 'domains',
+            'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -114,12 +114,12 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/set.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
+
         $params = [
             'action' => 'set',
             'payload' => $json,
         ];
-
-        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
@@ -137,12 +137,12 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/update.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
+
         $params = [
             'action' => 'update',
             'payload' => $json,
         ];
-
-        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 

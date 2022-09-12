@@ -2,464 +2,766 @@
  * React Component .
 
  */
-import React from 'react'
-import _ from 'lodash'
-import SegmentConstants from '../../constants/SegmentConstants'
-import SegmentStore from '../../stores/SegmentStore'
-import SegmentActions from '../../actions/SegmentActions'
-import Immutable from 'immutable'
-import TagUtils from '../../utils/tagUtils'
+import React, {useEffect, useState} from 'react'
+import {Select} from './../common/Select'
+import InfoIcon from '../../../../../img/icons/InfoIcon'
+import {SegmentedControl} from '../common/SegmentedControl'
 
-class SegmentFooterTabGlossary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      loading: false,
-      openComment: false,
-      enableAddButton: false,
-      editing: false,
+const mockGlossaryTerms = [
+  {
+    term_id: 'xxxxxxxx',
+    source_language: 'en-US',
+    target_language: 'it-IT',
+    source: {
+      term: 'Payment',
+      note: 'The amount a Rider ...',
+      sentence: 'Example phrase',
+    },
+    target: {
+      term: 'Pagamento',
+      note: "L'ammontare che un Rider ...",
+      sentence: 'Frase di esempio',
+    },
+    matching_words: ['Pay', 'Payment'],
+    metadata: {
+      definition: 'Non se sa che è ma definisce la parole',
+      key: 'abc-erd-sassdfdd',
+      key_name: 'Uber Glossary',
+      domain: 'Uber',
+      subdomain: 'Eats',
+      create_date: '2022-08-10',
+      last_update: '2022-09-01',
+    },
+  },
+  {
+    term_id: 'xxxxxxxx',
+    source_language: 'en-US',
+    target_language: 'it-IT',
+    source: {
+      term: 'Payment',
+      note: 'The amount a Rider ...',
+      sentence: 'Example phrase',
+    },
+    target: {
+      term: 'Pagamento',
+      note: "L'ammontare che un Rider ...",
+      sentence: 'Frase di esempio',
+    },
+    matching_words: ['Pay', 'Payment'],
+    metadata: {
+      definition: 'Non se sa che è ma definisce la parole',
+      key: 'abc-erd-sassdfdd',
+      key_name: 'Uber Glossary',
+      domain: 'Uber',
+      subdomain: 'Eats',
+      create_date: '2022-08-10',
+      last_update: '2022-09-01',
+    },
+  },
+  {
+    term_id: 'xxxxxxxx',
+    source_language: 'en-US',
+    target_language: 'it-IT',
+    source: {
+      term: 'Payment',
+      note: 'The amount a Rider ...',
+      sentence: 'Example phrase',
+    },
+    target: {
+      term: 'Pagamento',
+      note: "L'ammontare che un Rider ...",
+      sentence: 'Frase di esempio',
+    },
+    matching_words: ['Pay', 'Payment'],
+    metadata: {
+      definition: 'Non se sa che è ma definisce la parole',
+      key: 'abc-erd-sassdfdd',
+      key_name: 'Uber Glossary',
+      domain: 'Uber',
+      subdomain: 'Eats',
+      create_date: '2022-08-10',
+      last_update: '2022-09-01',
+    },
+  },
+]
+
+const TERM_FORM_FIELDS = {
+  DEFINITION: 'definition',
+  ORIGINAL_TERM: 'originalTerm',
+  ORIGINAL_DESCRIPTION: 'originalDescription',
+  ORIGINAL_EXAMPLE: 'originalExample',
+  TRANSLATED_TERM: 'translatedTerm',
+  TRANSLATED_DESCRIPTION: 'translatedDescription',
+  TRANSLATED_EXAMPLE: 'translatedExample',
+}
+
+const initialState = {
+  keys: [
+    {
+      name: 'Ciao',
+      id: 'a3a708aad524b8fd4468',
+    },
+    {
+      name: 'Uber Glossary',
+      id: 'abc-erd-sassdfdd',
+    },
+    {
+      name: 'No Name',
+      id: 'c0a28df1943c5f854f75',
+    },
+    {
+      name: 'No Name',
+      id: '3e8e2d0de4a63e0272e7',
+    },
+    {
+      name: 'Test creazione chiave 1',
+      id: '20fb44b40065351c90f1',
+    },
+    {
+      name: 'No Name',
+      id: '55f7032ecd4f01323fbe',
+    },
+    {
+      name: 'es_XC.tmx',
+      id: '95ec21ba2634a410b0d1',
+    },
+    {
+      name: 'prova',
+      id: '1b5e94f1d67c287509b3',
+    },
+    {
+      name: 'test ',
+      id: 'b6e38ab1e2c8393ded0d',
+    },
+    {
+      name: 'Ms test pl',
+      id: '53d198c4085b5293c798',
+    },
+    {
+      name: 'Micro1 test',
+      id: 'c04a88eaafb2841d1d43',
+    },
+    {
+      name: 'MMMM test',
+      id: '192881653391f54ee955',
+    },
+    {
+      name: 'test1 micro',
+      id: '43dda923f2914ef12350',
+    },
+    {
+      name: 'micro test',
+      id: 'c9889f3bb2cf906486ee',
+    },
+    {
+      name: 'micro test',
+      id: 'edfc29151e12f8ea7382',
+    },
+    {
+      name: 'Micro Test',
+      id: '19f61ecc47d6c4f3d2a6',
+    },
+    {
+      name: 'Private TM and Glossary',
+      id: '08b645519fc29d460437',
+    },
+    {
+      name: 'Microsoft test',
+      id: 'ea8e383ec331c768424a',
+    },
+    {
+      name: 'Microsoft',
+      id: 'eb44d624758710490a92',
+    },
+    {
+      name: 'Micro german',
+      id: '7263f04f9711301dbd35',
+    },
+    {
+      name: 'Micro french',
+      id: '32407df35ad4da726706',
+    },
+    {
+      name: 'Micro',
+      id: '4c9cb9fdc101a8ff24d9',
+    },
+    {
+      name: 'Micro',
+      id: 'fa973db1815c326acb6a',
+    },
+    {
+      name: 'MS',
+      id: 'fa4a22b355baf83394b9',
+    },
+    {
+      name: 'Private TM and Glossary',
+      id: '4849101ed342147449e2',
+    },
+    {
+      name: 'Private TM and Glossary',
+      id: 'daf31bb28574f1f79d10',
+    },
+    {
+      name: 'No Name',
+      id: '821ec669486c553f76a5',
+    },
+    {
+      name: 'guess tag test Finnish',
+      id: '6626a5790f0723a3032c',
+    },
+    {
+      name: 'es_XC.tmx',
+      id: 'cf70b5aad3b8802e4f77',
+    },
+    {
+      name: '1234567812345678123456734567456756565667ssssssssssssss',
+      id: 'e9ed98bb5137ed81f40f',
+    },
+    {
+      name: 'No Name',
+      id: 'e7e4e69f2af1fb26834b',
+    },
+    {
+      name: 'No Name',
+      id: 'b1997669fde460b74375',
+    },
+  ],
+  domains: [
+    {
+      name: 'Uber',
+      id: '1',
+    },
+    {
+      name: 'Patreon',
+      id: '2',
+    },
+    {
+      name: 'Ebay',
+      id: '3',
+    },
+  ],
+  subdomains: [
+    {
+      name: 'Rider',
+      id: '1',
+    },
+    {
+      name: 'Eats',
+      id: '2',
+    },
+  ],
+  termForm: Object.entries(TERM_FORM_FIELDS).reduce(
+    (acc, [, value]) => ({...acc, [value]: ''}),
+    {},
+  ),
+}
+
+export const SegmentFooterTabGlossary = ({active_class}) => {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTypes, setSearchTypes] = useState([
+    {id: '0', name: 'Source', selected: true},
+    {id: '1', name: 'Target'},
+  ])
+  const [showForm, setShowForm] = useState(false)
+  const [showMore, setShowMore] = useState(false)
+  const [keys, setKeys] = useState(initialState.keys)
+  const [domains, setDomains] = useState(initialState.domains)
+  const [subdomains, setSubdomains] = useState(initialState.subdomains)
+  const [selectsActive, setSelectsActive] = useState({
+    keys: [],
+    domain: undefined,
+    subdomain: undefined,
+  })
+  const [terms, setTerms] = useState(mockGlossaryTerms)
+  const [modifyElement, setModifyElement] = useState()
+  const [termForm, setTermForm] = useState(initialState.termForm)
+
+  // set active keys, domain and subdomain
+  useEffect(() => {
+    const defaultKeys = [keys[0]]
+    const defaultDomain = domains[0]
+    const defaultSubdomain = subdomains[0]
+
+    const {metadata} = modifyElement || {}
+
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      keys: keys.find(({id}) => id === metadata?.key)
+        ? [keys.find(({id}) => id === metadata?.key)]
+        : defaultKeys,
+      domain:
+        domains.find(({name}) => name === metadata?.domain) ?? defaultDomain,
+      subdomain:
+        subdomains.find(({name}) => name === metadata?.subdomain) ??
+        defaultSubdomain,
+    }))
+  }, [modifyElement, keys, domains, subdomains])
+
+  // prefill term form
+  useEffect(() => {
+    if (!modifyElement) {
+      setTermForm(initialState.termForm)
+      return
     }
-    this.matches = {}
-    this.stopLoading = this.stopLoading.bind(this)
-  }
-
-  stopLoading(sid) {
-    if (sid === this.props.id_segment) {
-      this.setState({
-        loading: false,
-      })
-    }
-  }
-
-  setTotalMatchesInTab(matches) {
-    let totalMatches = _.size(matches)
-    if (totalMatches > 0) {
-      SegmentActions.setTabIndex(
-        this.props.id_segment,
-        'glossary',
-        totalMatches,
-      )
-    }
-  }
-
-  searchInGlossary(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      let txt = this.source.textContent
-      let target = this.target.textContent
-      if (txt.length > 0 && !target) {
-        this.setState({
-          loading: true,
-        })
-        SegmentActions.searchGlossary(
-          this.props.segment.sid,
-          this.props.segment.fid,
-          txt,
-          false,
-        )
-      } else if (txt && target) {
-        this.setGlossaryItem()
-      }
-    }
-  }
-
-  searchInTarget() {
-    let txt = this.target.textContent
-    let target = this.source.textContent
-    if (txt.length > 0 && !target) {
-      this.setState({
-        loading: true,
-      })
-      SegmentActions.searchGlossary(
-        this.props.segment.sid,
-        this.props.segment.fid,
-        txt,
-        true,
-      )
-    } else if (txt && target) {
-      this.setGlossaryItem()
-    }
-  }
-
-  deleteMatch(match, event) {
-    event.preventDefault()
-    SegmentActions.deleteGlossaryItem(match, this.props.id_segment)
-  }
-
-  updateGlossaryItem(match, e) {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      const newTarget = $(this.matches[match.segment])
-        .find('.sugg-target span')
-        .text()
-      const newComment = match.comment
-      //Disable update comment
-      // const newComment =
-      //   $(this.matches[match.segment]).find('.details .comment').length > 0
-      //     ? $(this.matches[match.segment]).find('.details .comment').text()
-      //     : $(this.matches[match.segment])
-      //         .find('.glossary-add-comment .gl-comment')
-      //         .text()
-
-      SegmentActions.updateGlossaryItem(
-        match,
-        newTarget,
-        newComment,
-        this.props.id_segment,
-      )
-
-      this.setState({
-        openComment: false,
-        editing: false,
-      })
-    }
-  }
-
-  openAddComment(e) {
-    e.preventDefault()
-    this.setState({
-      openComment: !this.state.openComment,
+    const {
+      DEFINITION,
+      ORIGINAL_TERM,
+      ORIGINAL_DESCRIPTION,
+      ORIGINAL_EXAMPLE,
+      TRANSLATED_TERM,
+      TRANSLATED_DESCRIPTION,
+      TRANSLATED_EXAMPLE,
+    } = TERM_FORM_FIELDS
+    const {metadata, source, target} = modifyElement
+    setTermForm({
+      [DEFINITION]: metadata.definition,
+      [ORIGINAL_TERM]: source.term,
+      [ORIGINAL_DESCRIPTION]: source.note,
+      [ORIGINAL_EXAMPLE]: source.sentence,
+      [TRANSLATED_TERM]: target.term,
+      [TRANSLATED_DESCRIPTION]: target.note,
+      [TRANSLATED_EXAMPLE]: target.sentence,
     })
-  }
+  }, [modifyElement])
 
-  openAddCommentExistingMatch(match, e) {
-    e.preventDefault()
-    $(this.matches[match]).find('.glossary-add-comment .gl-comment').toggle()
-  }
-
-  editExistingMatch(match, e) {
-    e.preventDefault()
-    const {editing} = this.state
-    this.setState({editing: !editing})
-  }
-
-  onKeyUpSetItem() {
-    let source = this.source.textContent
-    let target = this.target.textContent
-    this.setState({
-      enableAddButton: this.checkAddItemButton(source, target),
-    })
-  }
-
-  onEnterSetItem(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      this.setGlossaryItem()
+  // execute search api
+  const onSubmitSearch = () => {
+    const searchingIn = searchTypes.find(({selected}) => selected).name
+    const data = {
+      sentence: searchTerm,
+      id_client: config.id_client,
+      id_job: config.id_job,
+      password: config.password,
+      source_language:
+        searchingIn === 'Source' ? config.source_code : config.target_code,
+      target_language:
+        searchingIn === 'Source' ? config.target_code : config.source_code,
     }
+    console.log(data)
   }
 
-  onClickSetItem() {
-    this.setGlossaryItem()
+  const openAddTerm = () => {
+    setModifyElement(undefined)
+    setShowForm(true)
   }
 
-  setGlossaryItem() {
-    let source = this.source.textContent.trim()
-    let target = this.target.textContent.trim()
-    if (this.checkAddItemButton(source, target)) {
-      let comment = this.comment ? this.comment.textContent : null
-      this.setState({
-        loading: true,
-      })
-      SegmentActions.addGlossaryItem(
-        source,
-        target,
-        comment,
-        this.props.id_segment,
-      )
-      this.setState({
-        loading: false,
-        openComment: false,
-        enableAddButton: false,
-      })
-      this.source.textContent = ''
-      this.target.textContent = ''
-    } else {
-      this.searchInTarget()
-    }
+  const modifyItem = (term) => {
+    setShowMore(true)
+    setModifyElement(term)
+    setShowForm(true)
   }
 
-  checkAddItemButton(source, target) {
-    return !!source && !!target
-  }
+  const updateSelectActive = (key, value) =>
+    setSelectsActive((prevState) => ({...prevState, [key]: value}))
 
-  copyItemInEditArea(glossaryTranslation) {
-    !this.state.editing &&
-      SegmentActions.copyGlossaryItemInEditarea(
-        glossaryTranslation,
-        this.props.segment,
-      )
-    // GlossaryUtils.copyGlossaryItemInEditareaDraftJs(glossaryTranslation, this.props.segment);
-  }
-  onPasteEvent(e) {
-    // cancel paste
-    e.preventDefault()
-    // get text representation of clipboard
-    var text = (e.originalEvent || e).clipboardData.getData('text/plain')
-    // insert text manually
-    document.execCommand('insertHTML', false, text)
-  }
-  renderMatches() {
-    let htmlResults = []
-    if (this.props.segment.glossary && this.props.segment.glossary.length > 0) {
-      this.props.segment.glossary.forEach((match, index) => {
-        if (match.segment === '' || match.translation === '') return
-        let cb = match.created_by
-        let disabled = match.id == '0' ? true : false
-        let sourceNoteEmpty =
-          _.isUndefined(match.source_note) || match.source_note === ''
-        let targetNoteEmpty =
-          _.isUndefined(match.target_note) || match.target_note === ''
+  const updateTermForm = (key, value) =>
+    setTermForm((prevState) => ({...prevState, [key]: value}))
 
-        if (sourceNoteEmpty && targetNoteEmpty) {
-          match.comment = ''
-        } else if (!targetNoteEmpty) {
-          match.comment = match.target_note
-        } else if (!sourceNoteEmpty) {
-          match.comment = match.source_note
-        }
-
-        let leftTxt = match.segment
-        let rightTxt = match.translation
-        let commentOriginal = match.comment
-        if (commentOriginal) {
-          commentOriginal = commentOriginal.replace(/\#\{/gi, '<mark>')
-          commentOriginal = commentOriginal.replace(/\}\#/gi, '</mark>')
-        }
-        // Temporary removed because not working on MM side
-        let addCommentHtml = ''
-        {
-          /*<div className="glossary-add-comment">*/
-        }
-        {
-          /*<a href="#" onClick={this.openAddCommentExistingMatch.bind(this, match.segment)}>Add a Comment</a>*/
-        }
-        {
-          /*<div className="input gl-comment" contentEditable="true" style={{display: 'none'}}*/
-        }
-        {
-          /*onKeyPress={this.updateGlossaryItem.bind(this, match.segment)}/>*/
-        }
-        {
-          /*</div>;*/
-        }
-
-        let html = (
-          <div
-            key={match.segment + '-' + index}
-            ref={(matchref) => (this.matches[match.segment] = matchref)}
-          >
-            <div className="glossary-item">
-              <span>{match.segment}</span>
-            </div>
-            <ul className="graysmall" data-id={match.id}>
-              <li className="sugg-source">
-                <div
-                  id={this.props.id_segment + '-tm-' + match.id + '-edit'}
-                  className="switch-editing icon-edit"
-                  title="Edit"
-                  onClick={this.editExistingMatch.bind(this, match.segment)}
-                />
-                {disabled ? (
-                  ''
-                ) : (
-                  <span
-                    id={this.props.id_segment + '-tm-' + match.id + '-delete'}
-                    className="trash"
-                    title="delete this row"
-                    onClick={this.deleteMatch.bind(this, match)}
-                  />
-                )}
-                <span
-                  id={this.props.id_segment + '-tm-' + match.id + '-source'}
-                  className="suggestion_source"
-                  dangerouslySetInnerHTML={this.allowHTML(
-                    TagUtils.decodePlaceholdersToTextSimple(leftTxt, true),
-                  )}
-                />
-              </li>
-              <li
-                className="b sugg-target"
-                onMouseDown={() => this.copyItemInEditArea(rightTxt)}
-              >
-                <span
-                  id={
-                    this.props.id_segment + '-tm-' + match.id + '-translation'
-                  }
-                  className={
-                    'translation ' + (this.state.editing ? 'editing' : '')
-                  }
-                  data-original={TagUtils.decodePlaceholdersToTextSimple(
-                    rightTxt,
-                    true,
-                  )}
-                  dangerouslySetInnerHTML={this.allowHTML(
-                    TagUtils.decodePlaceholdersToTextSimple(rightTxt, true),
-                  )}
-                  onKeyPress={this.updateGlossaryItem.bind(this, match)}
-                  contentEditable={this.state.editing}
-                />
-              </li>
-              <li className="details">
-                {!match.comment || match.comment === '' ? (
-                  addCommentHtml
-                ) : (
-                  <div
-                    className={
-                      'comment ' + (this.state.editing ? 'editing' : '')
-                    }
-                    data-original={TagUtils.decodePlaceholdersToTextSimple(
-                      commentOriginal,
-                      true,
-                    )}
-                    dangerouslySetInnerHTML={this.allowHTML(
-                      TagUtils.decodePlaceholdersToTextSimple(
-                        commentOriginal,
-                        true,
-                      ),
-                    )}
-                    contentEditable={this.state.editing}
-                  />
-                )}
-                <ul className="graysmall-details">
-                  <li>{match.last_update_date}</li>
-                  <li className="graydesc">
-                    Source:
-                    <span className="bold"> {cb}</span>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        )
-        htmlResults.push(html)
-      })
-    }
-    return htmlResults
-  }
-
-  componentDidMount() {
-    this._isMounted = true
-    SegmentStore.addListener(
-      SegmentConstants.SET_GLOSSARY_TO_CACHE,
-      this.stopLoading,
-    )
-    // UI.markGlossaryItemsInSource(UI.getSegmentById( this.props.id_segment ), this.props.segment.glossary);
-    // setTimeout(()=>this.setTotalMatchesInTab( this.props.segment.glossary), 0 );
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false
-    SegmentStore.removeListener(
-      SegmentConstants.SET_GLOSSARY_TO_CACHE,
-      this.stopLoading,
-    )
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.openComment !== this.state.openComment &&
-      this.state.openComment
-    ) {
-      this.comment.focus()
-    }
-  }
-
-  allowHTML(string) {
-    return {__html: string}
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
+  const getFormBox = () => {
+    const {
+      DEFINITION,
+      ORIGINAL_TERM,
+      ORIGINAL_DESCRIPTION,
+      ORIGINAL_EXAMPLE,
+      TRANSLATED_TERM,
+      TRANSLATED_DESCRIPTION,
+      TRANSLATED_EXAMPLE,
+    } = TERM_FORM_FIELDS
     return (
-      ((!_.isUndefined(nextProps.segment.glossary) ||
-        !_.isUndefined(this.props.segment.glossary)) &&
-        ((!_.isUndefined(nextProps.segment.glossary) &&
-          _.isUndefined(this.props.segment.glossary)) ||
-          !Immutable.fromJS(this.props.segment.glossary).equals(
-            Immutable.fromJS(nextProps.segment.glossary),
-          ))) ||
-      this.state.loading !== nextState.loading ||
-      this.state.openComment !== nextState.openComment ||
-      this.state.editing !== nextState.editing ||
-      this.props.active_class !== nextProps.active_class ||
-      this.state.enableAddButton !== nextState.enableButton ||
-      this.props.tab_class !== nextProps.tab_class
-    )
-  }
-
-  render() {
-    let matches
-    if (this.props.segment && this.props.segment.glossary) {
-      matches = this.renderMatches()
-    }
-    let html = ''
-    let loading = classnames({
-      'gl-search': true,
-      loading: this.state.loading,
-    })
-    if (config.tms_enabled) {
-      html = (
-        <div className={loading}>
-          <div
-            ref={(source) => (this.source = source)}
-            className="input search-source"
-            contentEditable="true"
-            onKeyPress={this.searchInGlossary.bind(this)}
-            onPaste={this.onPasteEvent.bind(this)}
-          />
-          <div
-            ref={(target) => (this.target = target)}
-            className="input search-target"
-            contentEditable="true"
-            onKeyDown={this.onEnterSetItem.bind(this)}
-            onPaste={this.onPasteEvent.bind(this)}
-            onKeyUp={this.onKeyUpSetItem.bind(this)}
-          />
-          {this.state.enableAddButton ? (
-            <span
-              className="set-glossary"
-              onClick={this.onClickSetItem.bind(this)}
+      <div className={'glossary_add-container'}>
+        <div className={'glossary-form-line'}>
+          <div className={'input-with-label__wrapper'}>
+            <label>Definition</label>
+            <input
+              name="glossary-term-definition"
+              value={termForm[DEFINITION]}
+              onChange={(event) =>
+                updateTermForm(DEFINITION, event.target.value)
+              }
             />
-          ) : (
-            <span className="set-glossary disabled" />
-          )}
-          <div className="comment">
-            <a href="#" onClick={this.openAddComment.bind(this)}>
-              (+) Comment
-            </a>
-            {this.state.openComment ? (
-              <div
-                ref={(comment) => (this.comment = comment)}
-                className="input gl-comment"
-                contentEditable="true"
-                onKeyDown={this.onEnterSetItem.bind(this)}
-              />
-            ) : null}
           </div>
-          <div className="results">{matches}</div>
+          <div className={'glossary-tm-container'}>
+            <Select
+              className="glossary-select"
+              name="glossary-term-tm"
+              label="Glossary"
+              placeholder="Select a glossary"
+              showSearchBar
+              searchPlaceholder="Find a glossary"
+              multipleSelect="dropdown"
+              options={keys}
+              activeOptions={selectsActive.keys}
+              checkSpaceToReverse={false}
+              isDisabled={!!modifyElement}
+              onToggleOption={(option) => {
+                if (option) {
+                  const {keys: activeKeys} = selectsActive
+                  if (activeKeys.some((item) => item.id === option.id)) {
+                    updateSelectActive(
+                      'keys',
+                      activeKeys.filter((item) => item.id !== option.id),
+                    )
+                  } else {
+                    updateSelectActive('keys', activeKeys.concat([option]))
+                  }
+                }
+              }}
+              optionTemplate={({name, isActive}) => (
+                <div className="glossary-option">
+                  <input
+                    type="checkbox"
+                    name={name}
+                    checked={isActive}
+                    onChange={() => false}
+                  />
+                  <label htmlFor={`${name}`}>{name}</label>
+                </div>
+              )}
+            />
+
+            <div className={'input-with-label__wrapper'}>
+              <Select
+                className="glossary-select domain-select"
+                name="glossary-term-domain"
+                label="Domain"
+                placeholder="Select a domain"
+                showSearchBar
+                searchPlaceholder="Find a domain"
+                options={domains}
+                activeOption={selectsActive.domain}
+                checkSpaceToReverse={false}
+                onSelect={(option) => {
+                  if (option) {
+                    updateSelectActive('domain', option)
+                  }
+                }}
+                optionTemplate={({name}) => (
+                  <div className="domain-option">{name}</div>
+                )}
+                onRenderOption={({
+                  index,
+                  optionsLength,
+                  queryFilter,
+                  resetQueryFilter,
+                }) =>
+                  index === optionsLength - 1 &&
+                  queryFilter.trim() && (
+                    <button
+                      className="button-create-option"
+                      onClick={() => {
+                        setDomains((prevState) => [
+                          ...prevState,
+                          {
+                            name: queryFilter,
+                            id: (prevState.length + 1).toString(),
+                          },
+                        ])
+                        resetQueryFilter()
+                      }}
+                    >
+                      + Create a domain name <b>{queryFilter}</b>
+                    </button>
+                  )
+                }
+              />
+            </div>
+            <div className={'input-with-label__wrapper'}>
+              <Select
+                className="glossary-select domain-select"
+                name="glossary-term-subdomain"
+                label="Subdomain"
+                placeholder="Select a subdomain"
+                showSearchBar
+                searchPlaceholder="Find a subdomain"
+                options={subdomains}
+                activeOption={selectsActive.subdomain}
+                checkSpaceToReverse={false}
+                onSelect={(option) => {
+                  if (option) {
+                    updateSelectActive('subdomain', option)
+                  }
+                }}
+                optionTemplate={({name}) => (
+                  <div className="domain-option">{name}</div>
+                )}
+                onRenderOption={({
+                  index,
+                  optionsLength,
+                  queryFilter,
+                  resetQueryFilter,
+                }) =>
+                  index === optionsLength - 1 &&
+                  queryFilter.trim() && (
+                    <button
+                      className="button-create-option"
+                      onClick={() => {
+                        setSubdomains((prevState) => [
+                          ...prevState,
+                          {
+                            name: queryFilter,
+                            id: (prevState.length + 1).toString(),
+                          },
+                        ])
+                        resetQueryFilter()
+                      }}
+                    >
+                      + Create a subdomain name <b>{queryFilter}</b>
+                    </button>
+                  )
+                }
+              />
+            </div>
+          </div>
         </div>
-      )
-    } else {
-      html = (
-        <ul className="graysmall message">
-          <li>Glossary is not available when the TM feature is disabled</li>
-        </ul>
-      )
-    }
-    return (
-      <div
-        key={'container_' + this.props.code}
-        className={
-          'tab sub-editor ' +
-          this.props.active_class +
-          ' ' +
-          this.props.tab_class
-        }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
-      >
-        <div className="overflow">{html}</div>
+
+        <div className={'glossary-form-line'}>
+          <div className={'input-with-label__wrapper'}>
+            <label>Original term*</label>
+            <input
+              name="glossary-term-original"
+              value={termForm[ORIGINAL_TERM]}
+              onChange={(event) =>
+                updateTermForm(ORIGINAL_TERM, event.target.value)
+              }
+            />
+          </div>
+          <div className={'input-with-label__wrapper'}>
+            <label>Translated term*</label>
+            <input
+              name="glossary-term-translated"
+              value={termForm[TRANSLATED_TERM]}
+              onChange={(event) =>
+                updateTermForm(TRANSLATED_TERM, event.target.value)
+              }
+            />
+          </div>
+        </div>
+        {showMore && (
+          <div className={'glossary-form-line more-line'}>
+            <div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Description</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-description-source"
+                  value={termForm[ORIGINAL_DESCRIPTION]}
+                  onChange={(event) =>
+                    updateTermForm(ORIGINAL_DESCRIPTION, event.target.value)
+                  }
+                />
+              </div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Example phrase</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-example-source"
+                  value={termForm[ORIGINAL_EXAMPLE]}
+                  onChange={(event) =>
+                    updateTermForm(ORIGINAL_EXAMPLE, event.target.value)
+                  }
+                />
+              </div>
+            </div>
+            <div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Description</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-description-target"
+                  value={termForm[TRANSLATED_DESCRIPTION]}
+                  onChange={(event) =>
+                    updateTermForm(TRANSLATED_DESCRIPTION, event.target.value)
+                  }
+                />
+              </div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Example phrase</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-example-target"
+                  value={termForm[TRANSLATED_EXAMPLE]}
+                  onChange={(event) =>
+                    updateTermForm(TRANSLATED_EXAMPLE, event.target.value)
+                  }
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        <div className={'glossary_buttons-container'}>
+          <div></div>
+          <div
+            className={`glossary-more ${!showMore ? 'show-less' : 'show-more'}`}
+            onClick={() => setShowMore(!showMore)}
+          >
+            <MoreIcon />
+            <span>{showMore ? 'Hide options' : 'More options'}</span>
+          </div>
+          <div className={'glossary_buttons'}>
+            <button
+              className={'glossary__button-cancel'}
+              onClick={() => {
+                setShowForm(false)
+                setShowMore(false)
+                setModifyElement(undefined)
+              }}
+            >
+              Cancel
+            </button>
+            <button className={'glossary__button-add'}>Add</button>
+          </div>
+        </div>
       </div>
     )
   }
+  return (
+    <div className={`tab sub-editor glossary ${active_class}`}>
+      {showForm ? (
+        getFormBox()
+      ) : (
+        <>
+          <div className={'glossary_search'}>
+            <div className={'glossary_search-container'}>
+              <input
+                name="search_term"
+                className={'glossary_search-input'}
+                placeholder={'Search term'}
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                onKeyDown={(event) => event.key === 'Enter' && onSubmitSearch()}
+              />
+              <SegmentedControl
+                name="search"
+                className="search-type"
+                options={searchTypes}
+                selectedId={searchTypes.find(({selected}) => selected).id}
+                onChange={(value) => {
+                  setSearchTypes((prevState) =>
+                    prevState.map((tab) => ({
+                      ...tab,
+                      selected: tab.id === value,
+                    })),
+                  )
+                }}
+              />
+            </div>
+            <button
+              className={'glossary__button-add'}
+              onClick={() => openAddTerm()}
+            >
+              + Add Term
+            </button>
+          </div>
+          <div className={'glossary_items'}>
+            {terms.map((term, index) => (
+              <GlossaryItem
+                key={index}
+                item={term}
+                modifyElement={() => modifyItem(term)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
-export default SegmentFooterTabGlossary
+const GlossaryItem = ({item, modifyElement}) => {
+  const {metadata, source, target} = item
+  return (
+    <div className={'glossary_item'}>
+      <div className={'glossary_item-header'}>
+        <div className={'glossary_definition-container'}>
+          <span className={'glossary_definition'}>
+            <GlossaryDefinitionIcon />
+            {metadata.definition}
+          </span>
+          <span className={'glossary_badge'}>{metadata.domain}</span>
+          <span className={'glossary_badge'}>{metadata.subdomain}</span>
+          <div className={'glossary_source'}>
+            <b>{metadata.key_name}</b>
+            <span>{metadata.last_update}</span>
+          </div>
+        </div>
+        <div className={'glossary_item-actions'}>
+          <div onClick={() => modifyElement()}>
+            <ModifyIcon />
+          </div>
+          <div onClick={() => {}}>
+            <DeleteIcon />
+          </div>
+        </div>
+      </div>
+
+      <div className={'glossary_item-body'}>
+        <div className={'glossary-item_column'}>
+          <div className={'glossary_word'}>
+            {`${source.term} `}
+            <div>
+              <InfoIcon size={16} />
+              <div className={'glossary_item-tooltip'}>{source.sentence}</div>
+            </div>
+          </div>
+          <div className={'glossary-description'}>{source.note}</div>
+        </div>
+        <div className={'glossary-item_column'}>
+          <div className={'glossary_word'}>
+            {`${target.term} `}
+            <div>
+              <InfoIcon size={16} />
+              <div className={'glossary_item-tooltip'}>{target.sentence}</div>
+            </div>
+          </div>
+          <div className={'glossary-description'}>{target.note}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const DeleteIcon = () => {
+  return (
+    <svg width="14" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M1 3.333a.667.667 0 0 0 0 1.334V3.333Zm12 1.334a.667.667 0 1 0 0-1.334v1.334ZM11.667 4h.666a.667.667 0 0 0-.666-.667V4Zm-9.334 9.333h-.666.666ZM3.667 4A.667.667 0 1 0 5 4H3.667Zm2-2.667V.667v.666Zm2.666 0V.667v.666ZM9 4a.667.667 0 0 0 1.333 0H9ZM6.333 7.333a.667.667 0 1 0-1.333 0h1.333Zm-1.333 4a.667.667 0 0 0 1.333 0H5Zm4-4a.667.667 0 0 0-1.333 0H9Zm-1.333 4a.667.667 0 1 0 1.333 0H7.667ZM1 4.667h1.333V3.333H1v1.334Zm1.333 0H13V3.333H2.333v1.334ZM11 4v9.333h1.333V4H11Zm0 9.333c0 .177-.07.347-.195.472l.943.943a2 2 0 0 0 .585-1.415H11Zm-.195.472a.667.667 0 0 1-.472.195v1.333a2 2 0 0 0 1.415-.585l-.943-.943Zm-.472.195H3.667v1.333h6.666V14Zm-6.666 0a.667.667 0 0 1-.472-.195l-.943.943a2 2 0 0 0 1.415.585V14Zm-.472-.195A.667.667 0 0 1 3 13.333H1.667a2 2 0 0 0 .585 1.415l.943-.943ZM3 13.333V4H1.667v9.333H3Zm-.667-8.666h9.334V3.333H2.333v1.334ZM5 4V2.667H3.667V4H5Zm0-1.333c0-.177.07-.347.195-.472l-.943-.943a2 2 0 0 0-.585 1.415H5Zm.195-.472A.667.667 0 0 1 5.667 2V.667a2 2 0 0 0-1.415.585l.943.943ZM5.667 2h2.666V.667H5.667V2Zm2.666 0c.177 0 .347.07.472.195l.943-.943A2 2 0 0 0 8.333.667V2Zm.472.195A.667.667 0 0 1 9 2.667h1.333a2 2 0 0 0-.585-1.415l-.943.943ZM9 2.667V4h1.333V2.667H9ZM5 7.333v4h1.333v-4H5Zm2.667 0v4H9v-4H7.667Z"
+        fillRule="evenodd"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+const ModifyIcon = () => {
+  return (
+    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M7.333 3.333a.667.667 0 0 0 0-1.333v1.333Zm-4.666-.666V2v.667ZM1.333 4H.667h.666Zm0 9.333H.667h.666ZM14 8.667a.667.667 0 0 0-1.333 0H14Zm-1.667-7-.471-.472.471.472Zm1-.415V.586v.666Zm1 2.415-.471-.472.471.472ZM8 10l.162.647a.668.668 0 0 0 .31-.176L8 10Zm-2.667.667-.647-.162a.667.667 0 0 0 .809.808l-.162-.646ZM6 8l-.471-.471a.667.667 0 0 0-.176.31L6 8Zm1.333-6H2.667v1.333h4.666V2ZM2.667 2a2 2 0 0 0-1.415.586l.943.943a.667.667 0 0 1 .472-.196V2Zm-1.415.586A2 2 0 0 0 .667 4H2c0-.177.07-.346.195-.471l-.943-.943ZM.667 4v9.333H2V4H.667Zm0 9.333a2 2 0 0 0 .585 1.415l.943-.943A.667.667 0 0 1 2 13.333H.667Zm.585 1.415a2 2 0 0 0 1.415.585V14a.666.666 0 0 1-.472-.195l-.943.943Zm1.415.585H12V14H2.667v1.333Zm9.333 0a2 2 0 0 0 1.414-.585l-.943-.943A.666.666 0 0 1 12 14v1.333Zm1.414-.585A2 2 0 0 0 14 13.332h-1.333c0 .177-.07.347-.196.472l.943.943ZM14 13.332V8.667h-1.333v4.666H14ZM12.805 2.138c.14-.14.33-.219.528-.219V.586c-.552 0-1.08.219-1.471.61l.943.942Zm.528-.219c.198 0 .389.079.529.22l.943-.944c-.39-.39-.92-.61-1.472-.61V1.92Zm.529.22c.14.14.219.33.219.528h1.333c0-.552-.22-1.082-.61-1.472l-.942.943Zm.219.528a.748.748 0 0 1-.22.528l.944.943c.39-.39.61-.92.61-1.471H14.08Zm-.22.528L7.53 9.53l.942.942 6.334-6.333-.943-.943ZM7.839 9.353l-2.666.667.323 1.293 2.667-.666-.324-1.294ZM5.98 10.828l.667-2.666-1.294-.324-.667 2.667 1.294.323Zm.491-2.357 6.334-6.333-.943-.943L5.529 7.53l.942.942Z"
+        fillRule="evenodd"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+const GlossaryDefinitionIcon = () => {
+  return (
+    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M13.333 12.667v-2H4.667a2 2 0 0 0-2 2m3.2 2H11.2c.747 0 1.12 0 1.405-.146.251-.128.455-.332.583-.582.145-.286.145-.659.145-1.406V3.467c0-.747 0-1.12-.145-1.406a1.333 1.333 0 0 0-.583-.582c-.285-.146-.658-.146-1.405-.146H5.867c-1.12 0-1.68 0-2.108.218a2 2 0 0 0-.875.874c-.217.428-.217.988-.217 2.108v6.934c0 1.12 0 1.68.217 2.108a2 2 0 0 0 .875.874c.427.218.987.218 2.108.218Z"
+        stroke="currentColor"
+      />
+    </svg>
+  )
+}
+
+const MoreIcon = () => {
+  return (
+    <svg width="12" height="8" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M5.2 6.933 1.2 1.6A1 1 0 0 1 2 0h8a1 1 0 0 1 .8 1.6l-4 5.333a1 1 0 0 1-1.6 0Z"
+        fill="#AEBDCD"
+      />
+    </svg>
+  )
+}

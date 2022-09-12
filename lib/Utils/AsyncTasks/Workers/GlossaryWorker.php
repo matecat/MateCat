@@ -132,33 +132,35 @@ class GlossaryWorker extends AbstractWorker {
         //	 "target_language": "it-IT"
         // }
 
-        $message = [
-                "entries" => [
-                        [
-                                "domain" => "Uber",
-                                "subdomains" => [
-                                        "Rider",
-                                        "Eats"
-                                ]
-                        ],
-                        [
-                                "domain" => "Airbnb",
-                                "subdomains" => [
-                                        "Tech",
-                                        "Marketing",
-                                        "Legal"
-                                ]
-                        ]
+        $message = [];
+
+        foreach ($payload['keys'] as $key){
+            $message['entries'][$key] = [
+                [
+                    "domain" => "Uber",
+                    "subdomains" => [
+                        "Rider",
+                        "Eats"
+                    ]
+                ],
+                [
+                    "domain" => "Airbnb",
+                    "subdomains" => [
+                        "Tech",
+                        "Marketing",
+                        "Legal"
+                    ]
                 ]
-        ];
+            ];
+        }
 
         $this->publishMessage(
-                $this->setResponsePayload(
-                        'glossary_domains',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_domains',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
         );
     }
 
