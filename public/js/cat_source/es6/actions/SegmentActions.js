@@ -728,7 +728,10 @@ const SegmentActions = {
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
       if (typeof segment.glossary === 'undefined') {
         //Response inside SSE Channel
-        getGlossaryForSegment(request.sid, request.text).catch(() => {
+        getGlossaryForSegment({
+          idSegment: request.sid,
+          source: request.text,
+        }).catch(() => {
           OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
         })
       }
@@ -743,11 +746,11 @@ const SegmentActions = {
     })
   },
 
-  setGlossaryForSegment: (sid, matches) => {
+  setGlossaryForSegment: (sid, terms) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
       sid: sid,
-      glossary: matches,
+      glossary: terms,
     })
   },
 

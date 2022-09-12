@@ -1,89 +1,9 @@
-/**
- * React Component .
-
- */
 import React, {useEffect, useState} from 'react'
+import PropTypes from 'prop-types'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 import {SegmentedControl} from '../common/SegmentedControl'
-
-const mockGlossaryTerms = [
-  {
-    term_id: 'xxxxxxxx',
-    source_language: 'en-US',
-    target_language: 'it-IT',
-    source: {
-      term: 'Payment',
-      note: 'The amount a Rider ...',
-      sentence: 'Example phrase',
-    },
-    target: {
-      term: 'Pagamento',
-      note: "L'ammontare che un Rider ...",
-      sentence: 'Frase di esempio',
-    },
-    matching_words: ['Pay', 'Payment'],
-    metadata: {
-      definition: 'Non se sa che è ma definisce la parole',
-      key: 'abc-erd-sassdfdd',
-      key_name: 'Uber Glossary',
-      domain: 'Uber',
-      subdomain: 'Eats',
-      create_date: '2022-08-10',
-      last_update: '2022-09-01',
-    },
-  },
-  {
-    term_id: 'xxxxxxxx',
-    source_language: 'en-US',
-    target_language: 'it-IT',
-    source: {
-      term: 'Payment',
-      note: 'The amount a Rider ...',
-      sentence: 'Example phrase',
-    },
-    target: {
-      term: 'Pagamento',
-      note: "L'ammontare che un Rider ...",
-      sentence: 'Frase di esempio',
-    },
-    matching_words: ['Pay', 'Payment'],
-    metadata: {
-      definition: 'Non se sa che è ma definisce la parole',
-      key: 'abc-erd-sassdfdd',
-      key_name: 'Uber Glossary',
-      domain: 'Uber',
-      subdomain: 'Eats',
-      create_date: '2022-08-10',
-      last_update: '2022-09-01',
-    },
-  },
-  {
-    term_id: 'xxxxxxxx',
-    source_language: 'en-US',
-    target_language: 'it-IT',
-    source: {
-      term: 'Payment',
-      note: 'The amount a Rider ...',
-      sentence: 'Example phrase',
-    },
-    target: {
-      term: 'Pagamento',
-      note: "L'ammontare che un Rider ...",
-      sentence: 'Frase di esempio',
-    },
-    matching_words: ['Pay', 'Payment'],
-    metadata: {
-      definition: 'Non se sa che è ma definisce la parole',
-      key: 'abc-erd-sassdfdd',
-      key_name: 'Uber Glossary',
-      domain: 'Uber',
-      subdomain: 'Eats',
-      create_date: '2022-08-10',
-      last_update: '2022-09-01',
-    },
-  },
-]
+import {getTmKeysJob} from '../../api/getTmKeysJob/getTmKeysJob'
 
 const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -96,136 +16,7 @@ const TERM_FORM_FIELDS = {
 }
 
 const initialState = {
-  keys: [
-    {
-      name: 'Ciao',
-      id: 'a3a708aad524b8fd4468',
-    },
-    {
-      name: 'Uber Glossary',
-      id: 'abc-erd-sassdfdd',
-    },
-    {
-      name: 'No Name',
-      id: 'c0a28df1943c5f854f75',
-    },
-    {
-      name: 'No Name',
-      id: '3e8e2d0de4a63e0272e7',
-    },
-    {
-      name: 'Test creazione chiave 1',
-      id: '20fb44b40065351c90f1',
-    },
-    {
-      name: 'No Name',
-      id: '55f7032ecd4f01323fbe',
-    },
-    {
-      name: 'es_XC.tmx',
-      id: '95ec21ba2634a410b0d1',
-    },
-    {
-      name: 'prova',
-      id: '1b5e94f1d67c287509b3',
-    },
-    {
-      name: 'test ',
-      id: 'b6e38ab1e2c8393ded0d',
-    },
-    {
-      name: 'Ms test pl',
-      id: '53d198c4085b5293c798',
-    },
-    {
-      name: 'Micro1 test',
-      id: 'c04a88eaafb2841d1d43',
-    },
-    {
-      name: 'MMMM test',
-      id: '192881653391f54ee955',
-    },
-    {
-      name: 'test1 micro',
-      id: '43dda923f2914ef12350',
-    },
-    {
-      name: 'micro test',
-      id: 'c9889f3bb2cf906486ee',
-    },
-    {
-      name: 'micro test',
-      id: 'edfc29151e12f8ea7382',
-    },
-    {
-      name: 'Micro Test',
-      id: '19f61ecc47d6c4f3d2a6',
-    },
-    {
-      name: 'Private TM and Glossary',
-      id: '08b645519fc29d460437',
-    },
-    {
-      name: 'Microsoft test',
-      id: 'ea8e383ec331c768424a',
-    },
-    {
-      name: 'Microsoft',
-      id: 'eb44d624758710490a92',
-    },
-    {
-      name: 'Micro german',
-      id: '7263f04f9711301dbd35',
-    },
-    {
-      name: 'Micro french',
-      id: '32407df35ad4da726706',
-    },
-    {
-      name: 'Micro',
-      id: '4c9cb9fdc101a8ff24d9',
-    },
-    {
-      name: 'Micro',
-      id: 'fa973db1815c326acb6a',
-    },
-    {
-      name: 'MS',
-      id: 'fa4a22b355baf83394b9',
-    },
-    {
-      name: 'Private TM and Glossary',
-      id: '4849101ed342147449e2',
-    },
-    {
-      name: 'Private TM and Glossary',
-      id: 'daf31bb28574f1f79d10',
-    },
-    {
-      name: 'No Name',
-      id: '821ec669486c553f76a5',
-    },
-    {
-      name: 'guess tag test Finnish',
-      id: '6626a5790f0723a3032c',
-    },
-    {
-      name: 'es_XC.tmx',
-      id: 'cf70b5aad3b8802e4f77',
-    },
-    {
-      name: '1234567812345678123456734567456756565667ssssssssssssss',
-      id: 'e9ed98bb5137ed81f40f',
-    },
-    {
-      name: 'No Name',
-      id: 'e7e4e69f2af1fb26834b',
-    },
-    {
-      name: 'No Name',
-      id: 'b1997669fde460b74375',
-    },
-  ],
+  keys: [],
   domains: [
     {
       name: 'Uber',
@@ -250,13 +41,14 @@ const initialState = {
       id: '2',
     },
   ],
+  terms: [],
   termForm: Object.entries(TERM_FORM_FIELDS).reduce(
     (acc, [, value]) => ({...acc, [value]: ''}),
     {},
   ),
 }
 
-export const SegmentFooterTabGlossary = ({active_class}) => {
+export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTypes, setSearchTypes] = useState([
     {id: '0', name: 'Source', selected: true},
@@ -272,13 +64,31 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
     domain: undefined,
     subdomain: undefined,
   })
-  const [terms, setTerms] = useState(mockGlossaryTerms)
+  const [terms, setTerms] = useState(initialState.terms)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
 
+  // get TM keys
+  useEffect(() => {
+    let cleaned = false
+
+    getTmKeysJob().then(
+      ({tm_keys: tmKeys}) =>
+        !cleaned && setKeys(tmKeys.map((item) => ({...item, id: item.key}))),
+    )
+
+    return () => (cleaned = true)
+  }, [])
+
+  useEffect(() => {
+    if (!segment?.glossary) return
+    console.log('----> segment glossary', segment.glossary)
+    setTerms(segment.glossary)
+  }, [segment?.glossary])
+
   // set active keys, domain and subdomain
   useEffect(() => {
-    const defaultKeys = [keys[0]]
+    const defaultKeys = keys.length ? [keys[0]] : []
     const defaultDomain = domains[0]
     const defaultSubdomain = subdomains[0]
 
@@ -665,6 +475,11 @@ export const SegmentFooterTabGlossary = ({active_class}) => {
       )}
     </div>
   )
+}
+
+SegmentFooterTabGlossary.propTypes = {
+  active_class: PropTypes.string,
+  segment: PropTypes.object,
 }
 
 const GlossaryItem = ({item, modifyElement}) => {

@@ -54,7 +54,7 @@ let SSE = {
     $(document).on('sse:glossary_get', function (ev, message) {
       SegmentActions.setGlossaryForSegment(
         message.data.id_segment,
-        message.data.matches,
+        message.data.terms,
       )
     })
     $(document).on('sse:glossary_set', function (ev, message) {
