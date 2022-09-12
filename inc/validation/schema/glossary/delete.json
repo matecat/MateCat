@@ -37,11 +37,36 @@
           "type": "null"
         },
         "metadata": {
-          "type": "null"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "definition": {
+              "type": "null"
+            },
+            "key": {
+              "type": "string"
+            },
+            "key_name": {
+              "type": "null"
+            },
+            "domain": {
+              "type": "null"
+            },
+            "subdomain": {
+              "type": "null"
+            },
+            "create_date": {
+              "type": "null"
+            },
+            "last_update": {
+              "type": "null"
+            }
+          },
+          "required": ["key"]
         }
       },
       "required": ["term_id"]
     }
   },
-  "required": ["id_client","id_job","password","term"]
+  "required": ["id_client", "id_job", "password", "term"]
 }

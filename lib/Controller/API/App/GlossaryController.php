@@ -28,6 +28,8 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
+
         $params = [
                 'action' => 'delete',
                 'payload' => $json,
@@ -113,9 +115,11 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'set',
-                'payload' => $json,
+            'action' => 'set',
+            'payload' => $json,
         ];
+
+        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
@@ -134,17 +138,16 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'update',
-                'payload' => $json,
+            'action' => 'update',
+            'payload' => $json,
         ];
+
+        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
         $this->response->json($json);
     }
-
-
-
 
     /**
      * This function validates the payload
@@ -194,7 +197,6 @@ class GlossaryController extends KleinController {
         }
 
         $userKeys = new UserKeysModel($this->user, $userRole ) ;
-
 
         $json['jobData'] = $job->toArray();
         $json['tm_keys'] = $job->tm_keys;

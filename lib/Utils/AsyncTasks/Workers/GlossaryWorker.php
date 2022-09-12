@@ -171,8 +171,14 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function get( $payload )
     {
+        if(isset($payload['id_segment'])){
+            $segment = (new \Segments_SegmentDao())->getById($payload['id_segment']);
+            $payload['source'] = $segment->segment;
+        }
+
         // @TODO HARD-CODED
         //  "source": $payload['source']
+        //  "target": $payload['target']
         //	"source_language": "en-US",
         //	"target_language": "it-IT",
         //	"keys": $payload['tm_keys'] ---->  [ "xxx", "yyy" ]

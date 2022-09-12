@@ -5,6 +5,12 @@
     "source": {
       "type": "string"
     },
+    "target": {
+      "type": "string"
+    },
+    "id_segment": {
+      "type": "integer"
+    },
     "id_client": {
       "type": "string"
     },
