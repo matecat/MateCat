@@ -94,7 +94,7 @@
               "type": "string"
             },
             "create_date": {
-              "type": "null",
+              "type": "null"
             },
             "last_update": {
               "type": "null"
