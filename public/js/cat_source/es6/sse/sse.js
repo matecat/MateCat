@@ -58,20 +58,21 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_set', function (ev, message) {
-      let match = message.data.matches[0]
-      match.id = match.id_match
-      SegmentActions.addGlossaryItemToCache(message.data.id_segment, match)
+      SegmentActions.addGlossaryItemToCache(
+        message.data.id_segment,
+        message.data.terms,
+      )
     })
-    // $(document).on('sse:glossary_delete', function (ev, message) {
-    //   SegmentActions.deleteGlossaryFromCache(
-    //     message.data.id_segment,
-    //     message.data.matchs[0],
-    //   )
-    // })
+    $(document).on('sse:glossary_delete', function (ev, message) {
+      SegmentActions.deleteGlossaryFromCache(
+        message.data.id_segment,
+        message.data.term,
+      )
+    })
     $(document).on('sse:glossary_update', function (ev, message) {
       SegmentActions.updateglossaryCache(
         message.data.id_segment,
-        message.data.matches,
+        message.data.terms,
       )
     })
     if (config.translation_matches_enabled) {

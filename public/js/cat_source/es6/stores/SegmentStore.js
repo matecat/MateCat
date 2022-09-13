@@ -596,26 +596,29 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(glossary),
     )
   },
-  deleteFromGlossary: function (sid, match) {
+  deleteFromGlossary: function (sid, term) {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
-    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
-    glossaryIndex > -1 && glossary.splice(glossaryIndex, 1)
+    const updatedGlossary = glossary.filter(
+      ({term_id}) => term.term_id !== term_id,
+    )
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      Immutable.fromJS(updatedGlossary),
     )
   },
-  addOrUpdateGlossaryItem: function (sid, match) {
+  addOrUpdateGlossaryItem: function (sid, terms) {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
-    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
-    glossaryIndex > -1
-      ? (glossary[glossaryIndex] = match)
-      : glossary.push(match)
+    const updatedGlossary = [
+      ...glossary.filter(
+        ({term_id}) => !terms.find((term) => term.term_id === term_id),
+      ),
+      ...terms,
+    ]
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      Immutable.fromJS(updatedGlossary),
     )
   },
   setCrossLanguageContributionsToCache: function (
@@ -1421,7 +1424,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(action.actionType, action.sid)
       break
     case SegmentConstants.DELETE_FROM_GLOSSARY:
-      SegmentStore.deleteFromGlossary(action.sid, action.match)
+      SegmentStore.deleteFromGlossary(action.sid, action.term)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1429,7 +1432,8 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHANGE_GLOSSARY:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
+      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.terms)
+      SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1437,7 +1441,8 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
+      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.terms)
+      SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,

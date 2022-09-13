@@ -1,9 +1,13 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 import {SegmentedControl} from '../common/SegmentedControl'
 import {getTmKeysJob} from '../../api/getTmKeysJob/getTmKeysJob'
+import SegmentActions from '../../actions/SegmentActions'
+import SegmentStore from '../../stores/SegmentStore'
+import SegmentConstants from '../../constants/SegmentConstants'
+import {getDomainsList} from '../../api/getDomainsList/getDomainsList'
 
 const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -67,18 +71,48 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   const [terms, setTerms] = useState(initialState.terms)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
+  const [isLoading, setIsLoading] = useState(false)
 
-  // get TM keys
+  const resetForm = useCallback(() => {
+    setTermForm(initialState.termForm)
+    setShowForm(false)
+    setShowMore(false)
+    setModifyElement(undefined)
+  }, [])
+
+  // get TM keys, domains and add actions listener
   useEffect(() => {
     let cleaned = false
 
-    getTmKeysJob().then(
-      ({tm_keys: tmKeys}) =>
-        !cleaned && setKeys(tmKeys.map((item) => ({...item, id: item.key}))),
-    )
+    getTmKeysJob().then(({tm_keys: tmKeys}) => {
+      if (!cleaned) {
+        getDomainsList({keys: tmKeys.map(({key}) => key)})
+        setKeys(tmKeys.map((item) => ({...item, id: item.key})))
+      }
+    })
 
-    return () => (cleaned = true)
-  }, [])
+    const addGlossaryItem = () => {
+      setIsLoading(false)
+      resetForm()
+    }
+    SegmentStore.addListener(
+      SegmentConstants.ADD_GLOSSARY_ITEM,
+      addGlossaryItem,
+    )
+    SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
+
+    return () => {
+      cleaned = true
+      SegmentStore.removeListener(
+        SegmentConstants.ADD_GLOSSARY_ITEM,
+        addGlossaryItem,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.CHANGE_GLOSSARY,
+        addGlossaryItem,
+      )
+    }
+  }, [resetForm])
 
   useEffect(() => {
     if (!segment?.glossary) return
@@ -109,10 +143,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
 
   // prefill term form
   useEffect(() => {
-    if (!modifyElement) {
-      setTermForm(initialState.termForm)
-      return
-    }
+    if (!modifyElement) return
     const {
       DEFINITION,
       ORIGINAL_TERM,
@@ -134,6 +165,82 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     })
   }, [modifyElement])
 
+  const getRequestPayloadTemplate = ({term = modifyElement, isDelete} = {}) => {
+    const getFieldValue = (value) => (value ? value : null)
+
+    const {
+      definition,
+      originalTerm,
+      originalDescription,
+      originalExample,
+      translatedTerm,
+      translatedDescription,
+      translatedExample,
+    } = termForm
+    const {keys = {}, domain = {}, subdomain = {}} = selectsActive
+    const {
+      term_id = null,
+      matching_words = null,
+      metadata: {
+        create_date = null,
+        last_update = null,
+        key,
+        key_name = null,
+      } = {},
+    } = term || {}
+
+    const source = !isDelete
+      ? {
+          term: getFieldValue(originalTerm),
+          note: getFieldValue(originalDescription),
+          sentence: getFieldValue(originalExample),
+        }
+      : null
+    const target = !isDelete
+      ? {
+          term: getFieldValue(translatedTerm),
+          note: getFieldValue(translatedDescription),
+          sentence: getFieldValue(translatedExample),
+        }
+      : null
+    const metadata = !isDelete
+      ? {
+          definition,
+          ...(term
+            ? {key, key_name}
+            : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
+          domain: domain.name,
+          subdomain: subdomain.name,
+          create_date,
+          last_update,
+        }
+      : {
+          key,
+          definition: null,
+          key_name: null,
+          domain: null,
+          subdomain: null,
+          create_date: null,
+          last_update: null,
+        }
+
+    return {
+      id_segment: segment.sid,
+      id_client: config.id_client,
+      id_job: config.id_job,
+      password: config.password,
+      term: {
+        term_id,
+        source_language: config.source_code,
+        target_language: config.target_code,
+        source,
+        target,
+        matching_words,
+        metadata,
+      },
+    }
+  }
+
   // execute search api
   const onSubmitSearch = () => {
     const searchingIn = searchTypes.find(({selected}) => selected).name
@@ -150,15 +257,34 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     console.log(data)
   }
 
+  const onSubmitAddOrUpdateTerm = () => {
+    setIsLoading(true)
+    if (modifyElement)
+      SegmentActions.updateGlossaryItem(getRequestPayloadTemplate())
+    else SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
+  }
+
   const openAddTerm = () => {
     setModifyElement(undefined)
     setShowForm(true)
   }
 
+  const closeAddTerm = () => resetForm()
+
   const modifyItem = (term) => {
     setShowMore(true)
     setModifyElement(term)
     setShowForm(true)
+  }
+
+  const deleteItem = (term) => {
+    const {term_id, metadata} = term
+    SegmentActions.deleteGlossaryItem(
+      getRequestPayloadTemplate({
+        term: {term_id, metadata: {key: metadata.key}},
+        isDelete: true,
+      }),
+    )
   }
 
   const updateSelectActive = (key, value) =>
@@ -410,15 +536,17 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
           <div className={'glossary_buttons'}>
             <button
               className={'glossary__button-cancel'}
-              onClick={() => {
-                setShowForm(false)
-                setShowMore(false)
-                setModifyElement(undefined)
-              }}
+              onClick={closeAddTerm}
             >
               Cancel
             </button>
-            <button className={'glossary__button-add'}>Add</button>
+            <button
+              className="glossary__button-add"
+              onClick={onSubmitAddOrUpdateTerm}
+              disabled={isLoading}
+            >
+              Add
+            </button>
           </div>
         </div>
       </div>
@@ -455,10 +583,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                 }}
               />
             </div>
-            <button
-              className={'glossary__button-add'}
-              onClick={() => openAddTerm()}
-            >
+            <button className={'glossary__button-add'} onClick={openAddTerm}>
               + Add Term
             </button>
           </div>
@@ -468,6 +593,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                 key={index}
                 item={term}
                 modifyElement={() => modifyItem(term)}
+                deleteElement={() => deleteItem(term)}
               />
             ))}
           </div>
@@ -482,7 +608,7 @@ SegmentFooterTabGlossary.propTypes = {
   segment: PropTypes.object,
 }
 
-const GlossaryItem = ({item, modifyElement}) => {
+const GlossaryItem = ({item, modifyElement, deleteElement}) => {
   const {metadata, source, target} = item
   return (
     <div className={'glossary_item'}>
@@ -503,7 +629,7 @@ const GlossaryItem = ({item, modifyElement}) => {
           <div onClick={() => modifyElement()}>
             <ModifyIcon />
           </div>
-          <div onClick={() => {}}>
+          <div onClick={() => deleteElement()}>
             <DeleteIcon />
           </div>
         </div>

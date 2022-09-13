@@ -754,36 +754,34 @@ const SegmentActions = {
     })
   },
 
-  deleteGlossaryItem: function (match, sid) {
-    deleteGlossaryItem(sid, match.segment, match.target, match.id)
+  deleteGlossaryItem: function (data) {
+    const sid = data.id_segment
+    deleteGlossaryItem(data)
       .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
           sid: sid,
           message: 'A glossary item has been deleted',
         })
-        SegmentActions.deleteGlossaryFromCache(sid, match)
       })
       .catch(() => {
         OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
   },
 
-  deleteGlossaryFromCache: (sid, match) => {
+  deleteGlossaryFromCache: (sid, term) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
       sid: sid,
-      match,
+      term,
     })
   },
 
-  addGlossaryItem: function (source, target, comment, sid) {
-    source = TextUtils.htmlEncode(source)
-    addGlossaryItem(sid, source, target, comment)
-      .then((response) => {
-        const msg = response.data.created_tm_key
-          ? 'A Private TM Key has been created for this job'
-          : 'A glossary item has been added'
+  addGlossaryItem: function (data) {
+    const sid = data.id_segment
+    addGlossaryItem(data)
+      .then(() => {
+        const msg = 'A glossary item has been added'
 
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
@@ -803,22 +801,16 @@ const SegmentActions = {
         }
       })
   },
-  addGlossaryItemToCache: (sid, match) => {
+  addGlossaryItemToCache: (sid, terms) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
-      match,
+      terms,
     })
   },
-  updateGlossaryItem: function (match, newTranslation, newComment, sid) {
-    updateGlossaryItem({
-      idItem: match.id,
-      source: match.segment,
-      target: match.translation,
-      newTranslation,
-      comment: newComment,
-      idSegment: sid,
-    })
+  updateGlossaryItem: function (data) {
+    const sid = data.id_segment
+    updateGlossaryItem(data)
       .then(() => {
         AppDispatcher.dispatch({
           actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
@@ -831,11 +823,11 @@ const SegmentActions = {
       })
   },
 
-  updateglossaryCache: (sid, match) => {
+  updateglossaryCache: (sid, terms) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHANGE_GLOSSARY,
       sid: sid,
-      match,
+      terms,
     })
   },
 
