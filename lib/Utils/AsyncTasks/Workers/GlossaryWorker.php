@@ -72,7 +72,10 @@ class GlossaryWorker extends AbstractWorker {
 //		"metadata": null
 //	}
 
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+
         $message =  [
+            "id_segment" => $id_segment,
             "terms" => [
                 [
                     "term_id" => "123456",
@@ -110,8 +113,7 @@ class GlossaryWorker extends AbstractWorker {
                         'glossary_delete',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        $message,
-                        $payload['id_segment']
+                        $message
                 )
         );
     }
@@ -186,37 +188,40 @@ class GlossaryWorker extends AbstractWorker {
         //	"target_language": "it-IT",
         //	"keys": $payload['tm_keys'] ---->  [ "xxx", "yyy" ]
 
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+
         $message =  [
-                "terms" => [
-                        [
-                                "term_id" => "123456",
-                                "source_language" => "en-US",
-                                "target_language" => "it-IT",
-                                "source" => [
-                                        "term" => "Payment",
-                                        "note" => "The amount a Rider ...",
-                                        "sentence" => "Example phrase"
-                                ],
-                                "target" => [
-                                        "term" => "Pagamento",
-                                        "note" => "L'ammontare che un Rider ...",
-                                        "sentence" => "Frase di esempio"
-                                ],
-                                "matching_words" => [
-                                        "Pay",
-                                        "Payment"
-                                ],
-                                "metadata" => [
-                                        "definition" => "Non se sa che è ma definisce la parole",
-                                        "key" => "abc-erd-sassdfdd",
-                                        "key_name" => "Uber Glossary",
-                                        "domain" => "Uber",
-                                        "subdomain" => "Eats",
-                                        "create_date" => "2022-08-10",
-                                        "last_update" => "2022-09-01"
-                                ]
-                        ]
+            "id_segment" => $id_segment,
+            "terms" => [
+                [
+                    "term_id" => "123456",
+                    "source_language" => "en-US",
+                    "target_language" => "it-IT",
+                    "source" => [
+                        "term" => "Payment",
+                        "note" => "The amount a Rider ...",
+                        "sentence" => "Example phrase"
+                    ],
+                    "target" => [
+                        "term" => "Pagamento",
+                        "note" => "L'ammontare che un Rider ...",
+                        "sentence" => "Frase di esempio"
+                    ],
+                    "matching_words" => [
+                        "Pay",
+                        "Payment"
+                    ],
+                    "metadata" => [
+                        "definition" => "Non se sa che è ma definisce la parole",
+                        "key" => "abc-erd-sassdfdd",
+                        "key_name" => "Uber Glossary",
+                        "domain" => "Uber",
+                        "subdomain" => "Eats",
+                        "create_date" => "2022-08-10",
+                        "last_update" => "2022-09-01"
+                    ]
                 ]
+            ]
         ];
 
         $this->publishMessage(
@@ -224,8 +229,7 @@ class GlossaryWorker extends AbstractWorker {
                         'glossary_get',
                         $payload[ 'id_client' ],
                         $payload[ 'jobData' ],
-                        $message,
-                        $payload['id_segment']
+                        $message
                 )
         );
     }
@@ -245,7 +249,10 @@ class GlossaryWorker extends AbstractWorker {
         //	"target_language": "it-IT",
         //	"keys": [ "xxx", "yyy" ]
 
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+
         $message =  [
+            "id_segment" => $id_segment,
             "terms" => [
                 [
                     "term_id" => "123456",
@@ -329,8 +336,10 @@ class GlossaryWorker extends AbstractWorker {
 //		}
 //	}
 //}
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
         $message =  [
+            "id_segment" => $id_segment,
             "terms" => [
                 [
                     "term_id" => "123456",
@@ -368,8 +377,7 @@ class GlossaryWorker extends AbstractWorker {
                 'glossary_set',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                $message,
-                $payload['id_segment']
+                $message
             )
         );
     }
@@ -416,47 +424,49 @@ class GlossaryWorker extends AbstractWorker {
 //	}
 //}
 
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+
         $message =  [
-                "terms" => [
-                        [
-                                "term_id" => "123456",
-                                "source_language" => "en-US",
-                                "target_language" => "it-IT",
-                                "source" => [
-                                        "term" => "Payment",
-                                        "note" => "The amount a Rider ...",
-                                        "sentence" => "Example phrase"
-                                ],
-                                "target" => [
-                                        "term" => "Pagamento",
-                                        "note" => "L'ammontare che un Rider ...",
-                                        "sentence" => "Frase di esempio"
-                                ],
-                                "matching_words" => [
-                                        "Pay",
-                                        "Payment"
-                                ],
-                                "metadata" => [
-                                        "definition" => "Non se sa che è ma definisce la parole",
-                                        "key" => "abc-erd-sassdfdd",
-                                        "key_name" => "Uber Glossary",
-                                        "domain" => "Uber",
-                                        "subdomain" => "Eats",
-                                        "create_date" => "2022-08-10",
-                                        "last_update" => "2022-09-01"
-                                ]
-                        ]
+            "id_segment" => $id_segment,
+            "terms" => [
+                [
+                    "term_id" => "123456",
+                    "source_language" => "en-US",
+                    "target_language" => "it-IT",
+                    "source" => [
+                        "term" => "Payment",
+                        "note" => "The amount a Rider ...",
+                        "sentence" => "Example phrase"
+                    ],
+                    "target" => [
+                        "term" => "Pagamento",
+                        "note" => "L'ammontare che un Rider ...",
+                        "sentence" => "Frase di esempio"
+                    ],
+                    "matching_words" => [
+                        "Pay",
+                        "Payment"
+                    ],
+                    "metadata" => [
+                        "definition" => "Non se sa che è ma definisce la parole",
+                        "key" => "abc-erd-sassdfdd",
+                        "key_name" => "Uber Glossary",
+                        "domain" => "Uber",
+                        "subdomain" => "Eats",
+                        "create_date" => "2022-08-10",
+                        "last_update" => "2022-09-01"
+                    ]
                 ]
+            ]
         ];
 
         $this->publishMessage(
-                $this->setResponsePayload(
-                        'glossary_update',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message,
-                        $payload['id_segment']
-                )
+            $this->setResponsePayload(
+                'glossary_update',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
         );
     }
 
@@ -469,9 +479,9 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @return array
      */
-    private function setResponsePayload( $type, $id_client, $jobData, $message, $id_segment = null ) {
+    private function setResponsePayload( $type, $id_client, $jobData, $message ) {
 
-        $payload = [
+        return [
             '_type' => $type,
             'data'  => [
                 'payload'   => $message,
@@ -480,17 +490,10 @@ class GlossaryWorker extends AbstractWorker {
                 'passwords' => $jobData[ 'password' ]
             ]
         ];
-
-        if($id_segment){
-            $payload['id_segment'] = $id_segment;
-        }
-
-        return $payload;
     }
 
     /**
-     * @param string $type
-     * @param array  $message
+     * @param $_object
      *
      * @throws \StompException
      */
