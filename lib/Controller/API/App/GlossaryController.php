@@ -28,7 +28,7 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
-        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
+        $this->checkWritePermissions([$json['term']['metadata']['key']], $json['userKeys']);
 
         $params = [
                 'action' => 'delete',
@@ -114,7 +114,12 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/set.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
-        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
+        $keys = [];
+        foreach ($json['term']['metadata']['keys'] as $key){
+            $keys[] = $key;
+        }
+
+        $this->checkWritePermissions($keys, $json['userKeys']);
 
         $params = [
             'action' => 'set',
@@ -137,7 +142,7 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/update.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
-        // @TODO CHECK JOB KEYS FOR UPDATE / DELETE / SET
+        $this->checkWritePermissions([$json['term']['metadata']['key']], $json['userKeys']);
 
         $params = [
             'action' => 'update',
@@ -200,14 +205,19 @@ class GlossaryController extends KleinController {
 
         $json['id_segment'] = (isset($json['id_segment'])) ? $json['id_segment'] : null;
         $json['jobData'] = $job->toArray();
-        $json['tm_keys'] = $job->tm_keys;
-        $json['jobKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
+        $json['tmKeys'] = \json_decode($job->tm_keys, true);
+        $json['userKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
 
         return $json;
     }
 
-    private function checkKeysPermissions()
-    {}
+    /**
+     * @param array $keys
+     * @param array $userKeys
+     */
+    private function checkWritePermissions(array $keys, array $userKeys)
+    {
+    }
 
     /**
      * @param $json

@@ -9,7 +9,7 @@
       "type": ["integer","string"]
     },
     "id_job": {
-      "type": "integer"
+      "type": ["integer","string"]
     },
     "password": {
       "type": "string"
