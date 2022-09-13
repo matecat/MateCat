@@ -76,34 +76,21 @@ class GlossaryWorker extends AbstractWorker {
 
         $message =  [
             "id_segment" => $id_segment,
-            "terms" => [
-                [
-                    "term_id" => "123456",
-                    "source_language" => "en-US",
-                    "target_language" => "it-IT",
-                    "source" => [
-                        "term" => "Payment",
-                        "note" => "The amount a Rider ...",
-                        "sentence" => "Example phrase"
-                    ],
-                    "target" => [
-                        "term" => "Pagamento",
-                        "note" => "L'ammontare che un Rider ...",
-                        "sentence" => "Frase di esempio"
-                    ],
-                    "matching_words" => [
-                        "Pay",
-                        "Payment"
-                    ],
-                    "metadata" => [
-                        "definition" => "Non se sa che è ma definisce la parole",
-                        "key" => "abc-erd-sassdfdd",
-                        "key_name" => "Uber Glossary",
-                        "domain" => "Uber",
-                        "subdomain" => "Eats",
-                        "create_date" => "2022-08-10",
-                        "last_update" => "2022-09-01"
-                    ]
+            "term" => [
+                "term_id" => "123456",
+                "source_language" => "en-US",
+                "target_language" => "it-IT",
+                "source" => null,
+                "target" => null,
+                "matching_words" => null,
+                "metadata" => [
+                    "definition" => "Non se sa che è ma definisce la parole",
+                    "key" => "abc-erd-sassdfdd",
+                    "key_name" => "Uber Glossary",
+                    "domain" => "Uber",
+                    "subdomain" => "Eats",
+                    "create_date" => "2022-08-10",
+                    "last_update" => "2022-09-01"
                 ]
             ]
         ];
