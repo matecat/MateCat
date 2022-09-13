@@ -19,7 +19,7 @@
       "additionalProperties": false,
       "properties": {
         "term_id": {
-          "type": "string"
+          "type": "null"
         },
         "source_language": {
           "type": "string"
@@ -94,12 +94,10 @@
               "type": "string"
             },
             "create_date": {
-              "type": "string",
-              "format": "date"
+              "type": "null",
             },
             "last_update": {
-              "type": "string",
-              "format": "date"
+              "type": "null"
             }
           },
           "required": [
