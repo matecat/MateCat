@@ -60,7 +60,10 @@
           "required": ["term", "note", "sentence"]
         },
         "matching_words": {
-          "type": "null"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "metadata": {
           "type": "object",
