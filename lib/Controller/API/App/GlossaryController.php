@@ -206,6 +206,9 @@ class GlossaryController extends KleinController {
         return $json;
     }
 
+    private function checkKeysPermissions()
+    {}
+
     /**
      * @param $json
      * @param $jsonSchema
