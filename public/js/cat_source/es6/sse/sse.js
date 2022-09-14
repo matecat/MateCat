@@ -75,6 +75,12 @@ let SSE = {
         message.data.terms,
       )
     })
+    $(document).on('sse:glossary_domains', function (ev, message) {
+      SegmentActions.getDomains({
+        sid: message.data.id_segment,
+        ...message.data,
+      })
+    })
     if (config.translation_matches_enabled) {
       $(document).on('sse:contribution', function (ev, message) {
         var segment = SegmentStore.getSegmentByIdToJS(message.data.id_segment)
@@ -133,6 +139,7 @@ let SSE = {
       'glossary_set',
       'glossary_delete',
       'glossary_update',
+      'glossary_domains',
     ]
     this.eventIdentifier = 'sse:' + this._type
 

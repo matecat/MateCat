@@ -1217,6 +1217,13 @@ const SegmentActions = {
       limit,
     })
   },
+  getDomains: ({entries, sid}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.GET_DOMAINS,
+      sid,
+      entries,
+    })
+  },
 }
 
 export default SegmentActions
