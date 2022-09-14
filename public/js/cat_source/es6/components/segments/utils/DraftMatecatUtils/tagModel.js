@@ -235,6 +235,23 @@ const tagSignatures = {
     replaceForLexiqa: true,
     lexiqaText: ' ',
   },
+  zeroWidthSpace: {
+    type: 'zeroWidthSpace',
+    regex: /\u200B/g,
+    selfClosing: true,
+    isClosure: false,
+    placeholder: '\u200B',
+    encodedPlaceholder: '⁠',
+    placeholderRegex: null,
+    decodeNeeded: false,
+    errorCheckAvailable: false,
+    lexiqaAvailable: false,
+    glossaryAvailable: false,
+    style: 'tag-selfclosed tag-word-joiner',
+    showTooltip: false,
+    replaceForLexiqa: true,
+    lexiqaText: ' ',
+  },
 }
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {

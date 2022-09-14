@@ -691,13 +691,19 @@ class Editarea extends React.Component {
       e.ctrlKey &&
       e.altKey
     ) {
-      return 'insert-word-joiner-tag'
+      // TODO: temporaneo solo per la lingua target con codice km-KH sostituisce il word-joiner con zero-width-space
+      return config.target_code === 'km-KH'
+        ? 'zero-width-space'
+        : 'insert-word-joiner-tag'
     } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
       const {get, reset} = typingWordJoiner
       if (e.key !== 'Alt') {
         const result = get(e.keyCode)
         if (result) {
-          return 'insert-word-joiner-tag'
+          // TODO: temporaneo solo per la lingua target con codice km-KH sostituisce il word-joiner con zero-width-space
+          return config.target_code === 'km-KH'
+            ? 'zero-width-space'
+            : 'insert-word-joiner-tag'
         }
       } else {
         reset()
@@ -761,6 +767,9 @@ class Editarea extends React.Component {
         return 'handled'
       case 'insert-word-joiner-tag':
         insertTagAtSelection('wordJoiner')
+        return 'handled'
+      case 'zero-width-space':
+        insertTagAtSelection('zeroWidthSpace')
         return 'handled'
       case 'translate':
         return 'not-handled'
