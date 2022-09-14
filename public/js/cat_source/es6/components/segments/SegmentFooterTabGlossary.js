@@ -246,15 +246,14 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     const searchingIn = searchTypes.find(({selected}) => selected).name
     const data = {
       sentence: searchTerm,
-      id_client: config.id_client,
-      id_job: config.id_job,
-      password: config.password,
+      id_segment: segment.sid,
       source_language:
         searchingIn === 'Source' ? config.source_code : config.target_code,
       target_language:
         searchingIn === 'Source' ? config.target_code : config.source_code,
     }
     console.log(data)
+    SegmentActions.searchGlossary(data)
   }
 
   const onSubmitAddOrUpdateTerm = () => {
@@ -324,9 +323,8 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
               placeholder="Select a glossary"
               showSearchBar
               searchPlaceholder="Find a glossary"
-              multipleSelect="dropdown"
               options={keys}
-              activeOptions={selectsActive.keys}
+              activeOption={selectsActive.keys[0]}
               checkSpaceToReverse={false}
               isDisabled={!!modifyElement}
               onToggleOption={(option) => {
@@ -342,17 +340,6 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                   }
                 }
               }}
-              optionTemplate={({name, isActive}) => (
-                <div className="glossary-option">
-                  <input
-                    type="checkbox"
-                    name={name}
-                    checked={isActive}
-                    onChange={() => false}
-                  />
-                  <label htmlFor={`${name}`}>{name}</label>
-                </div>
-              )}
             />
 
             <div className={'input-with-label__wrapper'}>
