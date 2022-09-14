@@ -11,6 +11,9 @@
     "id_client": {
       "type": "string"
     },
+    "id_segment": {
+      "type": ["integer","string"]
+    },
     "id_job": {
       "type": ["integer","string"]
     },
@@ -27,6 +30,7 @@
   "required": [
     "keys",
     "id_client",
+    "id_segment",
     "id_job",
     "password",
     "source_language",
