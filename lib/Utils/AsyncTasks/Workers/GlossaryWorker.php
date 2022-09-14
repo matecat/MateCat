@@ -178,8 +178,8 @@ class GlossaryWorker extends AbstractWorker {
                 "matching_words" => null,
                 "metadata" => [
                     "definition" => "Non se sa che è ma definisce la parole",
-                    "key" => "abc-erd-sassdfdd",
-                    "key_name" => "Uber Glossary",
+                    "key" => $payload['term']['metadata']['key'],
+                    "key_name" => $payload['term']['metadata']['key_name'],
                     "domain" => "Uber",
                     "subdomain" => "Eats",
                     "create_date" => "2022-08-10",
@@ -423,37 +423,39 @@ class GlossaryWorker extends AbstractWorker {
 
         $message =  [
             "id_segment" => $id_segment,
-            "terms" => [
-                [
+            "terms" => []
+        ];
+
+        foreach ($payload['term']['metadata']['keys'] as $key){
+            $message['terms'][] = [
                     "term_id" => "123456",
                     "source_language" => "en-US",
                     "target_language" => "it-IT",
                     "source" => [
-                        "term" => "Payment",
-                        "note" => "The amount a Rider ...",
-                        "sentence" => "Example phrase"
+                            "term" => "Payment",
+                            "note" => "The amount a Rider ...",
+                            "sentence" => "Example phrase"
                     ],
                     "target" => [
-                        "term" => "Pagamento",
-                        "note" => "L'ammontare che un Rider ...",
-                        "sentence" => "Frase di esempio"
+                            "term" => "Pagamento",
+                            "note" => "L'ammontare che un Rider ...",
+                            "sentence" => "Frase di esempio"
                     ],
                     "matching_words" => [
-                        "Pay",
-                        "Payment"
+                            "Pay",
+                            "Payment"
                     ],
                     "metadata" => [
-                        "definition" => "Non se sa che è ma definisce la parole",
-                        "key" => "abc-erd-sassdfdd",
-                        "key_name" => "Uber Glossary",
-                        "domain" => "Uber",
-                        "subdomain" => "Eats",
-                        "create_date" => "2022-08-10",
-                        "last_update" => "2022-09-01"
+                            "definition" => "Non se sa che è ma definisce la parole",
+                            "key" => $key['key'],
+                            "key_name" => $key['name'],
+                            "domain" => "Uber",
+                            "subdomain" => "Eats",
+                            "create_date" => "2022-08-10",
+                            "last_update" => "2022-09-01"
                     ]
-                ]
-            ]
-        ];
+            ];
+        }
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -532,8 +534,8 @@ class GlossaryWorker extends AbstractWorker {
                     ],
                     "metadata" => [
                         "definition" => "Non se sa che è ma definisce la parole",
-                        "key" => "abc-erd-sassdfdd",
-                        "key_name" => "Uber Glossary",
+                        "key" => $payload['term']['metadata']['key'],
+                        "key_name" => $payload['term']['metadata']['key_name'],
                         "domain" => "Uber",
                         "subdomain" => "Eats",
                         "create_date" => "2022-08-10",
