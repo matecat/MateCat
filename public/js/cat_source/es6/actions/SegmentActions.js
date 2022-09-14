@@ -738,12 +738,12 @@ const SegmentActions = {
     }
   },
 
-  searchGlossary: function (sid, fid, text, fromTarget) {
-    text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
-    text = text.replace(/"/g, '')
-    getGlossaryMatch(sid, text, fromTarget).catch(() => {
-      OfflineUtils.failedConnection(0, 'glossary')
-    })
+  searchGlossary: function ({sid, sentence, sourceLanguage, targetLanguage}) {
+    getGlossaryMatch({sid, sentence, sourceLanguage, targetLanguage}).catch(
+      () => {
+        OfflineUtils.failedConnection(0, 'glossary')
+      },
+    )
   },
 
   setGlossaryForSegment: (sid, terms) => {

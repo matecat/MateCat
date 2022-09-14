@@ -4,7 +4,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * Retrieve domains list from MyMemory
  *
  * @param {Object} options
- * @param {string} options.keys
+ * @param {Array} options.keys
+ * @param {string} options.idSegment
  * @param {string} [options.idJob=config.id_job]
  * @param {string} [options.password=config.password]
  * @param {string} [options.idClient=config.id_client]
@@ -14,6 +15,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const getDomainsList = async ({
   keys,
+  idSegment,
   idJob = config.id_job,
   password = config.password,
   idClient = config.id_client,
@@ -22,6 +24,7 @@ export const getDomainsList = async ({
 }) => {
   const dataParams = {
     keys,
+    id_segment: idSegment,
     id_job: idJob,
     password,
     id_client: idClient,
