@@ -237,6 +237,9 @@ class GlossaryWorker extends AbstractWorker {
             ];
         }
 
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+        $message['id_segment'] = $id_segment;
+
         $this->publishMessage(
             $this->setResponsePayload(
                 'glossary_domains',
