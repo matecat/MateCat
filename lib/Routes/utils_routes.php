@@ -85,6 +85,7 @@ $klein->with( '/api/app/tm-keys', function () {
 
 // Glossary
 $klein->with( '/api/app/glossary', function () {
+    route( '/check', 'POST', '\API\App\GlossaryController', 'check' );
     route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
     route( '/domains', 'POST', '\API\App\GlossaryController', 'domains' );
     route( '/get', 'POST', '\API\App\GlossaryController', 'get' );

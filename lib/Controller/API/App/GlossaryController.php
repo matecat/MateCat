@@ -18,6 +18,32 @@ class GlossaryController extends KleinController {
     }
 
     /**
+     * Glossary check action
+     *
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function check()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/check.json';
+        $jsonSchema = file_get_contents($jsonSchemaPath);
+        $this->validateJson($this->request->body(), $jsonSchema);
+
+        $json = json_decode($this->request->body(), true);
+
+        $this->validateLanguage($json['target_language']);
+        $this->validateLanguage($json['source_language']);
+
+        $params = [
+                'action' => 'check',
+                'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
      * Delete action on MyMemory
      *
      * @throws \ReflectionException
@@ -25,7 +51,7 @@ class GlossaryController extends KleinController {
      */
     public function delete()
     {
-        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json' ;
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/delete.json';
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $this->checkWritePermissions([$json['term']['metadata']['key']], $json['userKeys']);
