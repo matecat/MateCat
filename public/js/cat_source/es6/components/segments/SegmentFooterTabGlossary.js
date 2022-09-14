@@ -8,6 +8,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {getDomainsList} from '../../api/getDomainsList/getDomainsList'
+import {isEqual} from 'lodash'
 
 const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -21,30 +22,8 @@ const TERM_FORM_FIELDS = {
 
 const initialState = {
   keys: [],
-  domains: [
-    {
-      name: 'Uber',
-      id: '1',
-    },
-    {
-      name: 'Patreon',
-      id: '2',
-    },
-    {
-      name: 'Ebay',
-      id: '3',
-    },
-  ],
-  subdomains: [
-    {
-      name: 'Rider',
-      id: '1',
-    },
-    {
-      name: 'Eats',
-      id: '2',
-    },
-  ],
+  domains: [],
+  subdomains: [],
   terms: [],
   termForm: Object.entries(TERM_FORM_FIELDS).reduce(
     (acc, [, value]) => ({...acc, [value]: ''}),
@@ -60,6 +39,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   ])
   const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [domainsResponse, setDomainsResponse] = useState(undefined)
   const [keys, setKeys] = useState(initialState.keys)
   const [domains, setDomains] = useState(initialState.domains)
   const [subdomains, setSubdomains] = useState(initialState.subdomains)
@@ -80,13 +60,16 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     setModifyElement(undefined)
   }, [])
 
-  // get TM keys, domains and add actions listener
+  // get TM keys and add actions listener
   useEffect(() => {
     let cleaned = false
 
     getTmKeysJob().then(({tm_keys: tmKeys}) => {
       if (!cleaned) {
-        getDomainsList({keys: tmKeys.map(({key}) => key)})
+        getDomainsList({
+          keys: tmKeys.map(({key}) => key),
+          idSegment: segment.sid,
+        })
         setKeys(tmKeys.map((item) => ({...item, id: item.key})))
       }
     })
@@ -95,11 +78,16 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
       setIsLoading(false)
       resetForm()
     }
+    const getDomains = ({sid, entries}) => {
+      console.log('---->', sid, entries)
+      if (sid === segment.sid) setDomainsResponse(entries)
+    }
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
       addGlossaryItem,
     )
     SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
+    SegmentStore.addListener(SegmentConstants.GET_DOMAINS, getDomains)
 
     return () => {
       cleaned = true
@@ -111,8 +99,33 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
         SegmentConstants.CHANGE_GLOSSARY,
         addGlossaryItem,
       )
+      SegmentStore.removeListener(SegmentConstants.GET_DOMAINS, getDomains)
     }
-  }, [resetForm])
+  }, [segment.sid, resetForm])
+
+  // set domains by key
+  useEffect(() => {
+    if (!selectsActive.keys.length || !domainsResponse) return
+    const selectedKey = selectsActive.keys[0].key
+    setDomains(
+      domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
+        id: index.toString(),
+        name: domain,
+        subdomains,
+      })),
+    )
+  }, [domainsResponse, selectsActive.keys])
+  // set subdomains by domain
+  useEffect(() => {
+    if (!selectsActive.domain) return
+    if (selectsActive.domain?.subdomains)
+      setSubdomains(
+        selectsActive.domain?.subdomains.map((name, index) => ({
+          id: index.toString(),
+          name,
+        })),
+      )
+  }, [selectsActive.domain])
 
   useEffect(() => {
     if (!segment?.glossary) return
@@ -120,26 +133,48 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     setTerms(segment.glossary)
   }, [segment?.glossary])
 
-  // set active keys, domain and subdomain
   useEffect(() => {
-    const defaultKeys = keys.length ? [keys[0]] : []
-    const defaultDomain = domains[0]
-    const defaultSubdomain = subdomains[0]
-
-    const {metadata} = modifyElement || {}
-
     setSelectsActive((prevState) => ({
       ...prevState,
-      keys: keys.find(({id}) => id === metadata?.key)
-        ? [keys.find(({id}) => id === metadata?.key)]
-        : defaultKeys,
-      domain:
-        domains.find(({name}) => name === metadata?.domain) ?? defaultDomain,
-      subdomain:
-        subdomains.find(({name}) => name === metadata?.subdomain) ??
-        defaultSubdomain,
+      keys: keys.length ? [keys[0]] : [],
     }))
-  }, [modifyElement, keys, domains, subdomains])
+  }, [keys])
+
+  useEffect(() => {
+    setSelectsActive((prevState) => ({...prevState, domain: domains[0]}))
+  }, [domains])
+
+  useEffect(() => {
+    setSelectsActive((prevState) => ({...prevState, subdomain: subdomains[0]}))
+  }, [subdomains])
+
+  // prefill active keys, domain and subdomain modify element
+  // useEffect(() => {
+  //   if (!modifyElement) return
+  //   const {metadata} = modifyElement
+
+  //   const updateStateKeys = keys.find(({id}) => id === metadata?.key)
+  //   const updateStateDomain = domains.find(
+  //     ({name}) => name === metadata?.domain,
+  //   )
+  //   const updateStateSubdomain = subdomains.find(
+  //     ({name}) => name === metadata?.subdomain,
+  //   )
+
+  //   setSelectsActive((prevState) => ({
+  //     ...prevState,
+  //     ...(updateStateKeys &&
+  //       !isEqual(prevState.keys, updateStateKeys) && {keys: updateStateKeys}),
+  //     ...(updateStateDomain &&
+  //       !isEqual(prevState.domain, updateStateDomain) && {
+  //         domain: updateStateDomain,
+  //       }),
+  //     ...(updateStateSubdomain && {
+  //       subdomain: subdomains.find(({name}) => name === metadata?.subdomain),
+  //     }),
+  //   }))
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [modifyElement])
 
   // prefill term form
   useEffect(() => {
@@ -272,8 +307,16 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
 
   const modifyItem = (term) => {
     setShowMore(true)
-    setModifyElement(term)
     setShowForm(true)
+    setModifyElement(term)
+    // prefill selects active keys, domain and subdomain
+    const {metadata} = term
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      keys: [keys.find(({id}) => id === metadata?.key)],
+      domain: domains.find(({name}) => name === metadata?.domain),
+      subdomain: subdomains.find(({name}) => name === metadata?.subdomain),
+    }))
   }
 
   const deleteItem = (term) => {
