@@ -136,15 +136,26 @@
 
   .glossary_search-container {
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 1px solid #aebdcd;
+    border-radius: 4px;
+    padding: 4px;
+
+    svg {
+      color: $grey2;
+    }
   }
-  .glossary_search-target {
-    width: 50%;
+
+  .glossary__button-add-container {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
   }
+
   input.glossary_search-input {
-    width: 400px;
+    width: 300px;
     font-size: 16px;
+    border: none;
   }
   .glossary__button-add {
     color: #fff;
@@ -367,13 +378,17 @@
     background-color: $grey4;
   }
 
-  .search-type {
-    margin-left: 24px;
-  }
-
   .segmented-control {
+    background-color: $grey3;
     .segmented-control__cursor {
       padding: unset;
+      height: 82%;
+      margin-top: 3px;
+
+      &::before {
+        width: 88%;
+        margin-left: 4px;
+      }
     }
     .segmented-control__label {
       line-height: 32px;

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
@@ -8,7 +8,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {getDomainsList} from '../../api/getDomainsList/getDomainsList'
-import {isEqual} from 'lodash'
+import IconSearch from '../icons/IconSearch'
 
 const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -53,6 +53,8 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   const [termForm, setTermForm] = useState(initialState.termForm)
   const [isLoading, setIsLoading] = useState(false)
 
+  const previousSearchTermRef = useRef('')
+
   const resetForm = useCallback(() => {
     setTermForm(initialState.termForm)
     setShowForm(false)
@@ -79,7 +81,6 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
       resetForm()
     }
     const getDomains = ({sid, entries}) => {
-      console.log('---->', sid, entries)
       if (sid === segment.sid) setDomainsResponse(entries)
     }
     SegmentStore.addListener(
@@ -200,6 +201,44 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     })
   }, [modifyElement])
 
+  useEffect(() => {
+    let debounce
+
+    if (!searchTerm && searchTerm !== previousSearchTermRef.current) {
+      // empty search glossary GET
+      console.log('Refresh glossary GET')
+      SegmentActions.getGlossaryForSegment({
+        sid: segment.sid,
+        text: segment.segment,
+        shouldRefresh: true,
+      })
+    } else if (searchTerm) {
+      // start serching term with debounce
+      const onSubmitSearch = () => {
+        const searchingIn = searchTypes.find(({selected}) => selected).name
+        const data = {
+          sentence: searchTerm,
+          idSegment: segment.sid,
+          sourceLanguage:
+            searchingIn === 'Source' ? config.source_code : config.target_code,
+          targetLanguage:
+            searchingIn === 'Source' ? config.target_code : config.source_code,
+        }
+        SegmentActions.searchGlossary(data)
+      }
+      debounce = setTimeout(() => {
+        console.log('Searching:', searchTerm)
+        onSubmitSearch()
+      }, 500)
+    }
+
+    previousSearchTermRef.current = searchTerm
+
+    return () => {
+      clearTimeout(debounce)
+    }
+  }, [searchTerm, segment.sid, segment.segment, searchTypes])
+
   const getRequestPayloadTemplate = ({term = modifyElement, isDelete} = {}) => {
     const getFieldValue = (value) => (value ? value : null)
 
@@ -276,22 +315,11 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     }
   }
 
-  // execute search api
-  const onSubmitSearch = () => {
-    const searchingIn = searchTypes.find(({selected}) => selected).name
-    const data = {
-      sentence: searchTerm,
-      id_segment: segment.sid,
-      source_language:
-        searchingIn === 'Source' ? config.source_code : config.target_code,
-      target_language:
-        searchingIn === 'Source' ? config.target_code : config.source_code,
-    }
-    console.log(data)
-    SegmentActions.searchGlossary(data)
-  }
-
   const onSubmitAddOrUpdateTerm = () => {
+    // check mandatory fiels
+    const {originalTerm, translatedTerm} = termForm
+    if (!originalTerm || !translatedTerm) return
+
     setIsLoading(true)
     if (modifyElement)
       SegmentActions.updateGlossaryItem(getRequestPayloadTemplate())
@@ -590,13 +618,14 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
         <>
           <div className={'glossary_search'}>
             <div className={'glossary_search-container'}>
+              <IconSearch />
               <input
                 name="search_term"
                 className={'glossary_search-input'}
                 placeholder={'Search term'}
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={(event) => event.key === 'Enter' && onSubmitSearch()}
+                // onKeyDown={(event) => event.key === 'Enter' && onSubmitSearch()}
               />
               <SegmentedControl
                 name="search"
@@ -613,9 +642,11 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                 }}
               />
             </div>
-            <button className={'glossary__button-add'} onClick={openAddTerm}>
-              + Add Term
-            </button>
+            <div className="glossary__button-add-container">
+              <button className={'glossary__button-add'} onClick={openAddTerm}>
+                + Add Term
+              </button>
+            </div>
           </div>
           <div className={'glossary_items'}>
             {terms.map((term, index) => (

@@ -695,7 +695,18 @@ const SegmentActions = {
       tabName: tabName,
     })
   },
-  getGlossaryForSegment: function (sid, fid, text) {
+  getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
+    // refresh segment glossary already included
+    if (shouldRefresh) {
+      getGlossaryForSegment({
+        idSegment: sid,
+        source: text,
+      }).catch(() => {
+        OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
+      })
+      return
+    }
+
     let requestes = [
       {
         sid: sid,
@@ -738,12 +749,20 @@ const SegmentActions = {
     }
   },
 
-  searchGlossary: function ({sid, sentence, sourceLanguage, targetLanguage}) {
-    getGlossaryMatch({sid, sentence, sourceLanguage, targetLanguage}).catch(
-      () => {
-        OfflineUtils.failedConnection(0, 'glossary')
-      },
-    )
+  searchGlossary: function ({
+    idSegment,
+    sentence,
+    sourceLanguage,
+    targetLanguage,
+  }) {
+    getGlossaryMatch({
+      idSegment,
+      sentence,
+      sourceLanguage,
+      targetLanguage,
+    }).catch(() => {
+      OfflineUtils.failedConnection(0, 'glossary')
+    })
   },
 
   setGlossaryForSegment: (sid, terms) => {
