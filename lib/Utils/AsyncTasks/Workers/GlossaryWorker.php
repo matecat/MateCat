@@ -370,7 +370,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
             $this->setResponsePayload(
-                'glossary_sentence_search',
+                'glossary_search',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
                 $message
