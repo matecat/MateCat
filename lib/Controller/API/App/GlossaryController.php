@@ -239,10 +239,51 @@ class GlossaryController extends KleinController {
 
     /**
      * @param array $keys
-     * @param array $userKeys
+     * @param \TmKeyManagement_ClientTmKeyStruct[] $userKeys
      */
     private function checkWritePermissions(array $keys, array $userKeys)
     {
+        $allowedKeys = [];
+
+        foreach ($userKeys as $userKey){
+            $allowedKeys[] = $userKey->key;
+        }
+
+        // loop $keys
+        foreach ($keys as $key){
+
+            // check if $key is allowed
+            if(!in_array($key, $allowedKeys)){
+                $this->response->code(500);
+                $this->response->json([
+                    'error' => "Key ".$key." does not belong to this job"
+                ]);
+                die();
+            }
+
+            // check key permissions
+            $keyIsUse = array_filter($userKeys, function (\TmKeyManagement_ClientTmKeyStruct $userKey) use ($key){
+                return $userKey->key === $key;
+            })[0];
+
+            // is a glossary key?
+            if($keyIsUse->glos === false){
+                $this->response->code(500);
+                $this->response->json([
+                        'error' => "Key ".$key." is not a glossary key"
+                ]);
+                die();
+            }
+
+            // write permissions?
+            if($keyIsUse->edit === false or $keyIsUse->w === 0){
+                $this->response->code(500);
+                $this->response->json([
+                        'error' => "Key ".$key." has not write permissions"
+                ]);
+                die();
+            }
+        }
     }
 
     /**

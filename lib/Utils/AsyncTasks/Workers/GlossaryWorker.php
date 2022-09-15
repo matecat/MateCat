@@ -90,7 +90,7 @@ class GlossaryWorker extends AbstractWorker {
                     ],
                     'metadata' => [
                         'definition' => 'Non se sa che è ma definisce la parole',
-                        'key' => 'abc-erd-sassdfdd',
+                        'key' => 'c52da4a03d6aea33f242',
                         'key_name' => 'Uber Glossary',
                         'domain' => 'Uber',
                         'subdomain' => 'Eats',
@@ -120,7 +120,7 @@ class GlossaryWorker extends AbstractWorker {
                     ],
                     'metadata' => [
                         'definition' => 'Non se sa che è ma definisce la parole',
-                        'key' => 'abc-erd-sassdfdd',
+                        'key' => 'c52da4a03d6aea33f242',
                         'key_name' => 'Uber Glossary',
                         'domain' => 'Uber',
                         'subdomain' => 'Eats',
@@ -357,7 +357,7 @@ class GlossaryWorker extends AbstractWorker {
                     ],
                     "metadata" => [
                         "definition" => "Non se sa che è ma definisce la parole",
-                        "key" => "abc-erd-sassdfdd",
+                        "key" => "c52da4a03d6aea33f242",
                         "key_name" => "Uber Glossary",
                         "domain" => "Uber",
                         "subdomain" => "Eats",
@@ -410,7 +410,7 @@ class GlossaryWorker extends AbstractWorker {
 //		"matching_words": null,
 //		"metadata": {
 //        "definition": "Non se sa che è ma definisce la parole",
-//			"key": "abc-erd-sassdfdd",
+//			"key": "c52da4a03d6aea33f242",
 //			"key_name": "Uber Glossary",
 //			"domain": "Uber",
 //			"subdomain": "Eats",
@@ -499,7 +499,7 @@ class GlossaryWorker extends AbstractWorker {
 //		"matching_words": null,
 //		"metadata": {
 //        "definition": "Non se sa che è ma definisce la parole",
-//			"key": "abc-erd-sassdfdd",
+//			"key": "c52da4a03d6aea33f242",
 //			"key_name": "Uber Glossary",
 //			"domain": "Uber",
 //			"subdomain": "Eats",
