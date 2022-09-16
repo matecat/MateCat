@@ -21,6 +21,8 @@ import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
 import ModalsActions from './es6/actions/ModalsActions'
+import CatToolStore from './es6/stores/CatToolStore'
+import {getGlossaryCheck} from './es6/api/getGlossaryCheck'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {
@@ -709,6 +711,19 @@ window.UI = {
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')
       })
+
+    const jobTmKeys = CatToolStore.getJobTmKeys()
+    if (jobTmKeys) {
+      const clientId = CatToolStore.getClientId()
+      getGlossaryCheck({
+        target: trg_content,
+        source: src_content,
+        keys: jobTmKeys.map(({key}) => key),
+        idClient: clientId,
+        sourceLanguage: config.source_code,
+        targetLanguage: config.target_code,
+      })
+    }
   },
 
   translationIsToSave: function (segment) {

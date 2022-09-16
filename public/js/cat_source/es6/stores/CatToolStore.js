@@ -68,6 +68,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   getJobTmKeys: function () {
     return this.tmKeys
   },
+  getClientId: function () {
+    return this.clientId
+  },
   updateKeysDomains: function (domains) {
     this.keysDomains = domains
   },
