@@ -76,7 +76,7 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_domains', function (ev, message) {
-      SegmentActions.getDomains({
+      CatToolActions.setDomains({
         sid: message.data.id_segment,
         ...message.data,
       })
