@@ -101,5 +101,4 @@ module.exports = keyMirror({
   SET_SEGMENT_SAVING: null,
   TOGGLE_CHARACTER_COUNTER: null,
   CHARACTER_COUNTER: null,
-  GET_DOMAINS: null,
 })

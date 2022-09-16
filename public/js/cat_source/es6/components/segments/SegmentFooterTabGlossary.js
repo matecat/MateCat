@@ -10,13 +10,14 @@ import PropTypes from 'prop-types'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 import {SegmentedControl} from '../common/SegmentedControl'
-import {getTmKeysJob} from '../../api/getTmKeysJob/getTmKeysJob'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
+import CatToolStore from '../../stores/CatToolStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import {getDomainsList} from '../../api/getDomainsList/getDomainsList'
 import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
+import CatToolConstants from '../../constants/CatToolConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -92,24 +93,17 @@ export const SegmentFooterTabGlossary = forwardRef(
 
     // get TM keys and add actions listener
     useEffect(() => {
-      let cleaned = false
-
-      getTmKeysJob().then(({tm_keys: tmKeys}) => {
-        if (!cleaned) {
-          getDomainsList({
-            keys: tmKeys.map(({key}) => key),
-            idSegment: segment.sid,
-          })
-          setKeys(tmKeys.map((item) => ({...item, id: item.key})))
-        }
-      })
-
       const addGlossaryItem = () => {
         setIsLoading(false)
         resetForm()
       }
-      const getDomains = ({sid, entries}) => {
-        if (sid === segment.sid) setDomainsResponse(entries)
+      const setDomains = ({entries}) => {
+        console.log('Domains---->', entries)
+        setDomainsResponse(entries)
+      }
+      const setJobTmKeys = (keys) => {
+        console.log('Keys---->', segment.sid, keys)
+        setKeys(keys)
       }
       SegmentStore.addListener(
         SegmentConstants.ADD_GLOSSARY_ITEM,
@@ -119,10 +113,10 @@ export const SegmentFooterTabGlossary = forwardRef(
         SegmentConstants.CHANGE_GLOSSARY,
         addGlossaryItem,
       )
-      SegmentStore.addListener(SegmentConstants.GET_DOMAINS, getDomains)
-
+      CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
+      CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+      CatToolActions.retrieveJobKeys(segment.sid)
       return () => {
-        cleaned = true
         SegmentStore.removeListener(
           SegmentConstants.ADD_GLOSSARY_ITEM,
           addGlossaryItem,
@@ -131,7 +125,11 @@ export const SegmentFooterTabGlossary = forwardRef(
           SegmentConstants.CHANGE_GLOSSARY,
           addGlossaryItem,
         )
-        SegmentStore.removeListener(SegmentConstants.GET_DOMAINS, getDomains)
+        CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
+        CatToolStore.removeListener(
+          CatToolConstants.UPDATE_TM_KEYS,
+          setJobTmKeys,
+        )
       }
     }, [segment.sid, resetForm])
 
