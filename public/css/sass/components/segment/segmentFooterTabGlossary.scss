@@ -319,6 +319,20 @@
         }
       }
     }
+
+    .glossary_item--highlight {
+      animation: pulse 0.6s ease-in-out;
+      animation-iteration-count: 2;
+    }
+
+    @keyframes pulse {
+      50% {
+        box-shadow: inset 0 0 30px $grey2;
+      }
+      100% {
+        box-shadow: inset 0 0 0px $grey2;
+      }
+    }
   }
   .glossary_add-container {
     padding: 24px;
@@ -382,8 +396,8 @@
     background-color: $grey3;
     .segmented-control__cursor {
       padding: unset;
-      height: 82%;
-      margin-top: 3px;
+      height: 74%;
+      margin-top: 4px;
 
       &::before {
         width: 88%;
@@ -394,5 +408,20 @@
       line-height: 32px;
       padding: 0 14px 0 14px;
     }
+  }
+
+  .search-type {
+    margin-left: 14px;
+  }
+
+  .search_term_reset_button {
+    display: flex;
+    cursor: pointer;
+  }
+  .search_term_reset_button--hidden {
+    visibility: hidden;
+  }
+  .search_term_reset_button--visible {
+    visibility: visible;
   }
 }

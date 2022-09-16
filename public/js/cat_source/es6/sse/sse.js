@@ -85,14 +85,16 @@ let SSE = {
       SegmentActions.setGlossaryForSegment(
         message.data.id_segment,
         // message.data.terms
-        new Array(3).fill({}).map((item, index) => ({
-          ...message.data.terms[0],
-          term_id: `${message.data.terms[0].term_id}_${index}`,
-          source: {
-            ...message.data.terms[0].source,
-            term: `${message.data.terms[0].source.term}_${index}`,
-          },
-        })),
+        new Array(Math.floor(Math.random() * (30 - 12 + 1) + 12))
+          .fill({})
+          .map((item, index) => ({
+            ...message.data.terms[0],
+            term_id: `${message.data.terms[0].term_id}_${index}`,
+            source: {
+              ...message.data.terms[0].source,
+              term: `${message.data.terms[0].source.term}_${index}`,
+            },
+          })),
       )
     })
     if (config.translation_matches_enabled) {
