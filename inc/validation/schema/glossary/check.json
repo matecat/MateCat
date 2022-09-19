@@ -2,9 +2,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "id_client": {
-      "type": "string"
-    },
     "source": {
       "type": "string"
     },
@@ -25,7 +22,6 @@
     }
   },
   "required": [
-    "id_client",
     "source",
     "target",
     "source_language",
