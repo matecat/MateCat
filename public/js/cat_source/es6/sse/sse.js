@@ -76,10 +76,26 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_domains', function (ev, message) {
-      SegmentActions.getDomains({
+      CatToolActions.setDomains({
         sid: message.data.id_segment,
         ...message.data,
       })
+    })
+    $(document).on('sse:glossary_search', function (ev, message) {
+      SegmentActions.setGlossaryForSegment(
+        message.data.id_segment,
+        // message.data.terms
+        new Array(Math.floor(Math.random() * (30 - 12 + 1) + 12))
+          .fill({})
+          .map((item, index) => ({
+            ...message.data.terms[0],
+            term_id: `${message.data.terms[0].term_id}_${index}`,
+            source: {
+              ...message.data.terms[0].source,
+              term: `${message.data.terms[0].source.term}_${index}`,
+            },
+          })),
+      )
     })
     if (config.translation_matches_enabled) {
       $(document).on('sse:contribution', function (ev, message) {
@@ -140,6 +156,7 @@ let SSE = {
       'glossary_delete',
       'glossary_update',
       'glossary_domains',
+      'glossary_search',
     ]
     this.eventIdentifier = 'sse:' + this._type
 

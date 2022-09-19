@@ -1,6 +1,5 @@
 import * as DraftMatecatConstants from './editorConstants'
 import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component'
-import TextUtils from '../../../../utils/textUtils'
 
 const activateQaCheckBlacklist = (qaCheckGlossary) => {
   const generateGlossaryDecorator = () => {

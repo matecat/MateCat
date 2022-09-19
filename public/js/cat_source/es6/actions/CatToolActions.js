@@ -14,6 +14,9 @@ import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import ModalsActions from './ModalsActions'
 import {Header} from '../components/header/cattol/Header'
+import {getTmKeysJob} from '../api/getTmKeysJob'
+import {getDomainsList} from '../api/getDomainsList'
+import SegmentConstants from '../constants/SegmentConstants'
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
@@ -237,7 +240,42 @@ let CatToolActions = {
       qr: qr,
     })
   },
-
+  retrieveJobKeys: function (sid) {
+    const jobKeys = CatToolStore.getJobTmKeys()
+    const domains = CatToolStore.getKeysDomains()
+    if (!jobKeys) {
+      getTmKeysJob().then(({tm_keys: tmKeys}) => {
+        getDomainsList({
+          keys: tmKeys.map(({key}) => key),
+          idSegment: sid,
+        })
+        const keys = tmKeys.map((item) => ({...item, id: item.key}))
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.UPDATE_TM_KEYS,
+          keys,
+        })
+      })
+    } else {
+      AppDispatcher.dispatch({
+        actionType: CattolConstants.UPDATE_TM_KEYS,
+        keys: jobKeys,
+      })
+      //From sse channel
+      if (domains) {
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.UPDATE_DOMAINS,
+          entries: domains,
+        })
+      }
+    }
+  },
+  setDomains: ({entries, sid}) => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.UPDATE_DOMAINS,
+      sid,
+      entries,
+    })
+  },
   /**
    * Function to add notifications to the interface
    * notification object with the following properties

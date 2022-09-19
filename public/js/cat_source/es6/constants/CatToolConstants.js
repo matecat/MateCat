@@ -17,4 +17,6 @@ module.exports = keyMirror({
   ADD_NOTIFICATION: null,
   REMOVE_NOTIFICATION: null,
   REMOVE_ALL_NOTIFICATION: null,
+  UPDATE_TM_KEYS: null,
+  UPDATE_DOMAINS: null,
 })

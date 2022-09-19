@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {isUndefined, size} from 'lodash'
 import Cookies from 'js-cookie'
@@ -69,6 +69,8 @@ function SegmentFooter({sid, segment}) {
   const [activeTab, setActiveTab] = useState(undefined)
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
+
+  const tabGlossaryRef = useRef()
 
   const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
@@ -354,13 +356,21 @@ function SegmentFooter({sid, segment}) {
         )
       case 'gl':
         return (
-          <SegmentFooterTabGlossary
-            key={'container_' + tab.code}
-            code={tab.code}
-            active_class={openClass}
-            id_segment={sid}
-            segment={segment}
-          />
+          <>
+            <SegmentFooterTabGlossary
+              ref={tabGlossaryRef}
+              key={'container_' + tab.code}
+              code={tab.code}
+              active_class={openClass}
+              id_segment={sid}
+              segment={segment}
+            />
+            <button
+              onClick={() => tabGlossaryRef.current.scrollToTerm('123456_7')}
+            >
+              Go to term
+            </button>
+          </>
         )
       case 'al':
         return (

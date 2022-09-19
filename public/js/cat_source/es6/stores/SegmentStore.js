@@ -1820,12 +1820,6 @@ AppDispatcher.register(function (action) {
         limit: action.limit,
       })
       break
-    case SegmentConstants.GET_DOMAINS:
-      SegmentStore.emitChange(SegmentConstants.GET_DOMAINS, {
-        sid: action.sid,
-        entries: action.entries,
-      })
-      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }
