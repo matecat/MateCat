@@ -735,18 +735,46 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(tagMismatch),
     )
   },
-  setQACheckMatches(matches) {
-    this._segments = this._segments.map((segment) =>
-      segment.remove('qaCheckGlossary'),
-    )
-    Object.keys(matches).map((sid) => {
-      let index = this.getSegmentIndex(sid)
-      if (index === -1) return
-      this._segments = this._segments.setIn(
-        [index, 'qaCheckGlossary'],
-        matches[sid],
+  setQACheckMatches(sid, matches) {
+    // this._segments = this._segments.map((segment) =>
+    //   segment.remove('qaCheckGlossary'),
+    // )
+    // Object.keys(matches).map((sid) => {
+    //   let index = this.getSegmentIndex(sid)
+    //   if (index === -1) return
+    //   this._segments = this._segments.setIn(
+    //     [index, 'qaCheckGlossary'],
+    //     matches[sid],
+    //   )
+    // })
+
+    // TODO: nuova check glossary eliminare codice sopra
+    const {missing_terms: missingTerms, blacklisted_terms: blacklistedTerms} =
+      matches || {}
+    const termsId = [
+      ...new Set([
+        ...missingTerms.map(({term_id}) => term_id),
+        ...blacklistedTerms.map(({term_id}) => term_id),
+      ]),
+    ]
+    const terms = termsId.map((value) => {
+      const missingTermObject = missingTerms.find(
+        ({term_id}) => term_id === value,
       )
+      const blacklistedTermObject = blacklistedTerms.find(
+        ({term_id}) => term_id === value,
+      )
+
+      return {
+        ...(missingTermObject
+          ? {...missingTermObject}
+          : {...blacklistedTermObject}),
+        missingTerm: !!missingTermObject,
+        blacklistedTerm: !!blacklistedTermObject,
+      }
     })
+
+    this.addOrUpdateGlossaryItem(terms)
   },
   setQABlacklistMatches(sid, matches) {
     const index = this.getSegmentIndex(sid)
@@ -1702,7 +1730,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.setChoosenSuggestion(action.sid, action.index)
       break
     case SegmentConstants.SET_QA_CHECK_MATCHES:
-      SegmentStore.setQACheckMatches(action.matches)
+      SegmentStore.setQACheckMatches(action.sid, action.matches)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
