@@ -16,7 +16,6 @@ const GLOSSARY_TYPE_G = 'glossary_get';
 const GLOSSARY_TYPE_S = 'glossary_set';
 const GLOSSARY_TYPE_D = 'glossary_delete';
 const GLOSSARY_TYPE_U = 'glossary_update';
-const GLOSSARY_TYPE_CH = 'glossary_check';
 const GLOSSARY_TYPE_DO = 'glossary_domains';
 const GLOSSARY_TYPE_SE = 'glossary_search';
 const CONTRIBUTIONS_TYPE = 'contribution';
