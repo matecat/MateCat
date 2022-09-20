@@ -738,30 +738,23 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setQACheck(sid, data) {
     const {missing_terms: missingTerms, blacklisted_terms: blacklistedTerms} =
       data || {}
-    const termsId = [
-      ...new Set([
-        ...missingTerms.map(({term_id}) => term_id),
-        ...blacklistedTerms.map(({term_id}) => term_id),
-      ]),
-    ]
-    const terms = termsId.map((value) => {
-      const missingTermObject = missingTerms.find(
-        ({term_id}) => term_id === value,
-      )
-      const blacklistedTermObject = blacklistedTerms.find(
-        ({term_id}) => term_id === value,
-      )
-
-      return {
-        ...(missingTermObject
-          ? {...missingTermObject}
-          : {...blacklistedTermObject}),
-        missingTerm: !!missingTermObject,
-        blacklistedTerm: !!blacklistedTermObject,
-      }
-    })
+    const terms = missingTerms.map((term) => ({
+      ...term,
+      missingTerm: true,
+    }))
 
     this.addOrUpdateGlossaryItem(sid, terms)
+
+    // setup blacklisted
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn(
+      [index, 'qaBlacklistGlossary'],
+      blacklistedTerms.reduce(
+        (acc, {matching_words = []}) => [...acc, ...matching_words],
+        [],
+      ),
+    )
   },
   setSegmentSaving(sid, saving) {
     const index = this.getSegmentIndex(sid)
