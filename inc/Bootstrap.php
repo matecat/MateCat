@@ -362,8 +362,9 @@ class Bootstrap {
             $fileName  = str_replace( '\\', DIRECTORY_SEPARATOR, $namespace ) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
-        /** @noinspection PhpIncludeInspection */
-        @include $fileName;
+        if( stream_resolve_include_path( $fileName ) ){
+            include $fileName;
+        }
 
     }
 
@@ -462,7 +463,7 @@ class Bootstrap {
 
         Features::setIncludePath();
 
-    }
+     }
 
     /**
      * Check if all mandatory keys are present

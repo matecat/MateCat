@@ -32,7 +32,8 @@ class BlacklistDao extends \DataAccess_AbstractDao
         $thisDao = new self();
         $stmt = $this->_getStatementGetByJobIdAndPasswordForCache();
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'jid' => $jobId, 'password' => $password ] )[ 0 ];
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'jid' => $jobId, 'password' => $password ] );
+        return !empty( $result ) ? $result[ 0 ] : [];
     }
 
     /**

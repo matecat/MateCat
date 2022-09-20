@@ -222,13 +222,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      */
     public static function composeCachePath( $hash ) {
 
-        $cacheTree = [
-                'firstLevel'  => $hash{0} . $hash{1},
-                'secondLevel' => $hash{2} . $hash{3},
+        return [
+                'firstLevel'  => $hash[ 0 ] . $hash[ 1 ],
+                'secondLevel' => $hash[ 2 ] . $hash[ 3 ],
                 'thirdLevel'  => substr( $hash, 4 )
         ];
-
-        return $cacheTree;
 
     }
 

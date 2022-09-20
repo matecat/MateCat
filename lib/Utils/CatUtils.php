@@ -421,7 +421,7 @@ class CatUtils {
          * heuristic, of course this regexp is not perfect, hoping it is not too greedy
          *
          */
-        $linkRegexp = '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d-_]+)?(?:[\p{Latin}\d-_]+\.[\p{Latin}\d-_]+\.[\p{Latin}\d#\?=\.-_]+)/u';
+        $linkRegexp = '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d\-_]+)?(?:[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#\?=\.\-_]+)/u';
 
 
         /**

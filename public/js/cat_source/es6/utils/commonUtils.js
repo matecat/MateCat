@@ -529,9 +529,7 @@ const CommonUtils = {
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
   },
   checkJobIsSplitted: function () {
-    const jobPath = document.location.pathname.split('/').splice(-1)
-    const jobPathArray = jobPath[0].split('-')
-    return jobPathArray.length > 2
+    return config.job_is_splitted
   },
 }
 

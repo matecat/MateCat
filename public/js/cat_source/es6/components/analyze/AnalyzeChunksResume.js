@@ -75,13 +75,17 @@ class AnalyzeChunksResume extends React.Component {
     )
   }
 
-  openOutsourceModal = (idJob) => (e) => {
+  openOutsourceModal = (idJob, chunk) => (e) => {
     e.stopPropagation()
     e.preventDefault()
-    this.setState({
-      openOutsource: true,
-      outsourceJobId: idJob,
-    })
+    if (chunk.outsource_available) {
+      this.setState({
+        openOutsource: true,
+        outsourceJobId: idJob,
+      })
+    } else {
+      window.open('https://translated.com/contact-us', '_blank')
+    }
   }
 
   closeOutsourceModal = () => {
@@ -130,8 +134,11 @@ class AnalyzeChunksResume extends React.Component {
   getOutsourceButton = (chunk, index) => {
     const {openOutsourceModal} = this
     return (
-      <div className={'outsource-translation'}>
-        <a onClick={openOutsourceModal(index)}>Buy Translation</a>
+      <div
+        className={'outsource-translation'}
+        onClick={openOutsourceModal(index, chunk)}
+      >
+        <a>Buy Translation</a>
         <span>
           By
           <svg

@@ -241,7 +241,14 @@ class SearchModel {
     private function find( $haystack, $needle, $originalMap = null ) {
         $haystack = StringTransformer::transform($haystack, $originalMap);
 
-        return WholeTextFinder::find( $haystack, $needle, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
+        return WholeTextFinder::find(
+            $haystack,
+            $needle,
+            true,
+            $this->queryParams->isExactMatchRequested,
+            $this->queryParams->isMatchCaseRequested,
+            true
+        );
     }
 
     /**

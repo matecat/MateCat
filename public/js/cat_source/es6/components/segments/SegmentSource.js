@@ -601,6 +601,16 @@ class SegmentSource extends React.Component {
   }
 
   addSplitTag = () => {
+    // Check chars are selected
+    const selection = window.getSelection()
+    if (selection.anchorNode) {
+      const {startOffset = 0, endOffset = 0} = selection?.getRangeAt(0)
+      if (endOffset - startOffset > 0) {
+        selection?.removeAllRanges()
+        return
+      }
+    }
+
     this.insertTagAtSelection('splitPoint')
     this.updateSplitNumberNew(1)
   }

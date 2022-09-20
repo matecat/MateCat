@@ -56,12 +56,10 @@ class DefuseEncryption {
 
         if( $keyFile === false ) {
             throw new Exception( 'Failed to open the file.' );
-            exit;
         }
 
         if( fwrite( $keyFile, $this->key ) === FALSE ) {
             throw new Exception( 'Failed to write in the file.' );
-            exit;
         }
 
         fclose( $keyFile );
@@ -94,8 +92,7 @@ class DefuseEncryption {
      */
     public function decrypt( $cipherText ) {
         try {
-            $text = Crypto::decrypt( $cipherText, $this->key );
-            return $text;
+            return Crypto::decrypt( $cipherText, $this->key );
         } catch ( WrongKeyOrModifiedCiphertextException $ex ) {
             return false;
         }
