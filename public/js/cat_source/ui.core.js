@@ -714,12 +714,10 @@ window.UI = {
 
     const jobTmKeys = CatToolStore.getJobTmKeys()
     if (jobTmKeys) {
-      const clientId = CatToolStore.getClientId()
       getGlossaryCheck({
         target: trg_content,
         source: src_content,
         keys: jobTmKeys.map(({key}) => key),
-        idClient: clientId,
         sourceLanguage: config.source_code,
         targetLanguage: config.target_code,
       })
