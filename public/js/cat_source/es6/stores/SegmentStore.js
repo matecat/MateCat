@@ -735,22 +735,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(tagMismatch),
     )
   },
-  setQACheckMatches(sid, matches) {
-    // this._segments = this._segments.map((segment) =>
-    //   segment.remove('qaCheckGlossary'),
-    // )
-    // Object.keys(matches).map((sid) => {
-    //   let index = this.getSegmentIndex(sid)
-    //   if (index === -1) return
-    //   this._segments = this._segments.setIn(
-    //     [index, 'qaCheckGlossary'],
-    //     matches[sid],
-    //   )
-    // })
-
-    // TODO: nuova check glossary eliminare codice sopra
+  setQACheck(sid, data) {
     const {missing_terms: missingTerms, blacklisted_terms: blacklistedTerms} =
-      matches || {}
+      data || {}
     const termsId = [
       ...new Set([
         ...missingTerms.map(({term_id}) => term_id),
@@ -774,15 +761,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       }
     })
 
-    this.addOrUpdateGlossaryItem(terms)
-  },
-  setQABlacklistMatches(sid, matches) {
-    const index = this.getSegmentIndex(sid)
-    if (index === -1) return
-    this._segments = this._segments.setIn(
-      [index, 'qaBlacklistGlossary'],
-      matches,
-    )
+    this.addOrUpdateGlossaryItem(sid, terms)
   },
   setSegmentSaving(sid, saving) {
     const index = this.getSegmentIndex(sid)
@@ -1729,15 +1708,8 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CHOOSEN_SUGGESTION:
       SegmentStore.setChoosenSuggestion(action.sid, action.index)
       break
-    case SegmentConstants.SET_QA_CHECK_MATCHES:
-      SegmentStore.setQACheckMatches(action.sid, action.matches)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-      )
-      break
-    case SegmentConstants.SET_QA_BLACKLIST_MATCHES:
-      SegmentStore.setQABlacklistMatches(action.sid, action.matches)
+    case SegmentConstants.SET_QA_CHECK:
+      SegmentStore.setQACheck(action.sid, action.data)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,

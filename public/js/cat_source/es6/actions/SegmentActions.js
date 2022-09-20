@@ -361,17 +361,11 @@ const SegmentActions = {
       index: index,
     })
   },
-  addQaCheckMatches: function (matches) {
+  addQaCheck: function (sid, data) {
     AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_QA_CHECK_MATCHES,
-      matches: matches,
-    })
-  },
-  addQaBlacklistMatches: function (sid, matches) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_QA_BLACKLIST_MATCHES,
-      sid: sid,
-      matches: matches,
+      actionType: SegmentConstants.SET_QA_CHECK,
+      sid,
+      data,
     })
   },
   addLexiqaHighlight: function (sid, matches, type) {
@@ -848,15 +842,6 @@ const SegmentActions = {
       sid: sid,
       terms,
     })
-  },
-
-  updateGlossaryData(data, sid) {
-    if (QaCheckGlossary.enabled() && data.glossary) {
-      QaCheckGlossary.update(data.glossary)
-    }
-    if (QaCheckBlacklist.enabled() && data.blacklist) {
-      SegmentActions.addQaBlacklistMatches(sid, data.blacklist.matches)
-    }
   },
 
   copyGlossaryItemInEditarea: function (glossaryTranslation, segment) {

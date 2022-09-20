@@ -706,7 +706,6 @@ window.UI = {
           resp: data,
           segment: segment,
         })
-        SegmentActions.updateGlossaryData(data.data, segment.sid)
       })
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')
@@ -722,6 +721,8 @@ window.UI = {
         idClient: clientId,
         sourceLanguage: config.source_code,
         targetLanguage: config.target_code,
+      }).then((data) => {
+        SegmentActions.addQaCheck(segment.sid, data)
       })
     }
   },
