@@ -1032,11 +1032,18 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 s.raw_word_count, 
                 st.eq_word_count, 
                 st.match_type,
-                ste.source_page
+                ste.source_page,
+                f.filename,
+                fp.tag_key,
+                fp.tag_value
             FROM jobs j
             join segment_translations st on st.id_job = j.id
             join segments s on s.id = st.id_segment
-            LEFT JOIN (
+            join
+			  files f ON s.id_file = f.id
+			left join 
+			    files_parts fp ON fp.id = s.id_file_part 
+            left join (
                 	SELECT id_segment as ste_id_segment, source_page 
                     FROM  segment_translation_events 
                     JOIN ( 

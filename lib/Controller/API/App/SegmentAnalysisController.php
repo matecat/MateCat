@@ -161,10 +161,13 @@ class SegmentAnalysisController extends KleinController {
             ];
         }
 
+        $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original'  ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
+
         return [
                 'id_segment' => (int)$id,
                 'urls' => $jobUrlStruct->getUrls(),
                 'id_request' => ($idRequest) ? $idRequest->meta_value : null,
+                'original_filename' => $originalFile,
                 'source' => $segmentForAnalysis->segment,
                 'target' => $segmentForAnalysis->translation,
                 'source_lang' => $segmentForAnalysis->source,
