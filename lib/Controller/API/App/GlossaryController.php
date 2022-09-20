@@ -36,7 +36,7 @@ class GlossaryController extends KleinController {
         $this->response->json($message = [
             'missing_terms' => [
                 [
-                    'term_id' => 'xxxxxxxx',
+                    'term_id' => '123456',
                     'source_language' => 'en-US',
                     'target_language' => 'it-IT',
                     'source' => [
@@ -66,7 +66,7 @@ class GlossaryController extends KleinController {
             ],
             'blacklisted_terms' => [
                 [
-                    'term_id' => 'xxxxxxxx',
+                    'term_id' => '123456',
                     'source_language' => 'en-US',
                     'target_language' => 'it-IT',
                     'source' => [
