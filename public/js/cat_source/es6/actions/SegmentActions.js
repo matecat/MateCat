@@ -1267,24 +1267,21 @@ const SegmentActions = {
         const setJobTmKeys = () => {
           resolve()
           CatToolStore.removeListener(
-            CatToolConstants.UPDATE_TM_KEYS,
+            CattoolConstants.UPDATE_TM_KEYS,
             setJobTmKeys,
           )
         }
-        CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+        CatToolStore.addListener(CattoolConstants.UPDATE_TM_KEYS, setJobTmKeys)
       } else {
         resolve()
       }
     }).then(() => {
       const jobTmKeys = CatToolStore.getJobTmKeys()
       getGlossaryCheck({
+        id_segment: segment.sid,
         target: trg_content,
         source: src_content,
         keys: jobTmKeys.map(({key}) => key),
-        sourceLanguage: config.source_code,
-        targetLanguage: config.target_code,
-      }).then((data) => {
-        SegmentActions.addQaCheck(segment.sid, data)
       })
     })
   },
