@@ -9,7 +9,7 @@ use TaskRunner\Commons\AbstractWorker;
 
 class GlossaryWorker extends AbstractWorker {
 
-    const CHECK_ACTION = 'check';
+    const CHECK_ACTION  = 'check';
     const DELETE_ACTION = 'delete';
     const GET_ACTION    = 'get';
     const SET_ACTION    = 'set';
