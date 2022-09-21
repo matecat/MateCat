@@ -1255,7 +1255,6 @@ const SegmentActions = {
           resp: data,
           segment: segment,
         })
-        SegmentActions.updateGlossaryData(data.data, segment.sid)
       })
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')
@@ -1267,11 +1266,11 @@ const SegmentActions = {
         const setJobTmKeys = () => {
           resolve()
           CatToolStore.removeListener(
-            CattoolConstants.UPDATE_TM_KEYS,
+            CatToolConstants.UPDATE_TM_KEYS,
             setJobTmKeys,
           )
         }
-        CatToolStore.addListener(CattoolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+        CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
       } else {
         resolve()
       }
