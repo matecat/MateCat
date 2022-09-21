@@ -21,80 +21,21 @@ class GlossaryController extends KleinController {
      * Glossary check action
      *
      * @throws \Swaggest\JsonSchema\InvalidValue
+     * @throws \ReflectionException
      */
     public function check()
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/check.json';
-        $jsonSchema = file_get_contents($jsonSchemaPath);
-        $this->validateJson($this->request->body(), $jsonSchema);
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
-        $json = json_decode($this->request->body(), true);
+        $params = [
+                'action' => 'check',
+                'payload' => $json,
+        ];
 
-        $this->validateLanguage($json['target_language']);
-        $this->validateLanguage($json['source_language']);
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($message = [
-            'missing_terms' => [
-                [
-                    'term_id' => '123456',
-                    'source_language' => 'en-US',
-                    'target_language' => 'it-IT',
-                    'source' => [
-                        'term' => 'Buona',
-                        'note' => 'The amount a Rider ...',
-                        'sentence' => 'Example phrase',
-                    ],
-                    'target' => [
-                        'term' => 'good',
-                        'note' => 'L\'ammontare che un Rider ...',
-                        'sentence' => 'Frase di esempio',
-                    ],
-                    'matching_words' => [
-                        'buonissima',
-                        'buona',
-                    ],
-                    'metadata' => [
-                        'definition' => 'Non se sa che è ma definisce la parole',
-                        'key' => 'c52da4a03d6aea33f242',
-                        'key_name' => 'Uber Glossary',
-                        'domain' => 'Uber',
-                        'subdomain' => 'Eats',
-                        'create_date' => '2022-08-10',
-                        'last_update' => '2022-09-01',
-                    ],
-                ],
-            ],
-            'blacklisted_terms' => [
-                [
-                    'term_id' => '123456',
-                    'source_language' => 'en-US',
-                    'target_language' => 'it-IT',
-                    'source' => [
-                        'term' => 'Payment',
-                        'note' => 'The amount a Rider ...',
-                        'sentence' => 'Example phrase',
-                    ],
-                    'target' => [
-                        'term' => 'Pagamento',
-                        'note' => 'L\'ammontare che un Rider ...',
-                        'sentence' => 'Frase di esempio',
-                    ],
-                    'matching_words' => [
-                        'Pay',
-                        'Payment',
-                    ],
-                    'metadata' => [
-                        'definition' => 'Non se sa che è ma definisce la parole',
-                        'key' => 'c52da4a03d6aea33f242',
-                        'key_name' => 'Uber Glossary',
-                        'domain' => 'Uber',
-                        'subdomain' => 'Eats',
-                        'create_date' => '2022-08-10',
-                        'last_update' => '2022-09-01',
-                    ],
-                ],
-            ],
-        ]);
+        $this->response->json($json);
     }
 
     /**

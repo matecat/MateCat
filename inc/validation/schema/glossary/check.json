@@ -2,6 +2,12 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "id_job": {
+      "type": ["integer","string"]
+    },
+    "password": {
+      "type": "string"
+    },
     "source": {
       "type": "string"
     },
@@ -22,6 +28,8 @@
     }
   },
   "required": [
+    "id_job",
+    "password",
     "source",
     "target",
     "source_language",
