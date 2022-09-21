@@ -9,6 +9,7 @@ use TaskRunner\Commons\AbstractWorker;
 
 class GlossaryWorker extends AbstractWorker {
 
+    const CHECK_ACTION = 'check';
     const DELETE_ACTION = 'delete';
     const GET_ACTION    = 'get';
     const SET_ACTION    = 'set';
@@ -29,6 +30,7 @@ class GlossaryWorker extends AbstractWorker {
         $payload = $params[ 'payload' ];
 
         $allowedActions = [
+            self::CHECK_ACTION,
             self::DELETE_ACTION,
             self::DOMAINS_ACTION,
             self::GET_ACTION,
@@ -46,6 +48,88 @@ class GlossaryWorker extends AbstractWorker {
         $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
 
         $this->{$action}( $payload );
+    }
+
+    /**
+     * Check a key on MyMemory
+     *
+     * @param $payload
+     *
+     * @throws \Exception
+     */
+    private function check( $payload ) {
+
+        $message = [
+            'missing_terms' => [
+                [
+                    'term_id' => '123456',
+                    'source_language' => 'en-US',
+                    'target_language' => 'it-IT',
+                    'source' => [
+                        'term' => 'Buona',
+                        'note' => 'The amount a Rider ...',
+                        'sentence' => 'Example phrase',
+                    ],
+                    'target' => [
+                        'term' => 'good',
+                        'note' => 'L\'ammontare che un Rider ...',
+                        'sentence' => 'Frase di esempio',
+                    ],
+                    'matching_words' => [
+                        'buonissima',
+                        'buona',
+                    ],
+                    'metadata' => [
+                        'definition' => 'Non se sa che è ma definisce la parole',
+                        'key' => 'c52da4a03d6aea33f242',
+                        'key_name' => 'Uber Glossary',
+                        'domain' => 'Uber',
+                        'subdomain' => 'Eats',
+                        'create_date' => '2022-08-10',
+                        'last_update' => '2022-09-01',
+                    ],
+                ],
+            ],
+            'blacklisted_terms' => [
+                [
+                    'term_id' => '123456',
+                    'source_language' => 'en-US',
+                    'target_language' => 'it-IT',
+                    'source' => [
+                        'term' => 'Payment',
+                        'note' => 'The amount a Rider ...',
+                        'sentence' => 'Example phrase',
+                    ],
+                    'target' => [
+                        'term' => 'Pagamento',
+                        'note' => 'L\'ammontare che un Rider ...',
+                        'sentence' => 'Frase di esempio',
+                    ],
+                    'matching_words' => [
+                        'Pay',
+                        'Payment',
+                    ],
+                    'metadata' => [
+                        'definition' => 'Non se sa che è ma definisce la parole',
+                        'key' => 'c52da4a03d6aea33f242',
+                        'key_name' => 'Uber Glossary',
+                        'domain' => 'Uber',
+                        'subdomain' => 'Eats',
+                        'create_date' => '2022-08-10',
+                        'last_update' => '2022-09-01',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->publishMessage(
+                $this->setResponsePayload(
+                        'glossary_check',
+                        $payload[ 'id_client' ],
+                        $payload[ 'jobData' ],
+                        $message
+                )
+        );
     }
 
     /**
