@@ -97,6 +97,9 @@ let SSE = {
           })),
       )
     })
+    $(document).on('sse:glossary_check', function (ev, message) {
+      SegmentActions.addQaCheck(message.data.id_segment, message.data)
+    })
     if (config.translation_matches_enabled) {
       $(document).on('sse:contribution', function (ev, message) {
         var segment = SegmentStore.getSegmentByIdToJS(message.data.id_segment)
@@ -157,6 +160,7 @@ let SSE = {
       'glossary_update',
       'glossary_domains',
       'glossary_search',
+      'glossary_check',
     ]
     this.eventIdentifier = 'sse:' + this._type
 

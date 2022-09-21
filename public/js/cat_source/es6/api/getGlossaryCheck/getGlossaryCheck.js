@@ -6,6 +6,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {Object} options
  * @param {string} options.target
  * @param {string} options.source
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
  * @param {string} [options.idClient=config.id_client]
  * @param {string} [options.sourceLanguage=config.source_code]
  * @param {string} [options.targetLanguage=config.target_code]
@@ -15,6 +17,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getGlossaryCheck = async ({
   target,
   source,
+  idJob = config.id_job,
+  password = config.password,
   sourceLanguage = config.source_code,
   targetLanguage = config.target_code,
   keys,
@@ -22,6 +26,8 @@ export const getGlossaryCheck = async ({
   const dataParams = {
     target,
     source,
+    id_job: idJob,
+    password,
     source_language: sourceLanguage,
     target_language: targetLanguage,
     keys,
