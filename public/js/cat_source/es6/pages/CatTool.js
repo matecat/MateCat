@@ -48,7 +48,7 @@ function CatTool() {
         }),
         ...restOptions,
       }))
-      if (startSegmentId) startSegmentIdRef.current = startSegmentId
+      if (startSegmentId) startSegmentIdRef.current = startSegmentId.toString()
       if (callbackAfterSegmentsResponse)
         callbackAfterSegmentsResponseRef.current = callbackAfterSegmentsResponse
     }
@@ -158,6 +158,7 @@ function CatTool() {
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       $(window).trigger('segmentsAdded', {resp: data.files})
     }
+    $(document).trigger('files:appended')
   }, [segmentsResult, options?.openCurrentSegmentAfter])
 
   // execute callback option from onRender action

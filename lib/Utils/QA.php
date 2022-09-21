@@ -1984,7 +1984,7 @@ class QA {
             $deepDiffTagG = $this->_checkTagCountMismatch( count( @$this->srcDomMap[ 'g' ] ), count( @$this->trgDomMap[ 'g' ] ) );
         }
 
-        if ( $targetNumDiff == 0 ) {
+        if ( $targetNumDiff == 0 && ( isset( $this->srcDomMap[ 'innerHTML' ] ) || isset( $this->trgDomMap[ 'innerHTML' ] ) ) ) {
             // check for Tag ID MISMATCH (double check with content)
             $innerHtmlArray = array_diff_assoc( $this->srcDomMap[ 'innerHTML' ], $this->trgDomMap[ 'innerHTML' ] );
             $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
