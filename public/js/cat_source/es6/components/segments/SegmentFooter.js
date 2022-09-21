@@ -356,21 +356,14 @@ function SegmentFooter({sid, segment}) {
         )
       case 'gl':
         return (
-          <>
-            <SegmentFooterTabGlossary
-              ref={tabGlossaryRef}
-              key={'container_' + tab.code}
-              code={tab.code}
-              active_class={openClass}
-              id_segment={sid}
-              segment={segment}
-            />
-            <button
-              onClick={() => tabGlossaryRef.current.scrollToTerm('123456_7')}
-            >
-              Go to term
-            </button>
-          </>
+          <SegmentFooterTabGlossary
+            ref={tabGlossaryRef}
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            id_segment={sid}
+            segment={segment}
+          />
         )
       case 'al':
         return (

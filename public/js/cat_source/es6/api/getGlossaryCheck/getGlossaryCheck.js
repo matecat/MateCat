@@ -15,7 +15,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getGlossaryCheck = async ({
   target,
   source,
-  idClient = config.id_client,
   sourceLanguage = config.source_code,
   targetLanguage = config.target_code,
   keys,
@@ -23,7 +22,6 @@ export const getGlossaryCheck = async ({
   const dataParams = {
     target,
     source,
-    id_client: idClient,
     source_language: sourceLanguage,
     target_language: targetLanguage,
     keys,

@@ -23,6 +23,7 @@ import NotificationBox from './es6/components/notificationsComponent/Notificatio
 import ModalsActions from './es6/actions/ModalsActions'
 import CatToolStore from './es6/stores/CatToolStore'
 import {getGlossaryCheck} from './es6/api/getGlossaryCheck'
+import CattoolConstants from './es6/constants/CatToolConstants'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {
@@ -706,24 +707,37 @@ window.UI = {
           resp: data,
           segment: segment,
         })
-        SegmentActions.updateGlossaryData(data.data, segment.sid)
       })
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')
       })
 
-    const jobTmKeys = CatToolStore.getJobTmKeys()
-    if (jobTmKeys) {
-      const clientId = CatToolStore.getClientId()
+    // get tm keys
+    new Promise((resolve) => {
+      if (!CatToolStore.getJobTmKeys()) {
+        const setJobTmKeys = () => {
+          resolve()
+          CatToolStore.removeListener(
+            CattoolConstants.UPDATE_TM_KEYS,
+            setJobTmKeys,
+          )
+        }
+        CatToolStore.addListener(CattoolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+      } else {
+        resolve()
+      }
+    }).then(() => {
+      const jobTmKeys = CatToolStore.getJobTmKeys()
       getGlossaryCheck({
         target: trg_content,
         source: src_content,
         keys: jobTmKeys.map(({key}) => key),
-        idClient: clientId,
         sourceLanguage: config.source_code,
         targetLanguage: config.target_code,
+      }).then((data) => {
+        SegmentActions.addQaCheck(segment.sid, data)
       })
-    }
+    })
   },
 
   translationIsToSave: function (segment) {
