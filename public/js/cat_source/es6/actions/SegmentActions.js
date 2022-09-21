@@ -4,15 +4,13 @@ import _ from 'lodash'
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
 import EditAreaConstants from '../constants/EditAreaConstants'
+import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import TagUtils from '../utils/tagUtils'
-import TextUtils from '../utils/textUtils'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
-import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils'
-import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
@@ -29,7 +27,9 @@ import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
+import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
+import CatToolStore from '../stores/CatToolStore'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -1261,8 +1261,22 @@ const SegmentActions = {
         OfflineUtils.failedConnection(0, 'getWarning')
       })
 
-    const jobTmKeys = CatToolStore.getJobTmKeys()
-    if (jobTmKeys) {
+    // get tm keys
+    new Promise((resolve) => {
+      if (!CatToolStore.getJobTmKeys()) {
+        const setJobTmKeys = () => {
+          resolve()
+          CatToolStore.removeListener(
+            CatToolConstants.UPDATE_TM_KEYS,
+            setJobTmKeys,
+          )
+        }
+        CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+      } else {
+        resolve()
+      }
+    }).then(() => {
+      const jobTmKeys = CatToolStore.getJobTmKeys()
       getGlossaryCheck({
         target: trg_content,
         source: src_content,
@@ -1272,7 +1286,7 @@ const SegmentActions = {
       }).then((data) => {
         SegmentActions.addQaCheck(segment.sid, data)
       })
-    }
+    })
   },
 }
 

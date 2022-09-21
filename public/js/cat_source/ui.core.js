@@ -13,9 +13,6 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
-import CatToolStore from './es6/stores/CatToolStore'
-import {getGlossaryCheck} from './es6/api/getGlossaryCheck'
-import CattoolConstants from './es6/constants/CatToolConstants'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {

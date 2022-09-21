@@ -368,7 +368,6 @@ function SegmentFooter() {
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
-            id_segment={sid}
             segment={segment}
           />
         )
