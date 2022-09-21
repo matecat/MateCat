@@ -836,7 +836,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       this._globalWarnings.matecat.INFO.total = warnings.length
       this._globalWarnings.matecat.total =
         this._globalWarnings.matecat.total + warnings.length
+    } else {
+      this.removeLexiqaWarning()
     }
+  },
+  removeLexiqaWarning: function () {
+    this._segments = this._segments.map((segment) => segment.delete('lexiqa'))
   },
   addSearchResult: function (
     occurrencesList,
@@ -1211,7 +1216,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_SEGMENT:
       SegmentStore.openSegment(action.sid)
-      SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid)
+      SegmentStore.emitChange(
+        SegmentConstants.OPEN_SEGMENT,
+        action.sid,
+        action.wasOriginatedFromBrowserHistory,
+      )
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
     case SegmentConstants.SELECT_SEGMENT: {
@@ -1242,6 +1251,8 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.ADD_SEGMENTS:
       SegmentStore.updateAll(action.segments, action.where)
+      if (SegmentStore._segments.size)
+        SegmentStore.emitChange(SegmentConstants.FREEZING_SEGMENTS, false)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1606,6 +1617,10 @@ AppDispatcher.register(function (action) {
         SegmentConstants.UPDATE_GLOBAL_WARNINGS,
         SegmentStore._globalWarnings,
       )
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
       break
     case SegmentConstants.OPEN_ISSUES_PANEL:
       SegmentStore.openSegmentIssuePanel(action.data.sid)
@@ -1819,6 +1834,19 @@ AppDispatcher.register(function (action) {
         counter: action.counter,
         limit: action.limit,
       })
+      break
+    case SegmentConstants.GET_MORE_SEGMENTS:
+      SegmentStore.emitChange(SegmentConstants.GET_MORE_SEGMENTS, action.where)
+      break
+    case SegmentConstants.REMOVE_ALL_SEGMENTS:
+      SegmentStore.removeAllSegments()
+      SegmentStore.emitChange(SegmentConstants.REMOVE_ALL_SEGMENTS)
+      break
+    case SegmentConstants.FREEZING_SEGMENTS:
+      SegmentStore.emitChange(
+        SegmentConstants.FREEZING_SEGMENTS,
+        action.isFreezing,
+      )
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
