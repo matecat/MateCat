@@ -195,28 +195,9 @@
 
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
-
-        <header/>
-
-        <div class="main-container">
-            <div data-mount="review-side-panel"></div>
-            <div id="outer">
-                <article id="file" class="loading mbc-commenting-closed">
-                   <div class="article-segments-container"></div>
-                </article>
-                <div id="loader-getMoreSegments"/>
-            </div>
-            <div id="plugin-mount-point"></div>
-        </div>
-
-        <div class="notifications-wrapper"></div>
-
-        <footer class="stats-foo"/>
-
+        <div class="page-content"></div>
         <div metal:use-macro="tm.html/tm_panel"></div>
-
-
-    <div metal:use-macro="cookiebanner.html/cookieBanner"/>
+        <div metal:use-macro="cookiebanner.html/cookieBanner"></div>
         <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
     </body>
 
