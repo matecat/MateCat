@@ -36,8 +36,8 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * get segment list
-     * (for a project)
+     * Segment list
+     * from id project/password
      */
     public function project() {
 
@@ -69,16 +69,96 @@ class SegmentAnalysisController extends KleinController {
             $segmentsCount += \Chunks_ChunkDao::getSegmentsCount($job->id, $job->password, 3600);
         }
 
-    }
-
-    private function getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount)
-    {
-
+        try {
+            $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount));
+            exit();
+        } catch (\Exception $exception){
+            $this->response->code( 500 );
+            $this->response->json( [
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
+            ] );
+        }
     }
 
     /**
-     * get segment list
-     * (for a job)
+     * @param $idProject
+     * @param $password
+     * @param $page
+     * @param $perPage
+     * @param $segmentsCount
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount)
+    {
+        $totalPages = ceil($segmentsCount/$perPage);
+        $isLast = ((int)$page === (int)$totalPages);
+
+        if($page > $totalPages or $page <= 0){
+            throw new \Exception('Page number '.$page.' is not valid');
+        }
+
+        $prev = ($page > 1 ) ? "/api/app/projects/".$idProject."/".$password."/segment-analysis?page=".($page-1)."&per_page=".$perPage : null;
+        $next = (!$isLast and $totalPages > 1) ? "/api/app/projects/".$idProject."/".$password."/segment-analysis?page=".($page+1)."&per_page=".$perPage : null;
+        $items = $this->getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage);
+
+        return [
+                '_links' => [
+                        'page' => $page,
+                        'per_page' => $perPage,
+                        'total_pages' => $totalPages,
+                        'total_items' => $segmentsCount,
+                        'next_page' => $next,
+                        'prev_page' => $prev,
+                ],
+                'items' => $items
+        ];
+    }
+
+    /**
+     * @param $idProject
+     * @param $password
+     * @param $page
+     * @param $perPage
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage)
+    {
+        $segments = [];
+        $offset = $perPage;
+        $limit = ($page-1)*$offset;
+
+        $ids = \Segments_SegmentDao::getIdsFromIdProjectAndPassword($idProject, $password, $offset, $limit, 3600);
+
+        foreach ($ids as $id){
+
+            // Urls
+            $urls = JobUrlBuilder::createFromCredentials($id->id_job, $id->job_password, [
+                'id_segment' => $id->id
+            ]);
+
+            $chunk = \Chunks_ChunkDao::getByIdAndPassword($id->id_job, $id->job_password);
+
+            if($chunk === null){
+                throw new \Exception('Job not found');
+            }
+
+            $this->chunk = $chunk;
+
+            $segments[] = $this->formatSegment($id->id, $urls);
+        }
+
+        return $segments;
+    }
+
+    /**
+     * Segment list
+     * from id job/password
      */
     public function job() {
 
@@ -135,7 +215,7 @@ class SegmentAnalysisController extends KleinController {
 
         $prev = ($page > 1 ) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page-1)."&per_page=".$perPage : null;
         $next = (!$isLast and $totalPages > 1) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page+1)."&per_page=".$perPage : null;
-        $items = $this->getSegments($idJob, $password, $page, $perPage);
+        $items = $this->getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage);
 
         return [
             '_links' => [
@@ -159,13 +239,13 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws \Exception
      */
-    private function getSegments($idJob, $password, $page, $perPage)
+    private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
     {
         $segments = [];
         $offset = $perPage;
         $limit = ($page-1)*$offset;
 
-        $ids = \Segments_SegmentDao::getIds($idJob, $password, $offset, $limit, 3600);
+        $ids = \Segments_SegmentDao::getIdsFromIdJobAndPassword($idJob, $password, $offset, $limit, 3600);
 
         foreach ($ids as $id){
 
