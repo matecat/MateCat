@@ -59,7 +59,10 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function check( $payload ) {
 
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+
         $message = [
+            'id_segment' => $id_segment,
             'missing_terms' => [
                 [
                     'term_id' => '123456',
