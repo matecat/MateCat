@@ -611,9 +611,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
     const updatedGlossary = [
-      ...glossary.filter(
-        ({term_id}) => !terms.find((term) => term.term_id === term_id),
-      ),
+      ...glossary
+        .filter(({term_id}) => !terms.find((term) => term.term_id === term_id))
+        .map((term) => ({...term, missingTerm: false})),
       ...terms,
     ]
     this._segments = this._segments.setIn(
