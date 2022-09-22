@@ -1277,7 +1277,7 @@ const SegmentActions = {
     }).then(() => {
       const jobTmKeys = CatToolStore.getJobTmKeys()
       getGlossaryCheck({
-        id_segment: segment.sid,
+        idSegment: segment.sid,
         target: trg_content,
         source: src_content,
         keys: jobTmKeys.map(({key}) => key),
