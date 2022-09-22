@@ -247,7 +247,7 @@ class commentController extends ajaxController {
 
         if($commentDao->deleteComment($comment->id)){
             $this->result[ 'data' ][] = [
-                "id" => $comment->id
+                "id" => (int)$comment->id
             ];
             return;
         }
