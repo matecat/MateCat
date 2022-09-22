@@ -1,29 +1,31 @@
 import React from 'react'
+import {SegmentContext} from './SegmentContext'
 
 import SegmentSource from './SegmentSource'
 import SegmentTarget from './SegmentTarget'
 import SimpleEditor from './SimpleEditor'
 
 class SegmentWrapper extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
   }
 
   render() {
-    const {segment, isTarget} = this.props
+    const {isTarget} = this.props
+    const {segment} = this.context
 
     if (segment.opened) {
       return isTarget ? (
-        <SegmentTarget {...this.props} />
+        <SegmentTarget segment={segment} />
       ) : (
-        <SegmentSource {...this.props} />
+        <SegmentSource segment={segment} />
       )
     }
 
     return (
       <SimpleEditor
-        sid={segment.sid}
-        segment={segment}
         text={isTarget ? segment.translation : segment.segment}
         isTarget={isTarget}
       />

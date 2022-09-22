@@ -100,4 +100,8 @@ module.exports = keyMirror({
   SET_SEGMENT_SAVING: null,
   TOGGLE_CHARACTER_COUNTER: null,
   CHARACTER_COUNTER: null,
+  GET_MORE_SEGMENTS: null,
+  REMOVE_ALL_SEGMENTS: null,
+  FREEZING_SEGMENTS: null,
+  GET_SEGMENT_QA: null,
 })

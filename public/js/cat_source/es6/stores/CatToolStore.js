@@ -190,6 +190,11 @@ AppDispatcher.register(function (action) {
         entries: action.entries,
       })
       break
+    case CatToolConstants.ON_RENDER:
+      CatToolStore.emitChange(CatToolConstants.ON_RENDER, {
+        ...action,
+      })
+      break
   }
 })
 

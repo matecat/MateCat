@@ -4,15 +4,13 @@ import _ from 'lodash'
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
 import EditAreaConstants from '../constants/EditAreaConstants'
+import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import TagUtils from '../utils/tagUtils'
-import TextUtils from '../utils/textUtils'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
-import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils'
-import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
@@ -28,7 +26,10 @@ import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
+import {getLocalWarnings} from '../api/getLocalWarnings'
+import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
+import CatToolStore from '../stores/CatToolStore'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -37,13 +38,6 @@ const SegmentActions = {
       actionType: SegmentConstants.RENDER_SEGMENTS,
       segments: segments,
       idToOpen: idToOpen,
-    })
-  },
-  reloadSegments: function (sidToOpen) {
-    UI.unmountSegments()
-    UI.render({
-      firstLoad: false,
-      segmentToOpen: sidToOpen,
     })
   },
   splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -56,12 +50,11 @@ const SegmentActions = {
     })
   },
   splitSegment: function (sid, text) {
+    SegmentActions.freezingSegments(true)
     splitSegment(sid, text)
       .then(() => {
-        UI.unmountSegments()
-        UI.render({
-          segmentToOpen: sid.split('-')[0],
-        })
+        SegmentActions.removeAllSegments()
+        CatToolActions.onRender({segmentToOpen: sid.split('-')[0]})
       })
       .catch((errors) => {
         var notification = {
@@ -70,6 +63,7 @@ const SegmentActions = {
           type: 'error',
         }
         CatToolActions.addNotification(notification)
+        SegmentActions.freezingSegments(false)
       })
   },
   addSegments: function (segments, where) {
@@ -127,7 +121,7 @@ const SegmentActions = {
     })
   },
 
-  openSegment: function (sid) {
+  openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
 
     if (segment) {
@@ -147,10 +141,11 @@ const SegmentActions = {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
+        wasOriginatedFromBrowserHistory,
       })
     } else {
-      UI.unmountSegments()
-      UI.render({
+      SegmentActions.removeAllSegments()
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: sid,
       })
@@ -181,29 +176,21 @@ const SegmentActions = {
   scrollToSegment: function (sid, callback) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
-      if (
-        SegmentStore.segmentScrollableToCenter(sid) ||
-        UI.noMoreSegmentsAfter ||
-        config.last_job_segment == sid ||
-        SegmentStore._segments.size < UI.moreSegNum ||
-        SegmentStore.getLastSegmentId() === config.last_job_segment
-      ) {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SCROLL_TO_SEGMENT,
-          sid: sid,
-        })
-      }
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
       if (callback) {
         setTimeout(() => callback.apply(this, [sid]))
       }
     } else {
-      UI.unmountSegments()
-      UI.render({
+      SegmentActions.removeAllSegments()
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: sid,
-      }).then(
-        () => callback && setTimeout(() => callback.apply(this, [sid]), 1000),
-      )
+        callbackAfterSegmentsResponse: () =>
+          callback && setTimeout(() => callback.apply(this, [sid]), 1000),
+      })
     }
   },
   addClassToSegment: function (sid, newClass) {
@@ -413,7 +400,7 @@ const SegmentActions = {
       source = unescapeHTMLLeaveTags(source)
       SegmentActions.replaceEditAreaTextContent(sid, source)
       SegmentActions.modifiedTranslation(sid, true)
-      UI.segmentQA(UI.currentSegment)
+      SegmentActions.getSegmentsQa(currentSegment)
 
       if (config.translation_matches_enabled) {
         SegmentActions.setChoosenSuggestion(sid, null)
@@ -456,13 +443,12 @@ const SegmentActions = {
   continueCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
 
-    UI.unmountSegments() //TODO
+    SegmentActions.removeAllSegments() //TODO
     $('#outer').addClass('loading')
 
     copyAllSourceToTarget()
       .then(() => {
-        UI.unmountSegments()
-        UI.render({
+        CatToolActions.onRender({
           segmentToOpen: UI.currentSegmentId,
         })
       })
@@ -1219,6 +1205,83 @@ const SegmentActions = {
       sid,
       counter,
       limit,
+    })
+  },
+  getMoreSegments: (where) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.GET_MORE_SEGMENTS,
+      where,
+    })
+  },
+  removeAllSegments: () => {
+    UI.removeCacheObjects()
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.REMOVE_ALL_SEGMENTS,
+    })
+  },
+  freezingSegments: (isFreezing) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FREEZING_SEGMENTS,
+      isFreezing,
+    })
+  },
+  getSegmentsQa: (segment) => {
+    if (!segment) return
+
+    var segment_status = segment.status
+
+    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
+    const trg_content = TagUtils.prepareTextToSend(segment.translation)
+
+    getLocalWarnings({
+      id: segment.sid,
+      id_job: config.id_job,
+      password: config.password,
+      src_content: src_content,
+      trg_content: trg_content,
+      segment_status: segment_status,
+    })
+      .then((data) => {
+        if (data.details && data.details.id_segment) {
+          SegmentActions.setSegmentWarnings(
+            data.details.id_segment,
+            data.details.issues_info,
+            data.details.tag_mismatch,
+          )
+        } else {
+          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
+        }
+        $(document).trigger('getWarning:local:success', {
+          resp: data,
+          segment: segment,
+        })
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
+
+    // get tm keys
+    new Promise((resolve) => {
+      if (!CatToolStore.getJobTmKeys()) {
+        const setJobTmKeys = () => {
+          resolve()
+          CatToolStore.removeListener(
+            CatToolConstants.UPDATE_TM_KEYS,
+            setJobTmKeys,
+          )
+        }
+        CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+      } else {
+        resolve()
+      }
+    }).then(() => {
+      const jobTmKeys = CatToolStore.getJobTmKeys()
+      getGlossaryCheck({
+        id_segment: segment.sid,
+        target: trg_content,
+        source: src_content,
+        keys: jobTmKeys.map(({key}) => key),
+      })
     })
   },
 }

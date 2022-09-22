@@ -3,8 +3,11 @@ import CommonUtils from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import {setTranslation} from '../../api/setTranslation'
 import {orderBy} from 'lodash'
+import {SegmentContext} from '../segments/SegmentContext'
 
 class ReviewExtendedIssuePanel extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     this.issueCategoriesFlat = JSON.parse(config.lqa_flat_categories)
@@ -55,7 +58,7 @@ class ReviewExtendedIssuePanel extends React.Component {
     const deferredSubmit = () => {
       SegmentActions.setStatus(segment.sid, segment.fid, segment.status)
       UI.currentSegment.data('modified', false)
-      SegmentActions.submitIssue(this.props.sid, issue)
+      SegmentActions.submitIssue(this.context.segment.sid, issue)
         .then((data) => {
           this.setState({
             submitDisabled: false,
@@ -63,13 +66,13 @@ class ReviewExtendedIssuePanel extends React.Component {
           this.props.submitIssueCallback()
           this.props.setCreationIssueLoader(false)
           setTimeout(() => {
-            SegmentActions.issueAdded(this.props.sid, data.issue.id)
+            SegmentActions.issueAdded(this.context.segment.sid, data.issue.id)
           })
         })
         .catch(this.handleFail.bind(this))
     }
 
-    const segment = this.props.segment
+    const segment = this.context.segment
     if (
       segment.status.toLowerCase() !== 'approved' ||
       segment.revision_number !== ReviewExtended.number
@@ -121,7 +124,7 @@ class ReviewExtendedIssuePanel extends React.Component {
             selectedValue={selectedValue}
             nested={false}
             category={category}
-            sid={this.props.sid}
+            sid={this.context.segment.sid}
             active={
               this.state.enableArrows &&
               parseInt(this.state.categorySelectedId) === parseInt(category.id)
@@ -165,7 +168,7 @@ class ReviewExtendedIssuePanel extends React.Component {
                 sendIssue={this.sendIssue.bind(this)}
                 nested={true}
                 category={category}
-                sid={this.props.sid}
+                sid={this.context.segment.sid}
                 active={
                   this.state.enableArrows &&
                   parseInt(this.state.categorySelectedId) ===
@@ -189,7 +192,7 @@ class ReviewExtendedIssuePanel extends React.Component {
               sendIssue={this.sendIssue.bind(this)}
               nested={true}
               category={category}
-              sid={this.props.sid}
+              sid={this.context.segment.sid}
               active={
                 this.state.enableArrows &&
                 parseInt(this.state.categorySelectedId) ===
@@ -320,7 +323,7 @@ class ReviewExtendedIssuePanel extends React.Component {
         {/*<div className="mbc-triangle mbc-triangle-topleft"></div>*/}
         <div
           className="re-list errors"
-          id={'re-category-list-' + this.props.sid}
+          id={'re-category-list-' + this.context.segment.sid}
           ref={(node) => (this.listElm = node)}
         >
           {html}
