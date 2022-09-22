@@ -78,7 +78,6 @@ function SegmentFooter() {
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
 
-  const tabGlossaryRef = useRef()
   const {segment} = useContext(SegmentContext)
 
   const getHideMatchesCookie = useCallback(() => {
@@ -364,7 +363,6 @@ function SegmentFooter() {
       case 'gl':
         return (
           <SegmentFooterTabGlossary
-            ref={tabGlossaryRef}
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
