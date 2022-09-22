@@ -2,7 +2,6 @@ import React, {
   forwardRef,
   useCallback,
   useEffect,
-  useImperativeHandle,
   useRef,
   useState,
 } from 'react'
@@ -74,9 +73,8 @@ export const SegmentFooterTabGlossary = forwardRef(
       setModifyElement(undefined)
     }, [])
 
-    // expose to the parent 'scrollToTerm' function
-    useImperativeHandle(ref, () => ({
-      scrollToTerm: (id) => {
+    const scrollToTerm = useCallback(
+      (id) => {
         if (!id || !scrollItemsRef.current) return
         const indexToScroll = terms.findIndex(({term_id}) => term_id === id)
         const element = scrollItemsRef.current?.children[indexToScroll]
@@ -89,7 +87,8 @@ export const SegmentFooterTabGlossary = forwardRef(
           element.onanimationend = () => setIndexTermHighlight(undefined)
         }
       },
-    }))
+      [terms],
+    )
 
     // get TM keys and add actions listener
     useEffect(() => {
