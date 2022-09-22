@@ -39,6 +39,8 @@ class GlossaryWorker extends AbstractWorker {
             self::UPDATE_ACTION,
         ];
 
+        // @TODO add always "de"="tmanalysis_655321@matecat.com" when call MM
+
         if ( false === in_array( $action, $allowedActions ) ) {
             throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
