@@ -1284,6 +1284,14 @@ const SegmentActions = {
       })
     })
   },
+  highlightGlossaryTerm: ({sid, termId}) => {
+    SegmentActions.activateTab(sid, 'glossary')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HIGHLIGHT_GLOSSARY_TERM,
+      sid,
+      termId,
+    })
+  },
 }
 
 export default SegmentActions

@@ -39,657 +39,654 @@ const initialState = {
   ),
 }
 
-export const SegmentFooterTabGlossary = forwardRef(
-  ({active_class, segment}, ref) => {
-    const [searchTerm, setSearchTerm] = useState('')
-    const [searchTypes, setSearchTypes] = useState([
-      {id: '0', name: 'Source', selected: true},
-      {id: '1', name: 'Target'},
-    ])
-    const [showForm, setShowForm] = useState(false)
-    const [showMore, setShowMore] = useState(false)
-    const [domainsResponse, setDomainsResponse] = useState(undefined)
-    const [keys, setKeys] = useState(initialState.keys)
-    const [domains, setDomains] = useState(initialState.domains)
-    const [subdomains, setSubdomains] = useState(initialState.subdomains)
-    const [selectsActive, setSelectsActive] = useState({
-      keys: [],
-      domain: undefined,
-      subdomain: undefined,
-    })
-    const [terms, setTerms] = useState(initialState.terms)
-    const [indexTermHighlight, setIndexTermHighlight] = useState(undefined)
-    const [modifyElement, setModifyElement] = useState()
-    const [termForm, setTermForm] = useState(initialState.termForm)
-    const [isLoading, setIsLoading] = useState(false)
+export const SegmentFooterTabGlossary = ({active_class, segment}) => {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTypes, setSearchTypes] = useState([
+    {id: '0', name: 'Source', selected: true},
+    {id: '1', name: 'Target'},
+  ])
+  const [showForm, setShowForm] = useState(false)
+  const [showMore, setShowMore] = useState(false)
+  const [domainsResponse, setDomainsResponse] = useState(undefined)
+  const [keys, setKeys] = useState(initialState.keys)
+  const [domains, setDomains] = useState(initialState.domains)
+  const [subdomains, setSubdomains] = useState(initialState.subdomains)
+  const [selectsActive, setSelectsActive] = useState({
+    keys: [],
+    domain: undefined,
+    subdomain: undefined,
+  })
+  const [terms, setTerms] = useState(initialState.terms)
+  const [indexTermHighlight, setIndexTermHighlight] = useState(undefined)
+  const [modifyElement, setModifyElement] = useState()
+  const [termForm, setTermForm] = useState(initialState.termForm)
+  const [isLoading, setIsLoading] = useState(false)
 
-    const previousSearchTermRef = useRef('')
-    const scrollItemsRef = useRef()
+  const previousSearchTermRef = useRef('')
+  const scrollItemsRef = useRef()
 
-    const resetForm = useCallback(() => {
-      setTermForm(initialState.termForm)
-      setShowForm(false)
-      setShowMore(false)
-      setModifyElement(undefined)
-    }, [])
+  const resetForm = useCallback(() => {
+    setTermForm(initialState.termForm)
+    setShowForm(false)
+    setShowMore(false)
+    setModifyElement(undefined)
+  }, [])
 
-    const scrollToTerm = useCallback(
-      (id) => {
-        if (!id || !scrollItemsRef.current) return
-        const indexToScroll = terms.findIndex(({term_id}) => term_id === id)
-        const element = scrollItemsRef.current?.children[indexToScroll]
-        if (element) {
-          scrollItemsRef.current.scrollTo(
-            0,
-            indexToScroll * element.offsetHeight,
-          )
-          setIndexTermHighlight(indexToScroll)
-          element.onanimationend = () => setIndexTermHighlight(undefined)
-        }
-      },
-      [terms],
+  const scrollToTerm = useCallback(
+    (id) => {
+      if (!id || !scrollItemsRef.current) return
+      const indexToScroll = terms.findIndex(({term_id}) => term_id === id)
+      const element = scrollItemsRef.current?.children[indexToScroll]
+      if (element) {
+        scrollItemsRef.current.scrollTo(0, indexToScroll * element.offsetHeight)
+        setIndexTermHighlight(indexToScroll)
+        element.onanimationend = () => setIndexTermHighlight(undefined)
+      }
+    },
+    [terms],
+  )
+
+  // register listern highlight term
+  useEffect(() => {
+    const highlightTerm = ({sid, termId}) => {
+      console.log('highlightTerm', sid, termId)
+      if (sid === highlightTerm) scrollToTerm(termId)
+    }
+
+    SegmentStore.addListener(
+      SegmentConstants.HIGHLIGHT_GLOSSARY_TERM,
+      highlightTerm,
     )
 
-    // get TM keys and add actions listener
-    useEffect(() => {
-      const addGlossaryItem = () => {
-        setIsLoading(false)
-        resetForm()
-      }
-      const setDomains = ({entries}) => {
-        console.log('Domains---->', entries)
-        setDomainsResponse(entries)
-      }
-      const setJobTmKeys = (keys) => {
-        console.log('Keys---->', segment.sid, keys)
-        setKeys(keys)
-      }
-      SegmentStore.addListener(
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.HIGHLIGHT_GLOSSARY_TERM,
+        highlightTerm,
+      )
+    }
+  }, [scrollToTerm, segment.id])
+
+  // get TM keys and add actions listener
+  useEffect(() => {
+    const addGlossaryItem = () => {
+      setIsLoading(false)
+      resetForm()
+    }
+    const setDomains = ({entries}) => {
+      console.log('Domains---->', entries)
+      setDomainsResponse(entries)
+    }
+    const setJobTmKeys = (keys) => {
+      console.log('Keys---->', segment.sid, keys)
+      setKeys(keys)
+    }
+    SegmentStore.addListener(
+      SegmentConstants.ADD_GLOSSARY_ITEM,
+      addGlossaryItem,
+    )
+    SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
+    CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
+    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+    CatToolActions.retrieveJobKeys(segment.sid)
+    return () => {
+      SegmentStore.removeListener(
         SegmentConstants.ADD_GLOSSARY_ITEM,
         addGlossaryItem,
       )
-      SegmentStore.addListener(
+      SegmentStore.removeListener(
         SegmentConstants.CHANGE_GLOSSARY,
         addGlossaryItem,
       )
-      CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
-      CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
-      CatToolActions.retrieveJobKeys(segment.sid)
-      return () => {
-        SegmentStore.removeListener(
-          SegmentConstants.ADD_GLOSSARY_ITEM,
-          addGlossaryItem,
-        )
-        SegmentStore.removeListener(
-          SegmentConstants.CHANGE_GLOSSARY,
-          addGlossaryItem,
-        )
-        CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
-        CatToolStore.removeListener(
-          CatToolConstants.UPDATE_TM_KEYS,
-          setJobTmKeys,
-        )
-      }
-    }, [segment.sid, resetForm])
+      CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
+      CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+    }
+  }, [segment.sid, resetForm])
 
-    // set domains by key
-    useEffect(() => {
-      if (!selectsActive.keys.length || !domainsResponse) return
-      const selectedKey = selectsActive.keys[0].key
-      setDomains(
-        domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
+  // set domains by key
+  useEffect(() => {
+    if (!selectsActive.keys.length || !domainsResponse) return
+    const selectedKey = selectsActive.keys[0].key
+    setDomains(
+      domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
+        id: index.toString(),
+        name: domain,
+        subdomains,
+      })),
+    )
+  }, [domainsResponse, selectsActive.keys])
+  // set subdomains by domain
+  useEffect(() => {
+    if (!selectsActive.domain) return
+    if (selectsActive.domain?.subdomains)
+      setSubdomains(
+        selectsActive.domain?.subdomains.map((name, index) => ({
           id: index.toString(),
-          name: domain,
-          subdomains,
+          name,
         })),
       )
-    }, [domainsResponse, selectsActive.keys])
-    // set subdomains by domain
-    useEffect(() => {
-      if (!selectsActive.domain) return
-      if (selectsActive.domain?.subdomains)
-        setSubdomains(
-          selectsActive.domain?.subdomains.map((name, index) => ({
-            id: index.toString(),
-            name,
-          })),
-        )
-    }, [selectsActive.domain])
+  }, [selectsActive.domain])
 
-    useEffect(() => {
-      if (!segment?.glossary) return
-      console.log('----> segment glossary', segment.glossary)
-      setTerms(segment.glossary)
-      if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
-    }, [segment?.glossary])
+  useEffect(() => {
+    if (!segment?.glossary) return
+    console.log('----> segment glossary', segment.glossary)
+    setTerms(segment.glossary)
+    if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
+  }, [segment?.glossary])
 
-    useEffect(() => {
-      setSelectsActive((prevState) => ({
-        ...prevState,
-        keys: keys.length ? [keys[0]] : [],
-      }))
-    }, [keys])
+  useEffect(() => {
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      keys: keys.length ? [keys[0]] : [],
+    }))
+  }, [keys])
 
-    useEffect(() => {
-      setSelectsActive((prevState) => ({...prevState, domain: domains[0]}))
-    }, [domains])
+  useEffect(() => {
+    setSelectsActive((prevState) => ({...prevState, domain: domains[0]}))
+  }, [domains])
 
-    useEffect(() => {
-      setSelectsActive((prevState) => ({
-        ...prevState,
-        subdomain: subdomains[0],
-      }))
-    }, [subdomains])
+  useEffect(() => {
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      subdomain: subdomains[0],
+    }))
+  }, [subdomains])
 
-    // prefill term form
-    useEffect(() => {
-      if (!modifyElement) return
-      const {
-        DEFINITION,
-        ORIGINAL_TERM,
-        ORIGINAL_DESCRIPTION,
-        ORIGINAL_EXAMPLE,
-        TRANSLATED_TERM,
-        TRANSLATED_DESCRIPTION,
-        TRANSLATED_EXAMPLE,
-      } = TERM_FORM_FIELDS
-      const {metadata, source, target} = modifyElement
-      setTermForm({
-        [DEFINITION]: metadata.definition,
-        [ORIGINAL_TERM]: source.term,
-        [ORIGINAL_DESCRIPTION]: source.note,
-        [ORIGINAL_EXAMPLE]: source.sentence,
-        [TRANSLATED_TERM]: target.term,
-        [TRANSLATED_DESCRIPTION]: target.note,
-        [TRANSLATED_EXAMPLE]: target.sentence,
+  // prefill term form
+  useEffect(() => {
+    if (!modifyElement) return
+    const {
+      DEFINITION,
+      ORIGINAL_TERM,
+      ORIGINAL_DESCRIPTION,
+      ORIGINAL_EXAMPLE,
+      TRANSLATED_TERM,
+      TRANSLATED_DESCRIPTION,
+      TRANSLATED_EXAMPLE,
+    } = TERM_FORM_FIELDS
+    const {metadata, source, target} = modifyElement
+    setTermForm({
+      [DEFINITION]: metadata.definition,
+      [ORIGINAL_TERM]: source.term,
+      [ORIGINAL_DESCRIPTION]: source.note,
+      [ORIGINAL_EXAMPLE]: source.sentence,
+      [TRANSLATED_TERM]: target.term,
+      [TRANSLATED_DESCRIPTION]: target.note,
+      [TRANSLATED_EXAMPLE]: target.sentence,
+    })
+  }, [modifyElement])
+
+  useEffect(() => {
+    let debounce
+
+    if (!searchTerm && searchTerm !== previousSearchTermRef.current) {
+      // empty search glossary GET
+      console.log('Refresh glossary GET')
+      SegmentActions.getGlossaryForSegment({
+        sid: segment.sid,
+        text: segment.segment,
+        shouldRefresh: true,
       })
-    }, [modifyElement])
-
-    useEffect(() => {
-      let debounce
-
-      if (!searchTerm && searchTerm !== previousSearchTermRef.current) {
-        // empty search glossary GET
-        console.log('Refresh glossary GET')
-        SegmentActions.getGlossaryForSegment({
-          sid: segment.sid,
-          text: segment.segment,
-          shouldRefresh: true,
-        })
-      } else if (searchTerm) {
-        // start serching term with debounce
-        const onSubmitSearch = () => {
-          const searchingIn = searchTypes.find(({selected}) => selected).name
-          const data = {
-            sentence: searchTerm,
-            idSegment: segment.sid,
-            sourceLanguage:
-              searchingIn === 'Source'
-                ? config.source_code
-                : config.target_code,
-            targetLanguage:
-              searchingIn === 'Source'
-                ? config.target_code
-                : config.source_code,
-          }
-          SegmentActions.searchGlossary(data)
+    } else if (searchTerm) {
+      // start serching term with debounce
+      const onSubmitSearch = () => {
+        const searchingIn = searchTypes.find(({selected}) => selected).name
+        const data = {
+          sentence: searchTerm,
+          idSegment: segment.sid,
+          sourceLanguage:
+            searchingIn === 'Source' ? config.source_code : config.target_code,
+          targetLanguage:
+            searchingIn === 'Source' ? config.target_code : config.source_code,
         }
-        debounce = setTimeout(() => {
-          console.log('Searching:', searchTerm)
-          onSubmitSearch()
-        }, 500)
+        SegmentActions.searchGlossary(data)
       }
+      debounce = setTimeout(() => {
+        console.log('Searching:', searchTerm)
+        onSubmitSearch()
+      }, 500)
+    }
 
-      previousSearchTermRef.current = searchTerm
+    previousSearchTermRef.current = searchTerm
 
-      return () => {
-        clearTimeout(debounce)
-      }
-    }, [searchTerm, segment.sid, segment.segment, searchTypes])
+    return () => {
+      clearTimeout(debounce)
+    }
+  }, [searchTerm, segment.sid, segment.segment, searchTypes])
 
-    const getRequestPayloadTemplate = ({
-      term = modifyElement,
-      isDelete,
-    } = {}) => {
-      const getFieldValue = (value) => (value ? value : null)
+  const getRequestPayloadTemplate = ({term = modifyElement, isDelete} = {}) => {
+    const getFieldValue = (value) => (value ? value : null)
 
-      const {
-        definition,
-        originalTerm,
-        originalDescription,
-        originalExample,
-        translatedTerm,
-        translatedDescription,
-        translatedExample,
-      } = termForm
-      const {keys = {}, domain = {}, subdomain = {}} = selectsActive
-      const {
-        term_id = null,
-        matching_words = null,
-        metadata: {
-          create_date = null,
-          last_update = null,
+    const {
+      definition,
+      originalTerm,
+      originalDescription,
+      originalExample,
+      translatedTerm,
+      translatedDescription,
+      translatedExample,
+    } = termForm
+    const {keys = {}, domain = {}, subdomain = {}} = selectsActive
+    const {
+      term_id = null,
+      matching_words = null,
+      metadata: {
+        create_date = null,
+        last_update = null,
+        key,
+        key_name = null,
+      } = {},
+    } = term || {}
+
+    const source = !isDelete
+      ? {
+          term: getFieldValue(originalTerm),
+          note: getFieldValue(originalDescription),
+          sentence: getFieldValue(originalExample),
+        }
+      : null
+    const target = !isDelete
+      ? {
+          term: getFieldValue(translatedTerm),
+          note: getFieldValue(translatedDescription),
+          sentence: getFieldValue(translatedExample),
+        }
+      : null
+    const metadata = !isDelete
+      ? {
+          definition,
+          ...(term
+            ? {key, key_name}
+            : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
+          domain: domain.name,
+          subdomain: subdomain.name,
+          create_date,
+          last_update,
+        }
+      : {
           key,
-          key_name = null,
-        } = {},
-      } = term || {}
+          definition: null,
+          key_name: null,
+          domain: null,
+          subdomain: null,
+          create_date: null,
+          last_update: null,
+        }
 
-      const source = !isDelete
-        ? {
-            term: getFieldValue(originalTerm),
-            note: getFieldValue(originalDescription),
-            sentence: getFieldValue(originalExample),
-          }
-        : null
-      const target = !isDelete
-        ? {
-            term: getFieldValue(translatedTerm),
-            note: getFieldValue(translatedDescription),
-            sentence: getFieldValue(translatedExample),
-          }
-        : null
-      const metadata = !isDelete
-        ? {
-            definition,
-            ...(term
-              ? {key, key_name}
-              : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
-            domain: domain.name,
-            subdomain: subdomain.name,
-            create_date,
-            last_update,
-          }
-        : {
-            key,
-            definition: null,
-            key_name: null,
-            domain: null,
-            subdomain: null,
-            create_date: null,
-            last_update: null,
-          }
-
-      return {
-        id_segment: segment.sid,
-        id_client: config.id_client,
-        id_job: config.id_job,
-        password: config.password,
-        term: {
-          term_id,
-          source_language: config.source_code,
-          target_language: config.target_code,
-          source,
-          target,
-          matching_words,
-          metadata,
-        },
-      }
+    return {
+      id_segment: segment.sid,
+      id_client: config.id_client,
+      id_job: config.id_job,
+      password: config.password,
+      term: {
+        term_id,
+        source_language: config.source_code,
+        target_language: config.target_code,
+        source,
+        target,
+        matching_words,
+        metadata,
+      },
     }
+  }
 
-    const onSubmitAddOrUpdateTerm = () => {
-      // check mandatory fiels
-      const {originalTerm, translatedTerm} = termForm
-      if (!originalTerm || !translatedTerm) return
+  const onSubmitAddOrUpdateTerm = () => {
+    // check mandatory fiels
+    const {originalTerm, translatedTerm} = termForm
+    if (!originalTerm || !translatedTerm) return
 
-      setIsLoading(true)
-      if (modifyElement)
-        SegmentActions.updateGlossaryItem(getRequestPayloadTemplate())
-      else SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
-    }
+    setIsLoading(true)
+    if (modifyElement)
+      SegmentActions.updateGlossaryItem(getRequestPayloadTemplate())
+    else SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
+  }
 
-    const openAddTerm = () => {
-      setModifyElement(undefined)
-      setShowForm(true)
-    }
+  const openAddTerm = () => {
+    setModifyElement(undefined)
+    setShowForm(true)
+  }
 
-    const closeAddTerm = () => resetForm()
+  const closeAddTerm = () => resetForm()
 
-    const modifyItem = (term) => {
-      setShowMore(true)
-      setShowForm(true)
-      setModifyElement(term)
-      // prefill selects active keys, domain and subdomain
-      const {metadata} = term
-      setSelectsActive((prevState) => ({
-        ...prevState,
-        keys: [keys.find(({id}) => id === metadata?.key)],
-        domain: domains.find(({name}) => name === metadata?.domain),
-        subdomain: subdomains.find(({name}) => name === metadata?.subdomain),
-      }))
-    }
+  const modifyItem = (term) => {
+    setShowMore(true)
+    setShowForm(true)
+    setModifyElement(term)
+    // prefill selects active keys, domain and subdomain
+    const {metadata} = term
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      keys: [keys.find(({id}) => id === metadata?.key)],
+      domain: domains.find(({name}) => name === metadata?.domain),
+      subdomain: subdomains.find(({name}) => name === metadata?.subdomain),
+    }))
+  }
 
-    const deleteItem = (term) => {
-      const {term_id, metadata} = term
-      SegmentActions.deleteGlossaryItem(
-        getRequestPayloadTemplate({
-          term: {term_id, metadata: {key: metadata.key}},
-          isDelete: true,
-        }),
-      )
-    }
+  const deleteItem = (term) => {
+    const {term_id, metadata} = term
+    SegmentActions.deleteGlossaryItem(
+      getRequestPayloadTemplate({
+        term: {term_id, metadata: {key: metadata.key}},
+        isDelete: true,
+      }),
+    )
+  }
 
-    const updateSelectActive = (key, value) =>
-      setSelectsActive((prevState) => ({...prevState, [key]: value}))
+  const updateSelectActive = (key, value) =>
+    setSelectsActive((prevState) => ({...prevState, [key]: value}))
 
-    const updateTermForm = (key, value) =>
-      setTermForm((prevState) => ({...prevState, [key]: value}))
+  const updateTermForm = (key, value) =>
+    setTermForm((prevState) => ({...prevState, [key]: value}))
 
-    const getFormBox = () => {
-      const {
-        DEFINITION,
-        ORIGINAL_TERM,
-        ORIGINAL_DESCRIPTION,
-        ORIGINAL_EXAMPLE,
-        TRANSLATED_TERM,
-        TRANSLATED_DESCRIPTION,
-        TRANSLATED_EXAMPLE,
-      } = TERM_FORM_FIELDS
-      return (
-        <div className={'glossary_add-container'}>
-          <div className={'glossary-form-line'}>
-            <div className={'input-with-label__wrapper'}>
-              <label>Definition</label>
-              <input
-                name="glossary-term-definition"
-                value={termForm[DEFINITION]}
-                onChange={(event) =>
-                  updateTermForm(DEFINITION, event.target.value)
+  const getFormBox = () => {
+    const {
+      DEFINITION,
+      ORIGINAL_TERM,
+      ORIGINAL_DESCRIPTION,
+      ORIGINAL_EXAMPLE,
+      TRANSLATED_TERM,
+      TRANSLATED_DESCRIPTION,
+      TRANSLATED_EXAMPLE,
+    } = TERM_FORM_FIELDS
+    return (
+      <div className={'glossary_add-container'}>
+        <div className={'glossary-form-line'}>
+          <div className={'input-with-label__wrapper'}>
+            <label>Definition</label>
+            <input
+              name="glossary-term-definition"
+              value={termForm[DEFINITION]}
+              onChange={(event) =>
+                updateTermForm(DEFINITION, event.target.value)
+              }
+            />
+          </div>
+          <div className={'glossary-tm-container'}>
+            <Select
+              className="glossary-select"
+              name="glossary-term-tm"
+              label="Glossary"
+              placeholder="Select a glossary"
+              showSearchBar
+              searchPlaceholder="Find a glossary"
+              options={keys}
+              activeOption={selectsActive.keys[0]}
+              checkSpaceToReverse={false}
+              isDisabled={!!modifyElement}
+              onToggleOption={(option) => {
+                if (option) {
+                  const {keys: activeKeys} = selectsActive
+                  if (activeKeys.some((item) => item.id === option.id)) {
+                    updateSelectActive(
+                      'keys',
+                      activeKeys.filter((item) => item.id !== option.id),
+                    )
+                  } else {
+                    updateSelectActive('keys', activeKeys.concat([option]))
+                  }
                 }
-              />
-            </div>
-            <div className={'glossary-tm-container'}>
+              }}
+            />
+
+            <div className={'input-with-label__wrapper'}>
               <Select
-                className="glossary-select"
-                name="glossary-term-tm"
-                label="Glossary"
-                placeholder="Select a glossary"
+                className="glossary-select domain-select"
+                name="glossary-term-domain"
+                label="Domain"
+                placeholder="Select a domain"
                 showSearchBar
-                searchPlaceholder="Find a glossary"
-                options={keys}
-                activeOption={selectsActive.keys[0]}
+                searchPlaceholder="Find a domain"
+                options={domains}
+                activeOption={selectsActive.domain}
                 checkSpaceToReverse={false}
-                isDisabled={!!modifyElement}
-                onToggleOption={(option) => {
+                onSelect={(option) => {
                   if (option) {
-                    const {keys: activeKeys} = selectsActive
-                    if (activeKeys.some((item) => item.id === option.id)) {
-                      updateSelectActive(
-                        'keys',
-                        activeKeys.filter((item) => item.id !== option.id),
-                      )
-                    } else {
-                      updateSelectActive('keys', activeKeys.concat([option]))
-                    }
+                    updateSelectActive('domain', option)
                   }
                 }}
-              />
-
-              <div className={'input-with-label__wrapper'}>
-                <Select
-                  className="glossary-select domain-select"
-                  name="glossary-term-domain"
-                  label="Domain"
-                  placeholder="Select a domain"
-                  showSearchBar
-                  searchPlaceholder="Find a domain"
-                  options={domains}
-                  activeOption={selectsActive.domain}
-                  checkSpaceToReverse={false}
-                  onSelect={(option) => {
-                    if (option) {
-                      updateSelectActive('domain', option)
-                    }
-                  }}
-                  optionTemplate={({name}) => (
-                    <div className="domain-option">{name}</div>
-                  )}
-                  onRenderOption={({
-                    index,
-                    optionsLength,
-                    queryFilter,
-                    resetQueryFilter,
-                  }) =>
-                    index === optionsLength - 1 &&
-                    queryFilter.trim() && (
-                      <button
-                        className="button-create-option"
-                        onClick={() => {
-                          setDomains((prevState) => [
-                            ...prevState,
-                            {
-                              name: queryFilter,
-                              id: (prevState.length + 1).toString(),
-                            },
-                          ])
-                          resetQueryFilter()
-                        }}
-                      >
-                        + Create a domain name <b>{queryFilter}</b>
-                      </button>
-                    )
-                  }
-                />
-              </div>
-              <div className={'input-with-label__wrapper'}>
-                <Select
-                  className="glossary-select domain-select"
-                  name="glossary-term-subdomain"
-                  label="Subdomain"
-                  placeholder="Select a subdomain"
-                  showSearchBar
-                  searchPlaceholder="Find a subdomain"
-                  options={subdomains}
-                  activeOption={selectsActive.subdomain}
-                  checkSpaceToReverse={false}
-                  onSelect={(option) => {
-                    if (option) {
-                      updateSelectActive('subdomain', option)
-                    }
-                  }}
-                  optionTemplate={({name}) => (
-                    <div className="domain-option">{name}</div>
-                  )}
-                  onRenderOption={({
-                    index,
-                    optionsLength,
-                    queryFilter,
-                    resetQueryFilter,
-                  }) =>
-                    index === optionsLength - 1 &&
-                    queryFilter.trim() && (
-                      <button
-                        className="button-create-option"
-                        onClick={() => {
-                          setSubdomains((prevState) => [
-                            ...prevState,
-                            {
-                              name: queryFilter,
-                              id: (prevState.length + 1).toString(),
-                            },
-                          ])
-                          resetQueryFilter()
-                        }}
-                      >
-                        + Create a subdomain name <b>{queryFilter}</b>
-                      </button>
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={'glossary-form-line'}>
-            <div className={'input-with-label__wrapper'}>
-              <label>Original term*</label>
-              <input
-                name="glossary-term-original"
-                value={termForm[ORIGINAL_TERM]}
-                onChange={(event) =>
-                  updateTermForm(ORIGINAL_TERM, event.target.value)
+                optionTemplate={({name}) => (
+                  <div className="domain-option">{name}</div>
+                )}
+                onRenderOption={({
+                  index,
+                  optionsLength,
+                  queryFilter,
+                  resetQueryFilter,
+                }) =>
+                  index === optionsLength - 1 &&
+                  queryFilter.trim() && (
+                    <button
+                      className="button-create-option"
+                      onClick={() => {
+                        setDomains((prevState) => [
+                          ...prevState,
+                          {
+                            name: queryFilter,
+                            id: (prevState.length + 1).toString(),
+                          },
+                        ])
+                        resetQueryFilter()
+                      }}
+                    >
+                      + Create a domain name <b>{queryFilter}</b>
+                    </button>
+                  )
                 }
               />
             </div>
             <div className={'input-with-label__wrapper'}>
-              <label>Translated term*</label>
-              <input
-                name="glossary-term-translated"
-                value={termForm[TRANSLATED_TERM]}
-                onChange={(event) =>
-                  updateTermForm(TRANSLATED_TERM, event.target.value)
+              <Select
+                className="glossary-select domain-select"
+                name="glossary-term-subdomain"
+                label="Subdomain"
+                placeholder="Select a subdomain"
+                showSearchBar
+                searchPlaceholder="Find a subdomain"
+                options={subdomains}
+                activeOption={selectsActive.subdomain}
+                checkSpaceToReverse={false}
+                onSelect={(option) => {
+                  if (option) {
+                    updateSelectActive('subdomain', option)
+                  }
+                }}
+                optionTemplate={({name}) => (
+                  <div className="domain-option">{name}</div>
+                )}
+                onRenderOption={({
+                  index,
+                  optionsLength,
+                  queryFilter,
+                  resetQueryFilter,
+                }) =>
+                  index === optionsLength - 1 &&
+                  queryFilter.trim() && (
+                    <button
+                      className="button-create-option"
+                      onClick={() => {
+                        setSubdomains((prevState) => [
+                          ...prevState,
+                          {
+                            name: queryFilter,
+                            id: (prevState.length + 1).toString(),
+                          },
+                        ])
+                        resetQueryFilter()
+                      }}
+                    >
+                      + Create a subdomain name <b>{queryFilter}</b>
+                    </button>
+                  )
                 }
               />
-            </div>
-          </div>
-          {showMore && (
-            <div className={'glossary-form-line more-line'}>
-              <div>
-                <div className={'input-with-label__wrapper'}>
-                  <label>Description</label>
-                  <textarea
-                    className={'input-large'}
-                    name="glossary-term-description-source"
-                    value={termForm[ORIGINAL_DESCRIPTION]}
-                    onChange={(event) =>
-                      updateTermForm(ORIGINAL_DESCRIPTION, event.target.value)
-                    }
-                  />
-                </div>
-                <div className={'input-with-label__wrapper'}>
-                  <label>Example phrase</label>
-                  <textarea
-                    className={'input-large'}
-                    name="glossary-term-example-source"
-                    value={termForm[ORIGINAL_EXAMPLE]}
-                    onChange={(event) =>
-                      updateTermForm(ORIGINAL_EXAMPLE, event.target.value)
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <div className={'input-with-label__wrapper'}>
-                  <label>Description</label>
-                  <textarea
-                    className={'input-large'}
-                    name="glossary-term-description-target"
-                    value={termForm[TRANSLATED_DESCRIPTION]}
-                    onChange={(event) =>
-                      updateTermForm(TRANSLATED_DESCRIPTION, event.target.value)
-                    }
-                  />
-                </div>
-                <div className={'input-with-label__wrapper'}>
-                  <label>Example phrase</label>
-                  <textarea
-                    className={'input-large'}
-                    name="glossary-term-example-target"
-                    value={termForm[TRANSLATED_EXAMPLE]}
-                    onChange={(event) =>
-                      updateTermForm(TRANSLATED_EXAMPLE, event.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-          <div className={'glossary_buttons-container'}>
-            <div></div>
-            <div
-              className={`glossary-more ${
-                !showMore ? 'show-less' : 'show-more'
-              }`}
-              onClick={() => setShowMore(!showMore)}
-            >
-              <MoreIcon />
-              <span>{showMore ? 'Hide options' : 'More options'}</span>
-            </div>
-            <div className={'glossary_buttons'}>
-              <button
-                className={'glossary__button-cancel'}
-                onClick={closeAddTerm}
-              >
-                Cancel
-              </button>
-              <button
-                className="glossary__button-add"
-                onClick={onSubmitAddOrUpdateTerm}
-                disabled={isLoading}
-              >
-                Add
-              </button>
             </div>
           </div>
         </div>
-      )
-    }
-    return (
-      <div className={`tab sub-editor glossary ${active_class}`}>
-        {showForm ? (
-          getFormBox()
-        ) : (
-          <>
-            <div className={'glossary_search'}>
-              <div className={'glossary_search-container'}>
-                <IconSearch />
-                <input
-                  name="search_term"
-                  className={'glossary_search-input'}
-                  placeholder={'Search term'}
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                />
-                <div
-                  className={`search_term_reset_button ${
-                    searchTerm
-                      ? 'search_term_reset_button--visible'
-                      : 'search_term_reset_button--hidden'
-                  }`}
-                  onClick={() => setSearchTerm('')}
-                >
-                  <IconClose />
-                </div>
-                <SegmentedControl
-                  name="search"
-                  className="search-type"
-                  options={searchTypes}
-                  selectedId={searchTypes.find(({selected}) => selected).id}
-                  onChange={(value) => {
-                    setSearchTypes((prevState) =>
-                      prevState.map((tab) => ({
-                        ...tab,
-                        selected: tab.id === value,
-                      })),
-                    )
-                  }}
+
+        <div className={'glossary-form-line'}>
+          <div className={'input-with-label__wrapper'}>
+            <label>Original term*</label>
+            <input
+              name="glossary-term-original"
+              value={termForm[ORIGINAL_TERM]}
+              onChange={(event) =>
+                updateTermForm(ORIGINAL_TERM, event.target.value)
+              }
+            />
+          </div>
+          <div className={'input-with-label__wrapper'}>
+            <label>Translated term*</label>
+            <input
+              name="glossary-term-translated"
+              value={termForm[TRANSLATED_TERM]}
+              onChange={(event) =>
+                updateTermForm(TRANSLATED_TERM, event.target.value)
+              }
+            />
+          </div>
+        </div>
+        {showMore && (
+          <div className={'glossary-form-line more-line'}>
+            <div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Description</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-description-source"
+                  value={termForm[ORIGINAL_DESCRIPTION]}
+                  onChange={(event) =>
+                    updateTermForm(ORIGINAL_DESCRIPTION, event.target.value)
+                  }
                 />
               </div>
-              <div className="glossary__button-add-container">
-                <button
-                  className={'glossary__button-add'}
-                  onClick={openAddTerm}
-                >
-                  + Add Term
-                </button>
+              <div className={'input-with-label__wrapper'}>
+                <label>Example phrase</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-example-source"
+                  value={termForm[ORIGINAL_EXAMPLE]}
+                  onChange={(event) =>
+                    updateTermForm(ORIGINAL_EXAMPLE, event.target.value)
+                  }
+                />
               </div>
             </div>
-            <div ref={scrollItemsRef} className={'glossary_items'}>
-              {terms.map((term, index) => (
-                <GlossaryItem
-                  key={index}
-                  item={term}
-                  modifyElement={() => modifyItem(term)}
-                  deleteElement={() => deleteItem(term)}
-                  highlight={index === indexTermHighlight}
+            <div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Description</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-description-target"
+                  value={termForm[TRANSLATED_DESCRIPTION]}
+                  onChange={(event) =>
+                    updateTermForm(TRANSLATED_DESCRIPTION, event.target.value)
+                  }
                 />
-              ))}
+              </div>
+              <div className={'input-with-label__wrapper'}>
+                <label>Example phrase</label>
+                <textarea
+                  className={'input-large'}
+                  name="glossary-term-example-target"
+                  value={termForm[TRANSLATED_EXAMPLE]}
+                  onChange={(event) =>
+                    updateTermForm(TRANSLATED_EXAMPLE, event.target.value)
+                  }
+                />
+              </div>
             </div>
-          </>
+          </div>
         )}
+        <div className={'glossary_buttons-container'}>
+          <div></div>
+          <div
+            className={`glossary-more ${!showMore ? 'show-less' : 'show-more'}`}
+            onClick={() => setShowMore(!showMore)}
+          >
+            <MoreIcon />
+            <span>{showMore ? 'Hide options' : 'More options'}</span>
+          </div>
+          <div className={'glossary_buttons'}>
+            <button
+              className={'glossary__button-cancel'}
+              onClick={closeAddTerm}
+            >
+              Cancel
+            </button>
+            <button
+              className="glossary__button-add"
+              onClick={onSubmitAddOrUpdateTerm}
+              disabled={isLoading}
+            >
+              Add
+            </button>
+          </div>
+        </div>
       </div>
     )
-  },
-)
+  }
+  return (
+    <div className={`tab sub-editor glossary ${active_class}`}>
+      {showForm ? (
+        getFormBox()
+      ) : (
+        <>
+          <div className={'glossary_search'}>
+            <div className={'glossary_search-container'}>
+              <IconSearch />
+              <input
+                name="search_term"
+                className={'glossary_search-input'}
+                placeholder={'Search term'}
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+              <div
+                className={`search_term_reset_button ${
+                  searchTerm
+                    ? 'search_term_reset_button--visible'
+                    : 'search_term_reset_button--hidden'
+                }`}
+                onClick={() => setSearchTerm('')}
+              >
+                <IconClose />
+              </div>
+              <SegmentedControl
+                name="search"
+                className="search-type"
+                options={searchTypes}
+                selectedId={searchTypes.find(({selected}) => selected).id}
+                onChange={(value) => {
+                  setSearchTypes((prevState) =>
+                    prevState.map((tab) => ({
+                      ...tab,
+                      selected: tab.id === value,
+                    })),
+                  )
+                }}
+              />
+            </div>
+            <div className="glossary__button-add-container">
+              <button className={'glossary__button-add'} onClick={openAddTerm}>
+                + Add Term
+              </button>
+            </div>
+          </div>
+          <div ref={scrollItemsRef} className={'glossary_items'}>
+            {terms.map((term, index) => (
+              <GlossaryItem
+                key={index}
+                item={term}
+                modifyElement={() => modifyItem(term)}
+                deleteElement={() => deleteItem(term)}
+                highlight={index === indexTermHighlight}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 SegmentFooterTabGlossary.propTypes = {
   active_class: PropTypes.string,
