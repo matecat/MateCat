@@ -16,6 +16,7 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
       component: QaCheckGlossaryHighlight,
       props: {
         missingTerms,
+        sid,
       },
     }
   }

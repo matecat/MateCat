@@ -16,6 +16,7 @@ export const activateGlossary = (glossary, sid) => {
       component: GlossaryComponent,
       props: {
         glossary,
+        sid,
       },
     }
   }

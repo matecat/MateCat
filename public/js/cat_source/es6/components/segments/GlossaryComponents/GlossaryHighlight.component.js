@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
+import SegmentActions from '../../../actions/SegmentActions'
 
 class GlossaryHighlight extends Component {
   constructor(props) {
@@ -16,11 +17,11 @@ class GlossaryHighlight extends Component {
     })
   }
   onClickTerm = () => {
-    const {glossary, children} = this.props
+    const {glossary, children, sid} = this.props
     const text = children[0].props.text
     const glossaryTerm = glossary.find((gl) => gl.matching_words[0] === text)
     //Call Segment footer Action
-    console.log('Highlight glossary item', glossaryTerm.term_id)
+    SegmentActions.highlightGlossaryTerm({sid, termId: glossaryTerm.term_id})
   }
   render() {
     const {children} = this.props
