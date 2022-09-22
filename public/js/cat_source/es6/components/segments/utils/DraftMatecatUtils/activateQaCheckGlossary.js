@@ -4,7 +4,7 @@ import * as DraftMatecatConstants from './editorConstants'
 import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils'
 
-const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
+const activateQaCheckGlossary = (missingTerms, text, sid) => {
   const generateGlossaryDecorator = (regex) => {
     return {
       name: DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
@@ -14,6 +14,9 @@ const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
         }
       },
       component: QaCheckGlossaryHighlight,
+      props: {
+        missingTerms,
+      },
     }
   }
 
@@ -28,9 +31,7 @@ const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
   }
 
   const createGlossaryRegex = (glossaryArray) => {
-    const matches = _.map(glossaryArray, (elem) =>
-      elem.raw_segment ? elem.raw_segment : elem.segment,
-    )
+    const matches = _.map(glossaryArray, (elem) => elem.matching_words[0])
     let re
     try {
       const escapedMatches = matches.map((match) =>
@@ -47,7 +48,7 @@ const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
     return re
   }
 
-  const regex = createGlossaryRegex(qaCheckGlossary)
+  const regex = createGlossaryRegex(missingTerms)
   return generateGlossaryDecorator(regex, sid)
 }
 

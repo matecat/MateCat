@@ -16,7 +16,7 @@ class QaCheckBlacklistHighlight extends Component {
     })
   }
   render() {
-    const {children, sid} = this.props
+    const {children} = this.props
     const {showTooltip} = this.state
     return (
       <div className="blacklistItem">

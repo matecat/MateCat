@@ -161,7 +161,7 @@ export const SegmentFooterTabGlossary = forwardRef(
       if (!segment?.glossary) return
       console.log('----> segment glossary', segment.glossary)
       setTerms(segment.glossary)
-      if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
+      //if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
     }, [segment?.glossary])
 
     useEffect(() => {

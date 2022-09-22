@@ -15,8 +15,17 @@ class QaCheckGlossaryHighlight extends Component {
       showTooltip: !showTooltip,
     })
   }
+  onClickTerm = () => {
+    const {missingTerms, children} = this.props
+    const text = children[0].props.text
+    const glossaryTerm = missingTerms.find(
+      (gl) => gl.matching_words[0] === text,
+    )
+    //Call Segment footer Action
+    console.log('Highlight glossary item', glossaryTerm.term_id)
+  }
   render() {
-    const {children, sid, onClickAction} = this.props
+    const {children} = this.props
     const {showTooltip} = this.state
     return (
       <div className="qaCheckGlossaryItem">
@@ -24,7 +33,7 @@ class QaCheckGlossaryHighlight extends Component {
         <span
           onMouseEnter={() => this.tooltipToggle()}
           onMouseLeave={() => this.tooltipToggle()}
-          onClick={() => onClickAction(sid, 'glossary')}
+          onClick={() => this.onClickTerm()}
         >
           {children}
         </span>

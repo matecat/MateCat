@@ -1,7 +1,16 @@
+@import '../../commons/colors';
+
 .qaCheckGlossaryItem {
   display: inline-block;
   position: relative;
   background-color: #ff8734;
+  cursor: pointer;
+}
+
+.glossaryItem {
+  display: inline-block;
+  position: relative;
+  background-color: $linkBlue;
   cursor: pointer;
 }
 
