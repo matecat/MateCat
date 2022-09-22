@@ -1,6 +1,7 @@
 <?php
 
 use Comments\OpenThreadsStruct;
+use DataAccess\ShapelessConcreteStruct;
 
 class Comments_CommentDao extends DataAccess_AbstractDao {
 
@@ -60,6 +61,44 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $id
+     *
+     * @return bool
+     */
+    public function deleteComment($id)
+    {
+        $sql = "DELETE from comments WHERE id = :id";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return $stmt->execute([
+                'id' => $id
+        ]);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return DataAccess_IDaoStruct
+     */
+    public function getById($id)
+    {
+        $sql = "SELECT * from comments WHERE id = :id";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id' => $id
+        ] )[0];
+    }
+
+    /**
+     * @param Comments_CommentStruct $obj
+     *
+     * @return Comments_CommentStruct
+     * @throws Exception
+     */
     public function saveComment( Comments_CommentStruct $obj ) {
 
         if ( $obj->message_type == null ) {

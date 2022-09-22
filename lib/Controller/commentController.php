@@ -40,6 +40,7 @@ class commentController extends ajaxController {
                 'message'         => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'first_seg'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'last_seg'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_comment'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password'        => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
@@ -47,7 +48,7 @@ class commentController extends ajaxController {
         ];
 
         $this->__postInput              = filter_input_array( INPUT_POST, $filterArgs );
-        $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
+                    $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
 
     }
 
@@ -80,6 +81,9 @@ class commentController extends ajaxController {
                 break;
             case 'create':
                 $this->create();
+                break;
+            case 'delete':
+                $this->delete();
                 break;
             default:
                 $this->result[ 'errors' ][] = [
@@ -174,6 +178,84 @@ class commentController extends ajaxController {
         $struct->uid          = $user->getUid();
 
         return $struct;
+    }
+
+    /**
+     * Delete permanently a comment
+     */
+    private function delete(){
+
+        if(!$this->isLoggedIn()){
+            $this->result[ 'errors' ][] = [
+                "code" => -201,
+                "message" => "You MUST log in to delete a comment."
+            ];
+        }
+
+        if(!isset($this->__postInput['id_comment'])){
+            $this->result[ 'errors' ][] = [
+                "code" => -200,
+                "message" => "Id comment not provided."
+            ];
+            return;
+        }
+
+        $user = $this->user;
+        $idComment = $this->__postInput['id_comment'];
+        $commentDao = new Comments_CommentDao( Database::obtain() );
+        $comment = $commentDao->getById($idComment);
+
+        if(null === $comment){
+            $this->result[ 'errors' ][] = [
+                "code" => -202,
+                "message" => "Comment not found."
+            ];
+            return;
+        }
+
+        if((int)$comment->uid !== (int)$user->uid){
+            $this->result[ 'errors' ][] = [
+                "code" => -203,
+                "message" => "You are not the author of the comment."
+            ];
+            return;
+        }
+
+        if((int)$comment->id_segment !== (int)$this->__postInput['id_segment']){
+            $this->result[ 'errors' ][] = [
+                    "code" => -204,
+                    "message" => "Not corresponding id segment."
+            ];
+            return;
+        }
+
+        if((int)$comment->id_job !== (int)$this->__postInput['id_job']){
+            $this->result[ 'errors' ][] = [
+                    "code" => -205,
+                    "message" => "Not corresponding id job."
+            ];
+            return;
+        }
+
+        if((int)$comment->source_page !== (int)$this->__postInput['source_page']){
+            $this->result[ 'errors' ][] = [
+                    "code" => -206,
+                    "message" => "Not corresponding source_page."
+            ];
+            return;
+        }
+
+        if($commentDao->deleteComment($comment->id)){
+            $this->result[ 'data' ][] = [
+                "id" => $comment->id
+            ];
+            return;
+        }
+
+        $this->result[ 'errors' ][] = [
+            "code" => -220,
+            "message" => "Error when deleting a comment."
+        ];
     }
 
     /**
