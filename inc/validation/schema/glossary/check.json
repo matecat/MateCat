@@ -5,6 +5,9 @@
     "id_client": {
       "type": "string"
     },
+    "id_segment": {
+      "type": ["integer","string"]
+    },
     "id_job": {
       "type": ["integer","string"]
     },
@@ -32,6 +35,7 @@
   },
   "required": [
     "id_client",
+    "id_segment",
     "id_job",
     "password",
     "source",
