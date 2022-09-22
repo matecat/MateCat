@@ -78,4 +78,5 @@ $klein->with( '/api/app/api-key', function () {
     route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
 } );
 
-route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'segments' );
+route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'project' );
+route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'job' );

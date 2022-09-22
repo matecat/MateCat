@@ -999,7 +999,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare("SELECT s.id FROM segments s
+        $stmt    = $conn->prepare("
+                SELECT s.id 
+                FROM segments s
                 join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
                 where j.id = :id_job and j.password = :password
                 group by s.id limit ".$limit." offset " . $offset);
