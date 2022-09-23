@@ -3004,6 +3004,8 @@ class ProjectManager {
                 // import segments metadata from the `from` attribute
                 if(isset($note[ 'from' ])){
                     $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( $note[ 'from' ] );
+                } else {
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( 'NO_FROM' );
                 }
 
             }
