@@ -988,6 +988,33 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $idProject
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getIdsFromIdProjectAndPassword($idProject, $password, $limit, $offset, $ttl = 0)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare("
+                SELECT s.id, j.id as id_job, j.password as job_password
+                FROM segments s
+                join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
+                join matecat.projects p on p.id = j.id_project
+                where p.id = :id_project and p.password = :password
+                limit ".$limit." offset " . $offset);
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_project'   => $idProject,
+                'password' => $password,
+        ] );
+    }
+
+    /**
      * @param     $idJob
      * @param     $password
      * @param     $limit
@@ -996,11 +1023,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function getIds($idJob, $password, $limit, $offset, $ttl = 0)
+    public static function getIdsFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0)
     {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare("SELECT s.id FROM segments s
+        $stmt    = $conn->prepare("
+                SELECT s.id 
+                FROM segments s
                 join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
                 where j.id = :id_job and j.password = :password
                 group by s.id limit ".$limit." offset " . $offset);
