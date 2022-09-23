@@ -302,9 +302,58 @@ class SegmentAnalysisController extends KleinController {
                 'target_lang' => $segmentForAnalysis->target,
                 'source_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
                 'target_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-                'match_type' => $segmentForAnalysis->match_type,
+                'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
         ];
+    }
+
+    /**
+     * @param string $match_type
+     *
+     * @return string
+     */
+    public function humanReadableMatchType( $match_type){
+
+        switch ($match_type) {
+            case "INTERNAL":
+                return 'INTERNAL_MATCHES';
+
+            case "MT":
+                return 'MT';
+
+            case "100%":
+                return '100%';
+
+            case "100%_PUBLIC":
+                return 'TM_100_PUBLIC%';
+
+            case "75%-99%":
+                return 'TM_75_99';
+
+            case "75%-84%":
+                return 'TM_75_84';
+
+            case "85%-94%":
+                return 'TM_85_94';
+
+            case "95%-99%":
+                return 'TM_95_99';
+
+            case "50%-74%":
+                return 'TM_50_74';
+
+            case "NEW":
+            case "NO_MATCH":
+                return 'NEW';
+
+            case "ICE":
+                return 'ICE';
+
+            case "REPETITIONS":
+                return 'REPETITIONS';
+        }
+
+        return 'NUMBERS_ONLY';
     }
 }
