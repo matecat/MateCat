@@ -19,7 +19,9 @@ class GlossaryHighlight extends Component {
   onClickTerm = () => {
     const {glossary, children, sid} = this.props
     const text = children[0].props.text
-    const glossaryTerm = glossary.find((gl) => gl.matching_words[0] === text)
+    const glossaryTerm = glossary.find(({matching_words: matchingWords}) =>
+      matchingWords.find((value) => value === text),
+    )
     //Call Segment footer Action
     SegmentActions.highlightGlossaryTerm({sid, termId: glossaryTerm.term_id})
   }
