@@ -2,7 +2,7 @@ import * as DraftMatecatConstants from './editorConstants'
 import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component'
 import TextUtils from '../../../../utils/textUtils'
 
-const activateQaCheckBlacklist = (blackListedTerms) => {
+const activateQaCheckBlacklist = (blackListedTerms, sid) => {
   const generateGlossaryDecorator = (regex) => {
     return {
       name: DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
@@ -12,6 +12,10 @@ const activateQaCheckBlacklist = (blackListedTerms) => {
         }
       },
       component: QaCheckBlacklistHighlight,
+      props: {
+        blackListedTerms,
+        sid,
+      },
     }
   }
 
@@ -26,9 +30,14 @@ const activateQaCheckBlacklist = (blackListedTerms) => {
   }
 
   const createGlossaryRegex = (blacklistArray) => {
+    const matches = blacklistArray.reduce(
+      (acc, {matching_words}) => [...acc, ...matching_words],
+      [],
+    )
+
     let re
     try {
-      const escapedMatches = blacklistArray.map((match) =>
+      const escapedMatches = matches.map((match) =>
         TextUtils.escapeRegExp(match),
       )
       re = new RegExp('\\b(' + escapedMatches.join('|') + ')\\b', 'gi')

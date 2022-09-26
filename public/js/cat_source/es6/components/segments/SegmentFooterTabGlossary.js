@@ -51,7 +51,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     subdomain: undefined,
   })
   const [terms, setTerms] = useState(initialState.terms)
-  const [indexTermHighlight, setIndexTermHighlight] = useState(undefined)
+  const [termHighlight, setTermHighlight] = useState(undefined)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
   const [isLoading, setIsLoading] = useState(false)
@@ -67,14 +67,16 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   }, [])
 
   const scrollToTerm = useCallback(
-    (id) => {
+    ({id, isTarget, type}) => {
       if (!id || !scrollItemsRef.current) return
       const indexToScroll = terms.findIndex(({term_id}) => term_id === id)
       const element = scrollItemsRef.current?.children[indexToScroll]
       if (element) {
         scrollItemsRef.current.scrollTo(0, indexToScroll * element.offsetHeight)
-        setIndexTermHighlight(indexToScroll)
-        element.onanimationend = () => setIndexTermHighlight(undefined)
+        setTermHighlight({index: indexToScroll, isTarget, type})
+        const labelElement =
+          element.getElementsByClassName('glossary_word')[isTarget ? 1 : 0]
+        labelElement.onanimationend = () => setTermHighlight(undefined)
       }
     },
     [terms],
@@ -82,9 +84,8 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
 
   // register listern highlight term
   useEffect(() => {
-    const highlightTerm = ({sid, termId}) => {
-      console.log('highlightTerm', sid, termId)
-      if (sid === highlightTerm) scrollToTerm(termId)
+    const highlightTerm = ({sid, termId, isTarget, type}) => {
+      if (sid === segment.sid) scrollToTerm({id: termId, isTarget, type})
     }
 
     SegmentStore.addListener(
@@ -672,7 +673,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                 item={term}
                 modifyElement={() => modifyItem(term)}
                 deleteElement={() => deleteItem(term)}
-                highlight={index === indexTermHighlight}
+                highlight={index === termHighlight?.index && termHighlight}
               />
             ))}
           </div>
@@ -690,9 +691,7 @@ SegmentFooterTabGlossary.propTypes = {
 const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
   const {metadata, source, target} = item
   return (
-    <div
-      className={`glossary_item${highlight ? ' glossary_item--highlight' : ''}`}
-    >
+    <div className="glossary_item">
       <div className={'glossary_item-header'}>
         <div className={'glossary_definition-container'}>
           <span className={'glossary_definition'}>
@@ -718,8 +717,14 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
 
       <div className={'glossary_item-body'}>
         <div className={'glossary-item_column'}>
-          <div className={'glossary_word'}>
-            {`${source.term} `}
+          <div className="glossary_word">
+            <span
+              className={`${
+                highlight && !highlight.isTarget
+                  ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
+                  : ''
+              }`}
+            >{`${source.term} `}</span>
             <div>
               <InfoIcon size={16} />
               <div className={'glossary_item-tooltip'}>{source.sentence}</div>
@@ -728,8 +733,14 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
           <div className={'glossary-description'}>{source.note}</div>
         </div>
         <div className={'glossary-item_column'}>
-          <div className={'glossary_word'}>
-            {`${target.term} `}
+          <div className="glossary_word">
+            <span
+              className={`${
+                highlight && highlight.isTarget
+                  ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
+                  : ''
+              }`}
+            >{`${target.term} `}</span>
             <div>
               <InfoIcon size={16} />
               <div className={'glossary_item-tooltip'}>{target.sentence}</div>

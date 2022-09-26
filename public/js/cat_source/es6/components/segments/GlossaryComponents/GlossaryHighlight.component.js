@@ -23,7 +23,11 @@ class GlossaryHighlight extends Component {
       matchingWords.find((value) => value === text),
     )
     //Call Segment footer Action
-    SegmentActions.highlightGlossaryTerm({sid, termId: glossaryTerm.term_id})
+    SegmentActions.highlightGlossaryTerm({
+      sid,
+      termId: glossaryTerm.term_id,
+      type: 'glossary',
+    })
   }
   render() {
     const {children} = this.props

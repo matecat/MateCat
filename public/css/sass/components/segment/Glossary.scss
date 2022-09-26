@@ -3,7 +3,8 @@
 .qaCheckGlossaryItem {
   display: inline-block;
   position: relative;
-  background-color: #ff8734;
+  background: rgba(255, 169, 2, 0.24);
+  border-bottom: 2px solid #ffa902;
   cursor: pointer;
 }
 
@@ -11,12 +12,14 @@
   display: inline-block;
   position: relative;
   background-color: $linkBlue;
+  border-bottom: 2px solid $translatedBlue;
   cursor: pointer;
 }
 
 .blacklistItem {
-  background-color: #fffa8b;
-  border-bottom: 2px solid purple;
+  background: rgba(255, 47, 34, 0.24);
+  border-bottom: 2px solid #ff2f22;
   display: inline-block;
   position: relative;
+  cursor: pointer;
 }

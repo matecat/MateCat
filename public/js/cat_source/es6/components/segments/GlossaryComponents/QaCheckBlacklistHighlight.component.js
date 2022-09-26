@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import SegmentActions from '../../../actions/SegmentActions'
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
 
 class QaCheckBlacklistHighlight extends Component {
@@ -15,6 +16,21 @@ class QaCheckBlacklistHighlight extends Component {
       showTooltip: !showTooltip,
     })
   }
+  onClickTerm = () => {
+    const {blackListedTerms, children, sid} = this.props
+    const text = children[0].props.text
+    const glossaryTerm = blackListedTerms.find(
+      ({matching_words: matchingWords}) =>
+        matchingWords.find((value) => value === text),
+    )
+    //Call Segment footer Action
+    SegmentActions.highlightGlossaryTerm({
+      sid,
+      termId: glossaryTerm.term_id,
+      type: 'blacklist',
+      isTarget: true,
+    })
+  }
   render() {
     const {children} = this.props
     const {showTooltip} = this.state
@@ -24,6 +40,7 @@ class QaCheckBlacklistHighlight extends Component {
         <span
           onMouseEnter={() => this.tooltipToggle()}
           onMouseLeave={() => this.tooltipToggle()}
+          onClick={() => this.onClickTerm()}
         >
           {children}
         </span>

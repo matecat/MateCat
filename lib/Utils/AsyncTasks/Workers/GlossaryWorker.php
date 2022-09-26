@@ -71,18 +71,18 @@ class GlossaryWorker extends AbstractWorker {
                     'source_language' => 'en-US',
                     'target_language' => 'it-IT',
                     'source' => [
-                        'term' => 'Buona',
+                        'term' => 'Verified',
                         'note' => 'The amount a Rider ...',
                         'sentence' => 'Example phrase',
                     ],
                     'target' => [
-                        'term' => 'good',
+                        'term' => 'Verificato',
                         'note' => 'L\'ammontare che un Rider ...',
                         'sentence' => 'Frase di esempio',
                     ],
                     'matching_words' => [
                         'experience',
-                        'buona',
+                        'verified',
                     ],
                     'metadata' => [
                         'definition' => 'Non se sa che è ma definisce la parole',
@@ -111,7 +111,7 @@ class GlossaryWorker extends AbstractWorker {
                         'sentence' => 'Frase di esempio',
                     ],
                     'matching_words' => [
-                        'toegang',
+                        'consegnato',
                     ],
                     'metadata' => [
                         'definition' => 'Non se sa che è ma definisce la parole',

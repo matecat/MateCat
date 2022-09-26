@@ -750,10 +750,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'qaBlacklistGlossary'],
-      blacklistedTerms.reduce(
-        (acc, {matching_words = []}) => [...acc, ...matching_words],
-        [],
-      ),
+      blacklistedTerms,
     )
   },
   setSegmentSaving(sid, saving) {
@@ -1840,6 +1837,11 @@ AppDispatcher.register(function (action) {
         SegmentConstants.FREEZING_SEGMENTS,
         action.isFreezing,
       )
+      break
+    case SegmentConstants.HIGHLIGHT_GLOSSARY_TERM:
+      SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

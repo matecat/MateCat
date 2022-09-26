@@ -32,7 +32,11 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
   }
 
   const createGlossaryRegex = (glossaryArray) => {
-    const matches = _.map(glossaryArray, (elem) => elem.matching_words[0])
+    // const matches = _.map(glossaryArray, (elem) => elem.matching_words[0])
+    const matches = glossaryArray.reduce(
+      (acc, {matching_words}) => [...acc, ...matching_words],
+      [],
+    )
     let re
     try {
       const escapedMatches = matches.map((match) =>
