@@ -43,7 +43,6 @@ export const FilesMenu = ({projectName}) => {
       )
       setFiles(files)
       firstJobSegment.current = response.first_segment
-      UI.detectStartSegment() //TODO: remove
     })
   }, [])
 

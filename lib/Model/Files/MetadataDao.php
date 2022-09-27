@@ -44,7 +44,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param null $filePartsId
      * @param int  $ttl
      *
-     * @return MetadataStruct
+     * @return DataAccess_IDaoStruct|MetadataStruct
      */
     public function get( $id_project, $id_file, $key, $filePartsId = null, $ttl = 0 ) {
 

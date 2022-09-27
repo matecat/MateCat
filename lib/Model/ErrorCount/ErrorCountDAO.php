@@ -145,7 +145,7 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
      * @return ErrorCount_Struct|DataAccess_IDaoStruct
      * @throws Exception
      */
-    public function sanitize( $input ) {
+    public function sanitize( DataAccess_IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 

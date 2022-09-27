@@ -10,8 +10,11 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentTarget extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     this.state = {
@@ -23,7 +26,7 @@ class SegmentTarget extends React.Component {
   }
 
   onClickEvent(event) {
-    if (this.props.readonly) {
+    if (this.context.readonly) {
       UI.handleClickOnReadOnly($(event.currentTarget).closest('section'))
     }
   }
@@ -43,7 +46,7 @@ class SegmentTarget extends React.Component {
         SegmentActions.showIssuesMessage(this.props.segment.sid, 2)
       })
     } else {
-      this.props.removeSelection()
+      this.context.removeSelection()
       setTimeout(() => {
         SegmentActions.showIssuesMessage(this.props.segment.sid, 0)
       })
@@ -85,7 +88,7 @@ class SegmentTarget extends React.Component {
   }
 
   getTargetArea(translation) {
-    const {segment} = this.props
+    const {segment} = this.context
     const {showFormatMenu} = this.state
     const {toggleFormatMenu, updateCounter} = this
 
@@ -153,7 +156,7 @@ class SegmentTarget extends React.Component {
       }
 
       //Speeche2Text
-      var s2t_enabled = this.props.speech2textEnabledFn()
+      var s2t_enabled = this.context.speech2textEnabledFn()
       if (s2t_enabled) {
         s2tMicro = (
           <div
@@ -187,7 +190,7 @@ class SegmentTarget extends React.Component {
       //Tag Mode Buttons
 
       if (
-        /*this.props.tagModesEnabled &&*/ !this.props.enableTagProjection &&
+        /*this.context.tagModesEnabled &&*/ !this.context.enableTagProjection &&
         UI.tagLockEnabled
       ) {
         var buttonClass = $('body').hasClass('tagmode-default-extended')
@@ -208,7 +211,7 @@ class SegmentTarget extends React.Component {
       }
       // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
       if (
-        /*this.props.tagModesEnabled  &&*/ segment.missingTagsInTarget &&
+        /*this.context.tagModesEnabled  &&*/ segment.missingTagsInTarget &&
         segment.missingTagsInTarget.length > 0 &&
         this.editArea
       ) {
@@ -229,8 +232,6 @@ class SegmentTarget extends React.Component {
             ref={(ref) => (this.editArea = ref)}
             segment={this.props.segment}
             translation={translation}
-            locked={this.props.locked}
-            readonly={this.props.readonly}
             toggleFormatMenu={toggleFormatMenu}
             updateCounter={updateCounter}
           />
@@ -308,7 +309,7 @@ class SegmentTarget extends React.Component {
           this.props.segment.sid,
           newTranslation,
         )
-        UI.segmentQA(UI.getSegmentById(this.props.segment.sid))
+        SegmentActions.getSegmentsQa(this.props.segment)
       }, 100)
       // TODO: Change code with this (?)
       // this.editArea.addMissingSourceTagsToTarget()
@@ -331,7 +332,9 @@ class SegmentTarget extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     const charactersCounterLimit = this.props.segment.metadata.find(
-      (meta) => meta.id_segment === this.props.segment.sid,
+      (meta) =>
+        meta.id_segment === this.props.segment.sid &&
+        meta.meta_key === 'sizeRestriction',
     )?.meta_value
 
     if (
@@ -375,7 +378,7 @@ class SegmentTarget extends React.Component {
         {this.getTargetArea(translation)}
         <p className="warnings" />
 
-        <SegmentButtons disabled={buttonsDisabled} {...this.props} />
+        <SegmentButtons disabled={buttonsDisabled} {...this.context} />
         {this.props.segment.warnings ? (
           <SegmentWarnings warnings={this.props.segment.warnings} />
         ) : null}

@@ -185,12 +185,13 @@ if (ReviewExtended.enabled()) {
       // find in next segments
       if (nextApprovedSegment) {
         SegmentActions.openSegment(nextApprovedSegment.sid)
-        // else find from the beginning of the currently loaded segments in all files
-      } else if (this.noMoreSegmentsBefore && nextApprovedSegmentInPrevious) {
-        SegmentActions.openSegment(nextApprovedSegmentInPrevious.sid)
-      } else if (!this.noMoreSegmentsBefore || !this.noMoreSegmentsAfter) {
+      } else {
         // find in not loaded segments or go to the next approved
-        SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer)
+        SegmentActions.openSegment(
+          UI.nextUntranslatedSegmentIdByServer
+            ? UI.nextUntranslatedSegmentIdByServer
+            : nextApprovedSegmentInPrevious.sid,
+        )
       }
     },
   })

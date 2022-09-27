@@ -3,10 +3,11 @@
 use API\V2\Validators\SegmentTranslationIssueValidator;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
-use Features\ISegmentTranslationModel;
 use Features\ReviewExtended;
+use Features\ReviewExtended\ISegmentTranslationModel;
 use Features\SecondPassReview\Model\ChunkReviewModel;
 use Features\SecondPassReview\TranslationIssueModel;
+use Features\TranslationVersions\Model\TranslationEvent;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
 
@@ -58,13 +59,13 @@ class RevisionFactory {
     }
 
     /**
-     * @param SegmentTranslationChangeVector $translation
-     * @param ChunkReviewStruct[]            $chunkReviews
+     * @param TranslationEvent    $translationEventModel
+     * @param ChunkReviewStruct[] $chunkReviews
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
-        return $this->revision->getSegmentTranslationModel( $translation, $chunkReviews );
+    public function getSegmentTranslationModel( TranslationEvent $translationEventModel, array $chunkReviews ) {
+        return $this->revision->getSegmentTranslationModel( $translationEventModel, $chunkReviews );
     }
 
     /**
@@ -123,12 +124,13 @@ class RevisionFactory {
      * @see RevisionFactory::getTranslationIssuesValidator
      */
     public static function initFromProject( Projects_ProjectStruct $project ) {
-        foreach( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ){
+        foreach ( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ) {
             $feature = $featureStruct->toNewObject();
-            if( $feature instanceof AbstractRevisionFeature ){ //only one revision type can be present
+            if ( $feature instanceof AbstractRevisionFeature ) { //only one revision type can be present
                 return static::getInstance( $feature )->setFeatureSet( $project->getFeaturesSet() );
             }
         }
+
         /**
          * This return should never happens if the review_extended plugin is load as mandatory
          * When the OLD revision is set, this factory should be never invoked

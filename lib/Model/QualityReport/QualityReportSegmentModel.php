@@ -65,7 +65,7 @@ class QualityReportSegmentModel {
         /**
          * Validate revision_number param
          */
-        if ( in_array( $options[ 'filter' ] [ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+        if ( !empty( $options[ 'filter' ] ) && in_array( $options[ 'filter' ] [ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( isset( $options[ 'filter' ][ 'revision_number' ] ) ) {
 
                 $validRevisionNumbers = array_map( function ( $chunkReview ) {
@@ -96,16 +96,16 @@ class QualityReportSegmentModel {
      * @throws \Exception
      */
     protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Chunks_ChunkStruct $chunk, $isForUI = false ) {
-        $seg->warnings            = $seg->getLocalWarning($featureSet, $chunk);
+        $seg->warnings            = $seg->getLocalWarning( $featureSet, $chunk );
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
         $seg->secs_per_word       = $seg->getSecsPerWord();
         $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
 
-        if($isForUI){
-            $seg->segment             = $Filter->fromLayer0ToLayer2( $seg->segment );
-            $seg->translation         = $Filter->fromLayer0ToLayer2( $seg->translation );
-            $seg->suggestion          = $Filter->fromLayer0ToLayer2( $seg->suggestion );
+        if ( $isForUI ) {
+            $seg->segment     = $Filter->fromLayer0ToLayer2( $seg->segment );
+            $seg->translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+            $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->suggestion );
         }
     }
 
@@ -117,7 +117,7 @@ class QualityReportSegmentModel {
     protected function _assignIssues( $seg, $issues, $issue_comments ) {
         foreach ( $issues as $issue ) {
 
-            $issue->revision_number = ReviewUtils::sourcePageToRevisionNumber($issue->source_page);
+            $issue->revision_number = ReviewUtils::sourcePageToRevisionNumber( $issue->source_page );
 
             if ( isset( $issue_comments[ $issue->issue_id ] ) ) {
                 $issue->comments = $issue_comments[ $issue->issue_id ];
@@ -203,7 +203,7 @@ class QualityReportSegmentModel {
 
         foreach ( $data as $index => $seg ) {
 
-            $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap($seg->sid);
+            $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, $dataRefMap );
@@ -211,7 +211,7 @@ class QualityReportSegmentModel {
             $seg->dataRefMap = $dataRefMap;
 
             $this->_commonSegmentAssignments( $seg, $Filter, $featureSet, $this->chunk, $isForUI );
-            $this->_assignIssues( $seg, $issues, $issue_comments );
+            $this->_assignIssues( $seg, isset( $issues ) ? $issues : [], $issue_comments );
             $this->_assignComments( $seg, $comments );
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
 
@@ -222,16 +222,18 @@ class QualityReportSegmentModel {
             // set is_pre_translated to true
             if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ) {
 
-                if($isForUI){
+                if ( $isForUI ) {
                     $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
                 }
 
+                // this means the job has a bilingual file
                 if ( '' === $seg->suggestion ) {
-                    if($isForUI){
-                        $seg->suggestion        = $Filter->fromLayer0ToLayer2( $seg->translation );
+                    if ( $isForUI ) {
+                        $seg->suggestion = $Filter->fromLayer0ToLayer2( $seg->translation );
                     }
-                    $seg->is_pre_translated = true;
                 }
+
+                $seg->is_pre_translated = true;
             }
 
             // If the segment was APPROVED
@@ -239,19 +241,24 @@ class QualityReportSegmentModel {
             if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ) {
 
                 $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
+                $translation = ($first_version) ? $first_version->translation : $seg->translation;
 
-                if ( $first_version ) {
-                    $translation = $first_version->translation;
-                } else {
-                    $translation = $seg->translation;
+                if($isForUI){
+                    $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
                 }
 
+                // this means the job has a bilingual file
                 if ( '' === $seg->suggestion ) {
-                    if($isForUI){
-                        $seg->suggestion        = $Filter->fromLayer0ToLayer2( $translation );
+                    if ( $isForUI ) {
+                        $seg->suggestion = $Filter->fromLayer0ToLayer2( $translation );
                     }
-                    $seg->is_pre_translated = true;
                 }
+
+                if(null === $seg->last_translation){
+                    $seg->last_translation = $seg->suggestion;
+                }
+
+                $seg->is_pre_translated = true;
 
                 //
                 // -------------------------------
@@ -434,9 +441,9 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param        $seg
+     * @param               $seg
      * @param MateCatFilter $Filter
-     * @param        $last_translations
+     * @param               $last_translations
      *
      * @return null
      */

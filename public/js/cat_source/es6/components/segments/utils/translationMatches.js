@@ -99,16 +99,16 @@ let TranslationMatches = {
     }
   },
   getContribution: function (segmentSid, next, force) {
+    const segment = SegmentStore.getSegmentByIdToJS(segmentSid)
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded')
-      this.segmentQA(segment)
+      SegmentActions.addClassToSegment(segment.sid, 'loaded')
+      SegmentActions.getSegmentsQa(segment)
       var deferred = new jQuery.Deferred()
       return deferred.resolve()
     }
-    var txt
     var currentSegment =
       next === 0
-        ? SegmentStore.getSegmentByIdToJS(segmentSid)
+        ? segment
         : next == 1
         ? SegmentStore.getNextSegment(segmentSid)
         : SegmentStore.getNextSegment(segmentSid, null, 8)

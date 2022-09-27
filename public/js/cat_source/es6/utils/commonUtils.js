@@ -156,11 +156,12 @@ const CommonUtils = {
     let updateAppByPopState = () => {
       var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
       var currentSegment = SegmentStore.getCurrentSegment()
-      if (currentSegment.sid === segment.sid) return
+      if (segment && currentSegment.sid === segment.sid) return
       if (segment && !segment.opened) {
-        SegmentActions.openSegment(this.parsedHash.segmentId)
+        SegmentActions.openSegment(this.parsedHash.segmentId, true)
       }
     }
+
     window.onpopstate = () => {
       if (this.parsedHash.onlyActionRemoved(window.location.hash)) {
         return
@@ -174,6 +175,10 @@ const CommonUtils = {
 
       updateAppByPopState()
     }
+
+    window.addEventListener('historyChangeState', () => {
+      this.parsedHash = new ParsedHash(window.location.hash)
+    })
 
     this.parsedHash = new ParsedHash(window.location.hash)
     this.parsedHash.hashCleanupRequired() && this.parsedHash.cleanupHash()
