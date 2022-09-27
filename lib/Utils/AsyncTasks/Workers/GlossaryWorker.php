@@ -315,7 +315,8 @@ class GlossaryWorker extends AbstractWorker {
                     ],
                     "matching_words" => [
                         "guests",
-                        "places"
+                        "places",
+                        "delivered"
                     ],
                     "metadata" => [
                         "definition" => "Non se sa che è ma definisce la parole",

@@ -11,7 +11,6 @@
 .glossaryItem {
   display: inline-block;
   position: relative;
-  background-color: $linkBlue;
   border-bottom: 2px solid $translatedBlue;
   cursor: pointer;
 }
@@ -21,5 +20,4 @@
   border-bottom: 2px solid #ff2f22;
   display: inline-block;
   position: relative;
-  cursor: pointer;
 }
