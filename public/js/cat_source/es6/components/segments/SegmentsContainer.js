@@ -1,5 +1,4 @@
 import React, {
-  createContext,
   createRef,
   useCallback,
   useEffect,
@@ -34,7 +33,6 @@ const COMMENTS_PADDING_TOP = [
 ]
 const SEARCH_BAR_OPENED_PADDING_TOP = 80
 
-export const SegmentsContext = createContext({})
 const listRef = createRef()
 
 function SegmentsContainer({
@@ -93,13 +91,13 @@ function SegmentsContainer({
         }
       })
 
-      const {current: persistance} = persistenceVariables
+      const {current: persistence} = persistenceVariables
       let scrollTo
       if (scrollToSelected) {
         scrollTo =
-          scrollToSid < persistance.lastScrolled ? index - 1 : index + 1
+          scrollToSid < persistence.lastScrolled ? index - 1 : index + 1
         scrollTo = index > ROWS_LENGTH - 2 || index === 0 ? index : scrollTo
-        persistance.lastScrolled = scrollToSid
+        persistence.lastScrolled = scrollToSid
         return {scrollTo: scrollTo, position: position}
       }
       scrollTo = index >= 2 ? index - 2 : index === 0 ? 0 : index - 1
@@ -181,23 +179,23 @@ function SegmentsContainer({
   )
 
   const onScroll = useCallback(() => {
-    if (!listRef?.current || scrollToSid) return
+    if (!listRef?.current || !essentialRows.length) return
 
     const scrollValue = listRef.current.scrollTop
     const scrollBottomValue =
       listRef.current.firstChild.offsetHeight -
       (scrollValue + listRef.current.offsetHeight)
 
-    const {current: persistance} = persistenceVariables
-    persistance.scrollDirectionTop = scrollValue < persistance.lastScrollTop
-    if (scrollBottomValue < 700 && !persistance.scrollDirectionTop) {
-      UI.getMoreSegments('after')
-    } else if (scrollValue < 500 && persistance.scrollDirectionTop) {
-      UI.getMoreSegments('before')
+    const {current: persistence} = persistenceVariables
+    persistence.scrollDirectionTop = scrollValue < persistence.lastScrollTop
+    if (scrollBottomValue < 700 && !persistence.scrollDirectionTop) {
+      SegmentActions.getMoreSegments('after')
+    } else if (scrollValue < 500 && persistence.scrollDirectionTop) {
+      SegmentActions.getMoreSegments('before')
     }
-    persistance.lastScrollTop = scrollValue
+    persistence.lastScrollTop = scrollValue
     setScrollTopVisible(scrollValue > 400)
-  }, [scrollToSid])
+  }, [essentialRows])
 
   // segments details - ex. div collection type ecc.
   const segmentsDetails = useMemo(() => {
@@ -286,7 +284,18 @@ function SegmentsContainer({
 
   // add actions listener
   useEffect(() => {
-    const renderSegments = (segments) => setSegments(segments)
+    let wasRemovedAllSegments = false
+
+    const renderSegments = (segments) => {
+      if (!segments.size) return
+      setSegments(segments)
+      if (wasRemovedAllSegments) {
+        wasRemovedAllSegments = false
+        setRows([])
+        setEssentialRows([])
+      }
+    }
+    const removeAllSegments = () => (wasRemovedAllSegments = true)
     const scrollToSegment = (sid) => {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
@@ -311,6 +320,10 @@ function SegmentsContainer({
 
     SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, renderSegments)
     SegmentStore.addListener(
+      SegmentConstants.REMOVE_ALL_SEGMENTS,
+      removeAllSegments,
+    )
+    SegmentStore.addListener(
       SegmentConstants.SCROLL_TO_SEGMENT,
       scrollToSegment,
     )
@@ -331,6 +344,10 @@ function SegmentsContainer({
       SegmentStore.removeListener(
         SegmentConstants.RENDER_SEGMENTS,
         renderSegments,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.REMOVE_ALL_SEGMENTS,
+        removeAllSegments,
       )
       SegmentStore.removeListener(
         SegmentConstants.SCROLL_TO_SEGMENT,
@@ -445,7 +462,9 @@ function SegmentsContainer({
     const {current} = persistenceVariables
 
     const hasAddedSegmentsBefore =
-      rows.length > essentialRows.length && essentialRows[0]?.id !== rows[0]?.id
+      rows.length > essentialRows.length &&
+      essentialRows[0]?.id !== rows[0]?.id &&
+      rows[0]?.id !== config.first_job_segment
     if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
@@ -615,9 +634,11 @@ function SegmentsContainer({
 
   // single segment props to move down RowSegment component
   const getSegmentPropsBySid = (sid) => {
-    const {currentFileId, collectionTypeSeparator} = segmentsDetails.find(
+    const details = segmentsDetails.find(
       ({sid: iteratedSid}) => iteratedSid === sid,
     )
+    if (!details) return
+    const {currentFileId, collectionTypeSeparator} = details
     const {segment, segImmutable} = cachedSegmentsToJS.current.get(sid)
     return {
       segment,
@@ -641,45 +662,51 @@ function SegmentsContainer({
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
   return (
-    <SegmentsContext.Provider
-      value={{onChangeRowHeight, minRowHeight: ROW_HEIGHT}}
-    >
-      <>
-        <VirtualList
-          ref={listRef}
-          className="virtual-list"
-          items={essentialRows}
-          scrollToIndex={{
-            value: scrollToParams.scrollTo,
-            align: scrollToParams.position,
-          }}
-          overscan={OVERSCAN}
-          width={widthArea}
-          height={heightArea}
-          onRender={(index) => (
-            <RowSegment
-              {...{
-                ...essentialRows[index],
-                ...getSegmentPropsBySid(essentialRows[index].id),
-                ...(index === essentialRows.length - 1 && {isLastRow: true}),
-              }}
-            />
-          )}
-          onScroll={onScroll}
-          itemStyle={(index) =>
-            segments.get(index).get('opened') && {zIndex: 1}
-          }
-          renderedRange={renderedRange}
-        />
-        {scrollTopVisible && (
-          <div
-            className={'pointer-first-segment'}
-            title="Go to first segment"
-            onClick={goToFirstSegment}
-          ></div>
-        )}
-      </>
-    </SegmentsContext.Provider>
+    <>
+      <VirtualList
+        ref={listRef}
+        className="virtual-list"
+        items={essentialRows}
+        scrollToIndex={{
+          value: scrollToParams.scrollTo,
+          align: scrollToParams.position,
+        }}
+        overscan={OVERSCAN}
+        width={widthArea}
+        height={heightArea}
+        onRender={(index) => {
+          const props = getSegmentPropsBySid(essentialRows[index].id)
+          return (
+            props && (
+              <RowSegment
+                {...{
+                  minRowHeight: ROW_HEIGHT,
+                  onChangeRowHeight,
+                  ...essentialRows[index],
+                  ...props,
+                  ...(index === essentialRows.length - 1 && {
+                    isLastRow: true,
+                  }),
+                }}
+              />
+            )
+          )
+        }}
+        onScroll={onScroll}
+        itemStyle={(index) =>
+          segments.get(index) &&
+          segments.get(index).get('opened') && {zIndex: 1}
+        }
+        renderedRange={renderedRange}
+      />
+      {scrollTopVisible && (
+        <div
+          className={'pointer-first-segment'}
+          title="Go to first segment"
+          onClick={goToFirstSegment}
+        ></div>
+      )}
+    </>
   )
 }
 

@@ -1,4 +1,5 @@
 import {sprintf} from 'sprintf-js'
+import CatToolActions from '../actions/CatToolActions'
 
 import SegmentActions from '../actions/SegmentActions'
 import {toggleSpeechToText} from '../api/toggleSpeechToText'
@@ -14,7 +15,7 @@ const Speech2Text = {
     if (config.speech2text_enabled) {
       config.speech2text_enabled = 0
       toggleSpeechToText({enabled: false}).then(() => {
-        UI.render()
+        CatToolActions.onRender()
       })
     }
   },
@@ -26,7 +27,7 @@ const Speech2Text = {
           Speech2Text.init()
           Speech2Text.loadRecognition()
         }
-        UI.render()
+        CatToolActions.onRender()
       })
     }
   },

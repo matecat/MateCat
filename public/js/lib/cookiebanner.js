@@ -5,6 +5,7 @@
 
     var win = context, doc = win.document;
     var footer = doc.getElementsByTagName( 'footer' )[0];
+    const pageContent = !footer ? document.getElementsByClassName('page-content')[0] : undefined;
 
     var global_instance_name = 'cbinstance';
 
@@ -197,10 +198,31 @@
 
     };
 
+    function waitingForFooterElement(callback){
+        if(pageContent){
+            const observer = new MutationObserver((mutationList) => {
+                mutationList.forEach((mutation) => {
+                    if(mutation.type === 'childList'){
+                        mutation.addedNodes.forEach((node) => {
+                            if(node.nodeName.toLowerCase() === 'footer'){
+                                footer = pageContent.getElementsByTagName('footer')[0];
+                                callback();
+                            }
+                        })
+                    }
+                })
+            });
+            
+            observer.observe(pageContent, {subtree: true, childList: true});
+        }else{
+            callback();
+        }
+    }
+
     var script_el_invoker = Utils.find_script_by_id('cookiebanner');
 
     var Cookiebanner = context.Cookiebanner = function(opts) {
-        this.init(opts);
+        waitingForFooterElement(() => this.init(opts))
     };
 
     Cookiebanner.prototype = {
