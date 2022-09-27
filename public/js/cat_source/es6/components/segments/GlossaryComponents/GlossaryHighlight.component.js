@@ -8,12 +8,21 @@ class GlossaryHighlight extends Component {
     this.state = {
       showTooltip: false,
     }
+    this.tooltipDelay
   }
   tooltipToggle = () => {
     // this will trigger a rerender in the main Editor Component
-    const {showTooltip} = this.state
+    clearTimeout(this.tooltipDelay)
+    this.tooltipDelay = setTimeout(() => {
+      this.setState({
+        showTooltip: true,
+      })
+    }, 400)
+  }
+  removeTooltip = () => {
+    clearTimeout(this.tooltipDelay)
     this.setState({
-      showTooltip: !showTooltip,
+      showTooltip: false,
     })
   }
   onClickTerm = () => {
@@ -37,7 +46,7 @@ class GlossaryHighlight extends Component {
         {showTooltip && <TooltipInfo text={'Glossary term'} />}
         <span
           onMouseEnter={() => this.tooltipToggle()}
-          onMouseLeave={() => this.tooltipToggle()}
+          onMouseLeave={() => this.removeTooltip()}
           onClick={() => this.onClickTerm()}
         >
           {children}

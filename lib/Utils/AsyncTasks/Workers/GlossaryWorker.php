@@ -123,6 +123,34 @@ class GlossaryWorker extends AbstractWorker {
                         'last_update' => '2022-09-01',
                     ],
                 ],
+                [
+                    'term_id' => '1234567',
+                    'source_language' => 'en-US',
+                    'target_language' => 'it-IT',
+                    'source' => [
+                        'term' => 'Payment',
+                        'note' => 'The amount a Rider ...',
+                        'sentence' => 'Example phrase',
+                    ],
+                    'target' => [
+                        'term' => 'Pagamento',
+                        'note' => 'L\'ammontare che un Rider ...',
+                        'sentence' => 'Frase di esempio',
+                    ],
+                    'matching_words' => [
+                        'abc',
+                        "verificato"
+                    ],
+                    'metadata' => [
+                        'definition' => 'Non se sa che è ma definisce la parole',
+                        'key' => 'c52da4a03d6aea33f242',
+                        'key_name' => 'Uber Glossary',
+                        'domain' => 'Uber',
+                        'subdomain' => 'Eats',
+                        'create_date' => '2022-08-10',
+                        'last_update' => '2022-09-01',
+                    ],
+                ],
             ],
         ];
 

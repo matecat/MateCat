@@ -321,8 +321,7 @@
     }
 
     .glossary_word--highlight {
-      animation: pulse 0.6s ease-in-out;
-      animation-iteration-count: 2;
+      animation: pulse 4s ease-in-out;
     }
 
     .glossary_word--highlight-check {
@@ -336,7 +335,10 @@
     }
 
     @keyframes pulse {
-      50% {
+      20% {
+        background-color: rgba(var(--highlightColor), 0.4);
+      }
+      80% {
         background-color: rgba(var(--highlightColor), 0.4);
       }
       100% {

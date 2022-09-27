@@ -601,9 +601,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       [index, 'glossary'],
       Immutable.fromJS(glossary),
     )
-    console.log(this._segments.get(index).get('glossary'))
     if (pendingGlossaryUpdates)
       this.addOrUpdateGlossaryItem(sid, pendingGlossaryUpdates)
+
     this._segments = this._segments.deleteIn([index, 'pendingGlossaryUpdates'])
   },
   deleteFromGlossary: function (sid, term) {

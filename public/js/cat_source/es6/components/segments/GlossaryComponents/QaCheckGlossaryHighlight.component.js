@@ -8,12 +8,21 @@ class QaCheckGlossaryHighlight extends Component {
     this.state = {
       showTooltip: false,
     }
+    this.tooltipDelay
   }
   tooltipToggle = () => {
     // this will trigger a rerender in the main Editor Component
-    const {showTooltip} = this.state
+    clearTimeout(this.tooltipDelay)
+    this.tooltipDelay = setTimeout(() => {
+      this.setState({
+        showTooltip: true,
+      })
+    }, 400)
+  }
+  removeTooltip = () => {
+    clearTimeout(this.tooltipDelay)
     this.setState({
-      showTooltip: !showTooltip,
+      showTooltip: false,
     })
   }
   onClickTerm = () => {
@@ -34,10 +43,12 @@ class QaCheckGlossaryHighlight extends Component {
     const {showTooltip} = this.state
     return (
       <div className="qaCheckGlossaryItem">
-        {showTooltip && <TooltipInfo text={'Unused glossary term'} />}
+        {showTooltip && (
+          <TooltipInfo text={'Glossary translation not in target'} />
+        )}
         <span
           onMouseEnter={() => this.tooltipToggle()}
-          onMouseLeave={() => this.tooltipToggle()}
+          onMouseLeave={() => this.removeTooltip()}
           onClick={() => this.onClickTerm()}
         >
           {children}

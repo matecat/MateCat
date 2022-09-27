@@ -325,9 +325,17 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   }
 
   const onSubmitAddOrUpdateTerm = () => {
-    // check mandatory fiels
+    // check mandatory fields
     const {originalTerm, translatedTerm} = termForm
-    if (!originalTerm || !translatedTerm) return
+    const {keys, domain, subdomain} = selectsActive
+    if (
+      !originalTerm ||
+      !translatedTerm ||
+      !keys.length ||
+      !domain ||
+      !subdomain
+    )
+      return
 
     setIsLoading(true)
     if (modifyElement)
