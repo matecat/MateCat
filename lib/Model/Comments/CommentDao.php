@@ -78,6 +78,22 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $idSegment
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public function getBySegmentId($idSegment)
+    {
+        $sql = "SELECT * from comments WHERE id_segment = :id_segment order by id asc";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_segment' => $idSegment
+        ] );
+    }
+
+    /**
      * @param $id
      *
      * @return DataAccess_IDaoStruct

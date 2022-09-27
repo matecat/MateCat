@@ -213,6 +213,14 @@ class commentController extends ajaxController {
             return;
         }
 
+        if($comment->uid === null){
+            $this->result[ 'errors' ][] = [
+                    "code" => -203,
+                    "message" => "Anonymous comments cannot be deleted."
+            ];
+            return;
+        }
+
         if((int)$comment->uid !== (int)$user->uid){
             $this->result[ 'errors' ][] = [
                 "code" => -203,
@@ -229,9 +237,20 @@ class commentController extends ajaxController {
             return;
         }
 
-        if((int)$comment->id_job !== (int)$this->__postInput['id_job']){
+        $segments = $commentDao->getBySegmentId($comment->id_segment);
+        $lastSegment = end($segments);
+
+        if((int)$lastSegment->id !== (int)$this->__postInput['id_comment']){
             $this->result[ 'errors' ][] = [
                     "code" => -205,
+                    "message" => "Only the last element comment can be deleted."
+            ];
+            return;
+        }
+
+        if((int)$comment->id_job !== (int)$this->__postInput['id_job']){
+            $this->result[ 'errors' ][] = [
+                    "code" => -206,
                     "message" => "Not corresponding id job."
             ];
             return;
@@ -239,7 +258,7 @@ class commentController extends ajaxController {
 
         if((int)$comment->source_page !== (int)$this->__postInput['source_page']){
             $this->result[ 'errors' ][] = [
-                    "code" => -206,
+                    "code" => -207,
                     "message" => "Not corresponding source_page."
             ];
             return;
