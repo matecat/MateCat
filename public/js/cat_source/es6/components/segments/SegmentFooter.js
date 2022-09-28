@@ -116,7 +116,10 @@ function SegmentFooter() {
     return (
       Array.isArray(notes) ||
       (!Array.isArray(notes) &&
-        !/\bThere are no notes available\b/i.test(notes?.props?.children ?? ''))
+        !/\bThere are no notes available\b/i.test(
+          notes?.props?.children ?? '',
+        )) ||
+      segment.metadata.length > 0
     )
   }, [segment])
 
