@@ -20,6 +20,7 @@ class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements Data
 
     public $jid;
     public $id_file;
+    public $id_file_part;
     public $filename;
     public $sid;
     public $segment;

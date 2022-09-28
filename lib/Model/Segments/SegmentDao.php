@@ -662,6 +662,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $query = "SELECT j.id AS jid,
                 s.id_file,
+                s.id_file_part,
                 files.filename,
                 s.id AS sid,
                 s.segment,
@@ -986,4 +987,112 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param     $idProject
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getIdsFromIdProjectAndPassword($idProject, $password, $limit, $offset, $ttl = 0)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare("
+                SELECT s.id, j.id as id_job, j.password as job_password
+                FROM segments s
+                join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
+                join matecat.projects p on p.id = j.id_project
+                where p.id = :id_project and p.password = :password
+                limit ".$limit." offset " . $offset);
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_project'   => $idProject,
+                'password' => $password,
+        ] );
+    }
+
+    /**
+     * @param     $idJob
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getIdsFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare("
+                SELECT s.id 
+                FROM segments s
+                join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
+                where j.id = :id_job and j.password = :password
+                group by s.id limit ".$limit." offset " . $offset);
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $idJob,
+            'password' => $password,
+        ] );
+    }
+
+    /**
+     * @param     $idSegment
+     * @param     $idJob
+     * @param     $password
+     * @param     $firstSegment
+     * @param     $lastSegment
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct
+     */
+    public static function getSegmentForAnalysis($idSegment, $idJob, $password, $firstSegment, $lastSegment, $ttl = 0){
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare("SELECT
+                j.source, 
+                j.target, 
+                s.segment, 
+                st.translation, 
+                s.raw_word_count, 
+                st.eq_word_count, 
+                st.match_type,
+                ste.source_page,
+                f.filename,
+                fp.tag_key,
+                fp.tag_value
+            FROM jobs j
+            join segment_translations st on st.id_job = j.id
+            join segments s on s.id = st.id_segment
+            join
+			  files f ON s.id_file = f.id
+			left join 
+			    files_parts fp ON fp.id = s.id_file_part 
+            left join (
+                	SELECT id_segment as ste_id_segment, source_page 
+                    FROM  segment_translation_events 
+                    JOIN ( 
+                        SELECT max(id) as _m_id FROM segment_translation_events
+                            WHERE id_job = :id_job
+                            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                            GROUP BY id_segment 
+                        ) AS X ON _m_id = segment_translation_events.id
+                    ORDER BY id_segment
+
+                ) ste ON ste.ste_id_segment = s.id
+            where id_segment = :id_segment and j.id=:id_job and j.password=:password");
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_segment' => $idSegment,
+                'id_job'   => $idJob,
+                'password' => $password,
+                'job_first_segment' => $firstSegment,
+                'job_last_segment' => $lastSegment,
+        ] )[ 0 ];
+    }
 }

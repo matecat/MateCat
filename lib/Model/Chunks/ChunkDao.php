@@ -20,6 +20,18 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $id_job
+     * @param     $password
+     * @param int $ttl
+     *
+     * @return int
+     */
+    public static function getSegmentsCount($id_job, $password, $ttl = 0)
+    {
+        return Jobs_JobDao::getSegmentsCount( $id_job, $password, $ttl );
+    }
+
+    /**
      * @param Translations_SegmentTranslationStruct $translation
      * @param int                                   $ttl
      *
