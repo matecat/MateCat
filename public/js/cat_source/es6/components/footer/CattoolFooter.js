@@ -140,138 +140,152 @@ export const CattolFooter = ({
   const removeTooltip = () => setIsShowingTooltip(false)
 
   return (
-    <footer className="footer-body">
-      <div className="item">
-        <p id="job_id">
-          Job ID: <span>{idJob}</span>
-        </p>
-      </div>
+    <footer className="stats-foo">
+      <div className="footer-body">
+        <div className="item">
+          <p id="job_id">
+            Job ID: <span>{idJob}</span>
+          </p>
+        </div>
 
-      <div className="item language" data-testid="language-pair">
-        <p>
-          <span>{sourceLang}</span>
-          <span className="to-arrow"> &#8594; </span>
-          <span id="footer-target-lang">{targetLang}</span>
-        </p>
-      </div>
+        <div className="item language" data-testid="language-pair">
+          <p>
+            <span>{sourceLang}</span>
+            <span className="to-arrow"> &#8594; </span>
+            <span id="footer-target-lang">{targetLang}</span>
+          </p>
+        </div>
 
-      <div
-        className="progress-bar"
-        onMouseLeave={removeTooltip}
-        data-testid="progress-bar"
-      >
         <div
-          className="meter"
-          onClick={(e) => onClickTodo(e, 'progressBar')}
-          style={{width: '100%', position: 'relative'}}
+          className="progress-bar"
+          onMouseLeave={removeTooltip}
+          data-testid="progress-bar"
         >
-          {stats == null ? (
-            <div className="bg-loader" />
-          ) : !stats?.ANALYSIS_COMPLETE ? null : (
-            <>
-              <a
-                className="approved-bar"
-                style={{width: stats.a_perc + '%'}}
-                title={'Approved ' + stats.a_perc_formatted}
-              />
-              <a
-                className="approved-bar-2nd-pass"
-                style={{width: stats.a_perc_2nd + '%'}}
-                title={'2nd Approved ' + stats.a_perc_2nd_formatted}
-              />
-              <a
-                className="translated-bar"
-                style={{width: stats.t_perc + '%'}}
-                title={'Translated ' + stats.t_perc_formatted}
-              />
-              <a
-                className="rejected-bar"
-                style={{width: stats.r_perc + '%'}}
-                title={'Rejected ' + stats.r_perc_formatted}
-              />
-              <a
-                className="draft-bar"
-                style={{width: stats.d_perc + '%'}}
-                title={'Draft ' + stats.d_perc_formatted}
-              />
-            </>
-          )}
-        </div>
-
-        <div className="percent">
-          <span id="stat-progress" data-testid="progress-bar-amount">
-            {stats?.PROGRESS_PERC_FORMATTED || '-'}
-          </span>
-          %
-        </div>
-        {getTooltip('progressBar')}
-      </div>
-
-      <div className="item">
-        <div className="statistics-core">
-          <div id="stat-eqwords">
-            {config.allow_link_to_analysis ? (
-              <a
-                target="_blank"
-                rel="noreferrer"
-                href={
-                  '/jobanalysis/' + idProject + '-' + idJob + '-' + password
-                }
-              >
-                {!isCJK ? <span>Weighted words</span> : <span>Characters</span>}
-              </a>
-            ) : (
-              <a target="_blank">
-                {!isCJK ? <span>Weighted words</span> : <span>Characters</span>}
-              </a>
+          <div
+            className="meter"
+            onClick={(e) => onClickTodo(e, 'progressBar')}
+            style={{width: '100%', position: 'relative'}}
+          >
+            {stats == null ? (
+              <div className="bg-loader" />
+            ) : !stats?.ANALYSIS_COMPLETE ? null : (
+              <>
+                <a
+                  className="approved-bar"
+                  style={{width: stats.a_perc + '%'}}
+                  title={'Approved ' + stats.a_perc_formatted}
+                />
+                <a
+                  className="approved-bar-2nd-pass"
+                  style={{width: stats.a_perc_2nd + '%'}}
+                  title={'2nd Approved ' + stats.a_perc_2nd_formatted}
+                />
+                <a
+                  className="translated-bar"
+                  style={{width: stats.t_perc + '%'}}
+                  title={'Translated ' + stats.t_perc_formatted}
+                />
+                <a
+                  className="rejected-bar"
+                  style={{width: stats.r_perc + '%'}}
+                  title={'Rejected ' + stats.r_perc_formatted}
+                />
+                <a
+                  className="draft-bar"
+                  style={{width: stats.d_perc + '%'}}
+                  title={'Draft ' + stats.d_perc_formatted}
+                />
+              </>
             )}
-            :
-            <strong id="total-payable"> {stats?.TOTAL_FORMATTED || '-'}</strong>
+          </div>
+
+          <div className="percent">
+            <span id="stat-progress" data-testid="progress-bar-amount">
+              {stats?.PROGRESS_PERC_FORMATTED || '-'}
+            </span>
+            %
+          </div>
+          {getTooltip('progressBar')}
+        </div>
+
+        <div className="item">
+          <div className="statistics-core">
+            <div id="stat-eqwords">
+              {config.allow_link_to_analysis ? (
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href={
+                    '/jobanalysis/' + idProject + '-' + idJob + '-' + password
+                  }
+                >
+                  {!isCJK ? (
+                    <span>Weighted words</span>
+                  ) : (
+                    <span>Characters</span>
+                  )}
+                </a>
+              ) : (
+                <a target="_blank">
+                  {!isCJK ? (
+                    <span>Weighted words</span>
+                  ) : (
+                    <span>Characters</span>
+                  )}
+                </a>
+              )}
+              :
+              <strong id="total-payable">
+                {' '}
+                {stats?.TOTAL_FORMATTED || '-'}
+              </strong>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div
-        className="item"
-        onClick={(e) => onClickTodo(e, 'todo')}
-        onMouseLeave={removeTooltip}
-      >
-        {isReview ? (
-          <div id="stat-todo">
-            <span>To-do</span> :{' '}
-            <strong>{stats?.revise_todo_formatted || '-'}</strong>
-          </div>
-        ) : (
-          <div id="stat-todo">
-            <span>To-do</span> : <strong>{stats?.TODO_FORMATTED || '-'}</strong>
+        <div
+          className="item"
+          onClick={(e) => onClickTodo(e, 'todo')}
+          onMouseLeave={removeTooltip}
+        >
+          {isReview ? (
+            <div id="stat-todo">
+              <span>To-do</span> :{' '}
+              <strong>{stats?.revise_todo_formatted || '-'}</strong>
+            </div>
+          ) : (
+            <div id="stat-todo">
+              <span>To-do</span> :{' '}
+              <strong>{stats?.TODO_FORMATTED || '-'}</strong>
+            </div>
+          )}
+          {getTooltip('todo')}
+        </div>
+
+        {!!stats && stats?.ANALYSIS_COMPLETE && (
+          <div className="statistics-details">
+            {!!stats?.WORDS_PER_HOUR && (
+              <div id="stat-wph" title="Based on last 10 segments performance">
+                Speed:
+                <strong>{stats.WORDS_PER_HOUR}</strong> Words/h
+              </div>
+            )}
+
+            {!!stats?.ESTIMATED_COMPLETION && (
+              <div id="stat-completion">
+                Completed in:
+                <strong>{stats.ESTIMATED_COMPLETION}</strong>
+              </div>
+            )}
           </div>
         )}
-        {getTooltip('todo')}
+
+        {!stats?.ANALYSIS_COMPLETE && (
+          <div id="analyzing">
+            <p className="progress">Calculating word count...</p>
+          </div>
+        )}
       </div>
-
-      {!!stats && stats?.ANALYSIS_COMPLETE && (
-        <div className="statistics-details">
-          {!!stats?.WORDS_PER_HOUR && (
-            <div id="stat-wph" title="Based on last 10 segments performance">
-              Speed:
-              <strong>{stats.WORDS_PER_HOUR}</strong> Words/h
-            </div>
-          )}
-
-          {!!stats?.ESTIMATED_COMPLETION && (
-            <div id="stat-completion">
-              Completed in:
-              <strong>{stats.ESTIMATED_COMPLETION}</strong>
-            </div>
-          )}
-        </div>
-      )}
-
-      {!stats?.ANALYSIS_COMPLETE && (
-        <div id="analyzing">
-          <p className="progress">Calculating word count...</p>
-        </div>
-      )}
     </footer>
   )
 }

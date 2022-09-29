@@ -26,14 +26,14 @@ function useResizeObserver(ref, {actualWidth = 0, actualHeight = 0} = {}) {
 
       const width = borderBoxSize
         ? Array.isArray(borderBoxSize)
-          ? borderBoxSize[0]?.inlineSize
+          ? borderBoxSize[0].inlineSize
           : borderBoxSize.inlineSize
         : target.offsetWidth
       !wasCleaned && setWidth(width ? width : actualWidth)
 
       const height = borderBoxSize
         ? Array.isArray(borderBoxSize)
-          ? borderBoxSize[0]?.blockSize
+          ? borderBoxSize[0].blockSize
           : borderBoxSize.blockSize
         : target.offsetHeight
       !wasCleaned && setHeight(height ? height : actualHeight)

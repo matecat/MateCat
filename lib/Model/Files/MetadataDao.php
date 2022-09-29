@@ -12,6 +12,7 @@ use DataAccess_IDaoStruct;
 use Database;
 
 class MetadataDao extends \DataAccess_AbstractDao {
+
     const TABLE = 'file_metadata';
 
     /**
@@ -37,64 +38,126 @@ class MetadataDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id_project
-     * @param     $id_file
-     * @param     $key
-     *
-     * @param int $ttl
+     * @param      $id_project
+     * @param      $id_file
+     * @param      $key
+     * @param null $filePartsId
+     * @param int  $ttl
      *
      * @return DataAccess_IDaoStruct|MetadataStruct
      */
-    public function get( $id_project, $id_file, $key, $ttl = 0 ) {
+    public function get( $id_project, $id_file, $key, $filePartsId = null, $ttl = 0 ) {
 
-        $stmt = $this->_getStatementForCache(
-                "SELECT * FROM " . self::TABLE . " WHERE " .
+        $query = "SELECT * FROM " . self::TABLE . " WHERE " .
                 " id_project = :id_project " .
                 " AND id_file = :id_file " .
-                " AND `key` = :key "
-        );
+                " AND `key` = :key ";
 
-        $result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
-                'id_project' => $id_project,
-                'id_file'    => $id_file,
-                'key'        => $key
-        ] );
+        $params = [
+            'id_project' => $id_project,
+            'id_file'    => $id_file,
+            'key'        => $key
+        ];
 
-        return !empty( $result ) ? $result[ 0 ] : null;
+        if($filePartsId){
+            $query .= " AND `files_parts_id` = :files_parts_id";
+            $params['files_parts_id'] = $filePartsId;
+        }
 
+        $stmt = $this->_getStatementForCache($query);
+
+        return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params )[ 0 ];
     }
 
-    public function insert( $id_project, $id_file, $key, $value ) {
+    /**
+     * @param      $id_project
+     * @param      $id_file
+     * @param      $key
+     * @param      $value
+     * @param null $filePartsId
+     *
+     * @return MetadataStruct
+     */
+    public function insert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
+
         $sql = "INSERT INTO file_metadata " .
-                " ( id_project, id_file, `key`, `value` ) " .
+                " ( id_project, id_file, `key`, `value`, `files_parts_id` ) " .
                 " VALUES " .
-                " ( :id_project, :id_file, :key, :value ); ";
+                " ( :id_project, :id_file, :key, :value, :files_parts_id ); ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_project' => $id_project,
-                'id_file'    => $id_file,
-                'key'        => $key,
-                'value'      => $value
+                'id_project'     => $id_project,
+                'id_file'        => $id_file,
+                'files_parts_id' => $filePartsId,
+                'key'            => $key,
+                'value'          => $value
         ] );
 
-        return $this->get( $id_project, $id_file, $key );
+        return $this->get( $id_project, $id_file, $key, $filePartsId );
     }
 
+    /**
+     * @param      $id_project
+     * @param      $id_file
+     * @param      $key
+     * @param      $value
+     * @param null $filePartsId
+     *
+     * @return MetadataStruct
+     */
+    public function update( $id_project, $id_file, $key, $value, $filePartsId = null ) {
 
-    public function update( $id_project, $id_file, $key, $value ) {
-        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key  ";
+        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_project' => $id_project,
-                'id_file'    => $id_file,
-                'key'        => $key,
-                'value'      => $value
+                'id_project'     => $id_project,
+                'id_file'        => $id_file,
+                'files_parts_id' => $filePartsId,
+                'key'            => $key,
+                'value'          => $value
         ] );
 
-        return $this->get( $id_project, $id_file, $key );
+        return $this->get( $id_project, $id_file, $key, $filePartsId );
+    }
+
+    /**
+     * @param       $id_project
+     * @param       $id_file
+     * @param array $metadata
+     * @param null  $filePartsId
+     *
+     * @return bool
+     */
+    public function bulkInsert( $id_project, $id_file, array $metadata = [], $filePartsId = null ) {
+
+        $sql = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
+        $bind_values   = [];
+
+        foreach ($metadata as $key => $value){
+            if($value !== null and $value !== ''){
+                $sql .= "(?,?,?,?,?)";
+
+                if($value !== end($metadata)){
+                    $sql .= ',';
+                }
+
+                $bind_values[] = $id_project;
+                $bind_values[] = $id_file;
+                $bind_values[] = $key;
+                $bind_values[] = $value;
+                $bind_values[] = $filePartsId;
+            }
+        }
+
+        if(!empty($bind_values)){
+            $conn = Database::obtain()->getConnection();
+            $stmt = $conn->prepare( $sql );
+
+            return $stmt->execute( $bind_values );
+        }
     }
 }

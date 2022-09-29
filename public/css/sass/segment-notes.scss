@@ -7,7 +7,9 @@ div.segment-notes ul.graysmall li span.note-label {
 }
 
 .segments-notes-container {
-  float: left;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 .segments-preview-footer {
   display: inline-block;
@@ -62,9 +64,13 @@ div.segment-notes ul.graysmall li span.note-label {
   color: #666;
   list-style: none;
   font-size: 16px;
-  float: left;
-  width: 100%;
   word-break: break-word;
+  white-space: pre-wrap;
+}
+.segments-notes-container .metadata-notes {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 
 .segments-notes-container div.note p {

@@ -416,7 +416,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments = this._segments.setIn([index, 'tagged'], true)
   },
 
-  addSegmentVersions(fid, sid, versions) {
+  addSegmentVersions(sid, versions) {
     //If is a splitted segment the versions are added to the first of the split
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
@@ -554,7 +554,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(matches),
     )
   },
-  setContributionsToCache: function (sid, fid, contributions, errors) {
+  setContributionsToCache: function (sid, contributions, errors) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
@@ -826,7 +826,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       this._globalWarnings.matecat.INFO.total = warnings.length
       this._globalWarnings.matecat.total =
         this._globalWarnings.matecat.total + warnings.length
+    } else {
+      this.removeLexiqaWarning()
     }
+  },
+  removeLexiqaWarning: function () {
+    this._segments = this._segments.map((segment) => segment.delete('lexiqa'))
   },
   addSearchResult: function (
     occurrencesList,
@@ -1201,7 +1206,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_SEGMENT:
       SegmentStore.openSegment(action.sid)
-      SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid)
+      SegmentStore.emitChange(
+        SegmentConstants.OPEN_SEGMENT,
+        action.sid,
+        action.wasOriginatedFromBrowserHistory,
+      )
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
     case SegmentConstants.SELECT_SEGMENT: {
@@ -1232,6 +1241,8 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.ADD_SEGMENTS:
       SegmentStore.updateAll(action.segments, action.where)
+      if (SegmentStore._segments.size)
+        SegmentStore.emitChange(SegmentConstants.FREEZING_SEGMENTS, false)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1369,14 +1380,12 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CONTRIBUTIONS:
       SegmentStore.setContributionsToCache(
         action.sid,
-        action.fid,
         action.matches,
         action.errors,
       )
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     case SegmentConstants.SET_CL_CONTRIBUTIONS:
@@ -1465,18 +1474,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id)
       break
     case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES: {
-      let seg = SegmentStore.addSegmentVersions(
-        action.fid,
-        action.sid,
-        action.versions,
-      )
+      let seg = SegmentStore.addSegmentVersions(action.sid, action.versions)
       if (seg) {
         SegmentStore.emitChange(action.actionType, action.sid, seg.toJS())
       }
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     }
@@ -1593,6 +1597,10 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(
         SegmentConstants.UPDATE_GLOBAL_WARNINGS,
         SegmentStore._globalWarnings,
+      )
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
       )
       break
     case SegmentConstants.OPEN_ISSUES_PANEL:
@@ -1814,6 +1822,19 @@ AppDispatcher.register(function (action) {
         counter: action.counter,
         limit: action.limit,
       })
+      break
+    case SegmentConstants.GET_MORE_SEGMENTS:
+      SegmentStore.emitChange(SegmentConstants.GET_MORE_SEGMENTS, action.where)
+      break
+    case SegmentConstants.REMOVE_ALL_SEGMENTS:
+      SegmentStore.removeAllSegments()
+      SegmentStore.emitChange(SegmentConstants.REMOVE_ALL_SEGMENTS)
+      break
+    case SegmentConstants.FREEZING_SEGMENTS:
+      SegmentStore.emitChange(
+        SegmentConstants.FREEZING_SEGMENTS,
+        action.isFreezing,
+      )
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
