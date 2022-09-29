@@ -29,6 +29,7 @@ import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
+import SearchUtils from '../components/header/cattol/search/searchUtils'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
