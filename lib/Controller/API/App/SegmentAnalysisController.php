@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 09/06/17
- * Time: 15.40
- *
- */
 
 namespace API\App;
 
@@ -314,7 +307,6 @@ class SegmentAnalysisController extends KleinController {
      * @return string
      */
     public function humanReadableMatchType( $match_type){
-
         switch ($match_type) {
             case "INTERNAL":
                 return 'INTERNAL_MATCHES';
@@ -326,7 +318,7 @@ class SegmentAnalysisController extends KleinController {
                 return '100%';
 
             case "100%_PUBLIC":
-                return 'TM_100_PUBLIC%';
+                return 'TM_100_PUBLIC';
 
             case "75%-99%":
                 return 'TM_75_99';

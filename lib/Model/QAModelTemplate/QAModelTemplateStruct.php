@@ -113,16 +113,18 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
 
         foreach ($this->categories as $categoryStruct){
             $category = [];
+            $category['id'] = (int)$categoryStruct->id;
             $category['label'] = $categoryStruct->category_label;
             $category['code'] = $categoryStruct->code;
             $category['severities'] = [];
 
             foreach ($categoryStruct->severities as $severityStruct){
                 $category['severities'][] = [
+                        'id' => (int)$severityStruct->id,
                         'label' => $severityStruct->severity_label,
                         'code' => $severityStruct->severity_code,
                         'dqf_id' => ($severityStruct->dqf_id) ? (int)$severityStruct->dqf_id : null,
-                        'penalty' => $severityStruct->penalty,
+                        'penalty' => floatval($severityStruct->penalty),
                 ];
             }
 
