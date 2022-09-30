@@ -36,11 +36,11 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
 
   addSegments: function (segmentsData) {
     _.forEach(segmentsData.segments, (segment) => {
-      if (this._segmentsFiles.get(segment.file.id)) {
+      if (this._segmentsFiles.get(segment.file.id.toString())) {
         let immFiles = Immutable.fromJS(segment)
         this._segmentsFiles = this._segmentsFiles.set(
           segment.file.id,
-          this._segmentsFiles.get(segment.file.id).push(immFiles),
+          this._segmentsFiles.get(segment.file.id.toString()).push(immFiles),
         )
       } else {
         this._segmentsFiles = this._segmentsFiles.set(
