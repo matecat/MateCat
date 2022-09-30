@@ -281,11 +281,12 @@ class SegmentAnalysisController extends KleinController {
             ];
         }
 
-        $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original'  ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
+        $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
         return [
                 'id_segment' => (int)$id,
                 'id_chunk' => (int)$this->chunk->id,
+                'chunk_password' => $this->chunk->password,
                 'urls' => $jobUrlStruct->getUrls(),
                 'id_request' => ($idRequest) ? $idRequest->meta_value : null,
                 'filename' => $segmentForAnalysis->filename,
