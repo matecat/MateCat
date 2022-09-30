@@ -285,6 +285,7 @@ class SegmentAnalysisController extends KleinController {
 
         return [
                 'id_segment' => (int)$id,
+                'id_chunk' => (int)$this->chunk->id,
                 'urls' => $jobUrlStruct->getUrls(),
                 'id_request' => ($idRequest) ? $idRequest->meta_value : null,
                 'filename' => $segmentForAnalysis->filename,
