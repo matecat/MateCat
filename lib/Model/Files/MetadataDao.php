@@ -157,8 +157,6 @@ class MetadataDao extends \DataAccess_AbstractDao {
             $conn = Database::obtain()->getConnection();
             $stmt = $conn->prepare( $sql );
 
-            \Log::doJsonLog('PIPPO ---> '. $sql);
-
             return $stmt->execute( $bind_values );
         }
     }
