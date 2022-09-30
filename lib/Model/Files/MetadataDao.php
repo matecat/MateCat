@@ -54,9 +54,9 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 " AND `key` = :key ";
 
         $params = [
-            'id_project' => $id_project,
-            'id_file'    => $id_file,
-            'key'        => $key
+                'id_project' => $id_project,
+                'id_file'    => $id_file,
+                'key'        => $key
         ];
 
         if($filePartsId){
@@ -137,11 +137,15 @@ class MetadataDao extends \DataAccess_AbstractDao {
         $sql = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
         $bind_values   = [];
 
+        $index = 1;
         foreach ($metadata as $key => $value){
+
+            $isLast = ($index === count($metadata));
+
             if($value !== null and $value !== ''){
                 $sql .= "(?,?,?,?,?)";
 
-                if($value !== end($metadata)){
+                if(!$isLast){
                     $sql .= ',';
                 }
 
@@ -151,6 +155,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 $bind_values[] = $value;
                 $bind_values[] = $filePartsId;
             }
+            $index++;
         }
 
         if(!empty($bind_values)){
