@@ -59,7 +59,10 @@ class SegmentAnalysisController extends KleinController {
         $segmentsCount = 0;
 
         foreach ($this->project->getJobs() as $job){
-            $segmentsCount += \Chunks_ChunkDao::getSegmentsCount($job->id, $job->password, 3600);
+            $firstSegment = (int)$job->job_first_segment;
+            $lastSegment = (int)$job->job_last_segment;
+            $count = $lastSegment - $firstSegment + 1;
+            $segmentsCount = $segmentsCount + $count;
         }
 
         try {
