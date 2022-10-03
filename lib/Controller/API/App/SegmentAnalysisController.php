@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 09/06/17
- * Time: 15.40
- *
- */
 
 namespace API\App;
 
@@ -66,7 +59,10 @@ class SegmentAnalysisController extends KleinController {
         $segmentsCount = 0;
 
         foreach ($this->project->getJobs() as $job){
-            $segmentsCount += \Chunks_ChunkDao::getSegmentsCount($job->id, $job->password, 3600);
+            $firstSegment = (int)$job->job_first_segment;
+            $lastSegment = (int)$job->job_last_segment;
+            $count = $lastSegment - $firstSegment + 1;
+            $segmentsCount = $segmentsCount + $count;
         }
 
         try {
@@ -288,10 +284,12 @@ class SegmentAnalysisController extends KleinController {
             ];
         }
 
-        $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original'  ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
+        $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
         return [
                 'id_segment' => (int)$id,
+                'id_chunk' => (int)$this->chunk->id,
+                'chunk_password' => $this->chunk->password,
                 'urls' => $jobUrlStruct->getUrls(),
                 'id_request' => ($idRequest) ? $idRequest->meta_value : null,
                 'filename' => $segmentForAnalysis->filename,
@@ -314,7 +312,6 @@ class SegmentAnalysisController extends KleinController {
      * @return string
      */
     public function humanReadableMatchType( $match_type){
-
         switch ($match_type) {
             case "INTERNAL":
                 return 'INTERNAL_MATCHES';
@@ -326,7 +323,7 @@ class SegmentAnalysisController extends KleinController {
                 return '100%';
 
             case "100%_PUBLIC":
-                return 'TM_100_PUBLIC%';
+                return 'TM_100_PUBLIC';
 
             case "75%-99%":
                 return 'TM_75_99';
