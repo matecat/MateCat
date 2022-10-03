@@ -22,7 +22,14 @@ class CategoryStruct extends \DataAccess_AbstractDaoSilentStruct implements \Dat
     public function toArrayWithJsonDecoded() {
         $result = $this->toArray() ;
 
-        $result['severities'] = json_decode( $this->severities, true );
+        $severities = json_decode( $this->severities, true );
+        $severitiesArray = [];
+
+        foreach ($severities as $index =>$severity){
+            $severitiesArray[$index] = array_merge(['id' => null], $severities[$index]);
+        }
+
+        $result['severities'] = $severitiesArray;
         $result['options'] = json_decode( $this->options, true );
 
         return $result ;

@@ -3,6 +3,7 @@
 namespace LQA;
 
 use Exception;
+use QAModelTemplate\QAModelTemplateDao;
 
 class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct, QAModelInterface {
 
@@ -11,7 +12,7 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
     public $id;
     public $label ;
-
+    public $create_date;
     public $pass_type ;
     public $pass_options ;
 
@@ -65,11 +66,12 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public function getDecodedModel() {
 
         $categoriesArray = [];
-        foreach ( $this->getCategories() as $categoryStruct   ){
+        foreach ( $this->getCategories() as $categoryStruct ){
 
             $category = $categoryStruct->toArrayWithJsonDecoded();
 
             $categoriesArray[] = [
+                'id' => (int)$category['id'],
                 'label' => $category['label'],
                 'code' => $category['options']['code'],
                 'severities' => $category['severities'],
@@ -78,8 +80,11 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
         return [
             'model' => [
+                "id" => (int)$this->id,
+                "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
                 "version" => 1,
                 "label" => $this->label,
+                "create_date" => $this->create_date,
                 "categories" => $categoriesArray,
                 "passfail" => [
                     'type' => $this->pass_type,
