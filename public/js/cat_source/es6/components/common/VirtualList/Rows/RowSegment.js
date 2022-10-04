@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React, {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import Segment from '../../../segments/Segment'
-import {SegmentsContext} from '../../../segments/SegmentsContainer'
 import useResizeObserver from '../../../../hooks/useResizeObserver'
 import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
@@ -30,13 +29,14 @@ const LinkIcon = () => {
 function RowSegment({
   id,
   height,
+  minRowHeight,
+  onChangeRowHeight,
   hasRendered,
   isLastRow = false,
   currentFileId,
   collectionTypeSeparator,
   ...restProps
 }) {
-  const {onChangeRowHeight, minRowHeight} = useContext(SegmentsContext)
   const ref = useRef()
   const {height: newHeight} = useResizeObserver(ref)
 
@@ -66,9 +66,10 @@ function RowSegment({
     }
 
     const {segment, files, sideOpen} = restProps
-    if (segment.id_file !== currentFileId) {
+    const idFileSegment = SegmentUtils.getSegmentFileId(segment)
+    if (idFileSegment !== currentFileId) {
       const file = files
-        ? files.find((file) => file.id == segment.id_file)
+        ? files.find((file) => file.id == idFileSegment)
         : false
       let classes = sideOpen ? 'slide-right' : ''
       const isFirstSegment = files && segment.sid === files[0].first_segment
@@ -92,7 +93,7 @@ function RowSegment({
               </span>
             </div>
           ) : null}
-          {file ? (
+          {file && file.weighted_words > 0 ? (
             <div className="projectbar-wordcounter">
               <span>
                 Payable Words: <strong>{file.weighted_words}</strong>
@@ -102,7 +103,7 @@ function RowSegment({
           {file && file.metadata && file.metadata.instructions ? (
             <div
               className={'button-notes'}
-              onClick={() => openInstructionsModal(segment.id_file)}
+              onClick={() => openInstructionsModal(idFileSegment)}
             >
               <LinkIcon />
               <span>View notes</span>
@@ -125,6 +126,8 @@ function RowSegment({
 RowSegment.propTypes = {
   id: PropTypes.string.isRequired,
   height: PropTypes.number.isRequired,
+  minRowHeight: PropTypes.number.isRequired,
+  onChangeRowHeight: PropTypes.func.isRequired,
   hasRendered: PropTypes.bool,
   isLastRow: PropTypes.bool,
   currentFileId: PropTypes.string,

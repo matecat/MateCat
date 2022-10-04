@@ -176,26 +176,12 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       // find in next segments
       if (nextTranslatedSegment) {
         SegmentActions.openSegment(nextTranslatedSegment.sid)
-        // else find from the beginning of the currently loaded segments in all files
-      } else if (this.noMoreSegmentsBefore && nextTranslatedSegmentInPrevious) {
-        SegmentActions.openSegment(nextTranslatedSegmentInPrevious.sid)
-      } else if (!this.noMoreSegmentsBefore || !this.noMoreSegmentsAfter) {
-        // find in not loaded segments or go to the next approved
-        // Go to the next segment saved before
-        var callback = function () {
-          $(window).off('modalClosed')
-          //Check if the next is inside the view, if not render the file
-          UI.nextUntranslatedSegmentIdByServer &&
-            SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer)
-        }
-        // If the modal is open wait the close event
-        if ($(".modal[data-type='confirm']").length) {
-          $(window).on('modalClosed', function () {
-            callback()
-          })
-        } else {
-          callback()
-        }
+      } else {
+        SegmentActions.openSegment(
+          UI.nextUntranslatedSegmentIdByServer
+            ? UI.nextUntranslatedSegmentIdByServer
+            : nextTranslatedSegmentInPrevious.sid,
+        )
       }
     },
     //Overridden by  plugin

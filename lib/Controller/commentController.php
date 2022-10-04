@@ -476,5 +476,3 @@ class commentController extends ajaxController {
     }
 
 }
-
-?>

@@ -56,7 +56,7 @@ export const Header = ({
     }
   }, [])
   return (
-    <>
+    <header>
       <div className="wrapper">
         <div className="logo-menu">
           <a href="/" className="logo" />
@@ -144,6 +144,6 @@ export const Header = ({
       <div id="header-bars-wrapper">
         <SubHeaderContainer filtersEnabled={SegmentFilter.enabled()} />
       </div>
-    </>
+    </header>
   )
 }

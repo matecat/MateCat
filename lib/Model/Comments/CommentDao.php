@@ -279,6 +279,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     public function getCommentsInJob( Comments_CommentStruct $obj ) {
 
         $query = "SELECT
+                      id,
                       id_job, 
                       id_segment, 
                       create_date, 
@@ -320,6 +321,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         foreach ( $array_result as $item ) {
 
             $build_arr = [
+                    'id'             => (int)$item[ 'id' ],
                     'id_job'         => $item[ 'id_job' ],
                     'id_segment'     => $item[ 'id_segment' ],
                     'create_date'    => $item[ 'create_date' ],

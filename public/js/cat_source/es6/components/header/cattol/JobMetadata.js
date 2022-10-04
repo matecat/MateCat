@@ -4,6 +4,9 @@ import JobMetadataModal from '../../modals/JobMetadataModal'
 import SegmentStore from '../../../stores/SegmentStore'
 import ModalsActions from '../../../actions/ModalsActions'
 import {getJobMetadata} from '../../../api/getJobMetadata'
+import TeamsStore from '../../../stores/TeamsStore'
+import CatToolStore from '../../../stores/CatToolStore'
+import CattolConstants from '../../../constants/CatToolConstants'
 
 export const JobMetadata = ({idJob, password}) => {
   const [files, setFiles] = useState()
@@ -15,7 +18,7 @@ export const JobMetadata = ({idJob, password}) => {
   const openModal = () => {
     let currentSegment = SegmentStore.getCurrentSegment()
     let props = {
-      currentFile: currentSegment ? currentSegment.id_file : null,
+      currentFile: currentSegment ? parseInt(currentSegment.id_file) : null,
       files: files,
       projectInfo: projectInfo,
     }
@@ -34,16 +37,11 @@ export const JobMetadata = ({idJob, password}) => {
 
   useEffect(() => {
     getJobMetadata(idJob, password).then((jobMetadata) => {
-      const fileInstructions = jobMetadata.files.find(
-        (file) =>
-          file.data && file.data.instructions && file.data.instructions !== '',
-      )
       const projectInfo =
         jobMetadata.project && jobMetadata.project.project_info
           ? jobMetadata.project.project_info
           : undefined
-      if (fileInstructions || projectInfo) {
-        setFiles(jobMetadata.files)
+      if (projectInfo) {
         setProjectInfo(projectInfo)
         setShowButton(true)
       }
@@ -55,6 +53,26 @@ export const JobMetadata = ({idJob, password}) => {
     //   showInfoTooltipFunction()
     // }
   }, [showButton])
+
+  useEffect(() => {
+    const updateFiles = (files) => {
+      const fileInstructions = files.find(
+        (file) =>
+          file &&
+          file.metadata.instructions &&
+          file.metadata.instructions !== '',
+      )
+      if (fileInstructions) {
+        setFiles(files)
+        setShowButton(true)
+      }
+    }
+
+    CatToolStore.addListener(CattolConstants.STORE_FILES_INFO, updateFiles)
+    return () => {
+      CatToolStore.removeListener(CattolConstants.STORE_FILES_INFO, updateFiles)
+    }
+  }, [])
 
   return (
     <div

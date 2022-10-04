@@ -13,6 +13,7 @@ class MetadataStruct extends \DataAccess_AbstractDaoSilentStruct implements Data
 
     public $id ;
     public $id_project ;
+    public $files_parts_id ;
     public $id_file ;
     public $key ;
     public $value ;

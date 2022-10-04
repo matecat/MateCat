@@ -36,21 +36,19 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
 
   addSegments: function (segmentsData) {
     _.forEach(segmentsData.segments, (segment) => {
-      if (this._segmentsFiles.get(segment.file.id)) {
+      const fileId = segment.file.id.toString()
+      if (this._segmentsFiles.get(fileId)) {
         let immFiles = Immutable.fromJS(segment)
         this._segmentsFiles = this._segmentsFiles.set(
-          segment.file.id,
-          this._segmentsFiles.get(segment.file.id).push(immFiles),
+          fileId,
+          this._segmentsFiles.get(fileId).push(immFiles),
         )
       } else {
         this._segmentsFiles = this._segmentsFiles.set(
-          segment.file.id,
+          fileId,
           Immutable.fromJS([segment]),
         )
-        this._files = this._files.set(
-          segment.file.id,
-          Immutable.fromJS(segment.file),
-        )
+        this._files = this._files.set(fileId, Immutable.fromJS(segment.file))
       }
     })
     this._lastSegment = segmentsData._links.last_segment_id

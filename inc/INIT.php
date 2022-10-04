@@ -367,6 +367,7 @@ class INIT {
 //                    'php'   => array( '', '', 'extxml' ),
                     'json'  => [ '', '', 'extxml' ],
                     'jsont' => [ '', '', 'extxml' ],
+                    'jsont2' => [ '', '', 'extxml' ],
                     'yaml'  => [ '', '', 'extxml' ],
                     'yml'   => [ '', '', 'extxml' ],
                     'md'    => [ '', '', 'extxml' ],

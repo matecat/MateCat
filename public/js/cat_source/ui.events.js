@@ -357,8 +357,8 @@ $.extend(window.UI, {
       e.preventDefault()
       var current = SegmentStore.getCurrentSegment()
       if (!current) {
-        UI.unmountSegments()
-        UI.render({
+        SegmentActions.removeAllSegments()
+        CatToolActions.onRender({
           firstLoad: false,
         })
       } else {
