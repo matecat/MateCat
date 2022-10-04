@@ -44,7 +44,6 @@ let TranslationMatches = {
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
-      segmentObj.id_file,
       data.matches,
       data.errors,
     )
@@ -100,16 +99,16 @@ let TranslationMatches = {
     }
   },
   getContribution: function (segmentSid, next, force) {
+    const segment = SegmentStore.getSegmentByIdToJS(segmentSid)
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded')
-      this.segmentQA(segment)
+      SegmentActions.addClassToSegment(segment.sid, 'loaded')
+      SegmentActions.getSegmentsQa(segment)
       var deferred = new jQuery.Deferred()
       return deferred.resolve()
     }
-    var txt
     var currentSegment =
       next === 0
-        ? SegmentStore.getSegmentByIdToJS(segmentSid)
+        ? segment
         : next == 1
         ? SegmentStore.getNextSegment(segmentSid)
         : SegmentStore.getNextSegment(segmentSid, null, 8)
@@ -188,26 +187,12 @@ let TranslationMatches = {
     }
   },
 
-  showContributionError: function (segment) {
-    SegmentActions.setSegmentContributions(
-      UI.getSegmentId(segment),
-      UI.getSegmentFileId(segment),
-      [],
-      [{}],
-    )
-  },
-
   autoCopySuggestionEnabled: function () {
     return !!config.translation_matches_enabled
   },
 
   renderContributionErrors: function (errors, segment) {
-    SegmentActions.setSegmentContributions(
-      UI.getSegmentId(segment),
-      UI.getSegmentFileId(segment),
-      [],
-      errors,
-    )
+    SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id) {

@@ -45,10 +45,13 @@ class FileInfoController extends BaseChunkController {
 
     public function getInfo() {
 
+        $page = (isset($this->request->page)) ? $this->request->page : 1;
+        $perPage = (isset($this->request->per_page)) ? $this->request->per_page : 200;
+
         $this->return404IfTheJobWasDeleted();
 
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-        $this->response->json( $filesInfoUtility->getInfo() );
+        $this->response->json( $filesInfoUtility->getInfo(true, $page, $perPage) );
     }
 
     /**
@@ -69,6 +72,30 @@ class FileInfoController extends BaseChunkController {
         $this->response->json( $instructions );
     }
 
+    /**
+     * @throws NotFoundException
+     */
+    public function getInstructionsByFilePartsId() {
+
+        $this->return404IfTheJobWasDeleted();
+
+        $id_file = $this->request->param( 'id_file' );
+        $id_file_parts = $this->request->param( 'id_file_parts' );
+        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+        $instructions     = $filesInfoUtility->getInstructions( $id_file, $id_file_parts );
+
+        if ( !$instructions ) {
+            throw new NotFoundException( 'No instructions for this file parts id' );
+        }
+
+        $this->response->json( $instructions );
+    }
+
+    /**
+     * save instructions
+     *
+     * @throws NotFoundException
+     */
     public function setInstructions() {
 
         $this->return404IfTheJobWasDeleted();

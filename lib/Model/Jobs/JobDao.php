@@ -115,6 +115,30 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $id_job
+     * @param     $password
+     * @param int $ttl
+     *
+     * @return int
+     */
+    public static function getSegmentsCount($id_job, $password, $ttl = 0) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare(
+                "SELECT (job_last_segment - job_first_segment + 1 ) as segments_count FROM jobs WHERE " .
+                " id = :id_job AND password = :password "
+        );
+
+        $struct = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'   => $id_job,
+                'password' => $password
+        ] )[ 0 ];
+
+        return ($struct->segments_count) ? (int)$struct->segments_count : 0;
+    }
+
+    /**
      * @param                                        $id_job
      * @param                                        $password
      * @param int                                    $ttl
