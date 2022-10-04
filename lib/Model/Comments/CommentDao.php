@@ -1,6 +1,7 @@
 <?php
 
 use Comments\OpenThreadsStruct;
+use DataAccess\ShapelessConcreteStruct;
 
 class Comments_CommentDao extends DataAccess_AbstractDao {
 
@@ -60,6 +61,60 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $id
+     *
+     * @return bool
+     */
+    public function deleteComment($id)
+    {
+        $sql = "DELETE from comments WHERE id = :id";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return $stmt->execute([
+                'id' => $id
+        ]);
+    }
+
+    /**
+     * @param $idSegment
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public function getBySegmentId($idSegment)
+    {
+        $sql = "SELECT * from comments WHERE id_segment = :id_segment order by id asc";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_segment' => $idSegment
+        ] );
+    }
+
+    /**
+     * @param $id
+     *
+     * @return DataAccess_IDaoStruct
+     */
+    public function getById($id)
+    {
+        $sql = "SELECT * from comments WHERE id = :id";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id' => $id
+        ] )[0];
+    }
+
+    /**
+     * @param Comments_CommentStruct $obj
+     *
+     * @return Comments_CommentStruct
+     * @throws Exception
+     */
     public function saveComment( Comments_CommentStruct $obj ) {
 
         if ( $obj->message_type == null ) {
@@ -82,6 +137,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 'message_type' => $obj->message_type,
                 'message'      => $obj->message
         ] );
+
+        $id = $this->database->last_insert();
+        $obj->id = (int)$id;
 
         return $obj;
     }
@@ -224,6 +282,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     public function getCommentsInJob( Comments_CommentStruct $obj ) {
 
         $query = "SELECT
+                      id,
                       id_job, 
                       id_segment, 
                       create_date, 
@@ -265,6 +324,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         foreach ( $array_result as $item ) {
 
             $build_arr = [
+                    'id'             => (int)$item[ 'id' ],
                     'id_job'         => $item[ 'id_job' ],
                     'id_segment'     => $item[ 'id_segment' ],
                     'create_date'    => $item[ 'create_date' ],
