@@ -83,7 +83,6 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       CommentsStore.db.segments[idSegment] = segmentComments.filter(
         ({id}) => id !== idComment,
       )
-      console.log(segmentComments, idComment)
       CommentsStore.db.refreshHistory()
     },
 
