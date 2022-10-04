@@ -265,9 +265,13 @@ class commentController extends ajaxController {
         }
 
         if($commentDao->deleteComment($comment->id)){
+
+            $this->enqueueDeleteCommentMessage($comment->id, $comment->id_segment, $this->user->email, $this->__postInput['source_page']);
+
             $this->result[ 'data' ][] = [
                 "id" => (int)$comment->id
             ];
+            $this->appendUser();
             return;
         }
 
@@ -433,9 +437,44 @@ class commentController extends ajaxController {
     }
 
     /**
+     * @param $id
+     * @param $idSegment
+     * @param $email
+     * @param $sourcePage
+     *
+     * @throws StompException
+     */
+    private function enqueueDeleteCommentMessage($id, $idSegment, $email, $sourcePage)
+    {
+        $message = json_encode( [
+            '_type' => 'comment',
+            'data'  => [
+                'id_job'    => $this->__postInput[ 'id_job' ],
+                'passwords' => $this->getProjectPasswords(),
+                'id_client' => $this->__postInput[ 'id_client' ],
+                'payload'   => [
+                    'message_type'   => "2",
+                    'id'             => (int)$id,
+                    'id_segment'     => $idSegment,
+                    'email'          => $email,
+                    'source_page'    => $sourcePage,
+                ]
+            ]
+        ] );
+
+        $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
+        $stomp->connect();
+        $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
+                $message,
+                [ 'persistent' => 'true' ]
+        );
+    }
+
+    /**
      * @throws StompException
      */
     private function enqueueComment() {
+
         $this->payload = [
                 'message_type'   => $this->new_record->message_type,
                 'message'        => $this->new_record->message,
