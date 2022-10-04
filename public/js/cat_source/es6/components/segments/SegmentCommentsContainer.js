@@ -49,6 +49,16 @@ class SegmentCommentsContainer extends React.Component {
     }
   }
 
+  deleteComment = () => {
+    const {comments} = this.state
+    const lastCommentId = comments[comments.length - 1].id
+    return
+    CommentsActions.deleteComment(
+      lastCommentId,
+      this.props.segment.original_sid,
+    )
+  }
+
   resolveThread() {
     CommentsActions.resolveThread(this.props.segment.original_sid)
   }
@@ -198,6 +208,9 @@ class SegmentCommentsContainer extends React.Component {
         )
       }
       if (thread_wrap.length > 0) {
+        const isAuthorOfLastComment =
+          comments[comments.length - 1].email === config.userMail
+
         commentsHtml.push(
           <div
             key={'thread-' + 900}
@@ -206,6 +219,14 @@ class SegmentCommentsContainer extends React.Component {
           >
             {thread_wrap}
             {resolveButton}
+            {isAuthorOfLastComment && (
+              <a
+                className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
+                onClick={this.deleteComment}
+              >
+                Delete
+              </a>
+            )}
           </div>,
         )
       }
@@ -323,6 +344,10 @@ class SegmentCommentsContainer extends React.Component {
       this.updateComments,
     )
     CommentsStore.addListener(
+      CommentsConstants.DELETE_COMMENT,
+      this.updateComments,
+    )
+    CommentsStore.addListener(
       CommentsConstants.STORE_COMMENTS,
       this.updateComments,
     )
@@ -338,6 +363,10 @@ class SegmentCommentsContainer extends React.Component {
   componentWillUnmount() {
     CommentsStore.removeListener(
       CommentsConstants.ADD_COMMENT,
+      this.updateComments,
+    )
+    CommentsStore.removeListener(
+      CommentsConstants.DELETE_COMMENT,
       this.updateComments,
     )
     CommentsStore.removeListener(

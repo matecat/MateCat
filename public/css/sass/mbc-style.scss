@@ -208,6 +208,7 @@ a.mbc-new-message-link:hover {
   color: #999;
   position: absolute;
   top: 10px;
+  cursor: text;
 }
 
 .tagging-item {
@@ -393,6 +394,10 @@ a.mbc-comment-resolve-btn:hover,
 a.mbc-comment-resolve-btn:active {
   box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+a.ui.button.mbc-comment-delete-btn {
+  margin-right: 8px;
 }
 
 /*

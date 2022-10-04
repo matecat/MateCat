@@ -13,14 +13,14 @@ export const deleteComment = async ({
   idComment,
   idSegment,
   idJob = config.id_job,
+  sourcePage = config.revisionNumber,
 }) => {
   const dataParams = {
-    action: 'comment',
     _sub: 'delete',
     id_comment: idComment,
     id_segment: idSegment,
     id_job: idJob,
-    source_page: '',
+    source_page: sourcePage ? sourcePage + 1 : 1,
   }
   const formData = new FormData()
 
