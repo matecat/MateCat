@@ -55,10 +55,9 @@ class SegmentCommentsContainer extends React.Component {
   deleteComment = () => {
     const {comments} = this.state
     const lastCommentId = comments[comments.length - 1].id
-    return
     CommentsActions.deleteComment(
       lastCommentId,
-      this.props.segment.original_sid,
+      this.context.segment.original_sid,
     )
   }
 

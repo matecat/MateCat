@@ -7,20 +7,27 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.idComment
  * @param {string} options.idSegment
  * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
+ * @param {string} [options.sourcePage=config.revisionNumber]
+ * @param {string} [options.idClient=config.id_client]
  * @returns {Promise<object>}
  */
 export const deleteComment = async ({
   idComment,
   idSegment,
   idJob = config.id_job,
+  password = config.password,
   sourcePage = config.revisionNumber,
+  idClient = config.id_client,
 }) => {
   const dataParams = {
     _sub: 'delete',
     id_comment: idComment,
     id_segment: idSegment,
     id_job: idJob,
+    password,
     source_page: sourcePage ? sourcePage + 1 : 1,
+    id_client: idClient,
   }
   const formData = new FormData()
 

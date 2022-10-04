@@ -208,7 +208,7 @@ a.mbc-new-message-link:hover {
   color: #999;
   position: absolute;
   top: 10px;
-  cursor: text;
+  pointer-events: none;
 }
 
 .tagging-item {

@@ -36,11 +36,21 @@ const CommentsActions = {
       })
   },
   updateCommentsFromSse: function (data) {
-    AppDispatcher.dispatch({
-      actionType: CommentsConstants.ADD_COMMENT,
-      comment: data,
-      sid: data.id_segment,
-    })
+    const {id_segment: sid} = data
+    const isDeleteAction = data.message_type === '2'
+    if (isDeleteAction) {
+      AppDispatcher.dispatch({
+        actionType: CommentsConstants.DELETE_COMMENT,
+        sid,
+        idComment: data.id,
+      })
+    } else {
+      AppDispatcher.dispatch({
+        actionType: CommentsConstants.ADD_COMMENT,
+        comment: data,
+        sid,
+      })
+    }
   },
   updateTeamUsers: function (users) {
     AppDispatcher.dispatch({
@@ -55,10 +65,9 @@ const CommentsActions = {
   },
   deleteComment: function (idComment, sid) {
     deleteComment({idComment, idSegment: sid}).then(({data}) => {
-      console.log(data)
       AppDispatcher.dispatch({
         actionType: CommentsConstants.DELETE_COMMENT,
-        sid: sid,
+        sid,
         idComment: data[0].id,
       })
     })
