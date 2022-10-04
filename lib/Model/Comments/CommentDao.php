@@ -138,6 +138,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 'message'      => $obj->message
         ] );
 
+        $id = $this->database->last_insert();
+        $obj->id = (int)$id;
+
         return $obj;
     }
 

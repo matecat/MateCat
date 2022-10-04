@@ -439,6 +439,7 @@ class commentController extends ajaxController {
         $this->payload = [
                 'message_type'   => $this->new_record->message_type,
                 'message'        => $this->new_record->message,
+                'id'             => $this->new_record->id,
                 'id_segment'     => $this->new_record->id_segment,
                 'full_name'      => $this->new_record->full_name,
                 'email'          => $this->new_record->email,
