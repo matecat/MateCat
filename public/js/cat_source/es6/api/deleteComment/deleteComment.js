@@ -1,27 +1,26 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Get segments comments
+ * Delete user comment
  *
  * @param {Object} options
- * @param {boolean} options.firstSegment
- * @param {boolean} options.lastSegment
+ * @param {string} options.idComment
+ * @param {string} options.idSegment
  * @param {string} [options.idJob=config.id_job]
  * @returns {Promise<object>}
  */
-export const getComments = async ({
-  firstSegment,
-  lastSegment,
+export const deleteComment = async ({
+  idComment,
+  idSegment,
   idJob = config.id_job,
-  password = config.password,
 }) => {
   const dataParams = {
     action: 'comment',
-    _sub: 'getRange',
-    first_seg: firstSegment,
-    last_seg: lastSegment,
+    _sub: 'delete',
+    id_comment: idComment,
+    id_segment: idSegment,
     id_job: idJob,
-    password,
+    source_page: '',
   }
   const formData = new FormData()
 
