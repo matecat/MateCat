@@ -1003,8 +1003,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt    = $conn->prepare("
                 SELECT s.id, j.id as id_job, j.password as job_password
                 FROM segments s
-                join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
-                join matecat.projects p on p.id = j.id_project
+                join jobs j on s.id between j.job_first_segment and j.job_last_segment
+                join projects p on p.id = j.id_project
                 where p.id = :id_project and p.password = :password
                 limit ".$limit." offset " . $offset);
 
@@ -1030,7 +1030,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt    = $conn->prepare("
                 SELECT s.id 
                 FROM segments s
-                join matecat.jobs j on s.id between j.job_first_segment and j.job_last_segment
+                join jobs j on s.id between j.job_first_segment and j.job_last_segment
                 where j.id = :id_job and j.password = :password
                 group by s.id limit ".$limit." offset " . $offset);
 
