@@ -8,6 +8,19 @@ class ShortCutsModal extends React.Component {
     super(props)
   }
 
+  handleKeyupFunction = (event) => {
+    if (event.key === 'Escape') {
+      this.props.onClose()
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('keyup', this.handleKeyupFunction)
+  }
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.handleKeyupFunction)
+  }
+
   getShortcutsHtml() {
     let html = []
     let label = UI.isMac ? 'mac' : 'standard'
