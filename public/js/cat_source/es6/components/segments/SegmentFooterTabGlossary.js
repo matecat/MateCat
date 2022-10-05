@@ -390,6 +390,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
       TRANSLATED_DESCRIPTION,
       TRANSLATED_EXAMPLE,
     } = TERM_FORM_FIELDS
+
     return (
       <div className={'glossary_add-container'}>
         <div className={'glossary-form-line'}>
@@ -446,35 +447,39 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                     updateSelectActive('domain', option)
                   }
                 }}
-                optionTemplate={({name}) => (
-                  <div className="domain-option">{name}</div>
-                )}
-                onRenderOption={({
+              >
+                {({
+                  name,
                   index,
                   optionsLength,
                   queryFilter,
                   resetQueryFilter,
-                }) =>
-                  index === optionsLength - 1 &&
-                  queryFilter.trim() && (
-                    <button
-                      className="button-create-option"
-                      onClick={() => {
-                        setDomains((prevState) => [
-                          ...prevState,
-                          {
-                            name: queryFilter,
-                            id: (prevState.length + 1).toString(),
-                          },
-                        ])
-                        resetQueryFilter()
-                      }}
-                    >
-                      + Create a domain name <b>{queryFilter}</b>
-                    </button>
-                  )
-                }
-              />
+                }) => ({
+                  // override row content
+                  row: <div className="domain-option">{name}</div>,
+                  // insert button after last row
+                  ...(index === optionsLength - 1 &&
+                    queryFilter.trim() && {
+                      afterRow: (
+                        <button
+                          className="button-create-option"
+                          onClick={() => {
+                            setDomains((prevState) => [
+                              ...prevState,
+                              {
+                                name: queryFilter,
+                                id: (prevState.length + 1).toString(),
+                              },
+                            ])
+                            resetQueryFilter()
+                          }}
+                        >
+                          + Create a domain name <b>{queryFilter}</b>
+                        </button>
+                      ),
+                    }),
+                })}
+              </Select>
             </div>
             <div className={'input-with-label__wrapper'}>
               <Select
@@ -492,35 +497,39 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                     updateSelectActive('subdomain', option)
                   }
                 }}
-                optionTemplate={({name}) => (
-                  <div className="domain-option">{name}</div>
-                )}
-                onRenderOption={({
+              >
+                {({
+                  name,
                   index,
                   optionsLength,
                   queryFilter,
                   resetQueryFilter,
-                }) =>
-                  index === optionsLength - 1 &&
-                  queryFilter.trim() && (
-                    <button
-                      className="button-create-option"
-                      onClick={() => {
-                        setSubdomains((prevState) => [
-                          ...prevState,
-                          {
-                            name: queryFilter,
-                            id: (prevState.length + 1).toString(),
-                          },
-                        ])
-                        resetQueryFilter()
-                      }}
-                    >
-                      + Create a subdomain name <b>{queryFilter}</b>
-                    </button>
-                  )
-                }
-              />
+                }) => ({
+                  // override row content
+                  row: <div className="domain-option">{name}</div>,
+                  // insert button after last row
+                  ...(index === optionsLength - 1 &&
+                    queryFilter.trim() && {
+                      afterRow: (
+                        <button
+                          className="button-create-option"
+                          onClick={() => {
+                            setSubdomains((prevState) => [
+                              ...prevState,
+                              {
+                                name: queryFilter,
+                                id: (prevState.length + 1).toString(),
+                              },
+                            ])
+                            resetQueryFilter()
+                          }}
+                        >
+                          + Create a subdomain name <b>{queryFilter}</b>
+                        </button>
+                      ),
+                    }),
+                })}
+              </Select>
             </div>
           </div>
         </div>

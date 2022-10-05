@@ -21,8 +21,7 @@ export const Dropdown = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   onClose = () => {},
-  optionTemplate = () => {},
-  onRenderOption = () => {},
+  children,
 }) => {
   const [queryFilter, setQueryFilter] = useState('')
   const [highlightedOption, setHighlightedOption] = useState()
@@ -270,10 +269,17 @@ export const Dropdown = ({
     const isNoResultsFound = option.id === 'noResultsFound'
     const showActiveOptionIcon = isActiveOption || isActiveOptions
 
-    const optionNode = optionTemplate({
-      ...option,
-      isActive: isActiveOption || isActiveOptions,
-    })
+    const {row, afterRow} =
+      children?.({
+        index,
+        ...option,
+        optionsLength: !isNoResultsFound ? getFilteredOptions().length : 1,
+        queryFilter,
+        resetQueryFilter: () => {
+          setQueryFilter('')
+          queryFilterRef.current = ''
+        },
+      }) || {}
 
     return (
       <Fragment key={index}>
@@ -289,8 +295,8 @@ export const Dropdown = ({
             if (!isNoResultsFound) handleClick(option)
           }}
         >
-          {optionNode && !isNoResultsFound ? (
-            optionNode
+          {row && !isNoResultsFound ? (
+            row
           ) : (
             <>
               <span>{option.name}</span>
@@ -298,16 +304,7 @@ export const Dropdown = ({
             </>
           )}
         </li>
-        {onRenderOption({
-          index,
-          ...option,
-          optionsLength: !isNoResultsFound ? getFilteredOptions().length : 1,
-          queryFilter,
-          resetQueryFilter: () => {
-            setQueryFilter('')
-            queryFilterRef.current = ''
-          },
-        })}
+        {afterRow && afterRow}
       </Fragment>
     )
   }
@@ -413,6 +410,5 @@ Dropdown.propTypes = {
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
   onClose: PropTypes.func,
-  optionTemplate: PropTypes.func,
-  onRenderOption: PropTypes.func,
+  children: PropTypes.func,
 }

@@ -40,8 +40,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  optionTemplate,
-  onRenderOption,
+  children,
 }) => {
   const listRef = useRef()
   const wrapperRef = useRef()
@@ -249,10 +248,10 @@ export const Select = ({
               optionsSelectedCopyPlural,
               resetSelectedOptions,
               onClose: hideDropdown,
-              optionTemplate,
-              onRenderOption,
             }}
-          />
+          >
+            {children}
+          </Dropdown>
         </div>
       )}
     </div>
@@ -293,8 +292,7 @@ Select.propTypes = {
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
-  optionTemplate: PropTypes.func,
-  onRenderOption: PropTypes.func,
+  children: PropTypes.func,
 }
 
 const ChevronDown = () => {
