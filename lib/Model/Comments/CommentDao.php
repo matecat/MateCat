@@ -84,12 +84,14 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      */
     public function getBySegmentId($idSegment)
     {
-        $sql = "SELECT * from comments WHERE id_segment = :id_segment order by id asc";
+        $sql = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc";
         $con = $this->database->getConnection() ;
         $stmt = $con->prepare( $sql ) ;
 
         return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_segment' => $idSegment
+                'id_segment' => $idSegment,
+                'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
+                'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
         ] );
     }
 
