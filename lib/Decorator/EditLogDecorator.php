@@ -19,7 +19,7 @@ class EditLogDecorator extends AbstractDecorator {
          */
         $model = $controller->getModel();
 
-        $this->template->job_archived = ( $model->isJobArchived() ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_archived = ( $model->isJobArchived() ) ? 1 : '';
         $this->template->owner_email  = $model->getJobOwnerEmail();
         $this->template->emptyJob     = $model->isJobEmpty();
         /**

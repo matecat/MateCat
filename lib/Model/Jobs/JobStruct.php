@@ -227,15 +227,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
-     */
-    public function findLatestTranslation() {
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-
-        return $dao->lastTranslationByJobOrChunk( $this );
-    }
-
-    /**
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks() {
@@ -327,18 +318,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     public function isSecondPassReview(){
         return $this->is_review  && $this->_sourcePage == 3;
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function isArchiveable() {
-        $lastUpdate  = new DateTime( $this->last_update );
-        $oneMonthAgo = new DateTime();
-        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
-
-        return $lastUpdate < $oneMonthAgo && !$this->isCanceled() ;
     }
 
     /**
