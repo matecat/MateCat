@@ -150,7 +150,7 @@ class reviseSummaryController extends viewController {
     
 	public function setTemplateVars() {
 
-        $this->template->job_archived = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_archived = ( $this->job_archived ) ? 1 : '';
         $this->template->owner_email  = $this->job_owner_email;
 
         $this->template->jid          = $this->jid;
