@@ -104,6 +104,10 @@ export const decodeTagsToPlainText = (text) => {
 }
 
 export const formatText = (text, format) => {
+  const regexCapitalize = /\b\w/g.test(text)
+    ? new RegExp(/\b\w/, 'g') // latin chars
+    : new RegExp(/^(.)|(?<=\s)(.)/, 'g') // non latin chars
+
   switch (format) {
     case 'uppercase':
       text = text.toUpperCase()
@@ -112,7 +116,7 @@ export const formatText = (text, format) => {
       text = text.toLowerCase()
       break
     case 'capitalize':
-      text = text.replace(/\b\w/g, (l) => l.toUpperCase())
+      text = text.replace(regexCapitalize, (l) => l.toUpperCase())
       break
     default:
       break
