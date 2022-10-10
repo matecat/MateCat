@@ -260,11 +260,10 @@ class commentController extends ajaxController {
         // The comments from R2 phase are wrongly saved with source_page = 2
         $sourcePage = Utils::getSourcePage();
 
-        $allowedSourcePages = [
-            (int)$this->__postInput['source_page']
-        ];
+        $allowedSourcePages = [];
+        $allowedSourcePages[] = (int)$this->__postInput['source_page'];
 
-        if($sourcePage === 3){
+        if($sourcePage == 3){
             $allowedSourcePages[] = 2;
         }
 
