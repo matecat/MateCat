@@ -258,7 +258,7 @@ class commentController extends ajaxController {
 
         // Fix for R2
         // The comments from R2 phase are wrongly saved with source_page = 2
-        $sourcePage = Utils::getSourcePage();
+        $sourcePage = Utils::getSourcePageFromReferer();
 
         $allowedSourcePages = [];
         $allowedSourcePages[] = (int)$this->__postInput['source_page'];
