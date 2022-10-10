@@ -256,7 +256,19 @@ class commentController extends ajaxController {
             return;
         }
 
-        if((int)$comment->source_page !== (int)$this->__postInput['source_page']){
+        // Fix for R2
+        // The comments from R2 phase are wrongly saved with source_page = 2
+        $sourcePage = Utils::getSourcePage();
+
+        $allowedSourcePages = [
+            (int)$this->__postInput['source_page']
+        ];
+
+        if($sourcePage === 3){
+            $allowedSourcePages[] = 2;
+        }
+
+        if(!in_array((int)$comment->source_page, $allowedSourcePages)){
             $this->result[ 'errors' ][] = [
                     "code" => -207,
                     "message" => "Not corresponding source_page."
