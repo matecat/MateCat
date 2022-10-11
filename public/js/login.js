@@ -8,6 +8,7 @@ import ForgotPasswordModal from './cat_source/es6/components/modals/ForgotPasswo
 import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
 import LoginModal from './cat_source/es6/components/modals/LoginModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import {onModalWindowMounted} from './cat_source/es6/components/modals/ModalWindow'
 
 $.extend(APP, {
   setLoginEvents: function () {
@@ -134,7 +135,7 @@ $.extend(APP, {
       $('#modal').trigger('openlogin')
     }
 
-    this.checkForPopupToOpen()
+    onModalWindowMounted().then(() => this.checkForPopupToOpen())
   },
 
   checkForPopupToOpen: function () {
