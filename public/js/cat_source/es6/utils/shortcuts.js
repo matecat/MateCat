@@ -16,7 +16,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+alt+space',
-          mac: 'meta+alt+space',
+          mac: 'ctrl+option+space',
         },
       },
     },
@@ -77,7 +77,7 @@ const Shortcuts = {
         equivalent: 'click on > between source and target',
         keystrokes: {
           standard: 'ctrl+i',
-          mac: 'alt+ctrl+i',
+          mac: 'option+ctrl+i',
         },
       },
       undoInSegment: {
@@ -145,7 +145,7 @@ const Shortcuts = {
         },
         keystrokes: {
           standard: 'ctrl+alt+arrows-enter',
-          mac: 'ctrl+alt+arrows-enter',
+          mac: 'ctrl+option+arrows-enter',
         },
       },
       copyContribution1: {
@@ -185,7 +185,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'alt+t',
-          mac: 'alt+t',
+          mac: 'option+t',
         },
       },
       navigateTabs: {
@@ -193,7 +193,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'alt+s',
-          mac: 'ctrl+alt+s',
+          mac: 'ctrl+option+s',
         },
       },
     },
