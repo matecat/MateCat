@@ -1579,6 +1579,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.alt:after {
                   content: 'Alt';
                 }
+                &.option:after {
+                  content: 'Option';
+                }
                 &.\31 :after {
                   content: '1';
                 }
