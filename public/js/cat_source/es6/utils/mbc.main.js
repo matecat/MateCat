@@ -28,7 +28,6 @@ MBC.init = function () {
       'commentsPanelClosed-' + config.id_job + config.password
 
     var types = {sticky: 3, resolve: 2, comment: 1}
-    var source_pages = {revise: 2, translate: 1}
     var loggedUserName = null
     var customUserName = null
     var lastCommentHash = null
@@ -45,11 +44,7 @@ MBC.init = function () {
     }
 
     var getSourcePage = function () {
-      if (config.isReview) {
-        return source_pages.revise
-      } else {
-        return source_pages.translate
-      }
+      return config.revisionNumber ? config.revisionNumber + 1 : 1
     }
 
     var refreshBadgeHeaderIcon = function () {
