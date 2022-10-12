@@ -2332,6 +2332,9 @@ class ProjectManager {
 
 
     protected function _insertInstructions( $fid, $value ) {
+
+        $value = $this->features->filter( 'decodeInstructions', $value );
+
         $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
     }
 
