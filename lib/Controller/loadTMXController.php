@@ -113,6 +113,7 @@ class loadTMXController extends ajaxController {
                     }
 
                     $this->TMService->setName( $fileInfo->name );
+                    $this->TMService->setFile( [ $fileInfo ] );
                     $this->TMService->addTmxInMyMemory();
 
                     $this->featureSet->run( 'postPushTMX', $fileInfo, $this->user, $this->TMService->getTMKey() );
