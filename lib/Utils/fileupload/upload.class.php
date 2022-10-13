@@ -151,12 +151,13 @@ class UploadHandler {
         }
 
         // check if is a TMX
+        // for TMX the limit is different (300Mb vs 100Mb)
+        $file_pathinfo = pathinfo($file->name);
+        $max_file_size = ($file_pathinfo['extension'] === 'tmx') ? $this->options[ 'max_tmx_file_size' ] : $this->options[ 'max_file_size' ] ;
 
-
-
-        if ( $this->options[ 'max_file_size' ] && (
-                        $file_size > $this->options[ 'max_file_size' ] ||
-                        $file->size > $this->options[ 'max_file_size' ] )
+        if ( $max_file_size && (
+                        $file_size > $max_file_size ||
+                        $file->size > $max_file_size )
         ) {
             $file->error = 'maxFileSize';
 
