@@ -67,32 +67,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         }
     }
 
-    /**
-     * @param $chunk
-     *
-     * @return Translations_SegmentTranslationStruct
-     */
-    public function lastTranslationByJobOrChunk( $chunk ) {
-
-        $conn  = Database::obtain()->getConnection();
-        $query = "SELECT * 
-                  FROM segment_translations
-                    WHERE id_job = :id_job 
-                    AND segment_translations.id_segment BETWEEN :job_first_segment AND :job_last_segment 
-                  ORDER BY translation_date DESC
-                  LIMIT 1 ";
-        $stmt  = $conn->prepare( $query );
-        $array = [
-                'id_job'            => $chunk->id,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment'  => $chunk->job_last_segment
-        ];
-        $stmt->execute( $array );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct' );
-
-        return $stmt->fetch();
-    }
-
     protected function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
 
         $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
