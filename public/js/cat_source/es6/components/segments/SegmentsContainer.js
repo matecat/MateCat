@@ -274,7 +274,6 @@ function SegmentsContainer({
       const footerHeight =
         document.getElementsByTagName('footer')[0].offsetHeight
 
-      setWidthArea(window.innerWidth)
       setHeightArea(window.innerHeight - (headerHeight + footerHeight))
     }
 
