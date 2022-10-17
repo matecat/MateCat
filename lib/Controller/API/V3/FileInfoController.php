@@ -95,6 +95,11 @@ class FileInfoController extends BaseChunkController {
      * save instructions
      *
      * @throws NotFoundException
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     public function setInstructions() {
 
@@ -103,6 +108,8 @@ class FileInfoController extends BaseChunkController {
         $id_file          = $this->request->param( 'id_file' );
         $instructions     = $this->request->param( 'instructions' );
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+
+        $instructions = $this->featureSet->filter( 'decodeInstructions', $instructions );
 
         if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
             $this->response->json( true );
