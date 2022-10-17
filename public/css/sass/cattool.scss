@@ -3,7 +3,7 @@
 body.cattool {
   display: flex;
   height: 100vh;
-  flex-direction: column;
+  //flex-direction: column;
   overflow-y: hidden !important;
   padding: unset;
   background-color: $grey5;
@@ -33,7 +33,7 @@ body.cattool {
     width: 100%;
     height: 100%;
     flex: 1;
-    overflow: hidden;
+    //overflow: hidden;
 
     .freezing-overlay {
       position: absolute;
