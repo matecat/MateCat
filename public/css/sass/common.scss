@@ -4650,6 +4650,8 @@ body.side-popup {
   body {
     min-width: unset;
     background-color: #f5f6f7;
+    height: fill-available;
+    height: -webkit-fill-available;
   }
   .unsupported-device {
     display: block;
