@@ -48,7 +48,7 @@ class commentController extends ajaxController {
         ];
 
         $this->__postInput              = filter_input_array( INPUT_POST, $filterArgs );
-                    $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
+        $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
 
     }
 

@@ -17,6 +17,31 @@ const initialState = {
   onCloseCallback: false,
 }
 
+const componentStatus = (() => {
+  const obj = {}
+  let _isMounted = false
+  let _resolve
+
+  Object.defineProperty(obj, 'isMounted', {
+    get: () => _isMounted,
+    set: (value) => {
+      _isMounted = value
+      if (_isMounted && _resolve) _resolve()
+    },
+  })
+  Object.defineProperty(obj, 'resolve', {
+    enumerable: false,
+    set: (value) => {
+      _resolve = value
+      if (_isMounted) _resolve()
+    },
+  })
+  return obj
+})()
+
+export const onModalWindowMounted = () =>
+  new Promise((resolve) => (componentStatus.resolve = resolve))
+
 export class ModalWindow extends React.Component {
   state = initialState
 
@@ -54,6 +79,8 @@ export class ModalWindow extends React.Component {
       this.showModalComponent,
     )
     CatToolStore.addListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
+
+    componentStatus.isMounted = true
   }
 
   componentWillUnmount() {
@@ -62,6 +89,8 @@ export class ModalWindow extends React.Component {
       this.showModalComponent,
     )
     CatToolStore.removeListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
+
+    componentStatus.isMounted = false
   }
 
   render() {
