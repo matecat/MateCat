@@ -176,6 +176,18 @@ class NewController extends ajaxController {
 
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+
+        /**
+         * ----------------------------------
+         * Note 2022-10-13
+         * ----------------------------------
+         *
+         * We trim every space private_tm_key
+         * in order to avoid mispelling errors
+         *
+         */
+        $this->postInput['instructions'] = $this->featureSet->filter('encodeInstructions', $_POST['instructions']);
+
         /**
          * ----------------------------------
          * Note 2021-05-28
