@@ -48,7 +48,7 @@ class commentController extends ajaxController {
         ];
 
         $this->__postInput              = filter_input_array( INPUT_POST, $filterArgs );
-                    $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
+        $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
 
     }
 
@@ -137,6 +137,8 @@ class commentController extends ajaxController {
             $commentDao->saveComment( $mentioned_comment );
         }
 
+        $commentDao->destroySegmentIdCache($this->__postInput[ 'id_segment' ]);
+
         $this->enqueueComment();
         $this->users = $this->resolveUsers();
         $this->sendEmail();
@@ -160,7 +162,6 @@ class commentController extends ajaxController {
         $user_team_mentions       = $this->resolveTeamMentions();
         $userDao                  = new Users_UserDao( Database::obtain() );
         $this->users_mentioned_id = array_unique( array_merge( $user_mentions, $user_team_mentions ) );
-
 
         $this->users_mentioned = $this->filterUsers( $userDao->getByUids( $this->users_mentioned_id ) );
     }
@@ -277,6 +278,7 @@ class commentController extends ajaxController {
 
         if($commentDao->deleteComment($comment->id)){
 
+            $commentDao->destroySegmentIdCache($comment->id_segment);
             $this->enqueueDeleteCommentMessage($comment->id, $comment->id_segment, $this->user->email, $this->__postInput['source_page']);
 
             $this->result[ 'data' ][] = [
