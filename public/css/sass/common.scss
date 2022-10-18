@@ -286,7 +286,7 @@ footer #statistics {
 .unsupported-browser,
 .unsupported-device {
   background-color: #f5f6f7;
-
+  height: 100%;
   .wrapper {
     display: flex;
     flex-direction: column;
@@ -4629,10 +4629,9 @@ body.side-popup {
 }
 
 @media (max-width: 768px) {
-  body {
+  body.upload-page {
+    min-width: unset;
     background-color: #f5f6f7;
-    height: fill-available;
-    height: -webkit-fill-available;
   }
   .unsupported-device {
     display: block;
