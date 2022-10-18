@@ -390,10 +390,8 @@ const TEXT_UTILS = {
       return '<a href="' + href + '" target="_blank">' + match + '</a>'
     })
   },
-  isTranslatedHostDomainUrl: (url) =>
-    /(files.translated.com|files-sandbox.translated.com|files.staging.translated.com)/.test(
-      url.substr(url.indexOf('/') + 2).split('/')[0],
-    ),
+  // plugins
+  isTranslatedHostDomainUrl: () => false,
 }
 
 export default TEXT_UTILS
