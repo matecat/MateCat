@@ -4613,11 +4613,11 @@ body.side-popup {
     #template-download,
     .wrapper-claim,
     .wrapper-bottom {
-      //display: none !important;
+      display: none !important;
     }
   }
   .unsupported-device {
-    //display: block;
+    display: block;
   }
   .unsupported-browser {
     display: none;
