@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
+import SegmentActions from '../../../actions/SegmentActions'
 
 class QaCheckGlossaryHighlight extends Component {
   constructor(props) {
@@ -7,24 +8,48 @@ class QaCheckGlossaryHighlight extends Component {
     this.state = {
       showTooltip: false,
     }
+    this.tooltipDelay
   }
   tooltipToggle = () => {
     // this will trigger a rerender in the main Editor Component
-    const {showTooltip} = this.state
+    clearTimeout(this.tooltipDelay)
+    this.tooltipDelay = setTimeout(() => {
+      this.setState({
+        showTooltip: true,
+      })
+    }, 400)
+  }
+  removeTooltip = () => {
+    clearTimeout(this.tooltipDelay)
     this.setState({
-      showTooltip: !showTooltip,
+      showTooltip: false,
+    })
+  }
+  onClickTerm = () => {
+    const {missingTerms, children, sid} = this.props
+    const text = children[0].props.text
+    const glossaryTerm = missingTerms.find(({matching_words: matchingWords}) =>
+      matchingWords.find((value) => value === text),
+    )
+    //Call Segment footer Action
+    SegmentActions.highlightGlossaryTerm({
+      sid,
+      termId: glossaryTerm.term_id,
+      type: 'check',
     })
   }
   render() {
-    const {children, sid, onClickAction} = this.props
+    const {children} = this.props
     const {showTooltip} = this.state
     return (
       <div className="qaCheckGlossaryItem">
-        {showTooltip && <TooltipInfo text={'Unused glossary term'} />}
+        {showTooltip && (
+          <TooltipInfo text={'Glossary translation not in target'} />
+        )}
         <span
           onMouseEnter={() => this.tooltipToggle()}
-          onMouseLeave={() => this.tooltipToggle()}
-          onClick={() => onClickAction(sid, 'glossary')}
+          onMouseLeave={() => this.removeTooltip()}
+          onClick={() => this.onClickTerm()}
         >
           {children}
         </span>

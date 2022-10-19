@@ -589,12 +589,22 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       matches,
     )
   },
-  setGlossaryToCache: function (sid, fid, glossary) {
-    let index = this.getSegmentIndex(sid, fid)
+  setGlossaryToCache: function (sid, glossary) {
+    const index = this.getSegmentIndex(sid)
+    const pendingGlossaryUpdates = this._segments
+      .get(index)
+      .get('pendingGlossaryUpdates')
+      ? this._segments.get(index).get('pendingGlossaryUpdates').toJS()
+      : []
+
     this._segments = this._segments.setIn(
       [index, 'glossary'],
       Immutable.fromJS(glossary),
     )
+    if (pendingGlossaryUpdates)
+      this.addOrUpdateGlossaryItem(sid, pendingGlossaryUpdates)
+
+    this._segments = this._segments.deleteIn([index, 'pendingGlossaryUpdates'])
   },
   deleteFromGlossary: function (sid, term) {
     let index = this.getSegmentIndex(sid)
@@ -608,16 +618,20 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
   addOrUpdateGlossaryItem: function (sid, terms) {
-    let index = this.getSegmentIndex(sid)
-    let glossary = this._segments.get(index).get('glossary').toJS()
+    const index = this.getSegmentIndex(sid)
+    const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
+    const glossary = isGlossaryAlreadyExist
+      ? this._segments.get(index).get('glossary').toJS()
+      : []
     const updatedGlossary = [
-      ...glossary.filter(
-        ({term_id}) => !terms.find((term) => term.term_id === term_id),
-      ),
+      ...glossary
+        .filter(({term_id}) => !terms.find((term) => term.term_id === term_id))
+        .map((term) => ({...term, missingTerm: false})),
       ...terms,
     ]
+
     this._segments = this._segments.setIn(
-      [index, 'glossary'],
+      [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
       Immutable.fromJS(updatedGlossary),
     )
   },
@@ -750,10 +764,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'qaBlacklistGlossary'],
-      blacklistedTerms.reduce(
-        (acc, {matching_words = []}) => [...acc, ...matching_words],
-        [],
-      ),
+      blacklistedTerms,
     )
   },
   setSegmentSaving(sid, saving) {
@@ -1426,7 +1437,7 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.SET_GLOSSARY_TO_CACHE:
-      SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary)
+      SegmentStore.setGlossaryToCache(action.sid, action.glossary)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1840,6 +1851,11 @@ AppDispatcher.register(function (action) {
         SegmentConstants.FREEZING_SEGMENTS,
         action.isFreezing,
       )
+      break
+    case SegmentConstants.HIGHLIGHT_GLOSSARY_TERM:
+      SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

@@ -1,10 +1,4 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from './../common/Select'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
@@ -57,7 +51,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     subdomain: undefined,
   })
   const [terms, setTerms] = useState(initialState.terms)
-  const [indexTermHighlight, setIndexTermHighlight] = useState(undefined)
+  const [termHighlight, setTermHighlight] = useState(undefined)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
   const [isLoading, setIsLoading] = useState(false)
@@ -73,14 +67,16 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   }, [])
 
   const scrollToTerm = useCallback(
-    (id) => {
+    ({id, isTarget, type}) => {
       if (!id || !scrollItemsRef.current) return
       const indexToScroll = terms.findIndex(({term_id}) => term_id === id)
       const element = scrollItemsRef.current?.children[indexToScroll]
       if (element) {
         scrollItemsRef.current.scrollTo(0, indexToScroll * element.offsetHeight)
-        setIndexTermHighlight(indexToScroll)
-        element.onanimationend = () => setIndexTermHighlight(undefined)
+        setTermHighlight({index: indexToScroll, isTarget, type})
+        const labelElement =
+          element.getElementsByClassName('glossary_word')[isTarget ? 1 : 0]
+        labelElement.onanimationend = () => setTermHighlight(undefined)
       }
     },
     [terms],
@@ -88,9 +84,8 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
 
   // register listern highlight term
   useEffect(() => {
-    const highlightTerm = ({sid, termId}) => {
-      console.log('highlightTerm', sid, termId)
-      if (sid === highlightTerm) scrollToTerm(termId)
+    const highlightTerm = ({sid, termId, isTarget, type}) => {
+      if (sid === segment.sid) scrollToTerm({id: termId, isTarget, type})
     }
 
     SegmentStore.addListener(
@@ -330,9 +325,17 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   }
 
   const onSubmitAddOrUpdateTerm = () => {
-    // check mandatory fiels
+    // check mandatory fields
     const {originalTerm, translatedTerm} = termForm
-    if (!originalTerm || !translatedTerm) return
+    const {keys, domain, subdomain} = selectsActive
+    if (
+      !originalTerm ||
+      !translatedTerm ||
+      !keys.length ||
+      !domain ||
+      !subdomain
+    )
+      return
 
     setIsLoading(true)
     if (modifyElement)
@@ -387,6 +390,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
       TRANSLATED_DESCRIPTION,
       TRANSLATED_EXAMPLE,
     } = TERM_FORM_FIELDS
+
     return (
       <div className={'glossary_add-container'}>
         <div className={'glossary-form-line'}>
@@ -443,35 +447,39 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                     updateSelectActive('domain', option)
                   }
                 }}
-                optionTemplate={({name}) => (
-                  <div className="domain-option">{name}</div>
-                )}
-                onRenderOption={({
+              >
+                {({
+                  name,
                   index,
                   optionsLength,
                   queryFilter,
                   resetQueryFilter,
-                }) =>
-                  index === optionsLength - 1 &&
-                  queryFilter.trim() && (
-                    <button
-                      className="button-create-option"
-                      onClick={() => {
-                        setDomains((prevState) => [
-                          ...prevState,
-                          {
-                            name: queryFilter,
-                            id: (prevState.length + 1).toString(),
-                          },
-                        ])
-                        resetQueryFilter()
-                      }}
-                    >
-                      + Create a domain name <b>{queryFilter}</b>
-                    </button>
-                  )
-                }
-              />
+                }) => ({
+                  // override row content
+                  row: <div className="domain-option">{name}</div>,
+                  // insert button after last row
+                  ...(index === optionsLength - 1 &&
+                    queryFilter.trim() && {
+                      afterRow: (
+                        <button
+                          className="button-create-option"
+                          onClick={() => {
+                            setDomains((prevState) => [
+                              ...prevState,
+                              {
+                                name: queryFilter,
+                                id: (prevState.length + 1).toString(),
+                              },
+                            ])
+                            resetQueryFilter()
+                          }}
+                        >
+                          + Create a domain name <b>{queryFilter}</b>
+                        </button>
+                      ),
+                    }),
+                })}
+              </Select>
             </div>
             <div className={'input-with-label__wrapper'}>
               <Select
@@ -489,35 +497,39 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                     updateSelectActive('subdomain', option)
                   }
                 }}
-                optionTemplate={({name}) => (
-                  <div className="domain-option">{name}</div>
-                )}
-                onRenderOption={({
+              >
+                {({
+                  name,
                   index,
                   optionsLength,
                   queryFilter,
                   resetQueryFilter,
-                }) =>
-                  index === optionsLength - 1 &&
-                  queryFilter.trim() && (
-                    <button
-                      className="button-create-option"
-                      onClick={() => {
-                        setSubdomains((prevState) => [
-                          ...prevState,
-                          {
-                            name: queryFilter,
-                            id: (prevState.length + 1).toString(),
-                          },
-                        ])
-                        resetQueryFilter()
-                      }}
-                    >
-                      + Create a subdomain name <b>{queryFilter}</b>
-                    </button>
-                  )
-                }
-              />
+                }) => ({
+                  // override row content
+                  row: <div className="domain-option">{name}</div>,
+                  // insert button after last row
+                  ...(index === optionsLength - 1 &&
+                    queryFilter.trim() && {
+                      afterRow: (
+                        <button
+                          className="button-create-option"
+                          onClick={() => {
+                            setSubdomains((prevState) => [
+                              ...prevState,
+                              {
+                                name: queryFilter,
+                                id: (prevState.length + 1).toString(),
+                              },
+                            ])
+                            resetQueryFilter()
+                          }}
+                        >
+                          + Create a subdomain name <b>{queryFilter}</b>
+                        </button>
+                      ),
+                    }),
+                })}
+              </Select>
             </div>
           </div>
         </div>
@@ -678,7 +690,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                 item={term}
                 modifyElement={() => modifyItem(term)}
                 deleteElement={() => deleteItem(term)}
-                highlight={index === indexTermHighlight}
+                highlight={index === termHighlight?.index && termHighlight}
               />
             ))}
           </div>
@@ -696,9 +708,7 @@ SegmentFooterTabGlossary.propTypes = {
 const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
   const {metadata, source, target} = item
   return (
-    <div
-      className={`glossary_item${highlight ? ' glossary_item--highlight' : ''}`}
-    >
+    <div className="glossary_item">
       <div className={'glossary_item-header'}>
         <div className={'glossary_definition-container'}>
           <span className={'glossary_definition'}>
@@ -724,8 +734,14 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
 
       <div className={'glossary_item-body'}>
         <div className={'glossary-item_column'}>
-          <div className={'glossary_word'}>
-            {`${source.term} `}
+          <div className="glossary_word">
+            <span
+              className={`${
+                highlight && !highlight.isTarget
+                  ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
+                  : ''
+              }`}
+            >{`${source.term} `}</span>
             <div>
               <InfoIcon size={16} />
               <div className={'glossary_item-tooltip'}>{source.sentence}</div>
@@ -734,8 +750,14 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
           <div className={'glossary-description'}>{source.note}</div>
         </div>
         <div className={'glossary-item_column'}>
-          <div className={'glossary_word'}>
-            {`${target.term} `}
+          <div className="glossary_word">
+            <span
+              className={`${
+                highlight && highlight.isTarget
+                  ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
+                  : ''
+              }`}
+            >{`${target.term} `}</span>
             <div>
               <InfoIcon size={16} />
               <div className={'glossary_item-tooltip'}>{target.sentence}</div>
