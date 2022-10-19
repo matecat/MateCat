@@ -11,8 +11,33 @@ use Validator\GlossaryCSVValidatorObject;
  */
 class Engines_MyMemory extends Engines_AbstractEngine {
 
+    /**
+     * @var string
+     */
+    protected $de = 'pro_655321@matecat.com';
+
+    /**
+     ***************************
+     * 2022 API ROUTES
+     ***************************
+     */
+    protected $domains_relative_url = 'glossary/domains';
+    protected $keys_with_glossary_relative_url = 'glossary/keys_with_glossary';
+    protected $import_new_relative_url = 'glossary/import_new';
+    protected $check_glossary_relative_url = 'glossary/check_glossary';
+    protected $update_glossary_relative_url = 'glossary/update_glossary';
+    protected $delete_glossary_relative_url = 'glossary/delete_glossary';
+    protected $set_glossary_relative_url = 'glossary/set_glossary';
+    protected $get_glossary_relative_url = 'glossary/get_glossary';
+
+    /**
+     * @var string
+     */
     protected $content_type = 'json';
 
+    /**
+     * @var array
+     */
     protected $_config = [
             'dataRefMap'    => [],
             'segment'       => null,
@@ -62,6 +87,31 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $result_object = null;
 
         switch ( $functionName ) {
+
+            case 'domains_relative_url':
+                $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+
+//            case 'keys_with_glossary_relative_url':
+//                break;
+//            case 'import_new_relative_url':
+//                break;
+            case 'check_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'update_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'delete_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'set_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'get_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+
             case 'tags_projection' :
                 $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
@@ -358,6 +408,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param bool|false $name
      *
      * @return Engines_Results_MyMemory_TmxResponse
+     * @throws Exception
      */
     public function glossaryImport( $file, $key, $name = false ) {
 
@@ -440,6 +491,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryDomains($keys = [])
+    {
+        $payload = [
+            'de' => $this->de,
+            'keys' => $keys,
+        ];
+        $this->call( "domains_relative_url", $payload, true, true );
 
         return $this->result;
     }

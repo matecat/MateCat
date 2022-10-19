@@ -7,6 +7,7 @@ use API\V2\Validators\LoginValidator;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
 use Validator\JSONValidatorObject;
+use Engines_MyMemory;
 
 class GlossaryController extends KleinController {
 
@@ -83,6 +84,28 @@ class GlossaryController extends KleinController {
     }
 
     /**
+     * @return Engines_MyMemory
+     * @throws \Exception
+     */
+    private function getMyMemoryClient()
+    {
+        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
+        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
+        $engineStruct->id = 1;
+
+        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engineRecord = @$eng[ 0 ];
+
+        return new Engines_MyMemory( $engineRecord );
+    }
+
+
+
+    /**
      * Get action on MyMemory
      *
      * @throws \ReflectionException
@@ -94,8 +117,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'get',
-                'payload' => $json,
+            'action' => 'get',
+            'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );

@@ -3,6 +3,9 @@
 namespace AsyncTasks\Workers;
 
 use Engine;
+use Engines_Results_MyMemory_DomainsResponse;
+use EnginesModel_EngineStruct;
+use Engines_MyMemory;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -24,6 +27,30 @@ class GlossaryWorker extends AbstractWorker {
      * @throws \Exception
      */
     public function process( AbstractElement $queueElement ) {
+
+        //
+        // SU TUTTE VA FATTO PRIMA UN CHECK QUI
+        //
+        //https://api-test.mymemory.translated.net/glossary/keys_with_glossary
+        //
+        //{
+        //	"keys": [
+        //             "7e0246e854a2f09787f0",
+        //             "ec6e1f40c07ec12fba83",
+        //             "a7332b8b83e152710ba1"
+        //             ],
+        //}
+
+
+        // RISPOSTA
+        //{
+        //    "entries": {
+        //        "7e0246e854a2f09787f0": false,
+        //        "ec6e1f40c07ec12fba83": false,
+        //        "a7332b8b83e152710ba1": true
+        //    }
+        //}
+
 
         $params  = $queueElement->params->toArray();
         $action  = $params[ 'action' ];
@@ -60,6 +87,118 @@ class GlossaryWorker extends AbstractWorker {
      * @throws \Exception
      */
     private function check( $payload ) {
+
+        //https://api-test.mymemory.translated.net/glossary/check_glossary
+        //
+        //        {
+        //            "id_segment" : "123",
+        //    "source": "i contatti, CG verificato per qualità e design CG e CG ma anche verificando per qualità e design e natura",
+        //    "target": "the contacts verified for quality and design but also for",
+        //    "source_language": "it-IT",
+        //    "target_language": "en-GB",
+        //    "keys": [ "7e0246e854a2f09787f0", "ec6e1f40c07ec12fba83", "a7332b8b83e152710ba1" ],
+        //    "de": "pro_655321@matecat.com"
+        //}
+        //
+
+        // RISPOSTA
+        //{
+        //    "responseData": null,
+        //    "quotaFinished": null,
+        //    "mtLangSupported": null,
+        //    "responseDetails": "",
+        //    "responseStatus": 200,
+        //    "responderId": null,
+        //    "exception_code": null,
+        //    "matches": {
+        //        "missing_terms": [
+        //            {
+        //                "term_id": "3126",
+        //                "source_language": "it-IT",
+        //                "target_language": "en-GB",
+        //                "source": {
+        //                    "term": "Design e natura",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "Design in the Wild",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "design e natura"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 15:31:11"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2433",
+        //                "source_language": "it-IT",
+        //                "target_language": "en-GB",
+        //                "source": {
+        //                    "term": "Design e natura",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "Design in the Wild",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "design e natura"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:39:01"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "1740",
+        //                "source_language": "it-IT",
+        //                "target_language": "en-GB",
+        //                "source": {
+        //                    "term": "Design e natura",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "Design in the Wild",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "design e natura"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:28:05"
+        //                }
+        //            }
+        //        ],
+        //        "blacklisted_terms": [],
+        //        "id_segment": "123"
+        //    }
+        //}
+
 
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
@@ -161,6 +300,41 @@ class GlossaryWorker extends AbstractWorker {
 //		"metadata": null
 //	}
 
+        //https://api-test.mymemory.translated.net/glossary/delete_glossary
+        //{
+        //    "id_segment": 123456567,
+        //	"id_client": "XXXXXX",
+        //	"id_job": 123456,
+        //	"password": "dndndndnd",
+        //	"term":
+        //	{
+        //		"term_id": "xxxxxxxx",
+        //		"source_language": "en-US",
+        //		"target_language": "it-IT",
+        //		"source": null,
+        //		"target": null,
+        //		"matching_words": null,
+        //		"metadata": {
+        //			"definition": null,
+        //			"key": "7e0246e854a2f09787f0",
+        //			"key_name": null,
+        //			"domain": null,
+        //			"subdomain": null,
+        //			"create_date": null,
+        //			"last_update": null
+        //		}
+        //	}
+        //}
+
+
+        // RISPOSTA
+        //
+        //{
+        //    "responseData": "OK",
+        //    "responseStatus": 200,
+        //    "responseDetails": null
+        //}
+
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
         $message =  [
@@ -200,40 +374,18 @@ class GlossaryWorker extends AbstractWorker {
      * @param $payload
      *
      * @throws \StompException
+     * @throws \Exception
      */
     private function domains( $payload ) {
 
-        // @TODO HARD-CODED
-        // get domain -> MateCat -> Mymemory
-        // {
-        //   "key": "xxxxx-x-xx-xx-x",
-        //	 "source_language": "en-US",
-        //	 "target_language": "it-IT"
-        // }
-
         $message = [];
-
-        foreach ($payload['keys'] as $key){
-            $message['entries'][$key] = [
-                [
-                    "domain" => "Uber",
-                    "subdomains" => [
-                        "Rider",
-                        "Eats"
-                    ]
-                ],
-                [
-                    "domain" => "Airbnb",
-                    "subdomains" => [
-                        "Tech",
-                        "Marketing",
-                        "Legal"
-                    ]
-                ]
-            ];
-        }
-
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+        $client = $this->getMyMemoryClient();
+
+        /** @var Engines_Results_MyMemory_DomainsResponse  $domains */
+        $domains = $client->glossaryDomains($payload['keys']);
+
+        $message['entries'] = (!empty($domains->entries)) ? $domains->entries: [];
         $message['id_segment'] = $id_segment;
 
         $this->publishMessage(
@@ -266,6 +418,550 @@ class GlossaryWorker extends AbstractWorker {
         //	"source_language": "en-US",
         //	"target_language": "it-IT",
         //	"keys": $payload['tm_keys'] ---->  [ "xxx", "yyy" ]
+
+
+        //https://api-test.mymemory.translated.net/glossary/get_glossary
+        //
+        //{
+        //	"id_segment" : 129,
+        //    "source": "Is maybe accessible, verify quality and design but quality not so good",
+        //    "source_language": "en-GB",
+        //    "target_language": "it-IT",
+        //    "keys": [ "7e0246e854a2f09787f0", "ec6e1f40c07ec12fba83", "a7332b8b83e152710ba1" ],
+        //    "de": "pro_655321@matecat.com"
+        //}
+
+
+        // RISPOSTA
+        //
+        //{
+        //    "responseData": null,
+        //    "quotaFinished": null,
+        //    "mtLangSupported": null,
+        //    "responseDetails": "",
+        //    "responseStatus": 200,
+        //    "responderId": null,
+        //    "exception_code": null,
+        //    "matches": {
+        //        "terms": [
+        //            {
+        //                "term_id": "3587",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verify",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificare",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "To inspect a place to confirm that it meets the Airbnb Plus standards and criteria. ",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 15:31:36"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "3425",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "quality",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "qualità",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "quality"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "One of the things that guests get in Airbnb Plus homes and what homes in Airbnb Plus are verified for.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 15:31:31"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "3125",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "Design",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "Design",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "design"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "A Design stay is a thoughtfully curated, aesthetically inspiring, and globally diverse boutique-style home that has cohesive, consistent design style across all rooms in the listing",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "Home is the destination",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 15:31:11"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2948",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "accessible",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "accessibile",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "accessible"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "The quality of having any number of accessibility features that make products, services, or environment available, usable, safe, and welcoming for people with accessibility needs. (Don't equate accessibility needs with disabilities.)\nEXAMPLE: Here’s how we’re building a more accessible Airbnb.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[In-Home Accessibility] ",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 15:31:01"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2894",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verify",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificare",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "To inspect a place to confirm that it meets the Airbnb Plus standards and criteria. ",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:39:26"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2432",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "Design",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "Design",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "design"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "A Design stay is a thoughtfully curated, aesthetically inspiring, and globally diverse boutique-style home that has cohesive, consistent design style across all rooms in the listing",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "Home is the destination",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:39:01"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2255",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "accessible",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "accessibile",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "accessible"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "The quality of having any number of accessibility features that make products, services, or environment available, usable, safe, and welcoming for people with accessibility needs. (Don't equate accessibility needs with disabilities.)\nEXAMPLE: Here’s how we’re building a more accessible Airbnb.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[In-Home Accessibility] ",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:38:51"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2201",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verify",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificare",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "To inspect a place to confirm that it meets the Airbnb Plus standards and criteria. ",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:28:22"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2039",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "quality",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "qualità",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "quality"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "One of the things that guests get in Airbnb Plus homes and what homes in Airbnb Plus are verified for.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:28:19"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "1739",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "Design",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "Design",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "design"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "A Design stay is a thoughtfully curated, aesthetically inspiring, and globally diverse boutique-style home that has cohesive, consistent design style across all rooms in the listing",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "Home is the destination",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:28:05"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "1562",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "accessible",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "accessibile",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "accessible"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "The quality of having any number of accessibility features that make products, services, or environment available, usable, safe, and welcoming for people with accessibility needs. (Don't equate accessibility needs with disabilities.)\nEXAMPLE: Here’s how we’re building a more accessible Airbnb.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[In-Home Accessibility] ",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:27:55"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "1508",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verify",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificare",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "To inspect a place to confirm that it meets the Airbnb Plus standards and criteria. ",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-13 17:10:57"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "1346",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "quality",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "qualità",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "quality"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "One of the things that guests get in Airbnb Plus homes and what homes in Airbnb Plus are verified for.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-13 17:10:52"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "815",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verify",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificare",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "To inspect a place to confirm that it meets the Airbnb Plus standards and criteria. ",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-13 17:09:39"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "653",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "quality",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "qualità",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "quality"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "One of the things that guests get in Airbnb Plus homes and what homes in Airbnb Plus are verified for.",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-13 17:09:35"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "3583",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verified",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificato",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "Used to imply that the home has received a stamp of approval through a rigorous inspection process. May appear alone (as a badge), as \"\"verified homes,\"\" or part of a phrase (e.g. \"\"verified for comfort and style\"\"). Note: We can't use any language around \"\"guaranteeing\"\" quality and we also can't say that it's verified \"\"by Airbnb\"\".",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 15:31:36"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "2890",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verified",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificato",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "Used to imply that the home has received a stamp of approval through a rigorous inspection process. May appear alone (as a badge), as \"\"verified homes,\"\" or part of a phrase (e.g. \"\"verified for comfort and style\"\"). Note: We can't use any language around \"\"guaranteeing\"\" quality and we also can't say that it's verified \"\"by Airbnb\"\".",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-14 11:39:26"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "1504",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verified",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificato",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "Used to imply that the home has received a stamp of approval through a rigorous inspection process. May appear alone (as a badge), as \"\"verified homes,\"\" or part of a phrase (e.g. \"\"verified for comfort and style\"\"). Note: We can't use any language around \"\"guaranteeing\"\" quality and we also can't say that it's verified \"\"by Airbnb\"\".",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-13 17:10:57"
+        //                }
+        //            },
+        //            {
+        //                "term_id": "811",
+        //                "source_language": "en-GB",
+        //                "target_language": "it-IT",
+        //                "source": {
+        //                    "term": "verified",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "target": {
+        //                    "term": "verificato",
+        //                    "note": "",
+        //                    "sentence": "example"
+        //                },
+        //                "matching_words": [
+        //                    "verify"
+        //                ],
+        //                "metadata": {
+        //                    "definition": "Used to imply that the home has received a stamp of approval through a rigorous inspection process. May appear alone (as a badge), as \"\"verified homes,\"\" or part of a phrase (e.g. \"\"verified for comfort and style\"\"). Note: We can't use any language around \"\"guaranteeing\"\" quality and we also can't say that it's verified \"\"by Airbnb\"\".",
+        //                    "key": "a7332b8b83e152710ba1",
+        //                    "key_name": "",
+        //                    "domain": "[Plus]",
+        //                    "subdomain": "",
+        //                    "create_date": "2022-10-13 12:52:58",
+        //                    "last_update_date": "2022-10-13 17:09:39"
+        //                }
+        //            }
+        //        ],
+        //        "id_segment": 129
+        //    }
+        //}
+
 
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
@@ -327,6 +1023,20 @@ class GlossaryWorker extends AbstractWorker {
         //	"source_language": "en-US",
         //	"target_language": "it-IT",
         //	"keys": [ "xxx", "yyy" ]
+
+
+
+        // questa corrisponde alla search e alla get (che sono la stessa cosa, cambia solo che nel source gli passi la ricerca invece del segmento)
+        //https://api-test.mymemory.translated.net/glossary/get_glossary
+        //
+        //{
+        //	"id_segment" : 129,
+        //    "source": "Is maybe accessible, verify quality and design but quality not so good",
+        //    "source_language": "en-GB",
+        //    "target_language": "it-IT",
+        //    "keys": [ "7e0246e854a2f09787f0", "ec6e1f40c07ec12fba83", "a7332b8b83e152710ba1" ],
+        //    "de": "pro_655321@matecat.com"
+        //}
 
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
@@ -415,6 +1125,60 @@ class GlossaryWorker extends AbstractWorker {
 //		}
 //	}
 //}
+
+        //https://api-test.mymemory.translated.net/glossary/set_glossary
+        //{
+        //    "id_segment": 123456567,
+        //	"id_client": "XXXXXX",
+        //	"id_job": 97,
+        //	"password": "5257a65639c4",
+        //	"term":
+        //	{
+        //		"term_id": null,
+        //		"source_language": "en-US",
+        //		"target_language": "it-IT",
+        //		"source": {
+        //			"term": "Payment this",
+        //			"note": "The amount a Rider ...",
+        //			"sentence": "Example phrase"
+        //		},
+        //		"target": {
+        //			"term": "Pagamento",
+        //			"note": "L'ammontare che un Rider ...",
+        //			"sentence": "Frase di esempio"
+        //		},
+        //		"matching_words": null,
+        //		"metadata": {
+        //			"definition": "Non se sa che è ma definisce la parole",
+        //			"keys": [
+        //                             {
+        //                                 "key": "7e0246e854a2f09787f0",
+        //			        			"key_name": "Uber Glossary"
+        //                             },
+        //                             {
+        //                                 "key": "ec6e1f40c07ec12fba83",
+        //			        				"key_name": "Uber Glossary 2"
+        //                             }
+        //                         ],
+        //			"domain": "Uber",
+        //			"subdomain": "Eats",
+        //			"create_date": null,
+        //			"last_update":  null
+        //		}
+        //	}
+        //}
+
+
+        // RISPOSTA
+        //
+        //{
+        //    "responseData": "OK",
+        //    "responseStatus": 200,
+        //    "responseDetails": null
+        //}
+
+
+
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
         $message =  [
@@ -504,6 +1268,52 @@ class GlossaryWorker extends AbstractWorker {
 //		}
 //	}
 //}
+
+        //https://api-test.mymemory.translated.net/glossary/update_glossary
+        //
+        //{
+        //    "id_segment": 123456567,
+        //	"id_client": "XXXXXX",
+        //	"id_job": 97,
+        //	"password": "5257a65639c4",
+        //	"term":
+        //	{
+        //		"term_id": "xxxxxxxx",
+        //		"source_language": "en-US",
+        //		"target_language": "it-IT",
+        //		"source": {
+        //			"term": "Payment",
+        //			"note": "The amount a Rider ...",
+        //			"sentence": "Example phrase"
+        //		},
+        //		"target": {
+        //			"term": "Pagamento",
+        //			"note": "L'ammontare che un Rider ...",
+        //			"sentence": "Frase di esempio"
+        //		},
+        //		"matching_words": [
+        //                    "Pay",
+        //                    "Payment"
+        //                 ],
+        //		"metadata": {
+        //			"definition": "Non se sa che è ma definisce la parole",
+        //			"key": "7e0246e854a2f09787f0",
+        //			"key_name": "Uber Glossary",
+        //			"domain": "Uber",
+        //			"subdomain": "Eats",
+        //			"create_date": "2022-08-10",
+        //			"last_update": "2022-09-01"
+        //		}
+        //	}
+        //}
+
+        // RISPOSTA MM
+        //{
+        //    "responseData": "OK",
+        //    "responseStatus": 200,
+        //    "responseDetails": null
+        //}
+
 
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
@@ -630,5 +1440,25 @@ class GlossaryWorker extends AbstractWorker {
                 '$first_name' => $array[ 'first_name' ],
                 'last_name'   => $array[ 'last_name' ],
         ] );
+    }
+
+    /**
+     * @return Engines_MyMemory
+     * @throws \Exception
+     */
+    private function getMyMemoryClient()
+    {
+        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
+        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
+        $engineStruct->id = 1;
+
+        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engineRecord = @$eng[ 0 ];
+
+        return new Engines_MyMemory( $engineRecord );
     }
 }
