@@ -1437,6 +1437,11 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.SET_GLOSSARY_TO_CACHE:
+      console.log(
+        '#### Received glossary SET_GLOSSARY_TO_CACHE',
+        action.glossary,
+      )
+      console.log('-----------------------')
       SegmentStore.setGlossaryToCache(action.sid, action.glossary)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,

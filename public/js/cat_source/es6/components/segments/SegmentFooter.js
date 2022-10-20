@@ -77,6 +77,9 @@ function SegmentFooter() {
   const [activeTab, setActiveTab] = useState(undefined)
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
+  const [tabsLoadingStatus, setTabsLoadingStatus] = useState(
+    tabItems.reduce((acc, {code}) => ({...acc, [code]: false}), {}),
+  )
 
   const {segment} = useContext(SegmentContext)
 
@@ -303,7 +306,7 @@ function SegmentFooter() {
     return () => clearTimeout(timeout)
   }, [message])
 
-  const isTabLoading = ({code}) => {
+  const isInitTabLoading = ({code}) => {
     switch (code) {
       case 'tm':
         return (
@@ -367,6 +370,7 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             segment={segment}
+            notifyLoadingStatus={setTabsLoadingStatus}
           />
         )
       case 'al':
@@ -409,7 +413,11 @@ function SegmentFooter() {
   }
 
   const getListItem = (tab) => {
-    const isLoading = isTabLoading(tab)
+    const isLoading = isInitTabLoading(tab)
+      ? true
+      : tabsLoadingStatus[tab?.code]
+      ? true
+      : false
     const countResult = !isLoading && getTabIndex(tab)
     return (
       <li
