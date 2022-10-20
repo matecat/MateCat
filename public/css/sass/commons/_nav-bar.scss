@@ -12,7 +12,7 @@ header {
   }
   .nav-mc-bar {
     margin: 0px !important;
-    //min-width: 992px;
+    height: 100%;
     .navigation {
       padding: 10px !important;
       /*padding: 5px 15px 5px 0px !important;
@@ -425,7 +425,7 @@ header {
   height: 38px;
   background-size: cover;
   left: 20px;
-  top: 3px;
+  top: 1px;
 }
 
 #menu-site {

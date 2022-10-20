@@ -694,13 +694,13 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
   .matecat-modal-header {
     text-align: left;
-    min-height: 47px;
+    min-height: 50px;
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
     background: #002b5c;
-    padding: 10px 10px 7px 24px;
+    padding: 7px 10px 7px 24px;
     background-size: 35px;
     color: #fff;
     margin: 0 !important;
@@ -708,6 +708,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     grid-template-columns: 40px 1fr 24px;
     position: relative;
     grid-column-gap: 16px;
+    align-items: center;
     h2 {
       margin: 0 !important;
       line-height: 30px;
@@ -715,15 +716,16 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       width: auto !important;
       float: none !important;
       font-family: Calibri, Arial, Helvetica, sans-serif;
+      font-weight: normal;
     }
   }
   .modal-logo {
     background-size: inherit;
-    background: url(../../img/Logo-Onlycat-white.svg) no-repeat;
+    background: url(../../img/logo_matecat_white.svg) no-repeat;
     background-position-y: center;
     background-size: contain;
-    width: 40px;
-    height: 26px;
+    width: 35px;
+    height: 35px;
   }
   /* Modal Body */
   .matecat-modal-body {
