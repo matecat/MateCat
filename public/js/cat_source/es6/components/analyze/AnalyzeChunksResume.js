@@ -607,7 +607,7 @@ class AnalyzeChunksResume extends React.Component {
                 </h5>
               </div>
               <div className="title-matecat-words">
-                <h5>MateCat weighted</h5>
+                <h5>Matecat weighted</h5>
               </div>
             </div>
           </div>
