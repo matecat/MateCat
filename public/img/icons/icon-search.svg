@@ -1,15 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="42px" height="42px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 56.2 (81672) - https://sketch.com -->
-    <title>icon-search</title>
-    <desc>Created with Sketch.</desc>
-    <g id="icon-search" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Icon/Search/Inactive" transform="translate(9.000000, 9.000000)">
-            <g id="magnifier" stroke-width="1" fill-rule="evenodd" transform="translate(3.000000, 3.000000)" fill="#FFFFFF">
-                <path d="M20.3028148,17.1267654 L14.8057778,11.629284 C13.986716,12.9031111 12.9027654,13.9865185 11.6289383,14.8056296 L17.1264198,20.3031111 C18.0040494,21.1805432 19.4270123,21.1805432 20.3027654,20.3031111 C21.1804444,19.4271111 21.1804444,18.0041481 20.3028148,17.1267654 Z" id="Path"></path>
-                <path d="M0.744049383,5.9854321 L2.2414321,5.9854321 C2.2414321,3.92108642 3.9211358,2.24153086 5.9854321,2.24153086 L5.9854321,0.744 C3.0957037,0.744 0.744049383,3.09565432 0.744049383,5.9854321 Z" id="Path"></path>
-            </g>
-            <circle id="Oval" stroke="#FFFFFF" stroke-width="1.5" cx="9" cy="9" r="8.25"></circle>
-        </g>
-    </g>
-</svg>
+<svg width="42" height="42" xmlns="http://www.w3.org/2000/svg"><g transform="translate(9 9)" fill="none" fill-rule="evenodd"><g fill="#FFF"><path d="m23.303 20.127-5.497-5.498a10.581 10.581 0 0 1-3.177 3.177l5.497 5.497a2.245 2.245 0 1 0 3.177-3.176ZM3.744 8.985h1.497a3.748 3.748 0 0 1 3.744-3.743V3.744a5.248 5.248 0 0 0-5.241 5.241Z"/></g><circle stroke="#FFF" stroke-width="1.5" cx="9" cy="9" r="8.25"/></g></svg>
