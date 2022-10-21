@@ -109,14 +109,14 @@ let CatToolActions = {
   setPopupUserMenuCookie: function () {
     CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu')
   },
-  storeFilesInfo: function (data) {
+  storeFilesInfo: function (files, firstSegment, lastSegment) {
     AppDispatcher.dispatch({
       actionType: CattolConstants.STORE_FILES_INFO,
-      files: data.files,
+      files: files,
     })
 
-    config.last_job_segment = data.last_segment
-    config.firstSegmentOfFiles = data.files
+    config.last_job_segment = lastSegment
+    config.firstSegmentOfFiles = files
   },
   renderHeader: () => {
     const mountPoint = createRoot($('header')[0])

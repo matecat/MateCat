@@ -129,32 +129,6 @@ class catController extends viewController {
             return;
         }
 
-        /*
-         * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
-         * because the query to check "Utils::getArchivableJobs($this->jid)" should be
-         * executed every time a job is loaded ( F5 or CTRL+R on browser ) and it cost some milliseconds ( ~0.1s )
-         * and it is little heavy for the database.
-         * We use the data we already have from last query and perform
-         * the check on the last translation only if the job is older than 30 days
-         *
-         */
-        $lastUpdate  = new DateTime( $this->chunk->last_update );
-        $oneMonthAgo = new DateTime();
-        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
-
-        if ( $lastUpdate < $oneMonthAgo && !$this->job_cancelled ) {
-
-            $lastTranslationDate = ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->chunk );
-            if( !empty( $lastTranslationDate ) ){
-                $lastTranslationInJob = new Datetime( $lastTranslationDate->translation_date );
-                if ( $lastTranslationInJob < $oneMonthAgo ) {
-                    Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
-                    $this->job_archived = true;
-                }
-            }
-
-        }
-
         $this->pid = $this->project->id;
         $this->cid = $this->project->id_customer;
         $this->source_code = $this->chunk->source;
@@ -342,7 +316,7 @@ class catController extends viewController {
             }
 
             $this->template->job_not_found       = $this->job_not_found;
-            $this->template->job_archived        = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+            $this->template->job_archived        = ( $this->job_archived ) ? 1 : '';
             $this->template->job_cancelled       = $this->job_cancelled;
             $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
             $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
@@ -365,7 +339,7 @@ class catController extends viewController {
         $this->template->jobOwnerIsMe       = ( $this->user->email == $this->job_owner );
         $this->template->get_public_matches = ( !$this->chunk->only_private_tm );
         $this->template->job_not_found      = $this->job_not_found;
-        $this->template->job_archived       = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_archived       = ( $this->job_archived ) ? 1 : '';
         $this->template->job_cancelled      = $this->job_cancelled;
 
         $this->template->page        = 'cattool';

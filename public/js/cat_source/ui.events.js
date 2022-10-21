@@ -17,7 +17,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          ModalsActions.showModalComponent(ShortCutsModal, null, 'Shortcuts')
+          ModalsActions.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
         },
       )
       .on(
