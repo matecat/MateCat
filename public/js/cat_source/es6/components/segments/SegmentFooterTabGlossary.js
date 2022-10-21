@@ -144,20 +144,17 @@ export const SegmentFooterTabGlossary = ({
 
   // set domains by key
   useEffect(() => {
-    if (
-      !selectsActive.keys.length ||
-      !domainsResponse ||
-      !domainsResponse.length
-    )
-      return
+    if (!selectsActive.keys.length || !domainsResponse) return
     const selectedKey = selectsActive.keys[0].key
-    setDomains(
-      domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
-        id: index.toString(),
-        name: domain,
-        subdomains,
-      })),
-    )
+    if (Array.isArray(domainsResponse[selectedKey])) {
+      setDomains(
+        domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
+          id: index.toString(),
+          name: domain,
+          subdomains,
+        })),
+      )
+    }
   }, [domainsResponse, selectsActive.keys])
   // set subdomains by domain
   useEffect(() => {
