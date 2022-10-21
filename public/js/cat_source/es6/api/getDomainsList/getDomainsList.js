@@ -15,7 +15,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const getDomainsList = async ({
   keys,
-  idSegment,
+  idSegment = '',
   idJob = config.id_job,
   password = config.password,
   idClient = config.id_client,

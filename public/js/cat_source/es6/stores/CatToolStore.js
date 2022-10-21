@@ -5,8 +5,6 @@ import _ from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
-import SegmentConstants from '../constants/SegmentConstants'
-import SegmentStore from './SegmentStore'
 
 EventEmitter.prototype.setMaxListeners(0)
 

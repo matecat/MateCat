@@ -18,6 +18,7 @@ import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -1310,6 +1311,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         .then(() => {
           $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
+          // TODO: update keys for glossary
         })
         .catch(() => {
           UI.showErrorOnActiveTMTable(
@@ -1354,6 +1356,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         .then(() => {
           $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
+          // TODO: update keys for glossary
+          CatToolActions.retrieveJobKeys(true)
         })
         .catch((errors) => {
           setTimeout(function () {
@@ -1566,6 +1570,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
           }, 500)
+          // TODO: update keys for glossary
         })
         .catch(() => {
           UI.showErrorOnActiveTMTable(

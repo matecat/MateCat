@@ -241,14 +241,13 @@ let CatToolActions = {
       qr: qr,
     })
   },
-  retrieveJobKeys: function (sid) {
+  retrieveJobKeys: function (forceUpdate = false) {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
-    if (!jobKeys) {
+    if (!jobKeys && !forceUpdate) {
       getTmKeysJob().then(({tm_keys: tmKeys}) => {
         getDomainsList({
           keys: tmKeys.map(({key}) => key),
-          idSegment: sid,
         })
         const keys = tmKeys.map((item) => ({...item, id: item.key}))
         AppDispatcher.dispatch({
