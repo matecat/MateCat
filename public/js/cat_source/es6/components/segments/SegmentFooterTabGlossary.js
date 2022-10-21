@@ -33,7 +33,12 @@ const initialState = {
   ),
 }
 
-export const SegmentFooterTabGlossary = ({active_class, segment}) => {
+export const SegmentFooterTabGlossary = ({
+  code,
+  active_class,
+  segment,
+  notifyLoadingStatus,
+}) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTypes, setSearchTypes] = useState([
     {id: '0', name: 'Source', selected: true},
@@ -54,7 +59,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
   const [termHighlight, setTermHighlight] = useState(undefined)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const previousSearchTermRef = useRef('')
   const scrollItemsRef = useRef()
@@ -99,7 +104,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
         highlightTerm,
       )
     }
-  }, [scrollToTerm, segment.id])
+  }, [scrollToTerm, segment.sid])
 
   // get TM keys and add actions listener
   useEffect(() => {
@@ -165,6 +170,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
     if (!segment?.glossary) return
     console.log('----> segment glossary', segment.glossary)
     setTerms(segment.glossary)
+    setIsLoading(false)
     if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
   }, [segment?.glossary])
 
@@ -221,6 +227,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
         text: segment.segment,
         shouldRefresh: true,
       })
+      setIsLoading(true)
     } else if (searchTerm) {
       // start serching term with debounce
       const onSubmitSearch = () => {
@@ -234,6 +241,7 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
             searchingIn === 'Source' ? config.target_code : config.source_code,
         }
         SegmentActions.searchGlossary(data)
+        setIsLoading(true)
       }
       debounce = setTimeout(() => {
         console.log('Searching:', searchTerm)
@@ -247,6 +255,11 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
       clearTimeout(debounce)
     }
   }, [searchTerm, segment.sid, segment.segment, searchTypes])
+
+  // notify is loading status to parent (SegmentFooter)
+  useEffect(() => {
+    if (notifyLoadingStatus) notifyLoadingStatus({code, isLoading})
+  }, [isLoading, code, notifyLoadingStatus])
 
   const getRequestPayloadTemplate = ({term = modifyElement, isDelete} = {}) => {
     const getFieldValue = (value) => (value ? value : null)
@@ -391,6 +404,8 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
       TRANSLATED_EXAMPLE,
     } = TERM_FORM_FIELDS
 
+    const isEmptyKeys = !keys.length
+
     return (
       <div className={'glossary_add-container'}>
         <div className={'glossary-form-line'}>
@@ -410,9 +425,11 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
               name="glossary-term-tm"
               label="Glossary"
               placeholder="Select a glossary"
-              showSearchBar
+              showSearchBar={!isEmptyKeys}
               searchPlaceholder="Find a glossary"
-              options={keys}
+              options={
+                keys.length ? keys : [{id: '0', name: '+ Create glossary key'}]
+              }
               activeOption={selectsActive.keys[0]}
               checkSpaceToReverse={false}
               isDisabled={!!modifyElement}
@@ -429,7 +446,22 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
                   }
                 }
               }}
-            />
+            >
+              {({name}) => ({
+                // customize row with button create glossary key
+                ...(isEmptyKeys && {
+                  row: (
+                    <button
+                      className="button-create-glossary-key"
+                      onClick={() => UI.openLanguageResourcesPanel('tm')}
+                    >
+                      {name}
+                    </button>
+                  ),
+                  cancelHandleClick: true,
+                }),
+              })}
+            </Select>
 
             <div className={'input-with-label__wrapper'}>
               <Select
@@ -701,8 +733,10 @@ export const SegmentFooterTabGlossary = ({active_class, segment}) => {
 }
 
 SegmentFooterTabGlossary.propTypes = {
+  code: PropTypes.string,
   active_class: PropTypes.string,
   segment: PropTypes.object,
+  notifyLoadingStatus: PropTypes.func,
 }
 
 const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {

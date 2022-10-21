@@ -3,10 +3,8 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import PropTypes from 'prop-types'
 import {isUndefined, size} from 'lodash'
 import Cookies from 'js-cookie'
 import SegmentStore from '../../stores/SegmentStore'
@@ -26,31 +24,37 @@ const TAB_ITEMS = {
     label: 'Translation Matches',
     code: 'tm',
     tabClass: 'matches',
+    isLoading: false,
   },
   concordances: {
     label: 'TM Search',
     code: 'cc',
     tabClass: 'concordances',
+    isLoading: false,
   },
   glossary: {
     label: 'Glossary',
     code: 'gl',
     tabClass: 'glossary',
+    isLoading: false,
   },
   alternatives: {
     label: 'Translation conflicts',
     code: 'al',
     tabClass: 'alternatives',
+    isLoading: false,
   },
   messages: {
     label: 'Messages',
     code: 'notes',
     tabClass: 'segment-notes',
+    isLoading: false,
   },
   multiMatches: {
     label: 'Crosslanguage Matches',
     code: 'cl',
     tabClass: 'cross-matches',
+    isLoading: false,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -93,6 +97,15 @@ function SegmentFooter() {
       expires: 3,
       secure: true,
     })
+  }, [])
+
+  const setTabLoadingStatus = useCallback(({code, isLoading}) => {
+    setTabItems((prevState) =>
+      prevState.map((tab) => ({
+        ...tab,
+        isLoading: tab.code === code ? isLoading : tab.isLoading,
+      })),
+    )
   }, [])
 
   // Check tab messages has notes
@@ -306,7 +319,7 @@ function SegmentFooter() {
     return () => clearTimeout(timeout)
   }, [message])
 
-  const isTabLoading = ({code}) => {
+  const isInitTabLoading = ({code}) => {
     switch (code) {
       case 'tm':
         return (
@@ -370,6 +383,7 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             segment={segment}
+            notifyLoadingStatus={setTabLoadingStatus}
           />
         )
       case 'al':
@@ -412,7 +426,11 @@ function SegmentFooter() {
   }
 
   const getListItem = (tab) => {
-    const isLoading = isTabLoading(tab)
+    const isLoading = isInitTabLoading(tab)
+      ? true
+      : tabItems.find(({code}) => code === tab.code)?.isLoading
+      ? true
+      : false
     const countResult = !isLoading && getTabIndex(tab)
     return (
       <li

@@ -269,7 +269,7 @@ export const Dropdown = ({
     const isNoResultsFound = option.id === 'noResultsFound'
     const showActiveOptionIcon = isActiveOption || isActiveOptions
 
-    const {row, afterRow} =
+    const {row, afterRow, cancelHandleClick} =
       children?.({
         index,
         ...option,
@@ -292,7 +292,7 @@ export const Dropdown = ({
             isHighlightedOption ? 'dropdown__option--is-highlighted-option' : ''
           } ${isNoResultsFound ? 'dropdown__option--is-no-results-found' : ''}`}
           onClick={() => {
-            if (!isNoResultsFound) handleClick(option)
+            if (!isNoResultsFound && !cancelHandleClick) handleClick(option)
           }}
         >
           {row && !isNoResultsFound ? (

@@ -56,11 +56,6 @@
             margin: 0 0 0 8px;
           }
         }
-        .domain-option {
-          border: 1px solid $grey7;
-          border-radius: 12px;
-          padding: 0 6px 0 6px;
-        }
         .dropdown__option--is-active-option {
           background-color: unset;
           color: unset;
@@ -72,6 +67,19 @@
         .dropdown__option--is-no-results-found {
           background-color: unset;
           color: $grey7;
+        }
+        .button-create-glossary-key {
+          color: $grey6;
+          font-style: italic;
+          font-size: 14px;
+          border: none;
+          background: none;
+          cursor: pointer;
+          padding: 0;
+
+          &:hover {
+            color: $grey6;
+          }
         }
       }
     }
@@ -88,6 +96,11 @@
         }
         .dropdown__option--is-no-results-found {
           display: none;
+        }
+        .domain-option {
+          border: 1px solid $grey7;
+          border-radius: 12px;
+          padding: 0 6px 0 6px;
         }
         .button-create-option {
           color: $grey7;
