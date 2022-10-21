@@ -127,7 +127,7 @@ export const SegmentFooterTabGlossary = ({
     SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
-    CatToolActions.retrieveJobKeys(segment.sid)
+    CatToolActions.retrieveJobKeys()
     return () => {
       SegmentStore.removeListener(
         SegmentConstants.ADD_GLOSSARY_ITEM,
@@ -144,7 +144,12 @@ export const SegmentFooterTabGlossary = ({
 
   // set domains by key
   useEffect(() => {
-    if (!selectsActive.keys.length || !domainsResponse) return
+    if (
+      !selectsActive.keys.length ||
+      !domainsResponse ||
+      !domainsResponse.length
+    )
+      return
     const selectedKey = selectsActive.keys[0].key
     setDomains(
       domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
