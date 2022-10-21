@@ -22,13 +22,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      ***************************
      */
     protected $domains_relative_url = 'v2/glossary/domains';
-    protected $keys_with_glossary_relative_url = 'v2/glossary/keys_with_glossary';
-    protected $import_new_relative_url = 'v2/glossary/import_new';
-    protected $check_glossary_relative_url = 'v2/glossary/check_glossary';
-    protected $update_glossary_relative_url = 'v2/glossary/update_glossary';
-    protected $delete_glossary_relative_url = 'v2/glossary/delete_glossary';
-    protected $set_glossary_relative_url = 'v2/glossary/set_glossary';
-    protected $get_glossary_relative_url = 'v2/glossary/get_glossary';
+    protected $keys_with_glossary_relative_url = 'v2/glossary/keys';
+    protected $import_new_relative_url = 'v2/glossary/import';
+    protected $check_glossary_relative_url = 'v2/glossary/check';
+    protected $update_glossary_relative_url = 'v2/glossary/update';
+    protected $delete_glossary_relative_url = 'v2/glossary/delete';
+    protected $set_glossary_relative_url = 'v2/glossary/set';
+    protected $get_glossary_relative_url = 'v2/glossary/get';
 
     /**
      * @var string
@@ -92,10 +92,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
 
-//            case 'keys_with_glossary_relative_url':
-//                break;
-//            case 'import_new_relative_url':
-//                break;
             case 'check_glossary_relative_url':
                 $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
@@ -496,6 +492,30 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param       $source
+     * @param       $target
+     * @param       $sourceLanguage
+     * @param       $targetLanguage
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryCheck($source, $target, $sourceLanguage, $targetLanguage, $keys = [])
+    {
+        $payload = [
+                'de' => $this->de,
+                'source' => $source,
+                'target' => $target,
+                'source_language' => $sourceLanguage,
+                'target_language' => $targetLanguage,
+                'keys' => $keys,
+        ];
+        $this->call( "check_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
      * @param array $keys
      *
      * @return array
@@ -507,6 +527,28 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             'keys' => $keys,
         ];
         $this->call( "domains_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $source
+     * @param $sourceLanguage
+     * @param $targetLanguage
+     * @param $keys
+     *
+     * @return array
+     */
+    public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
+    {
+        $payload = [
+            'de' => $this->de,
+            "source" => $source,
+            "source_language" => $sourceLanguage,
+            "target_language" => $targetLanguage,
+            "keys" => $keys,
+        ];
+        $this->call( "get_glossary_relative_url", $payload, true, true );
 
         return $this->result;
     }

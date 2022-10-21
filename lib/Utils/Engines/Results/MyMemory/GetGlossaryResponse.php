@@ -2,7 +2,7 @@
 
 class Engines_Results_MyMemory_GetGlossaryResponse extends Engines_Results_AbstractResponse {
 
-    //public $entries = [];
+    public $matches = [];
 
     public function __construct( $response ) {
 
@@ -10,7 +10,7 @@ class Engines_Results_MyMemory_GetGlossaryResponse extends Engines_Results_Abstr
             throw new Exception( "Invalid Response", -1 );
         }
 
-        //$this->entries = isset( $response[ 'entries' ] ) ? $response[ 'entries' ] : [];
+        $this->matches = isset( $response[ 'matches' ] ) ? $response[ 'matches' ] : [];
     }
 
 }

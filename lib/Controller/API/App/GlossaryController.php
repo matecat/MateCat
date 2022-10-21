@@ -30,8 +30,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'check',
-                'payload' => $json,
+            'action' => 'check',
+            'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -84,6 +84,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
+     * @TODO REMOVE
      * @return Engines_MyMemory
      * @throws \Exception
      */
