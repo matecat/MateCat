@@ -258,8 +258,7 @@ export const SegmentFooterTabGlossary = ({
 
   // notify is loading status to parent (SegmentFooter)
   useEffect(() => {
-    if (notifyLoadingStatus)
-      notifyLoadingStatus((prevState) => ({...prevState, [code]: isLoading}))
+    if (notifyLoadingStatus) notifyLoadingStatus({code, isLoading})
   }, [isLoading, code, notifyLoadingStatus])
 
   const getRequestPayloadTemplate = ({term = modifyElement, isDelete} = {}) => {

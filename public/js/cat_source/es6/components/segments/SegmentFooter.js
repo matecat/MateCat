@@ -3,10 +3,8 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import PropTypes from 'prop-types'
 import {isUndefined, size} from 'lodash'
 import Cookies from 'js-cookie'
 import SegmentStore from '../../stores/SegmentStore'
@@ -26,31 +24,37 @@ const TAB_ITEMS = {
     label: 'Translation Matches',
     code: 'tm',
     tabClass: 'matches',
+    isLoading: false,
   },
   concordances: {
     label: 'TM Search',
     code: 'cc',
     tabClass: 'concordances',
+    isLoading: false,
   },
   glossary: {
     label: 'Glossary',
     code: 'gl',
     tabClass: 'glossary',
+    isLoading: false,
   },
   alternatives: {
     label: 'Translation conflicts',
     code: 'al',
     tabClass: 'alternatives',
+    isLoading: false,
   },
   messages: {
     label: 'Messages',
     code: 'notes',
     tabClass: 'segment-notes',
+    isLoading: false,
   },
   multiMatches: {
     label: 'Crosslanguage Matches',
     code: 'cl',
     tabClass: 'cross-matches',
+    isLoading: false,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -77,9 +81,6 @@ function SegmentFooter() {
   const [activeTab, setActiveTab] = useState(undefined)
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
-  const [tabsLoadingStatus, setTabsLoadingStatus] = useState(
-    tabItems.reduce((acc, {code}) => ({...acc, [code]: false}), {}),
-  )
 
   const {segment} = useContext(SegmentContext)
 
@@ -96,6 +97,15 @@ function SegmentFooter() {
       expires: 3,
       secure: true,
     })
+  }, [])
+
+  const setTabLoadingStatus = useCallback(({code, isLoading}) => {
+    setTabItems((prevState) =>
+      prevState.map((tab) => ({
+        ...tab,
+        isLoading: tab.code === code ? isLoading : tab.isLoading,
+      })),
+    )
   }, [])
 
   // Check tab messages has notes
@@ -370,7 +380,7 @@ function SegmentFooter() {
             code={tab.code}
             active_class={openClass}
             segment={segment}
-            notifyLoadingStatus={setTabsLoadingStatus}
+            notifyLoadingStatus={setTabLoadingStatus}
           />
         )
       case 'al':
@@ -415,7 +425,7 @@ function SegmentFooter() {
   const getListItem = (tab) => {
     const isLoading = isInitTabLoading(tab)
       ? true
-      : tabsLoadingStatus[tab?.code]
+      : tabItems.find(({code}) => code === tab.code)?.isLoading
       ? true
       : false
     const countResult = !isLoading && getTabIndex(tab)
