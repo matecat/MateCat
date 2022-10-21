@@ -244,7 +244,7 @@ let CatToolActions = {
   retrieveJobKeys: function (forceUpdate = false) {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
-    if (!jobKeys && !forceUpdate) {
+    if (!jobKeys || forceUpdate) {
       getTmKeysJob().then(({tm_keys: tmKeys}) => {
         getDomainsList({
           keys: tmKeys.map(({key}) => key),
