@@ -22,7 +22,7 @@ if (ReviewExtended.enabled()) {
   })
 
   $(document).on('translation:change', function (e, data) {
-    UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment))
+    UI.getSegmentVersionsIssues(data.sid)
     CatToolActions.reloadQualityReport()
   })
 

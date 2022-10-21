@@ -416,7 +416,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments = this._segments.setIn([index, 'tagged'], true)
   },
 
-  addSegmentVersions(fid, sid, versions) {
+  addSegmentVersions(sid, versions) {
     //If is a splitted segment the versions are added to the first of the split
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
@@ -554,7 +554,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(matches),
     )
   },
-  setContributionsToCache: function (sid, fid, contributions, errors) {
+  setContributionsToCache: function (sid, contributions, errors) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
@@ -1394,14 +1394,12 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CONTRIBUTIONS:
       SegmentStore.setContributionsToCache(
         action.sid,
-        action.fid,
         action.matches,
         action.errors,
       )
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     case SegmentConstants.SET_CL_CONTRIBUTIONS:
@@ -1492,18 +1490,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id)
       break
     case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES: {
-      let seg = SegmentStore.addSegmentVersions(
-        action.fid,
-        action.sid,
-        action.versions,
-      )
+      let seg = SegmentStore.addSegmentVersions(action.sid, action.versions)
       if (seg) {
         SegmentStore.emitChange(action.actionType, action.sid, seg.toJS())
       }
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     }

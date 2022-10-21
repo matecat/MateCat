@@ -141,10 +141,12 @@ function SegmentsContainer({
           ? previousSegment.get('id_file')
           : 0
         const isFirstSegment =
-          files && segment.get('sid') === files[0].first_segment
+          files &&
+          SegmentUtils.getSegmentFileId(segment.toJS()) ===
+            files[0].first_segment
         const fileDivHeight = isFirstSegment ? 60 : 75
         const collectionDivHeight = isFirstSegment ? 35 : 50
-        if (previousFileId !== segment.get('id_file')) {
+        if (previousFileId !== SegmentUtils.getSegmentFileId(segment.toJS())) {
           basicSize += fileDivHeight
         }
         // if it's collection type add 42px of header
@@ -259,7 +261,7 @@ function SegmentsContainer({
         currentFileId,
         collectionTypeSeparator,
       }
-      currentFileId = segment.id_file
+      currentFileId = SegmentUtils.getSegmentFileId(segment)
       return props
     })
   }, [files, isSideOpen, segments])

@@ -71,12 +71,19 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
+route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST',  'API\App\FilesController', 'segments' );
 
 $klein->with( '/api/app/api-key', function () {
     route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );
     route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
     route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
 } );
+
+route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'project' );
+route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'job' );
+
+route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
+route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'job' );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {

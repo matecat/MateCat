@@ -21,7 +21,9 @@ class SegmentsDetails extends React.Component {
             revisionToShow={this.props.revisionToShow}
             key={fileObj.get('id')}
             file={fileObj}
-            segments={this.props.segmentsFiles.get(fileObj.get('id'))}
+            segments={this.props.segmentsFiles.get(
+              fileObj.get('id').toString(),
+            )}
             urls={this.props.urls}
             secondPassReviewEnabled={this.props.secondPassReviewEnabled}
           />

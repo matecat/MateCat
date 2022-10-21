@@ -18,17 +18,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      ***************************
-     * 2022 API ROUTES
+     * 2022 NEW API ROUTES
      ***************************
      */
-    protected $domains_relative_url = 'glossary/domains';
-    protected $keys_with_glossary_relative_url = 'glossary/keys_with_glossary';
-    protected $import_new_relative_url = 'glossary/import_new';
-    protected $check_glossary_relative_url = 'glossary/check_glossary';
-    protected $update_glossary_relative_url = 'glossary/update_glossary';
-    protected $delete_glossary_relative_url = 'glossary/delete_glossary';
-    protected $set_glossary_relative_url = 'glossary/set_glossary';
-    protected $get_glossary_relative_url = 'glossary/get_glossary';
+    protected $domains_relative_url = 'v2/glossary/domains';
+    protected $keys_with_glossary_relative_url = 'v2/glossary/keys_with_glossary';
+    protected $import_new_relative_url = 'v2/glossary/import_new';
+    protected $check_glossary_relative_url = 'v2/glossary/check_glossary';
+    protected $update_glossary_relative_url = 'v2/glossary/update_glossary';
+    protected $delete_glossary_relative_url = 'v2/glossary/delete_glossary';
+    protected $set_glossary_relative_url = 'v2/glossary/set_glossary';
+    protected $get_glossary_relative_url = 'v2/glossary/get_glossary';
 
     /**
      * @var string
@@ -39,20 +39,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @var array
      */
     protected $_config = [
-            'dataRefMap'    => [],
-            'segment'       => null,
-            'translation'   => null,
-            'tnote'         => null,
-            'source'        => null,
-            'target'        => null,
-            'email'         => null,
-            'prop'          => null,
-            'get_mt'        => 1,
-            'id_user'       => null,
-            'num_result'    => 3,
-            'mt_only'       => false,
-            'isConcordance' => false,
-            'isGlossary'    => false,
+        'dataRefMap'    => [],
+        'segment'       => null,
+        'translation'   => null,
+        'tnote'         => null,
+        'source'        => null,
+        'target'        => null,
+        'email'         => null,
+        'prop'          => null,
+        'get_mt'        => 1,
+        'id_user'       => null,
+        'num_result'    => 3,
+        'mt_only'       => false,
+        'isConcordance' => false,
+        'isGlossary'    => false,
     ];
 
     /**

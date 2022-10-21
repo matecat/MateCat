@@ -150,6 +150,7 @@ class ProjectManagerModel {
 
         foreach ( $notes as $internal_id => $v ) {
 
+            $attributes = $v[ 'from' ];
             $entries  = $v[ 'entries' ];
             $segments = $v[ 'segment_ids' ];
 
@@ -157,19 +158,40 @@ class ProjectManagerModel {
             $json_segment_ids = $v[ 'json_segment_ids' ];
 
             foreach ( $segments as $id_segment ) {
-                foreach ( $entries as $note ) {
+                foreach ( $entries as $index => $note ) {
 
                     // NOTE
                     // we need to strip tags from $note
                     // to prevent possible xss attacks
                     // from the UI
-                    $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+
+                    if(isset($attributes['entries'][$index])) {
+                        $metaKey = strip_tags( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
+
+                        // check for metaKey is `notes`
+                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                            $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+                        }
+
+                    } else {
+                        $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+                    }
                 }
             }
 
             foreach ( $json_segment_ids as $id_segment ) {
-                foreach ( $json_entries as $json ) {
-                    $insert_values[] = [ $id_segment, $internal_id, null, $json ];
+                foreach ( $json_entries as $index => $json ) {
+
+                    if(isset($attributes['json'][$index])) {
+                        $metaKey = $attributes['json'][$index];
+
+                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                            $insert_values[] = [ $id_segment, $internal_id, null, $json ];
+                        }
+
+                    } else {
+                        $insert_values[] = [ $id_segment, $internal_id, null, $json ];
+                    }
                 }
             }
 
@@ -200,6 +222,82 @@ class ProjectManagerModel {
             throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
         }
 
+    }
+
+    /**
+     * @param $notes
+     *
+     * @throws Exception
+     */
+    public static function bulkInsertSegmentMetaDataFromAttributes ( $notes ) {
+
+        $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
+
+        $insert_values = [];
+        $chunk_size    = 30;
+
+        foreach ( $notes as $internal_id => $v ) {
+
+            $attributes = $v[ 'from' ];
+            $entries  = $v[ 'entries' ];
+            $segments = $v[ 'segment_ids' ];
+
+            $json_entries     = $v[ 'json' ];
+            $json_segment_ids = $v[ 'json_segment_ids' ];
+
+            foreach ( $segments as $id_segment ) {
+                foreach ( $entries as $index => $note ) {
+
+                    if(isset($attributes['entries'][$index])){
+                        $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
+                        $metaValue = strip_tags(html_entity_decode($note));
+
+                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                            $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        }
+                    }
+                }
+            }
+
+            foreach ( $json_segment_ids as $id_segment ) {
+                foreach ( $json_entries as $index => $json ) {
+
+                    if(isset($attributes['json'][$index])){
+                        $metaKey = $attributes['json'][$index];
+                        $metaValue = $json;
+
+                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                            $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        }
+                    }
+                }
+            }
+        }
+
+        $chunked = array_chunk( $insert_values, $chunk_size );
+        Log::doJsonLog( "Notes attributes: Total Rows to insert: " . count( $chunked ) );
+
+        $conn = Database::obtain()->getConnection();
+
+        try {
+
+            foreach ( $chunked as $i => $chunk ) {
+                $values_sql_array = array_fill( 0, count( $chunk ), " ( ?, ?, ? ) " );
+                $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
+                $flattened_values = array_reduce( $chunk, 'array_merge', [] );
+                $stmt->execute( $flattened_values );
+                Log::doJsonLog( "Notes attributes: Executed Query " . ( $i + 1 ) );
+            }
+
+        } catch ( Exception $e ) {
+            Log::doJsonLog( "Notes attributes import - DB Error: " . $e->getMessage() );
+            /** @noinspection PhpUndefinedVariableInspection */
+            Log::doJsonLog( "Notes attributes import - Statement: " . $stmt->queryString );
+            Log::doJsonLog( "Notes attributes Chunk Dump: " . var_export( $chunk, true ) );
+            /** @noinspection PhpUndefinedVariableInspection */
+            Log::doJsonLog( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
+            throw new Exception( "Notes attributes import - DB Error: " . $e->getMessage(), 0, $e );
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ import classnames from 'classnames'
 
 import JobMetadata from './components/header/cattol/JobMetadata'
 import SegmentStore from './stores/SegmentStore'
+import CatToolStore from './stores/CatToolStore'
 import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
 import AnalyzeActions from './actions/AnalyzeActions'
 import CatToolActions from './actions/CatToolActions'
@@ -42,6 +43,7 @@ window.SegmentActions = SegmentActions
 window.ModalsActions = ModalsActions
 
 window.SegmentStore = SegmentStore
+window.CatToolStore = CatToolStore
 
 window.Header = Header
 window.JobMetadata = JobMetadata
