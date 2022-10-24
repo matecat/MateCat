@@ -84,29 +84,6 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * @TODO REMOVE
-     * @return Engines_MyMemory
-     * @throws \Exception
-     */
-    private function getMyMemoryClient()
-    {
-        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
-        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
-        $engineStruct->id = 1;
-
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engineRecord = @$eng[ 0 ];
-
-        return new Engines_MyMemory( $engineRecord );
-    }
-
-
-
-    /**
      * Get action on MyMemory
      *
      * @throws \ReflectionException

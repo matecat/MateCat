@@ -236,6 +236,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
                 'r_rev' => $this->r_rev,
                 'w_rev' => $this->w_rev,
                 'is_shared' => $this->is_shared,
+                'is_private' => $this->isEncryptedKey()
             ];
         }
 
@@ -247,8 +248,5 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
             'key' => $this->key,
             'is_shared' => $this->is_shared,
         ];
-
-
-
     }
 }
