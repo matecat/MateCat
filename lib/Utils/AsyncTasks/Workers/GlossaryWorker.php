@@ -94,78 +94,20 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function delete( $payload ) {
 
-        // @TODO HARD-CODED
-//        "id_client": "XXXXXX"
-//	"id_job": 123456,
-//	"password": "dndndndnd",
-//	"term":
-//	{
-//        "term_id": "xxxxxxxx",
-//		"source_language": "en-US",
-//		"target_language": "it-IT"
-//		"source": null,
-//		"target": null,
-//		"matching_words": null,
-//		"metadata": null
-//	}
+        $client = $this->getMyMemoryClient();
 
-        //https://api-test.mymemory.translated.net/glossary/delete_glossary
-        //{
-        //    "id_segment": 123456567,
-        //	"id_client": "XXXXXX",
-        //	"id_job": 123456,
-        //	"password": "dndndndnd",
-        //	"term":
-        //	{
-        //		"term_id": "xxxxxxxx",
-        //		"source_language": "en-US",
-        //		"target_language": "it-IT",
-        //		"source": null,
-        //		"target": null,
-        //		"matching_words": null,
-        //		"metadata": {
-        //			"definition": null,
-        //			"key": "7e0246e854a2f09787f0",
-        //			"key_name": null,
-        //			"domain": null,
-        //			"subdomain": null,
-        //			"create_date": null,
-        //			"last_update": null
-        //		}
-        //	}
-        //}
-
-
-        // RISPOSTA
-        //
-        //{
-        //    "responseData": "OK",
-        //    "responseStatus": 200,
-        //    "responseDetails": null
-        //}
-
+        /** @var \Engines_Results_MyMemory_UpdateGlossaryResponse $response */
+        $response = $client->glossaryDelete($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
-        $message =  [
-            "id_segment" => $id_segment,
-            "term" => [
-                "term_id" => "123456",
-                "source_language" => "en-US",
-                "target_language" => "it-IT",
-                "source" => null,
-                "target" => null,
-                "matching_words" => null,
-                "metadata" => [
-                    "definition" => "Non se sa che è ma definisce la parole",
-                    "key" => $payload['term']['metadata']['key'],
-                    "key_name" => $payload['term']['metadata']['key_name'],
-                    "domain" => "Uber",
-                    "subdomain" => "Eats",
-                    "create_date" => "2022-08-10",
-                    "last_update" => "2022-09-01"
-                ]
-            ]
+        $message = [
+                'id_segment' => $id_segment,
+                'payload' => null,
         ];
+
+        if($response->responseStatus == 200){
+            $message['payload'] = $payload;
+        }
 
         $this->publishMessage(
                 $this->setResponsePayload(
@@ -286,128 +228,19 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function set( $payload ) {
 
-        // @TODO HARD-CODED
-//        {
-//            "id_client": "XXXXXX"
-//	"id_job": 123456,
-//	"password": "dndndndnd",
-//	"term":
-//	{
-//        "term_id": "xxxxxxxx",
-//		"source_language": "en-US",
-//		"target_language": "it-IT"
-//		"source": {
-//        "term": "Payment",
-//			"note": "The amount a Rider ...",
-//			"sentence": "Example phrase"
-//		},
-//		"target": {
-//        "term": "Pagamento",
-//			"note": "L'ammontare che un Rider ...",
-//			"sentence": "Frase di esempio"
-//		},
-//		"matching_words": null,
-//		"metadata": {
-//        "definition": "Non se sa che è ma definisce la parole",
-//			"key": "c52da4a03d6aea33f242",
-//			"key_name": "Uber Glossary",
-//			"domain": "Uber",
-//			"subdomain": "Eats",
-//			"create_date": "2022-08-10",
-//			"last_update": "2022-09-01"
-//		}
-//	}
-//}
+        $client = $this->getMyMemoryClient();
 
-        //https://api-test.mymemory.translated.net/glossary/set_glossary
-        //{
-        //    "id_segment": 123456567,
-        //	"id_client": "XXXXXX",
-        //	"id_job": 97,
-        //	"password": "5257a65639c4",
-        //	"term":
-        //	{
-        //		"term_id": null,
-        //		"source_language": "en-US",
-        //		"target_language": "it-IT",
-        //		"source": {
-        //			"term": "Payment this",
-        //			"note": "The amount a Rider ...",
-        //			"sentence": "Example phrase"
-        //		},
-        //		"target": {
-        //			"term": "Pagamento",
-        //			"note": "L'ammontare che un Rider ...",
-        //			"sentence": "Frase di esempio"
-        //		},
-        //		"matching_words": null,
-        //		"metadata": {
-        //			"definition": "Non se sa che è ma definisce la parole",
-        //			"keys": [
-        //                             {
-        //                                 "key": "7e0246e854a2f09787f0",
-        //			        			"key_name": "Uber Glossary"
-        //                             },
-        //                             {
-        //                                 "key": "ec6e1f40c07ec12fba83",
-        //			        				"key_name": "Uber Glossary 2"
-        //                             }
-        //                         ],
-        //			"domain": "Uber",
-        //			"subdomain": "Eats",
-        //			"create_date": null,
-        //			"last_update":  null
-        //		}
-        //	}
-        //}
-
-
-        // RISPOSTA
-        //
-        //{
-        //    "responseData": "OK",
-        //    "responseStatus": 200,
-        //    "responseDetails": null
-        //}
-
-
-
+        /** @var \Engines_Results_MyMemory_SetGlossaryResponse $response */
+        $response = $client->glossarySet($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
-        $message =  [
-            "id_segment" => $id_segment,
-            "terms" => []
+        $message = [
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
-        foreach ($payload['term']['metadata']['keys'] as $key){
-            $message['terms'][] = [
-                    "term_id" => "123456",
-                    "source_language" => "en-US",
-                    "target_language" => "it-IT",
-                    "source" => [
-                            "term" => "Payment",
-                            "note" => "The amount a Rider ...",
-                            "sentence" => "Example phrase"
-                    ],
-                    "target" => [
-                            "term" => "Pagamento",
-                            "note" => "L'ammontare che un Rider ...",
-                            "sentence" => "Frase di esempio"
-                    ],
-                    "matching_words" => [
-                            "Pay",
-                            "Payment"
-                    ],
-                    "metadata" => [
-                            "definition" => "Non se sa che è ma definisce la parole",
-                            "key" => $key['key'],
-                            "key_name" => $key['name'],
-                            "domain" => "Uber",
-                            "subdomain" => "Eats",
-                            "create_date" => "2022-08-10",
-                            "last_update" => "2022-09-01"
-                    ]
-            ];
+        if($response->responseStatus == 200){
+            $message['payload'] = $payload;
         }
 
         $this->publishMessage(
@@ -429,120 +262,20 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function update( $payload ) {
 
-        // @TODO HARD-CODED
-//        {
-//            "id_client": "XXXXXX"
-//	"id_job": 123456,
-//	"password": "dndndndnd",
-//	"term":
-//	{
-//        "term_id": "xxxxxxxx",
-//		"source_language": "en-US",
-//		"target_language": "it-IT"
-//		"source": {
-//        "term": "Payment",
-//			"note": "The amount a Rider ...",
-//			"sentence": "Example phrase"
-//		},
-//		"target": {
-//        "term": "Pagamento",
-//			"note": "L'ammontare che un Rider ...",
-//			"sentence": "Frase di esempio"
-//		},
-//		"matching_words": null,
-//		"metadata": {
-//        "definition": "Non se sa che è ma definisce la parole",
-//			"key": "c52da4a03d6aea33f242",
-//			"key_name": "Uber Glossary",
-//			"domain": "Uber",
-//			"subdomain": "Eats",
-//			"create_date": "2022-08-10",
-//			"last_update": "2022-09-01"
-//		}
-//	}
-//}
+        $client = $this->getMyMemoryClient();
 
-        //https://api-test.mymemory.translated.net/glossary/update_glossary
-        //
-        //{
-        //    "id_segment": 123456567,
-        //	"id_client": "XXXXXX",
-        //	"id_job": 97,
-        //	"password": "5257a65639c4",
-        //	"term":
-        //	{
-        //		"term_id": "xxxxxxxx",
-        //		"source_language": "en-US",
-        //		"target_language": "it-IT",
-        //		"source": {
-        //			"term": "Payment",
-        //			"note": "The amount a Rider ...",
-        //			"sentence": "Example phrase"
-        //		},
-        //		"target": {
-        //			"term": "Pagamento",
-        //			"note": "L'ammontare che un Rider ...",
-        //			"sentence": "Frase di esempio"
-        //		},
-        //		"matching_words": [
-        //                    "Pay",
-        //                    "Payment"
-        //                 ],
-        //		"metadata": {
-        //			"definition": "Non se sa che è ma definisce la parole",
-        //			"key": "7e0246e854a2f09787f0",
-        //			"key_name": "Uber Glossary",
-        //			"domain": "Uber",
-        //			"subdomain": "Eats",
-        //			"create_date": "2022-08-10",
-        //			"last_update": "2022-09-01"
-        //		}
-        //	}
-        //}
-
-        // RISPOSTA MM
-        //{
-        //    "responseData": "OK",
-        //    "responseStatus": 200,
-        //    "responseDetails": null
-        //}
-
-
+        /** @var \Engines_Results_MyMemory_UpdateGlossaryResponse $response */
+        $response = $client->glossaryUpdate($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
-        $message =  [
-            "id_segment" => $id_segment,
-            "terms" => [
-                [
-                    "term_id" => "123456",
-                    "source_language" => "en-US",
-                    "target_language" => "it-IT",
-                    "source" => [
-                        "term" => "Payment",
-                        "note" => "The amount a Rider ...",
-                        "sentence" => "Example phrase"
-                    ],
-                    "target" => [
-                        "term" => "Pagamento",
-                        "note" => "L'ammontare che un Rider ...",
-                        "sentence" => "Frase di esempio"
-                    ],
-                    "matching_words" => [
-                        "Pay",
-                        "Payment"
-                    ],
-                    "metadata" => [
-                        "definition" => "Non se sa che è ma definisce la parole",
-                        "key" => $payload['term']['metadata']['key'],
-                        "key_name" => $payload['term']['metadata']['key_name'],
-                        "domain" => "Uber",
-                        "subdomain" => "Eats",
-                        "create_date" => "2022-08-10",
-                        "last_update" => "2022-09-01"
-                    ]
-                ]
-            ]
+        $message = [
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
+
+        if($response->responseStatus == 200){
+            $message['payload'] = $payload;
+        }
 
         $this->publishMessage(
             $this->setResponsePayload(

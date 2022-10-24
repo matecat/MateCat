@@ -532,6 +532,28 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossaryDelete($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => $this->de,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "delete_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
      * @param $source
      * @param $sourceLanguage
      * @param $targetLanguage
@@ -549,6 +571,50 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             "keys" => $keys,
         ];
         $this->call( "get_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossarySet($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => $this->de,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "set_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossaryUpdate($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => $this->de,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "update_glossary_relative_url", $payload, true, true );
 
         return $this->result;
     }

@@ -161,7 +161,7 @@ class GlossaryController extends KleinController {
 
         $keys = [];
         foreach ($json['term']['metadata']['keys'] as $key){
-            $keys[] = $key;
+            $keys[] = $key['key'];
         }
 
         $this->checkWritePermissions($keys, $json['userKeys']);
