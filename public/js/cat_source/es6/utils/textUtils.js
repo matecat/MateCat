@@ -390,8 +390,6 @@ const TEXT_UTILS = {
       return '<a href="' + href + '" target="_blank">' + match + '</a>'
     })
   },
-  // plugins
-  isTranslatedHostDomainUrl: () => false,
 }
 
 export default TEXT_UTILS
