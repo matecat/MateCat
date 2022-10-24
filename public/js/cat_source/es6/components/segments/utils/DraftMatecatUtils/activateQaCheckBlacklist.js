@@ -35,6 +35,8 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
       [],
     )
 
+    if (!matches.length) return ''
+
     let re
     try {
       const escapedMatches = matches.map((match) =>
