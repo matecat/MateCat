@@ -82,7 +82,7 @@ class GlossaryWorker extends AbstractWorker {
                     ],
                     'matching_words' => [
                         'experience',
-                        'verified',
+                        'desire',
                     ],
                     'metadata' => [
                         'definition' => 'Non se sa che è ma definisce la parole',
@@ -111,7 +111,7 @@ class GlossaryWorker extends AbstractWorker {
                         'sentence' => 'Frase di esempio',
                     ],
                     'matching_words' => [
-                        'consegnato',
+                        'sviluppo',
                     ],
                     'metadata' => [
                         'definition' => 'Non se sa che è ma definisce la parole',

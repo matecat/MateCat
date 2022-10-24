@@ -40,6 +40,8 @@ export const activateGlossary = (glossary, sid) => {
       }
     })
     matches = [...new Set(matches)]
+    if (!matches.length) return ''
+
     let re
     try {
       const escapedMatches = matches.map((match) =>

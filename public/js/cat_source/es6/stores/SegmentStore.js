@@ -626,7 +626,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     const updatedGlossary = [
       ...glossary
         .filter(({term_id}) => !terms.find((term) => term.term_id === term_id))
-        .map((term) => ({...term, missingTerm: false})),
+        .map((term) => ({
+          ...term,
+          missingTerm: false,
+          matching_words: term.matching_words ?? [],
+        })),
       ...terms,
     ]
 

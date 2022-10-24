@@ -37,6 +37,9 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
       (acc, {matching_words}) => [...acc, ...matching_words],
       [],
     )
+
+    if (!matches.length) return ''
+
     let re
     try {
       const escapedMatches = matches.map((match) =>
