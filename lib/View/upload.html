@@ -17,6 +17,9 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
     <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
 
@@ -910,7 +913,7 @@
     <div class="footer-body">
         <div class="info">
             <div class="image">
-                <img src="${basepath}public/img/Logo-Matecat.svg"/>
+                <img src="${basepath}public/img/logo_matecat_small.svg"/>
             </div>
             <div class="description">
                 Matecat is a free and open source online CAT tool. It’s free for translation companies, translators and enterprise users.
@@ -927,8 +930,8 @@
 <!--        </div>-->
         <div class="side-info">
             <div class="item"><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></div>
+            <div class="item"><a href="https://site.matecat.com/open-source/" target="_blank">Open Source</a></div>
             <div class="item"><a href="https://site.matecat.com/terms/" target="_blank">Terms</a></div>
-            <div class="item"><a href="https://guides.matecat.com/" target="_blank">User Guide</a></div>
         </div>
     </div>
 
