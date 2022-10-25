@@ -111,7 +111,7 @@ export const SegmentFooterTabGlossary = ({
     [segment.glossary, segment.glossary_search_results],
   )
 
-  // register listern highlight term
+  // register listener highlight term
   useEffect(() => {
     const highlightTerm = ({sid, termId, isTarget, type}) => {
       if (sid === segment.sid) scrollToTerm({id: termId, isTarget, type})
@@ -137,7 +137,11 @@ export const SegmentFooterTabGlossary = ({
       setSearchTerm('')
       resetForm()
     }
-    const onReceiveGlossary = () => setIsLoading(false)
+    const onReceiveGlossary = () => {
+      setIsLoading(false)
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
+    }
+    const onReceiveGlossaryBySearch = () => setIsLoading(false)
     const setDomains = ({entries}) => {
       console.log('Domains---->', entries)
       setDomainsResponse(entries)
@@ -157,7 +161,7 @@ export const SegmentFooterTabGlossary = ({
     )
     SegmentStore.addListener(
       SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
-      onReceiveGlossary,
+      onReceiveGlossaryBySearch,
     )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
@@ -177,7 +181,7 @@ export const SegmentFooterTabGlossary = ({
       )
       SegmentStore.removeListener(
         SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
-        onReceiveGlossary,
+        onReceiveGlossaryBySearch,
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
@@ -198,6 +202,7 @@ export const SegmentFooterTabGlossary = ({
       )
     }
   }, [domainsResponse, selectsActive.keys])
+
   // set subdomains by domain
   useEffect(() => {
     if (!selectsActive.domain) return
@@ -303,7 +308,7 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     if (!terms.find(({term_id}) => !term_id)) return
 
-    let timeOut = setTimeout(() => {
+    const timeOut = setTimeout(() => {
       console.log('Retry GET request terms after created a new one term')
       SegmentActions.getGlossaryForSegment({
         sid: segment.sid,

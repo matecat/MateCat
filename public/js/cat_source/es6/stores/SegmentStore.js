@@ -651,6 +651,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       [index, 'glossary'],
       Immutable.fromJS(updatedGlossary),
     )
+    this.setGlossarySearchToCache(sid)
   },
   addOrUpdateGlossaryItem: function (sid, terms) {
     const addedTerms = terms.map((term) => ({

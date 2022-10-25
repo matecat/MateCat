@@ -66,7 +66,7 @@ let SSE = {
     $(document).on('sse:glossary_delete', function (ev, message) {
       SegmentActions.deleteGlossaryFromCache(
         message.data.id_segment,
-        message.data.term,
+        message.data.payload.term,
       )
     })
     $(document).on('sse:glossary_update', function (ev, message) {
