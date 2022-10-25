@@ -246,10 +246,12 @@ let CatToolActions = {
     const domains = CatToolStore.getKeysDomains()
     if (!jobKeys || forceUpdate) {
       getTmKeysJob().then(({tm_keys: tmKeys}) => {
+        // filter not private keys
+        const filteredKeys = tmKeys.filter(({is_private}) => !is_private)
         getDomainsList({
-          keys: tmKeys.map(({key}) => key),
+          keys: filteredKeys.map(({key}) => key),
         })
-        const keys = tmKeys.map((item) => ({...item, id: item.key}))
+        const keys = filteredKeys.map((item) => ({...item, id: item.key}))
         AppDispatcher.dispatch({
           actionType: CattolConstants.UPDATE_TM_KEYS,
           keys,

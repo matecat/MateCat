@@ -716,7 +716,7 @@ const SegmentActions = {
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
-      if (typeof segment.glossary === 'undefined') {
+      if (typeof segment.glossary === 'undefined' || sid === request.sid) {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
@@ -747,6 +747,14 @@ const SegmentActions = {
   setGlossaryForSegment: (sid, terms) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+      sid: sid,
+      glossary: terms,
+    })
+  },
+
+  setGlossaryForSegmentBySearch: (sid, terms) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
       sid: sid,
       glossary: terms,
     })
@@ -1257,7 +1265,6 @@ const SegmentActions = {
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')
       })
-
     // get tm keys
     new Promise((resolve) => {
       if (!CatToolStore.getJobTmKeys()) {
