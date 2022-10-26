@@ -9,6 +9,7 @@ use Engines_MyMemory;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
+use TmKeyManagement\UserKeysModel;
 
 class GlossaryWorker extends AbstractWorker {
 

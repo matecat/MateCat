@@ -114,6 +114,16 @@ class GlossaryController extends KleinController {
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/keys.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
+        $keysArray = [];
+
+        /** @var \TmKeyManagement_ClientTmKeyStruct $key */
+        foreach ($json['userKeys'] as $key){
+            if(!$key->isEncryptedKey()){
+                $keysArray[] = $key->key;
+            }
+        }
+
+        $json['keys'] = $keysArray;
 
         $params = [
             'action' => 'keys',

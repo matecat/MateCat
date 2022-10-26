@@ -10,18 +10,11 @@
     },
     "password": {
       "type": "string"
-    },
-    "keys": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
     }
   },
   "required": [
     "id_client",
     "id_job",
-    "password",
-    "keys"
+    "password"
   ]
 }
