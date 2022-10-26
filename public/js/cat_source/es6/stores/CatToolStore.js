@@ -5,6 +5,7 @@ import _ from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
+import CatToolActions from '../actions/CatToolActions'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -16,9 +17,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     occurrencesList: [],
     searchResultsDictionary: {},
     featuredSearchResult: 0,
-    clientConnected: false,
-    clientId: undefined,
   },
+  clientConnected: false,
+  clientId: undefined,
+  tmKeys: null,
+  keysDomains: null,
+  haveKeysGlossary: true,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -57,6 +61,27 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   clientConnect: function (clientId) {
     this.clientConnected = true
     this.clientId = clientId
+  },
+  updateJobTmKeys: function (keys) {
+    this.tmKeys = keys
+  },
+  getJobTmKeys: function () {
+    return this.tmKeys
+  },
+  getClientId: function () {
+    return this.clientId
+  },
+  updateKeysDomains: function (domains) {
+    this.keysDomains = domains
+  },
+  getKeysDomains: function () {
+    return this.keysDomains
+  },
+  getHaveKeysGlossary: function () {
+    return this.haveKeysGlossary
+  },
+  setHaveKeysGlossary: function (value) {
+    this.haveKeysGlossary = value
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
@@ -156,10 +181,38 @@ AppDispatcher.register(function (action) {
       CatToolStore.emitChange(ModalsConstants.CLOSE_MODAL)
       break
     }
+    case CatToolConstants.UPDATE_TM_KEYS: {
+      CatToolStore.updateJobTmKeys(action.keys)
+      CatToolStore.emitChange(
+        CatToolConstants.UPDATE_TM_KEYS,
+        CatToolStore.tmKeys,
+      )
+      break
+    }
+    case CatToolConstants.UPDATE_DOMAINS:
+      CatToolStore.updateKeysDomains(action.entries)
+      CatToolStore.emitChange(CatToolConstants.UPDATE_DOMAINS, {
+        sid: action.sid,
+        entries: action.entries,
+      })
+      break
     case CatToolConstants.ON_RENDER:
       CatToolStore.emitChange(CatToolConstants.ON_RENDER, {
         ...action,
       })
+      break
+    case CatToolConstants.ON_TM_KEYS_CHANGE_STATUS:
+      CatToolActions.retrieveJobKeys(true)
+      CatToolStore.emitChange(CatToolConstants.ON_TM_KEYS_CHANGE_STATUS, {
+        ...action,
+      })
+      break
+    case CatToolConstants.HAVE_KEYS_GLOSSARY:
+      CatToolActions.retrieveJobKeys(true)
+      CatToolStore.emitChange(
+        CatToolConstants.HAVE_KEYS_GLOSSARY,
+        CatToolStore.haveKeysGlossary,
+      )
       break
   }
 })

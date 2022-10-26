@@ -334,10 +334,11 @@ class Editarea extends React.Component {
       if (
         qaBlacklistGlossary &&
         qaBlacklistGlossary.length > 0 &&
+        !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] /* &&
         (_.isUndefined(prevQaBlacklistGlossary) ||
           !Immutable.fromJS(prevQaBlacklistGlossary).equals(
             Immutable.fromJS(qaBlacklistGlossary),
-          ))
+          )) */
       ) {
         activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
         changedDecorator = true

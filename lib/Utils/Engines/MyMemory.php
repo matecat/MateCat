@@ -1,5 +1,7 @@
 <?php
 
+use Validator\GlossaryCSVValidatorObject;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -9,23 +11,49 @@
  */
 class Engines_MyMemory extends Engines_AbstractEngine {
 
+    /**
+     * @var string
+     */
+    protected $de = 'pro_655321@matecat.com';
+
+    /**
+     ***************************
+     * 2022 NEW API ROUTES
+     ***************************
+     */
+    protected $domains_relative_url = 'v2/glossary/domains';
+    protected $keys_with_glossary_relative_url = 'v2/glossary/keys';
+    protected $import_new_relative_url = 'v2/glossary/import';
+    protected $check_glossary_relative_url = 'v2/glossary/check';
+    protected $update_glossary_relative_url = 'v2/glossary/update';
+    protected $delete_glossary_relative_url = 'v2/glossary/delete';
+    protected $set_glossary_relative_url = 'v2/glossary/set';
+    protected $get_glossary_relative_url = 'v2/glossary/get';
+    protected $keys_glossary_relative_url = 'v2/glossary/keys';
+
+    /**
+     * @var string
+     */
     protected $content_type = 'json';
 
+    /**
+     * @var array
+     */
     protected $_config = [
-            'dataRefMap'    => [],
-            'segment'       => null,
-            'translation'   => null,
-            'tnote'         => null,
-            'source'        => null,
-            'target'        => null,
-            'email'         => null,
-            'prop'          => null,
-            'get_mt'        => 1,
-            'id_user'       => null,
-            'num_result'    => 3,
-            'mt_only'       => false,
-            'isConcordance' => false,
-            'isGlossary'    => false,
+        'dataRefMap'    => [],
+        'segment'       => null,
+        'translation'   => null,
+        'tnote'         => null,
+        'source'        => null,
+        'target'        => null,
+        'email'         => null,
+        'prop'          => null,
+        'get_mt'        => 1,
+        'id_user'       => null,
+        'num_result'    => 3,
+        'mt_only'       => false,
+        'isConcordance' => false,
+        'isGlossary'    => false,
     ];
 
     /**
@@ -60,6 +88,30 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $result_object = null;
 
         switch ( $functionName ) {
+
+            case 'domains_relative_url':
+                $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+
+            case 'check_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'update_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'delete_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'set_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'get_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'keys_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+
             case 'tags_projection' :
                 $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
@@ -356,6 +408,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param bool|false $name
      *
      * @return Engines_Results_MyMemory_TmxResponse
+     * @throws Exception
      */
     public function glossaryImport( $file, $key, $name = false ) {
 
@@ -416,10 +469,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             return $this->result;
         }
 
+        // validate the CSV
+        if(!$this->validateCSVFile($file)){
+            throw new \Exception('File CSV is not valid');
+        }
+
         $postFields = [
                 'glossary'    => "@" . realpath( $file ),
-                'source_lang' => $source_lang,
-                'target_lang' => $target_lang,
                 'name'        => $name,
         ];
 
@@ -437,6 +493,173 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( "glossary_import_relative_url", $postFields, true );
 
         return $this->result;
+    }
+
+    /**
+     * @param       $source
+     * @param       $target
+     * @param       $sourceLanguage
+     * @param       $targetLanguage
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryCheck($source, $target, $sourceLanguage, $targetLanguage, $keys = [])
+    {
+        $payload = [
+                'de' => $this->de,
+                'source' => $source,
+                'target' => $target,
+                'source_language' => $sourceLanguage,
+                'target_language' => $targetLanguage,
+                'keys' => $keys,
+        ];
+        $this->call( "check_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryDomains($keys = [])
+    {
+        $payload = [
+            'de' => $this->de,
+            'keys' => $keys,
+        ];
+        $this->call( "domains_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossaryDelete($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => $this->de,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "delete_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $source
+     * @param $sourceLanguage
+     * @param $targetLanguage
+     * @param $keys
+     *
+     * @return array
+     */
+    public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
+    {
+        $payload = [
+            'de' => $this->de,
+            "source" => $source,
+            "source_language" => $sourceLanguage,
+            "target_language" => $targetLanguage,
+            "keys" => $keys,
+        ];
+
+        $this->call( "get_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryKeys($keys = [])
+    {
+        $payload = [
+                'de' => $this->de,
+                'keys' => $keys,
+        ];
+        $this->call( "keys_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossarySet($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => $this->de,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+
+        $this->call( "set_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossaryUpdate($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => $this->de,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "update_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $file
+     *
+     * @return bool
+     * @throws Exception
+     */
+    private function validateCSVFile($file)
+    {
+        $validatorObject = new GlossaryCSVValidatorObject();
+        $validatorObject->csv = $file;
+        $validator = new \Validator\GlossaryCSVValidator();
+        $validator->validate($validatorObject);
+
+        return $validator->isValid();
+    }
+
+    private function formatStructureDataFromCSV($filePath) {
+        $fileContent = file_get_contents($filePath);
+        // @TODO
     }
 
     public function import( $file, $key, $name = false ) {
