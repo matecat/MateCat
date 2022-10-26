@@ -85,12 +85,10 @@
               "type": "string"
             },
             "create_date": {
-              "type": "string",
-              "format": "date"
+              "type": "string"
             },
             "last_update": {
-              "type": "string",
-              "format": "date"
+              "type": ["null","string"]
             }
           },
           "required": [
