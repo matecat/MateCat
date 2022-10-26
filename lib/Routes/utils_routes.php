@@ -96,6 +96,7 @@ $klein->with( '/api/app/glossary', function () {
     route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
     route( '/domains', 'POST', '\API\App\GlossaryController', 'domains' );
     route( '/get', 'POST', '\API\App\GlossaryController', 'get' );
+    route( '/keys', 'POST', '\API\App\GlossaryController', 'keys' );
     route( '/search', 'POST', '\API\App\GlossaryController', 'search' );
     route( '/set', 'POST', '\API\App\GlossaryController', 'set' );
     route( '/update', 'POST', '\API\App\GlossaryController', 'update' );

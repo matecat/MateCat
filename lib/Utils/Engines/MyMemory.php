@@ -29,6 +29,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     protected $delete_glossary_relative_url = 'v2/glossary/delete';
     protected $set_glossary_relative_url = 'v2/glossary/set';
     protected $get_glossary_relative_url = 'v2/glossary/get';
+    protected $keys_glossary_relative_url = 'v2/glossary/keys';
 
     /**
      * @var string
@@ -106,6 +107,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 break;
             case 'get_glossary_relative_url':
                 $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'keys_glossary_relative_url':
+                $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
 
             case 'tags_projection' :
@@ -572,6 +576,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ];
 
         $this->call( "get_glossary_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryKeys($keys = [])
+    {
+        $payload = [
+                'de' => $this->de,
+                'keys' => $keys,
+        ];
+        $this->call( "keys_glossary_relative_url", $payload, true, true );
 
         return $this->result;
     }

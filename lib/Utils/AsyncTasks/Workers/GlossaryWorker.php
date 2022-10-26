@@ -15,6 +15,7 @@ class GlossaryWorker extends AbstractWorker {
     const CHECK_ACTION  = 'check';
     const DELETE_ACTION = 'delete';
     const GET_ACTION    = 'get';
+    const KEYS_ACTION    = 'keys';
     const SET_ACTION    = 'set';
     const UPDATE_ACTION = 'update';
     const DOMAINS_ACTION = 'domains';
@@ -185,6 +186,32 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
+     * Check a key on MyMemory
+     *
+     * @param $payload
+     *
+     * @throws \Exception
+     */
+    private function keys( $payload ) {
+
+        $client = $this->getMyMemoryClient();
+
+        /** @var \Engines_Results_MyMemory_KeysGlossaryResponse $response */
+        $response = $client->glossaryKeys($payload['keys']);
+
+        $this->publishMessage(
+            $this->setResponsePayload(
+        'glossary_keys',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                [
+                    'has_glossary' => $response->hasGlossary()
+                ]
+            )
+        );
+    }
+
+    /**
      * Search sentence in MyMemory
      *
      * @param $payload
@@ -241,6 +268,16 @@ class GlossaryWorker extends AbstractWorker {
 
         if($response->responseStatus == 200){
 
+            // reduce $payload['term']['matching_words'] to simple array
+            $matchingWords = $payload['term']['matching_words'];
+            $matchingWordsAsArray = [];
+
+            foreach ($matchingWords as $matchingWord){
+                $matchingWordsAsArray[] = $matchingWord;
+            }
+
+            $payload['term']['matching_words'] = $matchingWordsAsArray;
+
             // reduce $payload['term']['metadata']['keys'] to simple array
             $keys = $payload['term']['metadata']['keys'];
             $keysAsArray = [];
@@ -285,6 +322,17 @@ class GlossaryWorker extends AbstractWorker {
         ];
 
         if($response->responseStatus == 200){
+
+            // reduce $payload['term']['matching_words'] to simple array
+            $matchingWords = $payload['term']['matching_words'];
+            $matchingWordsAsArray = [];
+
+            foreach ($matchingWords as $matchingWord){
+                $matchingWordsAsArray[] = $matchingWord;
+            }
+
+            $payload['term']['matching_words'] = $matchingWordsAsArray;
+
             $message['payload'] = $payload;
         }
 

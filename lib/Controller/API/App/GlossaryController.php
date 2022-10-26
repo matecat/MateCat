@@ -105,6 +105,27 @@ class GlossaryController extends KleinController {
     }
 
     /**
+     * Retrieve from MyMemory the information if keys have at least one glossary associated
+     *
+     * @throws \ReflectionException
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     */
+    public function keys()
+    {
+        $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/keys.json' ;
+        $json = $this->createThePayloadForWorker($jsonSchemaPath);
+
+        $params = [
+            'action' => 'keys',
+            'payload' => $json,
+        ];
+
+        $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        $this->response->json($json);
+    }
+
+    /**
      * Search for a specific sentence in MyMemory
      *
      * @throws \ReflectionException
