@@ -72,7 +72,7 @@ let SSE = {
     $(document).on('sse:glossary_update', function (ev, message) {
       SegmentActions.updateglossaryCache(
         message.data.id_segment,
-        message.data.terms,
+        message.data.payload,
       )
     })
     $(document).on('sse:glossary_domains', function (ev, message) {

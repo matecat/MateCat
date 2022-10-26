@@ -1280,13 +1280,15 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      const jobTmKeys = CatToolStore.getJobTmKeys()
-      getGlossaryCheck({
-        idSegment: segment.sid,
-        target: trg_content,
-        source: src_content,
-        keys: jobTmKeys.map(({key}) => key),
-      })
+      if (CatToolStore.getHaveKeysGlossary()) {
+        const jobTmKeys = CatToolStore.getJobTmKeys()
+        getGlossaryCheck({
+          idSegment: segment.sid,
+          target: trg_content,
+          source: src_content,
+          keys: jobTmKeys.map(({key}) => key),
+        })
+      }
     })
   },
   highlightGlossaryTerm: ({sid, termId, type, isTarget}) => {

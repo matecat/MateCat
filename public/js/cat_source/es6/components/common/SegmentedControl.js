@@ -9,6 +9,7 @@ export const SegmentedControl = ({
   onChange,
   className,
   compact = false,
+  disabled = false,
 }) => {
   const selectedIndex = options.findIndex((option) => option.id === selectedId)
   const optionWidth = 100 / options.length
@@ -28,6 +29,7 @@ export const SegmentedControl = ({
           checked={selectedId === option.id}
           onChange={handleChange}
           data-testid={`radio-option-${option.id}`}
+          disabled={disabled}
         />
         <label className="segmented-control__label" htmlFor={option.id}>
           {option.icon && option.icon}
@@ -71,4 +73,5 @@ SegmentedControl.propTypes = {
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
   compact: PropTypes.bool,
+  disabled: PropTypes.bool,
 }

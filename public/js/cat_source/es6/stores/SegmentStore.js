@@ -46,14 +46,20 @@ EventEmitter.prototype.setMaxListeners(0)
 const normalizeSetUpdateGlossary = (terms) => {
   const {term} = terms
 
-  const metadataKeys = Array.isArray(term.metadata.keys)
+  const metadataKeys = term.metadata.keys
     ? term.metadata.keys
-    : Object.entries(term.metadata.keys).map(([key, value]) => value)
+    : [{key: term.metadata.key, key_name: term.metadata.key_name}]
 
   return metadataKeys.map(({key, key_name}) => {
-    const {keys, ...restMetadata} = term.metadata
+    const {
+      keys,
+      key: keyProp,
+      key_name: keyNameProp,
+      ...restMetadata
+    } = term.metadata
     return {
       ...term,
+      term_id: null,
       metadata: {
         ...restMetadata,
         key,
@@ -1508,7 +1514,10 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHANGE_GLOSSARY:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.terms)
+      SegmentStore.addOrUpdateGlossaryItem(
+        action.sid,
+        normalizeSetUpdateGlossary(action.terms),
+      )
       SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,

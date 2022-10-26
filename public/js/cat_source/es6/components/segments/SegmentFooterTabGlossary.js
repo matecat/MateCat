@@ -61,6 +61,7 @@ export const SegmentFooterTabGlossary = ({
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
   const [isLoading, setIsLoading] = useState(true)
+  const [haveKeysGlossary, setHaveKeysGlossary] = useState(true)
 
   const previousSearchTermRef = useRef('')
   const scrollItemsRef = useRef()
@@ -150,6 +151,14 @@ export const SegmentFooterTabGlossary = ({
       console.log('Keys---->', segment.sid, keys)
       setKeys(keys)
     }
+    const refreshGlossary = () =>
+      SegmentActions.getGlossaryForSegment({
+        sid: segment.sid,
+        text: segment.segment,
+        shouldRefresh: true,
+      })
+    const onReceiveHaveKeysGlossary = (value) => setHaveKeysGlossary(value)
+
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
       addGlossaryItem,
@@ -165,7 +174,17 @@ export const SegmentFooterTabGlossary = ({
     )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+    CatToolStore.addListener(
+      CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
+      refreshGlossary,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.HAVE_KEYS_GLOSSARY,
+      onReceiveHaveKeysGlossary,
+    )
+
     CatToolActions.retrieveJobKeys()
+
     return () => {
       SegmentStore.removeListener(
         SegmentConstants.ADD_GLOSSARY_ITEM,
@@ -185,8 +204,16 @@ export const SegmentFooterTabGlossary = ({
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+      CatToolStore.removeListener(
+        CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
+        refreshGlossary,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.HAVE_KEYS_GLOSSARY,
+        onReceiveHaveKeysGlossary,
+      )
     }
-  }, [segment.sid, resetForm])
+  }, [segment.sid, segment.segment, resetForm])
 
   // set domains by key
   useEffect(() => {
@@ -735,7 +762,11 @@ export const SegmentFooterTabGlossary = ({
       ) : (
         <>
           <div className={'glossary_search'}>
-            <div className={'glossary_search-container'}>
+            <div
+              className={`glossary_search-container${
+                !haveKeysGlossary ? ' glossary_search-container--disabled' : ''
+              }`}
+            >
               <IconSearch />
               <input
                 name="search_term"
@@ -743,6 +774,7 @@ export const SegmentFooterTabGlossary = ({
                 placeholder={'Search term'}
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
+                disabled={!haveKeysGlossary}
               />
               <div
                 className={`search_term_reset_button ${
@@ -758,6 +790,7 @@ export const SegmentFooterTabGlossary = ({
                 name="search"
                 className="search-type"
                 options={searchTypes}
+                disabled={!haveKeysGlossary}
                 selectedId={searchTypes.find(({selected}) => selected).id}
                 onChange={(value) => {
                   setSearchTypes((prevState) =>
