@@ -334,7 +334,7 @@ function SegmentFooter() {
             segment.cl_contributions.errors.length === 0)
         )
       case 'gl':
-        return isUndefined(segment.glossary)
+        return isUndefined(segment.glossary_search_results)
       default:
         return false
     }
@@ -347,7 +347,7 @@ function SegmentFooter() {
       case 'cl':
         return segment.cl_contributions.matches.length
       case 'gl':
-        return size(segment.glossary)
+        return size(segment.glossary_search_results)
       default:
         return index
     }

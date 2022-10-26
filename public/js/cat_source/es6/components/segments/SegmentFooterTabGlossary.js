@@ -11,6 +11,7 @@ import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolActions from '../../actions/CatToolActions'
+import _ from 'lodash'
 
 const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -72,9 +73,32 @@ export const SegmentFooterTabGlossary = ({
   }, [])
 
   const scrollToTerm = useCallback(
-    ({id, isTarget, type}) => {
+    async ({id, isTarget, type}) => {
       if (!id || !scrollItemsRef.current) return
-      const indexToScroll = terms.findIndex(({term_id}) => term_id === id)
+      // reset search results
+      setSearchTerm('')
+
+      await new Promise((resolve) => {
+        if (
+          !_.isEqual(
+            segment.glossary.map(({term_id}) => term_id),
+            segment.glossary_search_results.map(({term_id}) => term_id),
+          )
+        ) {
+          const interval = setInterval(() => {
+            if (scrollItemsRef.current?.children.length) {
+              clearInterval(interval)
+              resolve()
+            }
+          }, 100)
+        } else {
+          resolve()
+        }
+      })
+
+      const indexToScroll = segment.glossary.findIndex(
+        ({term_id}) => term_id === id,
+      )
       const element = scrollItemsRef.current?.children[indexToScroll]
       if (element) {
         scrollItemsRef.current.scrollTo(0, indexToScroll * element.offsetHeight)
@@ -84,10 +108,10 @@ export const SegmentFooterTabGlossary = ({
         labelElement.onanimationend = () => setTermHighlight(undefined)
       }
     },
-    [terms],
+    [segment.glossary, segment.glossary_search_results],
   )
 
-  // register listern highlight term
+  // register listener highlight term
   useEffect(() => {
     const highlightTerm = ({sid, termId, isTarget, type}) => {
       if (sid === segment.sid) scrollToTerm({id: termId, isTarget, type})
@@ -110,8 +134,14 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     const addGlossaryItem = () => {
       setIsLoading(false)
+      setSearchTerm('')
       resetForm()
     }
+    const onReceiveGlossary = () => {
+      setIsLoading(false)
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
+    }
+    const onReceiveGlossaryBySearch = () => setIsLoading(false)
     const setDomains = ({entries}) => {
       console.log('Domains---->', entries)
       setDomainsResponse(entries)
@@ -125,6 +155,14 @@ export const SegmentFooterTabGlossary = ({
       addGlossaryItem,
     )
     SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
+    SegmentStore.addListener(
+      SegmentConstants.SET_GLOSSARY_TO_CACHE,
+      onReceiveGlossary,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
+      onReceiveGlossaryBySearch,
+    )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
     CatToolActions.retrieveJobKeys()
@@ -136,6 +174,14 @@ export const SegmentFooterTabGlossary = ({
       SegmentStore.removeListener(
         SegmentConstants.CHANGE_GLOSSARY,
         addGlossaryItem,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.SET_GLOSSARY_TO_CACHE,
+        onReceiveGlossary,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
+        onReceiveGlossaryBySearch,
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
@@ -156,6 +202,7 @@ export const SegmentFooterTabGlossary = ({
       )
     }
   }, [domainsResponse, selectsActive.keys])
+
   // set subdomains by domain
   useEffect(() => {
     if (!selectsActive.domain) return
@@ -169,12 +216,11 @@ export const SegmentFooterTabGlossary = ({
   }, [selectsActive.domain])
 
   useEffect(() => {
-    if (!segment?.glossary) return
-    console.log('----> segment glossary', segment.glossary)
-    setTerms(segment.glossary)
-    setIsLoading(false)
+    if (!segment?.glossary_search_results) return
+    console.log('----> segment glossary', segment.glossary_search_results)
+    setTerms(segment.glossary_search_results)
     if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
-  }, [segment?.glossary])
+  }, [segment?.glossary_search_results])
 
   useEffect(() => {
     setSelectsActive((prevState) => ({
@@ -223,13 +269,8 @@ export const SegmentFooterTabGlossary = ({
 
     if (!searchTerm && searchTerm !== previousSearchTermRef.current) {
       // empty search glossary GET
-      console.log('Refresh glossary GET')
-      SegmentActions.getGlossaryForSegment({
-        sid: segment.sid,
-        text: segment.segment,
-        shouldRefresh: true,
-      })
-      setIsLoading(true)
+      console.log('Reset glossary GET')
+      SegmentActions.setGlossaryForSegmentBySearch(segment.sid)
     } else if (searchTerm) {
       // start serching term with debounce
       const onSubmitSearch = () => {
@@ -262,6 +303,22 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     if (notifyLoadingStatus) notifyLoadingStatus({code, isLoading})
   }, [isLoading, code, notifyLoadingStatus])
+
+  // check if should retry terms after user created a new one (2 seconds delay)
+  useEffect(() => {
+    if (!terms.find(({term_id}) => !term_id)) return
+
+    const timeOut = setTimeout(() => {
+      console.log('Retry GET request terms after created a new one term')
+      SegmentActions.getGlossaryForSegment({
+        sid: segment.sid,
+        text: segment.segment,
+        shouldRefresh: true,
+      })
+    }, 2000)
+
+    return () => clearTimeout(timeOut)
+  }, [terms, segment.sid, segment.segment])
 
   const getRequestPayloadTemplate = ({term = modifyElement, isDelete} = {}) => {
     const getFieldValue = (value) => (value ? value : null)
@@ -427,12 +484,13 @@ export const SegmentFooterTabGlossary = ({
               name="glossary-term-tm"
               label="Glossary"
               placeholder="Select a glossary"
+              multipleSelect="dropdown"
               showSearchBar={!isEmptyKeys}
               searchPlaceholder="Find a glossary"
               options={
                 keys.length ? keys : [{id: '0', name: '+ Create glossary key'}]
               }
-              activeOption={selectsActive.keys[0]}
+              activeOptions={selectsActive.keys}
               checkSpaceToReverse={false}
               isDisabled={!!modifyElement}
               onToggleOption={(option) => {
@@ -725,8 +783,22 @@ export const SegmentFooterTabGlossary = ({
                 modifyElement={() => modifyItem(term)}
                 deleteElement={() => deleteItem(term)}
                 highlight={index === termHighlight?.index && termHighlight}
+                isEnabledToModify={
+                  !!keys.find(({key}) => key === term?.metadata?.key)
+                }
               />
             ))}
+            {!isLoading && !terms.length && (
+              <div className="no-terms-result">
+                {searchTerm && searchTerm === previousSearchTermRef.current ? (
+                  <span>
+                    No results for <b>{searchTerm}</b>
+                  </span>
+                ) : !searchTerm ? (
+                  <span>No results</span>
+                ) : undefined}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -741,8 +813,17 @@ SegmentFooterTabGlossary.propTypes = {
   notifyLoadingStatus: PropTypes.func,
 }
 
-const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
+const GlossaryItem = ({
+  item,
+  modifyElement,
+  deleteElement,
+  highlight,
+  isEnabledToModify = false,
+}) => {
   const {metadata, source, target} = item
+
+  const canModifyItem = isEnabledToModify && item.term_id
+
   return (
     <div className="glossary_item">
       <div className={'glossary_item-header'}>
@@ -758,17 +839,22 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
             <span>{metadata.last_update}</span>
           </div>
         </div>
-        <div className={'glossary_item-actions'}>
-          <div onClick={() => modifyElement()}>
+        <div
+          className={`glossary_item-actions${
+            !canModifyItem ? ' glossary_item-actions--disabled' : ''
+          }`}
+        >
+          <div onClick={() => canModifyItem && modifyElement()}>
             <ModifyIcon />
           </div>
-          <div onClick={() => deleteElement()}>
+          <div onClick={() => canModifyItem && deleteElement()}>
             <DeleteIcon />
           </div>
         </div>
       </div>
 
       <div className={'glossary_item-body'}>
+        {!item.term_id && <span className="loader loader_on"></span>}
         <div className={'glossary-item_column'}>
           <div className="glossary_word">
             <span
@@ -780,7 +866,9 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
             >{`${source.term} `}</span>
             <div>
               <InfoIcon size={16} />
-              <div className={'glossary_item-tooltip'}>{source.sentence}</div>
+              {source.sentence && (
+                <div className={'glossary_item-tooltip'}>{source.sentence}</div>
+              )}
             </div>
           </div>
           <div className={'glossary-description'}>{source.note}</div>
@@ -796,7 +884,9 @@ const GlossaryItem = ({item, modifyElement, deleteElement, highlight}) => {
             >{`${target.term} `}</span>
             <div>
               <InfoIcon size={16} />
-              <div className={'glossary_item-tooltip'}>{target.sentence}</div>
+              {target.sentence && (
+                <div className={'glossary_item-tooltip'}>{target.sentence}</div>
+              )}
             </div>
           </div>
           <div className={'glossary-description'}>{target.note}</div>

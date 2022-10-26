@@ -60,13 +60,13 @@ let SSE = {
     $(document).on('sse:glossary_set', function (ev, message) {
       SegmentActions.addGlossaryItemToCache(
         message.data.id_segment,
-        message.data.terms,
+        message.data.payload,
       )
     })
     $(document).on('sse:glossary_delete', function (ev, message) {
       SegmentActions.deleteGlossaryFromCache(
         message.data.id_segment,
-        message.data.term,
+        message.data.payload.term,
       )
     })
     $(document).on('sse:glossary_update', function (ev, message) {
@@ -82,19 +82,9 @@ let SSE = {
       })
     })
     $(document).on('sse:glossary_search', function (ev, message) {
-      SegmentActions.setGlossaryForSegment(
+      SegmentActions.setGlossaryForSegmentBySearch(
         message.data.id_segment,
-        // message.data.terms
-        new Array(Math.floor(Math.random() * (30 - 12 + 1) + 12))
-          .fill({})
-          .map((item, index) => ({
-            ...message.data.terms[0],
-            term_id: `${message.data.terms[0].term_id}_${index}`,
-            source: {
-              ...message.data.terms[0].source,
-              term: `${message.data.terms[0].source.term}_${index}`,
-            },
-          })),
+        message.data.terms,
       )
     })
     $(document).on('sse:glossary_check', function (ev, message) {

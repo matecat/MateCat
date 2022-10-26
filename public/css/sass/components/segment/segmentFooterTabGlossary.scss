@@ -209,6 +209,7 @@
   }
   .glossary_items {
     max-height: 423px;
+    min-height: 42px;
     overflow: auto;
     .glossary_item {
       padding: 24px 32px;
@@ -271,9 +272,23 @@
           color: $grey6;
         }
       }
+      .glossary_item-actions--disabled {
+        cursor: unset;
+        opacity: 0.5;
+        svg:hover {
+          color: unset;
+        }
+      }
       .glossary_item-body {
         display: flex;
         padding: 16px 0;
+
+        .loader.loader_on {
+          position: relative;
+          left: 0;
+          bottom: 0;
+          margin-right: 8px;
+        }
       }
 
       .glossary-item_column {
@@ -345,6 +360,10 @@
     }
     .glossary_word--highlight-blacklist {
       --highlightColor: 255, 47, 34;
+    }
+
+    .no-terms-result {
+      padding-top: 10px;
     }
 
     @keyframes pulse {
