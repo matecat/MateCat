@@ -67,7 +67,7 @@ class GlossaryWorker extends AbstractWorker {
         $client = $this->getMyMemoryClient();
 
         /** @var \Engines_Results_MyMemory_CheckGlossaryResponse $response */
-        $response = $client->glossaryCheck($payload['source'], $payload['target'], $payload['source_language'], $payload['target_language'],$payload['keys']);
+        $response = $client->glossaryCheck($payload['source'], $payload['target'], $payload['source_language'], $payload['target_language'], $payload['keys']);
         $matches = $response->matches;
 
         if($matches['id_segment'] === null){
@@ -240,6 +240,17 @@ class GlossaryWorker extends AbstractWorker {
         ];
 
         if($response->responseStatus == 200){
+
+            // reduce $payload['term']['metadata']['keys'] to simple array
+            $keys = $payload['term']['metadata']['keys'];
+            $keysAsArray = [];
+
+            foreach ($keys as $key){
+                $keysAsArray[] = $key;
+            }
+
+            $payload['term']['metadata']['keys'] = $keysAsArray;
+
             $message['payload'] = $payload;
         }
 

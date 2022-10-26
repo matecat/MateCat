@@ -570,6 +570,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             "target_language" => $targetLanguage,
             "keys" => $keys,
         ];
+
         $this->call( "get_glossary_relative_url", $payload, true, true );
 
         return $this->result;
@@ -592,6 +593,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 "password" => $password,
                 "term" => $term,
         ];
+
         $this->call( "set_glossary_relative_url", $payload, true, true );
 
         return $this->result;
