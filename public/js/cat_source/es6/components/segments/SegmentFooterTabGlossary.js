@@ -61,7 +61,7 @@ export const SegmentFooterTabGlossary = ({
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
   const [isLoading, setIsLoading] = useState(true)
-  const [haveKeysGlossary, setHaveKeysGlossary] = useState(true)
+  const [haveKeysGlossary, setHaveKeysGlossary] = useState(false)
 
   const previousSearchTermRef = useRef('')
   const scrollItemsRef = useRef()
@@ -217,22 +217,35 @@ export const SegmentFooterTabGlossary = ({
 
   // set domains by key
   useEffect(() => {
-    if (!selectsActive.keys.length || !domainsResponse) return
-    const selectedKey = selectsActive.keys[0].key
-    if (Array.isArray(domainsResponse[selectedKey])) {
-      setDomains(
-        domainsResponse[selectedKey].map(({domain, subdomains}, index) => ({
-          id: index.toString(),
-          name: domain,
-          subdomains,
-        })),
-      )
+    if (!selectsActive.keys.length || !domainsResponse) {
+      setDomains([])
+      return
     }
+    const selectedKeys = selectsActive.keys
+    const domainsResponseAllKeys = selectedKeys.reduce(
+      (acc, {key}) => [
+        ...acc,
+        ...(Array.isArray(domainsResponse[key])
+          ? [...domainsResponse[key]]
+          : []),
+      ],
+      [],
+    )
+    setDomains(
+      domainsResponseAllKeys.map(({domain, subdomains}, index) => ({
+        id: index.toString(),
+        name: domain,
+        subdomains,
+      })),
+    )
   }, [domainsResponse, selectsActive.keys])
 
   // set subdomains by domain
   useEffect(() => {
-    if (!selectsActive.domain) return
+    if (!selectsActive.domain || !selectsActive.domain?.subdomains) {
+      setSubdomains([])
+      return
+    }
     if (selectsActive.domain?.subdomains)
       setSubdomains(
         selectsActive.domain?.subdomains.map((name, index) => ({
@@ -257,7 +270,10 @@ export const SegmentFooterTabGlossary = ({
   }, [keys])
 
   useEffect(() => {
-    setSelectsActive((prevState) => ({...prevState, domain: domains[0]}))
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      domain: prevState.domain ? prevState.domain : domains[0],
+    }))
   }, [domains])
 
   useEffect(() => {
@@ -437,9 +453,44 @@ export const SegmentFooterTabGlossary = ({
       return
 
     setIsLoading(true)
-    if (modifyElement)
+    if (modifyElement) {
       SegmentActions.updateGlossaryItem(getRequestPayloadTemplate())
-    else SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
+    } else {
+      SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
+      CatToolActions.setHaveKeysGlossary(true)
+
+      const updatedDomains = keys.reduce(
+        (acc, {key}) => {
+          const aggregator = [
+            ...(acc[key]?.length ? acc[key] : []),
+            ...(!acc[key]?.length ||
+            !acc[key]?.find((item) => item.domain === domain.name)
+              ? [{domain: domain.name, subdomains: []}]
+              : []),
+          ]
+          return {
+            ...acc,
+            [key]: aggregator.map((item) =>
+              item.domain === domain.name
+                ? {
+                    domain: domain.name,
+                    subdomains: [
+                      ...new Set([...item.subdomains, subdomain.name]),
+                    ],
+                  }
+                : item,
+            ),
+          }
+        },
+        {...domainsResponse},
+      )
+
+      // dispatch actions set domains
+      CatToolActions.setDomains({
+        sid: segment.sid,
+        entries: {...domainsResponse, ...updatedDomains},
+      })
+    }
   }
 
   const openAddTerm = () => {
@@ -509,7 +560,7 @@ export const SegmentFooterTabGlossary = ({
             <Select
               className="glossary-select"
               name="glossary-term-tm"
-              label="Glossary"
+              label="Glossary*"
               placeholder="Select a glossary"
               multipleSelect="dropdown"
               showSearchBar={!isEmptyKeys}
@@ -554,7 +605,7 @@ export const SegmentFooterTabGlossary = ({
               <Select
                 className="glossary-select domain-select"
                 name="glossary-term-domain"
-                label="Domain"
+                label="Domain*"
                 placeholder="Select a domain"
                 showSearchBar
                 searchPlaceholder="Find a domain"
@@ -578,7 +629,8 @@ export const SegmentFooterTabGlossary = ({
                   row: <div className="domain-option">{name}</div>,
                   // insert button after last row
                   ...(index === optionsLength - 1 &&
-                    queryFilter.trim() && {
+                    queryFilter.trim() &&
+                    !domains.find(({name}) => name === queryFilter) && {
                       afterRow: (
                         <button
                           className="button-create-option"
@@ -604,7 +656,7 @@ export const SegmentFooterTabGlossary = ({
               <Select
                 className="glossary-select domain-select"
                 name="glossary-term-subdomain"
-                label="Subdomain"
+                label="Subdomain*"
                 placeholder="Select a subdomain"
                 showSearchBar
                 searchPlaceholder="Find a subdomain"
@@ -628,7 +680,8 @@ export const SegmentFooterTabGlossary = ({
                   row: <div className="domain-option">{name}</div>,
                   // insert button after last row
                   ...(index === optionsLength - 1 &&
-                    queryFilter.trim() && {
+                    queryFilter.trim() &&
+                    !subdomains.find(({name}) => name === queryFilter) && {
                       afterRow: (
                         <button
                           className="button-create-option"
@@ -748,7 +801,7 @@ export const SegmentFooterTabGlossary = ({
               onClick={onSubmitAddOrUpdateTerm}
               disabled={isLoading}
             >
-              Add
+              {modifyElement ? 'Update' : 'Add'}
             </button>
           </div>
         </div>
@@ -759,14 +812,10 @@ export const SegmentFooterTabGlossary = ({
     <div className={`tab sub-editor glossary ${active_class}`}>
       {showForm ? (
         getFormBox()
-      ) : (
+      ) : haveKeysGlossary ? (
         <>
           <div className={'glossary_search'}>
-            <div
-              className={`glossary_search-container${
-                !haveKeysGlossary ? ' glossary_search-container--disabled' : ''
-              }`}
-            >
+            <div className="glossary_search-container">
               <IconSearch />
               <input
                 name="search_term"
@@ -834,6 +883,13 @@ export const SegmentFooterTabGlossary = ({
             )}
           </div>
         </>
+      ) : (
+        <div className="no_keys_glossary">
+          <p>bla bla bla bla</p>
+          <button className={'glossary__button-add'} onClick={openAddTerm}>
+            + Add Term
+          </button>
+        </div>
       )}
     </div>
   )
@@ -861,7 +917,11 @@ const GlossaryItem = ({
     <div className="glossary_item">
       <div className={'glossary_item-header'}>
         <div className={'glossary_definition-container'}>
-          <span className={'glossary_definition'}>
+          <span
+            className={`glossary_definition${
+              !metadata.definition ? ' glossary_definition--hidden' : ''
+            }`}
+          >
             <GlossaryDefinitionIcon />
             {metadata.definition}
           </span>

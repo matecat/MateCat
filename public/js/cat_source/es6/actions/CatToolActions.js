@@ -17,6 +17,7 @@ import {Header} from '../components/header/cattol/Header'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getDomainsList} from '../api/getDomainsList'
+import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -257,6 +258,9 @@ let CatToolActions = {
           keys,
         })
       })
+
+      // check job keys have glossary (response sse channel)
+      checkJobKeysHaveGlossary()
     } else {
       AppDispatcher.dispatch({
         actionType: CattolConstants.UPDATE_TM_KEYS,
@@ -348,9 +352,10 @@ let CatToolActions = {
       actionType: CattolConstants.ON_TM_KEYS_CHANGE_STATUS,
     })
   },
-  setHaveKeysGlossary: () => {
+  setHaveKeysGlossary: (value) => {
     AppDispatcher.dispatch({
       actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
+      value,
     })
   },
 }

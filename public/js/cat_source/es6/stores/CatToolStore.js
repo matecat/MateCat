@@ -22,7 +22,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   clientId: undefined,
   tmKeys: null,
   keysDomains: null,
-  haveKeysGlossary: true,
+  haveKeysGlossary: false,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -208,7 +208,7 @@ AppDispatcher.register(function (action) {
       })
       break
     case CatToolConstants.HAVE_KEYS_GLOSSARY:
-      CatToolActions.retrieveJobKeys(true)
+      CatToolStore.setHaveKeysGlossary(action.value)
       CatToolStore.emitChange(
         CatToolConstants.HAVE_KEYS_GLOSSARY,
         CatToolStore.haveKeysGlossary,
