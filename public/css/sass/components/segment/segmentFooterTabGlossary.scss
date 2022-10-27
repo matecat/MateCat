@@ -165,10 +165,6 @@
     align-items: center;
   }
 
-  .glossary_search-container--disabled {
-    opacity: 0.5;
-  }
-
   input.glossary_search-input {
     width: 300px;
     font-size: 16px;
@@ -257,6 +253,9 @@
         svg {
           margin-right: 8px;
         }
+      }
+      .glossary_definition--hidden {
+        visibility: hidden;
       }
       .glossary_source {
         font-size: 12px;
@@ -438,6 +437,13 @@
         }
       }
     }
+  }
+
+  .no_keys_glossary {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .select--is-disabled {
