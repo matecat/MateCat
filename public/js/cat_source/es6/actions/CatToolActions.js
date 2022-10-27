@@ -17,7 +17,7 @@ import {Header} from '../components/header/cattol/Header'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getDomainsList} from '../api/getDomainsList'
-import SegmentConstants from '../constants/SegmentConstants'
+
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
@@ -341,6 +341,16 @@ let CatToolActions = {
       ...props,
       ...(UI.startSegmentId && {startSegmentId: UI.startSegmentId}),
       where: props.where ? props.where : 'center',
+    })
+  },
+  onTMKeysChangeStatus: () => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.ON_TM_KEYS_CHANGE_STATUS,
+    })
+  },
+  setHaveKeysGlossary: () => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
     })
   },
 }

@@ -5,6 +5,7 @@ import _ from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
+import CatToolActions from '../actions/CatToolActions'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -21,6 +22,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   clientId: undefined,
   tmKeys: null,
   keysDomains: null,
+  haveKeysGlossary: true,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -74,6 +76,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getKeysDomains: function () {
     return this.keysDomains
+  },
+  getHaveKeysGlossary: function () {
+    return this.haveKeysGlossary
+  },
+  setHaveKeysGlossary: function (value) {
+    this.haveKeysGlossary = value
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
@@ -192,6 +200,19 @@ AppDispatcher.register(function (action) {
       CatToolStore.emitChange(CatToolConstants.ON_RENDER, {
         ...action,
       })
+      break
+    case CatToolConstants.ON_TM_KEYS_CHANGE_STATUS:
+      CatToolActions.retrieveJobKeys(true)
+      CatToolStore.emitChange(CatToolConstants.ON_TM_KEYS_CHANGE_STATUS, {
+        ...action,
+      })
+      break
+    case CatToolConstants.HAVE_KEYS_GLOSSARY:
+      CatToolActions.retrieveJobKeys(true)
+      CatToolStore.emitChange(
+        CatToolConstants.HAVE_KEYS_GLOSSARY,
+        CatToolStore.haveKeysGlossary,
+      )
       break
   }
 })

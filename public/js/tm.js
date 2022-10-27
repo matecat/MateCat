@@ -1312,7 +1312,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
           $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
           // TODO: update keys for glossary
-          CatToolActions.retrieveJobKeys(true)
+          CatToolActions.onTMKeysChangeStatus()
         })
         .catch(() => {
           UI.showErrorOnActiveTMTable(
@@ -1570,7 +1570,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
           }, 500)
           // TODO: update keys for glossary
-          CatToolActions.retrieveJobKeys(true)
+          if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
         })
         .catch(() => {
           UI.showErrorOnActiveTMTable(
