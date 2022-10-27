@@ -41,6 +41,7 @@ class GlossaryWorker extends AbstractWorker {
             self::GET_ACTION,
             self::SEARCH_ACTION,
             self::SET_ACTION,
+            self::KEYS_ACTION,
             self::UPDATE_ACTION,
         ];
 
