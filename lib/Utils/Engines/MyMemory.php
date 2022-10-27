@@ -17,21 +17,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     protected $de = 'pro_655321@matecat.com';
 
     /**
-     ***************************
-     * 2022 NEW API ROUTES
-     ***************************
-     */
-    protected $domains_relative_url = 'v2/glossary/domains';
-    protected $keys_with_glossary_relative_url = 'v2/glossary/keys';
-    protected $import_new_relative_url = 'v2/glossary/import';
-    protected $check_glossary_relative_url = 'v2/glossary/check';
-    protected $update_glossary_relative_url = 'v2/glossary/update';
-    protected $delete_glossary_relative_url = 'v2/glossary/delete';
-    protected $set_glossary_relative_url = 'v2/glossary/set';
-    protected $get_glossary_relative_url = 'v2/glossary/get';
-    protected $keys_glossary_relative_url = 'v2/glossary/keys';
-
-    /**
      * @var string
      */
     protected $content_type = 'json';
@@ -89,29 +74,27 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         switch ( $functionName ) {
 
-            case 'domains_relative_url':
+            case 'glossary_domains_relative_url':
                 $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-
-            case 'check_glossary_relative_url':
+            case 'glossary_check_relative_url':
                 $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-            case 'update_glossary_relative_url':
+            case 'glossary_update_relative_url':
                 $result_object = Engines_Results_MyMemory_UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-            case 'delete_glossary_relative_url':
+            case 'glossary_delete_relative_url':
                 $result_object = Engines_Results_MyMemory_DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-            case 'set_glossary_relative_url':
+            case 'glossary_set_relative_url':
                 $result_object = Engines_Results_MyMemory_SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-            case 'get_glossary_relative_url':
+            case 'glossary_get_relative_url':
                 $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-            case 'keys_glossary_relative_url':
+            case 'glossary_keys_relative_url':
                 $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-
             case 'tags_projection' :
                 $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
@@ -423,31 +406,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
-                if ( count( $line ) < 2 ) {
-                    throw new RuntimeException( "No valid glossary file provided. Field separator could be not valid." );
-                }
-
-                if ( $line_num == 0 ) {
-                    list( $source_lang, $target_lang, ) = $line;
-
-                    //eventually, remove BOM from source language
-                    $bom         = pack( 'H*', 'EFBBBF' );
-                    $source_lang = preg_replace( "/^$bom/", "", $source_lang );
-
-                    if ( !Langs_Languages::getInstance()->isEnabled( $source_lang ) ) {
-                        throw new RuntimeException( "The source language specified in the glossary is not supported: " . $source_lang );
-                    }
-
-                    if ( !Langs_Languages::getInstance()->isEnabled( $target_lang ) ) {
-                        throw new RuntimeException( "The target language specified in the glossary is not supported: " . $target_lang );
-                    }
-
-                    if ( empty( $source_lang ) || empty( $target_lang ) ) {
-                        throw new RuntimeException( "No language definition found in glossary file." );
-                    }
-                    continue;
-                }
-
                 //copy stream to stream
                 $newFile->fputcsv( $line );
 
@@ -471,7 +429,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         // validate the CSV
         if(!$this->validateCSVFile($file)){
-            throw new \Exception('File CSV is not valid');
+            throw new \Exception('The glossary file is not valid');
         }
 
         $postFields = [
@@ -514,7 +472,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 'target_language' => $targetLanguage,
                 'keys' => $keys,
         ];
-        $this->call( "check_glossary_relative_url", $payload, true, true );
+        $this->call( "glossary_check_relative_url", $payload, true, true );
 
         return $this->result;
     }
@@ -530,7 +488,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             'de' => $this->de,
             'keys' => $keys,
         ];
-        $this->call( "domains_relative_url", $payload, true, true );
+        $this->call( "glossary_domains_relative_url", $payload, true, true );
 
         return $this->result;
     }
@@ -552,7 +510,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 "password" => $password,
                 "term" => $term,
         ];
-        $this->call( "delete_glossary_relative_url", $payload, true, true );
+        $this->call( "glossary_delete_relative_url", $payload, true, true );
 
         return $this->result;
     }
@@ -575,7 +533,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             "keys" => $keys,
         ];
 
-        $this->call( "get_glossary_relative_url", $payload, true, true );
+        $this->call( "glossary_get_relative_url", $payload, true, true );
 
         return $this->result;
     }
@@ -591,7 +549,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 'de' => $this->de,
                 'keys' => $keys,
         ];
-        $this->call( "keys_glossary_relative_url", $payload, true, true );
+        $this->call( "glossary_keys_relative_url", $payload, true, true );
 
         return $this->result;
     }
@@ -614,7 +572,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 "term" => $term,
         ];
 
-        $this->call( "set_glossary_relative_url", $payload, true, true );
+        $this->call( "glossary_set_relative_url", $payload, true, true );
 
         return $this->result;
     }
@@ -636,7 +594,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 "password" => $password,
                 "term" => $term,
         ];
-        $this->call( "update_glossary_relative_url", $payload, true, true );
+        $this->call( "glossary_update_relative_url", $payload, true, true );
 
         return $this->result;
     }
