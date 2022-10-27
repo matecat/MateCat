@@ -51,7 +51,11 @@ export const FilesMenu = ({projectName}) => {
       CatToolActions.closeSubHeader()
       const current = SegmentStore.getCurrentSegment()
       setCurrentSegment(current.sid)
-      setCurrentFile(parseInt(current.id_file))
+      // check if use id_file or id_file_part
+      const idFileProp = files.find(({id}) => id === parseInt(current.id_file))
+        ? 'id_file'
+        : 'id_file_part'
+      setCurrentFile(parseInt(current[idFileProp]))
     }
     setMenuVisible(!menuVisible)
   }

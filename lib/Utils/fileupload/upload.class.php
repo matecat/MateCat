@@ -24,6 +24,7 @@ class UploadHandler {
                 'delete_type'             => "", //'DELETE',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
+                'max_tmx_file_size'       => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
                 'max_file_size'           => INIT::$MAX_UPLOAD_FILE_SIZE,
                 'min_file_size'           => 1,
             // The maximum number of files for the upload directory:
@@ -149,9 +150,14 @@ class UploadHandler {
             $file_size = $_SERVER[ 'CONTENT_LENGTH' ];
         }
 
-        if ( $this->options[ 'max_file_size' ] && (
-                        $file_size > $this->options[ 'max_file_size' ] ||
-                        $file->size > $this->options[ 'max_file_size' ] )
+        // check if is a TMX
+        // for TMX the limit is different (300Mb vs 100Mb)
+        $file_pathinfo = pathinfo($file->name);
+        $max_file_size = ($file_pathinfo['extension'] === 'tmx') ? $this->options[ 'max_tmx_file_size' ] : $this->options[ 'max_file_size' ] ;
+
+        if ( $max_file_size && (
+                        $file_size > $max_file_size ||
+                        $file->size > $max_file_size )
         ) {
             $file->error = 'maxFileSize';
 
