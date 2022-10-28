@@ -8,7 +8,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+shift+space',
-          mac: 'ctrl+shift+space',
+          mac: 'option+space',
         },
       },
       wordJoiner: {
@@ -16,7 +16,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+alt+space',
-          mac: 'ctrl+option+space',
+          mac: 'shift+space',
         },
       },
     },
