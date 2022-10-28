@@ -77,7 +77,7 @@ const Shortcuts = {
         equivalent: 'click on > between source and target',
         keystrokes: {
           standard: 'ctrl+i',
-          mac: 'option+ctrl+i',
+          mac: 'ctrl+i',
         },
       },
       undoInSegment: {
