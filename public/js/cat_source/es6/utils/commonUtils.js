@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Cookies from 'js-cookie'
-
+import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
@@ -533,6 +533,21 @@ const CommonUtils = {
   //Plugins
   parseFiles: (files) => {
     return files
+  },
+
+  /**
+   * Returns true if the current OS is MacOS or iOS, false otherwise
+   *
+   * @returns {boolean}
+   */
+  isMacOS: () => {
+    const os = Platform.os && Platform.os.family
+    return (
+      os &&
+      (os.indexOf('Mac') >= 0 ||
+        os.indexOf('OS X') >= 0 ||
+        os.indexOf('iOS') >= 0)
+    )
   },
 }
 
