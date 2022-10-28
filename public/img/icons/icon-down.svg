@@ -1,15 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="10px" viewBox="0 0 16 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 56.2 (81672) - https://sketch.com -->
-    <title>Icons/iconNeutralDarkGray/Outline/Arrow/Down</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Item/select/team" transform="translate(-121.000000, -16.000000)" fill="#788190">
-            <g id="Icons/iconNeutralDarkGray/Outline/Arrow/Down" transform="translate(121.000000, 13.000000)">
-                <g id="down-arrow" transform="translate(0.000000, 3.666667)">
-                    <path d="M15.7675214,0.218803419 C15.5487179,3.40005801e-16 15.1931624,3.40005801e-16 14.974359,0.218803419 L8,7.20683761 L1.01196581,0.218803419 C0.793162393,3.40005801e-16 0.437606838,3.40005801e-16 0.218803419,0.218803419 C-3.1918912e-16,0.437606838 -3.1918912e-16,0.793162393 0.218803419,1.01196581 L7.58974359,8.38290598 C7.6991453,8.49230769 7.83589744,8.54700855 7.98632479,8.54700855 C8.12307692,8.54700855 8.27350427,8.49230769 8.38290598,8.38290598 L15.7538462,1.01196581 C15.9863248,0.793162393 15.9863248,0.437606838 15.7675214,0.218803419 Z" id="Shape"></path>
-                </g>
-            </g>
-        </g>
-    </g>
-</svg>
+<svg width="16" height="10" xmlns="http://www.w3.org/2000/svg"><path d="M15.768.885a.561.561 0 0 0-.794 0L8 7.874 1.012.885a.561.561 0 0 0-.793.794l7.37 7.37c.11.11.247.165.397.165a.57.57 0 0 0 .397-.164l7.37-7.371a.55.55 0 0 0 .015-.794Z" fill="#788190" fill-rule="evenodd"/></svg>
