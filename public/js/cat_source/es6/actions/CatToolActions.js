@@ -15,6 +15,10 @@ import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import ModalsActions from './ModalsActions'
 import {Header} from '../components/header/cattol/Header'
 import SegmentUtils from '../utils/segmentUtils'
+import {getTmKeysJob} from '../api/getTmKeysJob'
+import {getDomainsList} from '../api/getDomainsList'
+import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
+
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
@@ -238,7 +242,46 @@ let CatToolActions = {
       qr: qr,
     })
   },
+  retrieveJobKeys: function (forceUpdate = false) {
+    const jobKeys = CatToolStore.getJobTmKeys()
+    const domains = CatToolStore.getKeysDomains()
+    if (!jobKeys || forceUpdate) {
+      getTmKeysJob().then(({tm_keys: tmKeys}) => {
+        // filter not private keys
+        const filteredKeys = tmKeys.filter(({is_private}) => !is_private)
+        getDomainsList({
+          keys: filteredKeys.map(({key}) => key),
+        })
+        const keys = filteredKeys.map((item) => ({...item, id: item.key}))
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.UPDATE_TM_KEYS,
+          keys,
+        })
+      })
 
+      // check job keys have glossary (response sse channel)
+      checkJobKeysHaveGlossary()
+    } else {
+      AppDispatcher.dispatch({
+        actionType: CattolConstants.UPDATE_TM_KEYS,
+        keys: jobKeys,
+      })
+      //From sse channel
+      if (domains) {
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.UPDATE_DOMAINS,
+          entries: domains,
+        })
+      }
+    }
+  },
+  setDomains: ({entries, sid}) => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.UPDATE_DOMAINS,
+      sid,
+      entries,
+    })
+  },
   /**
    * Function to add notifications to the interface
    * notification object with the following properties
@@ -302,6 +345,17 @@ let CatToolActions = {
       ...props,
       ...(UI.startSegmentId && {startSegmentId: UI.startSegmentId}),
       where: props.where ? props.where : 'center',
+    })
+  },
+  onTMKeysChangeStatus: () => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.ON_TM_KEYS_CHANGE_STATUS,
+    })
+  },
+  setHaveKeysGlossary: (value) => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
+      value,
     })
   },
 }

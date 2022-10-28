@@ -24,17 +24,17 @@ setTestConfigFile();
 
 Bootstrap::start();
 
-TestHelper::init();
-TestHelper::resetDb();
-
-function startConnection() {
-    $conn = Database::obtain(
-            INIT::$DB_SERVER, INIT::$DB_USER,
-            INIT::$DB_PASS, INIT::$DB_DATABASE
-    );
-    $conn->getConnection();
-}
-
-startConnection();
-
-INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);
+//TestHelper::init();
+//TestHelper::resetDb();
+//
+//function startConnection() {
+//    $conn = Database::obtain(
+//            INIT::$DB_SERVER, INIT::$DB_USER,
+//            INIT::$DB_PASS, INIT::$DB_DATABASE
+//    );
+//    $conn->getConnection();
+//}
+//
+//startConnection();
+//
+//INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);

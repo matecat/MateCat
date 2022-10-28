@@ -7,7 +7,7 @@
  * Time: 11.59
  *
  */
-abstract class Engines_AbstractEngine implements Engines_EngineInterface {
+abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @var EnginesModel_EngineStruct

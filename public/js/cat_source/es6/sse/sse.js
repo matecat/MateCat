@@ -54,25 +54,44 @@ let SSE = {
     $(document).on('sse:glossary_get', function (ev, message) {
       SegmentActions.setGlossaryForSegment(
         message.data.id_segment,
-        message.data.matches,
+        message.data.terms,
       )
     })
     $(document).on('sse:glossary_set', function (ev, message) {
-      let match = message.data.matches[0]
-      match.id = match.id_match
-      SegmentActions.addGlossaryItemToCache(message.data.id_segment, match)
+      SegmentActions.addGlossaryItemToCache(
+        message.data.id_segment,
+        message.data.payload,
+      )
     })
-    // $(document).on('sse:glossary_delete', function (ev, message) {
-    //   SegmentActions.deleteGlossaryFromCache(
-    //     message.data.id_segment,
-    //     message.data.matchs[0],
-    //   )
-    // })
+    $(document).on('sse:glossary_delete', function (ev, message) {
+      SegmentActions.deleteGlossaryFromCache(
+        message.data.id_segment,
+        message.data.payload.term,
+      )
+    })
     $(document).on('sse:glossary_update', function (ev, message) {
       SegmentActions.updateglossaryCache(
         message.data.id_segment,
-        message.data.matches,
+        message.data.payload,
       )
+    })
+    $(document).on('sse:glossary_domains', function (ev, message) {
+      CatToolActions.setDomains({
+        sid: message.data.id_segment,
+        ...message.data,
+      })
+    })
+    $(document).on('sse:glossary_search', function (ev, message) {
+      SegmentActions.setGlossaryForSegmentBySearch(
+        message.data.id_segment,
+        message.data.terms,
+      )
+    })
+    $(document).on('sse:glossary_check', function (ev, message) {
+      SegmentActions.addQaCheck(message.data.id_segment, message.data)
+    })
+    $(document).on('sse:glossary_keys', function (ev, message) {
+      CatToolActions.setHaveKeysGlossary(message.data.has_glossary)
     })
     if (config.translation_matches_enabled) {
       $(document).on('sse:contribution', function (ev, message) {
@@ -132,6 +151,10 @@ let SSE = {
       'glossary_set',
       'glossary_delete',
       'glossary_update',
+      'glossary_domains',
+      'glossary_search',
+      'glossary_check',
+      'glossary_keys',
     ]
     this.eventIdentifier = 'sse:' + this._type
 

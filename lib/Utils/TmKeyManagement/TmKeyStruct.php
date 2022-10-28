@@ -6,7 +6,7 @@
  * Date: 02/09/14
  * Time: 13.35
  */
-class TmKeyManagement_TmKeyStruct extends stdClass {
+class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
 
     /**
      * @var int This key is for tm. 0 or 1
@@ -106,12 +106,19 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
      *      $in_users > 1 and $is_shared == true
      * @var bool
      */
-    protected $is_shared = false;
+    public $is_shared = false;
 
     /**
      * @var int How much readable chars for hashed keys
      */
     protected $readable_chars = 5;
+
+    /**
+     * Used exclusively for JSON rendering purposes
+     *
+     * @var bool
+     */
+    public $complete_format = false;
 
     /**
      * When a key return back from the client we have to know if it is hashed
@@ -208,4 +215,38 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
         return $this->in_users;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize() {
+
+        if($this->complete_format){
+            return [
+                'tm' => $this->tm,
+                'glos' => $this->glos,
+                'owner' => $this->owner,
+                'uid_transl' => $this->uid_transl,
+                'uid_rev' => $this->uid_rev,
+                'name' => $this->name,
+                'key' => $this->key,
+                'r' => $this->r,
+                'w' => $this->w,
+                'r_transl' => $this->r_transl,
+                'w_transl' => $this->w_transl,
+                'r_rev' => $this->r_rev,
+                'w_rev' => $this->w_rev,
+                'is_shared' => $this->is_shared,
+                'is_private' => $this->isEncryptedKey()
+            ];
+        }
+
+        return [
+            'tm' => $this->tm,
+            'glos' => $this->glos,
+            'owner' => $this->owner,
+            'name' => $this->name,
+            'key' => $this->key,
+            'is_shared' => $this->is_shared,
+        ];
+    }
 }
