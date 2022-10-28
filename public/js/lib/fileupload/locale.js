@@ -14,7 +14,7 @@
 window.locale = {
     "fileupload": {
         "errors": {
-            "maxFileSize": "MateCat beta supports up to 30 MB.",
+            "maxFileSize": "File is too big. MateCat supports up to 100 MB for regular files, and up to 300MB for TMX files.",
             "minFileSize": "File is empty", //minFileSize in options is set to undefined, so this error trigger for 0 byte files
             "acceptFileTypes": "File format not supported",
             "maxNumberOfFiles": "Max number of files exceeded",
