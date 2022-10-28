@@ -218,6 +218,7 @@ class GlossaryWorker extends AbstractWorker {
      * @param $payload
      *
      * @throws \StompException
+     * @throws \Exception
      */
     private function search( $payload )
     {

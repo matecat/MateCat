@@ -14,11 +14,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * @var string
      */
-    protected $de = 'pro_655321@matecat.com';
-
-    /**
-     * @var string
-     */
     protected $content_type = 'json';
 
     /**
@@ -465,7 +460,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryCheck($source, $target, $sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-                'de' => $this->de,
+                'de' => \INIT::$MYMEMORY_API_KEY,
                 'source' => $source,
                 'target' => $target,
                 'source_language' => $sourceLanguage,
@@ -485,7 +480,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryDomains($keys = [])
     {
         $payload = [
-            'de' => $this->de,
+            'de' => \INIT::$MYMEMORY_API_KEY,
             'keys' => $keys,
         ];
         $this->call( "glossary_domains_relative_url", $payload, true, true );
@@ -504,7 +499,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryDelete($idSegment, $idJob, $password, $term)
     {
         $payload = [
-                'de' => $this->de,
+                'de' => \INIT::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job" => $idJob,
                 "password" => $password,
@@ -526,7 +521,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
     {
         $payload = [
-            'de' => $this->de,
+            'de' => \INIT::$MYMEMORY_API_KEY,
             "source" => $source,
             "source_language" => $sourceLanguage,
             "target_language" => $targetLanguage,
@@ -546,7 +541,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryKeys($keys = [])
     {
         $payload = [
-                'de' => $this->de,
+                'de' => \INIT::$MYMEMORY_API_KEY,
                 'keys' => $keys,
         ];
         $this->call( "glossary_keys_relative_url", $payload, true, true );
@@ -565,7 +560,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossarySet($idSegment, $idJob, $password, $term)
     {
         $payload = [
-                'de' => $this->de,
+                'de' => \INIT::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job" => $idJob,
                 "password" => $password,
@@ -588,7 +583,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryUpdate($idSegment, $idJob, $password, $term)
     {
         $payload = [
-                'de' => $this->de,
+                'de' => \INIT::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job" => $idJob,
                 "password" => $password,
