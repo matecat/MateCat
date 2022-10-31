@@ -83,7 +83,7 @@ export const SegmentFooterTabGlossary = ({
         translatedDescription,
         translatedExample,
       } = termForm
-      const {keys = {}, domain = {}, subdomain = {}} = selectsActive
+      const {keys = {}, domain, subdomain} = selectsActive
       const {
         term_id = null,
         matching_words = null,
@@ -115,8 +115,8 @@ export const SegmentFooterTabGlossary = ({
             ...(term
               ? {key, key_name}
               : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
-            domain: domain.name,
-            subdomain: subdomain.name,
+            domain: domain ? domain.name : '',
+            subdomain: subdomain ? subdomain.name : '',
             create_date,
             last_update,
           }
@@ -155,6 +155,7 @@ export const SegmentFooterTabGlossary = ({
       setIsLoading(false)
       setSearchTerm('')
       resetForm()
+      refreshGlossary()
     }
     const onReceiveGlossary = () => {
       setIsLoading(false)
@@ -232,6 +233,33 @@ export const SegmentFooterTabGlossary = ({
       )
     }
   }, [segment.sid, segment.segment, resetForm])
+
+  // error listener for set/update/delete
+  useEffect(() => {
+    const onError = (sid, error) => setIsLoading(false)
+
+    SegmentStore.addListener(SegmentConstants.ERROR_ADD_GLOSSARY_ITEM, onError)
+    SegmentStore.addListener(SegmentConstants.ERROR_CHANGE_GLOSSARY, onError)
+    SegmentStore.addListener(
+      SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
+      onError,
+    )
+
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
+        onError,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        onError,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
+        onError,
+      )
+    }
+  }, [])
 
   // set domains by key
   useEffect(() => {
@@ -330,22 +358,6 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     if (notifyLoadingStatus) notifyLoadingStatus({code, isLoading})
   }, [isLoading, code, notifyLoadingStatus])
-
-  // check if should retry terms after user created a new one (2 seconds delay)
-  useEffect(() => {
-    if (!terms.find(({term_id}) => !term_id)) return
-
-    const timeOut = setTimeout(() => {
-      console.log('Retry GET request terms after created a new one term')
-      SegmentActions.getGlossaryForSegment({
-        sid: segment.sid,
-        text: segment.segment,
-        shouldRefresh: true,
-      })
-    }, 2000)
-
-    return () => clearTimeout(timeOut)
-  }, [terms, segment.sid, segment.segment])
 
   return (
     <TabGlossaryContext.Provider

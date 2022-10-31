@@ -486,4 +486,16 @@
   .search_term_reset_button--visible {
     visibility: visible;
   }
+
+  .select_highlight_mandatory {
+    .select-with-icon__wrapper {
+      .select {
+        border: 1px solid red;
+      }
+    }
+  }
+
+  .highlight_mandatory {
+    border: 1px solid red !important;
+  }
 }

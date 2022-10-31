@@ -29,8 +29,12 @@ export const GlossaryItem = ({
             <GlossaryDefinitionIcon />
             {metadata.definition}
           </span>
-          <span className={'glossary_badge'}>{metadata.domain}</span>
-          <span className={'glossary_badge'}>{metadata.subdomain}</span>
+          {metadata.domain && (
+            <span className={'glossary_badge'}>{metadata.domain}</span>
+          )}
+          {metadata.subdomain && (
+            <span className={'glossary_badge'}>{metadata.subdomain}</span>
+          )}
           <div className={'glossary_source'}>
             <b>{metadata.key_name}</b>
             <span>{metadata.last_update}</span>

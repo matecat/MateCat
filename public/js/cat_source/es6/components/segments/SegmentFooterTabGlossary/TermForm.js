@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useState} from 'react'
 import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import {Select} from '../../common/Select'
@@ -27,6 +27,10 @@ const TermForm = () => {
     segment,
   } = useContext(TabGlossaryContext)
 
+  const [highlightMandatoryOnSubmit, setHighlightMandatoryOnSubmit] = useState(
+    {},
+  )
+
   const {
     DEFINITION,
     ORIGINAL_TERM,
@@ -45,18 +49,18 @@ const TermForm = () => {
   const updateTermForm = (key, value) =>
     setTermForm((prevState) => ({...prevState, [key]: value}))
 
+  const resetHightlightMandatory = () => setHighlightMandatoryOnSubmit({})
+
   const onSubmitAddOrUpdateTerm = () => {
     // check mandatory fields
     const {originalTerm, translatedTerm} = termForm
     const {keys, domain, subdomain} = selectsActive
-    if (
-      !originalTerm ||
-      !translatedTerm ||
-      !keys.length ||
-      !domain ||
-      !subdomain
-    )
-      return
+    setHighlightMandatoryOnSubmit({
+      originalTerm: !originalTerm,
+      translatedTerm: !translatedTerm,
+      keys: !keys.length,
+    })
+    if (!originalTerm || !translatedTerm || !keys.length) return
 
     setIsLoading(true)
     if (modifyElement) {
@@ -65,31 +69,36 @@ const TermForm = () => {
       SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
       CatToolActions.setHaveKeysGlossary(true)
 
-      const updatedDomains = keys.reduce(
-        (acc, {key}) => {
-          const aggregator = [
-            ...(acc[key]?.length ? acc[key] : []),
-            ...(!acc[key]?.length ||
-            !acc[key]?.find((item) => item.domain === domain.name)
-              ? [{domain: domain.name, subdomains: []}]
-              : []),
-          ]
-          return {
-            ...acc,
-            [key]: aggregator.map((item) =>
-              item.domain === domain.name
-                ? {
-                    domain: domain.name,
-                    subdomains: [
-                      ...new Set([...item.subdomains, subdomain.name]),
-                    ],
-                  }
-                : item,
-            ),
-          }
-        },
-        {...domainsResponse},
-      )
+      const updatedDomains = domain
+        ? keys.reduce(
+            (acc, {key}) => {
+              const aggregator = [
+                ...(acc[key]?.length ? acc[key] : []),
+                ...(!acc[key]?.length ||
+                !acc[key]?.find((item) => item.domain === domain.name)
+                  ? [{domain: domain.name, subdomains: []}]
+                  : []),
+              ]
+              return {
+                ...acc,
+                [key]: aggregator.map((item) =>
+                  item.domain === domain.name
+                    ? {
+                        domain: domain.name,
+                        subdomains: [
+                          ...new Set([
+                            ...item.subdomains,
+                            ...(subdomain?.name ? [subdomain.name] : []),
+                          ]),
+                        ],
+                      }
+                    : item,
+                ),
+              }
+            },
+            {...domainsResponse},
+          )
+        : []
 
       // dispatch actions set domains
       CatToolActions.setDomains({
@@ -112,7 +121,11 @@ const TermForm = () => {
         </div>
         <div className={'glossary-tm-container'}>
           <Select
-            className="glossary-select"
+            className={`glossary-select${
+              highlightMandatoryOnSubmit.keys
+                ? ' select_highlight_mandatory'
+                : ''
+            }`}
             name="glossary-term-tm"
             label="Glossary*"
             placeholder="Select a glossary"
@@ -126,6 +139,7 @@ const TermForm = () => {
             checkSpaceToReverse={false}
             isDisabled={!!modifyElement}
             onToggleOption={(option) => {
+              resetHightlightMandatory()
               if (option) {
                 const {keys: activeKeys} = selectsActive
                 if (activeKeys.some((item) => item.id === option.id)) {
@@ -159,7 +173,7 @@ const TermForm = () => {
             <Select
               className="glossary-select domain-select"
               name="glossary-term-domain"
-              label="Domain*"
+              label="Domain"
               placeholder="Select a domain"
               showSearchBar
               searchPlaceholder="Find a domain"
@@ -210,7 +224,7 @@ const TermForm = () => {
             <Select
               className="glossary-select domain-select"
               name="glossary-term-subdomain"
-              label="Subdomain*"
+              label="Subdomain"
               placeholder="Select a subdomain"
               showSearchBar
               searchPlaceholder="Find a subdomain"
@@ -264,21 +278,33 @@ const TermForm = () => {
         <div className={'input-with-label__wrapper'}>
           <label>Original term*</label>
           <input
+            className={`${
+              highlightMandatoryOnSubmit.originalTerm
+                ? 'highlight_mandatory'
+                : ''
+            }`}
             name="glossary-term-original"
             value={termForm[ORIGINAL_TERM]}
-            onChange={(event) =>
+            onChange={(event) => {
+              resetHightlightMandatory()
               updateTermForm(ORIGINAL_TERM, event.target.value)
-            }
+            }}
           />
         </div>
         <div className={'input-with-label__wrapper'}>
           <label>Translated term*</label>
           <input
+            className={`${
+              highlightMandatoryOnSubmit.translatedTerm
+                ? 'highlight_mandatory'
+                : ''
+            }`}
             name="glossary-term-translated"
             value={termForm[TRANSLATED_TERM]}
-            onChange={(event) =>
+            onChange={(event) => {
+              resetHightlightMandatory()
               updateTermForm(TRANSLATED_TERM, event.target.value)
-            }
+            }}
           />
         </div>
       </div>
