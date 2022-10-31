@@ -321,13 +321,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( $function, $parameters, true );
 
-        \Log::doJsonLog('PIPPO ---> ' . $this->result->responseData['UUID']);
-
-        if(isset($this->result->responseData['UUID'])){
-            $uuid = $this->result->responseData['UUID'];
-            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
-        }
-
         if ( $this->result->responseStatus != "200" &&
                 ( $this->result->responseStatus != "404" ||
                         $this->result->responseDetails != "NO ID FOUND" )
