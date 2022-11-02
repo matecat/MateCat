@@ -27,6 +27,7 @@ export const Select = ({
   options,
   activeOption,
   activeOptions,
+  mostPopularOptions,
   isValid = false,
   showValidation = false,
   showSearchBar = false,
@@ -265,17 +266,23 @@ Select.propTypes = {
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string,
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       name: PropTypes.string,
     }),
   ),
   activeOption: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     name: PropTypes.string,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string,
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      name: PropTypes.string,
+    }),
+  ),
+  mostPopularOptions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       name: PropTypes.string,
     }),
   ),

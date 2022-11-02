@@ -67,7 +67,7 @@ export const Dropdown = ({
         .filter((option) => {
           return (
             option.name.toLowerCase().indexOf(lowerQueryFilter) != -1 ||
-            option.id.toLowerCase().indexOf(lowerQueryFilter) != -1
+            option.id.toString().toLowerCase().indexOf(lowerQueryFilter) != -1
           )
         })
         .sort((optionA, optionB) => {
@@ -380,23 +380,23 @@ Dropdown.propTypes = {
   listRef: PropTypes.any,
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string,
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       name: PropTypes.string,
     }),
   ).isRequired,
   activeOption: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     name: PropTypes.string,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string,
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       name: PropTypes.string,
     }),
   ),
   mostPopularOptions: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string,
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       name: PropTypes.string,
     }),
   ),

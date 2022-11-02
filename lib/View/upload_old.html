@@ -70,8 +70,7 @@
             currentTargetLang: '${currentTargetLang | string: []}',
             currentSourceLang: '${currentSourceLang | string: []}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-            subject_array: ${subjects | string:[]]}
+            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
         };
         /*]]>*/
     </script>
@@ -94,14 +93,14 @@
 </div>
 
 <div class="new_project__page"/>
-<!--<div class="wrapper-claim">
+<div class="wrapper-claim">
     <div class="wrapper-claim-content">
         <h1>The CAT tool that works for you</h1>
     </div>
-</div>-->
+</div>
 
 
-<!--<div class="wrapper-upload">
+<div class="wrapper-upload">
     <div id="matecat-cat"/>
     <div id="languageSelector"/>
     <div class="translation-row">
@@ -125,7 +124,7 @@
                         <div class="scrolling menu">
                             <tal:block tal:repeat="team teams">
                                 <div class="item" tal:attributes="data-value team/id" tal:content="team/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                             </tal:block>
                         </div>
@@ -152,13 +151,13 @@
                             <div class="divider"></div>
                             <tal:block tal:repeat="language source_languages">
                                 <div class="item" tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                                 <div class="item" tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                                 <div class="item" tal:condition="php: language['code'] NE 'en-US'" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                             </tal:block>
                         </div>
@@ -196,19 +195,19 @@
 
                             <tal:block tal:repeat="language target_languages">
                                 <div class="item" tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" data-selected="selected" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                                 <div class="item" tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                                 <div class="item" tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="data-value language/code; data-direction language/direction" tal:content="language/name">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                             </tal:block>
                         </div>
                     </div>
                 </div>
-                &lt;!&ndash;<a href="#" id="multiple-link">Multiple languages?</a>&ndash;&gt;
+                <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
             </div>
 
 
@@ -227,7 +226,7 @@
                         <div class="scrolling menu">
                             <tal:block tal:repeat="subject subject_array">
                                 <div class="item" tal:attributes="data-value subject/key" tal:content="subject/display">
-                                    -&#45;&#45;
+                                    ---
                                 </div>
                             </tal:block>
                         </div>
@@ -352,7 +351,7 @@
         <p class="enter">Press Enter</p>
     </div>
 
-</div>-->
+</div>
 
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">
