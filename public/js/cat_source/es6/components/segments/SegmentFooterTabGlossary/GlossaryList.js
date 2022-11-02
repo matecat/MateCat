@@ -28,6 +28,8 @@ const GlossaryList = () => {
     domains,
     subdomains,
     getRequestPayloadTemplate,
+    termsStatusDeleting,
+    setTermsStatusDeleting,
   } = useContext(TabGlossaryContext)
 
   const [termHighlight, setTermHighlight] = useState(undefined)
@@ -113,6 +115,7 @@ const GlossaryList = () => {
 
   const onDeleteItem = (term) => {
     const {term_id, metadata} = term
+    setTermsStatusDeleting((prevState) => [...prevState, term_id])
     SegmentActions.deleteGlossaryItem(
       getRequestPayloadTemplate({
         term: {term_id, metadata: {key: metadata.key}},
@@ -133,6 +136,9 @@ const GlossaryList = () => {
           isEnabledToModify={
             !!keys.find(({key}) => key === term?.metadata?.key)
           }
+          isStatusDeleting={termsStatusDeleting.find(
+            (value) => value === term.term_id,
+          )}
         />
       ))}
       {!isLoading && !terms.length && (

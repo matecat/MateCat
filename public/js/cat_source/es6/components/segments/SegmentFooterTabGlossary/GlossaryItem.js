@@ -12,6 +12,7 @@ export const GlossaryItem = ({
   deleteElement,
   highlight,
   isEnabledToModify = false,
+  isStatusDeleting = false,
 }) => {
   const {metadata, source, target} = item
 
@@ -45,17 +46,28 @@ export const GlossaryItem = ({
             !canModifyItem ? ' glossary_item-actions--disabled' : ''
           }`}
         >
-          <div onClick={() => canModifyItem && modifyElement()}>
+          <div
+            onClick={() =>
+              canModifyItem && !isStatusDeleting && modifyElement()
+            }
+          >
             <ModifyIcon />
           </div>
-          <div onClick={() => canModifyItem && deleteElement()}>
-            <DeleteIcon />
+          <div
+            onClick={() =>
+              canModifyItem && !isStatusDeleting && deleteElement()
+            }
+          >
+            {isStatusDeleting ? (
+              <div className="loader loader_on"></div>
+            ) : (
+              <DeleteIcon />
+            )}
           </div>
         </div>
       </div>
 
       <div className={'glossary_item-body'}>
-        {!item.term_id && <span className="loader loader_on"></span>}
         <div className={'glossary-item_column'}>
           <div className="glossary_word">
             <span

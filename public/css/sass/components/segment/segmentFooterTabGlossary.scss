@@ -175,6 +175,8 @@
     }
   }
   .glossary__button-add {
+    display: flex;
+    flex-direction: row;
     color: #fff;
     font-weight: bold;
     text-decoration: none;
@@ -289,13 +291,6 @@
       .glossary_item-body {
         display: flex;
         padding: 16px 0;
-
-        .loader.loader_on {
-          position: relative;
-          left: 0;
-          bottom: 0;
-          margin-right: 8px;
-        }
       }
 
       .glossary-item_column {
@@ -416,8 +411,10 @@
       color: $grey2;
       > div {
         width: auto;
+        display: flex;
+        flex-direction: row;
       }
-      div:first-child {
+      > div:first-child {
         width: 128px;
       }
       .glossary-more {
@@ -497,5 +494,12 @@
 
   .highlight_mandatory {
     border: 1px solid red !important;
+  }
+
+  .loader.loader_on {
+    position: relative;
+    left: 0;
+    bottom: 0;
+    margin-right: 8px;
   }
 }

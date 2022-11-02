@@ -55,6 +55,7 @@ export const SegmentFooterTabGlossary = ({
   const [termForm, setTermForm] = useState(initialState.termForm)
   const [isLoading, setIsLoading] = useState(true)
   const [haveKeysGlossary, setHaveKeysGlossary] = useState(false)
+  const [termsStatusDeleting, setTermsStatusDeleting] = useState([])
 
   const previousSearchTermRef = useRef('')
 
@@ -177,6 +178,10 @@ export const SegmentFooterTabGlossary = ({
         shouldRefresh: true,
       })
     const onReceiveHaveKeysGlossary = (value) => setHaveKeysGlossary(value)
+    const onDeleteTerm = (sid, term) =>
+      setTermsStatusDeleting((prevState) =>
+        prevState.filter((value) => value !== term.term_id),
+      )
 
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
@@ -200,6 +205,10 @@ export const SegmentFooterTabGlossary = ({
     CatToolStore.addListener(
       CatToolConstants.HAVE_KEYS_GLOSSARY,
       onReceiveHaveKeysGlossary,
+    )
+    SegmentStore.addListener(
+      CatToolConstants.DELETE_FROM_GLOSSARY,
+      onDeleteTerm,
     )
 
     CatToolActions.retrieveJobKeys()
@@ -230,6 +239,10 @@ export const SegmentFooterTabGlossary = ({
       CatToolStore.removeListener(
         CatToolConstants.HAVE_KEYS_GLOSSARY,
         onReceiveHaveKeysGlossary,
+      )
+      SegmentStore.removeListener(
+        CatToolConstants.DELETE_FROM_GLOSSARY,
+        onDeleteTerm,
       )
     }
   }, [segment.sid, segment.segment, resetForm])
@@ -388,6 +401,8 @@ export const SegmentFooterTabGlossary = ({
         getRequestPayloadTemplate,
         setShowForm,
         setModifyElement,
+        termsStatusDeleting,
+        setTermsStatusDeleting,
       }}
     >
       <div className={`tab sub-editor glossary ${active_class}`}>

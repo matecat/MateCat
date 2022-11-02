@@ -370,7 +370,11 @@ const TermForm = () => {
           <span>{showMore ? 'Hide options' : 'More options'}</span>
         </div>
         <div className={'glossary_buttons'}>
-          <button className={'glossary__button-cancel'} onClick={resetForm}>
+          <button
+            className={'glossary__button-cancel'}
+            disabled={isLoading}
+            onClick={resetForm}
+          >
             Cancel
           </button>
           <button
@@ -378,6 +382,7 @@ const TermForm = () => {
             onClick={onSubmitAddOrUpdateTerm}
             disabled={isLoading}
           >
+            {isLoading && <div className="loader loader_on"></div>}
             {modifyElement ? 'Update' : 'Add'}
           </button>
         </div>
