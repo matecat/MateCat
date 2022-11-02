@@ -38,6 +38,11 @@ class ProjectManager {
     const SEGMENT_NOTES_MAX_SIZE = 65535;
 
     /**
+     * Configuration needed for cache invalidation needed segment analysis API
+     */
+    const SEGMENT_ANALYSIS_DEFAULT_LIMIT = 200;
+
+    /**
      * Counter fro the total number of segments in the project with the flag ( show_in_cattool == true )
      *
      * @var int
@@ -1639,6 +1644,8 @@ class ProjectManager {
 
         $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $splitted_standard_analysis_wc, $splitted_total_raw_wc );
 
+        $projectSegmentsCount = 0;
+
         foreach ( $projectStructure[ 'split_result' ][ 'chunks' ] as $chunk => $contents ) {
 
             //IF THIS IS NOT the original job, UPDATE relevant fields
@@ -1674,6 +1681,15 @@ class ProjectManager {
             $stmt->closeCursor();
             unset( $stmt );
 
+            //  invalid segment analysis cache
+            $jobSegmentsCount = $jobToSplit[ 'job_last_segment' ] - $jobToSplit[ 'job_first_segment' ] + 1;
+            $projectSegmentsCount = $projectSegmentsCount + $jobSegmentsCount;
+            $numberOfPages = (int) ceil ($jobSegmentsCount / self::SEGMENT_ANALYSIS_DEFAULT_LIMIT);
+
+            for ($i = 0; $i < $numberOfPages; $i++){
+                \Segments_SegmentDao::destroyGetIdsFromIdJobAndPasswordCache($jobToSplit[ 'id' ], $jobToSplit[ 'password' ], self::SEGMENT_ANALYSIS_DEFAULT_LIMIT, $i);
+            }
+
             /**
              * Async worker to re-count avg-PEE and total-TTE for splitted jobs
              */
@@ -1695,6 +1711,11 @@ class ProjectManager {
         $projectStruct = $jobToSplit->getProject( 60 * 10 );
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
         AnalysisDao::destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+
+        $numberOfPages = (int) ceil ($projectSegmentsCount / self::SEGMENT_ANALYSIS_DEFAULT_LIMIT);
+        for ($i = 0; $i < $numberOfPages; $i++){
+            \Segments_SegmentDao::destroyGetIdsFromIdProjectAndPasswordCache($projectStruct->id, $projectStruct->password, self::SEGMENT_ANALYSIS_DEFAULT_LIMIT, $i);
+        }
 
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
@@ -1736,6 +1757,8 @@ class ProjectManager {
         //the max segment from job list
         $last_job         = end( $jobStructs );
         $job_last_segment = $last_job[ 'job_last_segment' ];
+
+        $segmentsCount = $job_last_segment - $job_first_segment + 1;
 
         //change values of first job
         $first_job[ 'job_first_segment' ] = $job_first_segment; // redundant
@@ -1802,6 +1825,17 @@ class ProjectManager {
 
         $jobDao->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
         AnalysisDao::destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+
+        //  invalid segment analysis cache
+        $numberOfPages = (int) ceil ($segmentsCount / self::SEGMENT_ANALYSIS_DEFAULT_LIMIT);
+
+        foreach ($jobStructs as $jobs_JobStruct){
+            for ($i = 0; $i < $numberOfPages; $i++){
+                $projectStruct = $jobs_JobStruct->getProject( 60 * 10 );
+                \Segments_SegmentDao::destroyGetIdsFromIdJobAndPasswordCache($jobs_JobStruct->id, $jobs_JobStruct->password, self::SEGMENT_ANALYSIS_DEFAULT_LIMIT, $i);
+                \Segments_SegmentDao::destroyGetIdsFromIdProjectAndPasswordCache($projectStruct->id, $projectStruct->password, self::SEGMENT_ANALYSIS_DEFAULT_LIMIT, $i);
+            }
+        }
 
         $projectStruct = $jobStructs[ 0 ]->getProject( 60 * 10 );
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );

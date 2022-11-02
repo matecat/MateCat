@@ -126,10 +126,10 @@ class SegmentAnalysisController extends KleinController {
     private function getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage)
     {
         $segments = [];
-        $offset = $perPage;
-        $limit = ($page-1)*$offset;
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
 
-        $ids = \Segments_SegmentDao::getIdsFromIdProjectAndPassword($idProject, $password, $offset, $limit, 3600);
+        $ids = \Segments_SegmentDao::getIdsFromIdProjectAndPassword($idProject, $password, $limit, $offset, 3600);
 
         foreach ($ids as $id){
 
@@ -238,10 +238,10 @@ class SegmentAnalysisController extends KleinController {
     private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
     {
         $segments = [];
-        $offset = $perPage;
-        $limit = ($page-1)*$offset;
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
 
-        $ids = \Segments_SegmentDao::getIdsFromIdJobAndPassword($idJob, $password, $offset, $limit, 3600);
+        $ids = \Segments_SegmentDao::getIdsFromIdJobAndPassword($idJob, $password, $limit, $offset, 3600);
 
         foreach ($ids as $id){
 
@@ -320,7 +320,7 @@ class SegmentAnalysisController extends KleinController {
                 return 'MT';
 
             case "100%":
-                return '100%';
+                return 'TM_100';
 
             case "100%_PUBLIC":
                 return 'TM_100_PUBLIC';
