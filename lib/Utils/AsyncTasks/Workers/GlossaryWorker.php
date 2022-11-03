@@ -176,6 +176,8 @@ class GlossaryWorker extends AbstractWorker {
             $matches['id_segment'] = $id_segment;
         }
 
+        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys']);
+
         $this->publishMessage(
             $this->setResponsePayload(
                 'glossary_get',
@@ -243,9 +245,34 @@ class GlossaryWorker extends AbstractWorker {
                 'glossary_search',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                    $matches
+                $this->formatGetGlossaryMatches($matches, $payload['tmKeys'])
             )
         );
+    }
+
+    /**
+     * @param array $matches
+     *
+     * @param array $tmKeys
+     *
+     * @return array
+     */
+    private function formatGetGlossaryMatches(array $matches, array $tmKeys)
+    {
+        $key = $matches['terms']['metadata']['key'];
+
+        foreach ($tmKeys as $tmKey){
+            if($tmKey['key'] === $key and $tmKey['is_shared'] === false){
+
+                $keyLength   = strlen( $key );
+                $last_digits = substr( $key, - 8 );
+                $key         = str_repeat( "*", $keyLength - 8 ) . $last_digits;
+
+                $matches['terms']['metadata']['key'] = $key;
+            }
+        }
+
+        return $matches;
     }
 
     /**

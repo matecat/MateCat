@@ -461,9 +461,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $this->call( $relativeUrl, [
                 'uuid' => $uuid
             ], false );
-            sleep( $sleep );
 
-        } while ( $this->result->responseStatus !== 202 and (time() - $startTime) <= $limit );
+            if($this->result->responseStatus === 202){
+                sleep( $sleep );
+            }
+
+        } while ( $this->result->responseStatus === 202 and (time() - $startTime) <= $limit );
     }
 
     /**
