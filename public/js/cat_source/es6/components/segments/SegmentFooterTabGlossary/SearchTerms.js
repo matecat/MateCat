@@ -11,9 +11,10 @@ export const SearchTerms = () => {
     setSearchTerm,
     segment,
     previousSearchTermRef,
-    setIsLoading,
     haveKeysGlossary,
     openForm,
+    isLoading,
+    notifyLoadingStatusToParent,
   } = useContext(TabGlossaryContext)
 
   const [searchTypes, setSearchTypes] = useState([
@@ -41,7 +42,7 @@ export const SearchTerms = () => {
             searchingIn === 'Source' ? config.target_code : config.source_code,
         }
         SegmentActions.searchGlossary(data)
-        setIsLoading(true)
+        notifyLoadingStatusToParent(true)
       }
       debounce = setTimeout(() => {
         console.log('Searching:', searchTerm)
@@ -60,7 +61,7 @@ export const SearchTerms = () => {
     segment.segment,
     searchTypes,
     previousSearchTermRef,
-    setIsLoading,
+    notifyLoadingStatusToParent,
   ])
 
   return (
@@ -102,7 +103,11 @@ export const SearchTerms = () => {
         />
       </div>
       <div className="glossary__button-add-container">
-        <button className={'glossary__button-add'} onClick={openForm}>
+        <button
+          className={'glossary__button-add'}
+          onClick={openForm}
+          disabled={isLoading}
+        >
           + Add Term
         </button>
       </div>

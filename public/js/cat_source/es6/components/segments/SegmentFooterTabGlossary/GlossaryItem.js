@@ -16,7 +16,7 @@ export const GlossaryItem = ({
 }) => {
   const {metadata, source, target} = item
 
-  const canModifyItem = isEnabledToModify && item.term_id
+  const canModifyItem = isEnabledToModify && item.term_id && !isStatusDeleting
 
   return (
     <div className="glossary_item">
@@ -46,18 +46,10 @@ export const GlossaryItem = ({
             !canModifyItem ? ' glossary_item-actions--disabled' : ''
           }`}
         >
-          <div
-            onClick={() =>
-              canModifyItem && !isStatusDeleting && modifyElement()
-            }
-          >
+          <div onClick={() => canModifyItem && modifyElement()}>
             <ModifyIcon />
           </div>
-          <div
-            onClick={() =>
-              canModifyItem && !isStatusDeleting && deleteElement()
-            }
-          >
+          <div onClick={() => canModifyItem && deleteElement()}>
             {isStatusDeleting ? (
               <div className="loader loader_on"></div>
             ) : (
