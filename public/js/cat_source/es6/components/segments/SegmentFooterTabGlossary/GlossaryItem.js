@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import {
   DeleteIcon,
@@ -19,9 +20,9 @@ export const GlossaryItem = ({
   const canModifyItem = isEnabledToModify && item.term_id && !isStatusDeleting
 
   return (
-    <div className="glossary_item">
-      <div className={'glossary_item-header'}>
-        <div className={'glossary_definition-container'}>
+    <div className="glossary_item" id={item.term_id}>
+      <div className="glossary_item-header">
+        <div className="glossary_definition-container">
           <span
             className={`glossary_definition${
               !metadata.definition ? ' glossary_definition--hidden' : ''
@@ -31,12 +32,12 @@ export const GlossaryItem = ({
             {metadata.definition}
           </span>
           {metadata.domain && (
-            <span className={'glossary_badge'}>{metadata.domain}</span>
+            <span className="glossary_badge">{metadata.domain}</span>
           )}
           {metadata.subdomain && (
-            <span className={'glossary_badge'}>{metadata.subdomain}</span>
+            <span className="glossary_badge">{metadata.subdomain}</span>
           )}
-          <div className={'glossary_source'}>
+          <div className="glossary_source">
             <b>{metadata.key_name}</b>
             <span>{metadata.last_update}</span>
           </div>
@@ -59,8 +60,8 @@ export const GlossaryItem = ({
         </div>
       </div>
 
-      <div className={'glossary_item-body'}>
-        <div className={'glossary-item_column'}>
+      <div className="glossary_item-body">
+        <div className="glossary-item_column">
           <div className="glossary_word">
             <span
               className={`${
@@ -72,13 +73,13 @@ export const GlossaryItem = ({
             <div>
               <InfoIcon size={16} />
               {source.sentence && (
-                <div className={'glossary_item-tooltip'}>{source.sentence}</div>
+                <div className="glossary_item-tooltip">{source.sentence}</div>
               )}
             </div>
           </div>
-          <div className={'glossary-description'}>{source.note}</div>
+          <div className="glossary-description">{source.note}</div>
         </div>
-        <div className={'glossary-item_column'}>
+        <div className="glossary-item_column">
           <div className="glossary_word">
             <span
               className={`${
@@ -90,13 +91,22 @@ export const GlossaryItem = ({
             <div>
               <InfoIcon size={16} />
               {target.sentence && (
-                <div className={'glossary_item-tooltip'}>{target.sentence}</div>
+                <div className="glossary_item-tooltip">{target.sentence}</div>
               )}
             </div>
           </div>
-          <div className={'glossary-description'}>{target.note}</div>
+          <div className="glossary-description">{target.note}</div>
         </div>
       </div>
     </div>
   )
+}
+
+GlossaryItem.propTypes = {
+  item: PropTypes.object.isRequired,
+  modifyElement: PropTypes.func.isRequired,
+  deleteElement: PropTypes.func.isRequired,
+  highlight: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
+  isEnabledToModify: PropTypes.bool,
+  isStatusDeleting: PropTypes.bool,
 }

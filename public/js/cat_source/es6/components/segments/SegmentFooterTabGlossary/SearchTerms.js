@@ -65,13 +65,13 @@ export const SearchTerms = () => {
   ])
 
   return (
-    <div className={'glossary_search'}>
+    <div className="glossary_search">
       <div className="glossary_search-container">
         <IconSearch />
         <input
           name="search_term"
-          className={'glossary_search-input'}
-          placeholder={'Search term'}
+          className="glossary_search-input"
+          placeholder="Search term"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
           disabled={!haveKeysGlossary}
@@ -104,7 +104,7 @@ export const SearchTerms = () => {
       </div>
       <div className="glossary__button-add-container">
         <button
-          className={'glossary__button-add'}
+          className="glossary__button-add"
           onClick={openForm}
           disabled={isLoading}
         >

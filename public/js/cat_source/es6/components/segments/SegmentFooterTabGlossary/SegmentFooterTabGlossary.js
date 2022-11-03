@@ -422,31 +422,31 @@ export const SegmentFooterTabGlossary = ({
         selectsActive,
         setSelectsActive,
         modifyElement,
+        setModifyElement,
         showMore,
         setShowMore,
         resetForm,
         domainsResponse,
         getRequestPayloadTemplate,
         setShowForm,
-        setModifyElement,
         termsStatusDeleting,
         setTermsStatusDeleting,
         notifyLoadingStatusToParent,
       }}
     >
       <div className={`tab sub-editor glossary ${active_class}`}>
-        {showForm && !haveKeysGlossary ? (
-          <TermForm />
-        ) : haveKeysGlossary ? (
+        {haveKeysGlossary ? (
           <>
             <SearchTerms />
             {showForm && <TermForm />}
             <GlossaryList />
           </>
+        ) : showForm ? (
+          <TermForm />
         ) : (
           <div className="no_keys_glossary">
             <p>No glossary available.</p>
-            <button className={'glossary__button-add'} onClick={openForm}>
+            <button className="glossary__button-add" onClick={openForm}>
               + Click here to create one
             </button>
           </div>
