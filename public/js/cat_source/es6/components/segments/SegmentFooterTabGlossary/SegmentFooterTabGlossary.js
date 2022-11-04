@@ -71,12 +71,17 @@ export const SegmentFooterTabGlossary = ({
     setShowForm(false)
     setShowMore(false)
     setModifyElement(undefined)
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      domain: undefined,
+      subdomain: undefined,
+    }))
   }, [])
 
   const openForm = useCallback(() => {
-    setModifyElement(undefined)
+    resetForm()
     setShowForm(true)
-  }, [])
+  }, [resetForm])
 
   const getRequestPayloadTemplate = useCallback(
     ({term = modifyElement, isDelete} = {}) => {
@@ -160,10 +165,12 @@ export const SegmentFooterTabGlossary = ({
   // get TM keys and add actions listener
   useEffect(() => {
     const addGlossaryItem = () => {
-      setIsLoading(false)
-      setSearchTerm('')
-      resetForm()
-      refreshGlossary()
+      setTimeout(() => {
+        setIsLoading(false)
+        setSearchTerm('')
+        resetForm()
+        refreshGlossary()
+      }, 500)
     }
     const onReceiveGlossary = () => {
       setIsLoading(false)
@@ -265,13 +272,20 @@ export const SegmentFooterTabGlossary = ({
 
   // error listener for set/update/delete
   useEffect(() => {
-    const onError = (sid, error) => setIsLoading(false)
+    const onError = () => setIsLoading(false)
+    const onErrorDelete = (sid, error) => {
+      onError()
+      const {term_id} = error?.payload?.term ?? {}
+      setTermsStatusDeleting((prevState) =>
+        prevState.filter((value) => value !== term_id),
+      )
+    }
 
     SegmentStore.addListener(SegmentConstants.ERROR_ADD_GLOSSARY_ITEM, onError)
     SegmentStore.addListener(SegmentConstants.ERROR_CHANGE_GLOSSARY, onError)
     SegmentStore.addListener(
       SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
-      onError,
+      onErrorDelete,
     )
 
     return () => {
@@ -285,7 +299,7 @@ export const SegmentFooterTabGlossary = ({
       )
       SegmentStore.removeListener(
         SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
-        onError,
+        onErrorDelete,
       )
     }
   }, [])
@@ -355,14 +369,14 @@ export const SegmentFooterTabGlossary = ({
     }))
   }, [keys])
 
-  useEffect(() => {
-    setSelectsActive((prevState) => ({
-      ...prevState,
-      domain: domains.find(({name}) => name === prevState.domain?.name)
-        ? prevState.domain
-        : domains[0],
-    }))
-  }, [domains])
+  // useEffect(() => {
+  //   setSelectsActive((prevState) => ({
+  //     ...prevState,
+  //     domain: domains.find(({name}) => name === prevState.domain?.name)
+  //       ? prevState.domain
+  //       : domains[0],
+  //   }))
+  // }, [domains])
 
   useEffect(() => {
     setSelectsActive((prevState) => ({
@@ -393,7 +407,26 @@ export const SegmentFooterTabGlossary = ({
       [TRANSLATED_DESCRIPTION]: target.note,
       [TRANSLATED_EXAMPLE]: target.sentence,
     })
-  }, [modifyElement])
+
+    const domainsForActiveKeys = domainsResponse[metadata.key]?.map(
+      ({domain, subdomains}, index) => ({
+        id: index.toString(),
+        name: domain,
+        subdomains,
+      }),
+    )
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      domain: domainsForActiveKeys.find(({name}) => name === metadata.domain),
+      subdomain: domainsForActiveKeys
+        .find(({name}) => name === metadata.domain)
+        ?.subdomains.map((name, index) => ({
+          id: index.toString(),
+          name,
+        }))
+        ?.find(({name}) => name === metadata.subdomain),
+    }))
+  }, [modifyElement, domainsResponse])
 
   // notify loading status to parent (SegmentFooter)
   useEffect(() => {

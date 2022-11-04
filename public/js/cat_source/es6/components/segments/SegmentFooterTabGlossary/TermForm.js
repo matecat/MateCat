@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import {Select} from '../../common/Select'
@@ -31,6 +31,13 @@ const TermForm = () => {
     {},
   )
 
+  useEffect(() => {
+    setHighlightMandatoryOnSubmit({})
+  }, [
+    termForm?.[TERM_FORM_FIELDS.ORIGINAL_TERM],
+    termForm?.[TERM_FORM_FIELDS.TRANSLATED_TERM],
+  ])
+
   const {
     DEFINITION,
     ORIGINAL_TERM,
@@ -49,11 +56,10 @@ const TermForm = () => {
   const updateTermForm = (key, value) =>
     setTermForm((prevState) => ({...prevState, [key]: value}))
 
-  const resetHightlightMandatory = () => setHighlightMandatoryOnSubmit({})
-
   const onSubmitAddOrUpdateTerm = () => {
     // check mandatory fields
-    const {originalTerm, translatedTerm} = termForm
+    const {[ORIGINAL_TERM]: originalTerm, [TRANSLATED_TERM]: translatedTerm} =
+      termForm
     const {keys, domain, subdomain} = selectsActive
     setHighlightMandatoryOnSubmit({
       originalTerm: !originalTerm,
@@ -139,17 +145,16 @@ const TermForm = () => {
             checkSpaceToReverse={false}
             isDisabled={!!modifyElement}
             onToggleOption={(option) => {
-              resetHightlightMandatory()
+              setHighlightMandatoryOnSubmit({})
               if (option) {
                 const {keys: activeKeys} = selectsActive
-                if (activeKeys.some((item) => item.id === option.id)) {
-                  updateSelectActive(
-                    'keys',
-                    activeKeys.filter((item) => item.id !== option.id),
-                  )
-                } else {
-                  updateSelectActive('keys', activeKeys.concat([option]))
-                }
+                setSelectsActive({
+                  keys: activeKeys.some((item) => item.id === option.id)
+                    ? activeKeys.filter((item) => item.id !== option.id)
+                    : activeKeys.concat([option]),
+                  domain: undefined,
+                  subdomain: undefined,
+                })
               }
             }}
           >
@@ -174,7 +179,7 @@ const TermForm = () => {
               className="glossary-select domain-select"
               name="glossary-term-domain"
               label="Domain"
-              placeholder="Select a domain"
+              placeholder="No domain"
               showSearchBar
               searchPlaceholder="Find a domain"
               options={domains}
@@ -193,6 +198,17 @@ const TermForm = () => {
                 queryFilter,
                 resetQueryFilter,
               }) => ({
+                ...(index === 0 &&
+                  selectsActive.domain && {
+                    beforeRow: (
+                      <button
+                        className="button-create-option"
+                        onClick={() => updateSelectActive('domain', undefined)}
+                      >
+                        Deselect domain
+                      </button>
+                    ),
+                  }),
                 // override row content
                 row: <div className="domain-option">{name}</div>,
                 // insert button after last row
@@ -213,7 +229,7 @@ const TermForm = () => {
                           resetQueryFilter()
                         }}
                       >
-                        + Create a domain name <b>{queryFilter}</b>
+                        + Create a domain <b>{queryFilter}</b>
                       </button>
                     ),
                   }),
@@ -225,7 +241,7 @@ const TermForm = () => {
               className="glossary-select domain-select"
               name="glossary-term-subdomain"
               label="Subdomain"
-              placeholder="Select a subdomain"
+              placeholder="No subdomain"
               showSearchBar
               searchPlaceholder="Find a subdomain"
               options={subdomains}
@@ -244,6 +260,19 @@ const TermForm = () => {
                 queryFilter,
                 resetQueryFilter,
               }) => ({
+                ...(index === 0 &&
+                  selectsActive.subdomain && {
+                    beforeRow: (
+                      <button
+                        className="button-create-option"
+                        onClick={() =>
+                          updateSelectActive('subdomain', undefined)
+                        }
+                      >
+                        Deselect subdomain
+                      </button>
+                    ),
+                  }),
                 // override row content
                 row: <div className="domain-option">{name}</div>,
                 // insert button after last row
@@ -264,7 +293,7 @@ const TermForm = () => {
                           resetQueryFilter()
                         }}
                       >
-                        + Create a subdomain name <b>{queryFilter}</b>
+                        + Create a subdomain <b>{queryFilter}</b>
                       </button>
                     ),
                   }),
@@ -285,10 +314,9 @@ const TermForm = () => {
             }`}
             name="glossary-term-original"
             value={termForm[ORIGINAL_TERM]}
-            onChange={(event) => {
-              resetHightlightMandatory()
+            onChange={(event) =>
               updateTermForm(ORIGINAL_TERM, event.target.value)
-            }}
+            }
           />
         </div>
         <div className="input-with-label__wrapper">
@@ -301,10 +329,9 @@ const TermForm = () => {
             }`}
             name="glossary-term-translated"
             value={termForm[TRANSLATED_TERM]}
-            onChange={(event) => {
-              resetHightlightMandatory()
+            onChange={(event) =>
               updateTermForm(TRANSLATED_TERM, event.target.value)
-            }}
+            }
           />
         </div>
       </div>

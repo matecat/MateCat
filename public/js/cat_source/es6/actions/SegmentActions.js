@@ -784,7 +784,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'Error!',
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
@@ -825,7 +825,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'Error!',
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
@@ -857,7 +857,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'Error!',
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,

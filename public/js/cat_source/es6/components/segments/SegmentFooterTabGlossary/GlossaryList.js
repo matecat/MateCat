@@ -12,7 +12,7 @@ import SegmentConstants from '../../../constants/SegmentConstants'
 import _ from 'lodash'
 import SegmentActions from '../../../actions/SegmentActions'
 
-const setIntervalCounter = (callback, delay, maximumNumOfTime) => {
+const setIntervalCounter = ({callback, delay, maximumNumOfTime}) => {
   let count = 0
   let interval
 
@@ -21,7 +21,7 @@ const setIntervalCounter = (callback, delay, maximumNumOfTime) => {
     count = 0
   }
 
-  const set = (callback, delay, maximumNumOfTime) => {
+  const set = ({callback, delay, maximumNumOfTime}) => {
     reset()
     interval = setInterval(() => {
       if (
@@ -39,7 +39,7 @@ const setIntervalCounter = (callback, delay, maximumNumOfTime) => {
     }, delay)
   }
 
-  set(callback, delay, maximumNumOfTime)
+  set({callback, delay, maximumNumOfTime})
 }
 
 const GlossaryList = () => {
@@ -79,16 +79,16 @@ const GlossaryList = () => {
             segment.glossary_search_results.map(({term_id}) => term_id),
           )
         ) {
-          setIntervalCounter(
-            () => {
+          setIntervalCounter({
+            callback: () => {
               if (scrollItemsRef.current?.children.length) {
                 resolve()
                 return true
               }
             },
-            100,
-            5,
-          )
+            delay: 100,
+            maximumNumOfTime: 5,
+          })
         } else {
           resolve()
         }
@@ -101,16 +101,16 @@ const GlossaryList = () => {
 
       if (element) {
         await new Promise((resolve) => {
-          setIntervalCounter(
-            () => {
+          setIntervalCounter({
+            callback: () => {
               if (element.offsetHeight) {
                 resolve()
                 return true
               }
             },
-            100,
-            5,
-          )
+            delay: 100,
+            maximumNumOfTime: 5,
+          })
         })
 
         scrollItemsRef.current.scrollTo(0, indexToScroll * element.offsetHeight)
@@ -184,9 +184,9 @@ const GlossaryList = () => {
           isEnabledToModify={
             !!keys.find(({key}) => key === term?.metadata?.key) && !isLoading
           }
-          isStatusDeleting={termsStatusDeleting.find(
-            (value) => value === term.term_id,
-          )}
+          isStatusDeleting={
+            !!termsStatusDeleting.find((value) => value === term.term_id)
+          }
         />
       ))}
       {!isLoading && !terms.length && (

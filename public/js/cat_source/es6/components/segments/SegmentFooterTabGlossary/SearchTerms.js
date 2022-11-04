@@ -11,7 +11,6 @@ export const SearchTerms = () => {
     setSearchTerm,
     segment,
     previousSearchTermRef,
-    haveKeysGlossary,
     openForm,
     isLoading,
     notifyLoadingStatusToParent,
@@ -74,7 +73,6 @@ export const SearchTerms = () => {
           placeholder="Search term"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          disabled={!haveKeysGlossary}
         />
         <div
           className={`search_term_reset_button ${
@@ -90,7 +88,6 @@ export const SearchTerms = () => {
           name="search"
           className="search-type"
           options={searchTypes}
-          disabled={!haveKeysGlossary}
           selectedId={searchTypes.find(({selected}) => selected).id}
           onChange={(value) => {
             setSearchTypes((prevState) =>
