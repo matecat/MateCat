@@ -458,9 +458,14 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $startTime = time();
 
         do {
+
+            \Log::doJsonLog('PIPPO ---> ' . $uuid);
+
             $this->call( $relativeUrl, [
                 'uuid' => $uuid
             ], false );
+
+            \Log::doJsonLog('PIPPO ---> ' . json_encode($this->result->responseStatus));
 
             if($this->result->responseStatus === 202){
                 sleep( $sleep );
@@ -594,6 +599,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ];
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
+
+        \Log::doJsonLog('PIPPO ----> ' . json_encode($this->result));
 
         if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
             $uuid = $this->result->responseDetails;

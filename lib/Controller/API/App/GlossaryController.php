@@ -144,8 +144,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'search',
-                'payload' => $json,
+            'action' => 'search',
+            'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );

@@ -107,6 +107,24 @@ class GlossaryWorker extends AbstractWorker {
                 'payload' => null,
         ];
 
+        if($response->responseStatus != 200){
+
+            switch ($response->responseStatus){
+                case 202:
+                    $errMessage = "MyMemory is busy, please try later";
+                    break;
+
+                default:
+                    $errMessage = "Error, please try later";
+            }
+
+            $message['error'] = [
+                    'code' => $response->responseStatus,
+                    'message' => $errMessage,
+                    'payload' => $payload,
+            ];
+        }
+
         if($response->responseStatus == 200){
             $message['payload'] = $payload;
         }
@@ -294,6 +312,24 @@ class GlossaryWorker extends AbstractWorker {
             'payload' => null,
         ];
 
+        if($response->responseStatus != 200){
+
+            switch ($response->responseStatus){
+                case 202:
+                    $errMessage = "MyMemory is busy, please try later";
+                    break;
+
+                default:
+                    $errMessage = "Error, please try later";
+            }
+
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
+            ];
+        }
+
         if($response->responseStatus == 200){
 
             // reduce $payload['term']['matching_words'] to simple array
@@ -353,6 +389,24 @@ class GlossaryWorker extends AbstractWorker {
             'id_segment' => $id_segment,
             'payload' => null,
         ];
+
+        if($response->responseStatus != 200){
+
+            switch ($response->responseStatus){
+                case 202:
+                    $errMessage = "MyMemory is busy, please try later";
+                    break;
+
+                default:
+                    $errMessage = "Error, please try later";
+            }
+
+            $message['error'] = [
+                    'code' => $response->responseStatus,
+                    'message' => $errMessage,
+                    'payload' => $payload,
+            ];
+        }
 
         if($response->responseStatus == 200){
 
