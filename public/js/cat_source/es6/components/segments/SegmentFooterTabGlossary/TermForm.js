@@ -109,9 +109,9 @@ const TermForm = () => {
   }
 
   return (
-    <div className={'glossary_add-container'}>
-      <div className={'glossary-form-line'}>
-        <div className={'input-with-label__wrapper'}>
+    <div className="glossary_add-container">
+      <div className="glossary-form-line">
+        <div className="input-with-label__wrapper">
           <label>Definition</label>
           <input
             name="glossary-term-definition"
@@ -119,7 +119,7 @@ const TermForm = () => {
             onChange={(event) => updateTermForm(DEFINITION, event.target.value)}
           />
         </div>
-        <div className={'glossary-tm-container'}>
+        <div className="glossary-tm-container">
           <Select
             className={`glossary-select${
               highlightMandatoryOnSubmit.keys
@@ -169,7 +169,7 @@ const TermForm = () => {
             })}
           </Select>
 
-          <div className={'input-with-label__wrapper'}>
+          <div className="input-with-label__wrapper">
             <Select
               className="glossary-select domain-select"
               name="glossary-term-domain"
@@ -220,7 +220,7 @@ const TermForm = () => {
               })}
             </Select>
           </div>
-          <div className={'input-with-label__wrapper'}>
+          <div className="input-with-label__wrapper">
             <Select
               className="glossary-select domain-select"
               name="glossary-term-subdomain"
@@ -274,8 +274,8 @@ const TermForm = () => {
         </div>
       </div>
 
-      <div className={'glossary-form-line'}>
-        <div className={'input-with-label__wrapper'}>
+      <div className="glossary-form-line">
+        <div className="input-with-label__wrapper">
           <label>Original term*</label>
           <input
             className={`${
@@ -291,7 +291,7 @@ const TermForm = () => {
             }}
           />
         </div>
-        <div className={'input-with-label__wrapper'}>
+        <div className="input-with-label__wrapper">
           <label>Translated term*</label>
           <input
             className={`${
@@ -309,12 +309,12 @@ const TermForm = () => {
         </div>
       </div>
       {showMore && (
-        <div className={'glossary-form-line more-line'}>
+        <div className="glossary-form-line more-line">
           <div>
-            <div className={'input-with-label__wrapper'}>
+            <div className="input-with-label__wrapper">
               <label>Description</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-description-source"
                 value={termForm[ORIGINAL_DESCRIPTION]}
                 onChange={(event) =>
@@ -322,10 +322,10 @@ const TermForm = () => {
                 }
               />
             </div>
-            <div className={'input-with-label__wrapper'}>
+            <div className="input-with-label__wrapper">
               <label>Example phrase</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-example-source"
                 value={termForm[ORIGINAL_EXAMPLE]}
                 onChange={(event) =>
@@ -335,10 +335,10 @@ const TermForm = () => {
             </div>
           </div>
           <div>
-            <div className={'input-with-label__wrapper'}>
+            <div className="input-with-label__wrapper">
               <label>Description</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-description-target"
                 value={termForm[TRANSLATED_DESCRIPTION]}
                 onChange={(event) =>
@@ -346,10 +346,10 @@ const TermForm = () => {
                 }
               />
             </div>
-            <div className={'input-with-label__wrapper'}>
+            <div className="input-with-label__wrapper">
               <label>Example phrase</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-example-target"
                 value={termForm[TRANSLATED_EXAMPLE]}
                 onChange={(event) =>
@@ -360,7 +360,7 @@ const TermForm = () => {
           </div>
         </div>
       )}
-      <div className={'glossary_buttons-container'}>
+      <div className="glossary_buttons-container">
         <div></div>
         <div
           className={`glossary-more ${!showMore ? 'show-less' : 'show-more'}`}
@@ -369,9 +369,9 @@ const TermForm = () => {
           <MoreIcon />
           <span>{showMore ? 'Hide options' : 'More options'}</span>
         </div>
-        <div className={'glossary_buttons'}>
+        <div className="glossary_buttons">
           <button
-            className={'glossary__button-cancel'}
+            className="glossary__button-cancel"
             disabled={isLoading}
             onClick={resetForm}
           >
