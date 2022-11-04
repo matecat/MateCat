@@ -252,16 +252,15 @@ class GlossaryWorker extends AbstractWorker {
 
     /**
      * @param array $matches
-     *
      * @param array $tmKeys
      *
      * @return array
      */
-    private function formatGetGlossaryMatches(array $matches, array $tmKeys)
+    private function formatGetGlossaryMatches(array $matches, $tmKeys)
     {
         $key = $matches['terms']['metadata']['key'];
 
-        foreach ($tmKeys as $tmKey){
+        foreach ($tmKeys as $index => $tmKey){
             if($tmKey['key'] === $key and $tmKey['is_shared'] === false){
 
                 $keyLength   = strlen( $key );
