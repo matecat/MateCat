@@ -116,11 +116,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
         $keysArray = [];
 
-        /** @var \TmKeyManagement_ClientTmKeyStruct $key */
-        foreach ($json['userKeys'] as $key){
-            if(!$key->isEncryptedKey()){
-                $keysArray[] = $key->key;
-            }
+        foreach ($json['tmKeys'] as $key){
+            $keysArray[] = $key['key'];
         }
 
         $json['keys'] = $keysArray;
@@ -147,8 +144,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-                'action' => 'search',
-                'payload' => $json,
+            'action' => 'search',
+            'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );

@@ -269,7 +269,7 @@ export const Dropdown = ({
     const isNoResultsFound = option.id === 'noResultsFound'
     const showActiveOptionIcon = isActiveOption || isActiveOptions
 
-    const {row, afterRow, cancelHandleClick} =
+    const {beforeRow, row, afterRow, cancelHandleClick} =
       children?.({
         index,
         ...option,
@@ -279,10 +279,12 @@ export const Dropdown = ({
           setQueryFilter('')
           queryFilterRef.current = ''
         },
+        onClose,
       }) || {}
 
     return (
       <Fragment key={index}>
+        {beforeRow && beforeRow}
         <li
           className={`dropdown__option ${
             isActiveOption || isActiveOptions

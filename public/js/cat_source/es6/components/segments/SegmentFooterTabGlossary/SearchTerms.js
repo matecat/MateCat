@@ -11,9 +11,9 @@ export const SearchTerms = () => {
     setSearchTerm,
     segment,
     previousSearchTermRef,
-    setIsLoading,
-    haveKeysGlossary,
     openForm,
+    isLoading,
+    notifyLoadingStatusToParent,
   } = useContext(TabGlossaryContext)
 
   const [searchTypes, setSearchTypes] = useState([
@@ -41,7 +41,7 @@ export const SearchTerms = () => {
             searchingIn === 'Source' ? config.target_code : config.source_code,
         }
         SegmentActions.searchGlossary(data)
-        setIsLoading(true)
+        notifyLoadingStatusToParent(true)
       }
       debounce = setTimeout(() => {
         console.log('Searching:', searchTerm)
@@ -60,20 +60,19 @@ export const SearchTerms = () => {
     segment.segment,
     searchTypes,
     previousSearchTermRef,
-    setIsLoading,
+    notifyLoadingStatusToParent,
   ])
 
   return (
-    <div className={'glossary_search'}>
+    <div className="glossary_search">
       <div className="glossary_search-container">
         <IconSearch />
         <input
           name="search_term"
-          className={'glossary_search-input'}
-          placeholder={'Search term'}
+          className="glossary_search-input"
+          placeholder="Search term"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          disabled={!haveKeysGlossary}
         />
         <div
           className={`search_term_reset_button ${
@@ -89,7 +88,6 @@ export const SearchTerms = () => {
           name="search"
           className="search-type"
           options={searchTypes}
-          disabled={!haveKeysGlossary}
           selectedId={searchTypes.find(({selected}) => selected).id}
           onChange={(value) => {
             setSearchTypes((prevState) =>
@@ -102,7 +100,11 @@ export const SearchTerms = () => {
         />
       </div>
       <div className="glossary__button-add-container">
-        <button className={'glossary__button-add'} onClick={openForm}>
+        <button
+          className="glossary__button-add"
+          onClick={openForm}
+          disabled={isLoading}
+        >
           + Add Term
         </button>
       </div>

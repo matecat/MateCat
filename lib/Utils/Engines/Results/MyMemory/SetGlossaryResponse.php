@@ -2,8 +2,6 @@
 
 class Engines_Results_MyMemory_SetGlossaryResponse extends Engines_Results_AbstractResponse {
 
-    //public $entries = [];
-
     public function __construct( $response ) {
 
         if ( !is_array( $response ) ) {
