@@ -185,6 +185,11 @@ class updateJobKeysController extends ajaxController {
                 $this->jobData[ 'only_private_tm' ] = $this->only_private;
             }
 
+            /** @var TmKeyManagement_TmKeyStruct $totalTmKey */
+            foreach ( $totalTmKeys as $totalTmKey ){
+                $totalTmKey->complete_format = true;
+            }
+
             $this->jobData->tm_keys = json_encode( $totalTmKeys );
 
             $jobDao = new \Jobs_JobDao( Database::obtain() );

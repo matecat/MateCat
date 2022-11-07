@@ -58,22 +58,43 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_set', function (ev, message) {
-      SegmentActions.addGlossaryItemToCache(
-        message.data.id_segment,
-        message.data.payload,
-      )
+      if (message.data.error) {
+        SegmentActions.errorAddGlossaryItemToCache(
+          message.data.id_segment,
+          message.data.error,
+        )
+      } else {
+        SegmentActions.addGlossaryItemToCache(
+          message.data.id_segment,
+          message.data.payload,
+        )
+      }
     })
     $(document).on('sse:glossary_delete', function (ev, message) {
-      SegmentActions.deleteGlossaryFromCache(
-        message.data.id_segment,
-        message.data.payload.term,
-      )
+      if (message.data.error) {
+        SegmentActions.errorDeleteGlossaryFromCache(
+          message.data.id_segment,
+          message.data.error,
+        )
+      } else {
+        SegmentActions.deleteGlossaryFromCache(
+          message.data.id_segment,
+          message.data.payload.term,
+        )
+      }
     })
     $(document).on('sse:glossary_update', function (ev, message) {
-      SegmentActions.updateglossaryCache(
-        message.data.id_segment,
-        message.data.payload,
-      )
+      if (message.data.error) {
+        SegmentActions.errorUpdateglossaryCache(
+          message.data.id_segment,
+          message.data.error,
+        )
+      } else {
+        SegmentActions.updateglossaryCache(
+          message.data.id_segment,
+          message.data.payload,
+        )
+      }
     })
     $(document).on('sse:glossary_domains', function (ev, message) {
       CatToolActions.setDomains({

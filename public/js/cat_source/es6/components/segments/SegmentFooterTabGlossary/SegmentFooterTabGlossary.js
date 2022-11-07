@@ -53,10 +53,18 @@ export const SegmentFooterTabGlossary = ({
   const [terms, setTerms] = useState(initialState.terms)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [haveKeysGlossary, setHaveKeysGlossary] = useState(false)
+  const [termsStatusDeleting, setTermsStatusDeleting] = useState([])
 
   const previousSearchTermRef = useRef('')
+
+  const notifyLoadingStatusToParent = useCallback(
+    (value) => {
+      if (notifyLoadingStatus) notifyLoadingStatus({code, isLoading: value})
+    },
+    [code, notifyLoadingStatus],
+  )
 
   const resetForm = useCallback(() => {
     setTermForm(initialState.termForm)
@@ -66,9 +74,9 @@ export const SegmentFooterTabGlossary = ({
   }, [])
 
   const openForm = useCallback(() => {
-    setModifyElement(undefined)
+    resetForm()
     setShowForm(true)
-  }, [])
+  }, [resetForm])
 
   const getRequestPayloadTemplate = useCallback(
     ({term = modifyElement, isDelete} = {}) => {
@@ -83,7 +91,7 @@ export const SegmentFooterTabGlossary = ({
         translatedDescription,
         translatedExample,
       } = termForm
-      const {keys = {}, domain = {}, subdomain = {}} = selectsActive
+      const {keys = {}, domain, subdomain} = selectsActive
       const {
         term_id = null,
         matching_words = null,
@@ -115,8 +123,8 @@ export const SegmentFooterTabGlossary = ({
             ...(term
               ? {key, key_name}
               : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
-            domain: domain.name,
-            subdomain: subdomain.name,
+            domain: domain ? domain.name : '',
+            subdomain: subdomain ? subdomain.name : '',
             create_date,
             last_update,
           }
@@ -152,15 +160,17 @@ export const SegmentFooterTabGlossary = ({
   // get TM keys and add actions listener
   useEffect(() => {
     const addGlossaryItem = () => {
-      setIsLoading(false)
-      setSearchTerm('')
-      resetForm()
+      setTimeout(() => {
+        setIsLoading(false)
+        setSearchTerm('')
+        resetForm()
+        refreshGlossary()
+      }, 500)
     }
     const onReceiveGlossary = () => {
       setIsLoading(false)
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }
-    const onReceiveGlossaryBySearch = () => setIsLoading(false)
     const setDomains = ({entries}) => {
       console.log('Domains---->', entries)
       setDomainsResponse(entries)
@@ -176,6 +186,10 @@ export const SegmentFooterTabGlossary = ({
         shouldRefresh: true,
       })
     const onReceiveHaveKeysGlossary = (value) => setHaveKeysGlossary(value)
+    const onDeleteTerm = (sid, term) =>
+      setTermsStatusDeleting((prevState) =>
+        prevState.filter((value) => value !== term.term_id),
+      )
 
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
@@ -186,10 +200,6 @@ export const SegmentFooterTabGlossary = ({
       SegmentConstants.SET_GLOSSARY_TO_CACHE,
       onReceiveGlossary,
     )
-    SegmentStore.addListener(
-      SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
-      onReceiveGlossaryBySearch,
-    )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
     CatToolStore.addListener(
@@ -199,6 +209,10 @@ export const SegmentFooterTabGlossary = ({
     CatToolStore.addListener(
       CatToolConstants.HAVE_KEYS_GLOSSARY,
       onReceiveHaveKeysGlossary,
+    )
+    SegmentStore.addListener(
+      CatToolConstants.DELETE_FROM_GLOSSARY,
+      onDeleteTerm,
     )
 
     CatToolActions.retrieveJobKeys()
@@ -216,10 +230,6 @@ export const SegmentFooterTabGlossary = ({
         SegmentConstants.SET_GLOSSARY_TO_CACHE,
         onReceiveGlossary,
       )
-      SegmentStore.removeListener(
-        SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
-        onReceiveGlossaryBySearch,
-      )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
       CatToolStore.removeListener(
@@ -230,8 +240,64 @@ export const SegmentFooterTabGlossary = ({
         CatToolConstants.HAVE_KEYS_GLOSSARY,
         onReceiveHaveKeysGlossary,
       )
+      SegmentStore.removeListener(
+        CatToolConstants.DELETE_FROM_GLOSSARY,
+        onDeleteTerm,
+      )
     }
   }, [segment.sid, segment.segment, resetForm])
+
+  // search results listener
+  useEffect(() => {
+    const onReceiveGlossaryBySearch = () =>
+      !isLoading && notifyLoadingStatusToParent(false)
+
+    SegmentStore.addListener(
+      SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
+      onReceiveGlossaryBySearch,
+    )
+
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
+        onReceiveGlossaryBySearch,
+      )
+    }
+  }, [isLoading, notifyLoadingStatusToParent])
+
+  // error listener for set/update/delete
+  useEffect(() => {
+    const onError = () => setIsLoading(false)
+    const onErrorDelete = (sid, error) => {
+      onError()
+      const {term_id} = error?.payload?.term ?? {}
+      setTermsStatusDeleting((prevState) =>
+        prevState.filter((value) => value !== term_id),
+      )
+    }
+
+    SegmentStore.addListener(SegmentConstants.ERROR_ADD_GLOSSARY_ITEM, onError)
+    SegmentStore.addListener(SegmentConstants.ERROR_CHANGE_GLOSSARY, onError)
+    SegmentStore.addListener(
+      SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
+      onErrorDelete,
+    )
+
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
+        onError,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        onError,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
+        onErrorDelete,
+      )
+    }
+  }, [])
 
   // set domains by key
   useEffect(() => {
@@ -275,8 +341,20 @@ export const SegmentFooterTabGlossary = ({
 
   useEffect(() => {
     if (!segment?.glossary_search_results) return
-    console.log('----> segment glossary', segment.glossary_search_results)
-    setTerms(segment.glossary_search_results)
+    const orderedByUpdateDate = [...segment.glossary_search_results].sort(
+      (a, b) => {
+        if (
+          new Date(a.metadata.last_update_date).getTime() <
+          new Date(b.metadata.last_update_date).getTime()
+        ) {
+          return 1
+        } else {
+          return -1
+        }
+      },
+    )
+    console.log('----> segment glossary', orderedByUpdateDate)
+    setTerms(orderedByUpdateDate)
   }, [segment?.glossary_search_results])
 
   useEffect(() => {
@@ -287,20 +365,31 @@ export const SegmentFooterTabGlossary = ({
   }, [keys])
 
   useEffect(() => {
-    setSelectsActive((prevState) => ({
-      ...prevState,
-      domain: domains.find(({name}) => name === prevState.domain?.name)
-        ? prevState.domain
-        : domains[0],
-    }))
-  }, [domains])
+    const {metadata = {}} = modifyElement ?? {}
+
+    setSelectsActive((prevState) =>
+      prevState.domain?.name !== metadata.domain || !modifyElement
+        ? {
+            ...prevState,
+            domain: undefined,
+            subdomain: undefined,
+          }
+        : prevState,
+    )
+  }, [domains, modifyElement])
 
   useEffect(() => {
-    setSelectsActive((prevState) => ({
-      ...prevState,
-      subdomain: subdomains[0],
-    }))
-  }, [subdomains])
+    const {metadata = {}} = modifyElement ?? {}
+
+    setSelectsActive((prevState) =>
+      prevState.domain?.name !== metadata.domain || !modifyElement
+        ? {
+            ...prevState,
+            subdomain: undefined,
+          }
+        : prevState,
+    )
+  }, [subdomains, modifyElement])
 
   // prefill term form
   useEffect(() => {
@@ -324,28 +413,31 @@ export const SegmentFooterTabGlossary = ({
       [TRANSLATED_DESCRIPTION]: target.note,
       [TRANSLATED_EXAMPLE]: target.sentence,
     })
-  }, [modifyElement])
 
-  // notify is loading status to parent (SegmentFooter)
+    const domainsForActiveKeys = domainsResponse[metadata.key]?.map(
+      ({domain, subdomains}, index) => ({
+        id: index.toString(),
+        name: domain,
+        subdomains,
+      }),
+    )
+    setSelectsActive((prevState) => ({
+      ...prevState,
+      domain: domainsForActiveKeys.find(({name}) => name === metadata.domain),
+      subdomain: domainsForActiveKeys
+        .find(({name}) => name === metadata.domain)
+        ?.subdomains.map((name, index) => ({
+          id: index.toString(),
+          name,
+        }))
+        ?.find(({name}) => name === metadata.subdomain),
+    }))
+  }, [modifyElement, domainsResponse])
+
+  // notify loading status to parent (SegmentFooter)
   useEffect(() => {
-    if (notifyLoadingStatus) notifyLoadingStatus({code, isLoading})
-  }, [isLoading, code, notifyLoadingStatus])
-
-  // check if should retry terms after user created a new one (2 seconds delay)
-  useEffect(() => {
-    if (!terms.find(({term_id}) => !term_id)) return
-
-    const timeOut = setTimeout(() => {
-      console.log('Retry GET request terms after created a new one term')
-      SegmentActions.getGlossaryForSegment({
-        sid: segment.sid,
-        text: segment.segment,
-        shouldRefresh: true,
-      })
-    }, 2000)
-
-    return () => clearTimeout(timeOut)
-  }, [terms, segment.sid, segment.segment])
+    notifyLoadingStatusToParent(isLoading)
+  }, [isLoading, notifyLoadingStatusToParent])
 
   return (
     <TabGlossaryContext.Provider
@@ -369,27 +461,31 @@ export const SegmentFooterTabGlossary = ({
         selectsActive,
         setSelectsActive,
         modifyElement,
+        setModifyElement,
         showMore,
         setShowMore,
         resetForm,
         domainsResponse,
         getRequestPayloadTemplate,
         setShowForm,
-        setModifyElement,
+        termsStatusDeleting,
+        setTermsStatusDeleting,
+        notifyLoadingStatusToParent,
       }}
     >
       <div className={`tab sub-editor glossary ${active_class}`}>
-        {showForm ? (
-          <TermForm />
-        ) : haveKeysGlossary ? (
+        {haveKeysGlossary ? (
           <>
             <SearchTerms />
+            {showForm && <TermForm />}
             <GlossaryList />
           </>
+        ) : showForm ? (
+          <TermForm />
         ) : (
           <div className="no_keys_glossary">
             <p>No glossary available.</p>
-            <button className={'glossary__button-add'} onClick={openForm}>
+            <button className="glossary__button-add" onClick={openForm}>
               + Click here to create one
             </button>
           </div>

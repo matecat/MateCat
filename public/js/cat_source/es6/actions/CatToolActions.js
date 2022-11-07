@@ -245,6 +245,7 @@ let CatToolActions = {
   retrieveJobKeys: function (forceUpdate = false) {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
+    const haveKeysGlossary = CatToolStore.getHaveKeysGlossary()
     if (!jobKeys || forceUpdate) {
       getTmKeysJob().then(({tm_keys: tmKeys}) => {
         // filter not private keys
@@ -271,6 +272,12 @@ let CatToolActions = {
         AppDispatcher.dispatch({
           actionType: CattolConstants.UPDATE_DOMAINS,
           entries: domains,
+        })
+      }
+      if (haveKeysGlossary) {
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
+          value: haveKeysGlossary,
         })
       }
     }
