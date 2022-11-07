@@ -1,22 +1,18 @@
 import React, {useContext, useEffect, useState} from 'react'
 import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
-import {Select} from '../../common/Select'
 import SegmentActions from '../../../actions/SegmentActions'
 import CatToolActions from '../../../actions/CatToolActions'
+import {KeysSelect} from './KeysSelect'
+import {DomainSelect} from './DomainSelect'
+import {SubdomainSelect} from './SubdomainSelect'
 
 const TermForm = () => {
   const {
     isLoading,
-    keys,
-    domains,
-    setDomains,
-    subdomains,
-    setSubdomains,
     termForm,
     setTermForm,
     selectsActive,
-    setSelectsActive,
     modifyElement,
     showMore,
     setShowMore,
@@ -47,11 +43,6 @@ const TermForm = () => {
     TRANSLATED_DESCRIPTION,
     TRANSLATED_EXAMPLE,
   } = TERM_FORM_FIELDS
-
-  const isEmptyKeys = !keys.length
-
-  const updateSelectActive = (key, value) =>
-    setSelectsActive((prevState) => ({...prevState, [key]: value}))
 
   const updateTermForm = (key, value) =>
     setTermForm((prevState) => ({...prevState, [key]: value}))
@@ -126,179 +117,19 @@ const TermForm = () => {
           />
         </div>
         <div className="glossary-tm-container">
-          <Select
-            className={`glossary-select${
+          <KeysSelect
+            className={`${
               highlightMandatoryOnSubmit.keys
                 ? ' select_highlight_mandatory'
                 : ''
             }`}
-            name="glossary-term-tm"
-            label="Glossary*"
-            placeholder="Select a glossary"
-            multipleSelect="dropdown"
-            showSearchBar={!isEmptyKeys}
-            searchPlaceholder="Find a glossary"
-            options={
-              keys.length ? keys : [{id: '0', name: '+ Create glossary key'}]
-            }
-            activeOptions={selectsActive.keys}
-            checkSpaceToReverse={false}
-            isDisabled={!!modifyElement}
-            onToggleOption={(option) => {
-              setHighlightMandatoryOnSubmit({})
-              if (option) {
-                const {keys: activeKeys} = selectsActive
-                setSelectsActive({
-                  keys: activeKeys.some((item) => item.id === option.id)
-                    ? activeKeys.filter((item) => item.id !== option.id)
-                    : activeKeys.concat([option]),
-                  domain: undefined,
-                  subdomain: undefined,
-                })
-              }
-            }}
-          >
-            {({name}) => ({
-              // customize row with button create glossary key
-              ...(isEmptyKeys && {
-                row: (
-                  <button
-                    className="button-create-glossary-key"
-                    onClick={() => UI.openLanguageResourcesPanel('tm')}
-                  >
-                    {name}
-                  </button>
-                ),
-                cancelHandleClick: true,
-              }),
-            })}
-          </Select>
-
+            onToggleOption={() => setHighlightMandatoryOnSubmit({})}
+          />
           <div className="input-with-label__wrapper">
-            <Select
-              className="glossary-select domain-select"
-              name="glossary-term-domain"
-              label="Domain"
-              placeholder="No domain"
-              showSearchBar
-              searchPlaceholder="Find a domain"
-              options={domains}
-              activeOption={selectsActive.domain}
-              checkSpaceToReverse={false}
-              onSelect={(option) => {
-                if (option) {
-                  updateSelectActive('domain', option)
-                }
-              }}
-            >
-              {({
-                name,
-                index,
-                optionsLength,
-                queryFilter,
-                resetQueryFilter,
-              }) => ({
-                ...(index === 0 &&
-                  selectsActive.domain && {
-                    beforeRow: (
-                      <button
-                        className="button-create-option"
-                        onClick={() => updateSelectActive('domain', undefined)}
-                      >
-                        Deselect domain
-                      </button>
-                    ),
-                  }),
-                // override row content
-                row: <div className="domain-option">{name}</div>,
-                // insert button after last row
-                ...(index === optionsLength - 1 &&
-                  queryFilter.trim() &&
-                  !domains.find(({name}) => name === queryFilter) && {
-                    afterRow: (
-                      <button
-                        className="button-create-option"
-                        onClick={() => {
-                          setDomains((prevState) => [
-                            ...prevState,
-                            {
-                              name: queryFilter,
-                              id: (prevState.length + 1).toString(),
-                            },
-                          ])
-                          resetQueryFilter()
-                        }}
-                      >
-                        + Create a domain <b>{queryFilter}</b>
-                      </button>
-                    ),
-                  }),
-              })}
-            </Select>
+            <DomainSelect />
           </div>
           <div className="input-with-label__wrapper">
-            <Select
-              className="glossary-select domain-select"
-              name="glossary-term-subdomain"
-              label="Subdomain"
-              placeholder="No subdomain"
-              showSearchBar
-              searchPlaceholder="Find a subdomain"
-              options={subdomains}
-              activeOption={selectsActive.subdomain}
-              checkSpaceToReverse={false}
-              onSelect={(option) => {
-                if (option) {
-                  updateSelectActive('subdomain', option)
-                }
-              }}
-            >
-              {({
-                name,
-                index,
-                optionsLength,
-                queryFilter,
-                resetQueryFilter,
-              }) => ({
-                ...(index === 0 &&
-                  selectsActive.subdomain && {
-                    beforeRow: (
-                      <button
-                        className="button-create-option"
-                        onClick={() =>
-                          updateSelectActive('subdomain', undefined)
-                        }
-                      >
-                        Deselect subdomain
-                      </button>
-                    ),
-                  }),
-                // override row content
-                row: <div className="domain-option">{name}</div>,
-                // insert button after last row
-                ...(index === optionsLength - 1 &&
-                  queryFilter.trim() &&
-                  !subdomains.find(({name}) => name === queryFilter) && {
-                    afterRow: (
-                      <button
-                        className="button-create-option"
-                        onClick={() => {
-                          setSubdomains((prevState) => [
-                            ...prevState,
-                            {
-                              name: queryFilter,
-                              id: (prevState.length + 1).toString(),
-                            },
-                          ])
-                          resetQueryFilter()
-                        }}
-                      >
-                        + Create a subdomain <b>{queryFilter}</b>
-                      </button>
-                    ),
-                  }),
-              })}
-            </Select>
+            <SubdomainSelect />
           </div>
         </div>
       </div>

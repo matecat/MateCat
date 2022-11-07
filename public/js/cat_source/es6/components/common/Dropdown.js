@@ -279,6 +279,7 @@ export const Dropdown = ({
           setQueryFilter('')
           queryFilterRef.current = ''
         },
+        onClose,
       }) || {}
 
     return (

@@ -71,11 +71,6 @@ export const SegmentFooterTabGlossary = ({
     setShowForm(false)
     setShowMore(false)
     setModifyElement(undefined)
-    setSelectsActive((prevState) => ({
-      ...prevState,
-      domain: undefined,
-      subdomain: undefined,
-    }))
   }, [])
 
   const openForm = useCallback(() => {
@@ -369,21 +364,32 @@ export const SegmentFooterTabGlossary = ({
     }))
   }, [keys])
 
-  // useEffect(() => {
-  //   setSelectsActive((prevState) => ({
-  //     ...prevState,
-  //     domain: domains.find(({name}) => name === prevState.domain?.name)
-  //       ? prevState.domain
-  //       : domains[0],
-  //   }))
-  // }, [domains])
+  useEffect(() => {
+    const {metadata = {}} = modifyElement ?? {}
+
+    setSelectsActive((prevState) =>
+      prevState.domain?.name !== metadata.domain || !modifyElement
+        ? {
+            ...prevState,
+            domain: undefined,
+            subdomain: undefined,
+          }
+        : prevState,
+    )
+  }, [domains, modifyElement])
 
   useEffect(() => {
-    setSelectsActive((prevState) => ({
-      ...prevState,
-      subdomain: subdomains[0],
-    }))
-  }, [subdomains])
+    const {metadata = {}} = modifyElement ?? {}
+
+    setSelectsActive((prevState) =>
+      prevState.domain?.name !== metadata.domain || !modifyElement
+        ? {
+            ...prevState,
+            subdomain: undefined,
+          }
+        : prevState,
+    )
+  }, [subdomains, modifyElement])
 
   // prefill term form
   useEffect(() => {
