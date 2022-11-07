@@ -421,17 +421,19 @@ export const SegmentFooterTabGlossary = ({
         subdomains,
       }),
     )
-    setSelectsActive((prevState) => ({
-      ...prevState,
-      domain: domainsForActiveKeys.find(({name}) => name === metadata.domain),
-      subdomain: domainsForActiveKeys
-        .find(({name}) => name === metadata.domain)
-        ?.subdomains.map((name, index) => ({
-          id: index.toString(),
-          name,
-        }))
-        ?.find(({name}) => name === metadata.subdomain),
-    }))
+
+    if (domainsForActiveKeys)
+      setSelectsActive((prevState) => ({
+        ...prevState,
+        domain: domainsForActiveKeys.find(({name}) => name === metadata.domain),
+        subdomain: domainsForActiveKeys
+          .find(({name}) => name === metadata.domain)
+          ?.subdomains.map((name, index) => ({
+            id: index.toString(),
+            name,
+          }))
+          ?.find(({name}) => name === metadata.subdomain),
+      }))
   }, [modifyElement, domainsResponse])
 
   // notify loading status to parent (SegmentFooter)
