@@ -17,6 +17,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
+import CommonUtils from '../../utils/commonUtils'
 import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
@@ -657,10 +658,10 @@ class Editarea extends React.Component {
       return e.shiftKey ? null : 'insert-tab-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      isCtrlKeyCommand(e) &&
-      e.shiftKey
+      ((isCtrlKeyCommand(e) && e.shiftKey) ||
+        (CommonUtils.isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
     ) {
-      return 'insert-nbsp-tag' // Windows
+      return 'insert-nbsp-tag' // Windows && Mac
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       !e.shiftKey &&
@@ -688,8 +689,7 @@ class Editarea extends React.Component {
       return 'tm-search'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      e.ctrlKey &&
-      e.altKey
+      ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
