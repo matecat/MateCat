@@ -104,6 +104,9 @@
           border: 1px solid $grey7;
           border-radius: 12px;
           padding: 0 6px 0 6px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .button-create-option {
           color: $grey7;
@@ -377,8 +380,7 @@
     padding: 24px;
     .glossary-form-line {
       display: flex;
-      align-content: flex-start;
-      gap: 40px;
+      justify-content: space-between;
       padding-top: 8px;
       &.more-line {
         padding-top: 24px;
@@ -390,7 +392,8 @@
 
       > div {
         display: flex;
-        width: 50%;
+        flex-shrink: 0;
+        width: 49%;
         .input-with-label__wrapper {
           width: 100%;
         }
