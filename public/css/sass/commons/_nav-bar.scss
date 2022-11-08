@@ -12,7 +12,7 @@ header {
   }
   .nav-mc-bar {
     margin: 0px !important;
-    //min-width: 992px;
+    height: 100%;
     .navigation {
       padding: 10px !important;
       /*padding: 5px 15px 5px 0px !important;
@@ -420,12 +420,11 @@ header {
   float: left;
   border: 0;
   //margin-top: 5px;
-  background: url(../../img/logo_matecat.png) 0px 0px no-repeat;
-  width: 180px;
-  height: 38px;
-  background-size: cover;
+  background: url(../../img/logo_matecat_big_white.svg) 0px 0px no-repeat;
+  width: 190px;
+  height: 40px;
   left: 20px;
-  top: 3px;
+  top: 1px;
 }
 
 #menu-site {

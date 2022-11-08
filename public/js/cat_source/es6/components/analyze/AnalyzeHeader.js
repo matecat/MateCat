@@ -291,7 +291,7 @@ class AnalyzeHeader extends React.Component {
               </div>
             </h2>
             <p>
-              MateCat gives you more matches than any other tool thanks to a
+              Matecat gives you more matches than any other tool thanks to a
               better integration of machine translation and translation
               memories.
               <span
