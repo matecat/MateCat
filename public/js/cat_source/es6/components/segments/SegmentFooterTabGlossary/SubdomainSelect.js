@@ -20,6 +20,7 @@ export const SubdomainSelect = () => {
       options={subdomains}
       activeOption={selectsActive.subdomain}
       checkSpaceToReverse={false}
+      isDisabled={!selectsActive.domain}
       onSelect={(option) => {
         if (option) {
           updateSelectActive('subdomain', option)
