@@ -114,7 +114,7 @@ function SegmentFooter() {
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
     return (
-      (Array.isArray(notes) && Array.isArray(notes).lenght > 0) ||
+      (Array.isArray(notes) && notes.length > 0) ||
       (!Array.isArray(notes) &&
         !/\bThere are no notes available\b/i.test(
           notes?.props?.children ?? '',
