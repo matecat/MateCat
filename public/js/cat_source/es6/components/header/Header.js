@@ -141,7 +141,7 @@ class Header extends React.Component {
                 <div>
                   <ul id="menu-site">
                     <li>
-                      <a href="https://site.matecat.com/about/">About</a>
+                      <a href="https://site.matecat.com">About</a>
                     </li>
                     <li>
                       <a href="https://site.matecat.com/benefits/">Benefits</a>
