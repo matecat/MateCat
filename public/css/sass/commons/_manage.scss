@@ -393,9 +393,7 @@ body.manage {
               transition: 0.3s ease;
               background-color: #ffffff;
               padding: 8px 15px;
-              &.outsource-container.no-outsource {
-                overflow: unset;
-              }
+
               .outsource.modal .popup {
                 box-shadow: none;
               }
