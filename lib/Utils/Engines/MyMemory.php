@@ -418,20 +418,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $postFields = [
-                'glossary'    => "@" . realpath( $file ),
+                'glossary'    => $this->getCurlFile($file),
                 'name'        => $name,
         ];
 
         $postFields[ 'key' ] = trim( $key );
-
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = false;
-            $this->_setAdditionalCurlParams( $options );
-        }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
 
@@ -459,13 +450,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         do {
 
-            \Log::doJsonLog('PIPPO ---> ' . $uuid);
-
             $this->call( $relativeUrl, [
                 'uuid' => $uuid
             ], false );
-
-            \Log::doJsonLog('PIPPO ---> ' . json_encode($this->result->responseStatus));
 
             if($this->result->responseStatus === 202){
                 sleep( $sleep );
@@ -653,29 +640,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $validator->isValid();
     }
 
-    private function formatStructureDataFromCSV($filePath) {
-        $fileContent = file_get_contents($filePath);
-        // @TODO
-    }
-
     public function import( $file, $key, $name = false ) {
 
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 && class_exists( '\\CURLFile' ) ) {
-
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = true;
-            $this->_setAdditionalCurlParams( $options );
-            $file = new \CURLFile( realpath( $file ) );
-
-        } else {
-            $file = "@" . realpath( $file );
-        }
-
         $postFields = [
-                'tmx'  => $file,
+                'tmx'  => $this->getCurlFile($file),
                 'name' => $name,
                 'key'  => trim( $key )
         ];
