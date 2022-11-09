@@ -59,7 +59,6 @@ const normalizeSetUpdateGlossary = (terms) => {
     } = term.metadata
     return {
       ...term,
-      term_id: null,
       metadata: {
         ...restMetadata,
         key,
@@ -1536,6 +1535,11 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
         action.fid,
       )
+      break
+    case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
+    case SegmentConstants.ERROR_DELETE_FROM_GLOSSARY:
+    case SegmentConstants.ERROR_CHANGE_GLOSSARY:
+      SegmentStore.emitChange(action.actionType, action.sid, action.error)
       break
     case EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA:
       SegmentStore.emitChange(

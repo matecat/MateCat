@@ -1015,6 +1015,31 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $idProject
+     * @param $password
+     * @param $limit
+     * @param $offset
+     *
+     * @return bool|int
+     */
+    public static function destroyGetIdsFromIdProjectAndPasswordCache( $idProject, $password, $limit, $offset ) {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( "
+                SELECT s.id, j.id as id_job, j.password as job_password
+                FROM segments s
+                join jobs j on s.id between j.job_first_segment and j.job_last_segment
+                join projects p on p.id = j.id_project
+                where p.id = :id_project and p.password = :password
+                limit ".$limit." offset " . $offset);
+
+        return $thisDao->_destroyObjectCache( $stmt, [
+                'id_project'   => $idProject,
+                'password' => $password,
+        ] );
+    }
+
+    /**
      * @param     $idJob
      * @param     $password
      * @param     $limit
@@ -1035,6 +1060,30 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 group by s.id limit ".$limit." offset " . $offset);
 
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $idJob,
+            'password' => $password,
+        ] );
+    }
+
+    /**
+     * @param $idJob
+     * @param $password
+     * @param $limit
+     * @param $offset
+     *
+     * @return bool|int
+     */
+    public static function destroyGetIdsFromIdJobAndPasswordCache( $idJob, $password, $limit, $offset ) {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( "
+                SELECT s.id 
+                FROM segments s
+                join jobs j on s.id between j.job_first_segment and j.job_last_segment
+                where j.id = :id_job and j.password = :password
+                group by s.id limit ".$limit." offset " . $offset );
+
+        return $thisDao->_destroyObjectCache( $stmt, [
             'id_job'   => $idJob,
             'password' => $password,
         ] );

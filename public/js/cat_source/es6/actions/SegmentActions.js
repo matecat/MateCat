@@ -761,15 +761,8 @@ const SegmentActions = {
   },
 
   deleteGlossaryItem: function (data) {
-    const sid = data.id_segment
     deleteGlossaryItem(data)
-      .then(() => {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-          sid: sid,
-          message: 'A glossary item has been deleted',
-        })
-      })
+      .then(() => {})
       .catch(() => {
         OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
@@ -777,24 +770,33 @@ const SegmentActions = {
 
   deleteGlossaryFromCache: (sid, term) => {
     AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: 'A glossary item has been deleted',
+    })
+    AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
       sid: sid,
       term,
+    })
+  },
+  errorDeleteGlossaryFromCache: (sid, error) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: error.message ? error.message : `Error code: ${error.code}`,
+    })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
+      sid: sid,
+      error,
     })
   },
 
   addGlossaryItem: function (data) {
     const sid = data.id_segment
     addGlossaryItem(data)
-      .then(() => {
-        const msg = 'A glossary item has been added'
-
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-          sid: sid,
-          message: msg,
-        })
-      })
+      .then(() => {})
       .catch((errors) => {
         if (errors.length > 0) {
           AppDispatcher.dispatch({
@@ -809,21 +811,31 @@ const SegmentActions = {
   },
   addGlossaryItemToCache: (sid, terms) => {
     AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: 'A glossary item has been added',
+    })
+    AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
       terms,
     })
   },
+  errorAddGlossaryItemToCache: (sid, error) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: error.message ? error.message : `Error code: ${error.code}`,
+    })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
+      sid: sid,
+      error,
+    })
+  },
   updateGlossaryItem: function (data) {
-    const sid = data.id_segment
     updateGlossaryItem(data)
-      .then(() => {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-          sid: sid,
-          message: 'A glossary item has been updated',
-        })
-      })
+      .then(() => {})
       .catch(() => {
         OfflineUtils.failedConnection(0, 'updateGlossaryItem')
       })
@@ -831,9 +843,26 @@ const SegmentActions = {
 
   updateglossaryCache: (sid, terms) => {
     AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: 'A glossary item has been updated',
+    })
+    AppDispatcher.dispatch({
       actionType: SegmentConstants.CHANGE_GLOSSARY,
       sid: sid,
       terms,
+    })
+  },
+  errorUpdateglossaryCache: (sid, error) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: error.message ? error.message : `Error code: ${error.code}`,
+    })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+      sid: sid,
+      error,
     })
   },
 
@@ -1267,15 +1296,37 @@ const SegmentActions = {
       })
     // get tm keys
     new Promise((resolve) => {
-      if (!CatToolStore.getJobTmKeys()) {
+      if (!CatToolStore.getJobTmKeys() || !CatToolStore.getHaveKeysGlossary()) {
+        let isJobTmKeysCompleted = !!CatToolStore.getJobTmKeys()
+        let isHaveKeysGlossaryCompleted = !!CatToolStore.getHaveKeysGlossary()
+
+        const resolvePromise = () =>
+          isJobTmKeysCompleted && isHaveKeysGlossaryCompleted && resolve()
+
         const setJobTmKeys = () => {
-          resolve()
+          isJobTmKeysCompleted = true
+          resolvePromise()
+
           CatToolStore.removeListener(
             CatToolConstants.UPDATE_TM_KEYS,
             setJobTmKeys,
           )
         }
+        const setHaveKeysGlossary = () => {
+          isHaveKeysGlossaryCompleted = true
+          resolvePromise()
+
+          CatToolStore.removeListener(
+            CatToolConstants.HAVE_KEYS_GLOSSARY,
+            setHaveKeysGlossary,
+          )
+        }
+
         CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+        CatToolStore.addListener(
+          CatToolConstants.HAVE_KEYS_GLOSSARY,
+          setHaveKeysGlossary,
+        )
       } else {
         resolve()
       }

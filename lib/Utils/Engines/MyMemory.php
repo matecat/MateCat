@@ -99,6 +99,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             case 'api_key_create_user_url':
                 $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
+
+            case 'glossary_import_status_relative_url':
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
@@ -319,18 +321,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( $function, $parameters, true );
 
-        /*
-         * If the segment to be deleted is not present in the current TM,
-         * MyMemory response is
-         * {"responseData":{"translatedText":"NO ID FOUND"},
-         *  "responseDetails":"NO ID FOUND",
-         *  "responseStatus":"403",
-         *  "matches":""
-         * }
-         *
-         * but the result is the one expected: the segment is not present in the current TM.
-         **/
-
         if ( $this->result->responseStatus != "200" &&
                 ( $this->result->responseStatus != "404" ||
                         $this->result->responseDetails != "NO ID FOUND" )
@@ -428,24 +418,47 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $postFields = [
-                'glossary'    => "@" . realpath( $file ),
+                'glossary'    => $this->getCurlFile($file),
                 'name'        => $name,
         ];
 
         $postFields[ 'key' ] = trim( $key );
 
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = false;
-            $this->_setAdditionalCurlParams( $options );
-        }
-
         $this->call( "glossary_import_relative_url", $postFields, true );
 
+        if(isset($this->result->responseData['UUID'])){
+            $uuid = $this->result->responseData['UUID'];
+            $this->pollForStatus($uuid, 'glossary_import_status_relative_url');
+        }
+
         return $this->result;
+    }
+
+    /**
+     * Poll MM for obtain the status of a write operation
+     * using a cyclic barrier
+     * (import, update, set, delete)
+     *
+     * @param $uuid
+     * @param $relativeUrl
+     */
+    private function pollForStatus($uuid, $relativeUrl)
+    {
+        $limit = 10;
+        $sleep = 1;
+        $startTime = time();
+
+        do {
+
+            $this->call( $relativeUrl, [
+                'uuid' => $uuid
+            ], false );
+
+            if($this->result->responseStatus === 202){
+                sleep( $sleep );
+            }
+
+        } while ( $this->result->responseStatus === 202 and (time() - $startTime) <= $limit );
     }
 
     /**
@@ -506,6 +519,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 "term" => $term,
         ];
         $this->call( "glossary_delete_relative_url", $payload, true, true );
+
+        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+            $uuid = $this->result->responseDetails;
+            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+        }
 
         return $this->result;
     }
@@ -569,6 +587,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
 
+        \Log::doJsonLog('PIPPO ----> ' . json_encode($this->result));
+
+        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+            $uuid = $this->result->responseDetails;
+            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+        }
+
         return $this->result;
     }
 
@@ -591,6 +616,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ];
         $this->call( "glossary_update_relative_url", $payload, true, true );
 
+        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+            $uuid = $this->result->responseDetails;
+            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+        }
+
         return $this->result;
     }
 
@@ -610,29 +640,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $validator->isValid();
     }
 
-    private function formatStructureDataFromCSV($filePath) {
-        $fileContent = file_get_contents($filePath);
-        // @TODO
-    }
-
     public function import( $file, $key, $name = false ) {
 
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 && class_exists( '\\CURLFile' ) ) {
-
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = true;
-            $this->_setAdditionalCurlParams( $options );
-            $file = new \CURLFile( realpath( $file ) );
-
-        } else {
-            $file = "@" . realpath( $file );
-        }
-
         $postFields = [
-                'tmx'  => $file,
+                'tmx'  => $this->getCurlFile($file),
                 'name' => $name,
                 'key'  => trim( $key )
         ];

@@ -12,6 +12,36 @@ import SegmentConstants from '../../../constants/SegmentConstants'
 import _ from 'lodash'
 import SegmentActions from '../../../actions/SegmentActions'
 
+const setIntervalCounter = ({callback, delay, maximumNumOfTime}) => {
+  let count = 0
+  let interval
+
+  const reset = () => {
+    clearInterval(interval)
+    count = 0
+  }
+
+  const set = ({callback, delay, maximumNumOfTime}) => {
+    reset()
+    interval = setInterval(() => {
+      if (
+        typeof maximumNumOfTime === 'number' &&
+        count > maximumNumOfTime - 1
+      ) {
+        reset()
+        return
+      }
+
+      const result = callback()
+      count++
+
+      if (result) reset()
+    }, delay)
+  }
+
+  set({callback, delay, maximumNumOfTime})
+}
+
 const GlossaryList = () => {
   const {
     terms,
@@ -28,6 +58,8 @@ const GlossaryList = () => {
     domains,
     subdomains,
     getRequestPayloadTemplate,
+    termsStatusDeleting,
+    setTermsStatusDeleting,
   } = useContext(TabGlossaryContext)
 
   const [termHighlight, setTermHighlight] = useState(undefined)
@@ -47,22 +79,40 @@ const GlossaryList = () => {
             segment.glossary_search_results.map(({term_id}) => term_id),
           )
         ) {
-          const interval = setInterval(() => {
-            if (scrollItemsRef.current?.children.length) {
-              clearInterval(interval)
-              resolve()
-            }
-          }, 100)
+          setIntervalCounter({
+            callback: () => {
+              if (scrollItemsRef.current?.children.length) {
+                resolve()
+                return true
+              }
+            },
+            delay: 100,
+            maximumNumOfTime: 5,
+          })
         } else {
           resolve()
         }
       })
+      const indexToScroll = Array.from(
+        scrollItemsRef.current?.children,
+      ).findIndex((element) => element.getAttribute('id') === id)
 
-      const indexToScroll = segment.glossary.findIndex(
-        ({term_id}) => term_id === id,
-      )
       const element = scrollItemsRef.current?.children[indexToScroll]
+
       if (element) {
+        await new Promise((resolve) => {
+          setIntervalCounter({
+            callback: () => {
+              if (element.offsetHeight) {
+                resolve()
+                return true
+              }
+            },
+            delay: 100,
+            maximumNumOfTime: 5,
+          })
+        })
+
         scrollItemsRef.current.scrollTo(0, indexToScroll * element.offsetHeight)
         setTermHighlight({index: indexToScroll, isTarget, type})
         const labelElement =
@@ -113,6 +163,7 @@ const GlossaryList = () => {
 
   const onDeleteItem = (term) => {
     const {term_id, metadata} = term
+    setTermsStatusDeleting((prevState) => [...prevState, term_id])
     SegmentActions.deleteGlossaryItem(
       getRequestPayloadTemplate({
         term: {term_id, metadata: {key: metadata.key}},
@@ -122,7 +173,7 @@ const GlossaryList = () => {
   }
 
   return (
-    <div ref={scrollItemsRef} className={'glossary_items'}>
+    <div ref={scrollItemsRef} className="glossary_items">
       {terms.map((term, index) => (
         <GlossaryItem
           key={index}
@@ -131,7 +182,10 @@ const GlossaryList = () => {
           deleteElement={() => onDeleteItem(term)}
           highlight={index === termHighlight?.index && termHighlight}
           isEnabledToModify={
-            !!keys.find(({key}) => key === term?.metadata?.key)
+            !!keys.find(({key}) => key === term?.metadata?.key) && !isLoading
+          }
+          isStatusDeleting={
+            !!termsStatusDeleting.find((value) => value === term.term_id)
           }
         />
       ))}
