@@ -4,6 +4,7 @@ import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import {
   DeleteIcon,
   GlossaryDefinitionIcon,
+  LockIcon,
   ModifyIcon,
 } from './SegmentFooterTabGlossary'
 
@@ -50,6 +51,15 @@ export const GlossaryItem = ({
           <div onClick={() => canModifyItem && modifyElement()}>
             <ModifyIcon />
           </div>
+          {!canModifyItem && (
+            <div
+              className="locked-button"
+              aria-label="Editing is only allowed on keys that you own"
+              tooltip-position="left"
+            >
+              <LockIcon />
+            </div>
+          )}
           <div onClick={() => canModifyItem && deleteElement()}>
             {isStatusDeleting ? (
               <div className="loader loader_on"></div>
@@ -70,12 +80,15 @@ export const GlossaryItem = ({
                   : ''
               }`}
             >{`${source.term} `}</span>
-            <div>
-              <InfoIcon size={16} />
-              {source.sentence && (
-                <div className="glossary_item-tooltip">{source.sentence}</div>
-              )}
-            </div>
+            {source.sentence && (
+              <div
+                className="info-icon"
+                aria-label={source.sentence}
+                tooltip-position="right"
+              >
+                <InfoIcon size={16} />
+              </div>
+            )}
           </div>
           <div className="glossary-description">{source.note}</div>
         </div>
@@ -88,12 +101,15 @@ export const GlossaryItem = ({
                   : ''
               }`}
             >{`${target.term} `}</span>
-            <div>
-              <InfoIcon size={16} />
-              {target.sentence && (
-                <div className="glossary_item-tooltip">{target.sentence}</div>
-              )}
-            </div>
+            {target.sentence && (
+              <div
+                className="info-icon"
+                aria-label={target.sentence}
+                tooltip-position="right"
+              >
+                <InfoIcon size={16} />
+              </div>
+            )}
           </div>
           <div className="glossary-description">{target.note}</div>
         </div>
