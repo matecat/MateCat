@@ -108,7 +108,8 @@ function SegmentFooter() {
         segmentSource: segment.segment,
         segment: segment,
       },
-      getMetadataNoteTemplate: () => segment.metadata,
+      getMetadataNoteTemplate: () =>
+        segment.metadata?.length > 0 ? segment.metadata : null,
       allowHTML: () => '',
     }
     const notes =
