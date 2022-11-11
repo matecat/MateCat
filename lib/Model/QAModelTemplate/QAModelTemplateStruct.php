@@ -123,7 +123,6 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                         'id' => (int)$severityStruct->id,
                         'label' => $severityStruct->severity_label,
                         'code' => $severityStruct->severity_code,
-                        'dqf_id' => ($severityStruct->dqf_id) ? (int)$severityStruct->dqf_id : null,
                         'penalty' => floatval($severityStruct->penalty),
                 ];
             }
