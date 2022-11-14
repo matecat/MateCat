@@ -76,6 +76,8 @@ class FilesInfoUtility {
                         unset( $metadata[ 'files_parts' ][$id]);
                         $index++;
                     }
+
+                    $metadata[ 'files_parts' ] = array_values($metadata[ 'files_parts' ]);
                 }
 
                 if(!isset($metadata['files_parts'])){
