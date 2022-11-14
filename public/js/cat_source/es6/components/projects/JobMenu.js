@@ -285,8 +285,8 @@ class JobMenu extends React.Component {
             <i className="icon-drawer unarchive-project icon" /> Resume job
           </a>
           <a className="item" onClick={this.props.deleteJobFn}>
-            <i className="icon-drawer delete-project icon" /> Permanently Delete
-            job
+            <i className="icon-drawer delete-project icon" /> Delete job
+            permanently
           </a>
         </div>
       )
