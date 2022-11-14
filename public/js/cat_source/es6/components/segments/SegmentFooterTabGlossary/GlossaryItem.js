@@ -54,7 +54,7 @@ export const GlossaryItem = ({
           {!canModifyItem && (
             <div
               className="locked-button"
-              aria-label="Editing is only allowed on keys that you own"
+              aria-label="You can only edit entries from keys that you own"
               tooltip-position="left"
             >
               <LockIcon />
