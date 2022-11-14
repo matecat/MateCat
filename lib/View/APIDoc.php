@@ -21,7 +21,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
     <link href="/public/css/build/app.css" rel="stylesheet" type="text/css"/>
 
     <link rel="stylesheet" type="text/css" href="/public/api/dist/lib/swagger-ui.css">
-    <link rel="icon" href="/public/img/favicon.ico"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
     <script>
         /*<![CDATA[*/
