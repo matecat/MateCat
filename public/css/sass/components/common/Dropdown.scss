@@ -129,6 +129,17 @@
   padding: 24px 32px 0;
 }
 
+.dropdown__tooltip {
+  position: absolute;
+  z-index: 2;
+  margin-top: 14px;
+
+  &::after,
+  &::before {
+    opacity: 1;
+  }
+}
+
 // Options list
 .dropdown__list {
   margin: 0;
