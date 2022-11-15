@@ -316,6 +316,11 @@
         padding: 16px 0;
       }
 
+      .glossary_item-body-no-bottom-padding {
+        display: flex;
+        padding-bottom: 0;
+      }
+
       .glossary-item_column {
         width: 50%;
         display: flex;
