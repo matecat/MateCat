@@ -39,19 +39,25 @@ export const GlossaryItem = ({
             <span className="glossary_badge">{metadata.subdomain}</span>
           )}
           <div className="glossary_source">
-            <b>{metadata.key_name}</b>
+            <b>
+              {metadata.key_name
+                ? metadata.key_name
+                : `No name (${metadata.key})`}
+            </b>
             <span>{metadata.last_update}</span>
           </div>
         </div>
         <div
           className={`glossary_item-actions${
-            !canModifyItem ? ' glossary_item-actions--disabled' : ''
+            !canModifyItem && !isStatusDeleting
+              ? ' glossary_item-actions--disabled'
+              : ''
           }`}
         >
           <div onClick={() => canModifyItem && modifyElement()}>
             <ModifyIcon />
           </div>
-          {!canModifyItem && (
+          {!canModifyItem && !isStatusDeleting && (
             <div
               className="locked-button"
               aria-label="You can only edit entries from keys that you own"

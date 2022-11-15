@@ -66,6 +66,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     this.tmKeys = keys.map((key) => ({
       ...key,
       name: key.name ? key.name : `No name (${key.key})`,
+      isMissingName: true,
     }))
   },
   getJobTmKeys: function () {
