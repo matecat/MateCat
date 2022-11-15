@@ -70,7 +70,13 @@ export const GlossaryItem = ({
         </div>
       </div>
 
-      <div className="glossary_item-body">
+      <div
+        className={`glossary_item-body${
+          !source.note && !target.note
+            ? ' glossary_item-body-no-bottom-padding'
+            : ''
+        }`}
+      >
         <div className="glossary-item_column">
           <div className="glossary_word">
             <span
@@ -90,7 +96,9 @@ export const GlossaryItem = ({
               </div>
             )}
           </div>
-          <div className="glossary-description">{source.note}</div>
+          {source.note && (
+            <div className="glossary-description">{source.note}</div>
+          )}
         </div>
         <div className="glossary-item_column">
           <div className="glossary_word">
@@ -111,7 +119,9 @@ export const GlossaryItem = ({
               </div>
             )}
           </div>
-          <div className="glossary-description">{target.note}</div>
+          {target.note && (
+            <div className="glossary-description">{target.note}</div>
+          )}
         </div>
       </div>
     </div>
