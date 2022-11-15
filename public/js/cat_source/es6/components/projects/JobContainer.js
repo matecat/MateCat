@@ -638,18 +638,31 @@ class JobContainer extends React.Component {
   }
 
   openOutsourceModal(showTranslatorBox, extendedView) {
-    if (this.props.job.get('outsource_available')) {
+    if (showTranslatorBox && !this.props.job.get('outsource_available')) {
+      this.setState({
+        showTranslatorBox: showTranslatorBox,
+        extendedView: false,
+      })
+    } else if (this.props.job.get('outsource_available')) {
       if (!this.state.openOutsource) {
         $(document).trigger('outsource-request')
       }
       this.setState({
-        openOutsource: !this.state.openOutsource,
+        openOutsource: true,
         showTranslatorBox: showTranslatorBox,
         extendedView: extendedView,
       })
     } else {
       window.open('https://translated.com/contact-us', '_blank')
     }
+  }
+
+  closeOutsourceModal() {
+    this.setState({
+      openOutsource: false,
+      showTranslatorBox: false,
+      extendedView: false,
+    })
   }
 
   getOutsourceButton() {
@@ -840,7 +853,8 @@ class JobContainer extends React.Component {
     if (
       !nextProps.job.equals(this.props.job) ||
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
-      nextState.openOutsource !== this.state.openOutsource
+      nextState.openOutsource !== this.state.openOutsource ||
+      nextState.showTranslatorBox !== this.state.showTranslatorBox
     ) {
       this.updated = true
     }
@@ -848,7 +862,8 @@ class JobContainer extends React.Component {
       !nextProps.job.equals(this.props.job) ||
       nextProps.lastAction !== this.props.lastAction ||
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
-      nextState.openOutsource !== this.state.openOutsource
+      nextState.openOutsource !== this.state.openOutsource ||
+      nextState.showTranslatorBox !== this.state.showTranslatorBox
     )
   }
 
@@ -1146,7 +1161,7 @@ class JobContainer extends React.Component {
           url={this.getTranslateUrl()}
           showTranslatorBox={this.state.showTranslatorBox}
           extendedView={this.state.extendedView}
-          onClickOutside={this.openOutsourceModal.bind(this)}
+          onClickOutside={this.closeOutsourceModal.bind(this)}
           openOutsource={this.state.openOutsource}
           idJobLabel={idJobLabel}
         />

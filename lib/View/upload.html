@@ -17,6 +17,9 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
     <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
 
@@ -25,7 +28,7 @@
     <meta property="og:title" content="Translate a file with MateCat" />
     <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
     <meta property="og:url" content="https://www.matecat.com" />
-    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
+    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
 
     <link rel="stylesheet" href="${basepath}public/css/build/upload-build.css?build=${build_number}"/>
     <tal:block  tal:repeat="css_url css_resources">
@@ -86,7 +89,7 @@
 
 <div metal:use-macro="unsupported_browser.html/devices"/>
 
-<body tal:condition="php:supportedBrowser EQ 1" class="started">
+<body tal:condition="php:supportedBrowser EQ 1" class="upload-page started">
 <div class="reloading-upload-page" style="position: absolute;height: 85%;width: 100%;background-color: rgba(76, 69, 69, 0.3);top: 170px;left: 0;z-index: 3;display: none;">
     <div class="ui active inverted dimmer">
         <div class="ui massive text loader">Reloading</div>
@@ -327,7 +330,7 @@
 </div>
 
 <div class="wrapper-bottom">
-    <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
+    <p tal:condition="true:conversion_enabled" class="supported-files">Matecat supports
         <a class="supported-file-formats" href="#">${formats_number} file formats</a>
         <span style="float: right;">.</span>
         <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent() AND Bootstrap::isGDriveConfigured()">
@@ -911,10 +914,10 @@
     <div class="footer-body">
         <div class="info">
             <div class="image">
-                <img src="${basepath}public/img/Logo-Matecat.svg"/>
+                <img src="${basepath}public/img/logo_matecat_small.svg"/>
             </div>
             <div class="description">
-                MateCat is a free and open source online CAT tool. It’s free for translation companies, translators and enterprise users.
+                Matecat is a free and open source online CAT tool. It’s free for translation companies, translators and enterprise users.
             </div>
         </div>
 <!--        <div class="info">-->
@@ -928,8 +931,8 @@
 <!--        </div>-->
         <div class="side-info">
             <div class="item"><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></div>
+            <div class="item"><a href="https://site.matecat.com/open-source/" target="_blank">Open Source</a></div>
             <div class="item"><a href="https://site.matecat.com/terms/" target="_blank">Terms</a></div>
-            <div class="item"><a href="https://guides.matecat.com/" target="_blank">User Guide</a></div>
         </div>
     </div>
 

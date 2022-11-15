@@ -287,7 +287,6 @@ class AnalyzeChunksResume extends React.Component {
                   url={this.getTranslateUrl(chunkJob, index)}
                   showTranslatorBox={false}
                   extendedView={true}
-                  showOpenBox={true}
                   onClickOutside={this.closeOutsourceModal}
                   openOutsource={openOutsource}
                   idJobLabel={chunk.jid + '-' + index}
@@ -475,7 +474,6 @@ class AnalyzeChunksResume extends React.Component {
                   standardWC={total_standard}
                   showTranslatorBox={false}
                   extendedView={true}
-                  showOpenBox={true}
                   onClickOutside={this.closeOutsourceModal}
                   openOutsource={openOutsource}
                   idJobLabel={this.props.jobsInfo[indexJob].jid}
@@ -607,7 +605,7 @@ class AnalyzeChunksResume extends React.Component {
                 </h5>
               </div>
               <div className="title-matecat-words">
-                <h5>MateCat weighted</h5>
+                <h5>Matecat weighted</h5>
               </div>
             </div>
           </div>
