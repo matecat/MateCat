@@ -9,6 +9,7 @@ import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
+import ConfirmMessageModal from "../modals/ConfirmMessageModal";
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -262,7 +263,21 @@ class JobContainer extends React.Component {
   }
 
   deleteJob() {
-    ManageActions.changeJobStatus(this.props.project, this.props.job, 'delete')
+    const props = {
+      text:
+          'You are about to delete this job permanently. This action cannot be undone.</br>' +
+          ' Are you sure you want to proceed?',
+      successText: 'Yes, delete it',
+      successCallback:  () =>{
+        ManageActions.changeJobStatus(this.props.project, this.props.job, 'delete')
+      },
+      cancelCallback: ()=>{}
+    }
+    ModalsActions.showModalComponent(
+        ConfirmMessageModal,
+        props,
+        'Confirmation required',
+    )
   }
 
   downloadTranslation() {
