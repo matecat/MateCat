@@ -43,8 +43,8 @@ class SegmentsDetails extends React.Component {
 
   onScroll() {
     if (
-      $(window).scrollTop() + $(window).height() >
-      $(document).height() - 200
+      window.innerHeight + window.scrollY >
+      document.body.scrollHeight - 200
     ) {
       console.log('Load More Segments!')
       if (this.props.moreSegments) {

@@ -20,24 +20,6 @@ textarea {
   font-size: 16px;
 }
 
-@media (max-width: 500px) {
-  body {
-    min-width: 0 !important;
-    width: 100%;
-  }
-  .iepopup {
-    width: 90% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    left: 0 !important;
-    border: 0px solid #fff !important;
-    box-shadow: none !important;
-  }
-  .iepopup img {
-    width: 20% !important;
-  }
-}
-
 ul {
   margin: 0;
   padding: 0;
@@ -57,10 +39,9 @@ ul {
 .logo {
   float: left;
   border: 0;
-  background: url(../../img/logo_matecat.png) 0px 0px no-repeat;
-  width: 185px;
-  height: 38px;
-  background-size: contain;
+  background: url(../../img/logo_matecat_big_white.svg) 0px 0px no-repeat;
+  width: 190px;
+  height: 40px;
   //margin-top: 5px;
   position: relative;
 }
@@ -304,7 +285,7 @@ footer #statistics {
 .unsupported-browser,
 .unsupported-device {
   background-color: #f5f6f7;
-
+  height: 100%;
   .wrapper {
     display: flex;
     flex-direction: column;
@@ -528,7 +509,7 @@ footer #statistics {
 
 .logoblack {
   border: 0;
-  background: url(../../img/logoblack.png) 0px 2px no-repeat;
+  background: url(../../img/logo_matecat_big.svg) 0px 2px no-repeat;
   display: block;
   width: 145px;
   height: 31px;
@@ -1331,9 +1312,10 @@ form.add-TM-Form {
   overflow: visible;
   max-height: inherit;
   font-size: 24px;
-  background: #002b5c url(../../img/Logo-Onlycat-white.svg) 16px 12px no-repeat;
+  background: #002b5c url(../../img/logo_matecat_small_white.svg) 16px 12px
+    no-repeat;
   padding: 10px 10px 7px 68px;
-  background-size: 48px;
+  background-size: 40px;
   /*border-bottom: 1px solid #000;*/
   color: #fff;
   margin: 0 !important;
@@ -4620,9 +4602,19 @@ body.side-popup {
 }
 
 @media (max-width: 768px) {
-  body {
+  body.upload-page {
     min-width: unset;
     background-color: #f5f6f7;
+    .started header,
+    .wrapper-claim,
+    .wrapper-upload,
+    footer,
+    #template-upload,
+    #template-download,
+    .wrapper-claim,
+    .wrapper-bottom {
+      display: none !important;
+    }
   }
   .unsupported-device {
     display: block;
@@ -4640,44 +4632,9 @@ body.side-popup {
       }
     }
   }
-  .started header,
-  .wrapper-claim,
-  .wrapper-upload,
-  footer,
-  #template-upload,
-  #template-download,
-  .wrapper-claim,
-  .wrapper-bottom {
-    display: none !important;
-  }
+
   .nobrowser {
     display: block !important;
-  }
-  .iepopup.nobrowser {
-    width: 100%;
-  }
-  .iepopup .col-2 {
-    width: 90%;
-    margin: 8% 3% 5% 3%;
-    padding: 1% 2%;
-    min-height: 100px !important;
-    box-shadow: 0px 2px 3px #e9e9e9;
-    border: 1px solid #e6e6e6;
-    border-top: 3px solid #3aa9dd;
-  }
-
-  .iepopup .col-2 a {
-    font-size: 24px;
-  }
-  .iepopup.nobrowser p {
-    line-height: 30px;
-    margin-bottom: 40px;
-    font-size: 24px;
-  }
-
-  .iepopup h3 {
-    font-size: 30px;
-    margin-bottom: 20px;
   }
   .nobrowser .col-a img {
     width: 100px;

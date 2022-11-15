@@ -122,18 +122,14 @@ function SegmentFooter() {
         segmentSource: segment.segment,
         segment: segment,
       },
-      getMetadataNoteTemplate: () => segment.metadata,
+      getMetadataNoteTemplate: () =>
+        segment.metadata?.length > 0 ? segment.metadata : null,
       allowHTML: () => '',
     }
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
     return (
-      Array.isArray(notes) ||
-      (!Array.isArray(notes) &&
-        !/\bThere are no notes available\b/i.test(
-          notes?.props?.children ?? '',
-        )) ||
-      segment.metadata.length > 0
+      (Array.isArray(notes) && notes.length > 0) || segment.metadata.length > 0
     )
   }, [segment])
 
@@ -217,7 +213,6 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasNotes = SegmentUtils.segmentHasNote(segment)
     const hasMultiMatches = Boolean(
       UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
     )

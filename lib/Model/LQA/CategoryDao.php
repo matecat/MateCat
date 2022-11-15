@@ -91,10 +91,11 @@ class CategoryDao extends \DataAccess_AbstractDao {
     /**
      * Returns a json encoded representation of categories and subcategories
      *
+     * @param $id_model
+     *
      * @return array
      */
-
-    public static function getCatgoriesAndSeverities( $id_model ) {
+    public static function getCategoriesAndSeverities( $id_model ) {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model ORDER BY COALESCE(id_parent, 0) ";
 
         $conn = \Database::obtain()->getConnection();
@@ -109,6 +110,10 @@ class CategoryDao extends \DataAccess_AbstractDao {
         $result = $stmt->fetchAll() ;
 
         foreach($result as $row) {
+
+            $severities = self::extractSeverities($row);
+            $options = self::extractOptions($row);
+
             if ( $row['id_parent'] == null ) {
                 // process as parent
                 $out[ $row['id'] ] = array();
@@ -116,37 +121,65 @@ class CategoryDao extends \DataAccess_AbstractDao {
 
                 $out[ $row['id'] ]['label'] = $row['label'];
                 $out[ $row['id'] ]['id'] = (int)$row['id'];
-                $out[ $row['id'] ]['options'] = json_decode( $row['options'] );
-                $out[ $row['id'] ]['severities'] = json_decode( $row['severities'], true );
+                $out[ $row['id'] ]['options'] = $options;
+                $out[ $row['id'] ]['severities'] = $severities;
 
-            }
-
-            else {
+            } else {
                 // process as child
                 $current = array(
                     'label'      => $row['label'],
                     'id'         => $row['id'],
-                    'options'    => json_decode( $row['options'], true ),
-
-                    'severities' => json_decode( $row['severities'], true)
+                    'options'    => $options,
+                    'severities' => $severities
                 );
 
                 $out[ $row['id_parent'] ]['subcategories'][] = $current ;
             }
         }
 
-        $categories = array_map(function($element) {
-            return array(
+        return array_map(function( $element) {
+            return [
                 'label'         => $element['label'],
                 'id'            => $element['id'],
                 'severities'    => $element['severities'] ,
                 'options'       => $element['options'] ,
                 'subcategories' => $element['subcategories']
-            );
+            ];
         }, array_values($out) );
-
-        return $categories ;
     }
 
+    /**
+     * @param $json
+     *
+     * @return array
+     */
+    private static function extractSeverities($json)
+    {
+        return array_map(function($element) {
+            $return = [
+                    'label'   => $element['label'],
+                    'penalty' => $element['penalty']
+            ];
 
+            if(isset($element['code'])){
+                $return['code'] = $element['code'];
+            }
+
+            return $return;
+        }, array_values(json_decode( $json['severities'], true )));
+    }
+
+    /**
+     * @param $json
+     *
+     * @return array
+     */
+    private static function extractOptions($json)
+    {
+        return array_map(function($element) {
+            return [
+                'code' => $element['code']
+            ];
+        }, array_values(json_decode( $json['options'], true )));
+    }
 }
