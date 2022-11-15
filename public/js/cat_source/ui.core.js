@@ -322,7 +322,7 @@ window.UI = {
         successText: 'Download anyway',
         text:
           'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
+          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in Matecat </a> <br /><br /> If you' +
           ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
       },
       'Confirmation required',
@@ -443,8 +443,8 @@ window.UI = {
     if (this.version != config.build_number) {
       var notification = {
         uid: 'checkVersion',
-        title: 'New version of MateCat',
-        text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+        title: 'New version of Matecat',
+        text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
         type: 'warning',
         allowHtml: true,
         position: 'bl',

@@ -32,7 +32,7 @@ class ProductionSummary extends React.Component {
     const {qualitySummary, jobInfo, secondPassReviewEnabled} = this.props
 
     const tooltipText =
-      '<div style="color:gray">MateCat calculates the score as follows: </br></br>' +
+      '<div style="color:gray">Matecat calculates the score as follows: </br></br>' +
       '<code>(Tot. error points * 1000) / reviewed words</code></br>' +
       'Reviewed words =  raw words - unmodified ICE matches</br></br>' +
       'The score is compared to a max. amount of tolerated error points.' +

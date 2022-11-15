@@ -129,7 +129,7 @@ class SegmentAnalysisController extends KleinController {
         $limit = $perPage;
         $offset = ($page-1)*$perPage;
 
-        $ids = \Segments_SegmentDao::getIdsFromIdProjectAndPassword($idProject, $password, $limit, $offset, 3600);
+        $ids = \Segments_SegmentDao::getIdsFromIdProjectAndPassword($idProject, $password, $offset, $limit, 0);
 
         foreach ($ids as $id){
 
@@ -167,7 +167,7 @@ class SegmentAnalysisController extends KleinController {
 
         $idJob = $this->request->param('id_job');
         $password = $this->request->param('password');
-        $segmentsCount = \Chunks_ChunkDao::getSegmentsCount($idJob, $password, 3600);
+        $segmentsCount = \Chunks_ChunkDao::getSegmentsCount($idJob, $password, 0);
 
         try {
             $this->response->json($this->getSegmentsForAJob($idJob, $password, $page, $perPage, $segmentsCount));
@@ -241,7 +241,7 @@ class SegmentAnalysisController extends KleinController {
         $limit = $perPage;
         $offset = ($page-1)*$perPage;
 
-        $ids = \Segments_SegmentDao::getIdsFromIdJobAndPassword($idJob, $password, $limit, $offset, 3600);
+        $ids = \Segments_SegmentDao::getIdsFromIdJobAndPassword($idJob, $password, $offset, $limit, 0);
 
         foreach ($ids as $id){
 

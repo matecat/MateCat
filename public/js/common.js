@@ -287,8 +287,8 @@ window.APP = {
       if (!data.urls || data.urls.length === 0) {
         var props = {
           text:
-            'MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and' +
-            ' grant Google Drive privileges to MateCat.',
+            'Matecat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and' +
+            ' grant Google Drive privileges to Matecat.',
           successText: 'Ok',
           successCallback: function () {
             ModalsActions.onCloseModal()
