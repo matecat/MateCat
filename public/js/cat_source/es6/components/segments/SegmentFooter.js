@@ -128,7 +128,7 @@ function SegmentFooter() {
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
     return (
-      Array.isArray(notes) ||
+      (Array.isArray(notes) && Array.isArray(notes).lenght > 0) ||
       (!Array.isArray(notes) &&
         !/\bThere are no notes available\b/i.test(
           notes?.props?.children ?? '',
@@ -217,7 +217,6 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasNotes = SegmentUtils.segmentHasNote(segment)
     const hasMultiMatches = Boolean(
       UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
     )

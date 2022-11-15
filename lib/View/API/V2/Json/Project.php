@@ -124,7 +124,7 @@ class Project {
                          * @var $jobJSON Job
                          */
                         $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
-                        $jobStatuses[] = $job->status;
+                        $jobStatuses[] = $job->status_owner;
                     }
                 } else {
                     if(!$job->wasDeleted()){

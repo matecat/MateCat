@@ -257,7 +257,8 @@ class ProjectContainer extends React.Component {
               Project
             </a>
             <a className="item" onClick={this.deleteProject.bind(this)}>
-              <i className="icon-drawer icon-trash-o icon" /> Permanently Delete
+              <i className="icon-drawer icon-trash-o icon" /> Delete project
+              permanently
             </a>
           </div>
         </div>
@@ -718,17 +719,7 @@ class ProjectContainer extends React.Component {
                     </div>
                   </div>
                   {(state !== '' || this.props.project.get('is_cancelled')) && (
-                    <div className="project-header-more">
-                      {state}
-                      {this.props.project.get('is_cancelled') && (
-                        <div
-                          className="ui button red"
-                          onClick={this.deleteProject.bind(this)}
-                        >
-                          Permanently Delete
-                        </div>
-                      )}
-                    </div>
+                    <div className="project-header-more">{state}</div>
                   )}
                   {this.moreProjectInfo()}
                 </div>
