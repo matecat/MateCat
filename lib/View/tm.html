@@ -96,8 +96,8 @@
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
                                             <td class="description">
-                                                <div class="edit-desc" data-descr="${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}">
-                                                    ${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}
+                                                <div class="edit-desc" data-descr="${php: key.name}">
+                                                    ${php: key.name}
                                                 </div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td tal:condition="php: key.owner && ( jobOwnerIsMe || key.edit )" class="owner text-center">
@@ -522,7 +522,7 @@
                             <tal:block tal:condition="php: page == 'cattool'">
                                 <div class="options-box charscounter">
                                     <h3>Character counter</h3>
-                                    <p>                                        
+                                    <p>
                                         Enabling this option makes a counter appear that counts the number of characters in the target section of each segment.
                                     </p>
                                     <div class="onoffswitch-container">
