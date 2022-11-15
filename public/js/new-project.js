@@ -554,10 +554,10 @@ $.extend(UI.UPLOAD_PAGE, {
       e.preventDefault()
       $('.supported-formats').hide()
     })
-    $('.more-options-cont').on('click', function (e) {
-      e.preventDefault()
-      APP.openOptionsPanel('tm')
-    })
+    // $('.more-options-cont').on('click', function (e) {
+    //   e.preventDefault()
+    //   APP.openOptionsPanel('tm')
+    // })
 
     $('#target-lang').dropdown({
       selectOnKeydown: false,

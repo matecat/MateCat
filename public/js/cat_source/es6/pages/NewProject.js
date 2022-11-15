@@ -6,6 +6,7 @@ import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
+import More from "../../../../img/icons/More";
 
 const NewProject = ({
   isLoggedIn = false,
@@ -46,6 +47,10 @@ const NewProject = ({
       setTargetLangs([sourceLang])
       UI.restartConversions()
     }
+  }
+
+  const openTmPanel = ()=> {
+    APP.openOptionsPanel('tm')
   }
 
   //TODO: Move it
@@ -207,6 +212,10 @@ const NewProject = ({
                 }}
               />
             </div>
+            <div className="translate-box settings" onClick={()=>openTmPanel()}>
+              <More size={24}/>
+              <span className="text">More settings</span>
+            </div>
           </div>
         </div>
       </div>
@@ -215,5 +224,3 @@ const NewProject = ({
 }
 
 export default NewProject
-
-const LanguageSelect = () => {}
