@@ -122,7 +122,12 @@ export const SegmentFooterTabGlossary = ({
             definition,
             ...(term
               ? {key, key_name}
-              : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
+              : {
+                  keys: keys.map(({key, name, isMissingName}) => ({
+                    key,
+                    key_name: !isMissingName ? name : '',
+                  })),
+                }),
             domain: domain ? domain.name : '',
             subdomain: subdomain ? subdomain.name : '',
             create_date,
@@ -341,8 +346,8 @@ export const SegmentFooterTabGlossary = ({
 
   useEffect(() => {
     if (!segment?.glossary_search_results) return
-    const orderedByUpdateDate = [...segment.glossary_search_results].sort(
-      (a, b) => {
+    const orderedByUpdateDate = [...segment.glossary_search_results]
+      .sort((a, b) => {
         if (
           new Date(a.metadata.last_update_date).getTime() <
           new Date(b.metadata.last_update_date).getTime()
@@ -351,8 +356,14 @@ export const SegmentFooterTabGlossary = ({
         } else {
           return -1
         }
-      },
-    )
+      })
+      .sort((a, b) => {
+        if (a.term_id < b.term_id) {
+          return 1
+        } else {
+          return -1
+        }
+      })
     console.log('----> segment glossary', orderedByUpdateDate)
     setTerms(orderedByUpdateDate)
   }, [segment?.glossary_search_results])
