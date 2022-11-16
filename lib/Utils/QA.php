@@ -2475,8 +2475,10 @@ class QA {
         if($this->id_segment){
             $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
 
+            // remove trailing space
             $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg());
-            $preparedTargetToBeChecked = html_entity_decode($preparedTargetToBeChecked, ENT_QUOTES | ENT_HTML5);
+            $preparedTargetToBeChecked = preg_replace('/&nbsp;/iu', ' ', $preparedTargetToBeChecked);
+            $preparedTargetToBeChecked = rtrim($preparedTargetToBeChecked);
 
             $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $preparedTargetToBeChecked );
             if(false === $check){
