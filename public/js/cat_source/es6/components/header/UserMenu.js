@@ -36,7 +36,7 @@ export const UserMenu = ({user, userLogged}) => {
         const tooltipTex =
           "<h4 class='header'>Manage your projects</h4>" +
           "<div class='content'>" +
-          '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in MateCat.</p>' +
+          '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in Matecat.</p>' +
           "<a class='close-popup-teams'>Got it!</a>" +
           '</div>'
         $(dropdownProfile.current)

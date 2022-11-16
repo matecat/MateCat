@@ -163,9 +163,9 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
               'ModernMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
               'To provide the best results, <b>the following data will be synchronized with your private ModernMT engine:</b>' +
               '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
-              '<li>Private translation memories uploaded to MateCat</li>' +
-              '<li>All segments translated or revised in MateCat</li></ul>' +
-              'To stop data from being synchronized, please delete the ModernMT engine from your list of available engines in MateCat.',
+              '<li>Private translation memories uploaded to Matecat</li>' +
+              '<li>All segments translated or revised in Matecat</li></ul>' +
+              'To stop data from being synchronized, please delete the ModernMT engine from your list of available engines in Matecat.',
             successText: 'Continue',
             successCallback: function () {
               UI.addMTEngine(provider, providerName)
