@@ -262,7 +262,7 @@ class PreferencesModal extends React.Component {
       )
     }
 
-    var services_label = 'Allow MateCat to access your files on Google Drive'
+    var services_label = 'Allow Matecat to access your files on Google Drive'
     if (this.state.service && !this.state.service.disabled_at) {
       services_label =
         'Connected to Google Drive (' + this.state.service.email + ')'
