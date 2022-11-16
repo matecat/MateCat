@@ -103,7 +103,7 @@ window.UI = {
         var msg = '';
 
         if ( file.type.match( /^image/ ) ) {
-            msg = 'Images not allowed in MateCat';
+            msg = 'Images not allowed in Matecat';
         } else if (
                 (
                     //file.type == 'application/zip' ||
