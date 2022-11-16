@@ -48,9 +48,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (NotFoundException $exception) {
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => $exception->getMessage()
-                ]
+                    'error' => [
+                            'message' => $exception->getMessage()
+                    ]
             ] );
             exit();
         }
@@ -70,9 +70,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (\Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => $exception->getMessage()
-                ]
+                    'error' => [
+                            'message' => $exception->getMessage()
+                    ]
             ] );
         }
     }
@@ -101,15 +101,15 @@ class SegmentAnalysisController extends KleinController {
         $items = $this->getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage);
 
         return [
-            '_links' => [
-                'page' => $page,
-                'per_page' => $perPage,
-                'total_pages' => $totalPages,
-                'total_items' => $segmentsCount,
-                'next_page' => $next,
-                'prev_page' => $prev,
-            ],
-            'items' => $items
+                '_links' => [
+                        'page' => $page,
+                        'per_page' => $perPage,
+                        'total_pages' => $totalPages,
+                        'total_items' => $segmentsCount,
+                        'next_page' => $next,
+                        'prev_page' => $prev,
+                ],
+                'items' => $items
         ];
     }
 
@@ -125,10 +125,10 @@ class SegmentAnalysisController extends KleinController {
     private function getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage)
     {
         $segments = [];
-        $offset = $perPage;
-        $limit = ($page-1)*$offset;
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
 
-        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $offset, $limit, 0);
+        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, 0);
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
             $segments[] = $this->formatSegment($segmentForAnalysis);
@@ -160,9 +160,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (\Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => $exception->getMessage()
-                ]
+                    'error' => [
+                            'message' => $exception->getMessage()
+                    ]
             ] );
         }
     }
@@ -199,15 +199,15 @@ class SegmentAnalysisController extends KleinController {
         $items = $this->getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage);
 
         return [
-            '_links' => [
-                'page' => $page,
-                'per_page' => $perPage,
-                'total_pages' => $totalPages,
-                'total_items' => $segmentsCount,
-                'next_page' => $next,
-                'prev_page' => $prev,
-            ],
-            'items' => $items
+                '_links' => [
+                        'page' => $page,
+                        'per_page' => $perPage,
+                        'total_pages' => $totalPages,
+                        'total_items' => $segmentsCount,
+                        'next_page' => $next,
+                        'prev_page' => $prev,
+                ],
+                'items' => $items
         ];
     }
 
@@ -223,10 +223,10 @@ class SegmentAnalysisController extends KleinController {
     private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
     {
         $segments = [];
-        $offset = $perPage;
-        $limit = ($page-1)*$offset;
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
 
-        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $offset, $limit, 0);
+        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, 0);
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
             $segments[] = $this->formatSegment($segmentForAnalysis);
@@ -245,7 +245,7 @@ class SegmentAnalysisController extends KleinController {
     {
         // urls
         $urls = JobUrlBuilder::createFromCredentials($segmentForAnalysis->id_job, $segmentForAnalysis->job_password, [
-            'id_segment' => $segmentForAnalysis->id
+                'id_segment' => $segmentForAnalysis->id
         ]);
 
         // id_request
@@ -256,11 +256,11 @@ class SegmentAnalysisController extends KleinController {
         $issues         = [];
         foreach ( $issues_records as $issue_record ) {
             $issues[] = [
-                'id_category'         => (int)$issue_record->id_category,
-                'severity'            => $issue_record->severity,
-                'translation_version' => (int)$issue_record->translation_version,
-                'penalty_points'      => floatval($issue_record->penalty_points),
-                'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
+                    'id_category'         => (int)$issue_record->id_category,
+                    'severity'            => $issue_record->severity,
+                    'translation_version' => (int)$issue_record->translation_version,
+                    'penalty_points'      => floatval($issue_record->penalty_points),
+                    'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
             ];
         }
 
@@ -268,22 +268,22 @@ class SegmentAnalysisController extends KleinController {
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
         return [
-            'id_segment' => (int)$segmentForAnalysis->id,
-            'id_chunk' => (int)$segmentForAnalysis->id_job,
-            'chunk_password' => $segmentForAnalysis->job_password,
-            'urls' => $urls->getUrls(),
-            'id_request' => ($idRequest) ? $idRequest->meta_value : null,
-            'filename' => $segmentForAnalysis->filename,
-            'original_filename' => $originalFile,
-            'source' => $segmentForAnalysis->segment,
-            'target' => $segmentForAnalysis->translation,
-            'source_lang' => $segmentForAnalysis->source,
-            'target_lang' => $segmentForAnalysis->target,
-            'source_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
-            'target_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-            'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
-            'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
-            'issues' => $issues,
+                'id_segment' => (int)$segmentForAnalysis->id,
+                'id_chunk' => (int)$segmentForAnalysis->id_job,
+                'chunk_password' => $segmentForAnalysis->job_password,
+                'urls' => $urls->getUrls(),
+                'id_request' => ($idRequest) ? $idRequest->meta_value : null,
+                'filename' => $segmentForAnalysis->filename,
+                'original_filename' => $originalFile,
+                'source' => $segmentForAnalysis->segment,
+                'target' => $segmentForAnalysis->translation,
+                'source_lang' => $segmentForAnalysis->source,
+                'target_lang' => $segmentForAnalysis->target,
+                'source_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
+                'target_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
+                'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
+                'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
+                'issues' => $issues,
         ];
     }
 
