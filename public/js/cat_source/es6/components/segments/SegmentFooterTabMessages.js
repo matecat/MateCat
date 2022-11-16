@@ -83,17 +83,8 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     // metadata notes
-    if (this.props.metadata) {
+    if (this.props.metadata?.length > 0) {
       notesHtml.push(this.getMetadataNoteTemplate())
-    }
-
-    if (notesHtml.length === 0) {
-      let html = (
-        <div className="note" key={'note-0'}>
-          There are no notes available
-        </div>
-      )
-      notesHtml.push(html)
     }
     return notesHtml
   }
