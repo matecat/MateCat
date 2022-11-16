@@ -117,9 +117,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt    = $conn->prepare( $query );
 
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [
-            'id_job'     => $id_job,
-            'password'   => $password,
-            'id_segment' => $id_segment
+                'id_job'     => $id_job,
+                'password'   => $password,
+                'id_segment' => $id_segment
         ] );
 
         return isset($fetched[0]) ? $fetched[0] : null;
@@ -1000,7 +1000,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare("
+        $query   = "
             SELECT 
                 s.id,
                 j.id as id_job,
@@ -1013,7 +1013,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.eq_word_count,
                 st.match_type,
                 ste.source_page,
-                f.filename  ,
+                f.filename,
                 fp.tag_key,
                 fp.tag_value
             FROM
@@ -1055,8 +1055,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             AND 
                 p.password = :password
             GROUP BY s.id
-            LIMIT ".$limit." offset " .$offset. " 
-        ");
+            LIMIT ".$limit." offset " .$offset;
+
+        $stmt = $conn->prepare($query);
 
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_project'   => $idProject,
@@ -1077,7 +1078,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare("
+        $query = "
             SELECT 
                 s.id,
                 j.id as id_job,
@@ -1126,8 +1127,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 j.id = :id_job
             AND j.password = :password
             GROUP BY s.id
-            LIMIT " .$limit. " OFFSET " .$offset. ";
-        ");
+            LIMIT " .$limit. " OFFSET " .$offset;
+        $stmt    = $conn->prepare($query);
 
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job'   => $idJob,
