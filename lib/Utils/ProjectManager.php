@@ -1281,7 +1281,7 @@ class ProjectManager {
             if ( !empty( $projectStructure[ 'private_tm_key' ] ) ) {
                 foreach ( $projectStructure[ 'private_tm_key' ] as $tmKeyObj ) {
                     $newTmKey = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
-
+                    $newTmKey->complete_format = true;
                     $newTmKey->tm    = true;
                     $newTmKey->glos  = true;
                     $newTmKey->owner = true;
