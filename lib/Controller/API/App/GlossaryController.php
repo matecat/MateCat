@@ -29,9 +29,17 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/check.json';
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        $keys = [];
+
+        foreach($json['tmKeys'] as $tmKey){
+            $keys[] = $tmKey['key'];
+        }
+
+        $json['keys'] = $keys;
+
         $params = [
-            'action' => 'check',
-            'payload' => $json,
+                'action' => 'check',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -74,8 +82,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-            'action' => 'domains',
-            'payload' => $json,
+                'action' => 'domains',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -95,8 +103,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-            'action' => 'get',
-            'payload' => $json,
+                'action' => 'get',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -123,8 +131,8 @@ class GlossaryController extends KleinController {
         $json['keys'] = $keysArray;
 
         $params = [
-            'action' => 'keys',
-            'payload' => $json,
+                'action' => 'keys',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -144,8 +152,8 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
         $params = [
-            'action' => 'search',
-            'payload' => $json,
+                'action' => 'search',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
@@ -172,8 +180,8 @@ class GlossaryController extends KleinController {
         $this->checkWritePermissions($keys, $json['userKeys']);
 
         $params = [
-            'action' => 'set',
-            'payload' => $json,
+                'action' => 'set',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
@@ -195,8 +203,8 @@ class GlossaryController extends KleinController {
         $this->checkWritePermissions([$json['term']['metadata']['key']], $json['userKeys']);
 
         $params = [
-            'action' => 'update',
-            'payload' => $json,
+                'action' => 'update',
+                'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
@@ -280,7 +288,7 @@ class GlossaryController extends KleinController {
             if(!in_array($key, $allowedKeys)){
                 $this->response->code(500);
                 $this->response->json([
-                    'error' => "Key ".$key." does not belong to this job"
+                        'error' => "Key ".$key." does not belong to this job"
                 ]);
                 die();
             }
