@@ -390,6 +390,8 @@ const TEXT_UTILS = {
       return '<a href="' + href + '" target="_blank">' + match + '</a>'
     })
   },
+  isContentTextEllipsis: ({offsetWidth, scrollWidth} = {}) =>
+    offsetWidth < scrollWidth,
 }
 
 export default TEXT_UTILS

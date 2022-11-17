@@ -56,6 +56,9 @@
             margin: 0 0 0 8px;
           }
         }
+        .dropdown__option span {
+          width: 90%;
+        }
         .dropdown__option--is-active-option {
           background-color: unset;
           color: unset;
@@ -101,6 +104,9 @@
           border: 1px solid $grey7;
           border-radius: 12px;
           padding: 0 6px 0 6px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .button-create-option {
           color: $grey7;
@@ -172,6 +178,13 @@
 
     &:disabled {
       background: unset;
+    }
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      background-color: transparent !important;
+      -webkit-box-shadow: 0 0 0 50px white inset;
     }
   }
   .glossary__button-add {
@@ -276,21 +289,36 @@
         gap: 12px;
         padding-left: 16px;
         color: $grey7;
-        cursor: pointer;
         svg:hover {
           color: $grey6;
         }
+
+        > * {
+          cursor: pointer;
+        }
       }
       .glossary_item-actions--disabled {
-        cursor: unset;
-        opacity: 0.5;
-        svg:hover {
-          color: unset;
+        gap: 0px;
+
+        > * {
+          cursor: unset;
+        }
+
+        > *:not(.locked-button) {
+          opacity: 0.4;
+          svg:hover {
+            color: unset;
+          }
         }
       }
       .glossary_item-body {
         display: flex;
         padding: 16px 0;
+      }
+
+      .glossary_item-body-no-bottom-padding {
+        display: flex;
+        padding-bottom: 0;
       }
 
       .glossary-item_column {
@@ -312,39 +340,12 @@
             svg {
               cursor: pointer;
               color: $grey7;
-              margin-left: 8px;
-            }
-
-            .glossary_item-tooltip {
-              padding: 4px 8px;
-              background: $grey4;
-              border-radius: 2px;
-              color: $grey7;
-              visibility: hidden;
-              position: relative;
-              margin-left: 10px;
-              line-height: 14px;
-              font-size: 14px;
-              font-weight: 400;
-              &:before {
-                content: '';
-                display: block;
-                position: absolute;
-                left: -3px;
-                top: 3px;
-                margin-left: -3px;
-                width: 0;
-                height: 0;
-                border-top: 8px solid transparent;
-                border-bottom: 8px solid transparent;
-                border-right: 8px solid $grey4;
-              }
             }
           }
-          &:hover {
-            .glossary_item-tooltip {
-              visibility: visible;
-            }
+
+          .info-icon {
+            font-weight: normal;
+            margin-left: 8px;
           }
         }
       }
@@ -384,23 +385,30 @@
     padding: 24px;
     .glossary-form-line {
       display: flex;
-      align-content: flex-start;
-      gap: 40px;
+      justify-content: space-between;
       padding-top: 8px;
       &.more-line {
         padding-top: 24px;
+
+        & > * > :not(:first-child) {
+          margin-left: 10px;
+        }
       }
 
       > div {
         display: flex;
-        width: 50%;
-        column-gap: 24px;
+        flex-shrink: 0;
+        width: 49%;
         .input-with-label__wrapper {
           width: 100%;
         }
       }
       .glossary-tm-container > div {
         width: calc(100% / 3) !important;
+      }
+
+      .glossary-tm-container > :not(:first-child) {
+        margin-left: 10px;
       }
     }
     .glossary_buttons-container {

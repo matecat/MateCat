@@ -1,15 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="12px" viewBox="0 0 16 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 56.2 (81672) - https://sketch.com -->
-    <title>Icons/iconsWhite/Outline/Check</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Menu/TooltipMenu/Base/Record/Selected" transform="translate(-266.000000, -10.000000)" fill="#FFFFFF">
-            <g id="Icons/iconsWhite/Outline/Check" transform="translate(266.000000, 8.000000)">
-                <g id="tick" transform="translate(0.000000, 2.000000)">
-                    <path d="M15.7349552,0.264982456 C15.4231579,-0.0468460039 14.9176452,-0.0468460039 14.6057856,0.264982456 L5.03996881,9.83089279 L1.36302534,6.15394932 C1.05122807,5.84212086 0.5457154,5.84215205 0.23385575,6.15394932 C-0.0779727096,6.46574659 -0.0779727096,6.97125926 0.23385575,7.28308772 L4.47538402,11.5245536 C4.78708772,11.8363509 5.29297466,11.8361326 5.60455361,11.5245536 L15.7349552,1.39415205 C16.0467836,1.08235478 16.0467524,0.576810916 15.7349552,0.264982456 Z" id="Shape"></path>
-                </g>
-            </g>
-        </g>
-    </g>
-</svg>
+<svg width="16" height="12" xmlns="http://www.w3.org/2000/svg"><path d="M15.735.265a.798.798 0 0 0-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 0 0-1.13 1.13l4.242 4.24a.799.799 0 0 0 1.13 0l10.13-10.13a.798.798 0 0 0 0-1.129Z" fill="#FFF" fill-rule="evenodd"/></svg>

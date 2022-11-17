@@ -4,6 +4,7 @@ import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import {
   DeleteIcon,
   GlossaryDefinitionIcon,
+  LockIcon,
   ModifyIcon,
 } from './SegmentFooterTabGlossary'
 
@@ -38,18 +39,33 @@ export const GlossaryItem = ({
             <span className="glossary_badge">{metadata.subdomain}</span>
           )}
           <div className="glossary_source">
-            <b>{metadata.key_name}</b>
+            <b>
+              {metadata.key_name
+                ? metadata.key_name
+                : `No name (${metadata.key})`}
+            </b>
             <span>{metadata.last_update}</span>
           </div>
         </div>
         <div
           className={`glossary_item-actions${
-            !canModifyItem ? ' glossary_item-actions--disabled' : ''
+            !canModifyItem && !isStatusDeleting
+              ? ' glossary_item-actions--disabled'
+              : ''
           }`}
         >
           <div onClick={() => canModifyItem && modifyElement()}>
             <ModifyIcon />
           </div>
+          {!canModifyItem && !isStatusDeleting && (
+            <div
+              className="locked-button"
+              aria-label="You can only edit entries from keys that you own"
+              tooltip-position="left"
+            >
+              <LockIcon />
+            </div>
+          )}
           <div onClick={() => canModifyItem && deleteElement()}>
             {isStatusDeleting ? (
               <div className="loader loader_on"></div>
@@ -60,7 +76,13 @@ export const GlossaryItem = ({
         </div>
       </div>
 
-      <div className="glossary_item-body">
+      <div
+        className={`glossary_item-body${
+          !source.note && !target.note
+            ? ' glossary_item-body-no-bottom-padding'
+            : ''
+        }`}
+      >
         <div className="glossary-item_column">
           <div className="glossary_word">
             <span
@@ -70,14 +92,19 @@ export const GlossaryItem = ({
                   : ''
               }`}
             >{`${source.term} `}</span>
-            <div>
-              <InfoIcon size={16} />
-              {source.sentence && (
-                <div className="glossary_item-tooltip">{source.sentence}</div>
-              )}
-            </div>
+            {source.sentence && (
+              <div
+                className="info-icon"
+                aria-label={source.sentence}
+                tooltip-position="right"
+              >
+                <InfoIcon size={16} />
+              </div>
+            )}
           </div>
-          <div className="glossary-description">{source.note}</div>
+          {source.note && (
+            <div className="glossary-description">{source.note}</div>
+          )}
         </div>
         <div className="glossary-item_column">
           <div className="glossary_word">
@@ -88,14 +115,19 @@ export const GlossaryItem = ({
                   : ''
               }`}
             >{`${target.term} `}</span>
-            <div>
-              <InfoIcon size={16} />
-              {target.sentence && (
-                <div className="glossary_item-tooltip">{target.sentence}</div>
-              )}
-            </div>
+            {target.sentence && (
+              <div
+                className="info-icon"
+                aria-label={target.sentence}
+                tooltip-position="right"
+              >
+                <InfoIcon size={16} />
+              </div>
+            )}
           </div>
-          <div className="glossary-description">{target.note}</div>
+          {target.note && (
+            <div className="glossary-description">{target.note}</div>
+          )}
         </div>
       </div>
     </div>

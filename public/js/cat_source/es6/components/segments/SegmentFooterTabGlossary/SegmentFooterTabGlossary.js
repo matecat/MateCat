@@ -122,7 +122,12 @@ export const SegmentFooterTabGlossary = ({
             definition,
             ...(term
               ? {key, key_name}
-              : {keys: keys.map(({key, name}) => ({key, key_name: name}))}),
+              : {
+                  keys: keys.map(({key, name, isMissingName}) => ({
+                    key,
+                    key_name: !isMissingName ? name : '',
+                  })),
+                }),
             domain: domain ? domain.name : '',
             subdomain: subdomain ? subdomain.name : '',
             create_date,
@@ -341,8 +346,8 @@ export const SegmentFooterTabGlossary = ({
 
   useEffect(() => {
     if (!segment?.glossary_search_results) return
-    const orderedByUpdateDate = [...segment.glossary_search_results].sort(
-      (a, b) => {
+    const orderedByUpdateDate = [...segment.glossary_search_results]
+      .sort((a, b) => {
         if (
           new Date(a.metadata.last_update_date).getTime() <
           new Date(b.metadata.last_update_date).getTime()
@@ -351,8 +356,14 @@ export const SegmentFooterTabGlossary = ({
         } else {
           return -1
         }
-      },
-    )
+      })
+      .sort((a, b) => {
+        if (a.term_id < b.term_id) {
+          return 1
+        } else {
+          return -1
+        }
+      })
     console.log('----> segment glossary', orderedByUpdateDate)
     setTerms(orderedByUpdateDate)
   }, [segment?.glossary_search_results])
@@ -545,6 +556,26 @@ export const MoreIcon = () => {
       <path
         d="M5.2 6.933 1.2 1.6A1 1 0 0 1 2 0h8a1 1 0 0 1 .8 1.6l-4 5.333a1 1 0 0 1-1.6 0Z"
         fill="#AEBDCD"
+      />
+    </svg>
+  )
+}
+
+export const LockIcon = () => {
+  return (
+    <svg
+      width="20"
+      height="22"
+      viewBox="0 0 20 22"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5 9V7C5 4.23858 7.23858 2 10 2C12.0503 2 13.8124 3.2341 14.584 5M10 13.5V15.5M6.8 20H13.2C14.8802 20 15.7202 20 16.362 19.673C16.9265 19.3854 17.3854 18.9265 17.673 18.362C18 17.7202 18 16.8802 18 15.2V13.8C18 12.1198 18 11.2798 17.673 10.638C17.3854 10.0735 16.9265 9.6146 16.362 9.32698C15.7202 9 14.8802 9 13.2 9H6.8C5.11984 9 4.27976 9 3.63803 9.32698C3.07354 9.6146 2.6146 10.0735 2.32698 10.638C2 11.2798 2 12.1198 2 13.8V15.2C2 16.8802 2 17.7202 2.32698 18.362C2.6146 18.9265 3.07354 19.3854 3.63803 19.673C4.27976 20 5.11984 20 6.8 20Z"
+        stroke="#9E9E9E"
+        strokeWidth={2.66}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )

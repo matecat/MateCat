@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import Check from '../../../../../img/icons/Check'
 import Search from '../../../../../img/icons/Search'
+import TEXT_UTILS from '../../utils/textUtils'
 
 export const Dropdown = ({
   className,
@@ -25,6 +26,7 @@ export const Dropdown = ({
 }) => {
   const [queryFilter, setQueryFilter] = useState('')
   const [highlightedOption, setHighlightedOption] = useState()
+  const [rowTooltip, setRowTooltip] = useState()
 
   const textInputRef = useRef()
   const queryFilterRef = useRef('')
@@ -296,6 +298,14 @@ export const Dropdown = ({
           onClick={() => {
             if (!isNoResultsFound && !cancelHandleClick) handleClick(option)
           }}
+          onMouseEnter={(e) =>
+            TEXT_UTILS.isContentTextEllipsis(e.target?.firstChild) &&
+            setRowTooltip({
+              label: option.name,
+              top: e.target.offsetTop - listRef?.current.scrollTop,
+            })
+          }
+          onMouseLeave={() => setRowTooltip()}
         >
           {row && !isNoResultsFound ? (
             row
@@ -357,6 +367,14 @@ export const Dropdown = ({
           />
           <Search size={20} />
         </div>
+      )}
+      {rowTooltip && (
+        <div
+          className="dropdown__tooltip"
+          aria-label={rowTooltip.label}
+          tooltip-position="left"
+          style={{top: rowTooltip.top}}
+        ></div>
       )}
       {mostPopularOptions && mostPopularOptions.length > 0 && (
         <div className="dropdown__most-popular">
