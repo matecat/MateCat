@@ -1681,15 +1681,6 @@ class ProjectManager {
             $stmt->closeCursor();
             unset( $stmt );
 
-            //  invalid segment analysis cache
-            $jobSegmentsCount = $jobToSplit[ 'job_last_segment' ] - $jobToSplit[ 'job_first_segment' ] + 1;
-            $projectSegmentsCount = $projectSegmentsCount + $jobSegmentsCount;
-            $numberOfPages = (int) ceil ($jobSegmentsCount / self::SEGMENT_ANALYSIS_DEFAULT_LIMIT);
-
-            for ($i = 0; $i < $numberOfPages; $i++){
-                \Segments_SegmentDao::destroyGetIdsFromIdJobAndPasswordCache($jobToSplit[ 'id' ], $jobToSplit[ 'password' ], self::SEGMENT_ANALYSIS_DEFAULT_LIMIT, $i);
-            }
-
             /**
              * Async worker to re-count avg-PEE and total-TTE for splitted jobs
              */
