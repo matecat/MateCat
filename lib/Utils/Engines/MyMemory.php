@@ -418,11 +418,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $postFields = [
-                'glossary'    => $this->getCurlFile($file),
-                'name'        => $name,
+            'glossary'    => $this->getCurlFile($file),
+            'key'         => trim( $key ),
         ];
 
-        $postFields[ 'key' ] = trim( $key );
+        if($name and $name !== ''){
+            $postFields['key_name'] = $name;
+        }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
 
