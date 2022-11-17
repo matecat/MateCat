@@ -57,6 +57,7 @@ export const SegmentFooterTabGlossary = ({
   const [haveKeysGlossary, setHaveKeysGlossary] = useState(false)
   const [termsStatusDeleting, setTermsStatusDeleting] = useState([])
 
+  const ref = useRef()
   const previousSearchTermRef = useRef('')
 
   const notifyLoadingStatusToParent = useCallback(
@@ -455,6 +456,7 @@ export const SegmentFooterTabGlossary = ({
   return (
     <TabGlossaryContext.Provider
       value={{
+        ref,
         segment,
         keys,
         domains,
@@ -486,7 +488,11 @@ export const SegmentFooterTabGlossary = ({
         notifyLoadingStatusToParent,
       }}
     >
-      <div className={`tab sub-editor glossary ${active_class}`}>
+      <div
+        ref={ref}
+        className={`tab sub-editor glossary ${active_class}`}
+        tabIndex="0"
+      >
         {haveKeysGlossary ? (
           <>
             <SearchTerms />

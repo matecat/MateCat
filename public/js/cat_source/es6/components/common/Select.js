@@ -158,7 +158,7 @@ export const Select = ({
   }
 
   const handleFocus = () => {
-    showDropdown()
+    if (!isDisabled) showDropdown()
   }
 
   const handleSelect = (option) => {
@@ -250,6 +250,7 @@ export const Select = ({
           <Dropdown
             {...{
               className: 'select__dropdown',
+              wrapper: wrapperRef,
               showSearchBar,
               searchPlaceholder,
               listRef,
