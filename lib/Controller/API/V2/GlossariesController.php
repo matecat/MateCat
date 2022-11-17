@@ -91,12 +91,34 @@ class GlossariesController extends AbstractStatefulKleinController {
             return;
         }
 
+        $filterArgs = [
+            'name' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW
+            ],
+            'tm_key' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
+
+        $postInput = (object)filter_var_array( $this->request->params([
+            'tm_key',
+            'name',
+        ]), $filterArgs );
+
+        if(!isset($postInput->tm_key) or $postInput->tm_key === ""){
+            $this->setErrorResponse( -2, "`TM key` field is mandatory" );
+
+            return;
+        }
+
         set_time_limit(600);
 
         $fileInfo = $this->extractCSV( $stdResult );
 
-        //load it into MyMemory
-        $this->TMService->setName( $fileInfo->name );
+        // load it into MyMemory
+        $this->TMService->setName( $postInput->name );
         $this->TMService->setFile( array( $fileInfo ) );
 
         try {
