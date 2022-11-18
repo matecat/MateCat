@@ -3,20 +3,14 @@
 namespace API\App;
 
 use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
 use Validator\JSONValidatorObject;
-use Engines_MyMemory;
 
 class GlossaryController extends KleinController {
 
     const GLOSSARY_WRITE = 'GLOSSARY_WRITE';
     const GLOSSARY_READ  = 'GLOSSARY_READ';
-
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
-    }
 
     /**
      * Glossary check action
@@ -249,22 +243,28 @@ class GlossaryController extends KleinController {
             die();
         }
 
-        $isRevision = \CatUtils::getIsRevisionFromIdJobAndPassword($json['id_job'], $json['password']);
-
-        if ( $isRevision ) {
-            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->user->email == $job->status_owner ) {
-            $userRole = TmKeyManagement_Filter::OWNER;
-        } else {
-            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-        }
-
-        $userKeys = new UserKeysModel($this->user, $userRole ) ;
-
         $json['id_segment'] = (isset($json['id_segment'])) ? $json['id_segment'] : null;
         $json['jobData'] = $job->toArray();
         $json['tmKeys'] = \json_decode($job->tm_keys, true);
-        $json['userKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
+        $json['userKeys'] = [];
+
+        // Add user keys
+        if($this->userIsLogged()){
+
+            $isRevision = \CatUtils::getIsRevisionFromIdJobAndPassword($json['id_job'], $json['password']);
+
+            if ( $isRevision ) {
+                $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            } elseif ( $this->user->email == $job->status_owner ) {
+                $userRole = TmKeyManagement_Filter::OWNER;
+            } else {
+                $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            }
+
+            $userKeys = new UserKeysModel($this->user, $userRole ) ;
+
+            $json['userKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
+        }
 
         return $json;
     }
