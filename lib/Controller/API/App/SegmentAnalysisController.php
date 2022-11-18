@@ -128,7 +128,7 @@ class SegmentAnalysisController extends KleinController {
         $limit = $perPage;
         $offset = ($page-1)*$perPage;
 
-        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, 0);
+        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
             $segments[] = $this->formatSegment($segmentForAnalysis);
