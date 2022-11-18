@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
 
@@ -6,58 +6,57 @@ export const DomainSelect = () => {
   const {domains, setDomains, selectsActive, setSelectsActive} =
     useContext(TabGlossaryContext)
 
+  const ref = useRef()
+  const createDomainFnRef = useRef()
+
+  useEffect(() => {
+    const {current} = ref
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        createDomainFnRef?.current?.()
+        e.stopPropagation()
+      }
+    }
+
+    current.addEventListener('keydown', onKeyDown)
+
+    return () => current.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   const updateSelectActive = (key, value) =>
     setSelectsActive((prevState) => ({...prevState, [key]: value}))
 
   return (
-    <Select
-      className="glossary-select domain-select"
-      name="glossary-term-domain"
-      label="Domain"
-      placeholder="No domain"
-      showSearchBar
-      searchPlaceholder="Find a domain"
-      options={domains}
-      activeOption={selectsActive.domain}
-      checkSpaceToReverse={false}
-      onSelect={(option) => {
-        if (option) {
-          updateSelectActive('domain', option)
-        }
-      }}
-    >
-      {({
-        name,
-        index,
-        optionsLength,
-        queryFilter,
-        resetQueryFilter,
-        onClose,
-      }) => ({
-        ...(index === 0 &&
-          selectsActive.domain && {
-            beforeRow: (
-              <button
-                className="button-create-option"
-                onClick={() => {
-                  updateSelectActive('domain', undefined)
-                  onClose()
-                }}
-              >
-                Deselect domain
-              </button>
-            ),
-          }),
-        // override row content
-        row: <div className="domain-option">{name}</div>,
-        // insert button after last row
-        ...(index === optionsLength - 1 &&
-          queryFilter.trim() &&
-          !domains.find(({name}) => name === queryFilter) && {
-            afterRow: (
-              <button
-                className="button-create-option"
-                onClick={() => {
+    <div ref={ref}>
+      <Select
+        className="glossary-select domain-select"
+        name="glossary-term-domain"
+        label="Domain"
+        placeholder="No domain"
+        showSearchBar
+        searchPlaceholder="Find a domain"
+        options={domains}
+        activeOption={selectsActive.domain}
+        checkSpaceToReverse={false}
+        onSelect={(option) => {
+          if (option) {
+            updateSelectActive('domain', option)
+          }
+        }}
+      >
+        {({
+          name,
+          index,
+          optionsLength,
+          queryFilter,
+          resetQueryFilter,
+          onClose,
+        }) => {
+          const createDomainFn =
+            queryFilter.trim() &&
+            !domains.find(({name}) => name === queryFilter)
+              ? () => {
                   setDomains((prevState) => [
                     ...prevState,
                     {
@@ -66,13 +65,43 @@ export const DomainSelect = () => {
                     },
                   ])
                   resetQueryFilter()
-                }}
-              >
-                + Create a domain <b>{queryFilter}</b>
-              </button>
-            ),
-          }),
-      })}
-    </Select>
+                }
+              : () => false
+          createDomainFnRef.current = createDomainFn
+
+          return {
+            ...(index === 0 &&
+              selectsActive.domain && {
+                beforeRow: (
+                  <button
+                    className="button-create-option"
+                    onClick={() => {
+                      updateSelectActive('domain', undefined)
+                      onClose()
+                    }}
+                  >
+                    Deselect domain
+                  </button>
+                ),
+              }),
+            // override row content
+            row: <div className="domain-option">{name}</div>,
+            // insert button after last row
+            ...(index === optionsLength - 1 &&
+              queryFilter.trim() &&
+              !domains.find(({name}) => name === queryFilter) && {
+                afterRow: (
+                  <button
+                    className="button-create-option"
+                    onClick={createDomainFn}
+                  >
+                    + Create a domain <b>{queryFilter}</b>
+                  </button>
+                ),
+              }),
+          }
+        }}
+      </Select>
+    </div>
   )
 }
