@@ -1,4 +1,10 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import SegmentActions from '../../../actions/SegmentActions'
@@ -21,33 +27,16 @@ const TermForm = () => {
     getRequestPayloadTemplate,
     setIsLoading,
     segment,
+    ref,
   } = useContext(TabGlossaryContext)
 
   const [highlightMandatoryOnSubmit, setHighlightMandatoryOnSubmit] = useState(
     {},
   )
 
-  useEffect(() => {
-    setHighlightMandatoryOnSubmit({})
-  }, [
-    termForm?.[TERM_FORM_FIELDS.ORIGINAL_TERM],
-    termForm?.[TERM_FORM_FIELDS.TRANSLATED_TERM],
-  ])
+  const onSubmitAddOrUpdateTerm = useCallback(() => {
+    const {ORIGINAL_TERM, TRANSLATED_TERM} = TERM_FORM_FIELDS
 
-  const {
-    DEFINITION,
-    ORIGINAL_TERM,
-    ORIGINAL_DESCRIPTION,
-    ORIGINAL_EXAMPLE,
-    TRANSLATED_TERM,
-    TRANSLATED_DESCRIPTION,
-    TRANSLATED_EXAMPLE,
-  } = TERM_FORM_FIELDS
-
-  const updateTermForm = (key, value) =>
-    setTermForm((prevState) => ({...prevState, [key]: value}))
-
-  const onSubmitAddOrUpdateTerm = () => {
     // check mandatory fields
     const {[ORIGINAL_TERM]: originalTerm, [TRANSLATED_TERM]: translatedTerm} =
       termForm
@@ -103,7 +92,56 @@ const TermForm = () => {
         entries: {...domainsResponse, ...updatedDomains},
       })
     }
-  }
+  }, [
+    domainsResponse,
+    getRequestPayloadTemplate,
+    modifyElement,
+    segment.sid,
+    selectsActive,
+    setIsLoading,
+    termForm,
+  ])
+
+  useEffect(() => {
+    if (!ref) return
+    const {current} = ref
+
+    const onKeyUp = (e) => {
+      if (e.key === 'Escape') {
+        resetForm()
+      } else if (e.key === 'Enter') {
+        if (!isLoading) onSubmitAddOrUpdateTerm()
+      } else {
+        return
+      }
+
+      e.stopPropagation()
+    }
+
+    current.addEventListener('keydown', onKeyUp)
+
+    return () => current.removeEventListener('keydown', onKeyUp)
+  }, [isLoading, onSubmitAddOrUpdateTerm, ref, resetForm])
+
+  useEffect(() => {
+    setHighlightMandatoryOnSubmit({})
+  }, [
+    termForm?.[TERM_FORM_FIELDS.ORIGINAL_TERM],
+    termForm?.[TERM_FORM_FIELDS.TRANSLATED_TERM],
+  ])
+
+  const {
+    DEFINITION,
+    ORIGINAL_TERM,
+    ORIGINAL_DESCRIPTION,
+    ORIGINAL_EXAMPLE,
+    TRANSLATED_TERM,
+    TRANSLATED_DESCRIPTION,
+    TRANSLATED_EXAMPLE,
+  } = TERM_FORM_FIELDS
+
+  const updateTermForm = (key, value) =>
+    setTermForm((prevState) => ({...prevState, [key]: value}))
 
   return (
     <div className="glossary_add-container">

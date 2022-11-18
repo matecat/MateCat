@@ -1,5 +1,7 @@
 @import '../../commons/colors';
 .tab.glossary {
+  outline: none;
+
   .glossary-select,
   .input-with-label__wrapper {
     position: relative;
@@ -71,6 +73,9 @@
           background-color: unset;
           color: $grey7;
         }
+        .dropdown__option--is-highlighted-option {
+          background-color: $grey8;
+        }
         .button-create-glossary-key {
           color: $grey6;
           font-style: italic;
@@ -99,6 +104,9 @@
         }
         .dropdown__option--is-no-results-found {
           display: none;
+        }
+        .dropdown__option--is-highlighted-option {
+          background-color: $grey8;
         }
         .domain-option {
           border: 1px solid $grey7;
