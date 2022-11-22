@@ -19,52 +19,38 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         $headers = CSV::headers($object->csv);
+        $headerString = '';
 
         foreach ($headers as $index => $header){
+            $headerString .= Utils::trimAndLowerCase($header);
+        }
 
-            $isFirst = $index === 0;
-            $isLast = $index === (count($headers)-1);
-            $prev = !$isFirst ? Utils::trimAndLowerCase($headers[$index-1]) : null;
-            $next = !$isLast ? Utils::trimAndLowerCase($headers[$index+1]) : null;
-            $nextSibling = (!$isLast and isset($headers[$index+2])) ? Utils::trimAndLowerCase($headers[$index+2]) : null;
-            $header = Utils::trimAndLowerCase($header);
+        $allowedLanguages = $this->allowedLanguages();
 
-            if(!$this->validateSingleHeader($header, $isFirst, $isLast, $prev, $next, $nextSibling)){
-                $this->addError('Invalid header');
+        preg_match_all('/('.$allowedLanguages.')/', $headerString, $languageMatches);
 
-                return false;
-            }
+        if(empty($languageMatches[0]) or count($languageMatches[0]) < 2){
+
+            $this->errors[] = 'Minimum two language matches';
+
+            return false;
+        }
+
+        preg_match_all('/^(forbidden)?(domain)?(subdomain)?(definition)?((('.$allowedLanguages.')((notes)?(example of use)?){2,})+$)/', $headerString, $headerMatches);
+
+        if(empty($languageMatches[0])){
+
+            $this->errors[] = 'Incorrect header matches';
+
+            return false;
         }
 
         return true;
     }
 
-    /**
-     * @return array
-     */
-    private function allowedHeadingKeys()
-    {
-        return [
-            'forbidden',
-            'domain',
-            'subdomain',
-            'definition',
-        ];
-    }
 
     /**
-     * @return array
-     */
-    private function allowedLanguagesSpecifications()
-    {
-        return [
-            'notes',
-            'example of use',
-        ];
-    }
-
-    /**
-     * @return array
+     * @return string
      */
     private function allowedLanguages()
     {
@@ -78,68 +64,6 @@ class GlossaryCSVValidator extends AbstractValidator {
             $allowedLanguages[] = Utils::trimAndLowerCase($lang['rfc3066code']);
         }
 
-        return $allowedLanguages;
-    }
-
-    /**
-     * @param string $header
-     * @param bool   $isFirst
-     * @param bool   $isLast
-     * @param null   $prev
-     * @param null   $next
-     * @param null   $nextSibling
-     *
-     * @return bool
-     */
-    private function validateSingleHeader( $header, $isFirst, $isLast, $prev = null, $next = null, $nextSibling = null)
-    {
-        if(in_array($header, $this->allowedHeadingKeys())){
-            return true;
-        }
-
-        if(in_array($header, $this->allowedLanguages())){
-
-            // cannot be last element
-            if($isLast){
-                return false;
-            }
-
-            // next element is a valid language
-            if(in_array($next, $this->allowedLanguages())){
-                return true;
-            }
-
-            // next element (or next+1) is a language specific instructions
-            if(in_array($next, $this->allowedLanguagesSpecifications()) or in_array($nextSibling, $this->allowedLanguagesSpecifications())){
-                return true;
-            }
-
-            return false;
-        }
-
-        if(in_array($header, $this->allowedLanguagesSpecifications())){
-
-            // cannot be first element
-            if($isFirst){
-                return false;
-            }
-
-            // can be the last element
-            if($isLast){
-                return true;
-            }
-
-            // if prev element is a language or language specific instructions
-            if(in_array($prev, $this->allowedLanguages()) or in_array($prev, $this->allowedLanguagesSpecifications())){
-                return true;
-            }
-
-            // if next element is a language or language specific instructions
-            if(in_array($next, $this->allowedLanguages()) or in_array($next, $this->allowedLanguagesSpecifications())){
-                return true;
-            }
-        }
-
-        return false;
+        return implode("|", $allowedLanguages);
     }
 }
