@@ -109,7 +109,7 @@ const TermForm = () => {
     const onKeyUp = (e) => {
       if (e.key === 'Escape') {
         resetForm()
-      } else if (e.key === 'Enter') {
+      } else if (e.ctrlKey && e.key === 'Enter') {
         if (!isLoading) onSubmitAddOrUpdateTerm()
       } else {
         return
