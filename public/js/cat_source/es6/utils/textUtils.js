@@ -392,6 +392,18 @@ const TEXT_UTILS = {
   },
   isContentTextEllipsis: ({offsetWidth, scrollWidth} = {}) =>
     offsetWidth < scrollWidth,
+  isSupportingRegexLookAheadLookBehind: () => {
+    return false
+    try {
+      return (
+        'hibyehihi'
+          .replace(new RegExp('(?<=hi)hi', 'g'), 'hello')
+          .replace(new RegExp('hi(?!bye)', 'g'), 'hey') === 'hibyeheyhello'
+      )
+    } catch (error) {
+      return false
+    }
+  },
 }
 
 export default TEXT_UTILS

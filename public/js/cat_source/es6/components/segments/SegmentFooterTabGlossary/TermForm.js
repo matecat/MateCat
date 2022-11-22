@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import SegmentActions from '../../../actions/SegmentActions'
@@ -208,7 +202,7 @@ const TermForm = () => {
         <div className="glossary-form-line more-line">
           <div>
             <div className="input-with-label__wrapper">
-              <label>Description</label>
+              <label>Notes</label>
               <textarea
                 className="input-large"
                 name="glossary-term-description-source"
@@ -219,7 +213,7 @@ const TermForm = () => {
               />
             </div>
             <div className="input-with-label__wrapper">
-              <label>Example phrase</label>
+              <label>Example of use</label>
               <textarea
                 className="input-large"
                 name="glossary-term-example-source"
@@ -232,7 +226,7 @@ const TermForm = () => {
           </div>
           <div>
             <div className="input-with-label__wrapper">
-              <label>Description</label>
+              <label>Notes</label>
               <textarea
                 className="input-large"
                 name="glossary-term-description-target"
@@ -243,7 +237,7 @@ const TermForm = () => {
               />
             </div>
             <div className="input-with-label__wrapper">
-              <label>Example phrase</label>
+              <label>Example of use</label>
               <textarea
                 className="input-large"
                 name="glossary-term-example-target"
