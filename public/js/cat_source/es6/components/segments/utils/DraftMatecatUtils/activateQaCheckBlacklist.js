@@ -3,11 +3,11 @@ import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklist
 import TextUtils from '../../../../utils/textUtils'
 
 const activateQaCheckBlacklist = (blackListedTerms, sid) => {
-  const generateGlossaryDecorator = (regex) => {
+  const generateGlossaryDecorator = ({regex, regexCallback}) => {
     return {
       name: DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
       strategy: (contentBlock, callback) => {
-        if (regex !== '') {
+        if (regex !== '' && regexCallback) {
           findWithRegex(regex, contentBlock, callback)
         }
       },
@@ -29,6 +29,23 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
     }
   }
 
+  const findWithRegexWordSeparator = (regex, contentBlock, callback) => {
+    const text = contentBlock.getText()
+    let matchArr, start, end
+    while ((matchArr = regex.exec(text)) !== null) {
+      start = matchArr.index
+      end = start + matchArr[0].length
+
+      const isPreviousBreakWord =
+        (start > 0 && /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[start - 1])) ||
+        start === 0
+      const isNextBreakWord =
+        /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[end]) || !text[end]
+
+      if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
+    }
+  }
+
   const createGlossaryRegex = (blacklistArray) => {
     const matches = blacklistArray.reduce(
       (acc, {matching_words}) => [...acc, ...matching_words],
@@ -37,23 +54,29 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
 
     if (!matches.length) return ''
 
-    let re
     try {
       const escapedMatches = matches.map((match) =>
         TextUtils.escapeRegExp(match),
       )
-      re = new RegExp('\\b(' + escapedMatches.join('|') + ')\\b', 'gi')
-      //If source languace is Cyrillic or CJK
-      if (config.isCJK) {
-        re = new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
+
+      const regex =
+        TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+          ? new RegExp('(^|\\s)' + escapedMatches.join('|') + '(?=\\s|$)', 'gi')
+          : new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
+
+      return {
+        regex,
+        regexCallback:
+          TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+            ? findWithRegex
+            : findWithRegexWordSeparator,
       }
     } catch (e) {
-      return null
+      return {}
     }
-    return re
   }
-  const regex = createGlossaryRegex(blackListedTerms)
-  return generateGlossaryDecorator(regex)
+  const result = createGlossaryRegex(blackListedTerms)
+  return generateGlossaryDecorator(result)
 }
 
 export default activateQaCheckBlacklist

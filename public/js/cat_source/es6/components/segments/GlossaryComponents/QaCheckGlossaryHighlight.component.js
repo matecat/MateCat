@@ -27,7 +27,7 @@ class QaCheckGlossaryHighlight extends Component {
   }
   onClickTerm = () => {
     const {missingTerms, children, sid} = this.props
-    const text = children[0].props.text
+    const text = children[0].props.text.trim()
     const glossaryTerm = missingTerms.find(({matching_words: matchingWords}) =>
       matchingWords.find((value) => value.toLowerCase() === text.toLowerCase()),
     )

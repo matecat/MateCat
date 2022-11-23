@@ -5,12 +5,12 @@ import TextUtils from '../../../../utils/textUtils.js'
 import * as DraftMatecatConstants from './editorConstants'
 
 export const activateGlossary = (glossary, sid) => {
-  const generateGlossaryDecorator = (regex) => {
+  const generateGlossaryDecorator = ({regex, regexCallback}) => {
     return {
       name: DraftMatecatConstants.GLOSSARY_DECORATOR,
       strategy: (contentBlock, callback) => {
-        if (regex !== '') {
-          findWithRegex(regex, contentBlock, callback)
+        if (regex !== '' && regexCallback) {
+          regexCallback(regex, contentBlock, callback)
         }
       },
       component: GlossaryComponent,
@@ -31,6 +31,23 @@ export const activateGlossary = (glossary, sid) => {
     }
   }
 
+  const findWithRegexWordSeparator = (regex, contentBlock, callback) => {
+    const text = contentBlock.getText()
+    let matchArr, start, end
+    while ((matchArr = regex.exec(text)) !== null) {
+      start = matchArr.index
+      end = start + matchArr[0].length
+
+      const isPreviousBreakWord =
+        (start > 0 && /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[start - 1])) ||
+        start === 0
+      const isNextBreakWord =
+        /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[end]) || !text[end]
+
+      if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
+    }
+  }
+
   const createGlossaryRegex = (glossaryArray) => {
     let matches = []
     glossaryArray.forEach((item) => {
@@ -42,24 +59,30 @@ export const activateGlossary = (glossary, sid) => {
     matches = [...new Set(matches)]
     if (!matches.length) return ''
 
-    let re
     try {
       const escapedMatches = matches.map((match) =>
         TextUtils.escapeRegExp(match),
       )
-      re = new RegExp('\\b(' + escapedMatches.join('|') + ')\\b', 'gi')
-      //If source languace is Cyrillic or CJK
-      if (config.isCJK) {
-        re = new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
+
+      const regex =
+        TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+          ? new RegExp('(^|\\s)' + escapedMatches.join('|') + '(?=\\s|$)', 'gi')
+          : new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
+
+      return {
+        regex,
+        regexCallback:
+          TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+            ? findWithRegex
+            : findWithRegexWordSeparator,
       }
     } catch (e) {
-      return null
+      return {}
     }
-    return re
   }
 
-  const regex = createGlossaryRegex(glossary)
-  return generateGlossaryDecorator(regex, sid)
+  const result = createGlossaryRegex(glossary)
+  return generateGlossaryDecorator(result)
 }
 
 export default activateGlossary
