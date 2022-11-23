@@ -1060,6 +1060,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
       if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
       var TR = $(form).parents('tr')
       var Key = TR.find('.privatekey').first().text()
+      var keyNAme = TR.find('.description').first().text()
 
       // Set properties of form...
       form.setAttribute('target', 'upload_iframe')
@@ -1072,7 +1073,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
       }
       $(form)
         .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + tmName + '" />')
+        .append('<input type="hidden" name="name" value="' + keyNAme + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />')
       if (APP.isCattool) {
