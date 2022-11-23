@@ -78,8 +78,8 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
       return {}
     }
   }
-  const result = createGlossaryRegex(blackListedTerms)
-  return generateGlossaryDecorator(result)
+  const regexInstruction = createGlossaryRegex(blackListedTerms)
+  return generateGlossaryDecorator(regexInstruction)
 }
 
 export default activateQaCheckBlacklist

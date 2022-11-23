@@ -85,8 +85,8 @@ export const activateGlossary = (glossary, sid) => {
     }
   }
 
-  const result = createGlossaryRegex(glossary)
-  return generateGlossaryDecorator(result)
+  const regexInstruction = createGlossaryRegex(glossary)
+  return generateGlossaryDecorator(regexInstruction)
 }
 
 export default activateGlossary

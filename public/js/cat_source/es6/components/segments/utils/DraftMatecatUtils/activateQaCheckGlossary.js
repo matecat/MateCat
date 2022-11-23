@@ -82,8 +82,8 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
     }
   }
 
-  const result = createGlossaryRegex(missingTerms)
-  return generateGlossaryDecorator(result)
+  const regexInstruction = createGlossaryRegex(missingTerms)
+  return generateGlossaryDecorator(regexInstruction)
 }
 
 export default activateQaCheckGlossary
