@@ -122,7 +122,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         $this->TMService->setFile( array( $fileInfo ) );
 
         try {
-            $this->TMService->addGlossaryInMyMemory();
+            $uuids = $this->TMService->addGlossaryInMyMemory();
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
             unlink( $fileInfo->file_path );
@@ -131,7 +131,9 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( 202 );
+            $this->setSuccessResponse( 202, [
+                    'uuids' => $uuids
+            ] );
         }
 
         unlink( $fileInfo->file_path );
@@ -140,8 +142,10 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     public function uploadStatus() {
 
+        $uuid = $this->params['uuid'];
+
         try {
-            $result = $this->TMService->tmxUploadStatus();
+            $result = $this->TMService->glossaryUploadStatus($uuid);
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
@@ -149,7 +153,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( null, $result[ 'data' ] );
+            $this->setSuccessResponse( $result->responseStatus, $result->responseData );
         }
 
     }
