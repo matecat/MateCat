@@ -443,7 +443,7 @@ class JobContainer extends React.Component {
       keys.forEach(function (key) {
         let descript = key.get('name')
           ? key.get('name')
-          : 'Private TM and Glossary'
+          : 'Private resource'
         let item =
           '<div style="text-align: left"><span style="font-weight: bold">' +
           descript +
