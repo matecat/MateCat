@@ -3,6 +3,7 @@ import _ from 'lodash'
 import * as DraftMatecatConstants from './editorConstants'
 import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils'
+import {regexWordDelimiter} from './textUtils'
 
 const activateQaCheckGlossary = (missingTerms, text, sid) => {
   const generateGlossaryDecorator = ({regex, regexCallback}) => {
@@ -10,7 +11,7 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
       name: DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
       strategy: (contentBlock, callback) => {
         if (regex !== '' && regexCallback) {
-          findWithRegex(regex, contentBlock, callback)
+          regexCallback(regex, contentBlock, callback)
         }
       },
       component: QaCheckGlossaryHighlight,
@@ -25,8 +26,8 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
     const text = contentBlock.getText()
     let matchArr, start, end
     while ((matchArr = regex.exec(text)) !== null) {
-      start = matchArr.index
-      end = start + matchArr[0].length
+      start = start = matchArr.index > 0 ? matchArr.index + 1 : 0
+      end = start + matchArr[2].length
       callback(start, end)
     }
   }
@@ -39,10 +40,8 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
       end = start + matchArr[0].length
 
       const isPreviousBreakWord =
-        (start > 0 && /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[start - 1])) ||
-        start === 0
-      const isNextBreakWord =
-        /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[end]) || !text[end]
+        (start > 0 && regexWordDelimiter.test(text[start - 1])) || start === 0
+      const isNextBreakWord = regexWordDelimiter.test(text[end]) || !text[end]
 
       if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
     }
@@ -64,13 +63,17 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
 
       const regex =
         TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
-          ? new RegExp('(^|\\s)' + escapedMatches.join('|') + '(?=\\s|$)', 'gi')
+          ? new RegExp(
+              '(^|\\W)(' + escapedMatches.join('|') + ')(?=\\W|$)',
+              'gi',
+            )
           : new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
 
       return {
         regex,
         regexCallback:
-          TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+          (TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK) ||
+          config.isCJK
             ? findWithRegex
             : findWithRegexWordSeparator,
       }

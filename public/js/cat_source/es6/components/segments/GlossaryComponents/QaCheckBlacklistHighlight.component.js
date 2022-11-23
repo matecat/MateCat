@@ -31,7 +31,9 @@ class QaCheckBlacklistHighlight extends Component {
     const text = children[0].props.text
     const term = this.props.blackListedTerms.find(
       ({matching_words: matchingWords}) =>
-        matchingWords.find((value) => value === text),
+        matchingWords.find(
+          (value) => value.toLowerCase() === text.toLowerCase(),
+        ),
     )
     const {source, target} = term
 
