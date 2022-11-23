@@ -391,14 +391,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
+                if(in_array("1", $line)){
+                    foreach ($line as $lineKey => $item){
+                        if($item == "1"){
+                            $line[$lineKey] = "True";
+                        }
+                    }
+                }
+
                 //copy stream to stream
                 $newFile->fputcsv( $line );
-
             }
+
             $newFile->fflush();
 
-            $origFile = null; //close the file handle
-            $newFile  = null; //close the file handle
+            $origFile = null;
+            $newFile  = null;
             copy( $tmpFileName, $file );
             unlink( $tmpFileName );
 
