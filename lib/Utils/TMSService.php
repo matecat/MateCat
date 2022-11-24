@@ -236,6 +236,8 @@ class TMSService {
      * @param $keyName
      * @param $userEmail
      * @param $userName
+     *
+     * @return array
      */
     public function glossaryExport($key, $keyName, $userEmail, $userName)
     {

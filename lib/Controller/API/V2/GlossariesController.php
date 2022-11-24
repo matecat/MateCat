@@ -19,6 +19,7 @@ use Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
 use TMSService;
+use Users_UserDao;
 use Utils;
 use ZipArchive;
 
@@ -160,30 +161,37 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     public function download() {
 
-        if(!$this->userIsLogged()){
-            $this->setErrorResponse( 401, "Only logged users can download a glossary file" );
-
-            return;
-        }
-
         $filterArgs = [
             'key_name' => [
-                    'filter' => FILTER_SANITIZE_STRING,
-                    'flags' => FILTER_FLAG_STRIP_LOW
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW
             ],
             'key' => [
-                    'filter' => FILTER_SANITIZE_STRING,
-                    'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+            'email' => [
+                'filter' => FILTER_SANITIZE_EMAIL,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ],
         ];
 
         $postInput = (object)filter_var_array( $this->request->params([
+                'email',
                 'key_name',
                 'key',
         ]), $filterArgs );
 
         try {
-            $result = $this->TMService->glossaryExport($postInput->key, $postInput->key_name, $this->user->email, $this->user->fullName());
+            $user = (new Users_UserDao())->getByEmail( $postInput->email );
+
+            if(!$user){
+                $this->setErrorResponse( 404, "User with email ".$postInput->email." not found" );
+
+                return;
+            }
+
+            $result = $this->TMService->glossaryExport($postInput->key, $postInput->key_name, $postInput->email, $user->fullName());
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
