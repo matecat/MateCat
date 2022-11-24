@@ -349,17 +349,17 @@ export const SegmentFooterTabGlossary = ({
     if (!segment?.glossary_search_results) return
     const orderedByUpdateDate = [...segment.glossary_search_results]
       .sort((a, b) => {
-        if (
-          new Date(a.metadata.last_update_date).getTime() <
-          new Date(b.metadata.last_update_date).getTime()
-        ) {
+        if (a.term_id < b.term_id) {
           return 1
         } else {
           return -1
         }
       })
       .sort((a, b) => {
-        if (a.term_id < b.term_id) {
+        if (
+          new Date(a.metadata.last_update_date).getTime() <
+          new Date(b.metadata.last_update_date).getTime()
+        ) {
           return 1
         } else {
           return -1

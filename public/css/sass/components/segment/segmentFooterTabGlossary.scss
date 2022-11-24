@@ -65,15 +65,12 @@
           background-color: unset;
           color: unset;
         }
-        .dropdown__option:hover:not(.dropdown__option--is-no-results-found) {
-          color: $grey6;
-          background-color: $grey4;
-        }
         .dropdown__option--is-no-results-found {
           background-color: unset;
           color: $grey7;
         }
-        .dropdown__option--is-highlighted-option {
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
           background-color: $grey8;
         }
         .button-create-glossary-key {
@@ -105,7 +102,8 @@
         .dropdown__option--is-no-results-found {
           display: none;
         }
-        .dropdown__option--is-highlighted-option {
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
           background-color: $grey8;
         }
         .domain-option {
@@ -355,6 +353,15 @@
             font-weight: normal;
             margin-left: 8px;
           }
+        }
+
+        .glossary-description > p {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          white-space: break-spaces;
         }
       }
     }

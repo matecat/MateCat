@@ -1139,7 +1139,8 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
           setTimeout(function () {
             //delay because server can take some time to process large file
             // TRcaller.removeClass('startUploading');
-            UI.pollForUploadProgress(Key, fileName, TRcaller, type)
+            const uuid = type === 'glossary' && msg.data?.uuids?.length > 0 ? msg.data.uuids[0] : undefined
+            UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
           }, 2000)
         } else {
           // console.log('error');
@@ -1199,10 +1200,10 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgress: function (Key, fileName, TRcaller, type) {
+    pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
       const promise =
         type === 'glossary'
-          ? loadGlossaryFile({key: Key, name: fileName})
+          ? loadGlossaryFile({id: uuid})
           : loadTMX({key: Key, name: fileName})
       promise
         .then((response) => {
@@ -1210,12 +1211,12 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.showStartUpload($(TDcaller))
 
-          if (response.data.total == null) {
+          if (response.data.total == null && response.data.totals === null ) {
             setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           } else {
-            if (response.data.completed) {
+            if ((type === 'tmx' && response.data.completed) || (type === 'glossary' && response.data.completed === response.data.totals) ) {
               var tr = $(TDcaller).parents('tr')
               UI.showSuccessUpload(tr)
 
@@ -1233,14 +1234,16 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
 
               return false
             }
+            const done = type === 'tmx' ? response.data.done : response.data.completed
+            const total = type === 'tmx' ? response.data.total : response.data.totals
             var progress =
-              (parseInt(response.data.done) / parseInt(response.data.total)) *
+              (parseInt(done) / parseInt(total)) *
               100
             $(TDcaller)
               .find('.progress .inner')
               .css('width', progress + '%')
             setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           }
         })

@@ -393,7 +393,6 @@ const TEXT_UTILS = {
   isContentTextEllipsis: ({offsetWidth, scrollWidth} = {}) =>
     offsetWidth < scrollWidth,
   isSupportingRegexLookAheadLookBehind: () => {
-    return false
     try {
       return (
         'hibyehihi'
