@@ -1,6 +1,7 @@
 import * as DraftMatecatConstants from './editorConstants'
 import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component'
 import TextUtils from '../../../../utils/textUtils'
+import {regexWordDelimiter} from './textUtils'
 
 const activateQaCheckBlacklist = (blackListedTerms, sid) => {
   const generateGlossaryDecorator = ({regex, regexCallback}) => {
@@ -8,7 +9,7 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
       name: DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
       strategy: (contentBlock, callback) => {
         if (regex !== '' && regexCallback) {
-          findWithRegex(regex, contentBlock, callback)
+          regexCallback(regex, contentBlock, callback)
         }
       },
       component: QaCheckBlacklistHighlight,
@@ -23,8 +24,8 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
     const text = contentBlock.getText()
     let matchArr, start, end
     while ((matchArr = regex.exec(text)) !== null) {
-      start = matchArr.index
-      end = start + matchArr[0].length
+      start = start = matchArr.index > 0 ? matchArr.index + 1 : 0
+      end = start + matchArr[2].length
       callback(start, end)
     }
   }
@@ -33,14 +34,12 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
     const text = contentBlock.getText()
     let matchArr, start, end
     while ((matchArr = regex.exec(text)) !== null) {
-      start = matchArr.index
-      end = start + matchArr[0].length
+      start = matchArr.index + 1
+      end = start + matchArr[2].length
 
       const isPreviousBreakWord =
-        (start > 0 && /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[start - 1])) ||
-        start === 0
-      const isNextBreakWord =
-        /(\s+|[-+*\\/]|\d+|,|\.|;|\\:)/.test(text[end]) || !text[end]
+        (start > 0 && regexWordDelimiter.test(text[start - 1])) || start === 0
+      const isNextBreakWord = regexWordDelimiter.test(text[end]) || !text[end]
 
       if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
     }
@@ -61,13 +60,17 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
 
       const regex =
         TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
-          ? new RegExp('(^|\\s)' + escapedMatches.join('|') + '(?=\\s|$)', 'gi')
+          ? new RegExp(
+              '(^|\\W)(' + escapedMatches.join('|') + ')(?=\\W|$)',
+              'gi',
+            )
           : new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
 
       return {
         regex,
         regexCallback:
-          TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+          (TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK) ||
+          config.isCJK
             ? findWithRegex
             : findWithRegexWordSeparator,
       }
@@ -75,8 +78,8 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
       return {}
     }
   }
-  const result = createGlossaryRegex(blackListedTerms)
-  return generateGlossaryDecorator(result)
+  const regexInstruction = createGlossaryRegex(blackListedTerms)
+  return generateGlossaryDecorator(regexInstruction)
 }
 
 export default activateQaCheckBlacklist

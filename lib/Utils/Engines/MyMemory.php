@@ -436,10 +436,39 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "glossary_import_relative_url", $postFields, true );
 
-        if(isset($this->result->responseData['UUID'])){
-            $uuid = $this->result->responseData['UUID'];
-            $this->pollForStatus($uuid, 'glossary_import_status_relative_url');
-        }
+        return $this->result;
+    }
+
+    /**
+     * @param $uuid
+     *
+     * @return array
+     */
+    public function getGlossaryImportStatus($uuid)
+    {
+        $this->call( 'glossary_import_status_relative_url', [
+                'uuid' => $uuid
+        ], false );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     *
+     * @return array
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+        $this->call( 'glossary_export_relative_url', [
+            'key' => $key,
+            'key_name' => $keyName,
+            'user_name' => $userEmail,
+            'user_email' => $userName,
+        ], true );
 
         return $this->result;
     }
@@ -597,12 +626,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
 
-        \Log::doJsonLog('PIPPO ----> ' . json_encode($this->result));
-
-        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
-            $uuid = $this->result->responseDetails;
-            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
-        }
+//        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+//            $uuid = $this->result->responseDetails;
+//            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+//        }
 
         return $this->result;
     }

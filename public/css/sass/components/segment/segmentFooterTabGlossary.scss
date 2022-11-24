@@ -65,15 +65,12 @@
           background-color: unset;
           color: unset;
         }
-        .dropdown__option:hover:not(.dropdown__option--is-no-results-found) {
-          color: $grey6;
-          background-color: $grey4;
-        }
         .dropdown__option--is-no-results-found {
           background-color: unset;
           color: $grey7;
         }
-        .dropdown__option--is-highlighted-option {
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
           background-color: $grey8;
         }
         .button-create-glossary-key {
@@ -105,7 +102,8 @@
         .dropdown__option--is-no-results-found {
           display: none;
         }
-        .dropdown__option--is-highlighted-option {
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
           background-color: $grey8;
         }
         .domain-option {
@@ -115,6 +113,8 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          min-width: 18px;
+          text-align: center;
         }
         .button-create-option {
           color: $grey7;
@@ -258,6 +258,8 @@
         padding: 0 4px;
         overflow: hidden;
         margin-left: 8px;
+        min-width: 18px;
+        text-align: center;
       }
 
       .glossary_definition-container {
@@ -275,7 +277,13 @@
         display: flex;
         svg {
           margin-right: 8px;
-        }
+          flex-shrink: 0;
+        } /* 
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        } */
       }
       .glossary_definition--hidden {
         visibility: hidden;
@@ -355,6 +363,15 @@
             font-weight: normal;
             margin-left: 8px;
           }
+        }
+
+        .glossary-description > p {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          white-space: break-spaces;
         }
       }
     }
@@ -517,5 +534,10 @@
     left: 0;
     bottom: 0;
     margin-right: 8px;
+  }
+
+  .rtl {
+    direction: rtl;
+    text-align: right;
   }
 }

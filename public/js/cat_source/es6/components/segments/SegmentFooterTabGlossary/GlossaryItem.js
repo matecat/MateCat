@@ -24,14 +24,14 @@ export const GlossaryItem = ({
     <div className="glossary_item" id={item.term_id}>
       <div className="glossary_item-header">
         <div className="glossary_definition-container">
-          <span
+          <div
             className={`glossary_definition${
               !metadata.definition ? ' glossary_definition--hidden' : ''
             }`}
           >
             <GlossaryDefinitionIcon />
-            {metadata.definition}
-          </span>
+            <span>{metadata.definition}</span>
+          </div>
           {metadata.domain && (
             <span className="glossary_badge">{metadata.domain}</span>
           )}
@@ -84,7 +84,7 @@ export const GlossaryItem = ({
         }`}
       >
         <div className="glossary-item_column">
-          <div className="glossary_word">
+          <div className={`glossary_word${config.isSourceRTL ? ' rtl' : ''}`}>
             <span
               className={`${
                 highlight && !highlight.isTarget
@@ -103,11 +103,13 @@ export const GlossaryItem = ({
             )}
           </div>
           {source.note && (
-            <div className="glossary-description">{source.note}</div>
+            <div className="glossary-description" aria-label={source.note}>
+              <p>{source.note}</p>
+            </div>
           )}
         </div>
         <div className="glossary-item_column">
-          <div className="glossary_word">
+          <div className={`glossary_word${config.isTargetRTL ? ' rtl' : ''}`}>
             <span
               className={`${
                 highlight && highlight.isTarget
@@ -126,7 +128,9 @@ export const GlossaryItem = ({
             )}
           </div>
           {target.note && (
-            <div className="glossary-description">{target.note}</div>
+            <div className="glossary-description" aria-label={target.note}>
+              <p>{target.note}</p>
+            </div>
           )}
         </div>
       </div>

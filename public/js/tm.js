@@ -902,7 +902,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
     addTMKeyToList: function (uploading) {
       var descr = $('#new-tm-description').val()
       var key = $('#new-tm-key').val()
-      descr = descr.length ? descr : 'Private TM and Glossary'
+      descr = descr.length ? descr : 'Private resource'
       var keyParams = {
         r: $('#new-tm-read').is(':checked'),
         w: $('#new-tm-write').is(':checked'),
@@ -1086,6 +1086,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
       if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
       var TR = $(form).parents('tr')
       var Key = TR.find('.privatekey').first().text()
+      var keyNAme = TR.find('.description').first().text()
 
       // Set properties of form...
       form.setAttribute('target', 'upload_iframe')
@@ -1098,7 +1099,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
       }
       $(form)
         .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + tmName + '" />')
+        .append('<input type="hidden" name="name" value="' + keyNAme + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />')
       if (APP.isCattool) {
@@ -1138,7 +1139,8 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
           setTimeout(function () {
             //delay because server can take some time to process large file
             // TRcaller.removeClass('startUploading');
-            UI.pollForUploadProgress(Key, fileName, TRcaller, type)
+            const uuid = type === 'glossary' && msg.data?.uuids?.length > 0 ? msg.data.uuids[0] : undefined
+            UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
           }, 2000)
         } else {
           // console.log('error');
@@ -1198,10 +1200,10 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgress: function (Key, fileName, TRcaller, type) {
+    pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
       const promise =
         type === 'glossary'
-          ? loadGlossaryFile({key: Key, name: fileName})
+          ? loadGlossaryFile({id: uuid})
           : loadTMX({key: Key, name: fileName})
       promise
         .then((response) => {
@@ -1209,12 +1211,12 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.showStartUpload($(TDcaller))
 
-          if (response.data.total == null) {
+          if (response.data.total == null && response.data.totals === null ) {
             setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           } else {
-            if (response.data.completed) {
+            if ((type === 'tmx' && response.data.completed) || (type === 'glossary' && response.data.completed === response.data.totals) ) {
               var tr = $(TDcaller).parents('tr')
               UI.showSuccessUpload(tr)
 
@@ -1232,14 +1234,16 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
 
               return false
             }
+            const done = type === 'tmx' ? response.data.done : response.data.completed
+            const total = type === 'tmx' ? response.data.total : response.data.totals
             var progress =
-              (parseInt(response.data.done) / parseInt(response.data.total)) *
+              (parseInt(done) / parseInt(total)) *
               100
             $(TDcaller)
               .find('.progress .inner')
               .css('width', progress + '%')
             setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           }
         })
@@ -1351,10 +1355,14 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
       var tr = field.parents('tr').first()
       var old_descr = tr.find('.edit-desc').data('descr')
       var new_descr = field.text()
+
+      if (new_descr === '') {
+        old_descr.length > 0 ? new_descr = old_descr : new_descr = 'Private resource'
+        field.text(new_descr)
+      }
       if (old_descr === new_descr) {
         return
       }
-
       updateTmKey({
         key: tr.find('.privatekey').text(),
         description: new_descr,
@@ -1371,7 +1379,7 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
     saveTMkey: function (key, desc) {
       delete UI.newTmKey
       if (desc.length == 0) {
-        desc = 'Private TM and Glossary'
+        desc = 'Private resource'
       }
 
       const promise = createNewTmKey({
@@ -2235,10 +2243,10 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
     initTmxTooltips: function () {
       //Description input
       if (config.isLoggedIn) {
-        $('tr:not(.ownergroup) .edit-desc').data(
+        /*$('tr:not(.ownergroup) .edit-desc').data(
           'powertip',
           "<div style='line-height: 18px;font-size: 15px;'>Rename</div>",
-        )
+        )*/
         $('.edit-desc').powerTip({
           placement: 's',
         })

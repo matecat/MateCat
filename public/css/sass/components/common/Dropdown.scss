@@ -68,7 +68,7 @@
 .dropdown__search-bar input,
 .dropdown__search-bar input:hover,
 .dropdown__search-bar input:focus {
-  background-color: $grey5 !important;
+  background-color: $grey5;
   border: none !important;
   box-shadow: none;
 }
@@ -78,6 +78,10 @@
 
 .dropdown__search-bar-input::placeholder {
   color: $grey;
+}
+
+.dropdown__search-bar-input--highlighted {
+  background-color: $grey4 !important;
 }
 
 // Most popular options

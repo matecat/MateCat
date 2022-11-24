@@ -1331,7 +1331,7 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary()) {
+      if (CatToolStore.getHaveKeysGlossary() && trg_content) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
