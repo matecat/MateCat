@@ -113,6 +113,8 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          min-width: 18px;
+          text-align: center;
         }
         .button-create-option {
           color: $grey7;
@@ -256,6 +258,8 @@
         padding: 0 4px;
         overflow: hidden;
         margin-left: 8px;
+        min-width: 18px;
+        text-align: center;
       }
 
       .glossary_definition-container {
@@ -530,5 +534,10 @@
     left: 0;
     bottom: 0;
     margin-right: 8px;
+  }
+
+  .rtl {
+    direction: rtl;
+    text-align: right;
   }
 }
