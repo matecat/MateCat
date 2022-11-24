@@ -273,7 +273,13 @@
         display: flex;
         svg {
           margin-right: 8px;
-        }
+          flex-shrink: 0;
+        } /* 
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        } */
       }
       .glossary_definition--hidden {
         visibility: hidden;
@@ -359,7 +365,7 @@
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           white-space: break-spaces;
         }

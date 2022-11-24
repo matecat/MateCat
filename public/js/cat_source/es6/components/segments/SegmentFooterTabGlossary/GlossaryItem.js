@@ -24,14 +24,14 @@ export const GlossaryItem = ({
     <div className="glossary_item" id={item.term_id}>
       <div className="glossary_item-header">
         <div className="glossary_definition-container">
-          <span
+          <div
             className={`glossary_definition${
               !metadata.definition ? ' glossary_definition--hidden' : ''
             }`}
           >
             <GlossaryDefinitionIcon />
-            {metadata.definition}
-          </span>
+            <span>{metadata.definition}</span>
+          </div>
           {metadata.domain && (
             <span className="glossary_badge">{metadata.domain}</span>
           )}
