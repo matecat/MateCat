@@ -918,7 +918,7 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.1.8",
+            "version": "v1.1.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
@@ -968,7 +968,7 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.1.8"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.1.9"
             },
             "time": "2022-05-02T16:59:33+00:00"
         },
