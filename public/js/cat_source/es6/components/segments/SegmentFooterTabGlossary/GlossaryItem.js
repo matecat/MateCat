@@ -84,7 +84,7 @@ export const GlossaryItem = ({
         }`}
       >
         <div className="glossary-item_column">
-          <div className="glossary_word">
+          <div className={`glossary_word${config.isSourceRTL ? ' rtl' : ''}`}>
             <span
               className={`${
                 highlight && !highlight.isTarget
@@ -109,7 +109,7 @@ export const GlossaryItem = ({
           )}
         </div>
         <div className="glossary-item_column">
-          <div className="glossary_word">
+          <div className={`glossary_word${config.isTargetRTL ? ' rtl' : ''}`}>
             <span
               className={`${
                 highlight && highlight.isTarget
