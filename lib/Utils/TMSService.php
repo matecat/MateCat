@@ -232,6 +232,17 @@ class TMSService {
     }
 
     /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+       return $this->mymemory_engine->glossaryExport($key, $keyName, $userEmail, $userName);
+    }
+
+    /**
      * @return array
      * @throws Exception
      */

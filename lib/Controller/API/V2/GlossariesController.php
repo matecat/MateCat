@@ -160,28 +160,39 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     public function download() {
 
+        if(!$this->userIsLogged()){
+            $this->setErrorResponse( 401, "Only logged users can download a glossary file" );
+
+            return;
+        }
+
+        $filterArgs = [
+            'key_name' => [
+                    'filter' => FILTER_SANITIZE_STRING,
+                    'flags' => FILTER_FLAG_STRIP_LOW
+            ],
+            'key' => [
+                    'filter' => FILTER_SANITIZE_STRING,
+                    'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
+
+        $postInput = (object)filter_var_array( $this->request->params([
+                'key_name',
+                'key',
+        ]), $filterArgs );
+
         try {
-
-            $ZipFilePointer = $this->rebuildExcel(
-                    $this->TMService->downloadGlossary()
-            );
-
-            // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
-            // $this->recordActivity();
-
+            $result = $this->TMService->glossaryExport($postInput->key, $postInput->key_name, $this->user->email, $this->user->fullName());
         } catch ( Exception $e ) {
-            $this->logDownloadError( $e );
-            $this->unlockDownloadToken();
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
             return;
         }
 
-        $this->unlockDownloadToken();
-
-        $fileStream = new KleinResponseFileStream( $this->response );
-        $fileName   = $this->tm_key . "_" . ( new DateTime() )->format( 'YmdHi' ) . ".zip";
-        $fileStream->streamFileDownloadFromPointer( $ZipFilePointer, $fileName );
+        if ( !$this->response->isLocked() ) {
+            $this->setSuccessResponse( $result->responseStatus, $result->responseData );
+        }
     }
 
     protected function logDownloadError( Exception $e ) {

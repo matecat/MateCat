@@ -454,6 +454,26 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     *
+     * @return array
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+        $this->call( 'glossary_export_relative_url', [
+            'key' => $key,
+            'key_name' => $keyName,
+            'user_name' => $userEmail,
+            'user_email' => $userName,
+        ], true );
+
+        return $this->result;
+    }
+
+    /**
      * Poll MM for obtain the status of a write operation
      * using a cyclic barrier
      * (import, update, set, delete)
