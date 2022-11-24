@@ -46,60 +46,56 @@ export const SubdomainSelect = () => {
           }
         }}
       >
-        {({
-          name,
-          index,
-          optionsLength,
-          queryFilter,
-          resetQueryFilter,
-          onClose,
-        }) => {
+        {({name, index, queryFilter, resetQueryFilter, onClose}) => {
           const createSubdomainFn =
             queryFilter.trim() &&
             !subdomains.find(({name}) => name === queryFilter)
               ? () => {
-                  setSubdomains((prevState) => [
-                    ...prevState,
-                    {
-                      name: queryFilter,
-                      id: (prevState.length + 1).toString(),
-                    },
-                  ])
+                  const newEntry = {
+                    name: queryFilter,
+                    id: subdomains.length.toString(),
+                  }
+
+                  setSubdomains((prevState) => [...prevState, newEntry])
+                  setTimeout(
+                    () => updateSelectActive('subdomain', newEntry),
+                    100,
+                  )
                   resetQueryFilter()
+                  onClose()
                 }
               : () => false
           createSubdomainFnRef.current = createSubdomainFn
 
           return {
-            ...(index === 0 &&
-              selectsActive.subdomain && {
-                beforeRow: (
-                  <button
-                    className="button-create-option"
-                    onClick={() => {
-                      updateSelectActive('subdomain', undefined)
-                      onClose()
-                    }}
-                  >
-                    Deselect subdomain
-                  </button>
-                ),
-              }),
+            ...(index === 0 && {
+              beforeRow: (
+                <>
+                  {queryFilter.trim() &&
+                    !subdomains.find(({name}) => name === queryFilter) && (
+                      <button
+                        className="button-create-option"
+                        onClick={createSubdomainFn}
+                      >
+                        + Create subdomain <b>{queryFilter}</b>
+                      </button>
+                    )}
+                  {!queryFilter && selectsActive.subdomain && (
+                    <button
+                      className="button-create-option"
+                      onClick={() => {
+                        updateSelectActive('subdomain', undefined)
+                        onClose()
+                      }}
+                    >
+                      Deselect subdomain
+                    </button>
+                  )}
+                </>
+              ),
+            }),
             // override row content
             row: <div className="domain-option">{name}</div>,
-            // insert button after last row
-            ...(index === optionsLength - 1 &&
-              queryFilter.trim() &&
-              !subdomains.find(({name}) => name === queryFilter) && {
-                afterRow: (
-                  <button
-                    className="button-create-option"
-                    onClick={createSubdomainFn}
-                  >
-                    + Create a subdomain <b>{queryFilter}</b>
-                  </button>
-                ),
-              }),
           }
         }}
       </Select>

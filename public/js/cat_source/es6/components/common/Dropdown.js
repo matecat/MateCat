@@ -31,7 +31,6 @@ export const Dropdown = ({
 
   const textInputRef = useRef()
   const queryFilterRef = useRef('')
-  const highlightedOptionRef = useRef()
   const itemsOnTopRef = useRef(activeOptions)
 
   const handleClick = (option) => {
@@ -187,30 +186,55 @@ export const Dropdown = ({
       if (!options.length) return
       if (e.key === 'ArrowUp') {
         setHighlightedOption((prevState) => {
+          const getPrevIndex = ({index, lastIndex}) =>
+            showSearchBar
+              ? index >= -1
+                ? index
+                : lastIndex
+              : index >= 0
+              ? index
+              : lastIndex
+
+          const lastIndex = options.length - 1
+
           const findIndex = prevState
             ? options.findIndex(({id}) => id === prevState.id) - 1
-            : 0
-          const prevIndex = findIndex >= 0 ? findIndex : options.length - 1
+            : lastIndex
+
+          const prevIndex = getPrevIndex({index: findIndex, lastIndex})
           scrollToRow({
             index: prevIndex,
             direction: 'top',
             reset: findIndex < 0,
           })
-          return options[prevIndex >= 0 ? prevIndex : options.length - 1]
+          return options[getPrevIndex({index: prevIndex, lastIndex})]
+            ? options[getPrevIndex({index: prevIndex, lastIndex})]
+            : 0
         })
       } else if (e.key === 'ArrowDown') {
         setHighlightedOption((prevState) => {
+          const getNextIndex = ({index}) =>
+            showSearchBar
+              ? index <= options.length
+                ? index
+                : 0
+              : index < options.length
+              ? index
+              : 0
+
           const findIndex = prevState
             ? options.findIndex(({id}) => id === prevState.id) + 1
             : 0
 
-          const nextIndex = findIndex < options.length ? findIndex : 0
+          const nextIndex = getNextIndex({index: findIndex})
           scrollToRow({
             index: nextIndex,
             direction: 'down',
             reset: findIndex === options.length,
           })
-          return options[nextIndex < options.length ? nextIndex : 0]
+          return options[getNextIndex({index: nextIndex})]
+            ? options[getNextIndex({index: nextIndex})]
+            : 0
         })
       } else if (e.key === 'Enter' && highlightedOption) {
         handleClick(highlightedOption)
@@ -227,7 +251,14 @@ export const Dropdown = ({
 
     return () => current.removeEventListener('keydown', navigateItems)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wrapper, listRef, highlightedOption, activeOptions, getFilteredOptions])
+  }, [
+    wrapper,
+    listRef,
+    highlightedOption,
+    activeOptions,
+    showSearchBar,
+    getFilteredOptions,
+  ])
 
   useEffect(() => {
     setHighlightedOption(undefined)
@@ -333,7 +364,11 @@ export const Dropdown = ({
       {(showSearchBar || multipleSelect === 'modal') && (
         <div data-testid="dropdown-search" className="dropdown__search-bar">
           <input
-            className="dropdown__search-bar-input"
+            className={`dropdown__search-bar-input${
+              highlightedOption === 0
+                ? ' dropdown__search-bar-input--highlighted'
+                : ''
+            }`}
             placeholder={searchPlaceholder}
             type="text"
             ref={textInputRef}
