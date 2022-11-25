@@ -59,7 +59,8 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
       )
 
       const regex =
-        TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+          (TextUtils.isSupportingRegexLookAheadLookBehind() && !config.isCJK) ||
+          config.isCJK
           ? new RegExp(
               '(^|\\W)(' + escapedMatches.join('|') + ')(?=\\W|$)',
               'gi',
