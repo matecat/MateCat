@@ -1130,7 +1130,7 @@ td.addtmxtd {
   width: 804px;
 }
 
-input.email-export-tmx {
+input.email-export {
   width: 180px;
   margin-left: 10px !important;
 }
@@ -1443,7 +1443,6 @@ form.add-TM-Form {
 }
 
 .btn-grey {
-  border: 1px solid #848689;
   font-weight: bold;
   text-decoration: none;
   padding: 8px 18px;
@@ -1486,7 +1485,6 @@ form.add-TM-Form {
 .btn-grey {
   color: $grey2;
   background: white;
-  border: 1px solid $grey2;
   //background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
   //background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
   //background: linear-gradient(top, #f6f6f6, #e2e3e5);
@@ -1758,10 +1756,6 @@ select#mt_engine_int {
   clear: right;
 }
 
-.btn-grey:active {
-  border: 1px solid #333;
-}
-
 span.asterisk {
   line-height: 10px;
   vertical-align: bottom;
@@ -1776,12 +1770,6 @@ span.text-req {
   /* margin-top: 0px; */
   clear: left;
   color: #bbb;
-}
-
-.btn-grey:active:active {
-  -moz-box-shadow: inset 0 0 1px 1px #888;
-  -webkit-box-shadow: inset 0 0 1px 1px #888;
-  box-shadow: inset 0 0 1px 1px #888;
 }
 
 .file_upload_error,
@@ -1842,14 +1830,6 @@ div.mt-error-key {
   float: left;
 }
 
-.btn-grey:hover {
-  cursor: pointer;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-  box-shadow: 0 1px 2px #ccc;
-  border: 1px solid #000;
-  color: #333333;
-}
-
 body.cattool .mgmt-tm.mine thead,
 .mgmt-tm.new thead,
 .mgmt-tm.anonymous thead {
@@ -1862,7 +1842,7 @@ body.cattool .mgmt-tm.mine thead,
 }
 
 td.share-tmx-container,
-td.download-tmx-container,
+td.download-container,
 td.download-glossary-container,
 td.uploadfile {
   color: black !important;
@@ -2070,8 +2050,8 @@ tr.mymemory td.dragrow .status {
   box-sizing: content-box;
 }
 
-span.email-export-tmx-email-sent,
-span.email-export-tmx-email-error,
+span.email-export-email-sent,
+span.email-export-email-error,
 .message-glossary-export-completed,
 .mgmt-tm .message-glossary-export-error,
 #activetm td.uploadfile .msg,
@@ -2138,8 +2118,8 @@ td.uploadfile p {
 }
 
 /* Export TMX container */
-#activetm td.download-tmx-container,
-#inactivetm td.download-tmx-container,
+#activetm td.download-container,
+#inactivetm td.download-container,
 #activetm td.download-glossary-container,
 #inactivetm td.download-glossary-container,
 #activetm td.share-tmx-container,
@@ -2153,38 +2133,37 @@ td.uploadfile p {
   position: relative;
 }
 
-td.download-tmx-container,
+td.download-container,
 .mgmt-tm .download-glossary-container {
   line-height: 30px;
 }
 
-.message-export-tmx,
-.message-export-tmx-success,
-.message-export-glossary {
+.message-export,
+.message-export-success {
   float: left;
   margin-left: 11px;
 }
 
-input.email-export-tmx {
+input.email-export {
   float: left;
   margin-left: 14px;
   margin-top: 3px !important;
 }
 
-.export-tmx-button-label:before {
+.export-button-label:before {
   content: '\f00c';
   padding-right: 7px;
   vertical-align: text-top;
 }
 
-.export-tmx-button-label {
+.export-button-label {
   width: 90px !important;
   display: block;
   text-align: center;
   color: white !important;
 }
 
-.mgmt-tm .btn-ok.export-tmx-button {
+.mgmt-tm .btn-ok.export-button {
   padding: 0px 5px !important;
   margin-right: 9px;
 }
@@ -2334,18 +2313,18 @@ td.download-glossary-container .uploadloader {
   right: 85px;
 }
 
-.download-tmx-container .uploadloader {
+.download-container .uploadloader {
   right: 200px;
   top: 13px;
 }
 
-.export-tmx-button.disabled {
+.export-button.disabled {
   cursor: default;
   pointer-events: none;
 }
 
-span.email-export-tmx-email-sent,
-span.email-export-tmx-email-error,
+span.email-export-email-sent,
+span.email-export-email-error,
 .mgmt-tm .message-glossary-export-error,
 .message-glossary-export-completed {
   float: right;
@@ -2353,7 +2332,7 @@ span.email-export-tmx-email-error,
   display: none;
 }
 
-span.email-export-tmx-email-error {
+span.email-export-email-error {
   color: red;
   margin-left: 21px;
   line-height: 14px;
@@ -2361,16 +2340,19 @@ span.email-export-tmx-email-error {
   margin-right: 28px;
 }
 
-.btn-grey.canceladd-export-tmx {
+.btn-grey.canceladd-export {
   background: #f26522;
   width: 35px;
   padding: 0px !important;
   margin: 0px;
   text-align: center;
   color: #fff;
+  &:hover {
+    background: #c1511c;
+  }
 }
 
-.canceladd-export-tmx:before {
+.canceladd-export:before {
   content: '\f00d';
   vertical-align: text-top;
 }
@@ -3062,7 +3044,7 @@ input#new-tm-key {
 }
 
 #activetm input#new-tm-key,
-input.email-export-tmx {
+input.email-export {
   width: 170px;
   padding: 12px 5px;
   margin: 0;
@@ -3075,7 +3057,7 @@ input#new-tm-key {
   margin-right: 15px !important;
 }
 
-input.email-export-tmx {
+input.email-export {
   width: 200px;
 }
 
@@ -3822,8 +3804,8 @@ header .filter:before,
 .editToolbar .lowercase:after,
 .editToolbar .capitalize:after,
 .more-options:before,
-.export-tmx-button-label:before,
-.canceladd-export-tmx:before,
+.export-button-label:before,
+.canceladd-export:before,
 .icon-copy-key:before,
 .login-modal .login-container-right li:before {
   font-family: 'icomoon';
