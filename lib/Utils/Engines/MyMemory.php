@@ -466,8 +466,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( 'glossary_export_relative_url', [
             'key' => $key,
             'key_name' => $keyName,
-            'user_name' => $userEmail,
-            'user_email' => $userName,
+            'user_name' => $userName,
+            'user_email' => $userEmail,
         ], true );
 
         return $this->result;

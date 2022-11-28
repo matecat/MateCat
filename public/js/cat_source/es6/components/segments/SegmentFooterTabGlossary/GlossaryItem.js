@@ -103,7 +103,7 @@ export const GlossaryItem = ({
             )}
           </div>
           {source.note && (
-            <div className="glossary-description" aria-label={source.note}>
+            <div className={`glossary-description${config.isSourceRTL ? ' rtl' : ''}`} aria-label={source.note}>
               <p>{source.note}</p>
             </div>
           )}
@@ -128,7 +128,7 @@ export const GlossaryItem = ({
             )}
           </div>
           {target.note && (
-            <div className="glossary-description" aria-label={target.note}>
+            <div className={`glossary-description${config.isTargetRTL ? ' rtl' : ''}`} aria-label={target.note}>
               <p>{target.note}</p>
             </div>
           )}
