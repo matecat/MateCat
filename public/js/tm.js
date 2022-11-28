@@ -1046,8 +1046,8 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
         iframeId.addEventListener('load', eventHandler, true)
       if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
       var TR = $(form).parents('tr')
-      var Key = TR.find('.privatekey').first().text()
-      var keyNAme = TR.find('.description').first().text()
+      var Key = TR.find('.privatekey').first().text().trim()
+      var keyName = TR.find('.description').first().text().trim()
 
       // Set properties of form...
       form.setAttribute('target', 'upload_iframe')
@@ -1060,7 +1060,7 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
       }
       $(form)
         .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + keyNAme + '" />')
+        .append('<input type="hidden" name="name" value="' + keyName + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />')
       if (APP.isCattool) {
