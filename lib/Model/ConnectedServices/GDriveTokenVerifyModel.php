@@ -21,9 +21,16 @@ class GDriveTokenVerifyModel {
     public function validOrRefreshed() {
         $this->refreshed = false ;
         $this->expired = false ;
+        $decryptedOauthAccessToken = $this->service->getDecryptedOauthAccessToken();
+
+        if(false === $decryptedOauthAccessToken){
+            $this->__expireService();
+
+            return false;
+        }
 
         try {
-            $newToken = GDrive::getsNewToken( $this->service->getDecryptedOauthAccessToken() );
+            $newToken = GDrive::getsNewToken( $decryptedOauthAccessToken );
         } catch(\Exception $e ) {
 
             if ( preg_match( '/invalid_grant/', $e->getMessage() ) ) {
