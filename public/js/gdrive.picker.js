@@ -32,7 +32,12 @@ var GDrive = function () {
       .enableFeature(google.picker.Feature.MINE_ONLY)
       .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
       .build()
-    picker.setVisible(true)
+    try {
+      picker.setVisible(true)
+    } catch (e) {
+      APP.USER.STORE.connected_services = null
+      throw new Error('Picker Error');
+    }
   }
 
   function pickerCallback(data) {
