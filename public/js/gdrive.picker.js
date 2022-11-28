@@ -108,6 +108,7 @@ var gdrive = new GDrive()
         gdrive.createPicker(data.connected_service)
       })
       .catch(function () {
+        APP.USER.STORE.connected_services = null
         showPreferencesWithMessage()
       })
   }
