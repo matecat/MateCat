@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import {Base64} from 'js-base64'
+import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -401,6 +402,70 @@ const TEXT_UTILS = {
       )
     } catch (error) {
       return false
+    }
+  },
+  getGlossaryMatchRegex: (matches) => {
+    // find regex using look ahead and behind
+    const findWithRegex = (regex, contentBlock, callback) => {
+      const text = contentBlock.getText()
+      let matchArr, start, end
+      while ((matchArr = regex.exec(text)) !== null) {
+        start = matchArr.index > 0 ? matchArr.index + 1 : 0
+        end = start + matchArr[2].length
+        callback(start, end)
+      }
+    }
+
+    // find regex using for safari that not support regex look ahead and behind
+    const findWithRegexWordSeparator = (regex, contentBlock, callback) => {
+      const text = contentBlock.getText()
+      let matchArr, start, end
+      while ((matchArr = regex.exec(text)) !== null) {
+        start = matchArr.index
+        end = start + matchArr[0].length
+
+        const isPreviousBreakWord =
+          (start > 0 && regexWordDelimiter.test(text[start - 1])) || start === 0
+        const isNextBreakWord = regexWordDelimiter.test(text[end]) || !text[end]
+
+        if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
+      }
+    }
+
+    const findWithRegexCJK = (regex, contentBlock, callback) => {
+      const text = contentBlock.getText()
+      let matchArr, start, end
+      while ((matchArr = regex.exec(text)) !== null) {
+        start = matchArr.index
+        end = start + matchArr[0].length
+        callback(start, end)
+      }
+    }
+
+    try {
+      const escapedMatches = matches.flatMap((match) =>
+        match ? [TEXT_UTILS.escapeRegExp(match)] : [],
+      )
+
+      const regex =
+        TEXT_UTILS.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+          ? new RegExp(
+              '(^|\\W)(' + escapedMatches.join('|') + ')(?=\\W|$)',
+              'gi',
+            )
+          : new RegExp('(' + escapedMatches.join('|') + ')', 'gi')
+
+      return {
+        regex,
+        regexCallback:
+          TEXT_UTILS.isSupportingRegexLookAheadLookBehind() && !config.isCJK
+            ? findWithRegex
+            : config.isCJK
+            ? findWithRegexCJK
+            : findWithRegexWordSeparator,
+      }
+    } catch (e) {
+      return {}
     }
   },
 }
