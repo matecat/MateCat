@@ -71,6 +71,7 @@ class GDriveUserAuthorizationModel {
         $dao = new ConnectedServiceDao() ;
         $dao->updateOauthToken( $this->token, $service ) ;
 
+        $service->expired_at = null;
         $service->disabled_at = null;
         $dao->updateStruct( $service ) ;
     }
