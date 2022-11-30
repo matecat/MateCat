@@ -26,7 +26,6 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
     )
 
     if (!matches.length) return ''
-
     return TextUtils.getGlossaryMatchRegex(matches)
   }
   const regexInstruction = createGlossaryRegex(blackListedTerms)
