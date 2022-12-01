@@ -28,7 +28,6 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
       [],
     )
     if (!matches.length) return ''
-
     return TextUtils.getGlossaryMatchRegex(matches)
   }
 

@@ -178,11 +178,9 @@ export const SegmentFooterTabGlossary = ({
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }
     const setDomains = ({entries}) => {
-      console.log('Domains---->', entries)
       setDomainsResponse(entries)
     }
     const setJobTmKeys = (keys) => {
-      console.log('Keys---->', segment.sid, keys)
       setKeys(keys)
     }
     const refreshGlossary = () =>
@@ -365,7 +363,7 @@ export const SegmentFooterTabGlossary = ({
           return -1
         }
       })
-    console.log('----> segment glossary', orderedByUpdateDate)
+    // console.log('----> segment glossary', orderedByUpdateDate)
     setTerms(orderedByUpdateDate)
   }, [segment?.glossary_search_results])
 
@@ -426,7 +424,7 @@ export const SegmentFooterTabGlossary = ({
       [TRANSLATED_EXAMPLE]: target.sentence,
     })
 
-    const domainsForActiveKeys = domainsResponse[metadata.key]?.map(
+    const domainsForActiveKeys = domainsResponse?.[metadata.key]?.map(
       ({domain, subdomains}, index) => ({
         id: index.toString(),
         name: domain,

@@ -98,6 +98,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   clipboardFragment: '',
   clipboardPlainText: '',
   sideOpen: false,
+  isSearchingGlossaryInTarget: false,
   /**
    * Update all
    */

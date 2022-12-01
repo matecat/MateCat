@@ -410,9 +410,13 @@ const TEXT_UTILS = {
       const text = contentBlock.getText()
       let matchArr, start, end
       while ((matchArr = regex.exec(text)) !== null) {
-        start = matchArr.index > 0 ? matchArr.index + 1 : 0
-        end = start + matchArr[2].length
-        callback(start, end)
+        try {
+          start = matchArr.index > 0 ? matchArr.index + 1 : 0
+          end = start + matchArr[2].length
+          callback(start, end)
+        } catch (e) {
+          return false
+        }
       }
     }
 
@@ -421,14 +425,20 @@ const TEXT_UTILS = {
       const text = contentBlock.getText()
       let matchArr, start, end
       while ((matchArr = regex.exec(text)) !== null) {
-        start = matchArr.index
-        end = start + matchArr[0].length
+        try {
+          start = matchArr.index
+          end = start + matchArr[0].length
 
-        const isPreviousBreakWord =
-          (start > 0 && regexWordDelimiter.test(text[start - 1])) || start === 0
-        const isNextBreakWord = regexWordDelimiter.test(text[end]) || !text[end]
+          const isPreviousBreakWord =
+            (start > 0 && regexWordDelimiter.test(text[start - 1])) ||
+            start === 0
+          const isNextBreakWord =
+            regexWordDelimiter.test(text[end]) || !text[end]
 
-        if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
+          if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
+        } catch (e) {
+          return false
+        }
       }
     }
 
@@ -436,9 +446,13 @@ const TEXT_UTILS = {
       const text = contentBlock.getText()
       let matchArr, start, end
       while ((matchArr = regex.exec(text)) !== null) {
-        start = matchArr.index
-        end = start + matchArr[0].length
-        callback(start, end)
+        try {
+          start = matchArr.index
+          end = start + matchArr[0].length
+          callback(start, end)
+        } catch (e) {
+          return false
+        }
       }
     }
 
