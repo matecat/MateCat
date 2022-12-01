@@ -1021,7 +1021,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             JOIN 
                 projects p ON p.id = j.id_project
             JOIN
-                segment_translations st ON j.id = st.id_job
+                segment_translations st ON j.id = st.id_job AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
             JOIN 
                 segments s on s.id = st.id_segment 
             LEFT JOIN
