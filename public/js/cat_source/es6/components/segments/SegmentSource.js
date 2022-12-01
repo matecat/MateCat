@@ -164,15 +164,8 @@ class SegmentSource extends React.Component {
   }
 
   addGlossaryDecorator = () => {
-    let {editorState} = this.state
     let {glossary, segment, sid} = this.props.segment
-    const newDecorator = DraftMatecatUtils.activateGlossary(
-      editorState,
-      glossary,
-      segment,
-      sid,
-      SegmentActions.activateTab,
-    )
+    const newDecorator = DraftMatecatUtils.activateGlossary(glossary, sid)
     _.remove(
       this.decoratorsStructure,
       (decorator) =>
@@ -182,9 +175,10 @@ class SegmentSource extends React.Component {
   }
 
   addQaCheckGlossaryDecorator = () => {
-    let {qaCheckGlossary, segment, sid} = this.props.segment
+    let {glossary, segment, sid} = this.props.segment
+    const missingGossaryItems = glossary.filter((item) => item.missingTerm)
     const newDecorator = DraftMatecatUtils.activateQaCheckGlossary(
-      qaCheckGlossary,
+      missingGossaryItems,
       segment,
       sid,
       SegmentActions.activateTab,
@@ -274,25 +268,25 @@ class SegmentSource extends React.Component {
       }
 
       //Qa Check Glossary
-      const {qaCheckGlossary} = this.props.segment
-      const prevQaCheckGlossary = prevProps
-        ? prevProps.segment.qaCheckGlossary
-        : undefined
+      const missingGlossaryItems =
+        glossary && glossary.filter((item) => item.missingTerm)
+      const prevMissingGlossaryItems =
+        prevGlossary && prevGlossary.filter((item) => item.missingTerm)
       if (
-        qaCheckGlossary &&
-        qaCheckGlossary.length > 0 &&
-        (_.isUndefined(prevQaCheckGlossary) ||
-          !Immutable.fromJS(prevQaCheckGlossary).equals(
-            Immutable.fromJS(qaCheckGlossary),
+        missingGlossaryItems &&
+        missingGlossaryItems.length > 0 &&
+        (_.isUndefined(prevMissingGlossaryItems) ||
+          !Immutable.fromJS(prevMissingGlossaryItems).equals(
+            Immutable.fromJS(missingGlossaryItems),
           ))
       ) {
         this.addQaCheckGlossaryDecorator()
         changedDecorator = true
         activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
       } else if (
-        prevQaCheckGlossary &&
-        prevQaCheckGlossary.length > 0 &&
-        (!qaCheckGlossary || qaCheckGlossary.length === 0)
+        prevMissingGlossaryItems &&
+        prevMissingGlossaryItems.length > 0 &&
+        (!missingGlossaryItems || missingGlossaryItems.length === 0)
       ) {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.QA_GLOSSARY_DECORATOR)

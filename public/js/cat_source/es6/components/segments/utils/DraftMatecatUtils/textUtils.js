@@ -122,3 +122,6 @@ export const formatText = (text, format) => {
   }
   return text
 }
+
+export const regexWordDelimiter =
+  /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/

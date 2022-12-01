@@ -286,6 +286,16 @@ class Utils {
     }
 
     /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function trimAndLowerCase($string)
+    {
+        return trim(strtolower($string));
+    }
+
+    /**
      * @param $params
      * @param $required_keys
      *
