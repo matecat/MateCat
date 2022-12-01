@@ -176,10 +176,6 @@
       "type" : "points_per_thousand",
       "thresholds" : [
         {
-          "label": "T",
-          "value": 10
-        },
-        {
           "label": "R1",
           "value": 3
         },

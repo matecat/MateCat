@@ -108,11 +108,11 @@ class Segment extends React.Component {
       /************/
       UI.editStart = new Date()
       if (config.id_client) {
-        SegmentActions.getGlossaryForSegment(
-          this.props.segment.sid,
-          this.props.fid,
-          this.props.segment.segment,
-        )
+        SegmentActions.getGlossaryForSegment({
+          sid: this.props.segment.sid,
+          fid: this.props.fid,
+          text: this.props.segment.segment,
+        })
       }
 
       const hashUrl = document.location.pathname + '#' + this.props.segment.sid
@@ -503,11 +503,11 @@ class Segment extends React.Component {
 
   clientConnected = () => {
     if (this.props.segment.opened) {
-      SegmentActions.getGlossaryForSegment(
-        this.props.segment.sid,
-        this.props.fid,
-        this.props.segment.segment,
-      )
+      SegmentActions.getGlossaryForSegment({
+        sid: this.props.segment.sid,
+        fid: this.props.fid,
+        text: this.props.segment.segment,
+      })
     }
   }
 

@@ -18,4 +18,8 @@ module.exports = keyMirror({
   REMOVE_NOTIFICATION: null,
   REMOVE_ALL_NOTIFICATION: null,
   ON_RENDER: null,
+  UPDATE_TM_KEYS: null,
+  UPDATE_DOMAINS: null,
+  ON_TM_KEYS_CHANGE_STATUS: null,
+  HAVE_KEYS_GLOSSARY: null,
 })

@@ -1,0 +1,148 @@
+//selects
+.select {
+  user-select: none;
+
+  &:not(.select--is-disabled) {
+    cursor: pointer;
+  }
+}
+@import '../../commons/colors';
+
+.select-with-label__wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  label {
+    display: block;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+}
+
+@supports (-webkit-overflow-scrolling: touch) {
+  .select-with-label__wrapper {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba($black, 0);
+  }
+}
+
+.select-with-label__wrapper label {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.select {
+  margin: 0;
+  border: 1px solid $grey2;
+  border-radius: 2px;
+  padding: 4px 8px;
+  outline: none;
+  font-size: 14px;
+  line-height: 16px;
+  width: 100%;
+  background-color: $white;
+  white-space: nowrap;
+  color: $grey6;
+  transition: box-shadow 0.3s cubic-bezier(0.77, 0, 0.175, 1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  &::placeholder {
+    color: $grey1;
+    opacity: 1;
+  }
+}
+
+.select--is-focused {
+  box-shadow: inset 0 0 0 2px $white;
+}
+
+.select--is-invalid,
+.select--is-invalid:hover,
+.select--is-invalid:focus {
+  box-shadow: inset 0 0 0 2px $redDefault !important;
+}
+
+.select-with-icon__wrapper {
+  display: flex;
+  position: relative;
+  z-index: 1;
+
+  input + svg {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    pointer-events: none;
+  }
+}
+
+.select-with-icon__wrapper input + svg {
+  right: 12px;
+  color: $grey;
+}
+
+.input--invisible,
+.select--invisible {
+  background: rgba($black, 0) none repeat scroll 0px center;
+  border: 0px none !important;
+  font-size: inherit;
+  outline: currentcolor none 0px;
+  padding: 0px;
+  width: 1px;
+  color: transparent;
+  left: -100px;
+  opacity: 0;
+  position: relative;
+  transform: scale(0);
+  padding: 0 !important;
+}
+
+.select {
+  padding-right: 25px;
+}
+
+// Select's dropdown wrapper
+.select__dropdown-wrapper:not(.select__dropdown-wrapper--is-multiselect) {
+  position: absolute;
+  top: 100%;
+  z-index: 1;
+  width: 100%;
+
+  &.select__dropdown--is-reversed {
+    top: auto;
+    bottom: 100%;
+  }
+}
+label
+  ~ .select__dropdown-wrapper:not(.select__dropdown-wrapper--is-multiselect).select__dropdown--is-reversed {
+  bottom: calc(100% - 32px); // 32px = label height
+}
+
+.select__dropdown-wrapper.select__dropdown-wrapper--is-multiselect {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  padding: 40px;
+  background-color: rgba($grey, 0.6);
+}
+
+// Disabled state
+.select--is-disabled {
+  background-color: $grey6;
+  box-shadow: none;
+  color: $grey7;
+  cursor: not-allowed;
+
+  &::placeholder {
+    color: $grey7;
+    opacity: 1;
+  }
+
+  & ~ svg {
+    color: $grey7 !important;
+  }
+}

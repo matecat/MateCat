@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_client": {
+      "type": "string"
+    },
+    "id_segment": {
+      "type": ["integer","string"]
+    },
+    "id_job": {
+      "type": ["integer","string"]
+    },
+    "password": {
+      "type": "string"
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term_id": {
+          "type": "string"
+        },
+        "source_language": {
+          "type": "string"
+        },
+        "target_language": {
+          "type": "string"
+        },
+        "source": {
+          "type": "null"
+        },
+        "target": {
+          "type": "null"
+        },
+        "matching_words": {
+          "type": "null"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "definition": {
+              "type": "null"
+            },
+            "key": {
+              "type": "string"
+            },
+            "key_name": {
+              "type": "null"
+            },
+            "domain": {
+              "type": "null"
+            },
+            "subdomain": {
+              "type": "null"
+            },
+            "create_date": {
+              "type": "null"
+            },
+            "last_update": {
+              "type": "null"
+            }
+          },
+          "required": ["key"]
+        }
+      },
+      "required": ["term_id"]
+    }
+  },
+  "required": [
+    "id_client",
+    "id_segment",
+    "id_job",
+    "password",
+    "term"
+  ]
+}

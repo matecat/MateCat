@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_client": {
+      "type": "string"
+    },
+    "id_segment": {
+      "type": ["integer","string"]
+    },
+    "id_job": {
+      "type": ["integer","string"]
+    },
+    "password": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "source_language": {
+      "type": "string"
+    },
+    "target_language": {
+      "type": "string"
+    },
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id_client",
+    "id_segment",
+    "id_job",
+    "password",
+    "source",
+    "target",
+    "source_language",
+    "target_language",
+    "keys"
+  ]
+}
