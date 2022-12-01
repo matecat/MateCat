@@ -14,7 +14,6 @@ use Bootstrap;
 use Database;
 use Exception;
 use INIT;
-use InvalidArgumentException;
 use Log;
 use PDOException;
 use SplObserver;
@@ -275,10 +274,6 @@ class Executor implements SplObserver {
             } catch ( EmptyElementException $e ) {
 
 //                $this->_logMsg( $e->getMessage() );
-
-            } catch ( InvalidArgumentException $e ) {
-
-                $this->_logMsg( $e->getMessage() );
 
             } catch ( PDOException $e ) {
 
