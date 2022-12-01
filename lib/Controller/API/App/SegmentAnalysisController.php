@@ -7,7 +7,6 @@ use API\V2\Validators\LoginValidator;
 use Features\ReviewExtended\ReviewUtils;
 use LQA\EntryDao;
 use Url\JobUrlBuilder;
-use Url\JobUrlStruct;
 use Exceptions\NotFoundException;
 
 class SegmentAnalysisController extends KleinController {
@@ -71,9 +70,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (\Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => $exception->getMessage()
-                ]
+                    'error' => [
+                            'message' => $exception->getMessage()
+                    ]
             ] );
         }
     }
@@ -126,27 +125,13 @@ class SegmentAnalysisController extends KleinController {
     private function getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage)
     {
         $segments = [];
-        $offset = $perPage;
-        $limit = ($page-1)*$offset;
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
 
-        $ids = \Segments_SegmentDao::getIdsFromIdProjectAndPassword($idProject, $password, $offset, $limit, 0);
+        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
 
-        foreach ($ids as $id){
-
-            // Urls
-            $urls = JobUrlBuilder::createFromCredentials($id->id_job, $id->job_password, [
-                'id_segment' => $id->id
-            ]);
-
-            $chunk = \Chunks_ChunkDao::getByIdAndPassword($id->id_job, $id->job_password);
-
-            if($chunk === null){
-                throw new \Exception('Job not found');
-            }
-
-            $this->chunk = $chunk;
-
-            $segments[] = $this->formatSegment($id->id, $urls);
+        foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
+            $segments[] = $this->formatSegment($segmentForAnalysis);
         }
 
         return $segments;
@@ -175,9 +160,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (\Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => $exception->getMessage()
-                ]
+                    'error' => [
+                            'message' => $exception->getMessage()
+                    ]
             ] );
         }
     }
@@ -214,15 +199,15 @@ class SegmentAnalysisController extends KleinController {
         $items = $this->getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage);
 
         return [
-            '_links' => [
-                'page' => $page,
-                'per_page' => $perPage,
-                'total_pages' => $totalPages,
-                'total_items' => $segmentsCount,
-                'next_page' => $next,
-                'prev_page' => $prev,
-            ],
-            'items' => $items
+                '_links' => [
+                        'page' => $page,
+                        'per_page' => $perPage,
+                        'total_pages' => $totalPages,
+                        'total_items' => $segmentsCount,
+                        'next_page' => $next,
+                        'prev_page' => $prev,
+                ],
+                'items' => $items
         ];
     }
 
@@ -238,59 +223,55 @@ class SegmentAnalysisController extends KleinController {
     private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
     {
         $segments = [];
-        $offset = $perPage;
-        $limit = ($page-1)*$offset;
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
 
-        $ids = \Segments_SegmentDao::getIdsFromIdJobAndPassword($idJob, $password, $offset, $limit, 0);
+        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, 0);
 
-        foreach ($ids as $id){
-
-            // Urls
-            $urls = JobUrlBuilder::createFromCredentials($idJob, $password, [
-                'id_segment' => $id->id
-            ]);
-
-            $segments[] = $this->formatSegment($id->id, $urls);
+        foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
+            $segments[] = $this->formatSegment($segmentForAnalysis);
         }
 
         return $segments;
     }
 
     /**
-     * @param int          $id
-     * @param JobUrlStruct $jobUrlStruct
+     * @param \DataAccess_IDaoStruct $segmentForAnalysis
      *
      * @return array
      * @throws \Exception
      */
-    private function formatSegment($id, JobUrlStruct $jobUrlStruct){
-
-        // analysis
-        $segmentForAnalysis = \Segments_SegmentDao::getSegmentForAnalysis($id, $this->chunk->id, $this->chunk->password, $this->chunk->job_first_segment, $this->chunk->job_last_segment);
+    private function formatSegment(\DataAccess_IDaoStruct $segmentForAnalysis)
+    {
+        // urls
+        $urls = JobUrlBuilder::createFromCredentials($segmentForAnalysis->id_job, $segmentForAnalysis->job_password, [
+                'id_segment' => $segmentForAnalysis->id
+        ]);
 
         // id_request
-        $idRequest = \Segments_SegmentMetadataDao::get($id, 'id_request');
+        $idRequest = \Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request');
 
-        // Issues
-        $issues_records = EntryDao::findAllBySegmentId( $id );
+        // issues
+        $issues_records = EntryDao::findAllBySegmentId( $segmentForAnalysis->id );
         $issues         = [];
         foreach ( $issues_records as $issue_record ) {
             $issues[] = [
-                'id_category'         => (int)$issue_record->id_category,
-                'severity'            => $issue_record->severity,
-                'translation_version' => (int)$issue_record->translation_version,
-                'penalty_points'      => floatval($issue_record->penalty_points),
-                'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
+                    'id_category'         => (int)$issue_record->id_category,
+                    'severity'            => $issue_record->severity,
+                    'translation_version' => (int)$issue_record->translation_version,
+                    'penalty_points'      => floatval($issue_record->penalty_points),
+                    'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
             ];
         }
 
+        // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
         return [
-                'id_segment' => (int)$id,
-                'id_chunk' => (int)$this->chunk->id,
-                'chunk_password' => $this->chunk->password,
-                'urls' => $jobUrlStruct->getUrls(),
+                'id_segment' => (int)$segmentForAnalysis->id,
+                'id_chunk' => (int)$segmentForAnalysis->id_job,
+                'chunk_password' => $segmentForAnalysis->job_password,
+                'urls' => $urls->getUrls(),
                 'id_request' => ($idRequest) ? $idRequest->meta_value : null,
                 'filename' => $segmentForAnalysis->filename,
                 'original_filename' => $originalFile,
@@ -320,7 +301,7 @@ class SegmentAnalysisController extends KleinController {
                 return 'MT';
 
             case "100%":
-                return '100%';
+                return 'TM_100';
 
             case "100%_PUBLIC":
                 return 'TM_100_PUBLIC';
