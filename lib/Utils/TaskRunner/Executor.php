@@ -14,6 +14,7 @@ use Bootstrap;
 use Database;
 use Exception;
 use INIT;
+use InvalidArgumentException;
 use Log;
 use PDOException;
 use SplObserver;
@@ -175,6 +176,7 @@ class Executor implements SplObserver {
         }
 
         static::$__INSTANCE = new static( $queueContext );
+
 //        static::$__INSTANCE->_logMsg( $msg );
 
         return static::$__INSTANCE;
@@ -228,7 +230,7 @@ class Executor implements SplObserver {
                  * @var $msgFrame     \StompFrame
                  * @var $queueElement QueueElement
                  */
-                list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
+                [ $msgFrame, $queueElement ] = $this->_readAMQFrame();
 
             } catch ( Exception $e ) {
 
@@ -273,6 +275,10 @@ class Executor implements SplObserver {
             } catch ( EmptyElementException $e ) {
 
 //                $this->_logMsg( $e->getMessage() );
+
+            } catch ( InvalidArgumentException $e ) {
+
+                $this->_logMsg( $e->getMessage() );
 
             } catch ( PDOException $e ) {
 
@@ -327,12 +333,12 @@ class Executor implements SplObserver {
 
                 $queueElement = json_decode( $msgFrame->body, true );
 
-                if( empty( $queueElement ) ){
+                if ( empty( $queueElement ) ) {
 
                     $this->_queueHandler->ack( $msgFrame );
                     $msg = \Utils::raiseJsonExceptionError( false );
                     $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . $msg, 'FRAME' => $msgFrame->body ] );
-                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1);
+                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1 );
 
                 }
 
@@ -410,7 +416,7 @@ class Executor implements SplObserver {
 
     }
 
-    public function forceAck( SplSubject $subject ){
+    public function forceAck( SplSubject $subject ) {
         //TODO
     }
 

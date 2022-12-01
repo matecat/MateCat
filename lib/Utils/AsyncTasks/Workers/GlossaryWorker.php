@@ -6,6 +6,7 @@ use Engine;
 use Engines_Results_MyMemory_DomainsResponse;
 use EnginesModel_EngineStruct;
 use Engines_MyMemory;
+use InvalidArgumentException;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -47,7 +48,7 @@ class GlossaryWorker extends AbstractWorker {
         // @TODO add always "de"="tmanalysis_655321@matecat.com" when call MM
 
         if ( false === in_array( $action, $allowedActions ) ) {
-            throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
+            throw new InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
 
         $this->_checkDatabaseConnection();
