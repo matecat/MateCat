@@ -5,10 +5,11 @@ namespace Validator;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
+use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
 use Validator\Errors\JSONValidatorError;
 
-class JSONValidator extends ValidatorObject {
+class JSONValidator extends AbstractValidator {
 
     /**
      * The JSON schema
@@ -46,34 +47,30 @@ class JSONValidator extends ValidatorObject {
     }
 
     /**
-     * @param $json
+     * @param ValidatorObject $object
      *
      * @return bool
+     * @throws \Exception
      */
-    public function isValid($json)
-    {
-        return empty($this->validate($json));
-    }
+    public function validate( ValidatorObject $object ) {
 
-    /**
-     * @param $json
-     *
-     * @return array
-     */
-    public function validate($json)
-    {
-        $errors = [];
-
-        try {
-            $this->schemaContract->in(json_decode($json));
-        } catch (InvalidValue $invalidValue){
-            $errors[] = new JSONValidatorError($invalidValue->inspect());
-        } catch (\Exception $exception) {
-            $errors[] = [
-                'error' => $exception->getMessage()
-            ];
+        if(!$object instanceof JSONValidatorObject){
+            throw new \Exception('Object given is not an instance of JSONValidatorObject');
         }
 
-        return $errors;
+        try {
+            $this->schemaContract->in(json_decode($object->json));
+        } catch (InvalidValue $invalidValue){
+            $error = new JSONValidatorError($invalidValue->inspect());
+            $this->addError($error);
+
+            return false;
+        } catch (\Exception $exception) {
+            $this->addError($exception->getMessage());
+
+            return false;
+        }
+
+        return true;
     }
 }

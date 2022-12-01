@@ -1,7 +1,7 @@
 ; Express expiration date in UTC
-expire ="2019-12-11T21:00:01+01:00"
+expire ="2022-12-12T21:00:01+01:00"
 
 ; Put your message here.
 ; It will be shown in the translation page as long as it doesn't expire.
 ; This message has to be single-line and can contain html
-message="Matecat is great!"
+message="Hi there! Matecat has a new glossary with a lot of new and improved functions. Head over to our user guide to find out all about it!"
