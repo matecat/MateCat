@@ -52,10 +52,13 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_get', function (ev, message) {
-      SegmentActions.setGlossaryForSegment(
-        message.data.id_segment,
-        message.data.terms,
-      )
+      SegmentActions.setGlossaryForSegment(message.data.id_segment, [
+        ...message.data.terms,
+        ...message.data.blacklisted_terms.map((term) => ({
+          ...term,
+          isBlacklist: true,
+        })),
+      ])
     })
     $(document).on('sse:glossary_set', function (ev, message) {
       if (message.data.error) {
@@ -103,9 +106,27 @@ let SSE = {
       })
     })
     $(document).on('sse:glossary_search', function (ev, message) {
+      const mergedTerms = [
+        ...message.data.terms,
+        ...message.data.blacklisted_terms.map((term) => ({
+          ...term,
+          isBlacklist: true,
+        })),
+      ]
+
+      // swap source and target props of terms if user searching in target
+      const terms = SegmentStore.isSearchingGlossaryInTarget
+        ? mergedTerms.map((term) => ({
+            ...term,
+            source: term.target,
+            target: term.source,
+            source_language: term.target_language,
+            target_language: term.source_language,
+          }))
+        : mergedTerms
       SegmentActions.setGlossaryForSegmentBySearch(
         message.data.id_segment,
-        message.data.terms,
+        terms,
       )
     })
     $(document).on('sse:glossary_check', function (ev, message) {

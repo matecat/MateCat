@@ -182,11 +182,14 @@ const GlossaryList = () => {
           deleteElement={() => onDeleteItem(term)}
           highlight={index === termHighlight?.index && termHighlight}
           isEnabledToModify={
-            !!keys.find(({key}) => key === term?.metadata?.key) && !isLoading
+            !!keys.find(({key}) => key === term?.metadata?.key) &&
+            !term.isBlacklist &&
+            !isLoading
           }
           isStatusDeleting={
             !!termsStatusDeleting.find((value) => value === term.term_id)
           }
+          isBlacklist={term.isBlacklist}
         />
       ))}
       {!isLoading && !terms.length && (

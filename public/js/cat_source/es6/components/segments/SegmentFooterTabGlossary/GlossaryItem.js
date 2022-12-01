@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import InfoIcon from '../../../../../../img/icons/InfoIcon'
+import Forbidden from '../../../../../../img/icons/Forbidden'
 import {
   DeleteIcon,
   GlossaryDefinitionIcon,
@@ -15,6 +16,7 @@ export const GlossaryItem = ({
   highlight,
   isEnabledToModify = false,
   isStatusDeleting = false,
+  isBlacklist = false,
 }) => {
   const {metadata, source, target} = item
 
@@ -60,7 +62,11 @@ export const GlossaryItem = ({
           {!canModifyItem && !isStatusDeleting && (
             <div
               className="locked-button"
-              aria-label="You can only edit entries from keys that you own"
+              aria-label={
+                isBlacklist
+                  ? 'Forbidden words can only be edited offline'
+                  : 'You can only edit entries from keys that you own'
+              }
               tooltip-position="left"
             >
               <LockIcon />
@@ -103,7 +109,12 @@ export const GlossaryItem = ({
             )}
           </div>
           {source.note && (
-            <div className={`glossary-description${config.isSourceRTL ? ' rtl' : ''}`} aria-label={source.note}>
+            <div
+              className={`glossary-description${
+                config.isSourceRTL ? ' rtl' : ''
+              }`}
+              aria-label={source.note}
+            >
               <p>{source.note}</p>
             </div>
           )}
@@ -117,6 +128,11 @@ export const GlossaryItem = ({
                   : ''
               }`}
             >{`${target.term} `}</span>
+            {isBlacklist && (
+              <div className="forbidden-badge">
+                <Forbidden /> Forbidden term
+              </div>
+            )}
             {target.sentence && (
               <div
                 className="info-icon"
@@ -128,7 +144,12 @@ export const GlossaryItem = ({
             )}
           </div>
           {target.note && (
-            <div className={`glossary-description${config.isTargetRTL ? ' rtl' : ''}`} aria-label={target.note}>
+            <div
+              className={`glossary-description${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+              aria-label={target.note}
+            >
               <p>{target.note}</p>
             </div>
           )}
@@ -145,4 +166,5 @@ GlossaryItem.propTypes = {
   highlight: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   isEnabledToModify: PropTypes.bool,
   isStatusDeleting: PropTypes.bool,
+  isBlacklist: PropTypes.bool,
 }
