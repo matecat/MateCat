@@ -230,7 +230,7 @@ class Executor implements SplObserver {
                  * @var $msgFrame     \StompFrame
                  * @var $queueElement QueueElement
                  */
-               [ $msgFrame, $queueElement ] = $this->_readAMQFrame();
+                list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
 
             } catch ( Exception $e ) {
 
