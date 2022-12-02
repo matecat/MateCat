@@ -189,6 +189,11 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
 
+        // In case of error, MM returns an empty string
+        if($matches === ''){
+            return;
+        }
+
         if($matches['id_segment'] === null){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
@@ -252,6 +257,11 @@ class GlossaryWorker extends AbstractWorker {
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
+
+        // In case of error, MM returns an empty string
+        if($matches === ''){
+            return;
+        }
 
         if($matches['id_segment'] === null){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
