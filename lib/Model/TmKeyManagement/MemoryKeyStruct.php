@@ -38,6 +38,7 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
              * because TmKeyManagement_TmKeyStruct as toArray method too
              */
             if( $this->tm_key instanceof TmKeyManagement_TmKeyStruct ){
+                $this->tm_key->complete_format = true;
                 $result[ 'tm_key' ] = $this->tm_key->toArray();
             }
         }
