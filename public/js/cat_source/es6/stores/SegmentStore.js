@@ -43,6 +43,31 @@ import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
 
 EventEmitter.prototype.setMaxListeners(0)
 
+const normalizeSetUpdateGlossary = (terms) => {
+  const {term} = terms
+
+  const metadataKeys = term.metadata.keys
+    ? term.metadata.keys
+    : [{key: term.metadata.key, key_name: term.metadata.key_name}]
+
+  return metadataKeys.map(({key, key_name}) => {
+    const {
+      keys,
+      key: keyProp,
+      key_name: keyNameProp,
+      ...restMetadata
+    } = term.metadata
+    return {
+      ...term,
+      metadata: {
+        ...restMetadata,
+        key,
+        key_name,
+      },
+    }
+  })
+}
+
 const SegmentStore = assign({}, EventEmitter.prototype, {
   _segments: Immutable.fromJS([]),
   _globalWarnings: {
@@ -589,34 +614,78 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       matches,
     )
   },
-  setGlossaryToCache: function (sid, fid, glossary) {
-    let index = this.getSegmentIndex(sid, fid)
+  setGlossaryToCache: function (sid, terms) {
+    const adaptedTerms = terms.map((term) => ({
+      ...term,
+      matching_words: term.matching_words.filter((value) => value),
+    }))
+    const index = this.getSegmentIndex(sid)
+    const pendingGlossaryUpdates = this._segments
+      .get(index)
+      .get('pendingGlossaryUpdates')
+      ? this._segments.get(index).get('pendingGlossaryUpdates').toJS()
+      : []
+
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      Immutable.fromJS(adaptedTerms),
+    )
+    this.setGlossarySearchToCache(sid)
+
+    if (pendingGlossaryUpdates)
+      this.addOrUpdateGlossaryItem(sid, pendingGlossaryUpdates)
+
+    this._segments = this._segments.deleteIn([index, 'pendingGlossaryUpdates'])
+  },
+  setGlossarySearchToCache: function (sid, terms) {
+    const index = this.getSegmentIndex(sid)
+    this._segments = this._segments.setIn(
+      [index, 'glossary_search_results'],
+      Immutable.fromJS(
+        terms ? terms : this._segments.get(index).get('glossary'),
+      ),
     )
   },
-  deleteFromGlossary: function (sid, match) {
+  deleteFromGlossary: function (sid, term) {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
-    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
-    glossaryIndex > -1 && glossary.splice(glossaryIndex, 1)
+    const updatedGlossary = glossary.filter(
+      ({term_id}) => term.term_id !== term_id,
+    )
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      Immutable.fromJS(updatedGlossary),
     )
+    this.setGlossarySearchToCache(sid)
   },
-  addOrUpdateGlossaryItem: function (sid, match) {
-    let index = this.getSegmentIndex(sid)
-    let glossary = this._segments.get(index).get('glossary').toJS()
-    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
-    glossaryIndex > -1
-      ? (glossary[glossaryIndex] = match)
-      : glossary.push(match)
+  addOrUpdateGlossaryItem: function (sid, terms) {
+    const addedTerms = terms.map((term) => ({
+      ...term,
+      matching_words: term.matching_words
+        ? term.matching_words.filter((value) => value)
+        : [],
+    }))
+    const index = this.getSegmentIndex(sid)
+    const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
+    const glossary = isGlossaryAlreadyExist
+      ? this._segments.get(index).get('glossary').toJS()
+      : []
+    const updatedGlossary = [
+      ...addedTerms,
+      ...glossary
+        .filter(
+          ({term_id}) => !addedTerms.find((term) => term.term_id === term_id),
+        )
+        .map((term) => ({
+          ...term,
+          missingTerm: false,
+        })),
+    ]
     this._segments = this._segments.setIn(
-      [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
+      Immutable.fromJS(updatedGlossary),
     )
+    this.setGlossarySearchToCache(sid, updatedGlossary)
   },
   setCrossLanguageContributionsToCache: function (
     sid,
@@ -732,25 +801,22 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(tagMismatch),
     )
   },
-  setQACheckMatches(matches) {
-    this._segments = this._segments.map((segment) =>
-      segment.remove('qaCheckGlossary'),
-    )
-    Object.keys(matches).map((sid) => {
-      let index = this.getSegmentIndex(sid)
-      if (index === -1) return
-      this._segments = this._segments.setIn(
-        [index, 'qaCheckGlossary'],
-        matches[sid],
-      )
-    })
-  },
-  setQABlacklistMatches(sid, matches) {
+  setQACheck(sid, data) {
+    const {missing_terms: missingTerms, blacklisted_terms: blacklistedTerms} =
+      data || {}
+    const terms = missingTerms.map((term) => ({
+      ...term,
+      missingTerm: true,
+    }))
+
+    this.addOrUpdateGlossaryItem(sid, terms)
+
+    // setup blacklisted
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'qaBlacklistGlossary'],
-      matches,
+      blacklistedTerms,
     )
   },
   setSegmentSaving(sid, saving) {
@@ -1421,7 +1487,16 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.SET_GLOSSARY_TO_CACHE:
-      SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary)
+      SegmentStore.setGlossaryToCache(action.sid, action.glossary)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+        action.fid,
+      )
+      SegmentStore.emitChange(action.actionType, action.sid)
+      break
+    case SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH:
+      SegmentStore.setGlossarySearchToCache(action.sid, action.glossary)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1430,7 +1505,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(action.actionType, action.sid)
       break
     case SegmentConstants.DELETE_FROM_GLOSSARY:
-      SegmentStore.deleteFromGlossary(action.sid, action.match)
+      SegmentStore.deleteFromGlossary(action.sid, action.term)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1438,7 +1513,11 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHANGE_GLOSSARY:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
+      SegmentStore.addOrUpdateGlossaryItem(
+        action.sid,
+        normalizeSetUpdateGlossary(action.terms),
+      )
+      SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1446,12 +1525,21 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
+      SegmentStore.addOrUpdateGlossaryItem(
+        action.sid,
+        normalizeSetUpdateGlossary(action.terms),
+      )
+      SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
         action.fid,
       )
+      break
+    case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
+    case SegmentConstants.ERROR_DELETE_FROM_GLOSSARY:
+    case SegmentConstants.ERROR_CHANGE_GLOSSARY:
+      SegmentStore.emitChange(action.actionType, action.sid, action.error)
       break
     case EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA:
       SegmentStore.emitChange(
@@ -1704,15 +1792,8 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CHOOSEN_SUGGESTION:
       SegmentStore.setChoosenSuggestion(action.sid, action.index)
       break
-    case SegmentConstants.SET_QA_CHECK_MATCHES:
-      SegmentStore.setQACheckMatches(action.matches)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-      )
-      break
-    case SegmentConstants.SET_QA_BLACKLIST_MATCHES:
-      SegmentStore.setQABlacklistMatches(action.sid, action.matches)
+    case SegmentConstants.SET_QA_CHECK:
+      SegmentStore.setQACheck(action.sid, action.data)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1835,6 +1916,11 @@ AppDispatcher.register(function (action) {
         SegmentConstants.FREEZING_SEGMENTS,
         action.isFreezing,
       )
+      break
+    case SegmentConstants.HIGHLIGHT_GLOSSARY_TERM:
+      SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

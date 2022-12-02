@@ -22,7 +22,6 @@ import SegmentTabMatches from './components/segments/SegmentFooterTabMatches'
 import SegmentTabMessages from './components/segments/SegmentFooterTabMessages'
 import SegmentButtons from './components/segments/SegmentButtons'
 import TranslationIssuesSideButton from './components/review/TranslationIssuesSideButton'
-import QaCheckGlossary from './components/segments/utils/qaCheckGlossaryUtils'
 import TagUtils from './utils/tagUtils'
 import TextUtils from './utils/textUtils'
 import CursorUtils from './utils/cursorUtils'
@@ -59,8 +58,6 @@ window.SegmentTabMatches = SegmentTabMatches
 window.SegmentTabMessages = SegmentTabMessages
 window.SegmentButtons = SegmentButtons
 window.TranslationIssuesSideButton = TranslationIssuesSideButton
-
-window.QaCheckGlossary = QaCheckGlossary
 
 window.TagUtils = TagUtils
 window.TextUtils = TextUtils

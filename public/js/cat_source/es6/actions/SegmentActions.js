@@ -4,15 +4,13 @@ import _ from 'lodash'
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
 import EditAreaConstants from '../constants/EditAreaConstants'
+import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import TagUtils from '../utils/tagUtils'
-import TextUtils from '../utils/textUtils'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
-import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils'
-import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
 import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
@@ -29,7 +27,9 @@ import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
+import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
+import CatToolStore from '../stores/CatToolStore'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -348,17 +348,11 @@ const SegmentActions = {
       index: index,
     })
   },
-  addQaCheckMatches: function (matches) {
+  addQaCheck: function (sid, data) {
     AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_QA_CHECK_MATCHES,
-      matches: matches,
-    })
-  },
-  addQaBlacklistMatches: function (sid, matches) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_QA_BLACKLIST_MATCHES,
-      sid: sid,
-      matches: matches,
+      actionType: SegmentConstants.SET_QA_CHECK,
+      sid,
+      data,
     })
   },
   addLexiqaHighlight: function (sid, matches, type) {
@@ -680,7 +674,18 @@ const SegmentActions = {
       tabName: tabName,
     })
   },
-  getGlossaryForSegment: function (sid, fid, text) {
+  getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
+    // refresh segment glossary already included
+    if (shouldRefresh) {
+      getGlossaryForSegment({
+        idSegment: sid,
+        source: text,
+      }).catch(() => {
+        OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
+      })
+      return
+    }
+
     let requestes = [
       {
         sid: sid,
@@ -711,68 +716,87 @@ const SegmentActions = {
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
-      if (typeof segment.glossary === 'undefined') {
+      if (typeof segment.glossary === 'undefined' || sid === request.sid) {
         //Response inside SSE Channel
-        getGlossaryForSegment(request.sid, request.text).catch(() => {
+        getGlossaryForSegment({
+          idSegment: request.sid,
+          source: request.text,
+        }).catch(() => {
           OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
         })
       }
     }
   },
 
-  searchGlossary: function (sid, fid, text, fromTarget) {
-    text = TagUtils.removeAllTags(TextUtils.htmlEncode(text))
-    text = text.replace(/"/g, '')
-    getGlossaryMatch(sid, text, fromTarget).catch(() => {
+  searchGlossary: function ({
+    idSegment,
+    sentence,
+    sourceLanguage,
+    targetLanguage,
+  }) {
+    getGlossaryMatch({
+      idSegment,
+      sentence,
+      sourceLanguage,
+      targetLanguage,
+    }).catch(() => {
       OfflineUtils.failedConnection(0, 'glossary')
     })
   },
 
-  setGlossaryForSegment: (sid, matches) => {
+  setGlossaryForSegment: (sid, terms) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
       sid: sid,
-      glossary: matches,
+      glossary: terms,
     })
   },
 
-  deleteGlossaryItem: function (match, sid) {
-    deleteGlossaryItem(sid, match.segment, match.target, match.id)
-      .then(() => {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-          sid: sid,
-          message: 'A glossary item has been deleted',
-        })
-        SegmentActions.deleteGlossaryFromCache(sid, match)
-      })
+  setGlossaryForSegmentBySearch: (sid, terms) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
+      sid: sid,
+      glossary: terms,
+    })
+  },
+
+  deleteGlossaryItem: function (data) {
+    deleteGlossaryItem(data)
+      .then(() => {})
       .catch(() => {
         OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
       })
   },
 
-  deleteGlossaryFromCache: (sid, match) => {
+  deleteGlossaryFromCache: (sid, term) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: 'A glossary item has been deleted',
+    })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
       sid: sid,
-      match,
+      term,
+    })
+  },
+  errorDeleteGlossaryFromCache: (sid, error) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: error.message ? error.message : `Error code: ${error.code}`,
+    })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
+      sid: sid,
+      error,
     })
   },
 
-  addGlossaryItem: function (source, target, comment, sid) {
-    source = TextUtils.htmlEncode(source)
-    addGlossaryItem(sid, source, target, comment)
-      .then((response) => {
-        const msg = response.data.created_tm_key
-          ? 'A Private TM Key has been created for this job'
-          : 'A glossary item has been added'
-
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-          sid: sid,
-          message: msg,
-        })
-      })
+  addGlossaryItem: function (data) {
+    const sid = data.id_segment
+    addGlossaryItem(data)
+      .then(() => {})
       .catch((errors) => {
         if (errors.length > 0) {
           AppDispatcher.dispatch({
@@ -785,49 +809,61 @@ const SegmentActions = {
         }
       })
   },
-  addGlossaryItemToCache: (sid, match) => {
+  addGlossaryItemToCache: (sid, terms) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: 'A glossary item has been added',
+    })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
-      match,
+      terms,
     })
   },
-  updateGlossaryItem: function (match, newTranslation, newComment, sid) {
-    updateGlossaryItem({
-      idItem: match.id,
-      source: match.segment,
-      target: match.translation,
-      newTranslation,
-      comment: newComment,
-      idSegment: sid,
+  errorAddGlossaryItemToCache: (sid, error) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
-      .then(() => {
-        AppDispatcher.dispatch({
-          actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-          sid: sid,
-          message: 'A glossary item has been updated',
-        })
-      })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
+      sid: sid,
+      error,
+    })
+  },
+  updateGlossaryItem: function (data) {
+    updateGlossaryItem(data)
+      .then(() => {})
       .catch(() => {
         OfflineUtils.failedConnection(0, 'updateGlossaryItem')
       })
   },
 
-  updateglossaryCache: (sid, match) => {
+  updateglossaryCache: (sid, terms) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: 'A glossary item has been updated',
+    })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHANGE_GLOSSARY,
       sid: sid,
-      match,
+      terms,
     })
   },
-
-  updateGlossaryData(data, sid) {
-    if (QaCheckGlossary.enabled() && data.glossary) {
-      QaCheckGlossary.update(data.glossary)
-    }
-    if (QaCheckBlacklist.enabled() && data.blacklist) {
-      SegmentActions.addQaBlacklistMatches(sid, data.blacklist.matches)
-    }
+  errorUpdateglossaryCache: (sid, error) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+      sid: sid,
+      message: error.message ? error.message : `Error code: ${error.code}`,
+    })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+      sid: sid,
+      error,
+    })
   },
 
   copyGlossaryItemInEditarea: function (glossaryTranslation, segment) {
@@ -1254,11 +1290,67 @@ const SegmentActions = {
           resp: data,
           segment: segment,
         })
-        SegmentActions.updateGlossaryData(data.data, segment.sid)
       })
       .catch(() => {
         OfflineUtils.failedConnection(0, 'getWarning')
       })
+    // get tm keys
+    new Promise((resolve) => {
+      if (!CatToolStore.getJobTmKeys() || !CatToolStore.getHaveKeysGlossary()) {
+        let isJobTmKeysCompleted = !!CatToolStore.getJobTmKeys()
+        let isHaveKeysGlossaryCompleted = !!CatToolStore.getHaveKeysGlossary()
+
+        const resolvePromise = () =>
+          isJobTmKeysCompleted && isHaveKeysGlossaryCompleted && resolve()
+
+        const setJobTmKeys = () => {
+          isJobTmKeysCompleted = true
+          resolvePromise()
+
+          CatToolStore.removeListener(
+            CatToolConstants.UPDATE_TM_KEYS,
+            setJobTmKeys,
+          )
+        }
+        const setHaveKeysGlossary = () => {
+          isHaveKeysGlossaryCompleted = true
+          resolvePromise()
+
+          CatToolStore.removeListener(
+            CatToolConstants.HAVE_KEYS_GLOSSARY,
+            setHaveKeysGlossary,
+          )
+        }
+
+        CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
+        CatToolStore.addListener(
+          CatToolConstants.HAVE_KEYS_GLOSSARY,
+          setHaveKeysGlossary,
+        )
+      } else {
+        resolve()
+      }
+    }).then(() => {
+      if (CatToolStore.getHaveKeysGlossary() && trg_content) {
+        const jobTmKeys = CatToolStore.getJobTmKeys()
+        getGlossaryCheck({
+          idSegment: segment.sid,
+          target: trg_content,
+          source: src_content,
+          keys: jobTmKeys.map(({key}) => key),
+        })
+      }
+    })
+  },
+  highlightGlossaryTerm: ({sid, termId, type, isTarget}) => {
+    SegmentActions.activateTab(sid, 'glossary')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HIGHLIGHT_GLOSSARY_TERM,
+      sid,
+      termId,
+      type,
+      isTarget,
+    })
   },
 }
 

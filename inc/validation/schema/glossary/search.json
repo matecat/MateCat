@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "sentence": {
+      "type": "string"
+    },
+    "id_client": {
+      "type": "string"
+    },
+    "id_segment": {
+      "type": ["integer","string"]
+    },
+    "id_job": {
+      "type": ["integer","string"]
+    },
+    "password": {
+      "type": "string"
+    },
+    "source_language": {
+      "type": "string"
+    },
+    "target_language": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sentence",
+    "id_client",
+    "id_segment",
+    "id_job",
+    "password",
+    "source_language",
+    "target_language"
+  ]
+}

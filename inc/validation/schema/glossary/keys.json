@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_client": {
+      "type": "string"
+    },
+    "id_job": {
+      "type": ["integer","string"]
+    },
+    "password": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id_client",
+    "id_job",
+    "password"
+  ]
+}

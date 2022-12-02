@@ -4,35 +4,45 @@ namespace Validator;
 
 use DataAccess\ShapelessConcreteStruct;
 use LQA\ChunkReviewDao;
-use Validator\Contracts\ValidatorInterface;
+use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
 use Validator\Exception\LogicException;
 use Validator\Exception\WrongParamsException;
 
-class JobValidator implements ValidatorInterface {
+class IsJobRevisionValidator extends AbstractValidator {
 
     /**
      * @inheritDoc
      */
-    public function validate( ValidatorObject $object, array $params = [] ) {
+    public function validate( ValidatorObject $object ) {
 
-        if ( !isset( $params[ 'jid' ] ) ) {
+        if ( !isset( $object->jid ) ) {
             throw new WrongParamsException('Missing jid parameter');
         }
 
-        if ( !isset( $params[ 'password' ] ) ) {
+        if ( !isset( $object->password ) ) {
             throw new WrongParamsException('Missing jid parameter');
         }
 
         /** @var ShapelessConcreteStruct $data */
-        $data = (new ChunkReviewDao())->isTOrR1OrR2( $params[ 'jid' ], $params[ 'password' ] );
+        $data = (new ChunkReviewDao())->isTOrR1OrR2( $object->jid, $object->password );
 
         if ( $data->t == 0 and $data->r1 == 0 and $data->r2 == 0 ) {
             throw new LogicException( 'Invalid combination jid/password' );
         }
 
-        $object->hydrateFromObject($data);
+        if ( $data->t == 1 ) {
+            $this->errors[] = 'Given job password is the T password';
 
-        return $object;
+            return false;
+        }
+
+        if ( $data->r1 == 1 or $data->r2 == 1 ) {
+            return true;
+        }
+
+        $this->errors[] = 'No data recevied';
+
+        return false;
     }
 }
