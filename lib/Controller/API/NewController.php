@@ -843,7 +843,9 @@ class NewController extends ajaxController {
      */
     private static function __sanitizeTmKeyArr( $elem ) {
 
-        $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+        $element = new TmKeyManagement_TmKeyStruct( $elem );
+        $element->complete_format = true;
+        $elem = TmKeyManagement_TmKeyManagement::sanitize( $element );
 
         return $elem->toArray();
 
@@ -1067,8 +1069,8 @@ class NewController extends ajaxController {
     {
         if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
             $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get([
-                'id' => $this->postInput[ 'id_qa_model_template' ],
-                'uid' => $this->getUser()->uid
+                    'id' => $this->postInput[ 'id_qa_model_template' ],
+                    'uid' => $this->getUser()->uid
             ]);
 
             // check if qa_model template exists
