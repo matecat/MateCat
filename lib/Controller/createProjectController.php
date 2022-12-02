@@ -522,7 +522,9 @@ class createProjectController extends ajaxController {
 
     private static function sanitizeTmKeyArr( $elem ) {
 
-        $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+        $element = new TmKeyManagement_TmKeyStruct( $elem );
+        $element->complete_format = true;
+        $elem = TmKeyManagement_TmKeyManagement::sanitize( $element );
 
         return $elem->toArray();
 
