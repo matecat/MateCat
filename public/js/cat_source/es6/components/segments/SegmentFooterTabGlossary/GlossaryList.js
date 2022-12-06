@@ -172,6 +172,9 @@ const GlossaryList = () => {
     )
   }
 
+  const onClickTerm = (term) =>
+    SegmentActions.copyGlossaryItemInEditarea(term, segment)
+
   return (
     <div ref={scrollItemsRef} className="glossary_items">
       {terms.map((term, index) => (
@@ -181,6 +184,7 @@ const GlossaryList = () => {
           modifyElement={() => onModifyItem(term)}
           deleteElement={() => onDeleteItem(term)}
           highlight={index === termHighlight?.index && termHighlight}
+          onClick={onClickTerm}
           isEnabledToModify={
             !!keys.find(({key}) => key === term?.metadata?.key) &&
             !term.isBlacklist &&
