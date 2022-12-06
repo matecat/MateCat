@@ -385,13 +385,23 @@
         }
 
         .glossary-description {
+          &[aria-label]::after {
+            max-width: 400px;
+            white-space: normal;
+          }
+
           > p {
             white-space: break-spaces;
+          }
+          > p:first-child {
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
+          }
+          > p:not(:first-child) {
+            display: none;
           }
         }
       }

@@ -38,6 +38,7 @@ export const SegmentFooterTabGlossary = ({
   segment,
   notifyLoadingStatus,
 }) => {
+  const [isActive, setIsActive] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -451,10 +452,15 @@ export const SegmentFooterTabGlossary = ({
     notifyLoadingStatusToParent(isLoading)
   }, [isLoading, notifyLoadingStatusToParent])
 
+  useEffect(() => {
+    setIsActive(!!active_class)
+  }, [active_class])
+
   return (
     <TabGlossaryContext.Provider
       value={{
         ref,
+        isActive,
         segment,
         keys,
         domains,
