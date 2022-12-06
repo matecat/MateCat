@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import Forbidden from '../../../../../../img/icons/Forbidden'
@@ -8,6 +8,7 @@ import {
   LockIcon,
   ModifyIcon,
 } from './SegmentFooterTabGlossary'
+import {TabGlossaryContext} from './TabGlossaryContext'
 
 const DESCRIPTION_ELEMENTS_LINE_CLAMP = 3
 
@@ -21,40 +22,47 @@ export const GlossaryItem = ({
   isStatusDeleting = false,
   isBlacklist = false,
 }) => {
+  const {isActive} = useContext(TabGlossaryContext)
+
   const [toolipsRuleDescription, setToolipsRuleDescription] = useState({
     source: false,
     target: false,
   })
 
+  const noteDescriptionPlaceholderRef = useRef()
+
   useEffect(() => {
-    const placeholder = document.createElement('div')
-    placeholder.className = 'glossary-description'
-    const pTag = document.createElement('p')
-    placeholder.appendChild(pTag)
-    document.body.appendChild(placeholder)
+    if (!isActive || !noteDescriptionPlaceholderRef?.current) return
 
-    const lineHeight = Math.round(
-      window.getComputedStyle(pTag).lineHeight.split('px')[0],
-    )
+    const checkContentLength = () => {
+      const placeholderTag = noteDescriptionPlaceholderRef.current
+      placeholderTag.style.display = 'block'
 
-    pTag.innerText = item?.source?.note ?? ''
-    const source =
-      pTag.offsetHeight / lineHeight > DESCRIPTION_ELEMENTS_LINE_CLAMP
+      const lineHeight = Math.round(
+        window.getComputedStyle(placeholderTag).lineHeight.split('px')[0],
+      )
 
-    pTag.innerText = item?.target?.note ?? ''
-    const target =
-      pTag.offsetHeight / lineHeight > DESCRIPTION_ELEMENTS_LINE_CLAMP
+      placeholderTag.innerText = item?.source?.note ?? ''
+      const source =
+        placeholderTag.offsetHeight / lineHeight >
+        DESCRIPTION_ELEMENTS_LINE_CLAMP
 
-    console.log('target', pTag.offsetHeight, pTag.innerText)
-    document.body.removeChild(placeholder)
+      placeholderTag.innerText = item?.target?.note ?? ''
+      const target =
+        placeholderTag.offsetHeight / lineHeight >
+        DESCRIPTION_ELEMENTS_LINE_CLAMP
 
-    const newState = {
-      source,
-      target,
+      placeholderTag.style.display = 'none'
+
+      setToolipsRuleDescription({source, target})
     }
-    console.log('---->', newState)
-    setToolipsRuleDescription(newState)
-  }, [item?.source?.note, item?.target?.note])
+
+    checkContentLength()
+
+    window.addEventListener('resize', checkContentLength)
+
+    return () => window.removeEventListener('resize', checkContentLength)
+  }, [isActive, item?.source?.note, item?.target?.note])
 
   const {metadata, source, target} = item
 
@@ -154,8 +162,10 @@ export const GlossaryItem = ({
               aria-label={
                 toolipsRuleDescription.source ? source.note : undefined
               }
+              tooltip-position="right"
             >
               <p>{source.note}</p>
+              <p ref={noteDescriptionPlaceholderRef}>{source.note}</p>
             </div>
           )}
         </div>
@@ -193,8 +203,12 @@ export const GlossaryItem = ({
               aria-label={
                 toolipsRuleDescription.target ? target.note : undefined
               }
+              tooltip-position="left"
             >
               <p>{target.note}</p>
+              {!source.note && (
+                <p ref={noteDescriptionPlaceholderRef}>{target.note}</p>
+              )}
             </div>
           )}
         </div>
