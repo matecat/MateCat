@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import Forbidden from '../../../../../../img/icons/Forbidden'
@@ -9,15 +9,53 @@ import {
   ModifyIcon,
 } from './SegmentFooterTabGlossary'
 
+const DESCRIPTION_ELEMENTS_LINE_CLAMP = 3
+
 export const GlossaryItem = ({
   item,
   modifyElement,
   deleteElement,
   highlight,
+  onClick,
   isEnabledToModify = false,
   isStatusDeleting = false,
   isBlacklist = false,
 }) => {
+  const [toolipsRuleDescription, setToolipsRuleDescription] = useState({
+    source: false,
+    target: false,
+  })
+
+  useEffect(() => {
+    const placeholder = document.createElement('div')
+    placeholder.className = 'glossary-description'
+    const pTag = document.createElement('p')
+    placeholder.appendChild(pTag)
+    document.body.appendChild(placeholder)
+
+    const lineHeight = Math.round(
+      window.getComputedStyle(pTag).lineHeight.split('px')[0],
+    )
+
+    pTag.innerText = item?.source?.note ?? ''
+    const source =
+      pTag.offsetHeight / lineHeight > DESCRIPTION_ELEMENTS_LINE_CLAMP
+
+    pTag.innerText = item?.target?.note ?? ''
+    const target =
+      pTag.offsetHeight / lineHeight > DESCRIPTION_ELEMENTS_LINE_CLAMP
+
+    console.log('target', pTag.offsetHeight, pTag.innerText)
+    document.body.removeChild(placeholder)
+
+    const newState = {
+      source,
+      target,
+    }
+    console.log('---->', newState)
+    setToolipsRuleDescription(newState)
+  }, [item?.source?.note, item?.target?.note])
+
   const {metadata, source, target} = item
 
   const canModifyItem = isEnabledToModify && item.term_id && !isStatusDeleting
@@ -113,7 +151,9 @@ export const GlossaryItem = ({
               className={`glossary-description${
                 config.isSourceRTL ? ' rtl' : ''
               }`}
-              aria-label={source.note}
+              aria-label={
+                toolipsRuleDescription.source ? source.note : undefined
+              }
             >
               <p>{source.note}</p>
             </div>
@@ -122,11 +162,13 @@ export const GlossaryItem = ({
         <div className="glossary-item_column">
           <div className={`glossary_word${config.isTargetRTL ? ' rtl' : ''}`}>
             <span
-              className={`${
+              className={`target_label${
                 highlight && highlight.isTarget
                   ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
                   : ''
               }`}
+              onMouseDown={() => onClick && onClick(target.term)}
+              aria-label="Click to insert the term in the target segment"
             >{`${target.term} `}</span>
             {isBlacklist && (
               <div className="forbidden-badge">
@@ -148,7 +190,9 @@ export const GlossaryItem = ({
               className={`glossary-description${
                 config.isTargetRTL ? ' rtl' : ''
               }`}
-              aria-label={target.note}
+              aria-label={
+                toolipsRuleDescription.target ? target.note : undefined
+              }
             >
               <p>{target.note}</p>
             </div>
@@ -164,6 +208,7 @@ GlossaryItem.propTypes = {
   modifyElement: PropTypes.func.isRequired,
   deleteElement: PropTypes.func.isRequired,
   highlight: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
+  onClick: PropTypes.func,
   isEnabledToModify: PropTypes.bool,
   isStatusDeleting: PropTypes.bool,
   isBlacklist: PropTypes.bool,

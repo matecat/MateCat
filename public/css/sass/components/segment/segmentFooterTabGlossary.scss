@@ -359,6 +359,10 @@
             }
           }
 
+          .target_label {
+            cursor: pointer;
+          }
+
           .info-icon {
             font-weight: normal;
             margin-left: 8px;
@@ -380,13 +384,15 @@
           }
         }
 
-        .glossary-description > p {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          white-space: break-spaces;
+        .glossary-description {
+          > p {
+            white-space: break-spaces;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+          }
         }
       }
     }
