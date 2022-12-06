@@ -1070,7 +1070,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 't' ]          = $config[ 'target' ];
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
-        $this->engineRecord->base_url                    .= ':10000';
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_FOLLOWLOCATION => true,
+        ] );
+
+        $this->engineRecord->base_url = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
+
         $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
 
         $this->call( 'tags_projection', $parameters );
