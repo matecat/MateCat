@@ -180,9 +180,8 @@ class GlossaryWorker extends AbstractWorker {
     private function get( $payload )
     {
 
-        if( empty ( $payload['source_language'] ) ){
-            $this->_doLog( "**************************** INVALID PAYLOAD ********************************" );
-            return null;
+        if( empty ( $payload['source_language'] ) || empty ( $payload['target_language'] ) ){
+            throw new EndQueueException( "Invalid Payload" );
         }
 
         $keys = [];
@@ -199,6 +198,10 @@ class GlossaryWorker extends AbstractWorker {
         if($matches['id_segment'] === null){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
+        }
+
+        if ( empty( $matches ) ) {
+            throw new EndQueueException( "Empty response from Glossary" );
         }
 
         $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys']);
