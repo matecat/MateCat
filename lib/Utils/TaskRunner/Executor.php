@@ -175,6 +175,7 @@ class Executor implements SplObserver {
         }
 
         static::$__INSTANCE = new static( $queueContext );
+
 //        static::$__INSTANCE->_logMsg( $msg );
 
         return static::$__INSTANCE;
@@ -327,12 +328,12 @@ class Executor implements SplObserver {
 
                 $queueElement = json_decode( $msgFrame->body, true );
 
-                if( empty( $queueElement ) ){
+                if ( empty( $queueElement ) ) {
 
                     $this->_queueHandler->ack( $msgFrame );
                     $msg = \Utils::raiseJsonExceptionError( false );
                     $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . $msg, 'FRAME' => $msgFrame->body ] );
-                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1);
+                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1 );
 
                 }
 
@@ -410,7 +411,7 @@ class Executor implements SplObserver {
 
     }
 
-    public function forceAck( SplSubject $subject ){
+    public function forceAck( SplSubject $subject ) {
         //TODO
     }
 

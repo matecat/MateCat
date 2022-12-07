@@ -84,3 +84,20 @@ route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET',  'API\App\
 
 route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'job' );
+
+// TM Keys
+$klein->with( '/api/app/tm-keys', function () {
+    route( '/[:id_job]/[:password]', 'GET', '\API\App\TmKeyManagementController', 'getByJob' );
+} );
+
+// Glossary
+$klein->with( '/api/app/glossary', function () {
+    route( '/_check', 'POST', '\API\App\GlossaryController', 'check' );
+    route( '/_delete', 'POST', '\API\App\GlossaryController', 'delete' );
+    route( '/_domains', 'POST', '\API\App\GlossaryController', 'domains' );
+    route( '/_get', 'POST', '\API\App\GlossaryController', 'get' );
+    route( '/_keys', 'POST', '\API\App\GlossaryController', 'keys' );
+    route( '/_search', 'POST', '\API\App\GlossaryController', 'search' );
+    route( '/_set', 'POST', '\API\App\GlossaryController', 'set' );
+    route( '/_update', 'POST', '\API\App\GlossaryController', 'update' );
+} );

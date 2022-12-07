@@ -57,3 +57,7 @@ $klein->with( '/api/v3/qa_model_template', function () {
     route( '/[:id]', 'PUT', '\API\V3\QAModelTemplateController', 'edit' );
 } );
 
+// TM Keys
+$klein->with( '/api/v3/tm-keys', function () {
+    route( '/list', 'GET', '\API\V3\TmKeyManagementController', 'getByUser' );
+} );

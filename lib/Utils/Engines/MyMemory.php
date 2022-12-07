@@ -1,5 +1,7 @@
 <?php
 
+use Validator\GlossaryCSVValidatorObject;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -9,23 +11,29 @@
  */
 class Engines_MyMemory extends Engines_AbstractEngine {
 
+    /**
+     * @var string
+     */
     protected $content_type = 'json';
 
+    /**
+     * @var array
+     */
     protected $_config = [
-            'dataRefMap'    => [],
-            'segment'       => null,
-            'translation'   => null,
-            'tnote'         => null,
-            'source'        => null,
-            'target'        => null,
-            'email'         => null,
-            'prop'          => null,
-            'get_mt'        => 1,
-            'id_user'       => null,
-            'num_result'    => 3,
-            'mt_only'       => false,
-            'isConcordance' => false,
-            'isGlossary'    => false,
+        'dataRefMap'    => [],
+        'segment'       => null,
+        'translation'   => null,
+        'tnote'         => null,
+        'source'        => null,
+        'target'        => null,
+        'email'         => null,
+        'prop'          => null,
+        'get_mt'        => 1,
+        'id_user'       => null,
+        'num_result'    => 3,
+        'mt_only'       => false,
+        'isConcordance' => false,
+        'isGlossary'    => false,
     ];
 
     /**
@@ -60,6 +68,28 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $result_object = null;
 
         switch ( $functionName ) {
+
+            case 'glossary_domains_relative_url':
+                $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'glossary_check_relative_url':
+                $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'glossary_update_relative_url':
+                $result_object = Engines_Results_MyMemory_UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'glossary_delete_relative_url':
+                $result_object = Engines_Results_MyMemory_DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'glossary_set_relative_url':
+                $result_object = Engines_Results_MyMemory_SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'glossary_get_relative_url':
+                $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
+            case 'glossary_keys_relative_url':
+                $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
             case 'tags_projection' :
                 $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
@@ -69,6 +99,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             case 'api_key_create_user_url':
                 $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
+
+            case 'glossary_import_status_relative_url':
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
@@ -289,18 +321,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( $function, $parameters, true );
 
-        /*
-         * If the segment to be deleted is not present in the current TM,
-         * MyMemory response is
-         * {"responseData":{"translatedText":"NO ID FOUND"},
-         *  "responseDetails":"NO ID FOUND",
-         *  "responseStatus":"403",
-         *  "matches":""
-         * }
-         *
-         * but the result is the one expected: the segment is not present in the current TM.
-         **/
-
         if ( $this->result->responseStatus != "200" &&
                 ( $this->result->responseStatus != "404" ||
                         $this->result->responseDetails != "NO ID FOUND" )
@@ -356,6 +376,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param bool|false $name
      *
      * @return Engines_Results_MyMemory_TmxResponse
+     * @throws Exception
      */
     public function glossaryImport( $file, $key, $name = false ) {
 
@@ -370,39 +391,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
-                if ( count( $line ) < 2 ) {
-                    throw new RuntimeException( "No valid glossary file provided. Field separator could be not valid." );
-                }
-
-                if ( $line_num == 0 ) {
-                    list( $source_lang, $target_lang, ) = $line;
-
-                    //eventually, remove BOM from source language
-                    $bom         = pack( 'H*', 'EFBBBF' );
-                    $source_lang = preg_replace( "/^$bom/", "", $source_lang );
-
-                    if ( !Langs_Languages::getInstance()->isEnabled( $source_lang ) ) {
-                        throw new RuntimeException( "The source language specified in the glossary is not supported: " . $source_lang );
+                if(in_array("1", $line)){
+                    foreach ($line as $lineKey => $item){
+                        if($item == "1"){
+                            $line[$lineKey] = "True";
+                        }
                     }
-
-                    if ( !Langs_Languages::getInstance()->isEnabled( $target_lang ) ) {
-                        throw new RuntimeException( "The target language specified in the glossary is not supported: " . $target_lang );
-                    }
-
-                    if ( empty( $source_lang ) || empty( $target_lang ) ) {
-                        throw new RuntimeException( "No language definition found in glossary file." );
-                    }
-                    continue;
                 }
 
                 //copy stream to stream
                 $newFile->fputcsv( $line );
-
             }
+
             $newFile->fflush();
 
-            $origFile = null; //close the file handle
-            $newFile  = null; //close the file handle
+            $origFile = null;
+            $newFile  = null;
             copy( $tmpFileName, $file );
             unlink( $tmpFileName );
 
@@ -416,22 +420,18 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             return $this->result;
         }
 
+        // validate the CSV
+        if(!$this->validateCSVFile($file)){
+            throw new \Exception('The glossary file is not valid');
+        }
+
         $postFields = [
-                'glossary'    => "@" . realpath( $file ),
-                'source_lang' => $source_lang,
-                'target_lang' => $target_lang,
-                'name'        => $name,
+            'glossary'    => $this->getCurlFile($file),
+            'key'         => trim( $key ),
         ];
 
-        $postFields[ 'key' ] = trim( $key );
-
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = false;
-            $this->_setAdditionalCurlParams( $options );
+        if($name and $name !== ''){
+            $postFields['key_name'] = $name;
         }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
@@ -439,24 +439,248 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
-    public function import( $file, $key, $name = false ) {
+    /**
+     * @param $uuid
+     *
+     * @return array
+     */
+    public function getGlossaryImportStatus($uuid)
+    {
+        $this->call( 'glossary_import_status_relative_url', [
+                'uuid' => $uuid
+        ], false );
 
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 && class_exists( '\\CURLFile' ) ) {
+        return $this->result;
+    }
 
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = true;
-            $this->_setAdditionalCurlParams( $options );
-            $file = new \CURLFile( realpath( $file ) );
+    /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     *
+     * @return array
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+        $this->call( 'glossary_export_relative_url', [
+            'key' => $key,
+            'key_name' => $keyName,
+            'user_name' => $userName,
+            'user_email' => $userEmail,
+        ], true );
 
-        } else {
-            $file = "@" . realpath( $file );
+        return $this->result;
+    }
+
+    /**
+     * Poll MM for obtain the status of a write operation
+     * using a cyclic barrier
+     * (import, update, set, delete)
+     *
+     * @param $uuid
+     * @param $relativeUrl
+     */
+    private function pollForStatus($uuid, $relativeUrl)
+    {
+        $limit = 10;
+        $sleep = 1;
+        $startTime = time();
+
+        do {
+
+            $this->call( $relativeUrl, [
+                'uuid' => $uuid
+            ], false );
+
+            if($this->result->responseStatus === 202){
+                sleep( $sleep );
+            }
+
+        } while ( $this->result->responseStatus === 202 and (time() - $startTime) <= $limit );
+    }
+
+    /**
+     * @param       $source
+     * @param       $target
+     * @param       $sourceLanguage
+     * @param       $targetLanguage
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryCheck($source, $target, $sourceLanguage, $targetLanguage, $keys = [])
+    {
+        $payload = [
+                'de' => \INIT::$MYMEMORY_API_KEY,
+                'source' => $source,
+                'target' => $target,
+                'source_language' => $sourceLanguage,
+                'target_language' => $targetLanguage,
+                'keys' => $keys,
+        ];
+        $this->call( "glossary_check_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryDomains($keys = [])
+    {
+        $payload = [
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            'keys' => $keys,
+        ];
+        $this->call( "glossary_domains_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossaryDelete($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => \INIT::$MYMEMORY_API_KEY,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "glossary_delete_relative_url", $payload, true, true );
+
+        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+            $uuid = $this->result->responseDetails;
+            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
         }
 
+        return $this->result;
+    }
+
+    /**
+     * @param $source
+     * @param $sourceLanguage
+     * @param $targetLanguage
+     * @param $keys
+     *
+     * @return array
+     */
+    public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
+    {
+        $payload = [
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            "source" => $source,
+            "source_language" => $sourceLanguage,
+            "target_language" => $targetLanguage,
+            "keys" => $keys,
+        ];
+
+        $this->call( "glossary_get_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function glossaryKeys($keys = [])
+    {
+        $payload = [
+                'de' => \INIT::$MYMEMORY_API_KEY,
+                'keys' => $keys,
+        ];
+        $this->call( "glossary_keys_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossarySet($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => \INIT::$MYMEMORY_API_KEY,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+
+        $this->call( "glossary_set_relative_url", $payload, true, true );
+
+//        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+//            $uuid = $this->result->responseDetails;
+//            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+//        }
+
+        return $this->result;
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $term
+     *
+     * @return array
+     */
+    public function glossaryUpdate($idSegment, $idJob, $password, $term)
+    {
+        $payload = [
+                'de' => \INIT::$MYMEMORY_API_KEY,
+                "id_segment" => $idSegment,
+                "id_job" => $idJob,
+                "password" => $password,
+                "term" => $term,
+        ];
+        $this->call( "glossary_update_relative_url", $payload, true, true );
+
+        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+            $uuid = $this->result->responseDetails;
+            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+        }
+
+        return $this->result;
+    }
+
+    /**
+     * @param $file
+     *
+     * @return bool
+     * @throws Exception
+     */
+    private function validateCSVFile($file)
+    {
+        $validatorObject = new GlossaryCSVValidatorObject();
+        $validatorObject->csv = $file;
+        $validator = new \Validator\GlossaryCSVValidator();
+        $validator->validate($validatorObject);
+
+        return $validator->isValid();
+    }
+
+    public function import( $file, $key, $name = false ) {
+
         $postFields = [
-                'tmx'  => $file,
+                'tmx'  => $this->getCurlFile($file),
                 'name' => $name,
                 'key'  => trim( $key )
         ];
@@ -846,7 +1070,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 't' ]          = $config[ 'target' ];
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
-        $this->engineRecord->base_url                    .= ':10000';
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_FOLLOWLOCATION => true,
+        ] );
+
+        $this->engineRecord->base_url = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
+
         $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
 
         $this->call( 'tags_projection', $parameters );

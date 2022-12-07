@@ -16,6 +16,10 @@ const GLOSSARY_TYPE_G = 'glossary_get';
 const GLOSSARY_TYPE_S = 'glossary_set';
 const GLOSSARY_TYPE_D = 'glossary_delete';
 const GLOSSARY_TYPE_U = 'glossary_update';
+const GLOSSARY_TYPE_DO = 'glossary_domains';
+const GLOSSARY_TYPE_SE = 'glossary_search';
+const GLOSSARY_TYPE_CH = 'glossary_check';
+const GLOSSARY_TYPE_K = 'glossary_keys';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
@@ -163,6 +167,10 @@ const checkCandidate = ( type, response, message ) => {
         case GLOSSARY_TYPE_S:
         case GLOSSARY_TYPE_D:
         case GLOSSARY_TYPE_U:
+        case GLOSSARY_TYPE_DO:
+        case GLOSSARY_TYPE_SE:
+        case GLOSSARY_TYPE_CH:
+        case GLOSSARY_TYPE_K:
             candidate = response._matecatJobId === message.data.id_job &&
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;

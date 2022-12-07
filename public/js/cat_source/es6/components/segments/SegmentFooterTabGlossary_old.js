@@ -24,7 +24,7 @@ class SegmentFooterTabGlossary extends React.Component {
   }
 
   stopLoading(sid) {
-    if (sid === this.props.segment.sid) {
+    if (sid === this.props.id_segment) {
       this.setState({
         loading: false,
       })
@@ -35,7 +35,7 @@ class SegmentFooterTabGlossary extends React.Component {
     let totalMatches = _.size(matches)
     if (totalMatches > 0) {
       SegmentActions.setTabIndex(
-        this.props.segment.sid,
+        this.props.id_segment,
         'glossary',
         totalMatches,
       )
@@ -83,7 +83,7 @@ class SegmentFooterTabGlossary extends React.Component {
 
   deleteMatch(match, event) {
     event.preventDefault()
-    SegmentActions.deleteGlossaryItem(match, this.props.segment.sid)
+    SegmentActions.deleteGlossaryItem(match, this.props.id_segment)
   }
 
   updateGlossaryItem(match, e) {
@@ -105,7 +105,7 @@ class SegmentFooterTabGlossary extends React.Component {
         match,
         newTarget,
         newComment,
-        this.props.segment.sid,
+        this.props.id_segment,
       )
 
       this.setState({
@@ -164,7 +164,7 @@ class SegmentFooterTabGlossary extends React.Component {
         source,
         target,
         comment,
-        this.props.segment.sid,
+        this.props.id_segment,
       )
       this.setState({
         loading: false,
@@ -254,7 +254,7 @@ class SegmentFooterTabGlossary extends React.Component {
             <ul className="graysmall" data-id={match.id}>
               <li className="sugg-source">
                 <div
-                  id={this.props.segment.sid + '-tm-' + match.id + '-edit'}
+                  id={this.props.id_segment + '-tm-' + match.id + '-edit'}
                   className="switch-editing icon-edit"
                   title="Edit"
                   onClick={this.editExistingMatch.bind(this, match.segment)}
@@ -263,14 +263,14 @@ class SegmentFooterTabGlossary extends React.Component {
                   ''
                 ) : (
                   <span
-                    id={this.props.segment.sid + '-tm-' + match.id + '-delete'}
+                    id={this.props.id_segment + '-tm-' + match.id + '-delete'}
                     className="trash"
                     title="delete this row"
                     onClick={this.deleteMatch.bind(this, match)}
                   />
                 )}
                 <span
-                  id={this.props.segment.sid + '-tm-' + match.id + '-source'}
+                  id={this.props.id_segment + '-tm-' + match.id + '-source'}
                   className="suggestion_source"
                   dangerouslySetInnerHTML={this.allowHTML(
                     TagUtils.decodePlaceholdersToTextSimple(leftTxt, true),
@@ -283,7 +283,7 @@ class SegmentFooterTabGlossary extends React.Component {
               >
                 <span
                   id={
-                    this.props.segment.sid + '-tm-' + match.id + '-translation'
+                    this.props.id_segment + '-tm-' + match.id + '-translation'
                   }
                   className={
                     'translation ' + (this.state.editing ? 'editing' : '')
@@ -343,7 +343,7 @@ class SegmentFooterTabGlossary extends React.Component {
       SegmentConstants.SET_GLOSSARY_TO_CACHE,
       this.stopLoading,
     )
-    // UI.markGlossaryItemsInSource(UI.getSegmentById( this.props.segment.sid ), this.props.segment.glossary);
+    // UI.markGlossaryItemsInSource(UI.getSegmentById( this.props.id_segment ), this.props.segment.glossary);
     // setTimeout(()=>this.setTotalMatchesInTab( this.props.segment.glossary), 0 );
   }
 
@@ -454,7 +454,7 @@ class SegmentFooterTabGlossary extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
+        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
       >
         <div className="overflow">{html}</div>
       </div>
