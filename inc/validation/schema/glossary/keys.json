@@ -10,11 +10,19 @@
     },
     "password": {
       "type": "string"
+    },
+    "source_language": {
+      "type": "string"
+    },
+    "target_language": {
+      "type": "string"
     }
   },
   "required": [
     "id_client",
     "id_job",
-    "password"
+    "password",
+    "source_language",
+    "target_language"
   ]
 }
