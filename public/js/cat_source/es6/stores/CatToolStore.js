@@ -22,7 +22,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   clientId: undefined,
   tmKeys: null,
   keysDomains: null,
-  haveKeysGlossary: false,
+  haveKeysGlossary: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },

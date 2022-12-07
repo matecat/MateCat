@@ -54,8 +54,8 @@ export const SegmentFooterTabGlossary = ({
   const [terms, setTerms] = useState(initialState.terms)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
-  const [isLoading, setIsLoading] = useState(false)
-  const [haveKeysGlossary, setHaveKeysGlossary] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [haveKeysGlossary, setHaveKeysGlossary] = useState(undefined)
   const [termsStatusDeleting, setTermsStatusDeleting] = useState([])
 
   const ref = useRef()
@@ -175,7 +175,6 @@ export const SegmentFooterTabGlossary = ({
       }, 500)
     }
     const onReceiveGlossary = () => {
-      setIsLoading(false)
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }
     const setDomains = ({entries}) => {
@@ -190,7 +189,17 @@ export const SegmentFooterTabGlossary = ({
         text: segment.segment,
         shouldRefresh: true,
       })
-    const onReceiveHaveKeysGlossary = (value) => setHaveKeysGlossary(value)
+    const onReceiveHaveKeysGlossary = (value) => {
+      setHaveKeysGlossary(value)
+      if (value) {
+        SegmentActions.getGlossaryForSegment({
+          sid: segment.sid,
+          text: segment.segment,
+        })
+      } else {
+        setIsLoading(false)
+      }
+    }
     const onDeleteTerm = (sid, term) =>
       setTermsStatusDeleting((prevState) =>
         prevState.filter((value) => value !== term.term_id),
@@ -366,6 +375,7 @@ export const SegmentFooterTabGlossary = ({
       })
     // console.log('----> segment glossary', orderedByUpdateDate)
     setTerms(orderedByUpdateDate)
+    setIsLoading(false)
   }, [segment?.glossary_search_results])
 
   useEffect(() => {
@@ -505,13 +515,15 @@ export const SegmentFooterTabGlossary = ({
           </>
         ) : showForm ? (
           <TermForm />
-        ) : (
+        ) : haveKeysGlossary === false ? (
           <div className="no_keys_glossary">
             <p>No glossary available.</p>
             <button className="glossary__button-add" onClick={openForm}>
               + Click here to create one
             </button>
           </div>
+        ) : (
+          <span className="loading_label">Loading</span>
         )}
       </div>
     </TabGlossaryContext.Provider>
