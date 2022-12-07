@@ -675,6 +675,7 @@ const SegmentActions = {
     })
   },
   getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
+    if (!CatToolStore.haveKeysGlossary) return
     // refresh segment glossary already included
     if (shouldRefresh) {
       getGlossaryForSegment({

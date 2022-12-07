@@ -177,25 +177,29 @@ const GlossaryList = () => {
 
   return (
     <div ref={scrollItemsRef} className="glossary_items">
-      {terms.map((term, index) => (
-        <GlossaryItem
-          key={index}
-          item={term}
-          modifyElement={() => onModifyItem(term)}
-          deleteElement={() => onDeleteItem(term)}
-          highlight={index === termHighlight?.index && termHighlight}
-          onClick={onClickTerm}
-          isEnabledToModify={
-            !!keys.find(({key}) => key === term?.metadata?.key) &&
-            !term.isBlacklist &&
-            !isLoading
-          }
-          isStatusDeleting={
-            !!termsStatusDeleting.find((value) => value === term.term_id)
-          }
-          isBlacklist={term.isBlacklist}
-        />
-      ))}
+      {!terms.length && isLoading ? (
+        <span className="loading_label">Loading</span>
+      ) : (
+        terms.map((term, index) => (
+          <GlossaryItem
+            key={index}
+            item={term}
+            modifyElement={() => onModifyItem(term)}
+            deleteElement={() => onDeleteItem(term)}
+            highlight={index === termHighlight?.index && termHighlight}
+            onClick={onClickTerm}
+            isEnabledToModify={
+              !!keys.find(({key}) => key === term?.metadata?.key) &&
+              !term.isBlacklist &&
+              !isLoading
+            }
+            isStatusDeleting={
+              !!termsStatusDeleting.find((value) => value === term.term_id)
+            }
+            isBlacklist={term.isBlacklist}
+          />
+        ))
+      )}
       {!isLoading && !terms.length && (
         <div className="no-terms-result">
           {searchTerm && searchTerm === previousSearchTermRef.current ? (
