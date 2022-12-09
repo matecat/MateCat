@@ -284,6 +284,36 @@ class SegmentAnalysisController extends KleinController {
                 'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
+                'status' => $this->getStatusObject($segmentForAnalysis),
+        ];
+    }
+
+    /**
+     * @param $segmentForAnalysis
+     * @return array
+     */
+    private function getStatusObject($segmentForAnalysis)
+    {
+        $finalVersion = null;
+
+        if($segmentForAnalysis->source_page === 1){
+            $finalVersion = 't';
+        } elseif($segmentForAnalysis->source_page === 2){
+            $finalVersion = 'r1';
+        } elseif($segmentForAnalysis->source_page === 3){
+            $finalVersion = 'r2';
+        }
+
+        $r1 = ($finalVersion === "r1" and $segmentForAnalysis->has_r1 !== null) ? $segmentForAnalysis->raw_word_count : 0;
+        $r2 = ($finalVersion === "r2" and $segmentForAnalysis->has_r2 !== null) ? $segmentForAnalysis->raw_word_count : 0;
+
+        return [
+            'translation_status' => $segmentForAnalysis->status,
+            'final_version' => $finalVersion,
+            'counts' => [
+                'r1' => $r1,
+                'r2' => $r2,
+            ]
         ];
     }
 
