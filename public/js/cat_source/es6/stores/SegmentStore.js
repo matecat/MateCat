@@ -627,9 +627,20 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       ? this._segments.get(index).get('pendingGlossaryUpdates').toJS()
       : []
 
+    const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
+    const glossary = isGlossaryAlreadyExist
+      ? this._segments.get(index).get('glossary').toJS()
+      : []
+
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(adaptedTerms),
+      Immutable.fromJS(
+        adaptedTerms.map((term) => ({
+          ...term,
+          missingTerm: glossary.find(({term_id}) => term_id === term.term_id)
+            ?.missingTerm,
+        })),
+      ),
     )
     this.setGlossarySearchToCache(sid)
 
@@ -659,7 +670,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
     this.setGlossarySearchToCache(sid)
   },
-  addOrUpdateGlossaryItem: function (sid, terms) {
+  addOrUpdateGlossaryItem: function (
+    sid,
+    terms,
+    shouldCheckMissingTerms = false,
+  ) {
     const addedTerms = terms.map((term) => ({
       ...term,
       matching_words: term.matching_words
@@ -671,6 +686,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     const glossary = isGlossaryAlreadyExist
       ? this._segments.get(index).get('glossary').toJS()
       : []
+
     const updatedGlossary = [
       ...addedTerms,
       ...glossary
@@ -679,9 +695,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         )
         .map((term) => ({
           ...term,
-          missingTerm: false,
+          ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
+            missingTerm: false,
+          }),
         })),
     ]
+
     this._segments = this._segments.setIn(
       [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
       Immutable.fromJS(updatedGlossary),
@@ -810,7 +829,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       missingTerm: true,
     }))
 
-    this.addOrUpdateGlossaryItem(sid, terms)
+    this.addOrUpdateGlossaryItem(sid, terms, true)
 
     // setup blacklisted
     const index = this.getSegmentIndex(sid)
