@@ -296,11 +296,11 @@ class SegmentAnalysisController extends KleinController {
     {
         $finalVersion = null;
 
-        if($segmentForAnalysis->source_page === 1){
+        if($segmentForAnalysis->source_page == 1){
             $finalVersion = 't';
-        } elseif($segmentForAnalysis->source_page === 2){
+        } elseif($segmentForAnalysis->source_page == 2){
             $finalVersion = 'r1';
-        } elseif($segmentForAnalysis->source_page === 3){
+        } elseif($segmentForAnalysis->source_page == 3){
             $finalVersion = 'r2';
         }
 
