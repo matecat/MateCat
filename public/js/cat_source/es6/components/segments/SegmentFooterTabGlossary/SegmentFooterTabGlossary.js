@@ -166,16 +166,16 @@ export const SegmentFooterTabGlossary = ({
 
   // get TM keys and add actions listener
   useEffect(() => {
+    const refreshCheckQa = () =>
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     const addGlossaryItem = () => {
       setTimeout(() => {
         setIsLoading(false)
         setSearchTerm('')
         resetForm()
         refreshGlossary()
+        refreshCheckQa()
       }, 500)
-    }
-    const onReceiveGlossary = () => {
-      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }
     const setDomains = ({entries}) => {
       setDomainsResponse(entries)
@@ -189,9 +189,9 @@ export const SegmentFooterTabGlossary = ({
         text: segment.segment,
         shouldRefresh: true,
       })
-    const onReceiveHaveKeysGlossary = (value) => {
+    const onReceiveHaveKeysGlossary = ({value, wasAlreadyVerified}) => {
       setHaveKeysGlossary(value)
-      if (value) {
+      if (value && !wasAlreadyVerified) {
         SegmentActions.getGlossaryForSegment({
           sid: segment.sid,
           text: segment.segment,
@@ -200,20 +200,18 @@ export const SegmentFooterTabGlossary = ({
         setIsLoading(false)
       }
     }
-    const onDeleteTerm = (sid, term) =>
+    const onDeleteTerm = (sid, term) => {
       setTermsStatusDeleting((prevState) =>
         prevState.filter((value) => value !== term.term_id),
       )
+      refreshCheckQa()
+    }
 
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
       addGlossaryItem,
     )
     SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
-    SegmentStore.addListener(
-      SegmentConstants.SET_GLOSSARY_TO_CACHE,
-      onReceiveGlossary,
-    )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
     CatToolStore.addListener(
@@ -239,10 +237,6 @@ export const SegmentFooterTabGlossary = ({
       SegmentStore.removeListener(
         SegmentConstants.CHANGE_GLOSSARY,
         addGlossaryItem,
-      )
-      SegmentStore.removeListener(
-        SegmentConstants.SET_GLOSSARY_TO_CACHE,
-        onReceiveGlossary,
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)

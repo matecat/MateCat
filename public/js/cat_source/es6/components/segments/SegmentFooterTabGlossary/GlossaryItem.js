@@ -9,6 +9,7 @@ import {
   ModifyIcon,
 } from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import LabelWithTooltip from '../../common/LabelWithTooltip'
 
 const DESCRIPTION_ELEMENTS_LINE_CLAMP = 3
 
@@ -81,18 +82,32 @@ export const GlossaryItem = ({
             <span>{metadata.definition}</span>
           </div>
           {metadata.domain && (
-            <span className="glossary_badge">{metadata.domain}</span>
+            <LabelWithTooltip
+              className="glossary_badge"
+              tooltipPosition="bottom"
+            >
+              <span>{metadata.domain}</span>
+            </LabelWithTooltip>
           )}
           {metadata.subdomain && (
-            <span className="glossary_badge">{metadata.subdomain}</span>
+            <LabelWithTooltip
+              className="glossary_badge"
+              tooltipPosition="bottom"
+            >
+              <span>{metadata.subdomain}</span>
+            </LabelWithTooltip>
           )}
-          <div className="glossary_source">
-            <b>
-              {metadata.key_name
-                ? metadata.key_name
-                : `No name (${metadata.key})`}
-            </b>
-            <span>{metadata.last_update}</span>
+          <div className="glossary_source_details">
+            <LabelWithTooltip tooltipPosition="bottom">
+              <div className="glossary_source">
+                <b>
+                  {metadata.key_name
+                    ? metadata.key_name
+                    : `No name (${metadata.key})`}
+                </b>
+              </div>
+            </LabelWithTooltip>
+            <span>{metadata.last_update_date}</span>
           </div>
         </div>
         <div

@@ -250,16 +250,24 @@
         display: flex;
       }
       .glossary_badge {
-        color: $grey6;
-        font-size: 12px;
-        line-height: 15px;
-        border: 1px solid $grey6;
-        border-radius: 12px;
-        padding: 0 4px;
-        overflow: hidden;
-        margin-left: 8px;
-        min-width: 18px;
-        text-align: center;
+        display: flex;
+        flex-shrink: 0;
+        > span {
+          color: $grey6;
+          font-size: 12px;
+          line-height: 15px;
+          border: 1px solid $grey6;
+          border-radius: 12px;
+          padding: 0 4px;
+          overflow: hidden;
+          margin-left: 8px;
+          min-width: 18px;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 140px;
+        }
       }
 
       .glossary_definition-container {
@@ -288,12 +296,27 @@
       .glossary_definition--hidden {
         visibility: hidden;
       }
+
+      .glossary_source_details {
+        display: flex;
+        flex-direction: row;
+        margin-left: 10px;
+        flex-shrink: 0;
+
+        > span {
+          color: $grey7;
+          font-size: 10px;
+          margin-left: 8px;
+        }
+      }
+
       .glossary_source {
         font-size: 12px;
-        margin-left: 10px;
-        b {
-          margin-right: 10px;
-        }
+        max-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
         span {
           color: $grey7;
         }
