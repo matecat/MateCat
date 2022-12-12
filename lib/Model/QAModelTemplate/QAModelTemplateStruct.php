@@ -43,16 +43,17 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $QAModelTemplateStruct = $this;
         $QAModelTemplateStruct->version = $jsonModel->version;
         $QAModelTemplateStruct->label = $jsonModel->label;
+        $QAModelTemplateStruct->passfail = null;
+        $QAModelTemplateStruct->categories = [];
 
         // QAModelTemplatePassfailStruct
-        $QAModelTemplatePassfailStruct = (!empty($QAModelTemplateStruct->passfail)) ? $QAModelTemplateStruct->passfail : new QAModelTemplatePassfailStruct();
+        $QAModelTemplatePassfailStruct = new QAModelTemplatePassfailStruct();
         $QAModelTemplatePassfailStruct->passfail_type = $jsonModel->passfail->type;
         $QAModelTemplatePassfailStruct->id_template = (isset($jsonModel->id)) ? $jsonModel->id : null;
 
         foreach ($jsonModel->passfail->thresholds as $index => $threshold){
 
-            $modelTemplatePassfailThresholdStruct = (!empty($QAModelTemplateStruct->passfail->thresholds[$index])) ? $QAModelTemplateStruct->passfail->thresholds[$index] : new
-            QAModelTemplatePassfailThresholdStruct();
+            $modelTemplatePassfailThresholdStruct = new QAModelTemplatePassfailThresholdStruct();
             $modelTemplatePassfailThresholdStruct->passfail_label = $threshold->label;
             $modelTemplatePassfailThresholdStruct->passfail_value = $threshold->value;
 
@@ -64,7 +65,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         // QAModelTemplateCategoryStruct[]
         foreach ($jsonModel->categories as $index => $category){
 
-            $QAModelTemplateCategoryStruct = (!empty($QAModelTemplateStruct->categories[$index])) ? $QAModelTemplateStruct->categories[$index] : new QAModelTemplateCategoryStruct();
+            $QAModelTemplateCategoryStruct = new QAModelTemplateCategoryStruct();
             $QAModelTemplateCategoryStruct->id_template = (isset($QAModelTemplateStruct->id)) ? $QAModelTemplateStruct->id : null;
             $QAModelTemplateCategoryStruct->id_parent = (isset($jsonModel->id_parent)) ? $jsonModel->id_parent : null;
             $QAModelTemplateCategoryStruct->category_label = $category->label;
@@ -112,16 +113,17 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
 
         foreach ($this->categories as $categoryStruct){
             $category = [];
+            $category['id'] = (int)$categoryStruct->id;
             $category['label'] = $categoryStruct->category_label;
             $category['code'] = $categoryStruct->code;
             $category['severities'] = [];
 
             foreach ($categoryStruct->severities as $severityStruct){
                 $category['severities'][] = [
-                    'label' => $severityStruct->severity_label,
-                    'code' => $severityStruct->severity_code,
-                    'dqf_id' => ($severityStruct->dqf_id) ? $severityStruct->dqf_id : null,
-                    'penalty' => $severityStruct->penalty,
+                        'id' => (int)$severityStruct->id,
+                        'label' => $severityStruct->severity_label,
+                        'code' => $severityStruct->severity_code,
+                        'penalty' => floatval($severityStruct->penalty),
                 ];
             }
 
@@ -129,18 +131,18 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         }
 
         return [
-            'model' => [
-                "id_template" => $this->id,
-                "version" => $this->version,
-                "label" => $this->label,
-                "categories" => $categoriesArray,
-                "passfail" => [
-                    'type' => $this->passfail->passfail_type,
-                    'options' => [
-                        'limit' => $limitsArray
-                    ]
-                ],
-            ]
+                'model' => [
+                        "id_template" => (int)$this->id,
+                        "version" => (int)$this->version,
+                        "label" => $this->label,
+                        "categories" => $categoriesArray,
+                        "passfail" => [
+                                'type' => $this->passfail->passfail_type,
+                                'options' => [
+                                        'limit' => $limitsArray
+                                ]
+                        ],
+                ]
         ];
     }
 
@@ -150,12 +152,12 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'uid' => $this->uid,
-            'label' => $this->label,
-            'version' => $this->version,
-            'categories' => $this->categories,
-            'passfail' => $this->passfail,
+                'id' => (int)$this->id,
+                'uid' => (int)$this->uid,
+                'label' => $this->label,
+                'version' => (int)$this->version,
+                'categories' => $this->categories,
+                'passfail' => $this->passfail,
         ];
     }
 }

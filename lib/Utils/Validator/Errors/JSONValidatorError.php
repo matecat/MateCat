@@ -18,7 +18,7 @@ class JSONValidatorError extends \Exception implements \JsonSerializable
      */
     public function __construct(Error $error)
     {
-        parent::__construct("JSON Validation Error: " . $this->error->error);
+        parent::__construct("JSON Validation Error: " . $error->error);
         $this->error = $error;
     }
 

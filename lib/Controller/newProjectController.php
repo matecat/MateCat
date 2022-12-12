@@ -18,7 +18,7 @@ class newProjectController extends viewController {
 
     private $keyList = [];
 
-    protected  $subject_handler ;
+    protected $subject_handler;
 
     public function __construct() {
 
@@ -124,18 +124,27 @@ class newProjectController extends viewController {
     }
 
     private function evalSourceLangHistory() {
-        if ( isset ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] == \Constants::EMPTY_VAL ) {
+        if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] == Constants::EMPTY_VAL ) {
             $this->noSourceLangHistory = true;
         } else {
 
-            if ( !isset( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) ) {
-                setcookie( \Constants::COOKIE_SOURCE_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
+            if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
+                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
+                        [
+                                'expires'  => time() + ( 86400 * 365 ),
+                                'path'     => '/',
+                                'domain'   => INIT::$COOKIE_DOMAIN,
+                                'secure'   => true,
+                                'httponly' => true,
+                                'samesite' => 'None',
+                        ]
+                );
                 $this->noSourceLangHistory = true;
             } else {
 
-                if ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] != \Constants::EMPTY_VAL ) {
+                if ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] != Constants::EMPTY_VAL ) {
                     $this->noSourceLangHistory = false;
-                    $this->sourceLangHistory   = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
+                    $this->sourceLangHistory   = $_COOKIE[ Constants::COOKIE_SOURCE_LANG ];
                     $this->sourceLangAr        = explode( '||', urldecode( $this->sourceLangHistory ) );
                     $tmpSourceAr               = [];
                     $tmpSourceArAs             = [];
@@ -166,7 +175,16 @@ class newProjectController extends viewController {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid, time() + 86400, '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
+            CookieManager::setCookie( "upload_session", $this->guid,
+                    [
+                            'expires'  => time() + 86400,
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'None',
+                    ]
+            );
         } else {
             $this->guid = $_COOKIE[ 'upload_session' ];
         }
@@ -252,9 +270,9 @@ class newProjectController extends viewController {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 
-        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
-        $this->template->languages_array_obj = $this->lang_handler->getEnabledLanguages( 'en' ) ;
-        $this->template->subject_array = $this->subjectArray;
+        $this->template->languages_array     = json_encode( $this->lang_handler->getEnabledLanguages( 'en' ) );
+        $this->template->languages_array_obj = $this->lang_handler->getEnabledLanguages( 'en' );
+        $this->template->subject_array       = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
 
@@ -274,17 +292,17 @@ class newProjectController extends viewController {
             $this->template->allowed_file_types = $this->getExtensions( "default" );
         }
 
-        $this->template->supported_file_types_array = $this->getCategories();
-        $this->template->unsupported_file_types     = $this->getExtensionsUnsupported();
-        $this->template->formats_number             = $this->countExtensions();
-        $this->template->volume_analysis_enabled    = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->sourceLangHistory          = $this->sourceLangArray;
-        $this->template->targetLangHistory          = $this->targetLangArray;
-        $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
-        $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->extended_user              = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->logged_user                = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
-        $this->template->userMail                   = $this->user->email;
+        $this->template->supported_file_types_array            = $this->getCategories();
+        $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
+        $this->template->formats_number                        = $this->countExtensions();
+        $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;
+        $this->template->sourceLangHistory                     = $this->sourceLangArray;
+        $this->template->targetLangHistory                     = $this->targetLangArray;
+        $this->template->noSourceLangHistory                   = $this->noSourceLangHistory;
+        $this->template->noTargetLangHistory                   = $this->noTargetLangHistory;
+        $this->template->extended_user                         = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
+        $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+        $this->template->userMail                              = $this->user->email;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
 
         $this->template->build_number   = INIT::$BUILD_NUMBER;
@@ -309,10 +327,10 @@ class newProjectController extends viewController {
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
 
-        $this->template->additional_input_params_base_path = \INIT::$TEMPLATE_ROOT;
+        $this->template->additional_input_params_base_path = INIT::$TEMPLATE_ROOT;
 
         //Enable tag projection at instance level
-        $this->template->show_tag_projection = true;
+        $this->template->show_tag_projection    = true;
         $this->template->tag_projection_enabled = true;
         $this->template->tag_projection_default = true;
 
@@ -343,16 +361,25 @@ class newProjectController extends viewController {
     }
 
     private function evalTragetLangHistory() {
-        if ( isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] == \Constants::EMPTY_VAL ) {
+        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ Constants::COOKIE_TARGET_LANG ] == Constants::EMPTY_VAL ) {
             $this->noTargetLangHistory = true;
         } else {
-            if ( !isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) ) {
-                setcookie( \Constants::COOKIE_TARGET_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
+            if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
+                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
+                        [
+                                'expires'  => time() + ( 86400 * 365 ),
+                                'path'     => '/',
+                                'domain'   => INIT::$COOKIE_DOMAIN,
+                                'secure'   => true,
+                                'httponly' => true,
+                                'samesite' => 'None',
+                        ]
+                );
                 $this->noTargetLangHistory = true;
             } else {
-                if ( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] != \Constants::EMPTY_VAL ) {
+                if ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] != Constants::EMPTY_VAL ) {
                     $this->noTargetLangHistory = false;
-                    $this->targetLangHistory   = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
+                    $this->targetLangHistory   = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
                     $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
 
                     $tmpTargetAr   = [];

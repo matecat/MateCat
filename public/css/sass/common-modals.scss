@@ -206,6 +206,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
     }
   }
+  .user-api-text-confirm-delete {
+    label {
+      color: $black;
+    }
+  }
   .user-api-buttons {
     order: 2;
   }
@@ -231,6 +236,22 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       line-height: 30px;
     }
   }
+  &.user-api-created {
+    align-items: baseline;
+
+    .user-api-text {
+      display: flex;
+      flex-direction: row;
+      > div input {
+        height: 38px;
+        border-radius: 2px;
+      }
+      > :last-child {
+        margin-left: 3px;
+      }
+    }
+  }
+
   &.user-api-created textarea,
   &.user-api-created label {
     color: $black;
@@ -673,13 +694,13 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
   .matecat-modal-header {
     text-align: left;
-    min-height: 47px;
+    min-height: 50px;
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
     background: #002b5c;
-    padding: 10px 10px 7px 24px;
+    padding: 7px 10px 7px 24px;
     background-size: 35px;
     color: #fff;
     margin: 0 !important;
@@ -687,6 +708,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     grid-template-columns: 40px 1fr 24px;
     position: relative;
     grid-column-gap: 16px;
+    align-items: center;
     h2 {
       margin: 0 !important;
       line-height: 30px;
@@ -694,15 +716,16 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       width: auto !important;
       float: none !important;
       font-family: Calibri, Arial, Helvetica, sans-serif;
+      font-weight: normal;
     }
   }
   .modal-logo {
     background-size: inherit;
-    background: url(../../img/Logo-Onlycat-white.svg) no-repeat;
+    background: url(../../img/logo_matecat_small_white.svg) no-repeat;
     background-position-y: center;
     background-size: contain;
-    width: 40px;
-    height: 26px;
+    width: 35px;
+    height: 35px;
   }
   /* Modal Body */
   .matecat-modal-body {
@@ -738,7 +761,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     animation-name: animatetop;
     animation-duration: 0.4s;
     text-align: center;
-    max-width: 600px;
+    max-width: 640px;
     min-width: 400px;
     //-webkit-box-shadow: 0 1px 20px #000;
     //box-shadow: 0 1px 20px #6f6e6e;
@@ -889,7 +912,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   display: block;
   width: 200%;
   margin-left: -100%;
-  transition: margin 0.3s ease-in 0s;
+  transition: margin 0.2s ease-out 0s;
 }
 
 .onoffswitch-inner:before,
@@ -905,6 +928,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: white;
   font-weight: bold;
   box-sizing: border-box;
+  border-radius: 16px;
 }
 
 .onoffswitch-inner:before {
@@ -912,6 +936,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding-left: 10px;
   background-color: $linkBlue;
   color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.3s ease-in 0s;
 }
 
 .onoffswitch-inner:after {
@@ -933,7 +959,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   right: 25px;
   border: 2px solid #ccc;
   border-radius: 20px;
-  transition: all 0.3s ease-in 0s;
+  transition: all 0.2s ease-out 0s;
 }
 
 .onoffswitch-label-status-active {
@@ -998,6 +1024,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
   margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner:before {
+  opacity: 1;
 }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
@@ -1552,6 +1581,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.alt:after {
                   content: 'Alt';
                 }
+                &.option:after {
+                  content: 'Option';
+                }
                 &.\31 :after {
                   content: '1';
                 }
@@ -1633,6 +1665,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.arrows-enter:after {
                   content: 'Arrows/Enter';
                 }
+                &.space:after {
+                  content: 'Space';
+                }
               }
             }
           }
@@ -1667,13 +1702,6 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     .btn-cancel {
       margin-right: 16px;
       font-weight: 100;
-    }
-    .notes-action {
-      padding-left: 196px;
-      position: relative;
-      top: 2px;
-      font-size: 12px;
-      margin-top: 12px;
     }
   }
   .boxed {

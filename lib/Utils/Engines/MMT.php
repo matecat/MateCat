@@ -108,7 +108,16 @@ class Engines_MMT extends Engines_AbstractEngine {
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
         try {
-            $translation = $client->translate( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], @$_config[ 'mt_context' ], $_keys, @$_config[ 'job_id' ], static::GET_REQUEST_TIMEOUT );
+
+            $translation = $client->translate(
+                    $_config[ 'source' ],
+                    $_config[ 'target' ],
+                    $_config[ 'segment' ],
+                    @$_config[ 'mt_context' ],
+                    $_keys, @$_config[ 'job_id' ],
+                    static::GET_REQUEST_TIMEOUT,
+                    @$_config[ 'priority' ]
+            );
 
             return ( new Engines_Results_MyMemory_Matches(
                     $_config[ 'segment' ],

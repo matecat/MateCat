@@ -85,6 +85,7 @@ class UserKeysModel {
         foreach ( $job_keyList as $jobKey ) {
 
             $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+            $jobKey->complete_format = true;
 
             if ( !is_null( $this->user->uid ) && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ) {
 

@@ -9,12 +9,16 @@
 namespace Features;
 
 use AMQHandler;
+use Chunks_ChunkStruct;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects\ProjectModel;
+use Projects_ProjectDao;
 use RedisHandler;
+use Segments_SegmentStruct;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
 use Translations\WarningStruct;
+use Utils;
 use WorkerClient;
 
 class QaCheckBlacklist extends BaseFeature {
@@ -54,7 +58,7 @@ class QaCheckBlacklist extends BaseFeature {
     }
 
     public function postProjectCreate( $projectStructure ) {
-        $project_struct = \Projects_ProjectDao::findById( $projectStructure[ 'result' ][ 'id_project' ] );
+        $project_struct = Projects_ProjectDao::findById( $projectStructure[ 'result' ][ 'id_project' ] );
         $project_model = new ProjectModel($project_struct );
         $project_model->saveBlacklistPresence();
     }
@@ -62,10 +66,10 @@ class QaCheckBlacklist extends BaseFeature {
     public function setTranslationCommitted( $params ) {
         $translation = $params[ 'translation' ];
 
-        /** @var  $segment \Segments_SegmentStruct */
+        /** @var  $segment Segments_SegmentStruct */
         $segment = $params[ 'segment' ];
 
-        /** @var $chunk \Chunks_ChunkStruct */
+        /** @var $chunk Chunks_ChunkStruct */
         $chunk = $params[ 'chunk' ];
 
         $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
@@ -89,7 +93,7 @@ class QaCheckBlacklist extends BaseFeature {
 
     public function filterGlobalWarnings( $result, $params ) {
         /**
-         * @var $chunk \Chunks_ChunkStruct
+         * @var $chunk Chunks_ChunkStruct
          */
         $chunk = $params[ 'chunk' ];
 
@@ -114,14 +118,14 @@ class QaCheckBlacklist extends BaseFeature {
     }
 
     public function filterSegmentWarnings( $data, $params ) {
-        $params = \Utils::ensure_keys( $params, array(
+        $params = Utils::ensure_keys( $params, array(
                 'src_content', 'trg_content', 'chunk', 'project'
         ));
 
         $target = $params['trg_content'] ;
 
         /**
-         * @var $chunk \Chunks_ChunkStruct
+         * @var $chunk Chunks_ChunkStruct
          */
         $chunk = $params['chunk'] ;
 

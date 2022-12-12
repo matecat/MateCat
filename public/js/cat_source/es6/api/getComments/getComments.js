@@ -6,7 +6,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {Object} options
  * @param {boolean} options.firstSegment
  * @param {boolean} options.lastSegment
- * @param {stromg} [options.idJob=config.id_job]
+ * @param {string} [options.idJob=config.id_job]
  * @returns {Promise<object>}
  */
 export const getComments = async ({

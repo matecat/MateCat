@@ -239,7 +239,16 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( \Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
+        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal,
+                [
+                        'expires'  => time() + ( 86400 * 365 ),
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
 
         // SET TARGET COOKIE
 
@@ -271,7 +280,16 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( \Constants::COOKIE_TARGET_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
+        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal,
+                [
+                        'expires'  => time() + ( 86400 * 365 ),
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
@@ -504,7 +522,9 @@ class createProjectController extends ajaxController {
 
     private static function sanitizeTmKeyArr( $elem ) {
 
-        $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+        $element = new TmKeyManagement_TmKeyStruct( $elem );
+        $element->complete_format = true;
+        $elem = TmKeyManagement_TmKeyManagement::sanitize( $element );
 
         return $elem->toArray();
 

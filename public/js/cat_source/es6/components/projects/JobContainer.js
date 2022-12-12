@@ -9,6 +9,7 @@ import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
+import ConfirmMessageModal from "../modals/ConfirmMessageModal";
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -29,6 +30,7 @@ class JobContainer extends React.Component {
     this.archiveJob = this.archiveJob.bind(this)
     this.activateJob = this.activateJob.bind(this)
     this.cancelJob = this.cancelJob.bind(this)
+    this.deleteJob = this.deleteJob.bind(this)
   }
 
   getTranslateUrl() {
@@ -249,23 +251,33 @@ class JobContainer extends React.Component {
   }
 
   archiveJob() {
-    ManageActions.changeJobStatus(
-      this.props.project,
-      this.props.job,
-      'archived',
-    )
+    ManageActions.changeJobStatus(this.props.project, this.props.job, 'archive')
   }
 
   cancelJob() {
-    ManageActions.changeJobStatus(
-      this.props.project,
-      this.props.job,
-      'cancelled',
-    )
+    ManageActions.changeJobStatus(this.props.project, this.props.job, 'cancel')
   }
 
   activateJob() {
     ManageActions.changeJobStatus(this.props.project, this.props.job, 'active')
+  }
+
+  deleteJob() {
+    const props = {
+      text:
+          'You are about to delete this job permanently. This action cannot be undone.</br>' +
+          ' Are you sure you want to proceed?',
+      successText: 'Yes, delete it',
+      successCallback:  () =>{
+        ManageActions.changeJobStatus(this.props.project, this.props.job, 'delete')
+      },
+      cancelCallback: ()=>{}
+    }
+    ModalsActions.showModalComponent(
+        ConfirmMessageModal,
+        props,
+        'Confirmation required',
+    )
   }
 
   downloadTranslation() {
@@ -405,6 +417,7 @@ class JobContainer extends React.Component {
         archiveJobFn={this.archiveJob}
         activateJobFn={this.activateJob}
         cancelJobFn={this.cancelJob}
+        deleteJobFn={this.deleteJob}
       />
     )
   }
@@ -445,7 +458,7 @@ class JobContainer extends React.Component {
       keys.forEach(function (key) {
         let descript = key.get('name')
           ? key.get('name')
-          : 'Private TM and Glossary'
+          : 'Private resource'
         let item =
           '<div style="text-align: left"><span style="font-weight: bold">' +
           descript +
@@ -640,13 +653,30 @@ class JobContainer extends React.Component {
   }
 
   openOutsourceModal(showTranslatorBox, extendedView) {
-    if (!this.state.openOutsource) {
-      $(document).trigger('outsource-request')
+    if (showTranslatorBox && !this.props.job.get('outsource_available')) {
+      this.setState({
+        showTranslatorBox: showTranslatorBox,
+        extendedView: false,
+      })
+    } else if (this.props.job.get('outsource_available')) {
+      if (!this.state.openOutsource) {
+        $(document).trigger('outsource-request')
+      }
+      this.setState({
+        openOutsource: true,
+        showTranslatorBox: showTranslatorBox,
+        extendedView: extendedView,
+      })
+    } else {
+      window.open('https://translated.com/contact-us', '_blank')
     }
+  }
+
+  closeOutsourceModal() {
     this.setState({
-      openOutsource: !this.state.openOutsource,
-      showTranslatorBox: showTranslatorBox,
-      extendedView: extendedView,
+      openOutsource: false,
+      showTranslatorBox: false,
+      extendedView: false,
     })
   }
 
@@ -838,7 +868,8 @@ class JobContainer extends React.Component {
     if (
       !nextProps.job.equals(this.props.job) ||
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
-      nextState.openOutsource !== this.state.openOutsource
+      nextState.openOutsource !== this.state.openOutsource ||
+      nextState.showTranslatorBox !== this.state.showTranslatorBox
     ) {
       this.updated = true
     }
@@ -846,7 +877,8 @@ class JobContainer extends React.Component {
       !nextProps.job.equals(this.props.job) ||
       nextProps.lastAction !== this.props.lastAction ||
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
-      nextState.openOutsource !== this.state.openOutsource
+      nextState.openOutsource !== this.state.openOutsource ||
+      nextState.showTranslatorBox !== this.state.showTranslatorBox
     )
   }
 
@@ -1144,7 +1176,7 @@ class JobContainer extends React.Component {
           url={this.getTranslateUrl()}
           showTranslatorBox={this.state.showTranslatorBox}
           extendedView={this.state.extendedView}
-          onClickOutside={this.openOutsourceModal.bind(this)}
+          onClickOutside={this.closeOutsourceModal.bind(this)}
           openOutsource={this.state.openOutsource}
           idJobLabel={idJobLabel}
         />

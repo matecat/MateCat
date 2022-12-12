@@ -20,24 +20,6 @@ textarea {
   font-size: 16px;
 }
 
-@media (max-width: 500px) {
-  body {
-    min-width: 0 !important;
-    width: 100%;
-  }
-  .iepopup {
-    width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    left: 0 !important;
-    border: 0px solid #fff !important;
-    box-shadow: none !important;
-  }
-  .iepopup img {
-    width: 20% !important;
-  }
-}
-
 ul {
   margin: 0;
   padding: 0;
@@ -57,10 +39,9 @@ ul {
 .logo {
   float: left;
   border: 0;
-  background: url(../../img/logo_matecat.png) 0px 0px no-repeat;
-  width: 180px;
-  height: 38px;
-  background-size: cover;
+  background: url(../../img/logo_matecat_big_white.svg) 0px 0px no-repeat;
+  width: 190px;
+  height: 40px;
   //margin-top: 5px;
   position: relative;
 }
@@ -298,21 +279,24 @@ footer #statistics {
 }
 
 /*new browser supported */
-.unsupported-browser {
-  width: 100%;
-  height: 100%;
+.unsupported-device {
+  display: none;
+}
+.unsupported-browser,
+.unsupported-device {
   background-color: #f5f6f7;
-
+  height: 100%;
   .wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 40px;
-
+    height: 100%;
     .logoblack {
       background-size: 200px auto;
       width: 200px;
       height: 50px;
+      margin: 0 auto;
     }
 
     .container {
@@ -321,14 +305,18 @@ footer #statistics {
       align-items: center;
       width: 100%;
       max-width: 1024px;
-
+      padding-top: 20px;
       > h2 {
         margin-bottom: 0;
+      }
+      h1 {
+        text-align: center;
       }
 
       > p {
         color: gray;
-        margin-bottom: 60px;
+        margin-bottom: 20px;
+        text-align: center;
       }
 
       .browsers-list {
@@ -338,7 +326,9 @@ footer #statistics {
         width: 100%;
         color: gray;
       }
-
+      .link-more {
+        padding-bottom: 20px;
+      }
       .browsers-list > li {
         display: flex;
         justify-content: center;
@@ -385,45 +375,6 @@ footer #statistics {
         > :last-child {
           border-top-right-radius: 8px;
           border-bottom-right-radius: 8px;
-        }
-      }
-    }
-    /* homepage */
-
-    .homepage {
-      > h2 {
-        color: gray;
-        margin-bottom: 40px;
-      }
-
-      .boxes {
-        display: flex;
-        flex-direction: row;
-        color: gray;
-
-        > div {
-          padding: 10px;
-          background-color: #f1f1f1;
-          margin-left: 1px;
-          margin-right: 1px;
-
-          > h4 {
-            font-weight: normal;
-          }
-        }
-
-        .browsers-list > li {
-          max-width: 120px;
-          height: 120px;
-
-          img {
-            width: 80px;
-            height: auto;
-          }
-        }
-
-        > :last-child > :last-child {
-          margin-top: 105px;
         }
       }
     }
@@ -531,7 +482,7 @@ footer #statistics {
 
 .iepopup {
   width: 800px;
-  margin: 0 auto;
+  margin: 30px auto;
   padding: 30px 0 30px 0;
   display: block;
   z-index: 999999;
@@ -558,7 +509,7 @@ footer #statistics {
 
 .logoblack {
   border: 0;
-  background: url(../../img/logoblack.png) 0px 2px no-repeat;
+  background: url(../../img/logo_matecat_big.svg) 0px 2px no-repeat;
   display: block;
   width: 145px;
   height: 31px;
@@ -578,38 +529,6 @@ footer #statistics {
   line-height: 27px;
 }
 
-.topMenu.open {
-  max-height: 64%;
-  overflow-y: scroll;
-  top: 48px !important;
-  display: block;
-  box-shadow: 0 0 4px #cecccc;
-}
-
-.topMenu ul.gotocurrentsegment {
-  position: fixed;
-  width: 400px;
-}
-
-.topMenu ul.jobmenu-list {
-  margin-top: 45px;
-}
-
-/*scrollbar*/
-
-.topMenu ::-webkit-scrollbar {
-  width: 16px;
-}
-
-.topMenu ::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-.topMenu ::-webkit-scrollbar-thumb {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-}
-
-/*end-scrollbar*/
 /* mgmt panel  */
 
 .mgmt-panel-tm .tablestats,
@@ -723,10 +642,6 @@ footer #statistics {
   background-size: 24px;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
-}
-
-.currSegment a {
-  background: #efefef;
 }
 
 .topMenu ul li.current a {
@@ -1215,7 +1130,7 @@ td.addtmxtd {
   width: 804px;
 }
 
-input.email-export-tmx {
+input.email-export {
   width: 180px;
   margin-left: 10px !important;
 }
@@ -1397,9 +1312,10 @@ form.add-TM-Form {
   overflow: visible;
   max-height: inherit;
   font-size: 24px;
-  background: #002b5c url(../../img/Logo-Onlycat-white.svg) 16px 12px no-repeat;
+  background: #002b5c url(../../img/logo_matecat_small_white.svg) 16px 12px
+    no-repeat;
   padding: 10px 10px 7px 68px;
-  background-size: 48px;
+  background-size: 40px;
   /*border-bottom: 1px solid #000;*/
   color: #fff;
   margin: 0 !important;
@@ -1527,7 +1443,6 @@ form.add-TM-Form {
 }
 
 .btn-grey {
-  border: 1px solid #848689;
   font-weight: bold;
   text-decoration: none;
   padding: 8px 18px;
@@ -1570,7 +1485,6 @@ form.add-TM-Form {
 .btn-grey {
   color: $grey2;
   background: white;
-  border: 1px solid $grey2;
   //background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
   //background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
   //background: linear-gradient(top, #f6f6f6, #e2e3e5);
@@ -1869,10 +1783,6 @@ select#mt_engine_int {
   clear: right;
 }
 
-.btn-grey:active {
-  border: 1px solid #333;
-}
-
 span.asterisk {
   line-height: 10px;
   vertical-align: bottom;
@@ -1887,12 +1797,6 @@ span.text-req {
   /* margin-top: 0px; */
   clear: left;
   color: #bbb;
-}
-
-.btn-grey:active:active {
-  -moz-box-shadow: inset 0 0 1px 1px #888;
-  -webkit-box-shadow: inset 0 0 1px 1px #888;
-  box-shadow: inset 0 0 1px 1px #888;
 }
 
 .file_upload_error,
@@ -1953,14 +1857,6 @@ div.mt-error-key {
   float: left;
 }
 
-.btn-grey:hover {
-  cursor: pointer;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-  box-shadow: 0 1px 2px #ccc;
-  border: 1px solid #000;
-  color: #333333;
-}
-
 body.cattool .mgmt-tm.mine thead,
 .mgmt-tm.new thead,
 .mgmt-tm.anonymous thead {
@@ -1973,7 +1869,7 @@ body.cattool .mgmt-tm.mine thead,
 }
 
 td.share-tmx-container,
-td.download-tmx-container,
+td.download-container,
 td.download-glossary-container,
 td.uploadfile {
   color: black !important;
@@ -2181,8 +2077,8 @@ tr.mymemory td.dragrow .status {
   box-sizing: content-box;
 }
 
-span.email-export-tmx-email-sent,
-span.email-export-tmx-email-error,
+span.email-export-email-sent,
+span.email-export-email-error,
 .message-glossary-export-completed,
 .mgmt-tm .message-glossary-export-error,
 #activetm td.uploadfile .msg,
@@ -2249,8 +2145,8 @@ td.uploadfile p {
 }
 
 /* Export TMX container */
-#activetm td.download-tmx-container,
-#inactivetm td.download-tmx-container,
+#activetm td.download-container,
+#inactivetm td.download-container,
 #activetm td.download-glossary-container,
 #inactivetm td.download-glossary-container,
 #activetm td.share-tmx-container,
@@ -2264,38 +2160,37 @@ td.uploadfile p {
   position: relative;
 }
 
-td.download-tmx-container,
+td.download-container,
 .mgmt-tm .download-glossary-container {
   line-height: 30px;
 }
 
-.message-export-tmx,
-.message-export-tmx-success,
-.message-export-glossary {
+.message-export,
+.message-export-success {
   float: left;
   margin-left: 11px;
 }
 
-input.email-export-tmx {
+input.email-export {
   float: left;
   margin-left: 14px;
   margin-top: 3px !important;
 }
 
-.export-tmx-button-label:before {
+.export-button-label:before {
   content: '\f00c';
   padding-right: 7px;
   vertical-align: text-top;
 }
 
-.export-tmx-button-label {
+.export-button-label {
   width: 90px !important;
   display: block;
   text-align: center;
   color: white !important;
 }
 
-.mgmt-tm .btn-ok.export-tmx-button {
+.mgmt-tm .btn-ok.export-button {
   padding: 0px 5px !important;
   margin-right: 9px;
 }
@@ -2441,22 +2336,22 @@ input.email-export-tmx {
 
 /*******************/
 td.download-glossary-container .uploadloader {
-  top: -18px;
+  top: 13px;
   right: 85px;
 }
 
-.download-tmx-container .uploadloader {
+.download-container .uploadloader {
   right: 200px;
-  top: -18px;
+  top: 13px;
 }
 
-.export-tmx-button.disabled {
+.export-button.disabled {
   cursor: default;
   pointer-events: none;
 }
 
-span.email-export-tmx-email-sent,
-span.email-export-tmx-email-error,
+span.email-export-email-sent,
+span.email-export-email-error,
 .mgmt-tm .message-glossary-export-error,
 .message-glossary-export-completed {
   float: right;
@@ -2464,7 +2359,7 @@ span.email-export-tmx-email-error,
   display: none;
 }
 
-span.email-export-tmx-email-error {
+span.email-export-email-error {
   color: red;
   margin-left: 21px;
   line-height: 14px;
@@ -2472,16 +2367,19 @@ span.email-export-tmx-email-error {
   margin-right: 28px;
 }
 
-.btn-grey.canceladd-export-tmx {
+.btn-grey.canceladd-export {
   background: #f26522;
   width: 35px;
   padding: 0px !important;
   margin: 0px;
   text-align: center;
   color: #fff;
+  &:hover {
+    background: #c1511c;
+  }
 }
 
-.canceladd-export-tmx:before {
+.canceladd-export:before {
   content: '\f00d';
   vertical-align: text-top;
 }
@@ -3173,7 +3071,7 @@ input#new-tm-key {
 }
 
 #activetm input#new-tm-key,
-input.email-export-tmx {
+input.email-export {
   width: 170px;
   padding: 12px 5px;
   margin: 0;
@@ -3186,7 +3084,7 @@ input#new-tm-key {
   margin-right: 15px !important;
 }
 
-input.email-export-tmx {
+input.email-export {
   width: 200px;
 }
 
@@ -3573,25 +3471,6 @@ section.currSearchSegment mark.searchMarker {
 
 /* Google Sheet */
 
-#jobMenu span {
-  height: 30px;
-  padding: 5px;
-  margin: 0 8px 0 0;
-  width: 30px;
-  float: left;
-  background-size: 25px !important;
-}
-.currSegment span {
-  position: absolute;
-  top: 4px;
-  color: #757472;
-  visibility: hidden;
-  left: 200px;
-}
-.currSegment:hover span {
-  visibility: visible;
-}
-
 @media (max-height: 500px) {
   .register-modal {
     overflow-x: hidden;
@@ -3872,7 +3751,7 @@ p.tm-warning-message {
 /*
 /* mbc extend iconmoon set with icons for matecat chat
 */
-
+icon-iconmoon:before,
 .tagLockCustomize,
 #logoutlink:before,
 .btn-confirm-small .text:before,
@@ -3952,8 +3831,8 @@ header .filter:before,
 .editToolbar .lowercase:after,
 .editToolbar .capitalize:after,
 .more-options:before,
-.export-tmx-button-label:before,
-.canceladd-export-tmx:before,
+.export-button-label:before,
+.canceladd-export:before,
 .icon-copy-key:before,
 .login-modal .login-container-right li:before {
   font-family: 'icomoon';
@@ -4114,14 +3993,6 @@ header .filter:before {
 
 #swaplang:after {
   content: '\f0ec';
-}
-
-.review .breadcrumbs #pname:before,
-.cattool .breadcrumbs #pname:before {
-  content: '\f0dd';
-  font-size: 18px;
-  display: inline-block;
-  margin-right: 10px;
 }
 
 .more:before,
@@ -4739,45 +4610,40 @@ body.side-popup {
   color: #3aa9dd;
 }
 
-@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
-  header,
-  .wrapper-claim,
-  .wrapper-upload,
-  footer,
-  #template-upload,
-  #template-download,
-  .wrapper-claim,
-  .wrapper-bottom {
-    display: none !important;
+@media (max-width: 768px) {
+  body.upload-page {
+    min-width: unset;
+    background-color: #f5f6f7;
+    .started header,
+    .wrapper-claim,
+    .wrapper-upload,
+    footer,
+    #template-upload,
+    #template-download,
+    .wrapper-claim,
+    .wrapper-bottom {
+      display: none !important;
+    }
   }
+  .unsupported-device {
+    display: block;
+  }
+  .unsupported-browser {
+    display: none;
+  }
+  .unsupported-browser,
+  .unsupported-device {
+    .wrapper {
+      min-width: unset !important;
+      .boxes {
+        flex-direction: column !important;
+        gap: 30px;
+      }
+    }
+  }
+
   .nobrowser {
     display: block !important;
-  }
-  .iepopup.nobrowser {
-    width: 100%;
-  }
-  .iepopup .col-2 {
-    width: 90%;
-    margin: 8% 3% 5% 3%;
-    padding: 1% 2%;
-    min-height: 100px !important;
-    box-shadow: 0px 2px 3px #e9e9e9;
-    border: 1px solid #e6e6e6;
-    border-top: 3px solid #3aa9dd;
-  }
-
-  .iepopup .col-2 a {
-    font-size: 24px;
-  }
-  .iepopup.nobrowser p {
-    line-height: 30px;
-    margin-bottom: 40px;
-    font-size: 24px;
-  }
-
-  .iepopup h3 {
-    font-size: 30px;
-    margin-bottom: 20px;
   }
   .nobrowser .col-a img {
     width: 100px;

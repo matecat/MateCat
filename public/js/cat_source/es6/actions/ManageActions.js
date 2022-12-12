@@ -2,7 +2,6 @@ import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
 import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
-import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
 import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
 import {changeProjectTeam} from '../api/changeProjectTeam'
@@ -14,6 +13,8 @@ import {addUserTeam} from '../api/addUserTeam'
 import {removeTeamUser} from '../api/removeTeamUser'
 import {updateTeamName} from '../api/updateTeamName'
 import CatToolActions from './CatToolActions'
+import {changeProjectStatus} from '../api/changeProjectStatus'
+import {changeJobStatus} from '../api/changeJobStatus'
 
 let ManageActions = {
   /********* Projects *********/
@@ -83,7 +84,11 @@ let ManageActions = {
   },
 
   updateStatusProject: function (project, status) {
-    changeJobsOrProjectStatus('prj', project.toJS(), status).then(() => {
+    changeProjectStatus(
+      project.get('id'),
+      project.get('password'),
+      status,
+    ).then(() => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.HIDE_PROJECT,
         project: project,
@@ -95,7 +100,7 @@ let ManageActions = {
   },
 
   changeJobStatus: function (project, job, status) {
-    changeJobsOrProjectStatus('job', job.toJS(), status).then(() => {
+    changeJobStatus(job.get('id'), job.get('password'), status).then(() => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.REMOVE_JOB,
         project: project,

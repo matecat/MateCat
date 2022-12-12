@@ -18,7 +18,11 @@ import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
-;(function ($) {
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
+;
+import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
+
+(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
     var winBottom = winTop + $(window).height()
@@ -182,7 +186,34 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         if ($(this).hasClass('disabled')) return false
         var provider = $('#mt_engine_int').val()
         var providerName = $('#mt_engine_int option:selected').text()
-        UI.addMTEngine(provider, providerName)
+        if (provider === 'mmt') {
+          var props = {
+            modalName: 'mmt-message-modal',
+            text:
+              'ModernMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
+              'To provide the best results, <b>the following data will be synchronized with your private ModernMT engine:</b>' +
+              '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
+              '<li>Private translation memories uploaded to Matecat</li>' +
+              '<li>All segments translated or revised in Matecat</li></ul>' +
+              'To stop data from being synchronized, please delete the ModernMT engine from your list of available engines in Matecat.',
+            successText: 'Continue',
+            successCallback: function () {
+              UI.addMTEngine(provider, providerName)
+              ModalsActions.onCloseModal()
+            },
+            warningText: 'Cancel',
+            warningCallback: function () {
+              ModalsActions.onCloseModal()
+            },
+          }
+          ModalsActions.showModalComponent(
+            ConfirmMessageModal,
+            props,
+            'Confirmation required',
+          )
+        } else {
+          UI.addMTEngine(provider, providerName)
+        }
       })
       $('#add-mt-provider-cancel').click(function () {
         $('.add-mt-engine').show()
@@ -304,9 +335,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           'click',
           '#activetm tr.new a.addtmxfile:not(.disabled)',
           function () {
-            console.log('upload file')
             UI.checkTMKey('tm')
-
             $(this).addClass('disabled')
           },
         )
@@ -397,7 +426,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         .on('mousedown', '.mgmt-tm .downloadtmx:not(.disabled)', function (e) {
           e.preventDefault()
 
-          UI.openExportTmx(this)
+          UI.openExport(this, 'tmx')
         })
         .on('click', '.shareKey:not(.disabled)', function () {
           var tr = $(this).closest('tr')
@@ -410,25 +439,36 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           UI.openShareResource($(this))
         })
         .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
-          //Todo
           if ($(this).hasClass('disabled')) return false
-          UI.downloadGlossary($(this))
+          UI.openExport($(this), 'glossary')
         })
-        .on('mousedown', '.mgmt-tm .export-tmx-button', function (e) {
+        .on('mousedown', '.mgmt-tm .export-tmx .export-button', function (e) {
           e.preventDefault()
-          UI.startExportTmx(this)
+          UI.startExport(this, 'tmx')
         })
-        .on('keydown', '.email-export-tmx.mgmt-input', function (e) {
+        .on('mousedown', '.mgmt-tm .export-glossary .export-button', function (e) {
+          e.preventDefault()
+          UI.startExport(this, 'glossary')
+        })
+        .on('keydown', '.export-tmx .email-export.mgmt-input', function (e) {
           if (e.which == 13) {
             // enter
             e.preventDefault()
-            UI.startExportTmx(this)
+            UI.startExport(this, 'tmx')
           }
           UI.hideAllBoxOnTables()
         })
-        .on('mousedown', '.mgmt-tm .canceladd-export-tmx', function (e) {
+        .on('keydown', '.export-glossary .email-export.mgmt-input', function (e) {
+          if (e.which == 13) {
+            // enter
+            e.preventDefault()
+            UI.startExport(this, 'glossary')
+          }
+          UI.hideAllBoxOnTables()
+        })
+        .on('mousedown', '.mgmt-tm .canceladd-export', function (e) {
           e.preventDefault()
-          UI.closeExportTmx($(this).closest('tr'))
+          UI.closeExport($(this).closest('tr'))
           UI.hideAllBoxOnTables()
         })
         .on('mousedown', '.mgmt-tm .deleteTM:not(.disabled)', function (e) {
@@ -487,30 +527,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 
       $(document).ready(function () {
         UI.setTMsortable()
-        // $("#inactivetm").tablesorter({
-        //     textExtraction: function(node) {
-        //         // extract data from markup and return it
-        //         if($(node).hasClass('privatekey')) {
-        //             return $(node).text();
-        //         } else {
-        //             return $(node).text();
-        //         }
-        //     },
-        //     headers: {
-        //         4: {
-        //             sorter: true
-        //         },
-        //         5: {
-        //             sorter: false
-        //         },
-        //         6: {
-        //             sorter: false
-        //         },
-        //         7: {
-        //             sorter: false
-        //         }
-        //     }
-        // });
         UI.checkCreateTmKeyFromQueryString()
         UI.checkOpenTabFromParameters()
       })
@@ -874,7 +890,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
     addTMKeyToList: function (uploading) {
       var descr = $('#new-tm-description').val()
       var key = $('#new-tm-key').val()
-      descr = descr.length ? descr : 'Private TM and Glossary'
+      descr = descr.length ? descr : 'Private resource'
       var keyParams = {
         r: $('#new-tm-read').is(':checked'),
         w: $('#new-tm-write').is(':checked'),
@@ -1021,7 +1037,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
       var ifId = 'upload_iframe-' + ts
       var iframe = document.createElement('iframe')
       iframe.setAttribute('id', ifId)
-      console.log('iframe: ', iframe)
       iframe.setAttribute('name', 'upload_iframe')
       iframe.setAttribute('width', '0')
       iframe.setAttribute('height', '0')
@@ -1057,7 +1072,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         iframeId.addEventListener('load', eventHandler, true)
       if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
       var TR = $(form).parents('tr')
-      var Key = TR.find('.privatekey').first().text()
+      var Key = TR.find('.privatekey').first().text().trim()
+      var keyName = TR.find('.description').first().text().trim()
 
       // Set properties of form...
       form.setAttribute('target', 'upload_iframe')
@@ -1070,7 +1086,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
       }
       $(form)
         .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + tmName + '" />')
+        .append('<input type="hidden" name="name" value="' + keyName + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />')
       if (APP.isCattool) {
@@ -1110,13 +1126,10 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           setTimeout(function () {
             //delay because server can take some time to process large file
             // TRcaller.removeClass('startUploading');
-            UI.pollForUploadProgress(Key, fileName, TRcaller, type)
+            const uuid = type === 'glossary' && msg.data?.uuids?.length > 0 ? msg.data.uuids[0] : undefined
+            UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
           }, 2000)
         } else {
-          // console.log('error');
-
-          // TRcaller.removeClass('startUploading');
-
           TRcaller.find('.action a').removeClass('disabled')
           UI.showErrorUpload($(TRcaller))
           UI.UploadIframeId.remove()
@@ -1170,10 +1183,10 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgress: function (Key, fileName, TRcaller, type) {
+    pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
       const promise =
         type === 'glossary'
-          ? loadGlossaryFile({key: Key, name: fileName})
+          ? loadGlossaryFile({id: uuid})
           : loadTMX({key: Key, name: fileName})
       promise
         .then((response) => {
@@ -1181,12 +1194,12 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.showStartUpload($(TDcaller))
 
-          if (response.data.total == null) {
+          if (response.data.total == null && response.data.totals === null ) {
             setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           } else {
-            if (response.data.completed) {
+            if ((type === 'tmx' && response.data.completed) || (type === 'glossary' && response.data.completed === response.data.totals) ) {
               var tr = $(TDcaller).parents('tr')
               UI.showSuccessUpload(tr)
 
@@ -1204,14 +1217,16 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 
               return false
             }
+            const done = type === 'tmx' ? response.data.done : response.data.completed
+            const total = type === 'tmx' ? response.data.total : response.data.totals
             var progress =
-              (parseInt(response.data.done) / parseInt(response.data.total)) *
+              (parseInt(done) / parseInt(total)) *
               100
             $(TDcaller)
               .find('.progress .inner')
               .css('width', progress + '%')
             setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type)
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           }
         })
@@ -1309,6 +1324,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         .then(() => {
           $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
+          // TODO: update keys for glossary
+          CatToolActions.onTMKeysChangeStatus()
         })
         .catch(() => {
           UI.showErrorOnActiveTMTable(
@@ -1321,10 +1338,14 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
       var tr = field.parents('tr').first()
       var old_descr = tr.find('.edit-desc').data('descr')
       var new_descr = field.text()
+
+      if (new_descr === '') {
+        old_descr.length > 0 ? new_descr = old_descr : new_descr = 'Private resource'
+        field.text(new_descr)
+      }
       if (old_descr === new_descr) {
         return
       }
-
       updateTmKey({
         key: tr.find('.privatekey').text(),
         description: new_descr,
@@ -1341,7 +1362,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
     saveTMkey: function (key, desc) {
       delete UI.newTmKey
       if (desc.length == 0) {
-        desc = 'Private TM and Glossary'
+        desc = 'Private resource'
       }
 
       const promise = createNewTmKey({
@@ -1393,105 +1414,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
       )
         .parents('tr')
         .addClass('found')
-    },
-    downloadTM: function (tm, email) {
-      var tm_key = $('.privatekey', tm).text().trim()
-      var tm_name = $('.description', tm).text().trim()
-
-      return downloadTMXApi({
-        key: tm_key,
-        name: tm_name,
-        email,
-      })
-    },
-    downloadGlossary: function (elem) {
-      var tr = elem.closest('tr')
-      UI.hideAllBoxOnTables()
-      this.openExportGlossary(elem, tr)
-
-      //add a random string to avoid collision for concurrent javascript requests
-      //in the same milli second, and also, because a string is needed for token and not number....
-      var downloadToken =
-        new Date().getTime() + '_' + parseInt(Math.random(0, 1) * 10000000)
-
-      //create a random Frame ID and form ID to get it uniquely
-      var iFrameID = 'iframeDownload_' + downloadToken
-      var formID = 'form_' + downloadToken
-
-      //create an iFrame element
-      var iFrameDownload = $(document.createElement('iframe')).hide().prop({
-        id: iFrameID,
-        src: '',
-      })
-
-      $('body').append(iFrameDownload)
-
-      iFrameDownload.ready(function () {
-        //create a GLOBAL setInterval so in anonymous function it can be disabled
-        var downloadTimer = window.setInterval(function () {
-          //check for cookie equals to it's value.
-          //This is unique by definition and we can do multiple downloads
-          var token = Cookies.get(downloadToken)
-
-          //if the cookie is found, download is completed
-          //remove iframe an re-enable download button
-          if (token) {
-            window.clearInterval(downloadTimer)
-            elem.removeClass('disabled')
-            tr.find('.uploadloader').hide()
-            Cookies.set(downloadToken, null, {
-              path: '/',
-              expires: -1,
-              secure: true,
-            })
-            const errorMsg = $('#' + iFrameID)
-              .contents()
-              .find('body')
-              .text()
-            if (errorMsg != '') {
-              tr.find('.message-glossary-export-error').show()
-              if (tr.closest('table').attr('id') == 'inactivetm') {
-                UI.showErrorOnInactiveTMTable(
-                  'Export failed. No glossary found in the resource.',
-                )
-              } else {
-                UI.showErrorOnActiveTMTable(
-                  'Export failed. No glossary found in the resource.',
-                )
-              }
-              tr.find('.download-glossary-container').addClass('tm-error')
-            } else {
-              tr.find('.message-glossary-export-completed').show()
-            }
-            tr.find('.action a').removeClass('disabled')
-            $('#' + iFrameID).remove()
-
-            setTimeout(function () {
-              tr.find('td.download-glossary-container').slideToggle(
-                function () {
-                  $(this).remove()
-                },
-              )
-              UI.hideAllBoxOnTables()
-            }, 5000)
-          }
-        }, 2000)
-      })
-      var tm_key = $('.privatekey', tr).text()
-      //create the html form and append a token for download
-      var iFrameForm = $(document.createElement('form')).attr({
-        id: formID,
-        action: '/api/v2/glossaries/export/' + tm_key + '/' + downloadToken,
-        method: 'GET',
-      })
-
-      //append from to newly created iFrame and submit form post
-      iFrameDownload.contents().find('body').append(iFrameForm)
-      console.log(iFrameDownload.contents().find('#' + formID))
-      iFrameDownload
-        .contents()
-        .find('#' + formID)
-        .submit()
     },
     showMTDeletingMessage: function (button) {
       var tr = button.closest('tr')
@@ -1565,6 +1487,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
           }, 500)
+          // TODO: update keys for glossary
+          if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
         })
         .catch(() => {
           UI.showErrorOnActiveTMTable(
@@ -1622,7 +1546,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
           ) {
             UI.renderMTConfig(provider, response.name, response.data.config)
           } else {
-            console.log('success')
             UI.renderNewMT(props, response.data)
             if (!APP.isCattool) {
               UI.activateMT(
@@ -1842,7 +1765,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
       //call API
       tmCreateRandUser().then((response) => {
         const {data} = response
-        console.log(data)
         //put value into input field
         UI.newTmKey = data.key
         UI.copyNewTMKey(UI.newTmKey)
@@ -1853,34 +1775,35 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
       $('#activetm tr.new').removeClass('badkey')
       UI.checkTMAddAvailability()
     },
-    openExportTmx: function (elem) {
+    openExport: function (elem, type) {
       $(elem)
         .parents('.action')
         .find('a')
         .each(function () {
           $(this).addClass('disabled')
         })
-
-      var exportDiv =
-        '<td class="download-tmx-container" style="display: none">' +
-        '<div class="message-export-tmx">We will send a link to download the exported TM to this email:</div>' +
-        '<div class="message-export-tmx-success"></div>' +
-        '<input type="email" required class="email-export-tmx mgmt-input" value="' +
+      const text = type === 'glossary' ?  'We will send a link to download the exported Glossary to this email:' : 'We will send a link to download the exported TM to this email:';
+      const className =  type === 'glossary' ?  'export-glossary' : 'export-tmx';
+      const exportDiv =
+        '<td class="download-container '+ className +'" style="display: none">' +
+        '<div class="message-export">'+text+'</div>' +
+        '<div class="message-export-success"></div>' +
+        '<input type="email" required class="email-export mgmt-input" value="' +
         config.userMail +
         '"/>' +
         '<span class="uploadloader"></span>' +
-        '<span class="email-export-tmx-email-sent">Request submitted</span>' +
-        '<a class="pull-right btn-grey canceladd-export-tmx">' +
+        '<span class="email-export-email-sent">Request submitted</span>' +
+        '<a class="pull-right btn-grey canceladd-export">' +
         '<span class="text"></span>' +
         '</a>' +
-        '<a class="pull-right btn-ok export-tmx-button">' +
-        '   <span class="text export-tmx-button-label">Confirm</span>' +
+        '<a class="pull-right btn-ok export-button export-tmx-button">' +
+        '   <span class="text export-button-label">Confirm</span>' +
         '</a>' +
-        '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
+        '<span class="email-export-email-error">We got an error,</br> please contact support</span>' +
         '</td>'
 
       $(elem).parents('tr').append(exportDiv)
-      $(elem).parents('tr').find('.download-tmx-container').slideToggle()
+      $(elem).parents('tr').find('.download-container').slideToggle()
     },
     getUserSharedKey: function (keyValue) {
       const promise = getInfoTmKey({
@@ -1995,69 +1918,60 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         })
       })
     },
-    openExportGlossary: function (elem, tr) {
-      tr.find('.action a').addClass('disabled')
-      var exportDiv =
-        '<td class="download-glossary-container" style="display: none">' +
-        '<div class="message-export-glossary">We are exporting the glossary. Please wait...</div>' +
-        '<span class="message-glossary-export-completed">Export Completed</span>' +
-        '<span class="message-glossary-export-error">Export failed. No glossary found in the resource.</span>' +
-        '<span class="uploadloader"></span>' +
-        '</td>'
-
-      tr.append(exportDiv)
-      tr.find('.uploadloader').show()
-      tr.find('.download-glossary-container').slideToggle()
-    },
-    startExportTmx: function (elem) {
+    startExport: function (elem, type) {
       var line = $(elem).closest('tr')
-      var email = line.find('.email-export-tmx').val()
-      var successText =
-        'You should receive the link at ' +
-        email +
-        ' in <strong>%XX% minutes.</strong>'
+      var email = line.find('.email-export').val()
+      var successText = 'You should receive the link at ' + email
 
       line.find('.uploadloader').show()
       line
-        .find('.export-tmx-button, .canceladd-export-tmx')
+        .find('.export-button, .canceladd-export')
         .addClass('disabled')
-      UI.downloadTM(line, email)
+      const tm_key = $('.privatekey', line).text().trim()
+      const tm_name = $('.description', line).text().trim()
+      const params = {
+        key: tm_key,
+        name: tm_name,
+        email
+      }
+      const promise = type === 'glossary' ? downloadGlossary(params) : downloadTMXApi(params)
+      promise
         .then((response) => {
           var time = Math.round(response.data.estimatedTime / 60)
           time = time > 0 ? time : 1
           successText = successText.replace('%XX%', time)
           setTimeout(function () {
-            line.find('.message-export-tmx-success').html(successText)
+            line.find('.message-export-success').html(successText)
             line.find('.uploadloader').hide()
             line
               .find(
-                '.export-tmx-button, .canceladd-export-tmx, .email-export-tmx',
+                '.export-button, .canceladd-export, .email-export',
               )
               .hide()
-            line.find('.message-export-tmx').hide()
+            line.find('.message-export').hide()
             line
-              .find('.message-export-tmx-success, .email-export-tmx-email-sent')
+              .find('.message-export-success, .email-export-email-sent')
               .show()
             setTimeout(function () {
-              UI.closeExportTmx(line)
+              UI.closeExport(line)
             }, 5000)
           }, 3000)
         })
         .catch(() => {
           setTimeout(function () {
             line.find('.uploadloader').hide()
-            line.find('.export-tmx-button').hide()
+            line.find('.export-button').hide()
             line.find('.action a').removeClass('disabled')
-            line.find('.canceladd-export-tmx').removeClass('disabled')
-            line.find('.email-export-tmx-email-error').show()
+            line.find('.canceladd-export').removeClass('disabled')
+            line.find('.email-export-email-error').show()
             UI.showErrorMessage(line, 'We got an error, please contact support')
-            line.find('.download-tmx-container').addClass('tm-error')
+            line.find('.download-container').addClass('tm-error')
           }, 2000)
         })
     },
-    closeExportTmx: function (elem) {
+    closeExport: function (elem) {
       $(elem)
-        .find('td.download-tmx-container')
+        .find('td.download-container')
         .slideToggle(function () {
           $(this).remove()
         })
@@ -2066,7 +1980,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
     addFormUpload: function (elem, type) {
       var label, format
       if (type == 'tmx') {
-        label = '<p class="pull-left">Select TMX file to import</p>'
+        label =
+          '<p class="pull-left">Select one or more TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2075,10 +1990,10 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select glossary in XLSX format ' +
+          '<p class="pull-left">Select one or more glossaries in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
-        format = '.xlsx,.xls'
+        format = '.xlsx,.xls, .ods'
       }
       $(elem).closest('tr').find('.action a').addClass('disabled')
       var nr =
@@ -2086,9 +2001,9 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
         label +
         '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-        '    <input type="file" name="uploaded_file" accept="' +
+        '    <input type="file" name="uploaded_file[]" accept="' +
         format +
-        '"/>' +
+        '" multiple/>' +
         '</form>' +
         '   <a class="pull-right btn-grey canceladd' +
         type +
@@ -2202,10 +2117,10 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
     initTmxTooltips: function () {
       //Description input
       if (config.isLoggedIn) {
-        $('tr:not(.ownergroup) .edit-desc').data(
+        /*$('tr:not(.ownergroup) .edit-desc').data(
           'powertip',
           "<div style='line-height: 18px;font-size: 15px;'>Rename</div>",
-        )
+        )*/
         $('.edit-desc').powerTip({
           placement: 's',
         })

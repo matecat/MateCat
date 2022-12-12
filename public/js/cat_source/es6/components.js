@@ -5,6 +5,7 @@ import classnames from 'classnames'
 
 import JobMetadata from './components/header/cattol/JobMetadata'
 import SegmentStore from './stores/SegmentStore'
+import CatToolStore from './stores/CatToolStore'
 import SegmentFilter from './components/header/cattol/segment_filter/segment_filter'
 import AnalyzeActions from './actions/AnalyzeActions'
 import CatToolActions from './actions/CatToolActions'
@@ -21,7 +22,6 @@ import SegmentTabMatches from './components/segments/SegmentFooterTabMatches'
 import SegmentTabMessages from './components/segments/SegmentFooterTabMessages'
 import SegmentButtons from './components/segments/SegmentButtons'
 import TranslationIssuesSideButton from './components/review/TranslationIssuesSideButton'
-import QaCheckGlossary from './components/segments/utils/qaCheckGlossaryUtils'
 import TagUtils from './utils/tagUtils'
 import TextUtils from './utils/textUtils'
 import CursorUtils from './utils/cursorUtils'
@@ -43,6 +43,7 @@ window.SegmentActions = SegmentActions
 window.ModalsActions = ModalsActions
 
 window.SegmentStore = SegmentStore
+window.CatToolStore = CatToolStore
 
 window.Header = Header
 window.JobMetadata = JobMetadata
@@ -57,8 +58,6 @@ window.SegmentTabMatches = SegmentTabMatches
 window.SegmentTabMessages = SegmentTabMessages
 window.SegmentButtons = SegmentButtons
 window.TranslationIssuesSideButton = TranslationIssuesSideButton
-
-window.QaCheckGlossary = QaCheckGlossary
 
 window.TagUtils = TagUtils
 window.TextUtils = TextUtils

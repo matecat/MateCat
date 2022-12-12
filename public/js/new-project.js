@@ -14,6 +14,7 @@ import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 import {createProject} from './cat_source/es6/api/createProject'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -377,6 +378,37 @@ APP.checkForDqf = function () {
 
 UI.UPLOAD_PAGE = {}
 
+// workaround hide dropdown tab navigation
+const getInputElement = function () {
+  return this.getElementsByClassName('menu-dropdown')[0].getElementsByTagName(
+    'input',
+  )[0]
+}
+const onTabKeyDown = (e) => {
+  if (e.key.toLowerCase() === 'tab') {
+    const elements = [
+      document.getElementById('project-team'),
+      document.getElementById('source-lang'),
+      document.getElementById('target-lang'),
+      document.getElementById('project-subject'),
+      document.getElementById('tmx-select'),
+    ]
+
+    elements.forEach((element) => {
+      if (!element) return
+      const input = getInputElement.call(element)
+      if (
+        element.classList.contains('visible') &&
+        element.classList.contains('active') &&
+        document.activeElement &&
+        input === document.activeElement
+      ) {
+        $(element).dropdown('hide')
+      }
+    })
+  }
+}
+
 $.extend(UI.UPLOAD_PAGE, {
   init: function () {
     this.checkLanguagesCookie()
@@ -482,11 +514,15 @@ $.extend(UI.UPLOAD_PAGE, {
 
     $('.tmx-select .tm-info-title .icon').popup({
       html:
-        "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +
-        'and helping fellow MateCat users improve their translations.</br></br>' +
+        "<div style='text-align: left'>By updating MyMemory, you are contributing to making Matecat better " +
+        'and helping fellow Matecat users improve their translations.</br></br>' +
         'For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel.</div>',
       position: 'bottom center',
     })
+
+    // add keydown listener workaround hide dropdown tab navigation
+    window.removeEventListener('keydown', onTabKeyDown)
+    window.addEventListener('keydown', onTabKeyDown)
   },
 
   checkLanguagesCookie: function () {
@@ -620,13 +656,6 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
-    $('body').on('keydown', function (e) {
-      if (e.key === 'Enter') {
-        if ($('.menu-dropdown.visible').length == 0) {
-          $('input.uploadbtn').click()
-        }
-      }
-    })
     $('.supported-file-formats').click(function (e) {
       e.preventDefault()
       $('.supported-formats').show()
@@ -1039,4 +1068,8 @@ APP.postProjectCreation = function (d) {
 
 $(document).ready(function () {
   UI.UPLOAD_PAGE.init()
+  //TODO: REMOVE
+  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
+  const root = createRoot(mountPoint)
+  root.render(<NotificationBox />)
 })

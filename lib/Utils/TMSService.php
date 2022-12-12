@@ -169,7 +169,7 @@ class TMSService {
 
     /**
      * Import TMX file in MyMemory
-     * @return bool
+     * @return array
      * @throws Exception
      */
     public function addGlossaryInMyMemory() {
@@ -180,6 +180,8 @@ class TMSService {
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
+
+            $uuids = [];
 
             foreach ( $this->file as $k => $fileInfo ) {
 
@@ -205,14 +207,41 @@ class TMSService {
                         break;
                     default:
                 }
+
+                if(isset($importStatus->responseData['UUID'])){
+                    $uuids[] = $importStatus->responseData['UUID'];
+                }
             }
 
-            return true;
+            return $uuids;
 
         } else {
             throw new Exception( "Can't find uploaded Glossary files", -15 );
         }
 
+    }
+
+    /**
+     * @param $uuid
+     *
+     * @return array
+     */
+    public function glossaryUploadStatus($uuid)
+    {
+        return $this->mymemory_engine->getGlossaryImportStatus($uuid);
+    }
+
+    /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     *
+     * @return array
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+       return $this->mymemory_engine->glossaryExport($key, $keyName, $userEmail, $userName);
     }
 
     /**

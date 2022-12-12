@@ -67,7 +67,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/options', 'POST', 'API\V2\ChunkOptionsController', 'update' );
 
 
-    //route( '/delete', 'POST', 'API\V2\ChunkController', 'delete' );
+    route( '/delete', 'POST', 'API\V2\ChunkController', 'delete' );
     route( '/cancel', 'POST', 'API\V2\ChunkController', 'cancel' );
     route( '/archive', 'POST', 'API\V2\ChunkController', 'archive' );
     route( '/active', 'POST', 'API\V2\ChunkController', 'active' );
@@ -77,8 +77,8 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
 $klein->with('/api/v2/glossaries', function() {
 
     route( '/import/', 'POST', '\API\V2\GlossariesController', 'import' );
-    route( '/import/status/[:tm_key].?[:name]?', 'GET', '\API\V2\GlossariesController', 'uploadStatus' );
-    route( '/export/[:tm_key].?[:downloadToken]?', 'GET', '\API\V2\GlossariesController', 'download' );
+    route( '/import/status/[:uuid]', 'GET', '\API\V2\GlossariesController', 'uploadStatus' );
+    route( '/export/', 'POST', '\API\V2\GlossariesController', 'download' );
 
 });
 

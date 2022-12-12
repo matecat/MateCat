@@ -10,13 +10,16 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import MBC from '../../utils/mbc.main'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentCommentsContainer extends React.Component {
-  constructor(props) {
+  static contextType = SegmentContext
+
+  constructor(props, context) {
     super(props)
     this.state = {
       comments: CommentsStore.getCommentsBySegment(
-        this.props.segment.original_sid,
+        context.segment.original_sid,
       ),
       user: CommentsStore.getUser(),
       teamUsers: CommentsStore.getTeamUsers(),
@@ -31,14 +34,14 @@ class SegmentCommentsContainer extends React.Component {
   closeComments(e) {
     e.preventDefault()
     e.stopPropagation()
-    SegmentActions.closeSegmentComment(this.props.segment.sid)
+    SegmentActions.closeSegmentComment(this.context.segment.sid)
     localStorage.setItem(MBC.localStorageCommentsClosed, true)
   }
 
   sendComment() {
     let text = $(this.commentInput).html()
     if (this.commentInput.textContent.trim().length > 0) {
-      CommentsActions.sendComment(text, this.props.segment.original_sid)
+      CommentsActions.sendComment(text, this.context.segment.original_sid)
         .catch(() => {
           this.setState({sendCommentError: true})
         })
@@ -49,14 +52,23 @@ class SegmentCommentsContainer extends React.Component {
     }
   }
 
+  deleteComment = () => {
+    const {comments} = this.state
+    const lastCommentId = comments[comments.length - 1].id
+    CommentsActions.deleteComment(
+      lastCommentId,
+      this.context.segment.original_sid,
+    )
+  }
+
   resolveThread() {
-    CommentsActions.resolveThread(this.props.segment.original_sid)
+    CommentsActions.resolveThread(this.context.segment.original_sid)
   }
 
   updateComments(sid) {
-    if (_.isUndefined(sid) || sid === this.props.segment.original_sid) {
+    if (_.isUndefined(sid) || sid === this.context.segment.original_sid) {
       const comments = CommentsStore.getCommentsBySegment(
-        this.props.segment.original_sid,
+        this.context.segment.original_sid,
       )
       const user = CommentsStore.getUser()
       this.setState({
@@ -198,6 +210,9 @@ class SegmentCommentsContainer extends React.Component {
         )
       }
       if (thread_wrap.length > 0) {
+        const isAuthorOfLastComment =
+          comments[comments.length - 1].email === config.userMail
+
         commentsHtml.push(
           <div
             key={'thread-' + 900}
@@ -206,6 +221,14 @@ class SegmentCommentsContainer extends React.Component {
           >
             {thread_wrap}
             {resolveButton}
+            {isAuthorOfLastComment && (
+              <a
+                className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
+                onClick={this.deleteComment}
+              >
+                Delete
+              </a>
+            )}
           </div>,
         )
       }
@@ -311,15 +334,19 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   componentDidUpdate() {
-    // const comments = CommentsStore.getCommentsBySegment(this.props.segment.sid);
+    // const comments = CommentsStore.getCommentsBySegment(this.context.segment.sid);
     this.scrollToBottom()
   }
 
   componentDidMount() {
-    this.updateComments(this.props.segment.sid)
+    this.updateComments(this.context.segment.sid)
     this.addTagging()
     CommentsStore.addListener(
       CommentsConstants.ADD_COMMENT,
+      this.updateComments,
+    )
+    CommentsStore.addListener(
+      CommentsConstants.DELETE_COMMENT,
       this.updateComments,
     )
     CommentsStore.addListener(
@@ -341,6 +368,10 @@ class SegmentCommentsContainer extends React.Component {
       this.updateComments,
     )
     CommentsStore.removeListener(
+      CommentsConstants.DELETE_COMMENT,
+      this.updateComments,
+    )
+    CommentsStore.removeListener(
       CommentsConstants.STORE_COMMENTS,
       this.updateComments,
     )
@@ -357,11 +388,11 @@ class SegmentCommentsContainer extends React.Component {
   render() {
     //if is not splitted or is the first of the splitted group
     if (
-      (!this.props.segment.splitted ||
-        this.props.segment.sid.split('-')[1] === '1') &&
+      (!this.context.segment.splitted ||
+        this.context.segment.sid.split('-')[1] === '1') &&
       this.state.comments
     ) {
-      if (this.props.segment.openComments) {
+      if (this.context.segment.openComments) {
         return this.getComments()
       }
     } else {

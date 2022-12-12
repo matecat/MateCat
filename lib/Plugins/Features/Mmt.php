@@ -14,9 +14,11 @@ use Analysis\Workers\FastAnalysis;
 use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionSetStruct;
+use createProjectController;
 use Database;
 use Engine;
 use Engines\MMT\MMTServiceApi;
+use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use EnginesModel_EngineDAO;
@@ -25,9 +27,11 @@ use EnginesModel_MMTStruct;
 use Exception;
 use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
+use INIT;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
+use NewController;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use stdClass;
@@ -45,35 +49,36 @@ class Mmt extends BaseFeature {
 
     const FEATURE_CODE = 'mmt';
 
-    protected $forceOnProject = true ;
+    protected $forceOnProject = true;
 
-    public static function loadRoutes(  Klein $klein  ){
+    public static function loadRoutes( Klein $klein ) {
         route( '/me', 'GET', '\Features\Mmt\Controller\RedirectMeController', 'redirect' );
     }
 
     /**
      * Called in @see Bootstrap::notifyBootCompleted
      */
-    public static function bootstrapCompleted(){
+    public static function bootstrapCompleted() {
         Constants_Engines::setInEnginesList( Constants_Engines::MMT );
     }
 
     /**
-     * Called in @see engineController::add()
+     * Called in @param                  $enginesList
      *
-     * Only one MMT engine per user can be registered
-     *
-     * @param                  $enginesList
      * @param Users_UserStruct $userStruct
      *
      * @return mixed
+     * @see engineController::add()
+     *
+     * Only one MMT engine per user can be registered
+     *
      */
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
+        $engineEnabled   = $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
 
-        if( !empty( $engineEnabled ) ){
+        if ( !empty( $engineEnabled ) ) {
             unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
         }
 
@@ -81,15 +86,18 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see engineController::add()
+     * Called in @param EnginesModel_EngineStruct $newCreatedDbRowStruct
      *
-     * @param EnginesModel_EngineStruct $newCreatedDbRowStruct
-     * @param Users_UserStruct          $userStruct
+     * @param Users_UserStruct $userStruct
      *
      * @return null
      * @throws Exception
+     * @see engineController::add()
+     *
      */
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
+
+        //gestire il flag synca tutto o no
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
             return $newCreatedDbRowStruct;
@@ -122,7 +130,7 @@ class Mmt extends BaseFeature {
             Log::doJsonLog( $me_result );
 
             $keyList = self::_getKeyringOwnerKeys( $userStruct );
-            if( !empty( $keyList ) ){
+            if ( !empty( $keyList ) ) {
                 $newTestCreatedMT->activate( $keyList );
             }
 
@@ -140,17 +148,19 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see engineController::add()
+     * Called in @param $errorObject
      *
-     * @param $errorObject
      * @param $class_load
      *
      * @return array
+     * @see engineController::add()
+     *
      */
-    public function engineCreationFailed( $errorObject, $class_load ){
-        if( $class_load == Constants_Engines::MMT ){
+    public function engineCreationFailed( $errorObject, $class_load ) {
+        if ( $class_load == Constants_Engines::MMT ) {
             return [ 'code' => 403, 'message' => "Creation failed. Only one ModernMT engine is allowed." ];
         }
+
         return $errorObject;
     }
 
@@ -159,14 +169,14 @@ class Mmt extends BaseFeature {
      * @throws Exception
      * @see engineController::disable()
      */
-    public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ){
+    public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled = $UserMetadataDao->setCacheTTL( 60 * 60 *24 * 30 )->get( $engineStruct->uid, self::FEATURE_CODE );
+        $engineEnabled   = $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->get( $engineStruct->uid, self::FEATURE_CODE );
 
-        if( $engineStruct->class_load == Constants_Engines::MMT ){
+        if ( $engineStruct->class_load == Constants_Engines::MMT ) {
 
-            if( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ){
+            if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
                 $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
 
                 // @TODO Devo controllare il parametro MMT-preimport?
@@ -184,32 +194,35 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see getContributionController::doAction()
+     * Called in @param                        $config
      *
-     * @param                        $config
      * @param Engines_AbstractEngine $engine
      * @param Jobs_JobStruct         $jobStruct
      *
      * @return mixed
      * @throws Exception
+     * @see getContributionController::doAction()
+     *
      */
-    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, Jobs_JobStruct $jobStruct ){
+    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, Jobs_JobStruct $jobStruct ) {
 
-        if( $engine instanceof Engines_MMT ){
+        if ( $engine instanceof Engines_MMT ) {
 
-            //get the Owner keys Keys from the Job
-            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ] );
-            $config[ 'keys' ] = array_map( function( $tm_key ) {
+            //get the Owner Keys from the Job
+            $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ] );
+            $config[ 'keys' ] = array_map( function ( $tm_key ) {
                 /**
                  * @var $tm_key TmKeyManagement_MemoryKeyStruct
                  */
                 return $tm_key->key;
             }, $tm_keys );
 
-            $mt_context = @array_pop( ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' ) );
+            $contextRs              = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
+            $mt_context             = @array_pop( $contextRs );
             $config[ 'mt_context' ] = ( !empty( $mt_context ) ? $mt_context->value : "" );
-            $config[ 'job_id' ] = $jobStruct->id;
-            $config[ 'secret_key' ] = self::getSecretKey();
+            $config[ 'job_id' ]     = $jobStruct->id;
+            $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
+            $config[ 'priority' ]   = 'normal';
 
         }
 
@@ -217,22 +230,24 @@ class Mmt extends BaseFeature {
 
     }
 
-    public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ){
+    public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ) {
 
-        if( $engine instanceof Engines_MMT ){
-            $config[ 'secret_key' ] = self::getSecretKey();
+        if ( $engine instanceof Engines_MMT ) {
+            $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
+            $config[ 'priority' ]   = 'background';
         }
 
         return $config;
 
     }
 
-    public static function getSecretKey() {
-        $secret_key = [ 'secret_key' => null ];
-        $config_file_path = realpath( \INIT::$ROOT . '/inc/mmt_fallback_key.ini' );
-        if( file_exists( $config_file_path ) ){
-            $secret_key = parse_ini_file( $config_file_path ) ;
+    public static function getG2FallbackSecretKey() {
+        $secret_key       = [ 'secret_key' => null ];
+        $config_file_path = realpath( INIT::$ROOT . '/inc/mmt_fallback_key.ini' );
+        if ( file_exists( $config_file_path ) ) {
+            $secret_key = parse_ini_file( $config_file_path );
         }
+
         return $secret_key[ 'secret_key' ];
     }
 
@@ -271,19 +286,20 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see createProjectController::__appendFeaturesToProject()
-     * Called in @see NewController::__appendFeaturesToProject()
+     * Called in @param $projectFeatures
      *
-     * @param $projectFeatures
-     * @param $controller \NewController|\createProjectController
+     * @param $controller NewController|createProjectController
      *
      * @return array
-     * @throws \Engines\MMT\MMTServiceApiException
+     * @throws MMTServiceApiException
+     * @see createProjectController::__appendFeaturesToProject()
+     *      Called in @see NewController::__appendFeaturesToProject()
+     *
      */
-    public function filterCreateProjectFeatures( $projectFeatures, $controller ){
+    public function filterCreateProjectFeatures( $projectFeatures, $controller ) {
 
         $engine = Engine::getInstance( $controller->postInput[ 'mt_engine' ] );
-        if( $engine instanceof Engines_MMT ){
+        if ( $engine instanceof Engines_MMT ) {
             /**
              * @var $availableLangs
              * <code>
@@ -293,23 +309,23 @@ class Mmt extends BaseFeature {
              *  }
              * </code>
              */
-            $availableLangs = $engine->getAvailableLanguages();
+            $availableLangs       = $engine->getAvailableLanguages();
             $target_language_list = explode( ",", $controller->postInput[ 'target_lang' ] );
-            $source_language = $controller->postInput[ 'source_lang' ];
+            $source_language      = $controller->postInput[ 'source_lang' ];
 
             $found = true;
-            foreach( $availableLangs as $source => $availableTargets ){
+            foreach ( $availableLangs as $source => $availableTargets ) {
 
                 //take only the language code $langCode is passed by reference, change the value from inside the callback
-                array_walk( $availableTargets,function( &$langCode ){
+                array_walk( $availableTargets, function ( &$langCode ) {
                     list( $langCode, ) = explode( "-", $langCode );
                 } );
 
                 list( $mSourceCode, ) = explode( "-", $source_language );
-                if( $source == $mSourceCode ){
-                    foreach( $target_language_list as $_matecatTarget ){
+                if ( $source == $mSourceCode ) {
+                    foreach ( $target_language_list as $_matecatTarget ) {
                         list( $mTargetCode, ) = explode( "-", $_matecatTarget );
-                        if( in_array( $mTargetCode, $availableTargets ) ){
+                        if ( in_array( $mTargetCode, $availableTargets ) ) {
                             $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $controller->postInput[ 'mt_engine' ];
                         } else {
                             $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = 1; // MyMemory
@@ -318,9 +334,9 @@ class Mmt extends BaseFeature {
                 }
             }
 
-            $feature                 = new BasicFeatureStruct();
-            $feature->feature_code   = self::FEATURE_CODE;
-            $projectFeatures[] = $feature;
+            $feature               = new BasicFeatureStruct();
+            $feature->feature_code = self::FEATURE_CODE;
+            $projectFeatures[]     = $feature;
 
         }
 
@@ -329,31 +345,32 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see FastAnalysis::main()
+     * Called in @param array $segments
      *
-     * @param array $segments
      * @param array $projectRows
      *
      * @throws Exception
      *
+     * @see FastAnalysis::main()
+     *
      */
-    public static function fastAnalysisComplete( Array $segments, Array $projectRows ){
+    public static function fastAnalysisComplete( array $segments, array $projectRows ) {
 
         $pid = $projectRows[ 'id' ];
         $engine = Engine::getInstance( $projectRows[ 'id_mt_engine' ] );
 
-        if( $engine instanceof Engines_MMT ){
+        if ( $engine instanceof Engines_MMT ) {
 
             $source       = $segments[ 0 ][ 'source' ];
-            $targets = [];
+            $targets      = [];
             $jobLanguages = [];
-            foreach( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ){
+            foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
                 list( $jobId, $target ) = explode( ":", $jid_Lang );
                 $jobLanguages[ $jobId ] = $source . "|" . $target;
-                $targets[] = $target;
+                $targets[]              = $target;
             }
 
-            $tmp_name = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
+            $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
             $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
             foreach ( $segments as $pos => $segment ) {
                 $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
@@ -408,12 +425,12 @@ class Mmt extends BaseFeature {
                 }
 
                 Database::obtain()->begin();
-                foreach( $result as $langPair => $context ){
+                foreach ( $result as $langPair => $context ) {
                     $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
                 }
                 Database::obtain()->commit();
 
-            } catch( Exception $e ){
+            } catch ( Exception $e ) {
                 Log::doJsonLog( $e->getMessage() );
                 Log::doJsonLog( $e->getTraceAsString() );
             }
@@ -427,15 +444,16 @@ class Mmt extends BaseFeature {
 
     /**
      *
-     * Called in @see \setTranslationController::evalSetContribution()
+     * Called in @param                        $response
      *
-     * @param                        $response
      * @param ContributionSetStruct  $contributionStruct
      * @param Projects_ProjectStruct $projectStruct
      *
      * @return ContributionSetStruct|null
+     * @see \setTranslationController::evalSetContribution()
+     *
      */
-    public function filterSetContributionMT( $response, ContributionSetStruct $contributionStruct, Projects_ProjectStruct $projectStruct ){
+    public function filterSetContributionMT( $response, ContributionSetStruct $contributionStruct, Projects_ProjectStruct $projectStruct ) {
 
         /**
          * When a project is created, it's features and used plugins are stored in project_metadata,
@@ -443,16 +461,18 @@ class Mmt extends BaseFeature {
          *
          * So, the MMT engine is not in the list of available plugins, check and exclude if the Plugin is not enables at global level
          */
-        if( !array_key_exists( Constants_Engines::MMT, Constants_Engines::getAvailableEnginesList() ) ) return $response;
+        if ( !array_key_exists( Constants_Engines::MMT, Constants_Engines::getAvailableEnginesList() ) ) {
+            return $response;
+        }
 
         //Project is not anonymous
-        if( !$projectStruct->isAnonymous() ){
+        if ( !$projectStruct->isAnonymous() ) {
 
             try {
 
                 $features = FeatureSet::splitString( $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
 
-                if( in_array( self::FEATURE_CODE, $features )  ){
+                if ( in_array( self::FEATURE_CODE, $features ) ) {
                     $response = $contributionStruct;
                 } else {
                     $response = null;
@@ -469,16 +489,20 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @see \ProjectManager::_pushTMXToMyMemory()
-     * Called in @see \loadTMXController::doAction()
      *
      * @param stdClass $file
      * @param          $user
      * @param          $tm_key
+     *
+     * Called in @see \ProjectManager::_pushTMXToMyMemory()
+     * Called in @see \loadTMXController::doAction()
+     *
      */
     public function postPushTMX( stdClass $file, $user, $tm_key ) {
 
-        // Project is not anonymous
+        // chiedo tutte le chiavi di mymemory ( list o get singola chiave ) e se questa key c'è mando la tmx altrimenti no
+
+        //Project is not anonymous
         if ( !empty( $user ) ) {
 
             $uStruct = $user;
@@ -508,17 +532,17 @@ class Mmt extends BaseFeature {
                     foreach ($associatedMemories as $memory){
 
                         if('x_mm-' . trim( $tm_key ) === $memory['externalId']){
-                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
-                            $result = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
+                            $fileName  = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                            $result    = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
 
-                            if( $result->responseStatus >= 400 ){
+                            if ( $result->responseStatus >= 400 ) {
                                 throw new Exception( $result->error->message );
                             }
                         }
                     }
                 }
 
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
                 Log::doJsonLog( $e->getMessage() );
             }
         }
@@ -543,9 +567,9 @@ class Mmt extends BaseFeature {
      * @see engineController::add()
      *
      */
-    public function buildNewEngineStruct( $isValid, $data ){
+    public function buildNewEngineStruct( $isValid, $data ) {
 
-        if( strtolower( Constants_Engines::MMT ) == $data->providerName ){
+        if ( strtolower( Constants_Engines::MMT ) == $data->providerName ) {
 
             /**
              * @var $featureSet FeatureSet
@@ -580,5 +604,37 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * Called in @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
+     *
+     * @param                  $uid              integer
+     *
+     * @throws Exception
+     * @throws MMTServiceApiException
+     * @see      \ProjectManager::setPrivateTMKeys()
+     * Called in @see \userKeysController::doAction()
+     *
+     * @internal param Users_UserStruct $userStruct
+     */
+    public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
+
+        //usare solo se c'è la flag sync
+
+        if ( empty( $memoryKeyStructs ) || empty( $uid ) ) {
+            return;
+        }
+
+        //retrieve OWNER MMT License
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+        if ( !empty( $ownerMmtEngineMetaData ) ) {
+
+            /**
+             * @var Engines_MMT $MMTEngine
+             */
+            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+            $MMTEngine->activate( $memoryKeyStructs );
+
+        }
+    }
 }
 

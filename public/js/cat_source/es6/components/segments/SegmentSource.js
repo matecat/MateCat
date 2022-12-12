@@ -15,8 +15,11 @@ import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentSource extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     const {onEntityClick, getUpdatedSegmentInfo} = this
@@ -161,15 +164,8 @@ class SegmentSource extends React.Component {
   }
 
   addGlossaryDecorator = () => {
-    let {editorState} = this.state
     let {glossary, segment, sid} = this.props.segment
-    const newDecorator = DraftMatecatUtils.activateGlossary(
-      editorState,
-      glossary,
-      segment,
-      sid,
-      SegmentActions.activateTab,
-    )
+    const newDecorator = DraftMatecatUtils.activateGlossary(glossary, sid)
     _.remove(
       this.decoratorsStructure,
       (decorator) =>
@@ -179,9 +175,10 @@ class SegmentSource extends React.Component {
   }
 
   addQaCheckGlossaryDecorator = () => {
-    let {qaCheckGlossary, segment, sid} = this.props.segment
+    let {glossary, segment, sid} = this.props.segment
+    const missingGossaryItems = glossary.filter((item) => item.missingTerm)
     const newDecorator = DraftMatecatUtils.activateQaCheckGlossary(
-      qaCheckGlossary,
+      missingGossaryItems,
       segment,
       sid,
       SegmentActions.activateTab,
@@ -271,25 +268,25 @@ class SegmentSource extends React.Component {
       }
 
       //Qa Check Glossary
-      const {qaCheckGlossary} = this.props.segment
-      const prevQaCheckGlossary = prevProps
-        ? prevProps.segment.qaCheckGlossary
-        : undefined
+      const missingGlossaryItems =
+        glossary && glossary.filter((item) => item.missingTerm)
+      const prevMissingGlossaryItems =
+        prevGlossary && prevGlossary.filter((item) => item.missingTerm)
       if (
-        qaCheckGlossary &&
-        qaCheckGlossary.length > 0 &&
-        (_.isUndefined(prevQaCheckGlossary) ||
-          !Immutable.fromJS(prevQaCheckGlossary).equals(
-            Immutable.fromJS(qaCheckGlossary),
+        missingGlossaryItems &&
+        missingGlossaryItems.length > 0 &&
+        (_.isUndefined(prevMissingGlossaryItems) ||
+          !Immutable.fromJS(prevMissingGlossaryItems).equals(
+            Immutable.fromJS(missingGlossaryItems),
           ))
       ) {
         this.addQaCheckGlossaryDecorator()
         changedDecorator = true
         activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
       } else if (
-        prevQaCheckGlossary &&
-        prevQaCheckGlossary.length > 0 &&
-        (!qaCheckGlossary || qaCheckGlossary.length === 0)
+        prevMissingGlossaryItems &&
+        prevMissingGlossaryItems.length > 0 &&
+        (!missingGlossaryItems || missingGlossaryItems.length === 0)
       ) {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.QA_GLOSSARY_DECORATOR)
@@ -460,7 +457,7 @@ class SegmentSource extends React.Component {
   preventEdit = () => 'handled'
 
   render() {
-    const {segment} = this.props
+    const {segment} = this.context
     const {editorState} = this.state
     const {
       onChange,
@@ -598,6 +595,16 @@ class SegmentSource extends React.Component {
   }
 
   addSplitTag = () => {
+    // Check chars are selected
+    const selection = window.getSelection()
+    if (selection.anchorNode) {
+      const {startOffset = 0, endOffset = 0} = selection?.getRangeAt(0)
+      if (endOffset - startOffset > 0) {
+        selection?.removeAllRanges()
+        return
+      }
+    }
+
     this.insertTagAtSelection('splitPoint')
     this.updateSplitNumberNew(1)
   }
@@ -617,7 +624,7 @@ class SegmentSource extends React.Component {
 
   endSplitMode = () => {
     const {editorStateBeforeSplit} = this.state
-    const {segment} = this.props
+    const {segment} = this.context
     this.splitPoint = segment.split_group ? segment.split_group.length - 1 : 0
     // TODO: why so much calls endSplitMode??
     if (segment.openSplit) {
@@ -635,7 +642,7 @@ class SegmentSource extends React.Component {
 
   onEntityClick = (start, end) => {
     const {editorState} = this.state
-    const {segment} = this.props
+    const {segment} = this.context
     const {isSplitPoint} = this
     try {
       // Get latest selection
@@ -739,7 +746,7 @@ class SegmentSource extends React.Component {
         missingTagsInTarget,
         openSplit,
       },
-    } = this.props
+    } = this.context
     const {tagRange, editorState} = this.state
     return {
       sid,

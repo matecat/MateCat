@@ -134,9 +134,9 @@ class PreferencesModal extends React.Component {
 
   copyToClipboard(e) {
     e.stopPropagation()
-    this.keys.select()
-    this.keys.setSelectionRange(0, 99999)
-    document.execCommand('copy')
+    navigator.clipboard.writeText(
+      `${this.state.credentials.api_key}-${this.state.credentials.api_secret}`,
+    )
     this.setState({
       credentialsCopied: true,
     })
@@ -148,8 +148,8 @@ class PreferencesModal extends React.Component {
         <h2>API Key</h2>
         {this.state.credentials ? (
           this.state.confirmDelete ? (
-            <div className={'user-api user-api-created'}>
-              <div className={'user-api-text'}>
+            <div className={'user-api'}>
+              <div className={'user-api-text user-api-text-confirm-delete'}>
                 <label>Are you sure you want to delete the token?</label>
                 <label>This action cannot be undone.</label>
               </div>
@@ -170,16 +170,39 @@ class PreferencesModal extends React.Component {
               }
             >
               <div className={'user-api-text'}>
-                <textarea
-                  ref={(keys) => (this.keys = keys)}
-                  rows="1"
-                  readOnly={true}
-                  value={
-                    this.state.credentials.api_key +
-                    '-' +
-                    this.state.credentials.api_secret
-                  }
-                />
+                {this.state.credentialsCreated ? (
+                  <>
+                    <div>
+                      <label>Api Key</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={this.state.credentials.api_key}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </div>
+                    <div>
+                      <label>Api Secret</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={this.state.credentials.api_secret}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <textarea
+                    ref={(keys) => (this.keys = keys)}
+                    rows="1"
+                    readOnly={true}
+                    value={
+                      this.state.credentials.api_key +
+                      '-' +
+                      this.state.credentials.api_secret
+                    }
+                  />
+                )}
               </div>
               {this.state.credentialsCreated ? (
                 <div className={'user-api-buttons'}>
@@ -239,8 +262,8 @@ class PreferencesModal extends React.Component {
       )
     }
 
-    var services_label = 'Allow MateCat to access your files on Google Drive'
-    if (this.state.service && !this.state.service.disabled_at) {
+    var services_label = 'Allow Matecat to access your files on Google Drive'
+    if (this.state.service && (!this.state.service.disabled_at || !this.state.service.expired_at)) {
       services_label =
         'Connected to Google Drive (' + this.state.service.email + ')'
     }
@@ -282,7 +305,7 @@ class PreferencesModal extends React.Component {
                 type="checkbox"
                 name="onoffswitch"
                 defaultChecked={
-                  this.state.service && !this.state.service.disabled_at
+                  this.state.service && (!this.state.service.disabled_at ||  !this.state.service.expired_at)
                 }
                 onChange={this.checkboxChange.bind(this)}
                 ref={(input) => (this.checkDrive = input)}

@@ -17,6 +17,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
+import CommonUtils from '../../utils/commonUtils'
 import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
@@ -29,6 +30,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
+import {SegmentContext} from './SegmentContext'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -51,6 +53,8 @@ const typingWordJoiner = matchTypingSequence(
 )
 
 class Editarea extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
@@ -311,6 +315,8 @@ class Editarea extends React.Component {
       this.props.updateCounter(cleanTranslation.length)
       // console.log('updatingTranslationInStore');
       UI.registerQACheck()
+    } else {
+      this.props.updateCounter(0)
     }
   }
 
@@ -329,10 +335,11 @@ class Editarea extends React.Component {
       if (
         qaBlacklistGlossary &&
         qaBlacklistGlossary.length > 0 &&
+        !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] /* &&
         (_.isUndefined(prevQaBlacklistGlossary) ||
           !Immutable.fromJS(prevQaBlacklistGlossary).equals(
             Immutable.fromJS(qaBlacklistGlossary),
-          ))
+          )) */
       ) {
         activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
         changedDecorator = true
@@ -411,9 +418,11 @@ class Editarea extends React.Component {
 
     if (changedDecorator) {
       const decorator = new CompositeDecorator(this.decoratorsStructure)
-      this.setState({
-        editorState: EditorState.set(editorState, {decorator}),
-        activeDecorators,
+      setTimeout(() => {
+        this.setState({
+          editorState: EditorState.set(editorState, {decorator}),
+          activeDecorators,
+        })
       })
     }
   }
@@ -530,13 +539,13 @@ class Editarea extends React.Component {
     if (this.props.segment) {
       lang = config.target_rfc.toLowerCase()
       readonly =
-        this.props.readonly ||
-        this.props.locked ||
+        this.context.readonly ||
+        this.context.locked ||
         this.props.segment.muted ||
         !this.props.segment.opened
     }
     let classes = this.state.editAreaClasses.slice()
-    if (this.props.locked || this.props.readonly) {
+    if (this.context.locked || this.context.readonly) {
       classes.push('area')
     } else {
       classes.push('editarea')
@@ -650,17 +659,17 @@ class Editarea extends React.Component {
       return e.shiftKey ? null : 'insert-tab-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      isCtrlKeyCommand(e) &&
-      e.shiftKey
+      ((isCtrlKeyCommand(e) && e.shiftKey) ||
+        (CommonUtils.isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
     ) {
-      return 'insert-nbsp-tag' // Windows
+      return 'insert-nbsp-tag' // Windows && Mac
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       !e.shiftKey &&
       e.altKey &&
-      (isOptionKeyCommand(e) || isChromeBook)
+      isChromeBook
     ) {
-      return 'insert-nbsp-tag' // MacOS && Chromebook
+      return 'insert-nbsp-tag' // Chromebook
     } else if (e.key === 'ArrowLeft' && !e.altKey) {
       if (e.shiftKey) {
         if (handleCursorMovement(-1, true, config.isTargetRTL))
@@ -681,8 +690,7 @@ class Editarea extends React.Component {
       return 'tm-search'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      (e.ctrlKey || e.metaKey) &&
-      e.altKey
+      ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
@@ -1487,7 +1495,7 @@ class Editarea extends React.Component {
         segmentTargetTagMap,
         [],
       )
-      UI.segmentQA(UI.getSegmentById(this.props.segment.sid))
+      SegmentActions.getSegmentsQa(this.props.segment)
     }, 100)
   }
 }

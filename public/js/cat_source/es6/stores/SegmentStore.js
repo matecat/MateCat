@@ -1,5 +1,4 @@
 /*
- * TodoStore
  * Segment structure example
  * {
      "last_opened_segment":"61079",
@@ -44,6 +43,31 @@ import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
 
 EventEmitter.prototype.setMaxListeners(0)
 
+const normalizeSetUpdateGlossary = (terms) => {
+  const {term} = terms
+
+  const metadataKeys = term.metadata.keys
+    ? term.metadata.keys
+    : [{key: term.metadata.key, key_name: term.metadata.key_name}]
+
+  return metadataKeys.map(({key, key_name}) => {
+    const {
+      keys,
+      key: keyProp,
+      key_name: keyNameProp,
+      ...restMetadata
+    } = term.metadata
+    return {
+      ...term,
+      metadata: {
+        ...restMetadata,
+        key,
+        key_name,
+      },
+    }
+  })
+}
+
 const SegmentStore = assign({}, EventEmitter.prototype, {
   _segments: Immutable.fromJS([]),
   _globalWarnings: {
@@ -51,12 +75,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     matecat: {
       ERROR: {
         Categories: [],
+        total: 0,
       },
       WARNING: {
         Categories: [],
+        total: 0,
       },
       INFO: {
         Categories: [],
+        total: 0,
       },
     },
   },
@@ -98,29 +125,27 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
-    let self = this
-    $.each(segments, function () {
-      let splittedSourceAr = this.segment.split(
+    $.each(segments, (i, segment) => {
+      let splittedSourceAr = segment.segment.split(
         UI.splittedTranslationPlaceholder,
       )
-      let segment = this
       let inSearch = false
       let currentInSearch = false
       let occurrencesInSearch = null
       //if search active
-      if (self.searchOccurrences.length > 0) {
-        inSearch = self.searchOccurrences.indexOf(segment.sid) > -1
+      if (this.searchOccurrences.length > 0) {
+        inSearch = this.searchOccurrences.indexOf(segment.sid) > -1
         currentInSearch =
-          segment.sid === self.searchOccurrences[self.currentInSearch]
-        occurrencesInSearch = self.searchResultsDictionary[segment.sid]
+          segment.sid === this.searchOccurrences[this.currentInSearch]
+        occurrencesInSearch = this.searchResultsDictionary[segment.sid]
       }
       if (splittedSourceAr.length > 1) {
         var splitGroup = []
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           splitGroup.push(segment.sid + '-' + (i + 1))
         })
 
-        $.each(splittedSourceAr, function (i) {
+        $.each(splittedSourceAr, (i) => {
           let translation = segment.translation.split(
             UI.splittedTranslationPlaceholder,
           )[i]
@@ -152,7 +177,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             ),
             warning: '0',
             warnings: {},
-            tagged: !self.hasSegmentTagProjectionEnabled(segment),
+            tagged: !this.hasSegmentTagProjectionEnabled(segment),
             unlocked: false,
             edit_area_locked: false,
             notes: segment.notes,
@@ -165,10 +190,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             inSearch: inSearch,
             currentInSearch: currentInSearch,
             occurrencesInSearch: occurrencesInSearch,
-            searchParams: self.searchParams,
+            searchParams: this.searchParams,
             updatedSource: splittedSourceAr[i],
             openComments: false,
             openSplit: false,
+            metadata: segment.metadata,
           }
           newSegments.push(segData)
           segData = null
@@ -179,7 +205,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
         segment.warnings = {}
-        segment.tagged = !self.hasSegmentTagProjectionEnabled(segment)
+        segment.tagged = !this.hasSegmentTagProjectionEnabled(segment)
         segment.edit_area_locked = false
         segment.original_sid = segment.sid
         segment.modified = false
@@ -189,7 +215,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.inSearch = inSearch
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
-        segment.searchParams = self.searchParams
+        segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
           DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
         )
@@ -202,7 +228,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.updatedSource = segment.segment
         segment.openComments = false
         segment.openSplit = false
-        newSegments.push(this)
+        newSegments.push(segment)
       }
     })
     return newSegments
@@ -415,7 +441,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments = this._segments.setIn([index, 'tagged'], true)
   },
 
-  addSegmentVersions(fid, sid, versions) {
+  addSegmentVersions(sid, versions) {
     //If is a splitted segment the versions are added to the first of the split
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
@@ -553,7 +579,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(matches),
     )
   },
-  setContributionsToCache: function (sid, fid, contributions, errors) {
+  setContributionsToCache: function (sid, contributions, errors) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
@@ -588,34 +614,78 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       matches,
     )
   },
-  setGlossaryToCache: function (sid, fid, glossary) {
-    let index = this.getSegmentIndex(sid, fid)
+  setGlossaryToCache: function (sid, terms) {
+    const adaptedTerms = terms.map((term) => ({
+      ...term,
+      matching_words: term.matching_words.filter((value) => value),
+    }))
+    const index = this.getSegmentIndex(sid)
+    const pendingGlossaryUpdates = this._segments
+      .get(index)
+      .get('pendingGlossaryUpdates')
+      ? this._segments.get(index).get('pendingGlossaryUpdates').toJS()
+      : []
+
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      Immutable.fromJS(adaptedTerms),
+    )
+    this.setGlossarySearchToCache(sid)
+
+    if (pendingGlossaryUpdates)
+      this.addOrUpdateGlossaryItem(sid, pendingGlossaryUpdates)
+
+    this._segments = this._segments.deleteIn([index, 'pendingGlossaryUpdates'])
+  },
+  setGlossarySearchToCache: function (sid, terms) {
+    const index = this.getSegmentIndex(sid)
+    this._segments = this._segments.setIn(
+      [index, 'glossary_search_results'],
+      Immutable.fromJS(
+        terms ? terms : this._segments.get(index).get('glossary'),
+      ),
     )
   },
-  deleteFromGlossary: function (sid, match) {
+  deleteFromGlossary: function (sid, term) {
     let index = this.getSegmentIndex(sid)
     let glossary = this._segments.get(index).get('glossary').toJS()
-    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
-    glossaryIndex > -1 && glossary.splice(glossaryIndex, 1)
+    const updatedGlossary = glossary.filter(
+      ({term_id}) => term.term_id !== term_id,
+    )
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      Immutable.fromJS(updatedGlossary),
     )
+    this.setGlossarySearchToCache(sid)
   },
-  addOrUpdateGlossaryItem: function (sid, match) {
-    let index = this.getSegmentIndex(sid)
-    let glossary = this._segments.get(index).get('glossary').toJS()
-    const glossaryIndex = glossary.findIndex((i) => i.segment === match.segment)
-    glossaryIndex > -1
-      ? (glossary[glossaryIndex] = match)
-      : glossary.push(match)
+  addOrUpdateGlossaryItem: function (sid, terms) {
+    const addedTerms = terms.map((term) => ({
+      ...term,
+      matching_words: term.matching_words
+        ? term.matching_words.filter((value) => value)
+        : [],
+    }))
+    const index = this.getSegmentIndex(sid)
+    const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
+    const glossary = isGlossaryAlreadyExist
+      ? this._segments.get(index).get('glossary').toJS()
+      : []
+    const updatedGlossary = [
+      ...addedTerms,
+      ...glossary
+        .filter(
+          ({term_id}) => !addedTerms.find((term) => term.term_id === term_id),
+        )
+        .map((term) => ({
+          ...term,
+          missingTerm: false,
+        })),
+    ]
     this._segments = this._segments.setIn(
-      [index, 'glossary'],
-      Immutable.fromJS(glossary),
+      [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
+      Immutable.fromJS(updatedGlossary),
     )
+    this.setGlossarySearchToCache(sid, updatedGlossary)
   },
   setCrossLanguageContributionsToCache: function (
     sid,
@@ -731,25 +801,22 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       Immutable.fromJS(tagMismatch),
     )
   },
-  setQACheckMatches(matches) {
-    this._segments = this._segments.map((segment) =>
-      segment.remove('qaCheckGlossary'),
-    )
-    Object.keys(matches).map((sid) => {
-      let index = this.getSegmentIndex(sid)
-      if (index === -1) return
-      this._segments = this._segments.setIn(
-        [index, 'qaCheckGlossary'],
-        matches[sid],
-      )
-    })
-  },
-  setQABlacklistMatches(sid, matches) {
+  setQACheck(sid, data) {
+    const {missing_terms: missingTerms, blacklisted_terms: blacklistedTerms} =
+      data || {}
+    const terms = missingTerms.map((term) => ({
+      ...term,
+      missingTerm: true,
+    }))
+
+    this.addOrUpdateGlossaryItem(sid, terms)
+
+    // setup blacklisted
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'qaBlacklistGlossary'],
-      matches,
+      blacklistedTerms,
     )
   },
   setSegmentSaving(sid, saving) {
@@ -783,14 +850,54 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
   },
   updateGlobalWarnings: function (warnings) {
+    let totalWarnings = []
     Object.keys(warnings).map((key) => {
+      let totalCategoryWarnings = []
       Object.keys(warnings[key].Categories).map((key2) => {
+        totalCategoryWarnings.push(...warnings[key].Categories[key2])
+        totalWarnings.push(...warnings[key].Categories[key2])
+        warnings[key].total = totalCategoryWarnings.filter(
+          (value, index, self) => {
+            return self.indexOf(value) === index
+          },
+        ).length
         warnings[key].Categories[key2] = warnings[key].Categories[key2].filter(
           this.filterGlobalWarning.bind(this, key2),
         )
       })
     })
     this._globalWarnings.matecat = warnings
+    this._globalWarnings.matecat.total = totalWarnings.filter(
+      (value, index, self) => {
+        return self.indexOf(value) === index
+      },
+    ).length
+    //lexiqa
+    if (this._globalWarnings.lexiqa && this._globalWarnings.lexiqa.length > 0) {
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(
+        this._globalWarnings.lexiqa,
+      )
+      this._globalWarnings.matecat.INFO.total =
+        this._globalWarnings.lexiqa.length
+      this._globalWarnings.matecat.total =
+        this._globalWarnings.matecat.total + this._globalWarnings.lexiqa.length
+    }
+  },
+  updateLexiqaWarnings: function (warnings) {
+    this._globalWarnings.lexiqa = warnings.filter(
+      this.filterGlobalWarning.bind(this, 'LXQ'),
+    )
+    if (warnings && warnings.length > 0) {
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings)
+      this._globalWarnings.matecat.INFO.total = warnings.length
+      this._globalWarnings.matecat.total =
+        this._globalWarnings.matecat.total + warnings.length
+    } else {
+      this.removeLexiqaWarning()
+    }
+  },
+  removeLexiqaWarning: function () {
+    this._segments = this._segments.map((segment) => segment.delete('lexiqa'))
   },
   addSearchResult: function (
     occurrencesList,
@@ -866,11 +973,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   closeSegmentsSplit: function () {
     this._segments = this._segments.map((segment) =>
       segment.set('openSplit', false),
-    )
-  },
-  updateLexiqaWarnings: function (warnings) {
-    this._globalWarnings.lexiqa = warnings.filter(
-      this.filterGlobalWarning.bind(this, 'LXQ'),
     )
   },
   hasSegmentTagProjectionEnabled: function (segment) {
@@ -1116,6 +1218,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
     return
   },
+  getGlobalWarnings() {
+    return this._globalWarnings
+  },
   isSidePanelToOpen: function () {
     const commentOpen = this._segments.findIndex(
       (segment) => segment.get('openComments') === true,
@@ -1167,7 +1272,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_SEGMENT:
       SegmentStore.openSegment(action.sid)
-      SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid)
+      SegmentStore.emitChange(
+        SegmentConstants.OPEN_SEGMENT,
+        action.sid,
+        action.wasOriginatedFromBrowserHistory,
+      )
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
     case SegmentConstants.SELECT_SEGMENT: {
@@ -1198,6 +1307,8 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.ADD_SEGMENTS:
       SegmentStore.updateAll(action.segments, action.where)
+      if (SegmentStore._segments.size)
+        SegmentStore.emitChange(SegmentConstants.FREEZING_SEGMENTS, false)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1335,14 +1446,12 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CONTRIBUTIONS:
       SegmentStore.setContributionsToCache(
         action.sid,
-        action.fid,
         action.matches,
         action.errors,
       )
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     case SegmentConstants.SET_CL_CONTRIBUTIONS:
@@ -1378,7 +1487,16 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.SET_GLOSSARY_TO_CACHE:
-      SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary)
+      SegmentStore.setGlossaryToCache(action.sid, action.glossary)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+        action.fid,
+      )
+      SegmentStore.emitChange(action.actionType, action.sid)
+      break
+    case SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH:
+      SegmentStore.setGlossarySearchToCache(action.sid, action.glossary)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1387,7 +1505,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(action.actionType, action.sid)
       break
     case SegmentConstants.DELETE_FROM_GLOSSARY:
-      SegmentStore.deleteFromGlossary(action.sid, action.match)
+      SegmentStore.deleteFromGlossary(action.sid, action.term)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1395,7 +1513,11 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHANGE_GLOSSARY:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
+      SegmentStore.addOrUpdateGlossaryItem(
+        action.sid,
+        normalizeSetUpdateGlossary(action.terms),
+      )
+      SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1403,12 +1525,21 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
-      SegmentStore.addOrUpdateGlossaryItem(action.sid, action.match)
+      SegmentStore.addOrUpdateGlossaryItem(
+        action.sid,
+        normalizeSetUpdateGlossary(action.terms),
+      )
+      SegmentStore.emitChange(action.actionType)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
         action.fid,
       )
+      break
+    case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
+    case SegmentConstants.ERROR_DELETE_FROM_GLOSSARY:
+    case SegmentConstants.ERROR_CHANGE_GLOSSARY:
+      SegmentStore.emitChange(action.actionType, action.sid, action.error)
       break
     case EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA:
       SegmentStore.emitChange(
@@ -1431,18 +1562,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id)
       break
     case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES: {
-      let seg = SegmentStore.addSegmentVersions(
-        action.fid,
-        action.sid,
-        action.versions,
-      )
+      let seg = SegmentStore.addSegmentVersions(action.sid, action.versions)
       if (seg) {
         SegmentStore.emitChange(action.actionType, action.sid, seg.toJS())
       }
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
-        action.fid,
       )
       break
     }
@@ -1560,6 +1686,10 @@ AppDispatcher.register(function (action) {
         SegmentConstants.UPDATE_GLOBAL_WARNINGS,
         SegmentStore._globalWarnings,
       )
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
       break
     case SegmentConstants.OPEN_ISSUES_PANEL:
       SegmentStore.openSegmentIssuePanel(action.data.sid)
@@ -1662,15 +1792,8 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.SET_CHOOSEN_SUGGESTION:
       SegmentStore.setChoosenSuggestion(action.sid, action.index)
       break
-    case SegmentConstants.SET_QA_CHECK_MATCHES:
-      SegmentStore.setQACheckMatches(action.matches)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-      )
-      break
-    case SegmentConstants.SET_QA_BLACKLIST_MATCHES:
-      SegmentStore.setQABlacklistMatches(action.sid, action.matches)
+    case SegmentConstants.SET_QA_CHECK:
+      SegmentStore.setQACheck(action.sid, action.data)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
@@ -1767,19 +1890,37 @@ AppDispatcher.register(function (action) {
         action.isTarget,
       )
       break
-    case SegmentConstants.SET_SEGMENT_CHAR_LIMIT:
-      SegmentStore.emitChange(
-        SegmentConstants.SET_SEGMENT_CHAR_LIMIT,
-        action.sid,
-        action.limit,
-      )
-      break
     case SegmentConstants.SET_SEGMENT_SAVING:
       SegmentStore.setSegmentSaving(action.sid, action.saving)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
       )
+      break
+    case SegmentConstants.CHARACTER_COUNTER:
+      SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
+        sid: action.sid,
+        counter: action.counter,
+        limit: action.limit,
+      })
+      break
+    case SegmentConstants.GET_MORE_SEGMENTS:
+      SegmentStore.emitChange(SegmentConstants.GET_MORE_SEGMENTS, action.where)
+      break
+    case SegmentConstants.REMOVE_ALL_SEGMENTS:
+      SegmentStore.removeAllSegments()
+      SegmentStore.emitChange(SegmentConstants.REMOVE_ALL_SEGMENTS)
+      break
+    case SegmentConstants.FREEZING_SEGMENTS:
+      SegmentStore.emitChange(
+        SegmentConstants.FREEZING_SEGMENTS,
+        action.isFreezing,
+      )
+      break
+    case SegmentConstants.HIGHLIGHT_GLOSSARY_TERM:
+      SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

@@ -164,7 +164,7 @@ class Features {
      */
     public static function setIncludePath() {
         $instance = static::getInstance();
-        set_include_path( get_include_path() . PATH_SEPARATOR . implode( $instance->PLUGIN_PATHS, PATH_SEPARATOR ) );
+        set_include_path( get_include_path() . PATH_SEPARATOR . implode( PATH_SEPARATOR, $instance->PLUGIN_PATHS ) );
     }
 
     /**
