@@ -304,8 +304,8 @@ class SegmentAnalysisController extends KleinController {
             $finalVersion = 'r2';
         }
 
-        $r1 = ($finalVersion === "r1" and $segmentForAnalysis->has_r1 !== null) ? $segmentForAnalysis->raw_word_count : 0;
-        $r2 = ($finalVersion === "r2" and $segmentForAnalysis->has_r2 !== null) ? $segmentForAnalysis->raw_word_count : 0;
+        $r1 = ($segmentForAnalysis->has_r1 !== null) ? $segmentForAnalysis->raw_word_count : 0;
+        $r2 = ($segmentForAnalysis->has_r2 !== null) ? $segmentForAnalysis->raw_word_count : 0;
 
         return [
             'translation_status' => $segmentForAnalysis->status,
