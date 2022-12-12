@@ -159,6 +159,16 @@ class MMTServiceApi {
     }
 
     /**
+     * @param $id
+     *
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function getMemory( $id ) {
+        return $this->send( 'GET', "$this->baseUrl/memories/$id" );
+    }
+
+    /**
      * @param             $id
      * @param             $name
      * @param string|null $description

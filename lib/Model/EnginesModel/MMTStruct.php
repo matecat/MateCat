@@ -87,5 +87,4 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
     public static function getStruct() {
         return new EnginesModel_MMTStruct();
     }
-
 }

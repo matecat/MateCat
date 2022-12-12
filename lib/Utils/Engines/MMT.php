@@ -52,6 +52,14 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRecord()
+    {
+        return $this->engineRecord;
+    }
+
+    /**
      * MMT exception name from tag_projection call
      * @see Engines_MMT::_decode
      */
@@ -61,10 +69,19 @@ class Engines_MMT extends Engines_AbstractEngine {
             'LanguagePairNotSupportedException' => self::LanguagePairNotSupportedException
     ];
 
+    /**
+     * Get MMTServiceApi client
+     *
+     * @return MMTServiceApi
+     */
     protected function _getClient() {
+
+        $extraParams = $this->engineRecord->getExtraParamsAsArray();
+        $license = $extraParams[ 'MMT-License' ];
+
         return Engines\MMT\MMTServiceApi::newInstance()
                 ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
-                ->setLicense( $this->engineRecord->extra_parameters[ 'MMT-License' ] );
+                ->setLicense( $license );
     }
 
     /**
@@ -335,6 +352,14 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
+    public function createMemory($name, $description = null, $externalId = null) {
+
+        $client       = $this->_getClient();
+        $this->result = $client->createMemory( $name, $description, $externalId );
+
+        return $this->result;
+    }
+
     /**
      * @param $rawValue
      *
@@ -382,4 +407,49 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * Delete a memory associated to an MMT account
+     * (id can be an external account)
+     *
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function deleteMemory($id)
+    {
+        $client = $this->_getClient();
+
+        return $client->deleteMemory($id);
+    }
+
+    /**
+     * Get all memories associated to an MMT account
+     * (id can be an external account)
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function getAllMemories()
+    {
+        $client = $this->_getClient();
+
+        return $client->getAllMemories();
+    }
+
+    /**
+     * Get a memory associated to an MMT account
+     * (id can be an external account)
+     *
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function getMemory($id)
+    {
+        $client = $this->_getClient();
+
+        return $client->getMemory($id);
+    }
 }
