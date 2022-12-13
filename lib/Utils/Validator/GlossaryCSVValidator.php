@@ -61,7 +61,10 @@ class GlossaryCSVValidator extends AbstractValidator {
         $langs = json_decode( $string, true );
 
         foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = Utils::trimAndLowerCase($lang['rfc3066code']);
+            $rfc3066code = Utils::trimAndLowerCase($lang['rfc3066code']);
+
+            $allowedLanguages[] = $rfc3066code;
+            $allowedLanguages[] = str_replace('-','_', $rfc3066code); // Allow also this format: en_US
         }
 
         return implode("|", $allowedLanguages);
