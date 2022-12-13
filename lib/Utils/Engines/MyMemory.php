@@ -389,7 +389,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $newFile     = new SplFileObject( $tmpFileName, 'r+' );
             $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
+            $index = 0;
+
             foreach ( $origFile as $line_num => $line ) {
+
+                // Allow also this format in the headers. Ex: en_US
+                if($index === 0){
+                    foreach ($line as $lineKey => $item){
+                        $line[$lineKey] = str_replace('_', '-', $item);
+                    }
+                }
 
                 if(in_array("1", $line)){
                     foreach ($line as $lineKey => $item){
@@ -400,6 +409,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 }
 
                 //copy stream to stream
+                $index++;
                 $newFile->fputcsv( $line );
             }
 
@@ -422,7 +432,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         // validate the CSV
         if(!$this->validateCSVFile($file)){
-            throw new \Exception('The glossary file is not valid');
+            throw new \Exception('File format not supported, please upload a glossary in XLSX, XLS or ODS format.');
         }
 
         $postFields = [
