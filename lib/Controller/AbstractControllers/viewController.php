@@ -170,12 +170,25 @@ abstract class viewController extends controller {
         $this->template->logged_user   = $this->user->shortName();
         $this->template->extended_user = $this->user->fullName();
 
+        $this->template->isTranslatedUser = $this->isLoggedInATranslatedUser();
         $this->template->isLoggedIn = $this->userIsLogged;
         $this->template->userMail   = $this->user->email;
         $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
 
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isLoggedInATranslatedUser()
+    {
+        if(!$this->isLoggedIn()){
+            return false;
+        }
+
+        return strpos($this->user->email, '@translated.net') !== false or strpos($this->user->email, '@translated.com') !== false;
     }
 
     /**
