@@ -256,6 +256,7 @@ class SegmentAnalysisController extends KleinController {
         $issues         = [];
         foreach ( $issues_records as $issue_record ) {
             $issues[] = [
+                    'source_page'         => $issue_record->source_page,
                     'id_category'         => (int)$issue_record->id_category,
                     'severity'            => $issue_record->severity,
                     'translation_version' => (int)$issue_record->translation_version,
