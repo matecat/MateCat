@@ -23,7 +23,7 @@ window.UI = {
         this.conversionBlocked = false;
         this.RTLCheckDone = false;
         this.skipLangDetectArr = {};
-
+        setTimeout(()=>this.addEvents(), 2000);
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
@@ -220,34 +220,29 @@ window.UI = {
     },
     uploadingTMX: function () {
         return $( '.mgmt-tm td.uploadfile.uploading' ).length;
-    }
+    },
+    addEvents: function () {
+        // Initialize the jQuery File Upload widget:
+        $( '#fileupload' ).fileupload();
 
-};
-
-$( function () {
-    'use strict';
-
-    // Initialize the jQuery File Upload widget:
-    $( '#fileupload' ).fileupload();
-
-    // Enable iframe cross-domain access via redirect option:
-    $( '#fileupload' ).fileupload(
+        // Enable iframe cross-domain access via redirect option:
+        $( '#fileupload' ).fileupload(
             'option',
             'redirect',
             window.location.href.replace(
-                    /\/[^\/]*$/,
-                    '/cors/result.html?%s'
+                /\/[^\/]*$/,
+                '/cors/result.html?%s'
             )
-    );
-    var dropzone = $( '#overlay' );
-    var langCorrections = [];
-    UI.conversionRequests = [];
+        );
+        var dropzone = $( '#overlay' );
+        var langCorrections = [];
+        UI.conversionRequests = [];
 
-    $( document ).bind( 'drop dragover', function ( e ) {
-        e.preventDefault();
-    } );
+        $( document ).bind( 'drop dragover', function ( e ) {
+            e.preventDefault();
+        } );
 
-    $( '#fileupload' ).fileupload(
+        $( '#fileupload' ).fileupload(
             'option',
             {
                 dropZone: $( '.drag' ),
@@ -259,274 +254,276 @@ $( function () {
                 acceptFileTypes: config.allowedFileTypes,
                 dataType: config.blueimp_dataType
             }
-    );
-    $( '#fileupload' ).bind( 'fileuploaddragover', function ( e ) {
-        $( '.upload-files' ).addClass( 'dragging' );
-        dropzone.show();
-    } ).bind( 'fileuploadadd', function ( e, data ) {
+        );
+        $( '#fileupload' ).bind( 'fileuploaddragover', function ( e ) {
+            $( '.upload-files' ).addClass( 'dragging' );
+            dropzone.show();
+        } ).bind( 'fileuploadadd', function ( e, data ) {
 
-        $( 'body' ).addClass( 'initialized' );
+            $( 'body' ).addClass( 'initialized' );
 
-        if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
-            console.log( 'adding more than config.maxNumberFiles' );
-            var jqXHR = data.submit();
-            jqXHR.abort();
-        }
+            if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
+                console.log( 'adding more than config.maxNumberFiles' );
+                var jqXHR = data.submit();
+                jqXHR.abort();
+            }
 
-        disableAnalyze();
-        $( '#fileupload table.upload-table tr' ).addClass( 'current' );
+            disableAnalyze();
+            $( '#fileupload table.upload-table tr' ).addClass( 'current' );
 
-    } ).bind( 'fileuploadsend', function ( e, data ) {
-        console.log( 'FIRE fileuploadsend' );
-        console.log( data.files );
-        $( '.progress', $( data.context[0] ) ).before( '<div class="operation">Uploading</div>' );
-    } ).bind( 'fileuploadprogress', function ( e, data ) {
-        console.log( data.loaded );
-    } ).bind( 'fileuploadstart', function ( e ) {
-        console.log( 'FIRE fileuploadstart' );
-    } ).bind( 'fileuploaddone', function ( e, data ) {
+        } ).bind( 'fileuploadsend', function ( e, data ) {
+            console.log( 'FIRE fileuploadsend' );
+            console.log( data.files );
+            $( '.progress', $( data.context[0] ) ).before( '<div class="operation">Uploading</div>' );
+        } ).bind( 'fileuploadprogress', function ( e, data ) {
+            console.log( data.loaded );
+        } ).bind( 'fileuploadstart', function ( e ) {
+            console.log( 'FIRE fileuploadstart' );
+        } ).bind( 'fileuploaddone', function ( e, data ) {
 
-    } ).bind( 'fileuploaddrop', function ( e ) {
-        $( '.upload-files' ).addClass( 'uploaded' );
-        $( '.upload-files' ).removeClass( 'dragging dnd-hover' );
-        dropzone.hide();
-    } ).bind( 'fileuploaddone', function ( e, data ) {
-
-    } ).bind( 'fileuploadadded fileuploaddestroyed', function ( e, data ) {
-        if ( $( '.upload-table tr' ).length ) {
+        } ).bind( 'fileuploaddrop', function ( e ) {
             $( '.upload-files' ).addClass( 'uploaded' );
-            if (APP.hideGDLink)
-                APP.hideGDLink();
-        } else {
-            $( '.upload-files' ).removeClass( 'uploaded' );
-            if (APP.showGDLink)
-                APP.showGDLink();
-        }
-    } ).bind( 'fileuploadfail', function ( e ) {
-        if ( !($( '.upload-table tr' ).length > 1) ) $( '.upload-files' ).removeClass( 'uploaded' );
-        UI.checkFailedConversionsNumber();
-    } ).bind( 'fileuploadchange', function ( e ) {
-        $( '.upload-files' ).addClass( 'uploaded' );
-        console.log( 'FIRE fileuploadchange' );
-        UI.checkFailedConversionsNumber();
-    } ).bind( 'fileuploaddestroyed', function ( e, data ) {
+            $( '.upload-files' ).removeClass( 'dragging dnd-hover' );
+            dropzone.hide();
+        } ).bind( 'fileuploaddone', function ( e, data ) {
 
-        var deletedFileName = data.url.match( /file=[^&]*/g );
-        if (deletedFileName) {
-            deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
-
-            if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
-                delete(UI.skipLangDetectArr[deletedFileName]);
+        } ).bind( 'fileuploadadded fileuploaddestroyed', function ( e, data ) {
+            if ( $( '.upload-table tr' ).length ) {
+                $( '.upload-files' ).addClass( 'uploaded' );
+                if (APP.hideGDLink)
+                    APP.hideGDLink();
+            } else {
+                $( '.upload-files' ).removeClass( 'uploaded' );
+                if (APP.showGDLink)
+                    APP.showGDLink();
             }
-        }
-
-        if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
-
-            if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-
-                $( '.error-message' ).find('p').text('');
-                $( '.error-message' ).hide();
-
-                $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
-                $( '#add-files' ).removeClass( 'disabled' );
-                $( '#add-files input' ).removeAttr( 'disabled' );
-            }
-
-        }
-        UI.checkFailedConversionsNumber();
-
-        if ( $( '.upload-table tr:not(.failed)' ).length ) {
-
-            if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
-                enableAnalyze();
-            }
-
-        } else {
-            disableAnalyze();
-        }
-
-    } ).on( 'click', '.template-upload .cancel button', function ( e, data ) {
-
-        console.log( 'file canceled' );
-        if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
-
-            if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-
-                $( '.error-message' ).find('p').text('');
-                $( '.error-message' ).hide();
-
-                $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
-                $( '#add-files' ).removeClass( 'disabled' );
-                $( '#add-files input' ).removeAttr( 'disabled' );
-            }
-
-        }
-        setTimeout( function () {
+        } ).bind( 'fileuploadfail', function ( e ) {
+            if ( !($( '.upload-table tr' ).length > 1) ) $( '.upload-files' ).removeClass( 'uploaded' );
             UI.checkFailedConversionsNumber();
-        }, 500 );
+        } ).bind( 'fileuploadchange', function ( e ) {
+            $( '.upload-files' ).addClass( 'uploaded' );
+            console.log( 'FIRE fileuploadchange' );
+            UI.checkFailedConversionsNumber();
+        } ).bind( 'fileuploaddestroyed', function ( e, data ) {
 
-        if ( $( '.upload-table tr:not(.failed)' ).length ) {
+            var deletedFileName = data.url.match( /file=[^&]*/g );
+            if (deletedFileName) {
+                deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
 
-            if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
-                enableAnalyze();
+                if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
+                    delete(UI.skipLangDetectArr[deletedFileName]);
+                }
             }
 
-        } else {
-            disableAnalyze();
-        }
+            if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
-    } ).bind( 'fileuploadcompleted', function ( e, data ) {
-        console.log( 'FIRE fileuploadcompleted' );
-        if ( !$( 'body' ).hasClass( 'initialized' ) ) {
-            $( '#clear-all-files' ).click();
-        }
-        var maxnum = config.maxNumberFiles;
-        if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
-            console.log( '10 files loaded' );
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
-            $( '.wrapper-upload .error-message' ).show()
-            $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
-            $( '#add-files' ).addClass( 'disabled' );
-            $( '#add-files input' ).attr( 'disabled', 'disabled' );
+                if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
 
-        }
+                    $( '.error-message' ).find('p').text('');
+                    $( '.error-message' ).hide();
 
-        $( 'body' ).addClass( 'initialized' );
-        /*
-         * BUG FIXED: UTF16 / UTF8 File name conversion
-         * Use Return String From AJAX RESULT ( safe raw url encoded )
-         *      and NOT data.files[0].name; ( INPUT TAG content )
-         *
-         *      fname: data.result[0].name,
-         *
-         **/
-        var fileSpecs;
-        if (data.result[0]) {
+                    $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
+                    $( '#add-files' ).removeClass( 'disabled' );
+                    $( '#add-files input' ).removeAttr( 'disabled' );
+                }
 
-            fileSpecs = {
-                fname: data.result[0].name,
-                filesize: data.result[0].size,
-                filerow: data.context,
-                extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
-                error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
-                enforceConversion: data.result[0].convert
-            };
-        } else {
-            fileSpecs = {
-                error: ( typeof data.result.errors !== 'undefined' ? data.result.errors[0] : false ),
-            };
-        }
-
-        if ( !fileSpecs.enforceConversion ) {
-            if ( checkAnalyzability( 'file upload completed' ) ) {
-                enableAnalyze();
             }
-        }
+            UI.checkFailedConversionsNumber();
 
-        if ( $( 'body' ).hasClass( 'started' ) ) {
-            setFileReadiness();
-            if ( checkAnalyzability( 'primo caricamento' ) ) {
-                enableAnalyze();
-            }
-        }
-        $( 'body' ).removeClass( 'started' );
+            if ( $( '.upload-table tr:not(.failed)' ).length ) {
 
-        $( '.name', fileSpecs.filerow ).text( fileSpecs.fname );
-
-        if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
-
-            //Global
-            UI.skipLangDetectArr[fileSpecs.fname] = 'detect';
-
-            if ( config.conversionEnabled ) {
-
-                if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
-                    //console.log( filerow );
-                    console.log( 'ACTION: bind fileuploadcompleted' );
-                    convertFile( fileSpecs.fname, fileSpecs.filerow, fileSpecs.filesize, fileSpecs.enforceConversion );
+                if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
+                    enableAnalyze();
                 }
 
             } else {
-                enableAnalyze();
+                disableAnalyze();
             }
 
-            /**
-             * Check for TMX file type, we must trigger the creation of a new TM key
-             */
-            var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
-            if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
-                UI.createKeyByTMX(extension);
+        } ).on( 'click', '.template-upload .cancel button', function ( e, data ) {
+
+            console.log( 'file canceled' );
+            if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
+
+                if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
+
+                    $( '.error-message' ).find('p').text('');
+                    $( '.error-message' ).hide();
+
+                    $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
+                    $( '#add-files' ).removeClass( 'disabled' );
+                    $( '#add-files input' ).removeAttr( 'disabled' );
+                }
+
+            }
+            setTimeout( function () {
+                UI.checkFailedConversionsNumber();
+            }, 500 );
+
+            if ( $( '.upload-table tr:not(.failed)' ).length ) {
+
+                if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
+                    enableAnalyze();
+                }
+
+            } else {
+                disableAnalyze();
             }
 
-        } else if ( fileSpecs.error ) {
-            disableAnalyze();
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'An error occurred during upload.' );
-            $( '.wrapper-upload .error-message' ).show();
-            $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
-            $( '#add-files' ).addClass( 'disabled' );
-            $( '#add-files input' ).attr( 'disabled', 'disabled' );
-        }
-
-        if ( $( '.upload-table tr' ).length ) {
-            $( '.upload-files' ).addClass( 'uploaded' );
-        } else {
-            $( '.upload-files' ).removeClass( 'uploaded' );
-        }
-
-    } );
-
-    $( '.upload-files' ).bind( 'dragleave', function ( e ) {
-        $( this ).removeClass( 'dragging' );
-    } );
-
-    $( '[draggable="true"]' ).on( 'dragend', function () {
-        dropzone.hide();
-    } );
-
-    dropzone.on( 'dragenter', function ( event ) {
-        $( '.upload-files' ).addClass( 'dnd-hover' );
-    } );
-
-    dropzone.on( 'dragleave', function ( event ) {
-        $( '.upload-files' ).removeClass( 'dnd-hover' );
-    } );
-
-    $( '#clear-all-files' ).bind( 'click', function ( e ) {
-        e.preventDefault();
-        $( '.wrapper-upload .error-message' ).hide();
-        $( '.template-download .delete button, .template-upload .cancel button' ).click();
-    } );
-
-    $( '#delete-failed-conversions' ).bind( 'click', function ( e ) {
-        e.preventDefault();
-        console.log( $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ) );
-        $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ).click();
-    } );
-
-    // Load existing files:
-    $( '#upload-files-list #fileupload' ).each( function () {
-        var that = this;
-        initFileUpload().then((result)=>{
-            if ( result && result.length ) {
-                $( that ).fileupload( 'option', 'done' )
-                        .call( that, null, {result: result} );
+        } ).bind( 'fileuploadcompleted', function ( e, data ) {
+            console.log( 'FIRE fileuploadcompleted' );
+            if ( !$( 'body' ).hasClass( 'initialized' ) ) {
+                $( '#clear-all-files' ).click();
             }
+            var maxnum = config.maxNumberFiles;
+            if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
+                console.log( '10 files loaded' );
+                $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
+                $( '.wrapper-upload .error-message' ).show()
+                $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
+                $( '#add-files' ).addClass( 'disabled' );
+                $( '#add-files input' ).attr( 'disabled', 'disabled' );
+
+            }
+
+            $( 'body' ).addClass( 'initialized' );
+            /*
+             * BUG FIXED: UTF16 / UTF8 File name conversion
+             * Use Return String From AJAX RESULT ( safe raw url encoded )
+             *      and NOT data.files[0].name; ( INPUT TAG content )
+             *
+             *      fname: data.result[0].name,
+             *
+             **/
+            var fileSpecs;
+            if (data.result[0]) {
+
+                fileSpecs = {
+                    fname: data.result[0].name,
+                    filesize: data.result[0].size,
+                    filerow: data.context,
+                    extension: data.result[0].name.split( '.' )[data.result[0].name.split( '.' ).length - 1],
+                    error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
+                    enforceConversion: data.result[0].convert
+                };
+            } else {
+                fileSpecs = {
+                    error: ( typeof data.result.errors !== 'undefined' ? data.result.errors[0] : false ),
+                };
+            }
+
+            if ( !fileSpecs.enforceConversion ) {
+                if ( checkAnalyzability( 'file upload completed' ) ) {
+                    enableAnalyze();
+                }
+            }
+
+            if ( $( 'body' ).hasClass( 'started' ) ) {
+                setFileReadiness();
+                if ( checkAnalyzability( 'primo caricamento' ) ) {
+                    enableAnalyze();
+                }
+            }
+            $( 'body' ).removeClass( 'started' );
+
+            $( '.name', fileSpecs.filerow ).text( fileSpecs.fname );
+
+            if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
+
+                //Global
+                UI.skipLangDetectArr[fileSpecs.fname] = 'detect';
+
+                if ( config.conversionEnabled ) {
+
+                    if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
+                        //console.log( filerow );
+                        console.log( 'ACTION: bind fileuploadcompleted' );
+                        convertFile( fileSpecs.fname, fileSpecs.filerow, fileSpecs.filesize, fileSpecs.enforceConversion );
+                    }
+
+                } else {
+                    enableAnalyze();
+                }
+
+                /**
+                 * Check for TMX file type, we must trigger the creation of a new TM key
+                 */
+                var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
+                if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
+                    UI.createKeyByTMX(extension);
+                }
+
+            } else if ( fileSpecs.error ) {
+                disableAnalyze();
+                $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'An error occurred during upload.' );
+                $( '.wrapper-upload .error-message' ).show();
+                $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
+                $( '#add-files' ).addClass( 'disabled' );
+                $( '#add-files input' ).attr( 'disabled', 'disabled' );
+            }
+
+            if ( $( '.upload-table tr' ).length ) {
+                $( '.upload-files' ).addClass( 'uploaded' );
+            } else {
+                $( '.upload-files' ).removeClass( 'uploaded' );
+            }
+
         } );
-    } );
 
-    // Initialize the theme switcher:
-    $( '#theme-switcher' ).change( function () {
-        var theme = $( '#theme' );
-        theme.prop(
+        $( '.upload-files' ).bind( 'dragleave', function ( e ) {
+            $( this ).removeClass( 'dragging' );
+        } );
+
+        $( '[draggable="true"]' ).on( 'dragend', function () {
+            dropzone.hide();
+        } );
+
+        dropzone.on( 'dragenter', function ( event ) {
+            $( '.upload-files' ).addClass( 'dnd-hover' );
+        } );
+
+        dropzone.on( 'dragleave', function ( event ) {
+            $( '.upload-files' ).removeClass( 'dnd-hover' );
+        } );
+
+        $( '#clear-all-files' ).bind( 'click', function ( e ) {
+            e.preventDefault();
+            $( '.wrapper-upload .error-message' ).hide();
+            $( '.template-download .delete button, .template-upload .cancel button' ).click();
+        } );
+
+        $( '#delete-failed-conversions' ).bind( 'click', function ( e ) {
+            e.preventDefault();
+            console.log( $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ) );
+            $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ).click();
+        } );
+
+        // Load existing files:
+        $( '#upload-files-list #fileupload' ).each( function () {
+            var that = this;
+            initFileUpload().then((result)=>{
+                if ( result && result.length ) {
+                    $( that ).fileupload( 'option', 'done' )
+                        .call( that, null, {result: result} );
+                }
+            } );
+        } );
+
+        // Initialize the theme switcher:
+        $( '#theme-switcher' ).change( function () {
+            var theme = $( '#theme' );
+            theme.prop(
                 'href',
                 theme.prop( 'href' ).replace(
-                        /[\w\-]+\/jquery-ui.css/,
-                        $( this ).val() + '/jquery-ui.css'
+                    /[\w\-]+\/jquery-ui.css/,
+                    $( this ).val() + '/jquery-ui.css'
                 )
-        );
-    } );
+            );
+        } );
+    }
 
-} );
+};
+
 
 var userLangName = function ( t, userLangCode ) {
     return $( '#' + t + '-lang  option[value=\'' + userLangCode + '\']' ).text();

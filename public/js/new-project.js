@@ -343,6 +343,8 @@ UI.UPLOAD_PAGE = {}
 
 $.extend(UI.UPLOAD_PAGE, {
   init: function () {
+    //setTimeout(() => this.addEvents(), 2000)
+    this.addEvents()
     /*this.checkLanguagesCookie()
     this.checkGDriveEvents()
     /!**
@@ -559,7 +561,7 @@ $.extend(UI.UPLOAD_PAGE, {
     //   APP.openOptionsPanel('tm')
     // })
 
-    $('#target-lang').dropdown({
+    /*$('#target-lang').dropdown({
       selectOnKeydown: false,
       fullTextSearch: 'exact',
       onChange: function () {
@@ -577,7 +579,7 @@ $.extend(UI.UPLOAD_PAGE, {
         APP.checkForLexiQALangs()
         APP.checkForTagProjectionLangs()
       },
-    })
+    })*/
 
     $('input.uploadbtn').click(function () {
       if (!$('.uploadbtn').hasClass('disabled')) {
@@ -696,12 +698,12 @@ $.extend(UI.UPLOAD_PAGE, {
       }
     })
 
-    $('input, select').change(function () {
+    /*$('input, select').change(function () {
       $('.error-message').hide()
     })
     $('input').keyup(function () {
       $('.error-message').hide()
-    })
+    })*/
   },
   sourceLangChangedCallback: function () {
     APP.changeSourceLang($('#source-lang').dropdown('get value'))
@@ -919,11 +921,10 @@ $(document).ready(function () {
   //TODO: REMOVE
   let currentTargetLangs = localStorage.getItem('currentSourceLang')
   let currentSourceLangs = localStorage.getItem('currentTargetLang')
-  if (currentSourceLangs) {
+  if (!currentSourceLangs) {
     currentSourceLangs = config.currentSourceLang
   }
-
-  if (currentTargetLangs) {
+  if (!currentTargetLangs) {
     currentTargetLangs = config.currentTargetLang
   }
   const newProjectPage = document.getElementsByClassName('new_project__page')[0]

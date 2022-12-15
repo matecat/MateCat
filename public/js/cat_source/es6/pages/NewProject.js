@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react'
+import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
 import TeamConstants from '../constants/TeamConstants'
@@ -6,7 +7,8 @@ import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
-import More from "../../../../img/icons/More";
+import More from '../../../../img/icons/More'
+import UploadFile from '../components/createProject/UploadFile'
 
 const NewProject = ({
   isLoggedIn = false,
@@ -32,7 +34,8 @@ const NewProject = ({
       : [languages[0]],
   )
   const [subject, setSubject] = useState(subjectsArray[0])
-
+  const headerMountPoint = document.querySelector('header.upload-page-header')
+  const HeaderPortal = usePortal(headerMountPoint)
   const swapLanguages = () => {
     if (targetLangs.length > 1) {
       ModalsActions.showModalComponent(
@@ -49,7 +52,7 @@ const NewProject = ({
     }
   }
 
-  const openTmPanel = ()=> {
+  const openTmPanel = () => {
     APP.openOptionsPanel('tm')
   }
 
@@ -93,19 +96,20 @@ const NewProject = ({
   }, [])
   return (
     <>
-      <header className="upload-page-header">
+      <HeaderPortal>
         <Header
           showModals={false}
           showLinks={true}
           loggedUser={isLoggedIn}
           user={user}
         />
-      </header>
+      </HeaderPortal>
       <div className="wrapper-claim">
         <div className="wrapper-claim-content">
           <h1>The CAT tool that works for you</h1>
         </div>
       </div>
+
       <div className="wrapper-upload">
         <div id="matecat-cat" />
         <div id="languageSelector" />
@@ -212,12 +216,16 @@ const NewProject = ({
                 }}
               />
             </div>
-            <div className="translate-box settings" onClick={()=>openTmPanel()}>
-              <More size={24}/>
+            <div
+              className="translate-box settings"
+              onClick={() => openTmPanel()}
+            >
+              <More size={24} />
               <span className="text">More settings</span>
             </div>
           </div>
         </div>
+        <UploadFile />
       </div>
     </>
   )
