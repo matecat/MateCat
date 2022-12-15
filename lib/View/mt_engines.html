@@ -75,7 +75,7 @@
             </div>
             <div class="provider-field checkbox">
                 <tal:block tal:condition="isTranslatedUser">
-                    <input class="required" data-field-name="pretranslate" type="checkbox" checked="checked" />
+                    <input class="required" data-field-name="pretranslate" type="checkbox" checked="checked" disabled="disabled" />
                     <label class="checkbox-label">Pre-translate files</label>
                 </tal:block>
                 <tal:block tal:condition="not:isTranslatedUser">
