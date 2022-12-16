@@ -1292,13 +1292,6 @@ button.ui-button::-moz-focus-inner {
   margin-left: 3px;
 }
 
-.translate-box.settings {
-  .more-options-cont {
-    margin-top: 0;
-    /*margin-left: 10px;*/
-  }
-}
-
 @media only screen and (max-width: 1320px) {
   .translate-box.tmx-select,
   .translate-box.source,
@@ -2211,40 +2204,6 @@ tr.ready .size span {
   margin-top: 8px;
   text-align: center;
   padding: 4px 0px;
-}
-
-.more-options-cont {
-  margin-top: 7px;
-  .more-options {
-    float: left;
-    font-size: 14px;
-    &:before {
-      display: none;
-    }
-  }
-  .more-options,
-  span:hover {
-    text-decoration: none;
-    cursor: pointer;
-  }
-  span {
-    font-size: 14px;
-    float: left;
-    color: $linkBlue;
-    &:hover {
-      color: $linkBlueHover;
-    }
-    &.text {
-      margin-top: 2px;
-    }
-  }
-
-  .more-options-icon {
-    svg {
-      width: 24px;
-      height: auto;
-    }
-  }
 }
 
 @-moz-document url-prefix() {

@@ -5,7 +5,7 @@ export const UploadFile = () => {
     <div id="upload-files-list" className="upload-files drag">
       <form
         id="fileupload"
-        action="${basepath}lib/Utils/fileupload/"
+        action="/lib/Utils/fileupload/"
         method="POST"
         encType="multipart/form-data"
       >

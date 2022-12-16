@@ -86,13 +86,12 @@ APP.changeSourceLang = function (lang) {
  * Disable/Enable languages for LexiQA
  *
  */
-APP.checkForLexiQALangs = function () {
+APP.checkForLexiQALangs = function (source) {
   var acceptedLanguages = config.lexiqa_languages.slice()
   var LXQCheck = $('.options-box.qa-box')
   var notAcceptedLanguages = []
   var targetLanguages = localStorage.getItem('currentTargetLang').split(',')
-  var sourceAccepted =
-    acceptedLanguages.indexOf($('#source-lang').dropdown('get value')) > -1
+  var sourceAccepted = acceptedLanguages.indexOf(source.code) > -1
   var targetAccepted =
     targetLanguages.filter(function (n) {
       if (acceptedLanguages.indexOf(n) === -1) {
@@ -105,7 +104,7 @@ APP.checkForLexiQALangs = function () {
     }).length > 0
 
   if (!sourceAccepted) {
-    notAcceptedLanguages.push($('#source-lang').dropdown('get text'))
+    notAcceptedLanguages.push(source.name)
   }
 
   LXQCheck.find('.onoffswitch').off('click')
@@ -137,13 +136,13 @@ APP.checkForLexiQALangs = function () {
  * Disable/Enable languages for LexiQA
  *
  */
-APP.checkForTagProjectionLangs = function () {
+APP.checkForTagProjectionLangs = function (source) {
   if ($('.options-box #tagp_check').length == 0) return
 
   var acceptedLanguages = config.tag_projection_languages
   var tpCheck = $('.options-box.tagp')
-  var sourceLanguageCode = $('#source-lang').dropdown('get value')
-  var sourceLanguageText = $('#source-lang').dropdown('get text')
+  var sourceLanguageCode = source.code
+  var sourceLanguageText = source.name
   var languageCombinations = []
   var notSupportedCouples = []
 
@@ -228,9 +227,6 @@ APP.getCreateProjectParams = function () {
     source_lang: $('#source-lang').dropdown('get value'),
     target_lang: $('#target-lang').dropdown('get value'),
     job_subject: $('#project-subject').dropdown('get value'),
-    disable_tms_engine: $('#disable_tms_engine').prop('checked')
-      ? $('#disable_tms_engine').val()
-      : false,
     mt_engine: $('.mgmt-mt .activemt').data('id'),
     private_keys_list: UI.extractTMdataFromTable(),
     lang_detect_files: UI.skipLangDetectArr,
@@ -343,74 +339,7 @@ UI.UPLOAD_PAGE = {}
 
 $.extend(UI.UPLOAD_PAGE, {
   init: function () {
-    //setTimeout(() => this.addEvents(), 2000)
     this.addEvents()
-    /*this.checkLanguagesCookie()
-    this.checkGDriveEvents()
-    /!**
-     * LexiQA language Enable/Disable
-     *!/
-    APP.checkForLexiQALangs()
-    /!**
-     * Guess Tags language Enable/Disable
-     *!/
-    APP.checkForTagProjectionLangs()
-    /!**
-     * SpeechToText language Enable/Disable
-     *!/
-    APP.checkForSpeechToText()
-    APP.checkForDqf()
-    this.render()
-    this.addEvents()
-    $('#activetm').on('update', this.checkTmKeys)
-    $('#activetm').on('removeTm', this.disableTmKeysFromSelect)
-    $('#activetm').on('deleteTm', this.deleteTMFromSelect)*/
-  },
-
-  initDropdowns: function () {
-    var self = this
-    $('#tmx-select').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      useLabels: false,
-      message: {
-        count: '{count} Private TMs',
-        noResults: 'No TMs found.',
-      },
-      onAdd: function (value) {
-        self.selectTm(value)
-      },
-      onRemove: function (removedValue) {
-        self.disableTm(removedValue)
-        setTimeout(self.checkMailDropDownValueSelected, 100)
-      },
-    })
-
-    $('#add-tmx-option').on('click', function () {
-      UI.openLanguageResourcesPanel('tm')
-    })
-
-    $('#project-subject').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-    })
-
-    $('#project-subject').dropdown('set selected', 'general')
-
-    $('.tmx-select .tm-info-title .icon').popup({
-      html:
-        "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +
-        'and helping fellow MateCat users improve their translations.</br></br>' +
-        'For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel.</div>',
-      position: 'bottom center',
-    })
-  },
-
-  checkGDriveEvents: function () {
-    var cookie = Cookies.get('gdrive_files_to_be_listed')
-    if (cookie) {
-      APP.tryListGDriveFiles()
-    }
   },
 
   selectTm: function (value) {
@@ -422,9 +351,6 @@ $.extend(UI.UPLOAD_PAGE, {
     if (tmElem.length > 0) {
       $(tmElem).trigger('click')
     }
-    setTimeout(function () {
-      UI.UPLOAD_PAGE.setTMName()
-    })
   },
 
   disableTm: function (value) {
@@ -435,82 +361,6 @@ $.extend(UI.UPLOAD_PAGE, {
     )
     if (tmElem.length > 0) {
       $(tmElem).trigger('click')
-    }
-    setTimeout(function () {
-      UI.UPLOAD_PAGE.setTMName()
-    })
-  },
-
-  checkMailDropDownValueSelected: function () {
-    var values = $('#tmx-select').dropdown('get value')
-    if (values.length === 0) {
-      $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM')
-    }
-  },
-
-  setTMName: function () {
-    if (
-      $('#tmx-select').dropdown('get value').indexOf(',') === -1 &&
-      $('#tmx-select').dropdown('get value').length > 0
-    ) {
-      var html = $('#tmx-select').find('div.item.active').html()
-      $('#tmx-select').dropdown('set text', html)
-    }
-  },
-
-  checkTmKeys: function (event, desc, key) {
-    var activeTm = $('#activetm .mine')
-    if (activeTm.length === 0) {
-      $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM')
-      $('#tmx-select').dropdown('remove selected', key)
-    } else {
-      var existingKey = $('#tmx-select').find(
-        'div.item[data-value=' + key + ']',
-      )
-      if (existingKey.length > 0) {
-        if (existingKey.hasClass('active')) {
-          return
-        } else {
-          $('#tmx-select').dropdown('set selected', key)
-        }
-      } else {
-        var html =
-          '<div class="item"  data-value="' +
-          key +
-          '">' +
-          '<span class="item-key-name">' +
-          desc +
-          '</span>' +
-          '<span class="item-key-id">' +
-          key +
-          '</span>' +
-          '<i class="icon-checkmark2 icon"></i>' +
-          '</div>'
-        $('#tmx-select div.item').first().before(html)
-        setTimeout(function () {
-          $('#tmx-select').dropdown('set selected', key)
-        })
-      }
-    }
-  },
-
-  disableTmKeysFromSelect: function (event, key) {
-    var existingKey = $('#tmx-select').find('div.item[data-value=' + key + ']')
-    if (existingKey.length > 0) {
-      if (existingKey.hasClass('active')) {
-        $('#tmx-select').dropdown('remove selected', key)
-      }
-    }
-  },
-
-  deleteTMFromSelect: function (event, key) {
-    if ($('#tmx-select').find('div.item[data-value=' + key + ']').length > 0) {
-      $('#tmx-select')
-        .find('div.item[data-value=' + key + ']')
-        .remove()
-      if ($('#tmx-select').dropdown('get value') == key) {
-        $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM')
-      }
     }
   },
 
@@ -556,10 +406,6 @@ $.extend(UI.UPLOAD_PAGE, {
       e.preventDefault()
       $('.supported-formats').hide()
     })
-    // $('.more-options-cont').on('click', function (e) {
-    //   e.preventDefault()
-    //   APP.openOptionsPanel('tm')
-    // })
 
     /*$('#target-lang').dropdown({
       selectOnKeydown: false,
@@ -623,6 +469,7 @@ $.extend(UI.UPLOAD_PAGE, {
       }
     })
 
+    //Error upload (??)
     $('.upload-table').on('click', 'a.skip_link', function () {
       var fname = decodeURIComponent($(this).attr('id').replace('skip_', ''))
 
@@ -641,6 +488,7 @@ $.extend(UI.UPLOAD_PAGE, {
       }
     })
 
+    //Multilanguage TODO
     $('#add-multiple-lang').click(function (e) {
       e.preventDefault()
 
@@ -684,29 +532,8 @@ $.extend(UI.UPLOAD_PAGE, {
         }),
       )
     })
-
-    $('#disable_tms_engine').change(function () {
-      if (this.checked) {
-        $("input[id^='private-tm-']").prop('disabled', true)
-
-        // $("#create_private_tm_btn").addClass("disabled", true);
-      } else {
-        if (!$('#create_private_tm_btn[data-key]').length) {
-          $("input[id^='private-tm-']").prop('disabled', false)
-          $('#create_private_tm_btn').removeClass('disabled')
-        }
-      }
-    })
-
-    /*$('input, select').change(function () {
-      $('.error-message').hide()
-    })
-    $('input').keyup(function () {
-      $('.error-message').hide()
-    })*/
   },
   sourceLangChangedCallback: function () {
-    APP.changeSourceLang($('#source-lang').dropdown('get value'))
     if ($('.template-download').length) {
       //.template-download is present when jquery file upload is used and a file is found
       if (UI.conversionsAreToRestart()) {
@@ -719,9 +546,6 @@ $.extend(UI.UPLOAD_PAGE, {
           'Confirmation required',
         )
       }
-      if (UI.checkTMXLangFailure()) {
-        UI.delTMXLangFailure()
-      }
     } else if ($('.template-gdrive').length) {
       ModalsActions.showModalComponent(
         AlertModal,
@@ -733,14 +557,14 @@ $.extend(UI.UPLOAD_PAGE, {
       )
     }
   },
-  targetLanguageChangedCallback: function () {
-    $('.translate-box.target h2 .extra').remove()
-    if (UI.checkTMXLangFailure()) {
-      UI.delTMXLangFailure()
-    }
-    APP.changeTargetLang($('#target-lang').dropdown('get value'))
-  },
 })
+
+APP.checkGDriveEvents = function () {
+  var cookie = Cookies.get('gdrive_files_to_be_listed')
+  if (cookie) {
+    APP.tryListGDriveFiles()
+  }
+}
 APP.handleCreationStatus = function (id_project, password) {
   projectCreationStatus(id_project, password)
     .then(({data, status}) => {

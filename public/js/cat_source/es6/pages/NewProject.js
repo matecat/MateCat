@@ -56,32 +56,21 @@ const NewProject = ({
     APP.openOptionsPanel('tm')
   }
 
-  //TODO: Move it
-  useEffect(() => {
-    if (selectedTeam) {
-      APP.setTeamInStorage(selectedTeam.id)
-    }
-  }, [selectedTeam])
+  const changeSourceLanguage = (option) => {
+    setSourceLang(option)
+    UI.UPLOAD_PAGE.sourceLangChangedCallback()
+    APP.checkForTagProjectionLangs()
+  }
 
-  //TODO: Move it
-  useEffect(() => {
-    if (sourceLang) {
-      APP.changeSourceLang(sourceLang.id)
+  const changeTargetLanguage = (option) => {
+    if (targetLangs.some((lang) => lang.id === option.id)) {
+      setTargetLangs(targetLangs.filter((lang) => lang.id !== option.id))
+    } else {
+      setTargetLangs(targetLangs.concat([option]))
     }
-  }, [sourceLang])
+  }
 
-  //TODO: Move it
-  useEffect(() => {
-    if (targetLangs) {
-      APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
-    }
-  }, [targetLangs])
-
-  useEffect(() => {
-    const updateUser = (user) => {
-      setUser(user)
-      setSelectedTeam(APP.getLastTeamSelected(user.teams))
-    }
+  const getTmKeys = () => {
     getTmKeysUser().then(({tm_keys}) =>
       setTmKeys(
         tm_keys.map((key) => {
@@ -89,11 +78,64 @@ const NewProject = ({
         }),
       ),
     )
+  }
+
+  //TODO: Move it
+  useEffect(() => {
+    if (selectedTeam) {
+      APP.setTeamInStorage(selectedTeam.id)
+    }
+  }, [selectedTeam])
+
+  useEffect(() => {
+    if (sourceLang) {
+      APP.changeSourceLang(sourceLang.id)
+    }
+    if (targetLangs) {
+      APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
+    }
+    APP.checkForLexiQALangs(sourceLang)
+    APP.checkForTagProjectionLangs(sourceLang)
+  }, [sourceLang, targetLangs])
+
+  useEffect(() => {
+    APP.checkForSpeechToText()
+    APP.checkForDqf()
+    APP.checkGDriveEvents()
+
+    const updateUser = (user) => {
+      setUser(user)
+      setSelectedTeam(APP.getLastTeamSelected(user.teams))
+    }
+    getTmKeys()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
+
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
     }
   }, [])
+  useEffect(() => {
+    const activateKey = (event, desc, key) => {
+      const tmSelected = tmKeys.find((item) => item.id === key)
+      if (!tmKeySelected.find((item) => item.id === key)) {
+        setTmKeySelected(tmKeySelected.concat([tmSelected]))
+      }
+    }
+    const deactivateKey = (event, key) => {
+      setTmKeySelected(tmKeySelected.filter((item) => item.id !== key))
+    }
+    const removeKey = () => {
+      getTmKeys()
+    }
+    $('#activetm').on('update', activateKey)
+    $('#activetm').on('removeTm', deactivateKey)
+    $('#activetm').on('deleteTm', removeKey)
+    return () => {
+      $('#activetm').off('update')
+      $('#activetm').off('removeTm')
+      $('#activetm').off('deleteTm')
+    }
+  }, [tmKeys, tmKeySelected])
   return (
     <>
       <HeaderPortal>
@@ -150,7 +192,7 @@ const NewProject = ({
                 options={languages}
                 activeOption={sourceLang}
                 checkSpaceToReverse={false}
-                onSelect={(option) => setSourceLang(option)}
+                onSelect={(option) => changeSourceLanguage(option)}
               />
             </div>
             <a
@@ -171,13 +213,7 @@ const NewProject = ({
                 activeOptions={targetLangs}
                 checkSpaceToReverse={false}
                 onToggleOption={(option) => {
-                  if (targetLangs.some((lang) => lang.id === option.id)) {
-                    setTargetLangs(
-                      targetLangs.filter((lang) => lang.id !== option.id),
-                    )
-                  } else {
-                    setTargetLangs(targetLangs.concat([option]))
-                  }
+                  changeTargetLanguage(option)
                 }}
               />
             </div>
@@ -210,8 +246,10 @@ const NewProject = ({
                     setTmKeySelected(
                       tmKeySelected.filter((item) => item.id !== option.id),
                     )
+                    UI.UPLOAD_PAGE.disableTm(option.id)
                   } else {
                     setTmKeySelected(tmKeySelected.concat([option]))
+                    UI.UPLOAD_PAGE.selectTm(option.id)
                   }
                 }}
               />

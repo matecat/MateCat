@@ -62,18 +62,6 @@ window.UI = {
         } );
         return num
     },
-    checkTMXLangFailure: function () {
-        return $( '#source-lang' ).hasClass( 'failed-tmx-lang' ) || $( '#target-lang' ).hasClass( 'failed-tmx-lang' );
-    },
-    addTMXLangFailure: function () {
-        $( '#source-lang' ).addClass( 'failed-tmx-lang' );
-        $( '#target-lang' ).addClass( 'failed-tmx-lang' );
-    },
-    delTMXLangFailure: function () {
-        $( '#source-lang' ).removeClass( 'failed-tmx-lang' );
-        $( '#target-lang' ).removeClass( 'failed-tmx-lang' );
-        $( '.uploadbtn' ).attr( 'value', 'Analyze' ).removeAttr( 'disabled' ).removeClass( 'disabled' );
-    },
     confirmRestartConversions: function () {
         UI.restartConversions();
     },
@@ -156,7 +144,6 @@ window.UI = {
     },
 
     TMXloaded: function () {
-        // $( '#disable_tms_engine' ).trigger( 'click' );
         this.createKeyByTMX();
     },
 
