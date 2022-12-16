@@ -616,6 +616,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
   setGlossaryToCache: function (sid, terms) {
+    if (!this._segments.size) return
     const adaptedTerms = terms.map((term) => ({
       ...term,
       matching_words: term.matching_words.filter((value) => value),
@@ -1163,19 +1164,20 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     })
   },
   getSegmentIndex(sid) {
-    return this._segments.findIndex(function (segment) {
+    const index = this._segments.findIndex(function (segment) {
       if (sid.toString().indexOf('-') === -1) {
         return parseInt(segment.get('sid')) === parseInt(sid)
       } else {
         return segment.get('sid') === sid
       }
     })
+    return index > 0 ? index : 0
   },
   getLastSegmentId() {
-    return this._segments.last().get('sid')
+    return this._segments?.last()?.get('sid')
   },
   getFirstSegmentId() {
-    return this._segments.first().get('sid')
+    return this._segments?.first()?.get('sid')
   },
   getCurrentSegment: function () {
     let current = null,
