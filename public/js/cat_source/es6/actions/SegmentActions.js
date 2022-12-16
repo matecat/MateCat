@@ -1201,7 +1201,7 @@ const SegmentActions = {
   },
   gotoNextUntranslatedSegment() {
     let next = SegmentStore.getNextUntranslatedSegmentId()
-    SegmentActions.openSegment(next)
+    if (next) SegmentActions.openSegment(next)
   },
   setNextUntranslatedSegmentFromServer(sid) {
     SegmentStore.nextUntranslatedFromServer = sid
