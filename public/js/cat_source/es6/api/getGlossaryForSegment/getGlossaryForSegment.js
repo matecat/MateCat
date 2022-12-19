@@ -32,11 +32,14 @@ export const getGlossaryForSegment = async ({
     target_language: targetLanguage,
   }
 
-  const response = await fetch(`${getMatecatApiDomain()}api/app/glossary/get`, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify(dataParams),
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/glossary/_get`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(dataParams),
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

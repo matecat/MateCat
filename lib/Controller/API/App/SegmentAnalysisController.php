@@ -308,6 +308,35 @@ class SegmentAnalysisController extends KleinController {
             $finalVersion = 'r2';
         }
 
+        $r1 = ($segmentForAnalysis->has_r1 !== null) ? $segmentForAnalysis->raw_word_count : 0;
+        $r2 = ($segmentForAnalysis->has_r2 !== null) ? $segmentForAnalysis->raw_word_count : 0;
+
+        return [
+            'translation_status' => $segmentForAnalysis->status,
+            'final_version' => $finalVersion,
+            'counts' => [
+                'r1' => $r1,
+                'r2' => $r2,
+            ]
+        ];
+    }
+
+    /**
+     * @param $segmentForAnalysis
+     * @return array
+     */
+    private function getStatusObject($segmentForAnalysis)
+    {
+        $finalVersion = null;
+
+        if($segmentForAnalysis->source_page == 1){
+            $finalVersion = 't';
+        } elseif($segmentForAnalysis->source_page == 2){
+            $finalVersion = 'r1';
+        } elseif($segmentForAnalysis->source_page == 3){
+            $finalVersion = 'r2';
+        }
+
         $r1 = ($segmentForAnalysis->status === 'APPROVED' and $segmentForAnalysis->has_r1 !== null) ? $segmentForAnalysis->raw_word_count : 0;
         $r2 = ($segmentForAnalysis->status === 'APPROVED' and $finalVersion === 'r2' and $segmentForAnalysis->has_r2 !== null) ? $segmentForAnalysis->raw_word_count : 0;
 

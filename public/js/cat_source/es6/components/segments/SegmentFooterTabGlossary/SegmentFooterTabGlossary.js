@@ -10,6 +10,7 @@ import {TabGlossaryContext} from './TabGlossaryContext'
 import {SearchTerms} from './SearchTerms'
 import GlossaryList from './GlossaryList'
 import TermForm from './TermForm'
+import SegmentUtils from '../../../utils/segmentUtils'
 
 export const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -375,7 +376,7 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     setSelectsActive((prevState) => ({
       ...prevState,
-      keys: keys.length ? [keys[0]] : [],
+      keys: keys.length ? SegmentUtils.getSelectedKeysGlossary(keys) : [],
     }))
   }, [keys])
 

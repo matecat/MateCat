@@ -7,11 +7,14 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const addGlossaryItem = async (dataRequest) => {
-  const response = await fetch(`${getMatecatApiDomain()}api/app/glossary/set`, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify(dataRequest),
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/glossary/_set`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(dataRequest),
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 
