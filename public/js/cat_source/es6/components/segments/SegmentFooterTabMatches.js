@@ -80,7 +80,7 @@ class SegmentFooterTabMatches extends React.Component {
 
       if (
         this.match !== 'MT' &&
-        parseInt(this.match) > 74 &&
+        parseInt(this.match) > 70 &&
         parseInt(this.match) < 100
       ) {
         item.sourceDiff = TextUtils.getDiffHtml(
