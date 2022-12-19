@@ -228,7 +228,7 @@ class GlossaryWorker extends AbstractWorker {
         $client = $this->getMyMemoryClient();
 
         /** @var \Engines_Results_MyMemory_KeysGlossaryResponse $response */
-        $response = $client->glossaryKeys($payload['keys']);
+        $response = $client->glossaryKeys($payload['source_language'], $payload['target_language'], $payload['keys']);
 
         $this->publishMessage(
             $this->setResponsePayload(
