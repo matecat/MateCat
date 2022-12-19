@@ -27,7 +27,7 @@ export const checkJobKeysHaveGlossary = async ({
   }
 
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/keys`,
+    `${getMatecatApiDomain()}api/app/glossary/_keys`,
     {
       method: 'POST',
       credentials: 'include',

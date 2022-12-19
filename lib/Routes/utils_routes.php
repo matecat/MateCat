@@ -92,12 +92,12 @@ $klein->with( '/api/app/tm-keys', function () {
 
 // Glossary
 $klein->with( '/api/app/glossary', function () {
-    route( '/check', 'POST', '\API\App\GlossaryController', 'check' );
-    route( '/delete', 'POST', '\API\App\GlossaryController', 'delete' );
-    route( '/domains', 'POST', '\API\App\GlossaryController', 'domains' );
-    route( '/get', 'POST', '\API\App\GlossaryController', 'get' );
-    route( '/keys', 'POST', '\API\App\GlossaryController', 'keys' );
-    route( '/search', 'POST', '\API\App\GlossaryController', 'search' );
-    route( '/set', 'POST', '\API\App\GlossaryController', 'set' );
-    route( '/update', 'POST', '\API\App\GlossaryController', 'update' );
+    route( '/_check', 'POST', '\API\App\GlossaryController', 'check' );
+    route( '/_delete', 'POST', '\API\App\GlossaryController', 'delete' );
+    route( '/_domains', 'POST', '\API\App\GlossaryController', 'domains' );
+    route( '/_get', 'POST', '\API\App\GlossaryController', 'get' );
+    route( '/_keys', 'POST', '\API\App\GlossaryController', 'keys' );
+    route( '/_search', 'POST', '\API\App\GlossaryController', 'search' );
+    route( '/_set', 'POST', '\API\App\GlossaryController', 'set' );
+    route( '/_update', 'POST', '\API\App\GlossaryController', 'update' );
 } );
