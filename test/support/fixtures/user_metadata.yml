@@ -1,0 +1,9 @@
+um1:
+  uid: @REF:users:user1:uid
+  key: dqf_username
+  value: fabrizio@translated.net
+
+um2:
+  uid: @REF:users:user1:uid
+  key: dqf_password
+  value: @CONFIG:dqf/dqf_test_secret:user_1:dqf_password
