@@ -2,6 +2,7 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import SegmentUtils from '../../../utils/segmentUtils'
 
 export const KeysSelect = ({className = '', onToggleOption = () => false}) => {
   const {keys, selectsActive, setSelectsActive, modifyElement} =
@@ -25,12 +26,17 @@ export const KeysSelect = ({className = '', onToggleOption = () => false}) => {
       onToggleOption={(option) => {
         if (option) {
           const {keys: activeKeys} = selectsActive
+          const updatedKeys = activeKeys.some((item) => item.id === option.id)
+            ? activeKeys.filter((item) => item.id !== option.id)
+            : activeKeys.concat([option])
+
           setSelectsActive((prevState) => ({
             ...prevState,
-            keys: activeKeys.some((item) => item.id === option.id)
-              ? activeKeys.filter((item) => item.id !== option.id)
-              : activeKeys.concat([option]),
+            keys: updatedKeys,
           }))
+
+          // save to local storage keys selected for actual job
+          SegmentUtils.setSelectedKeysGlossary(updatedKeys)
         }
         onToggleOption(option)
       }}
