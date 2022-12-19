@@ -1,7 +1,0 @@
-qa_model_1:
-  id: @EVER_INCREMENT
-  uid: NULL
-  create_date: 2017-06-09 16:08:16
-  label: MateCat default
-  pass_type: points_per_thousand
-  pass_options: '{"limit":20}'
