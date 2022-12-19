@@ -241,9 +241,9 @@ class AnalyzeHeader extends React.Component {
 
   getWordscount() {
     let tooltipText =
-      'MateCat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
+      'Matecat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
       'offer machine translation suggestions or translation memory matches thanks to the millions ' +
-      'of words corrected by the MateCat community.<br> This data is also used to define a fair pricing ' +
+      'of words corrected by the Matecat community.<br> This data is also used to define a fair pricing ' +
       'scheme that splits the benefits of the technology between the customer and the translator.'
 
     let status = this.props.data.get('STATUS')

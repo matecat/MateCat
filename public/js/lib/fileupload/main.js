@@ -91,7 +91,7 @@ window.UI = {
         var msg = '';
 
         if ( file.type.match( /^image/ ) ) {
-            msg = 'Images not allowed in MateCat';
+            msg = 'Images not allowed in Matecat';
         } else if (
                 (
                     //file.type == 'application/zip' ||
@@ -838,30 +838,6 @@ var unsupported = function () {
     var jj = $( '<div/>' ).html( config.unsupportedFileTypes ).text();
     return $.parseJSON( jj );
 };
-
-function goodbye( e ) {
-    if ( $( '.popup-tm .notify' ).length ) {
-        var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-        var leave_message = 'You have a pending operation. Are you sure you want to quit?';
-        if ( dont_confirm_leave !== 1 ) {
-            if ( !e ) e = window.event;
-            //e.cancelBubble is supported by IE - this will kill the bubbling process.
-            e.cancelBubble = true;
-            e.returnValue = leave_message;
-            //e.stopPropagation works in Firefox.
-            if ( e.stopPropagation ) {
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-        }
-
-        //return works for Chrome and Safari
-        clearNotCompletedUploads();
-
-        return leave_message;
-    }
-}
 
 var getIconClass = function ( ext ) {
     switch ( ext ) {

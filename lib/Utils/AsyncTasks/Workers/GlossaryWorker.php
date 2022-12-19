@@ -9,6 +9,7 @@ use Engines_MyMemory;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Exceptions\EndQueueException;
 
 class GlossaryWorker extends AbstractWorker {
 
@@ -47,7 +48,7 @@ class GlossaryWorker extends AbstractWorker {
         // @TODO add always "de"="tmanalysis_655321@matecat.com" when call MM
 
         if ( false === in_array( $action, $allowedActions ) ) {
-            throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
+            throw new EndQueueException( $action . ' is not an allowed action. ' );
         }
 
         $this->_checkDatabaseConnection();
@@ -107,6 +108,24 @@ class GlossaryWorker extends AbstractWorker {
                 'payload' => null,
         ];
 
+        if($response->responseStatus != 200){
+
+            switch ($response->responseStatus){
+                case 202:
+                    $errMessage = "MyMemory is busy, please try later";
+                    break;
+
+                default:
+                    $errMessage = "Error, please try later";
+            }
+
+            $message['error'] = [
+                    'code' => $response->responseStatus,
+                    'message' => $errMessage,
+                    'payload' => $payload,
+            ];
+        }
+
         if($response->responseStatus == 200){
             $message['payload'] = $payload;
         }
@@ -160,6 +179,11 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function get( $payload )
     {
+
+        if( empty ( $payload['source_language'] ) || empty ( $payload['target_language'] ) ){
+            throw new EndQueueException( "Invalid Payload" );
+        }
+
         $keys = [];
         foreach ($payload['tmKeys'] as $key){
             $keys[] = $key['key'];
@@ -175,6 +199,12 @@ class GlossaryWorker extends AbstractWorker {
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
         }
+
+        if ( empty( $matches ) ) {
+            throw new EndQueueException( "Empty response from Glossary" );
+        }
+
+        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys']);
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -198,7 +228,7 @@ class GlossaryWorker extends AbstractWorker {
         $client = $this->getMyMemoryClient();
 
         /** @var \Engines_Results_MyMemory_KeysGlossaryResponse $response */
-        $response = $client->glossaryKeys($payload['keys']);
+        $response = $client->glossaryKeys($payload['source_language'], $payload['target_language'], $payload['keys']);
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -243,9 +273,33 @@ class GlossaryWorker extends AbstractWorker {
                 'glossary_search',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                    $matches
+                $this->formatGetGlossaryMatches($matches, $payload['tmKeys'])
             )
         );
+    }
+
+    /**
+     * @param array $matches
+     * @param array $tmKeys
+     *
+     * @return array
+     */
+    private function formatGetGlossaryMatches(array $matches, $tmKeys)
+    {
+        $key = $matches['terms']['metadata']['key'];
+
+        foreach ($tmKeys as $index => $tmKey){
+            if($tmKey['key'] === $key and $tmKey['is_shared'] === false){
+
+                $keyLength   = strlen( $key );
+                $last_digits = substr( $key, - 8 );
+                $key         = str_repeat( "*", $keyLength - 8 ) . $last_digits;
+
+                $matches['terms']['metadata']['key'] = $key;
+            }
+        }
+
+        return $matches;
     }
 
     /**
@@ -267,6 +321,24 @@ class GlossaryWorker extends AbstractWorker {
             'id_segment' => $id_segment,
             'payload' => null,
         ];
+
+        if($response->responseStatus != 200){
+
+            switch ($response->responseStatus){
+                case 202:
+                    $errMessage = "MyMemory is busy, please try later";
+                    break;
+
+                default:
+                    $errMessage = "Error, please try later";
+            }
+
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
+            ];
+        }
 
         if($response->responseStatus == 200){
 
@@ -327,6 +399,24 @@ class GlossaryWorker extends AbstractWorker {
             'id_segment' => $id_segment,
             'payload' => null,
         ];
+
+        if($response->responseStatus != 200){
+
+            switch ($response->responseStatus){
+                case 202:
+                    $errMessage = "MyMemory is busy, please try later";
+                    break;
+
+                default:
+                    $errMessage = "Error, please try later";
+            }
+
+            $message['error'] = [
+                    'code' => $response->responseStatus,
+                    'message' => $errMessage,
+                    'payload' => $payload,
+            ];
+        }
 
         if($response->responseStatus == 200){
 

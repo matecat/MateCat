@@ -1,7 +1,8 @@
-import React, {useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect, useCallback} from 'react'
 import PropTypes from 'prop-types'
 
 import {Dropdown} from './../common/Dropdown'
+import TEXT_UTILS from '../../utils/textUtils'
 
 const mergeClassNames = (...args) => {
   return (
@@ -27,7 +28,6 @@ export const Select = ({
   options,
   activeOption,
   activeOptions,
-  mostPopularOptions,
   isValid = false,
   showValidation = false,
   showSearchBar = false,
@@ -45,10 +45,22 @@ export const Select = ({
 }) => {
   const listRef = useRef()
   const wrapperRef = useRef()
+  const selectedItemRef = useRef()
 
   const [value, setValue] = useState(activeOption ? activeOption.id : '')
   const [isDropdownVisible, setDropdownVisibility] = useState(false)
   const [isDropdownReversed, setDropdownReversed] = useState(false)
+  const [selectedLabel, setSelectedLabel] = useState('')
+
+  const renderSelection = useCallback(() => {
+    if (multipleSelect !== 'off' && activeOptions && activeOptions.length > 0) {
+      const array = activeOptions.map((option, index) => {
+        return option.name
+      })
+      return array.join(', ')
+    }
+    return activeOption ? activeOption.name : placeholder
+  }, [activeOption, activeOptions, multipleSelect, placeholder])
 
   useEffect(() => {
     if (activeOption && (!value || activeOption.id !== value)) {
@@ -126,6 +138,10 @@ export const Select = ({
     }
   }, [isDropdownVisible, multipleSelect, label, showSearchBar, offsetParent])
 
+  useEffect(() => {
+    setSelectedLabel(renderSelection())
+  }, [renderSelection])
+
   const checkIfShouldHideDropdown = (event) => {
     const isTabPressed = event.keyCode === 9
     const isEscPressed = event.keyCode === 27
@@ -142,7 +158,7 @@ export const Select = ({
   }
 
   const handleFocus = () => {
-    showDropdown()
+    if (!isDisabled) showDropdown()
   }
 
   const handleSelect = (option) => {
@@ -186,16 +202,6 @@ export const Select = ({
   const inputValue =
     (activeOptions && activeOptions.map((v) => v.id).join(',')) || value
 
-  const renderSelection = () => {
-    if (multipleSelect !== 'off' && activeOptions && activeOptions.length > 0) {
-      const array = activeOptions.map((option, index) => {
-        return option.name
-      })
-      return array.join(', ')
-    }
-    return activeOption ? activeOption.name : placeholder
-  }
-
   return (
     <div
       className={`select-with-label__wrapper ${className ? className : ''}`}
@@ -209,9 +215,17 @@ export const Select = ({
       )}
       <div
         className="select-with-icon__wrapper"
-        aria-label={multipleSelect === 'off' ? renderSelection() : null}
+        aria-label={
+          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current)
+            ? selectedLabel
+            : null
+        }
       >
-        <span className={inputClassName} onClick={toggleDropdown}>
+        <span
+          ref={selectedItemRef}
+          className={inputClassName}
+          onClick={toggleDropdown}
+        >
           {renderSelection()}
         </span>
         <input
@@ -236,6 +250,7 @@ export const Select = ({
           <Dropdown
             {...{
               className: 'select__dropdown',
+              wrapper: wrapperRef,
               showSearchBar,
               searchPlaceholder,
               listRef,
@@ -266,23 +281,17 @@ Select.propTypes = {
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      id: PropTypes.string,
       name: PropTypes.string,
     }),
   ),
   activeOption: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    id: PropTypes.string,
     name: PropTypes.string,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      name: PropTypes.string,
-    }),
-  ),
-  mostPopularOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      id: PropTypes.string,
       name: PropTypes.string,
     }),
   ),

@@ -391,14 +391,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
+                if(in_array("1", $line)){
+                    foreach ($line as $lineKey => $item){
+                        if($item == "1"){
+                            $line[$lineKey] = "True";
+                        }
+                    }
+                }
+
                 //copy stream to stream
                 $newFile->fputcsv( $line );
-
             }
+
             $newFile->fflush();
 
-            $origFile = null; //close the file handle
-            $newFile  = null; //close the file handle
+            $origFile = null;
+            $newFile  = null;
             copy( $tmpFileName, $file );
             unlink( $tmpFileName );
 
@@ -418,27 +426,49 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $postFields = [
-                'glossary'    => "@" . realpath( $file ),
-                'name'        => $name,
+            'glossary'    => $this->getCurlFile($file),
+            'key'         => trim( $key ),
         ];
 
-        $postFields[ 'key' ] = trim( $key );
-
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = false;
-            $this->_setAdditionalCurlParams( $options );
+        if($name and $name !== ''){
+            $postFields['key_name'] = $name;
         }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
 
-        if(isset($this->result->responseData['UUID'])){
-            $uuid = $this->result->responseData['UUID'];
-            $this->pollForStatus($uuid, 'glossary_import_status_relative_url');
-        }
+        return $this->result;
+    }
+
+    /**
+     * @param $uuid
+     *
+     * @return array
+     */
+    public function getGlossaryImportStatus($uuid)
+    {
+        $this->call( 'glossary_import_status_relative_url', [
+                'uuid' => $uuid
+        ], false );
+
+        return $this->result;
+    }
+
+    /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     *
+     * @return array
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+        $this->call( 'glossary_export_relative_url', [
+            'key' => $key,
+            'key_name' => $keyName,
+            'user_name' => $userName,
+            'user_email' => $userEmail,
+        ], true );
 
         return $this->result;
     }
@@ -458,12 +488,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $startTime = time();
 
         do {
+
             $this->call( $relativeUrl, [
                 'uuid' => $uuid
             ], false );
-            sleep( $sleep );
 
-        } while ( $this->result->responseStatus !== 202 and (time() - $startTime) <= $limit );
+            if($this->result->responseStatus === 202){
+                sleep( $sleep );
+            }
+
+        } while ( $this->result->responseStatus === 202 and (time() - $startTime) <= $limit );
     }
 
     /**
@@ -557,15 +591,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param string $sourceLanguage
+     * @param string $targetLanguage
      * @param array $keys
      *
      * @return array
      */
-    public function glossaryKeys($keys = [])
+    public function glossaryKeys($sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                'keys' => $keys,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            'source_language' => $sourceLanguage,
+            'target_language' => $targetLanguage,
+            'keys' => $keys,
         ];
         $this->call( "glossary_keys_relative_url", $payload, true, true );
 
@@ -592,10 +630,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
 
-        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
-            $uuid = $this->result->responseDetails;
-            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
-        }
+//        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
+//            $uuid = $this->result->responseDetails;
+//            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
+//        }
 
         return $this->result;
     }
@@ -643,29 +681,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $validator->isValid();
     }
 
-    private function formatStructureDataFromCSV($filePath) {
-        $fileContent = file_get_contents($filePath);
-        // @TODO
-    }
-
     public function import( $file, $key, $name = false ) {
 
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 && class_exists( '\\CURLFile' ) ) {
-
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = true;
-            $this->_setAdditionalCurlParams( $options );
-            $file = new \CURLFile( realpath( $file ) );
-
-        } else {
-            $file = "@" . realpath( $file );
-        }
-
         $postFields = [
-                'tmx'  => $file,
+                'tmx'  => $this->getCurlFile($file),
                 'name' => $name,
                 'key'  => trim( $key )
         ];
@@ -1055,7 +1074,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 't' ]          = $config[ 'target' ];
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
-        $this->engineRecord->base_url                    .= ':10000';
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_FOLLOWLOCATION => true,
+        ] );
+
+        $this->engineRecord->base_url = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
+
         $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
 
         $this->call( 'tags_projection', $parameters );

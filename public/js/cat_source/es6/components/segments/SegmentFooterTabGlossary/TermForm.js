@@ -1,22 +1,18 @@
-import React, {useContext, useState} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import {MoreIcon, TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
-import {Select} from '../../common/Select'
 import SegmentActions from '../../../actions/SegmentActions'
 import CatToolActions from '../../../actions/CatToolActions'
+import {KeysSelect} from './KeysSelect'
+import {DomainSelect} from './DomainSelect'
+import {SubdomainSelect} from './SubdomainSelect'
 
 const TermForm = () => {
   const {
     isLoading,
-    keys,
-    domains,
-    setDomains,
-    subdomains,
-    setSubdomains,
     termForm,
     setTermForm,
     selectsActive,
-    setSelectsActive,
     modifyElement,
     showMore,
     setShowMore,
@@ -25,35 +21,19 @@ const TermForm = () => {
     getRequestPayloadTemplate,
     setIsLoading,
     segment,
+    ref,
   } = useContext(TabGlossaryContext)
 
   const [highlightMandatoryOnSubmit, setHighlightMandatoryOnSubmit] = useState(
     {},
   )
 
-  const {
-    DEFINITION,
-    ORIGINAL_TERM,
-    ORIGINAL_DESCRIPTION,
-    ORIGINAL_EXAMPLE,
-    TRANSLATED_TERM,
-    TRANSLATED_DESCRIPTION,
-    TRANSLATED_EXAMPLE,
-  } = TERM_FORM_FIELDS
+  const onSubmitAddOrUpdateTerm = useCallback(() => {
+    const {ORIGINAL_TERM, TRANSLATED_TERM} = TERM_FORM_FIELDS
 
-  const isEmptyKeys = !keys.length
-
-  const updateSelectActive = (key, value) =>
-    setSelectsActive((prevState) => ({...prevState, [key]: value}))
-
-  const updateTermForm = (key, value) =>
-    setTermForm((prevState) => ({...prevState, [key]: value}))
-
-  const resetHightlightMandatory = () => setHighlightMandatoryOnSubmit({})
-
-  const onSubmitAddOrUpdateTerm = () => {
     // check mandatory fields
-    const {originalTerm, translatedTerm} = termForm
+    const {[ORIGINAL_TERM]: originalTerm, [TRANSLATED_TERM]: translatedTerm} =
+      termForm
     const {keys, domain, subdomain} = selectsActive
     setHighlightMandatoryOnSubmit({
       originalTerm: !originalTerm,
@@ -106,12 +86,61 @@ const TermForm = () => {
         entries: {...domainsResponse, ...updatedDomains},
       })
     }
-  }
+  }, [
+    domainsResponse,
+    getRequestPayloadTemplate,
+    modifyElement,
+    segment.sid,
+    selectsActive,
+    setIsLoading,
+    termForm,
+  ])
+
+  useEffect(() => {
+    if (!ref) return
+    const {current} = ref
+
+    const onKeyUp = (e) => {
+      if (e.key === 'Escape') {
+        resetForm()
+      } else if (e.ctrlKey && e.key === 'Enter') {
+        if (!isLoading) onSubmitAddOrUpdateTerm()
+      } else {
+        return
+      }
+
+      e.stopPropagation()
+    }
+
+    current.addEventListener('keydown', onKeyUp)
+
+    return () => current.removeEventListener('keydown', onKeyUp)
+  }, [isLoading, onSubmitAddOrUpdateTerm, ref, resetForm])
+
+  useEffect(() => {
+    setHighlightMandatoryOnSubmit({})
+  }, [
+    termForm?.[TERM_FORM_FIELDS.ORIGINAL_TERM],
+    termForm?.[TERM_FORM_FIELDS.TRANSLATED_TERM],
+  ])
+
+  const {
+    DEFINITION,
+    ORIGINAL_TERM,
+    ORIGINAL_DESCRIPTION,
+    ORIGINAL_EXAMPLE,
+    TRANSLATED_TERM,
+    TRANSLATED_DESCRIPTION,
+    TRANSLATED_EXAMPLE,
+  } = TERM_FORM_FIELDS
+
+  const updateTermForm = (key, value) =>
+    setTermForm((prevState) => ({...prevState, [key]: value}))
 
   return (
-    <div className={'glossary_add-container'}>
-      <div className={'glossary-form-line'}>
-        <div className={'input-with-label__wrapper'}>
+    <div className="glossary_add-container">
+      <div className="glossary-form-line">
+        <div className="input-with-label__wrapper">
           <label>Definition</label>
           <input
             name="glossary-term-definition"
@@ -119,163 +148,30 @@ const TermForm = () => {
             onChange={(event) => updateTermForm(DEFINITION, event.target.value)}
           />
         </div>
-        <div className={'glossary-tm-container'}>
-          <Select
-            className={`glossary-select${
+        <div className="glossary-tm-container">
+          <KeysSelect
+            className={`${
               highlightMandatoryOnSubmit.keys
                 ? ' select_highlight_mandatory'
                 : ''
             }`}
-            name="glossary-term-tm"
-            label="Glossary*"
-            placeholder="Select a glossary"
-            multipleSelect="dropdown"
-            showSearchBar={!isEmptyKeys}
-            searchPlaceholder="Find a glossary"
-            options={
-              keys.length ? keys : [{id: '0', name: '+ Create glossary key'}]
-            }
-            activeOptions={selectsActive.keys}
-            checkSpaceToReverse={false}
-            isDisabled={!!modifyElement}
-            onToggleOption={(option) => {
-              resetHightlightMandatory()
-              if (option) {
-                const {keys: activeKeys} = selectsActive
-                if (activeKeys.some((item) => item.id === option.id)) {
-                  updateSelectActive(
-                    'keys',
-                    activeKeys.filter((item) => item.id !== option.id),
-                  )
-                } else {
-                  updateSelectActive('keys', activeKeys.concat([option]))
-                }
-              }
-            }}
-          >
-            {({name}) => ({
-              // customize row with button create glossary key
-              ...(isEmptyKeys && {
-                row: (
-                  <button
-                    className="button-create-glossary-key"
-                    onClick={() => UI.openLanguageResourcesPanel('tm')}
-                  >
-                    {name}
-                  </button>
-                ),
-                cancelHandleClick: true,
-              }),
-            })}
-          </Select>
-
-          <div className={'input-with-label__wrapper'}>
-            <Select
-              className="glossary-select domain-select"
-              name="glossary-term-domain"
-              label="Domain"
-              placeholder="Select a domain"
-              showSearchBar
-              searchPlaceholder="Find a domain"
-              options={domains}
-              activeOption={selectsActive.domain}
-              checkSpaceToReverse={false}
-              onSelect={(option) => {
-                if (option) {
-                  updateSelectActive('domain', option)
-                }
-              }}
-            >
-              {({
-                name,
-                index,
-                optionsLength,
-                queryFilter,
-                resetQueryFilter,
-              }) => ({
-                // override row content
-                row: <div className="domain-option">{name}</div>,
-                // insert button after last row
-                ...(index === optionsLength - 1 &&
-                  queryFilter.trim() &&
-                  !domains.find(({name}) => name === queryFilter) && {
-                    afterRow: (
-                      <button
-                        className="button-create-option"
-                        onClick={() => {
-                          setDomains((prevState) => [
-                            ...prevState,
-                            {
-                              name: queryFilter,
-                              id: (prevState.length + 1).toString(),
-                            },
-                          ])
-                          resetQueryFilter()
-                        }}
-                      >
-                        + Create a domain name <b>{queryFilter}</b>
-                      </button>
-                    ),
-                  }),
-              })}
-            </Select>
+            onToggleOption={() => setHighlightMandatoryOnSubmit({})}
+          />
+          <div className="input-with-label__wrapper">
+            <DomainSelect />
           </div>
-          <div className={'input-with-label__wrapper'}>
-            <Select
-              className="glossary-select domain-select"
-              name="glossary-term-subdomain"
-              label="Subdomain"
-              placeholder="Select a subdomain"
-              showSearchBar
-              searchPlaceholder="Find a subdomain"
-              options={subdomains}
-              activeOption={selectsActive.subdomain}
-              checkSpaceToReverse={false}
-              onSelect={(option) => {
-                if (option) {
-                  updateSelectActive('subdomain', option)
-                }
-              }}
-            >
-              {({
-                name,
-                index,
-                optionsLength,
-                queryFilter,
-                resetQueryFilter,
-              }) => ({
-                // override row content
-                row: <div className="domain-option">{name}</div>,
-                // insert button after last row
-                ...(index === optionsLength - 1 &&
-                  queryFilter.trim() &&
-                  !subdomains.find(({name}) => name === queryFilter) && {
-                    afterRow: (
-                      <button
-                        className="button-create-option"
-                        onClick={() => {
-                          setSubdomains((prevState) => [
-                            ...prevState,
-                            {
-                              name: queryFilter,
-                              id: (prevState.length + 1).toString(),
-                            },
-                          ])
-                          resetQueryFilter()
-                        }}
-                      >
-                        + Create a subdomain name <b>{queryFilter}</b>
-                      </button>
-                    ),
-                  }),
-              })}
-            </Select>
+          <div className="input-with-label__wrapper">
+            <SubdomainSelect />
           </div>
         </div>
       </div>
 
-      <div className={'glossary-form-line'}>
-        <div className={'input-with-label__wrapper'}>
+      <div className="glossary-form-line">
+        <div
+          className={`input-with-label__wrapper ${
+            config.isSourceRTL ? ' rtl' : ''
+          }`}
+        >
           <label>Original term*</label>
           <input
             className={`${
@@ -285,13 +181,16 @@ const TermForm = () => {
             }`}
             name="glossary-term-original"
             value={termForm[ORIGINAL_TERM]}
-            onChange={(event) => {
-              resetHightlightMandatory()
+            onChange={(event) =>
               updateTermForm(ORIGINAL_TERM, event.target.value)
-            }}
+            }
           />
         </div>
-        <div className={'input-with-label__wrapper'}>
+        <div
+          className={`input-with-label__wrapper ${
+            config.isTargetRTL ? ' rtl' : ''
+          }`}
+        >
           <label>Translated term*</label>
           <input
             className={`${
@@ -301,20 +200,23 @@ const TermForm = () => {
             }`}
             name="glossary-term-translated"
             value={termForm[TRANSLATED_TERM]}
-            onChange={(event) => {
-              resetHightlightMandatory()
+            onChange={(event) =>
               updateTermForm(TRANSLATED_TERM, event.target.value)
-            }}
+            }
           />
         </div>
       </div>
       {showMore && (
-        <div className={'glossary-form-line more-line'}>
+        <div className="glossary-form-line more-line">
           <div>
-            <div className={'input-with-label__wrapper'}>
-              <label>Description</label>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+            >
+              <label>Notes</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-description-source"
                 value={termForm[ORIGINAL_DESCRIPTION]}
                 onChange={(event) =>
@@ -322,10 +224,14 @@ const TermForm = () => {
                 }
               />
             </div>
-            <div className={'input-with-label__wrapper'}>
-              <label>Example phrase</label>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isSourceRTL ? ' rtl' : ''
+              }`}
+            >
+              <label>Example of use</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-example-source"
                 value={termForm[ORIGINAL_EXAMPLE]}
                 onChange={(event) =>
@@ -335,10 +241,14 @@ const TermForm = () => {
             </div>
           </div>
           <div>
-            <div className={'input-with-label__wrapper'}>
-              <label>Description</label>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+            >
+              <label>Notes</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-description-target"
                 value={termForm[TRANSLATED_DESCRIPTION]}
                 onChange={(event) =>
@@ -346,10 +256,14 @@ const TermForm = () => {
                 }
               />
             </div>
-            <div className={'input-with-label__wrapper'}>
-              <label>Example phrase</label>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+            >
+              <label>Example of use</label>
               <textarea
-                className={'input-large'}
+                className="input-large"
                 name="glossary-term-example-target"
                 value={termForm[TRANSLATED_EXAMPLE]}
                 onChange={(event) =>
@@ -360,7 +274,7 @@ const TermForm = () => {
           </div>
         </div>
       )}
-      <div className={'glossary_buttons-container'}>
+      <div className="glossary_buttons-container">
         <div></div>
         <div
           className={`glossary-more ${!showMore ? 'show-less' : 'show-more'}`}
@@ -369,9 +283,9 @@ const TermForm = () => {
           <MoreIcon />
           <span>{showMore ? 'Hide options' : 'More options'}</span>
         </div>
-        <div className={'glossary_buttons'}>
+        <div className="glossary_buttons">
           <button
-            className={'glossary__button-cancel'}
+            className="glossary__button-cancel"
             disabled={isLoading}
             onClick={resetForm}
           >

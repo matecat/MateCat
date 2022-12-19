@@ -109,6 +109,11 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
     public $is_shared = false;
 
     /**
+     * @var
+     */
+    public $is_private;
+
+    /**
      * @var int How much readable chars for hashed keys
      */
     protected $readable_chars = 5;
@@ -229,8 +234,8 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
                 'uid_rev' => $this->uid_rev,
                 'name' => $this->name,
                 'key' => $this->key,
-                'r' => $this->r,
-                'w' => $this->w,
+                'r' => (int)$this->r,
+                'w' => (int)$this->w,
                 'r_transl' => $this->r_transl,
                 'w_transl' => $this->w_transl,
                 'r_rev' => $this->r_rev,

@@ -675,6 +675,7 @@ const SegmentActions = {
     })
   },
   getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
+    if (!CatToolStore.haveKeysGlossary) return
     // refresh segment glossary already included
     if (shouldRefresh) {
       getGlossaryForSegment({
@@ -733,7 +734,9 @@ const SegmentActions = {
     sentence,
     sourceLanguage,
     targetLanguage,
+    isSearchingInTarget,
   }) {
+    SegmentStore.isSearchingGlossaryInTarget = isSearchingInTarget
     getGlossaryMatch({
       idSegment,
       sentence,
@@ -741,6 +744,7 @@ const SegmentActions = {
       targetLanguage,
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'glossary')
+      SegmentStore.isSearchingGlossaryInTarget = false
     })
   },
 
@@ -753,6 +757,7 @@ const SegmentActions = {
   },
 
   setGlossaryForSegmentBySearch: (sid, terms) => {
+    SegmentStore.isSearchingGlossaryInTarget = false
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
       sid: sid,
@@ -784,7 +789,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'Error!',
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
@@ -825,7 +830,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'Error!',
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
@@ -857,7 +862,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'Error!',
+      message: error.message ? error.message : `Error code: ${error.code}`,
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
@@ -1201,7 +1206,7 @@ const SegmentActions = {
   },
   gotoNextUntranslatedSegment() {
     let next = SegmentStore.getNextUntranslatedSegmentId()
-    SegmentActions.openSegment(next)
+    if (next) SegmentActions.openSegment(next)
   },
   setNextUntranslatedSegmentFromServer(sid) {
     SegmentStore.nextUntranslatedFromServer = sid
@@ -1331,7 +1336,7 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary()) {
+      if (CatToolStore.getHaveKeysGlossary() && trg_content) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,

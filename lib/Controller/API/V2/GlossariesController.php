@@ -19,6 +19,7 @@ use Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
 use TMSService;
+use Users_UserDao;
 use Utils;
 use ZipArchive;
 
@@ -91,16 +92,38 @@ class GlossariesController extends AbstractStatefulKleinController {
             return;
         }
 
+        $filterArgs = [
+            'name' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW
+            ],
+            'tm_key' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
+
+        $postInput = (object)filter_var_array( $this->request->params([
+            'tm_key',
+            'name',
+        ]), $filterArgs );
+
+        if(!isset($postInput->tm_key) or $postInput->tm_key === ""){
+            $this->setErrorResponse( -2, "`TM key` field is mandatory" );
+
+            return;
+        }
+
         set_time_limit(600);
 
         $fileInfo = $this->extractCSV( $stdResult );
 
-        //load it into MyMemory
-        $this->TMService->setName( $fileInfo->name );
+        // load it into MyMemory
+        $this->TMService->setName( $postInput->name );
         $this->TMService->setFile( array( $fileInfo ) );
 
         try {
-            $this->TMService->addGlossaryInMyMemory();
+            $uuids = $this->TMService->addGlossaryInMyMemory();
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
             unlink( $fileInfo->file_path );
@@ -109,7 +132,9 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( 202 );
+            $this->setSuccessResponse( 202, [
+                    'uuids' => $uuids
+            ] );
         }
 
         unlink( $fileInfo->file_path );
@@ -118,8 +143,10 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     public function uploadStatus() {
 
+        $uuid = $this->params['uuid'];
+
         try {
-            $result = $this->TMService->tmxUploadStatus();
+            $result = $this->TMService->glossaryUploadStatus($uuid);
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
@@ -127,35 +154,53 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( null, $result[ 'data' ] );
+            $this->setSuccessResponse( $result->responseStatus, $result->responseData );
         }
 
     }
 
     public function download() {
 
+        $filterArgs = [
+            'key_name' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW
+            ],
+            'key' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+            'email' => [
+                'filter' => FILTER_SANITIZE_EMAIL,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
+
+        $postInput = (object)filter_var_array( $this->request->params([
+                'email',
+                'key_name',
+                'key',
+        ]), $filterArgs );
+
         try {
+            $user = (new Users_UserDao())->getByEmail( $postInput->email );
 
-            $ZipFilePointer = $this->rebuildExcel(
-                    $this->TMService->downloadGlossary()
-            );
+            if(!$user){
+                $this->setErrorResponse( 404, "User with email ".$postInput->email." not found" );
 
-            // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
-            // $this->recordActivity();
+                return;
+            }
 
+            $result = $this->TMService->glossaryExport($postInput->key, $postInput->key_name, $postInput->email, $user->fullName());
         } catch ( Exception $e ) {
-            $this->logDownloadError( $e );
-            $this->unlockDownloadToken();
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
             return;
         }
 
-        $this->unlockDownloadToken();
-
-        $fileStream = new KleinResponseFileStream( $this->response );
-        $fileName   = $this->tm_key . "_" . ( new DateTime() )->format( 'YmdHi' ) . ".zip";
-        $fileStream->streamFileDownloadFromPointer( $ZipFilePointer, $fileName );
+        if ( !$this->response->isLocked() ) {
+            $this->setSuccessResponse( $result->responseStatus, $result->responseData );
+        }
     }
 
     protected function logDownloadError( Exception $e ) {

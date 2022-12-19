@@ -9,10 +9,6 @@ use TmKeyManagement_Filter;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
-    }
-
     /**
      * Return all the keys of the job
      * AND the all keys of the user
@@ -30,6 +26,13 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
                     'errors' => [
                             'The job was not found'
                     ]
+            ] );
+            exit();
+        }
+
+        if(!$this->userIsLogged()){
+            $this->response->json( [
+                'tm_keys' => []
             ] );
             exit();
         }

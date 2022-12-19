@@ -1,0 +1,90 @@
+// Tooltips
+[aria-label] {
+  position: relative;
+}
+
+[aria-label]::after {
+  content: attr(aria-label);
+  position: absolute;
+  z-index: 4;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background-color: $grey4;
+  color: $grey6;
+  pointer-events: none;
+  white-space: pre;
+  font-size: 14px;
+  font-weight: normal;
+}
+[aria-label]::before {
+  content: '';
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+[aria-label]::after,
+[aria-label]::before {
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 0.1s;
+  transition-delay: 0.2s;
+}
+[aria-label]:hover::after,
+[aria-label]:hover::before {
+  opacity: 1;
+}
+
+[aria-label]:not([tooltip-position])::before,
+[aria-label][tooltip-position='top']::before,
+[aria-label][tooltip-position='bottom']::before {
+  left: 50%;
+  margin-left: -4px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+[aria-label]:not([tooltip-position])::after,
+[aria-label][tooltip-position='top']::after {
+  top: -6px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+}
+[aria-label]:not([tooltip-position])::before,
+[aria-label][tooltip-position='top']::before {
+  top: -6px;
+  border-top: 6px solid $grey4;
+}
+[aria-label][tooltip-position='bottom']::after {
+  bottom: -6px;
+  left: 50%;
+  transform: translate(-50%, 100%);
+}
+[aria-label][tooltip-position='bottom']::before {
+  bottom: -6px;
+  border-bottom: 6px solid $grey4;
+}
+
+[aria-label][tooltip-position='left']::before,
+[aria-label][tooltip-position='right']::before {
+  top: 50%;
+  margin-top: -4px;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+[aria-label][tooltip-position='left']::after {
+  top: 50%;
+  left: -6px;
+  transform: translate(-100%, -50%);
+}
+[aria-label][tooltip-position='left']::before {
+  left: -6px;
+  border-left: 6px solid $grey4;
+}
+[aria-label][tooltip-position='right']::after {
+  top: 50%;
+  right: -6px;
+  transform: translate(100%, -50%);
+}
+[aria-label][tooltip-position='right']::before {
+  right: -6px;
+  border-right: 6px solid $grey4;
+}

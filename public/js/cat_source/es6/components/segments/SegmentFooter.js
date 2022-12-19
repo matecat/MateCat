@@ -329,7 +329,7 @@ function SegmentFooter() {
             segment.cl_contributions.errors.length === 0)
         )
       case 'gl':
-        return isUndefined(segment.glossary_search_results)
+        return tabItems.find(({code}) => code === 'gl')?.isLoading
       default:
         return false
     }

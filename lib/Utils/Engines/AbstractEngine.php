@@ -267,4 +267,29 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return clone $this->engineRecord;
     }
 
+    /**
+     * This function is PHP7 compatible
+     *
+     * @param $file
+     *
+     * @return CURLFile|string
+     */
+    protected function getCurlFile($file)
+    {
+        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 and class_exists( '\\CURLFile' ) ) {
+
+            /**
+             * Added in PHP 5.5.0 with FALSE as the default value.
+             * PHP 5.6.0 changes the default value to TRUE.
+             */
+            if ( version_compare( PHP_VERSION, '7.0.0' ) < 0 ){
+                $options[ CURLOPT_SAFE_UPLOAD ] = true;
+                $this->_setAdditionalCurlParams( $options );
+            }
+
+            return new CURLFile( realpath( $file ) );
+        }
+
+        return "@" . realpath( $file );
+    }
 }

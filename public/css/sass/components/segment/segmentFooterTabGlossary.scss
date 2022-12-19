@@ -1,5 +1,7 @@
 @import '../../commons/colors';
 .tab.glossary {
+  outline: none;
+
   .glossary-select,
   .input-with-label__wrapper {
     position: relative;
@@ -56,17 +58,20 @@
             margin: 0 0 0 8px;
           }
         }
+        .dropdown__option span {
+          width: 90%;
+        }
         .dropdown__option--is-active-option {
           background-color: unset;
           color: unset;
         }
-        .dropdown__option:hover:not(.dropdown__option--is-no-results-found) {
-          color: $grey6;
-          background-color: $grey4;
-        }
         .dropdown__option--is-no-results-found {
           background-color: unset;
           color: $grey7;
+        }
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
+          background-color: $grey8;
         }
         .button-create-glossary-key {
           color: $grey6;
@@ -97,10 +102,19 @@
         .dropdown__option--is-no-results-found {
           display: none;
         }
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
+          background-color: $grey8;
+        }
         .domain-option {
           border: 1px solid $grey7;
           border-radius: 12px;
           padding: 0 6px 0 6px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 18px;
+          text-align: center;
         }
         .button-create-option {
           color: $grey7;
@@ -173,6 +187,13 @@
     &:disabled {
       background: unset;
     }
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      background-color: transparent !important;
+      -webkit-box-shadow: 0 0 0 50px white inset;
+    }
   }
   .glossary__button-add {
     display: flex;
@@ -229,14 +250,24 @@
         display: flex;
       }
       .glossary_badge {
-        color: $grey6;
-        font-size: 12px;
-        line-height: 15px;
-        border: 1px solid $grey6;
-        border-radius: 12px;
-        padding: 0 4px;
-        overflow: hidden;
-        margin-left: 8px;
+        display: flex;
+        flex-shrink: 0;
+        > span {
+          color: $grey6;
+          font-size: 12px;
+          line-height: 15px;
+          border: 1px solid $grey6;
+          border-radius: 12px;
+          padding: 0 4px;
+          overflow: hidden;
+          margin-left: 8px;
+          min-width: 18px;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 140px;
+        }
       }
 
       .glossary_definition-container {
@@ -254,17 +285,38 @@
         display: flex;
         svg {
           margin-right: 8px;
-        }
+          flex-shrink: 0;
+        } /* 
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        } */
       }
       .glossary_definition--hidden {
         visibility: hidden;
       }
+
+      .glossary_source_details {
+        display: flex;
+        flex-direction: row;
+        margin-left: 10px;
+        flex-shrink: 0;
+
+        > span {
+          color: $grey7;
+          font-size: 10px;
+          margin-left: 8px;
+        }
+      }
+
       .glossary_source {
         font-size: 12px;
-        margin-left: 10px;
-        b {
-          margin-right: 10px;
-        }
+        max-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
         span {
           color: $grey7;
         }
@@ -276,21 +328,36 @@
         gap: 12px;
         padding-left: 16px;
         color: $grey7;
-        cursor: pointer;
         svg:hover {
           color: $grey6;
         }
+
+        > * {
+          cursor: pointer;
+        }
       }
       .glossary_item-actions--disabled {
-        cursor: unset;
-        opacity: 0.5;
-        svg:hover {
-          color: unset;
+        gap: 0px;
+
+        > * {
+          cursor: unset;
+        }
+
+        > *:not(.locked-button) {
+          opacity: 0.4;
+          svg:hover {
+            color: unset;
+          }
         }
       }
       .glossary_item-body {
         display: flex;
         padding: 16px 0;
+      }
+
+      .glossary_item-body-no-bottom-padding {
+        display: flex;
+        padding-bottom: 0;
       }
 
       .glossary-item_column {
@@ -312,39 +379,52 @@
             svg {
               cursor: pointer;
               color: $grey7;
-              margin-left: 8px;
-            }
-
-            .glossary_item-tooltip {
-              padding: 4px 8px;
-              background: $grey4;
-              border-radius: 2px;
-              color: $grey7;
-              visibility: hidden;
-              position: relative;
-              margin-left: 10px;
-              line-height: 14px;
-              font-size: 14px;
-              font-weight: 400;
-              &:before {
-                content: '';
-                display: block;
-                position: absolute;
-                left: -3px;
-                top: 3px;
-                margin-left: -3px;
-                width: 0;
-                height: 0;
-                border-top: 8px solid transparent;
-                border-bottom: 8px solid transparent;
-                border-right: 8px solid $grey4;
-              }
             }
           }
-          &:hover {
-            .glossary_item-tooltip {
-              visibility: visible;
+
+          .target_label {
+            cursor: pointer;
+          }
+
+          .info-icon {
+            font-weight: normal;
+            margin-left: 8px;
+          }
+
+          .forbidden-badge {
+            background-color: $grey4;
+            font-weight: normal;
+            font-size: 14px;
+            color: $grey6;
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin-left: 10px;
+
+            > :first-child {
+              cursor: unset;
+              margin-right: 4px;
             }
+          }
+        }
+
+        .glossary-description {
+          &[aria-label]::after {
+            max-width: 400px;
+            white-space: normal;
+          }
+
+          > p {
+            white-space: break-spaces;
+          }
+          > p:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+          }
+          > p:not(:first-child) {
+            display: none;
           }
         }
       }
@@ -384,23 +464,30 @@
     padding: 24px;
     .glossary-form-line {
       display: flex;
-      align-content: flex-start;
-      gap: 40px;
+      justify-content: space-between;
       padding-top: 8px;
       &.more-line {
         padding-top: 24px;
+
+        & > * > :not(:first-child) {
+          margin-left: 10px;
+        }
       }
 
       > div {
         display: flex;
-        width: 50%;
-        column-gap: 24px;
+        flex-shrink: 0;
+        width: 49%;
         .input-with-label__wrapper {
           width: 100%;
         }
       }
       .glossary-tm-container > div {
         width: calc(100% / 3) !important;
+      }
+
+      .glossary-tm-container > :not(:first-child) {
+        margin-left: 10px;
       }
     }
     .glossary_buttons-container {
@@ -427,7 +514,7 @@
           -ms-transition: -ms-transform 0.2s ease-in-out;
           transition: transform 0.2s ease-in-out;
         }
-        &.show-less {
+        &.show-more {
           svg {
             transform: rotate(180deg);
           }
@@ -501,5 +588,20 @@
     left: 0;
     bottom: 0;
     margin-right: 8px;
+  }
+
+  .rtl {
+    span,
+    input,
+    textarea,
+    p {
+      direction: rtl;
+      text-align: right;
+    }
+  }
+
+  .loading_label {
+    display: block;
+    margin-top: 10px;
   }
 }

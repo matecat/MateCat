@@ -27,7 +27,7 @@ class GlossaryHighlight extends Component {
   }
   onClickTerm = () => {
     const {glossary, children, sid} = this.props
-    const text = children[0].props.text
+    const text = children[0].props.text.trim()
     const glossaryTerm = glossary.find(({matching_words: matchingWords}) =>
       matchingWords.find((value) => value.toLowerCase() === text.toLowerCase()),
     )
