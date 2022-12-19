@@ -675,6 +675,7 @@ const SegmentActions = {
     })
   },
   getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
+    if (!CatToolStore.haveKeysGlossary) return
     // refresh segment glossary already included
     if (shouldRefresh) {
       getGlossaryForSegment({
@@ -733,7 +734,9 @@ const SegmentActions = {
     sentence,
     sourceLanguage,
     targetLanguage,
+    isSearchingInTarget,
   }) {
+    SegmentStore.isSearchingGlossaryInTarget = isSearchingInTarget
     getGlossaryMatch({
       idSegment,
       sentence,
@@ -741,6 +744,7 @@ const SegmentActions = {
       targetLanguage,
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'glossary')
+      SegmentStore.isSearchingGlossaryInTarget = false
     })
   },
 
@@ -753,6 +757,7 @@ const SegmentActions = {
   },
 
   setGlossaryForSegmentBySearch: (sid, terms) => {
+    SegmentStore.isSearchingGlossaryInTarget = false
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE_BY_SEARCH,
       sid: sid,
