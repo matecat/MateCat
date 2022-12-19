@@ -278,6 +278,7 @@ let CatToolActions = {
         AppDispatcher.dispatch({
           actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
           value: haveKeysGlossary,
+          wasAlreadyVerified: true,
         })
       }
     }
