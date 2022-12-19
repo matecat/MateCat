@@ -376,7 +376,12 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     setSelectsActive((prevState) => ({
       ...prevState,
-      keys: keys.length ? SegmentUtils.getSelectedKeysGlossary(keys) : [],
+      keys:
+        keys.length > 1
+          ? SegmentUtils.getSelectedKeysGlossary(keys)
+          : keys.length === 1
+          ? [keys[0]]
+          : [],
     }))
   }, [keys])
 
