@@ -255,8 +255,11 @@ class SegmentAnalysisController extends KleinController {
         $issues_records = EntryDao::findAllBySegmentId( $segmentForAnalysis->id );
         $issues         = [];
         foreach ( $issues_records as $issue_record ) {
+
+            $sourcePageToHumanReadable =
+
             $issues[] = [
-                    'source_page'         => (int)$issue_record->source_page,
+                    'source_page'         => $this->humanReadableSourcePage($issue_record->source_page),
                     'id_category'         => (int)$issue_record->id_category,
                     'severity'            => $issue_record->severity,
                     'translation_version' => (int)$issue_record->translation_version,
@@ -286,6 +289,27 @@ class SegmentAnalysisController extends KleinController {
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
         ];
+    }
+
+    /**
+     * @param $sourcePage
+     * @return string|null
+     */
+    private function humanReadableSourcePage($sourcePage)
+    {
+        if($sourcePage == 1){
+            return 't';
+        }
+
+        if($sourcePage == 2){
+            return 'r1';
+        }
+
+        if($sourcePage == 3){
+            return 'r2';
+        }
+
+        return null;
     }
 
     /**
