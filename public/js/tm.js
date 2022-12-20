@@ -20,7 +20,6 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
-
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -535,6 +534,27 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       $('#sign-in').click(function () {
         $('.loginpopup').show()
       })
+    },
+    selectTm: function (value) {
+      var tmElem = $(
+        '.mgmt-table-tm #inactivetm tr.mine[data-key=' +
+          value +
+          '] .activate input',
+      )
+      if (tmElem.length > 0) {
+        $(tmElem).trigger('click')
+      }
+    },
+
+    disableTm: function (value) {
+      var tmElem = $(
+        '.mgmt-table-tm #activetm tr.mine[data-key=' +
+          value +
+          '] .activate input',
+      )
+      if (tmElem.length > 0) {
+        $(tmElem).trigger('click')
+      }
     },
     enableTM: function (el) {
       UI.checkTMGrantsModifications(el)

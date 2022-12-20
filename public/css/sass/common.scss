@@ -773,12 +773,7 @@ footer #statistics {
   display: none;
 }
 
-.mgmt-popup-outer {
-  display: none;
-}
-
-.popup-outer,
-.mgmt-popup-outer {
+.popup-outer {
   background: #000;
   position: fixed;
   top: 0;
@@ -787,10 +782,6 @@ footer #statistics {
   height: 100%;
   z-index: 12;
   opacity: 0.4;
-}
-
-.mgmt-popup-outer {
-  z-index: 99999999999999;
 }
 
 .popup {

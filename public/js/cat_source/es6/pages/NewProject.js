@@ -54,7 +54,7 @@ const NewProject = ({
     } else {
       setSourceLang(targetLangs[0])
       setTargetLangs([sourceLang])
-      UI.restartConversions()
+      UI.UPLOAD_PAGE.restartConversions()
     }
   }
 
@@ -64,7 +64,7 @@ const NewProject = ({
 
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
-    UI.UPLOAD_PAGE.sourceLangChangedCallback()
+    APP.sourceLangChangedCallback()
     APP.checkForTagProjectionLangs()
   }
 
@@ -101,7 +101,7 @@ const NewProject = ({
       APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
     }
     APP.checkForLexiQALangs(sourceLang)
-    APP.checkForTagProjectionLangs(sourceLang)
+    APP.checkForTagProjectionLangs(sourceLang, targetLangs)
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
@@ -252,10 +252,10 @@ const NewProject = ({
                     setTmKeySelected(
                       tmKeySelected.filter((item) => item.id !== option.id),
                     )
-                    UI.UPLOAD_PAGE.disableTm(option.id)
+                    UI.disableTm(option.id)
                   } else {
                     setTmKeySelected(tmKeySelected.concat([option]))
-                    UI.UPLOAD_PAGE.selectTm(option.id)
+                    UI.selectTm(option.id)
                   }
                 }}
               />
@@ -268,6 +268,15 @@ const NewProject = ({
               <span className="text">More settings</span>
             </div>
           </div>
+        </div>
+        {/* TODO: ERROR MESSAGES*/}
+        <div className="warning-message">
+          <i className="icon-warning2 icon"> </i>
+          <p>Oops we got an error...</p>
+        </div>
+        <div className="error-message">
+          <i className="icon-error_outline icon"> </i>
+          <p>Oops we got an error... </p>
         </div>
         <UploadFile />
       </div>

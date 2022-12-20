@@ -103,25 +103,6 @@
 <header class="upload-page-header"/>
 
 <div class="new_project__page"/>
-<!--<div class="wrapper-upload">
-    <div class="cl"></div>
-    <div class="warning-message">
-       <i class="icon-warning2 icon"> </i>
-       <p>Oops we got an error...</p>
-    </div>
-
-    <div class="error-message">
-       <i class="icon-error_outline icon"> </i>
-       <p>Oops we got an error... </p>
-    </div>
-
-    <div class="cl"></div>
-
-    <div metal:use-macro="upload_partials.html/upload_files"/>
-
-    <div metal:use-macro="upload_partials.html/gdrive_files"/>
-</div>-->
-
 
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">
@@ -624,41 +605,10 @@
     {% } %}
 </script>
 
-<!-- The Templates plugin is included to render the upload/download listings -->
-<!--<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>-->
-
-<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-<!--<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>-->
-
-<!-- The Canvas to Blob plugin is included for image resizing functionality -->
-<!--<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>-->
-
-<!-- jQuery Image Gallery -->
-<!--<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>-->
-
-<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<!--<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>-->
-<!-- The basic File Upload plugin -->
-<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>-->
-<!-- The File Upload file processing plugin -->
-<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>-->
-<!-- The File Upload user interface plugin -->
-<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>-->
-<!-- The File Upload jQuery UI plugin -->
-<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>-->
-<!-- The localization script -->
-<!--<script src="${basepath}public/js/lib/fileupload/locale.js"></script>-->
-<!-- The main application script -->
-<!--<script src="${basepath}public/js/lib/fileupload/main.js"></script>-->
-
-<!--<script src="${basepath}public/js/new-project.js"></script>-->
-<!--<script src="${basepath}public/js/tm.js"></script>-->
-
 <div class="notifications-wrapper"></div>
 
 <div metal:use-macro="tm.html/tm_panel"></div>
 
-<div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
 
 <div id="uploadCallback"></div>
 

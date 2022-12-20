@@ -149,9 +149,7 @@ APP.checkForTagProjectionLangs = function (source) {
       var elem = {}
       elem.targetCode = value
       elem.sourceCode = sourceLanguageCode
-      elem.targetName = $(
-        $('#target-lang div[data-value="' + value + '"]')[0],
-      ).text()
+      elem.targetName = CommonUtils.getLanguageNameFromLocale(value)
       elem.sourceName = sourceLanguageText
       languageCombinations.push(elem)
     })
@@ -338,28 +336,6 @@ $.extend(UI.UPLOAD_PAGE, {
     this.addEvents()
   },
 
-  selectTm: function (value) {
-    var tmElem = $(
-      '.mgmt-table-tm #inactivetm tr.mine[data-key=' +
-        value +
-        '] .activate input',
-    )
-    if (tmElem.length > 0) {
-      $(tmElem).trigger('click')
-    }
-  },
-
-  disableTm: function (value) {
-    var tmElem = $(
-      '.mgmt-table-tm #activetm tr.mine[data-key=' +
-        value +
-        '] .activate input',
-    )
-    if (tmElem.length > 0) {
-      $(tmElem).trigger('click')
-    }
-  },
-
   getSelectedTeam: function () {
     var selectedTeamId
     if (config.isLoggedIn) {
@@ -394,35 +370,6 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
-    // $('.supported-file-formats').click(function (e) {
-    //   e.preventDefault()
-    //   $('.supported-formats').show()
-    // })
-    $('.supported-formats .x-popup').click(function (e) {
-      e.preventDefault()
-      $('.supported-formats').hide()
-    })
-
-    /*$('#target-lang').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      onChange: function () {
-        UI.UPLOAD_PAGE.targetLanguageChangedCallback()
-        APP.checkForLexiQALangs()
-        APP.checkForTagProjectionLangs()
-      },
-    })
-
-    $('#source-lang').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      onChange: function () {
-        UI.UPLOAD_PAGE.sourceLangChangedCallback()
-        APP.checkForLexiQALangs()
-        APP.checkForTagProjectionLangs()
-      },
-    })*/
-
     $('input.uploadbtn').click(function () {
       if (!$('.uploadbtn').hasClass('disabled')) {
         if (!UI.allTMUploadsCompleted()) {
@@ -529,31 +476,32 @@ $.extend(UI.UPLOAD_PAGE, {
       )
     })
   },
-  sourceLangChangedCallback: function () {
-    if ($('.template-download').length) {
-      //.template-download is present when jquery file upload is used and a file is found
-      if (UI.conversionsAreToRestart()) {
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'Source language changed. The files must be reimported.',
-            successCallback: () => UI.confirmRestartConversions(),
-          },
-          'Confirmation required',
-        )
-      }
-    } else if ($('.template-gdrive').length) {
+})
+
+APP.sourceLangChangedCallback = function () {
+  if ($('.template-download').length) {
+    //.template-download is present when jquery file upload is used and a file is found
+    if (UI.conversionsAreToRestart()) {
       ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Source language changed. The files must be reimported.',
-          successCallback: () => UI.confirmGDriveRestartConversions(),
+          successCallback: () => UI.confirmRestartConversions(),
         },
         'Confirmation required',
       )
     }
-  },
-})
+  } else if ($('.template-gdrive').length) {
+    ModalsActions.showModalComponent(
+      AlertModal,
+      {
+        text: 'Source language changed. The files must be reimported.',
+        successCallback: () => UI.confirmGDriveRestartConversions(),
+      },
+      'Confirmation required',
+    )
+  }
+}
 
 APP.checkGDriveEvents = function () {
   var cookie = Cookies.get('gdrive_files_to_be_listed')
@@ -739,8 +687,8 @@ APP.postProjectCreation = function (d) {
 $(document).ready(function () {
   UI.UPLOAD_PAGE.init()
   //TODO: REMOVE
-  let currentTargetLangs = localStorage.getItem('currentSourceLang')
-  let currentSourceLangs = localStorage.getItem('currentTargetLang')
+  let currentTargetLangs = localStorage.getItem('currentTargetLang')
+  let currentSourceLangs = localStorage.getItem('currentSourceLang')
   if (!currentSourceLangs) {
     currentSourceLangs = config.currentSourceLang
   }
