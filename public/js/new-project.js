@@ -4,11 +4,7 @@ import {createRoot} from 'react-dom/client'
 import React from 'react'
 
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
-import CatToolActions from './cat_source/es6/actions/CatToolActions'
-import Header from './cat_source/es6/components/header/Header'
 import LanguageSelector from './cat_source/es6/components/languageSelector/LanguageSelector'
-import TeamsStore from './cat_source/es6/stores/TeamsStore'
-import TeamConstants from './cat_source/es6/constants/TeamConstants'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
@@ -398,10 +394,10 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
-    $('.supported-file-formats').click(function (e) {
-      e.preventDefault()
-      $('.supported-formats').show()
-    })
+    // $('.supported-file-formats').click(function (e) {
+    //   e.preventDefault()
+    //   $('.supported-formats').show()
+    // })
     $('.supported-formats .x-popup').click(function (e) {
       e.preventDefault()
       $('.supported-formats').hide()
@@ -764,6 +760,10 @@ $(document).ready(function () {
       subjectsArray={config.subject_array.map((item) => {
         return {...item, id: item.key, name: item.display}
       })}
+      conversionEnabled={config.conversionEnabled}
+      formatsNumber={config.formats_number}
+      googleDriveEnabled={config.googleDriveEnabled}
+      supportedFiles={config.supported_file_types_array}
     />,
   )
 

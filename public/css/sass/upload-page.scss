@@ -1952,6 +1952,9 @@ a {
   font-size: 16px;
   color: $grey1;
   margin-top: 48px;
+  .supported-file-formats {
+    cursor: pointer;
+  }
 }
 
 /*upload table*/
@@ -2256,78 +2259,11 @@ header {
   text-align: left;
 }
 
-.supported-formats .popup {
-  margin: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  min-width: 700px;
-  max-width: none;
-  width: 80%;
-  height: 76%;
-
-  .fileformat {
-    display: flex;
-    flex-direction: row;
-    height: calc(100% - 50px);
-    overflow: auto;
-
-    .format-box {
-      float: none;
-      flex: 1 1 auto;
-    }
-  }
-}
-@media (max-width: 1100px) {
-  .supported-formats .popup {
-    width: 95%;
-  }
-}
 .popup-tm .popup {
   width: 94% !important;
   margin: 0 !important;
   left: 3% !important;
   top: 5%;
-}
-
-.fileformat span {
-  padding: 10px 0px 10px 40px;
-  margin: 5px 0 0 0;
-  width: 60px;
-  height: 35px;
-  float: left;
-  background-size: 25px !important;
-}
-
-.fileformat.popup-box h3 {
-  padding: 5px 17px 5px 18px !important;
-}
-
-.fileformat.popup-box span {
-  line-height: 15px;
-}
-
-.fileformat.popup-box ul li {
-  margin: 0;
-  padding: 0 5px;
-  float: left;
-  text-align: left;
-}
-
-.fileformat .format-box ul {
-  margin: 0 auto;
-  float: none;
-  overflow: hidden;
-}
-
-.fileformat .format-box:first-child ul {
-  float: left;
-}
-
-.fileformat .format-box:last-child ul {
-  width: 120px;
 }
 
 .popup-tm h1 {
@@ -2362,10 +2298,6 @@ header {
   float: left;
   list-style: none;
   font-size: 14px;
-}
-
-.format-box ul {
-  width: 100px;
 }
 
 .popup ul li {
@@ -2449,10 +2381,35 @@ header {
   margin-left: 10px;
 }
 
-.format-box {
-  float: left;
-  margin: 0;
-  margin-right: 2px;
+.supported-formats {
+  height: 100%;
+  .fileformat {
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 50px);
+    overflow: auto;
+    span {
+      padding: 10px 0px 10px 40px;
+      margin: 5px 0 0 0;
+      width: 60px;
+      height: 35px;
+      float: left;
+      background-size: 25px !important;
+    }
+    .format-box {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      ul {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      li {
+        width: 100px;
+        height: 50px;
+      }
+    }
+  }
 }
 
 #delete-failed-conversions {

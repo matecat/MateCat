@@ -74,7 +74,9 @@
             currentSourceLang: '${currentSourceLang | string: []}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-            subject_array: ${subjects | string:[]]}
+            subject_array: ${subjects | string:[]]},
+            formats_number: ${formats_number},
+            supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
         };
         /*]]>*/
     </script>
@@ -120,33 +122,6 @@
     <div metal:use-macro="upload_partials.html/gdrive_files"/>
 </div>-->
 
-<div class="wrapper-bottom">
-   <p tal:condition="true:conversion_enabled" class="supported-files">Matecat supports
-       <a class="supported-file-formats" href="#">${formats_number} file formats</a>
-       <span style="float: right;">.</span>
-       <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent() AND Bootstrap::isGDriveConfigured()">
-           <span class="gdrive-addlink-container">
-               and
-               <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
-               <span class="gdrive-icon"></span>
-           </span>
-       </tal:block>
-
-   </p>
-
-   <div class="uploadbtn-box">
-       <span class="uploadloader"></span>
-
-       <input name="" type="button" class="uploadbtn disabled"
-              tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
-
-       <input name="" type="button" class="uploadbtn disabled"
-              tal:condition="volume_analysis_enabled" value="Analyze" disabled="disabled"/>
-
-       <p class="enter">Press Enter</p>
-   </div>
-
-</div>
 
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">
@@ -679,55 +654,7 @@
 <!--<script src="${basepath}public/js/new-project.js"></script>-->
 <!--<script src="${basepath}public/js/tm.js"></script>-->
 
-
-<div class="modal supported-formats" data-type="view">
-    <div class="popup-outer closeClickingOutside"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>Supported file formats</h1>
-
-        <div class="popup-box fileformat">
-            <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
-                <h3 tal:content="repeat/supported/key"></h3>
-                <ul tal:repeat="ext supported">
-                    <li tal:repeat="item ext">
-                        <span tal:content="item/ext" tal:attributes="class item/class"></span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="notifications-wrapper"></div>
-<footer class="normal-foo">
-    <div class="footer-body">
-        <div class="info">
-            <div class="image">
-                <img src="${basepath}public/img/logo_matecat_small.svg"/>
-            </div>
-            <div class="description">
-                Matecat is a free and open source online CAT tool. It’s free for translation companies, translators and enterprise users.
-            </div>
-        </div>
-<!--        <div class="info">-->
-<!--            <div class="image">-->
-<!--                <img src="${basepath}public/img/Logo-Translated.svg"/>-->
-<!--            </div>-->
-<!--            <div class="description">-->
-<!--                We’re a part of Translated, so if you ever need professional translation service, then go check out our-->
-<!--                <a href="https://translated.com/welcome" class="link">main site.</a>-->
-<!--            </div>-->
-<!--        </div>-->
-        <div class="side-info">
-            <div class="item"><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></div>
-            <div class="item"><a href="https://site.matecat.com/open-source/" target="_blank">Open Source</a></div>
-            <div class="item"><a href="https://site.matecat.com/terms/" target="_blank">Terms</a></div>
-        </div>
-    </div>
-
-</footer>
 
 <div metal:use-macro="tm.html/tm_panel"></div>
 

@@ -174,7 +174,7 @@ abstract class viewController extends controller {
         $this->template->userMail   = $this->user->email;
         $this->collectFlashMessages();
 
-        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
+        $this->template->googleDriveEnabled = Bootstrap::areOauthKeysPresent() && Bootstrap::isGDriveConfigured();
 
     }
 

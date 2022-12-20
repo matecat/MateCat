@@ -255,7 +255,7 @@ class newProjectController extends viewController {
                         'class' => $info[ 2 ]
                 ];
             }
-            $val = array_chunk( $val, 12 );
+            $val = array_chunk( $val, 1 );
 
             $ret[ $key ] = $val;
         }

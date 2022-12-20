@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useState} from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
@@ -9,6 +9,8 @@ import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import More from '../../../../img/icons/More'
 import UploadFile from '../components/createProject/UploadFile'
+import SupportedFilesModal from '../components/modals/SupportedFilesModal'
+import Footer from '../components/footer/Footer'
 
 const NewProject = ({
   isLoggedIn = false,
@@ -16,6 +18,10 @@ const NewProject = ({
   sourceLanguageSelected,
   targetLanguagesSelected,
   subjectsArray,
+  conversionEnabled,
+  formatsNumber,
+  googleDriveEnabled,
+  supportedFiles,
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
@@ -265,6 +271,48 @@ const NewProject = ({
         </div>
         <UploadFile />
       </div>
+      <div className="wrapper-bottom">
+        {conversionEnabled && (
+          <p className="supported-files">
+            Matecat supports{' '}
+            <a
+              className="supported-file-formats"
+              onClick={() => {
+                ModalsActions.showModalComponent(
+                  SupportedFilesModal,
+                  {supportedFiles},
+                  'Supported file formats',
+                  {minWidth: '80%', height: '80%'},
+                )
+              }}
+            >
+              {formatsNumber} file formats{' '}
+            </a>
+            <span style={{float: 'right'}}>.</span>
+            {googleDriveEnabled && (
+              <span className="gdrive-addlink-container">
+                and{' '}
+                <a className="load-gdrive load-gdrive-disabled" href="#">
+                  Google Drive files
+                </a>
+                <span className="gdrive-icon"></span>
+              </span>
+            )}
+          </p>
+        )}
+        <div className="uploadbtn-box">
+          <span className="uploadloader"></span>
+          <input
+            name=""
+            type="button"
+            className="uploadbtn disabled"
+            value="Analyze"
+            disabled="disabled"
+          />
+          <p className="enter">Press Enter</p>
+        </div>
+      </div>
+      <Footer />
     </>
   )
 }
