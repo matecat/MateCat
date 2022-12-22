@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import {Base64} from 'js-base64'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
+import CommonUtils from './commonUtils'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -481,6 +482,50 @@ const TEXT_UTILS = {
     } catch (e) {
       return {}
     }
+  },
+  regexUrlPath:
+    /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)/g,
+
+  getContentWithAllowedLinkRedirect: (content) => {
+    let match
+    let start = 0
+    let end = 0
+    let prevEnd = 0
+    let result = []
+
+    while ((match = TEXT_UTILS.regexUrlPath.exec(content)) !== null) {
+      try {
+        start = match.index
+        end = start + match[0].length
+
+        result.push(content.substring(prevEnd, start))
+        const link = content.substring(start, end)
+
+        if (CommonUtils.isAllowedLinkRedirect(link))
+          result.push({isLink: true, link})
+        else result.push(link)
+
+        prevEnd = end
+      } catch (e) {
+        console.log(e)
+        return false
+      }
+    }
+
+    if (content.substring(prevEnd)) result.push(content.substring(prevEnd))
+    return result.reduce((acc, cur) => {
+      if (typeof cur === 'object') {
+        return [...acc, cur]
+      } else {
+        const copy = [...acc]
+        const lastItem = copy.pop()
+        const newItem =
+          typeof lastItem === 'object'
+            ? [lastItem, cur]
+            : [`${lastItem ? lastItem : ''}${cur}`]
+        return [...copy, ...newItem]
+      }
+    }, [])
   },
 }
 
