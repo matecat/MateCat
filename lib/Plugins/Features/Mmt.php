@@ -28,6 +28,7 @@ use Exception;
 use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
+use Jobs\MetadataStruct;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
@@ -219,7 +220,8 @@ class Mmt extends BaseFeature {
 
             $contextRs              = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
             $mt_context             = @array_pop( $contextRs );
-            $config[ 'mt_context' ] = ( !empty( $mt_context ) ? $mt_context->value : "" );
+
+            $config[ 'mt_context' ] = self::getContextAnalyzer($engine, $mt_context);
             $config[ 'job_id' ]     = $jobStruct->id;
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'normal';
@@ -228,6 +230,26 @@ class Mmt extends BaseFeature {
 
         return $config;
 
+    }
+
+    /**
+     * @param Engines_AbstractEngine $engine
+     * @param MetadataStruct|null $mt_context
+     * @return string|null
+     */
+    private static function getContextAnalyzer(Engines_AbstractEngine $engine, MetadataStruct $mt_context = null)
+    {
+        if(empty($mt_context)){
+            return null;
+        }
+
+        $extraParameters = $engine->getEngineRecord()->extra_parameters;
+
+        if(isset($extraParameters['MMT-context-analyzer']) and $extraParameters['MMT-context-analyzer'] === true){
+            return null;
+        }
+
+        return $mt_context->value;
     }
 
     public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ) {
@@ -586,11 +608,12 @@ class Mmt extends BaseFeature {
              */
             $newEngineStruct = EnginesModel_MMTStruct::getStruct();
 
-            $newEngineStruct->uid                                    = $logged_user->uid;
-            $newEngineStruct->type                                   = Constants_Engines::MT;
-            $newEngineStruct->extra_parameters[ 'MMT-License' ]      = $data->engineData[ 'secret' ];
-            $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ] = $data->engineData[ 'pretranslate' ];
-            $newEngineStruct->extra_parameters[ 'MMT-preimport' ]    = $data->engineData[ 'preimport' ];
+            $newEngineStruct->uid                                        = $logged_user->uid;
+            $newEngineStruct->type                                       = Constants_Engines::MT;
+            $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $data->engineData[ 'secret' ];
+            $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ]     = $data->engineData[ 'pretranslate' ];
+            $newEngineStruct->extra_parameters[ 'MMT-preimport' ]        = $data->engineData[ 'preimport' ];
+            $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = $data->engineData[ 'context_analyzer' ];
 
             $newEngineStruct = $featureSet->filter( 'disableMMTPreimport', (object)[
                 'logged_user'  => $logged_user,

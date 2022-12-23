@@ -130,6 +130,18 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
             placement: 's',
           })
 
+          $('.mgmt-container .tooltip-context_analyzer').data(
+              'powertip',
+              "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+              'If the option is enabled, ModernMT will adapt the suggestions provided for a job' +
+              '<br/> using mainly the content of the TMs that you activate for that job and your corrections during translation,' +
+              '<br/>but it will also scan all your other TMs for further adaptation based on the context of the document that you are translating.' +
+              '<br/> If the option is not enabled, ModernMT will only adapt based on the TMs that you activate for a job and on your corrections during translation.</div>',
+          )
+          $('.mgmt-container .tooltip-context_analyzer').powerTip({
+            placement: 's',
+          })
+
           $('.mgmt-container .tooltip-pretranslate').data(
             'powertip',
             "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +

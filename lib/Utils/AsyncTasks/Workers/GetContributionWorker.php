@@ -471,6 +471,7 @@ class GetContributionWorker extends AbstractWorker {
         if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
+
                 /**
                  * @var $mt_engine \Engines_MMT
                  */
