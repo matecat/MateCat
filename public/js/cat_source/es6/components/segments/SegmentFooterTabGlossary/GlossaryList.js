@@ -65,6 +65,7 @@ const GlossaryList = () => {
   const [termHighlight, setTermHighlight] = useState(undefined)
 
   const scrollItemsRef = useRef()
+  const previousTerms = useRef()
 
   const scrollToTerm = useCallback(
     async ({id, isTarget, type}) => {
@@ -143,9 +144,18 @@ const GlossaryList = () => {
   }, [scrollToTerm, segment.sid])
 
   useEffect(() => {
-    if (!segment?.glossary_search_results) return
+    if (
+      previousTerms?.current &&
+      _.isEqual(
+        terms.map(({term_id}) => term_id),
+        previousTerms?.current.map(({term_id}) => term_id),
+      )
+    )
+      return
+
     if (scrollItemsRef?.current) scrollItemsRef.current.scrollTo(0, 0)
-  }, [segment?.glossary_search_results])
+    previousTerms.current = terms
+  }, [terms])
 
   const onModifyItem = (term) => {
     setShowMore(true)
