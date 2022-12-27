@@ -369,6 +369,7 @@ class Editarea extends React.Component {
         )
 
       if (
+        Array.isArray(qaBlacklistGlossary) && //qaBlacklistGlossary undefined only before the glossary response
         currentLexiqaTarget &&
         (!prevLexiqaTarget ||
           lexiqaChanged ||
