@@ -74,8 +74,14 @@
                 <br class="clear" />
             </div>
             <div class="provider-field checkbox">
-                <input class="required" data-field-name="context_analyzer" type="checkbox" checked="checked" />
-                <label class="checkbox-label">Activate context analyzer</label>
+                <tal:block tal:condition="isTranslatedUser">
+                    <input class="required" data-field-name="context_analyzer" type="checkbox" disabled="disabled" />
+                    <label class="checkbox-label muted">Activate context analyzer</label>
+                </tal:block>
+                <tal:block tal:condition="not:isTranslatedUser">
+                    <input class="required" data-field-name="context_analyzer" type="checkbox" checked="checked" />
+                    <label class="checkbox-label">Activate context analyzer</label>
+                </tal:block>
                 <span class="info-icon tooltip-context_analyzer"/>
                 <br class="clear" />
             </div>
