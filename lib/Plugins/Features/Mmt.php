@@ -580,5 +580,27 @@ class Mmt extends BaseFeature {
 
     }
 
+    /**
+     * @param $key
+     * @param $uid
+     *
+     * @throws Exception
+     */
+    public function postUserKeyDelete($key, $uid){
+
+        $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
+        $engineToBeDeleted->uid = $uid;
+
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $result    = $engineDAO->read( $engineToBeDeleted );
+
+        if(empty($result)){
+            return;
+        }
+
+        $mmt = new Engines_MMT($result[0]);
+
+        $mmt->deleteMemory("x_mm-".$key);
+    }
 }
 
