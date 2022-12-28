@@ -36,7 +36,7 @@ var GDrive = function () {
       picker.setVisible(true)
     } catch (e) {
       APP.USER.STORE.connected_services = null
-      throw new Error('Picker Error');
+      throw new Error('Picker Error')
     }
   }
 

@@ -11,11 +11,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.email
  * @returns {Promise<object>}
  */
-export const downloadGlossary = async ({
-  key,
-  name,
-  email,
-}) => {
+export const downloadGlossary = async ({key, name, email}) => {
   const paramsData = {
     key: key,
     key_name: name,
