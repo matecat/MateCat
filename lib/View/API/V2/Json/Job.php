@@ -28,6 +28,11 @@ use WordCount_Struct;
 class Job {
 
     /**
+     * @var string
+     */
+    protected $status;
+
+    /**
      * @var \Users_UserStruct
      */
     protected $user;
@@ -41,6 +46,13 @@ class Job {
      * @var TmKeyManagement_ClientTmKeyStruct[]
      */
     protected $keyList = [];
+
+    /**
+     * @param mixed $status
+     */
+    public function setStatus( $status ) {
+        $this->status = $status;
+    }
 
     /**
      * @param \Users_UserStruct $user
@@ -160,6 +172,12 @@ class Job {
         // Added 5 minutes cache here
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
 
+        // is outsource available?
+        $outsourceAvailable = $featureSet->filter( 'outsourceAvailable', $chunk->target );
+        if(is_array($outsourceAvailable)){
+            $outsourceAvailable = true;
+        }
+
         $result = [
                 'id'                    => (int)$chunk->id,
                 'password'              => $chunk->password,
@@ -185,6 +203,7 @@ class Job {
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
                 'stats'                 => ReviewUtils::formatStats( CatUtils::getFastStatsForJob( $jobStats, false ), $chunkReviews ),
                 'outsource'             => $outsource,
+                'outsource_available'   => $outsourceAvailable,
                 'translator'            => $translator,
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
                 'standard_wc'           => (float)$chunk->standard_analysis_wc,

@@ -14,8 +14,12 @@ use Exceptions\NotFoundException;
 use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
+use Features\ReviewExtended\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
+use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\Model\QualityReportModel;
+use Features\TranslationVersions\Handlers\TranslationEventsHandler;
+use Features\TranslationVersions\Model\TranslationEvent;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
@@ -24,12 +28,10 @@ use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
-use LQA\ModelStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Revise_FeedbackDAO;
 use RevisionFactory;
-use SegmentTranslationChangeVector;
 use Utils;
 use ZipArchive;
 
@@ -330,13 +332,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param TranslationVersions\Model\BatchEventCreator $eventCreator
+     * @param TranslationEventsHandler $eventCreator
      *
      * @throws Exception
-     * @internal param SegmentTranslationEventModel $event
+     * @internal param TranslationEvent $event
      */
-    public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {
-        $batchReviewProcessor = new Features\ReviewExtended\Model\BatchReviewProcessor( $eventCreator );
+    public function translationVersionSaved( TranslationEventsHandler $eventCreator ) {
+        $batchReviewProcessor = new BatchReviewProcessor( $eventCreator );
         $batchReviewProcessor->process();
     }
 
@@ -531,7 +533,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         /**
          * Append the qa model to the project structure for later use.
          */
-        if ( !array_key_exists( 'features', $projectStructure ) ) {
+        if ( !isset( $projectStructure[ 'features' ] ) ) {
             $projectStructure[ 'features' ] = [];
         }
 
@@ -557,13 +559,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param SegmentTranslationChangeVector $translation
+     * @param TranslationEvent    $translation
      *
-     * @param ChunkReviewStruct[]            $chunkReviews
+     * @param ChunkReviewStruct[] $chunkReviews
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews = [] ) {
+    public function getSegmentTranslationModel( TranslationEvent $translation, array $chunkReviews = [] ) {
         $class_name = get_class( $this ) . '\SegmentTranslationModel';
 
         return new $class_name( $translation, $chunkReviews );

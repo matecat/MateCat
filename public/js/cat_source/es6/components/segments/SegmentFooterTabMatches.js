@@ -26,7 +26,7 @@ class SegmentFooterTabMatches extends React.Component {
   processContributions(matches) {
     var self = this
     var matchesProcessed = []
-    // SegmentActions.createFooter(this.props.id_segment);
+    // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
       if (
         _.isUndefined(this.segment) ||
@@ -116,7 +116,7 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   chooseSuggestion(sid, index) {
-    if (this.props.id_segment === sid) {
+    if (this.props.segment.sid === sid) {
       this.suggestionDblClick(this.props.segment.contributions, index)
     }
   }
@@ -239,7 +239,7 @@ class SegmentFooterTabMatches extends React.Component {
           ''
         ) : (
           <span
-            id={self.props.id_segment + '-tm-' + match.id + '-delete'}
+            id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
             className="trash"
             title="delete this row"
             onClick={self.deleteSuggestion.bind(self, match, index)}
@@ -256,7 +256,7 @@ class SegmentFooterTabMatches extends React.Component {
           >
             <li className="sugg-source">
               <span
-                id={self.props.id_segment + '-tm-' + match.id + '-source'}
+                id={self.props.segment.sid + '-tm-' + match.id + '-source'}
                 className="suggestion_source"
                 dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}
               ></span>
@@ -267,7 +267,7 @@ class SegmentFooterTabMatches extends React.Component {
                 {self.suggestionShortcutLabel + (index + 1)}
               </span>
               <span
-                id={self.props.id_segment + '-tm-' + match.id + '-translation'}
+                id={self.props.segment.sid + '-tm-' + match.id + '-translation'}
                 className="translation"
                 dangerouslySetInnerHTML={self.allowHTML(
                   match.translationDecodedHtml,
@@ -356,7 +356,7 @@ class SegmentFooterTabMatches extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (

@@ -54,7 +54,12 @@ const VirtualList = forwardRef(
     }, [ref, width, height])
 
     return (
-      <div ref={ref} className={className} onScroll={() => onScroll()}>
+      <div
+        ref={ref}
+        className={className}
+        onScroll={() => onScroll()}
+        tabIndex="1"
+      >
         <div
           style={{
             height: `${totalSize}px`,

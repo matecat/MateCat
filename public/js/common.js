@@ -4,6 +4,7 @@ import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 window.APP = null
 
@@ -20,7 +21,7 @@ window.APP = {
       })
     }
     this.isCattool = $('body').hasClass('cattool')
-    this.checkGlobalMassages()
+    setTimeout(() => this.checkGlobalMassages(), 1000)
   },
 
   fitText: function (
@@ -205,7 +206,7 @@ window.APP = {
            */
           var tokenData = $.parseJSON(token)
           if (parseInt(tokenData.code) < 0) {
-            this.showDownloadErrorMessage()
+            APP.showDownloadErrorMessage()
           }
           if (callback) {
             callback()
@@ -279,15 +280,15 @@ window.APP = {
       window.googleDriveWindows = {}
     }
 
-    if (UI.isSafari) {
+    if (CommonUtils.isSafari) {
       var windowReference = window.open()
     }
     var driveUpdateDone = function (data) {
       if (!data.urls || data.urls.length === 0) {
         var props = {
           text:
-            'MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and' +
-            ' grant Google Drive privileges to MateCat.',
+            'Matecat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and' +
+            ' grant Google Drive privileges to Matecat.',
           successText: 'Ok',
           successCallback: function () {
             ModalsActions.onCloseModal()
@@ -305,7 +306,7 @@ window.APP = {
 
       $.each(data.urls, function (index, item) {
         winName = 'window' + item.localId
-        if (UI.isSafari) {
+        if (CommonUtils.isSafari) {
           windowReference.location = item.alternateLink
         } else if (
           window.googleDriveWindows[winName] &&

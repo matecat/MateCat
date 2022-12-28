@@ -129,30 +129,6 @@ class catController extends viewController {
             return;
         }
 
-        /*
-         * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
-         * because the query to check "Utils::getArchivableJobs($this->jid)" should be
-         * executed every time a job is loaded ( F5 or CTRL+R on browser ) and it cost some milliseconds ( ~0.1s )
-         * and it is little heavy for the database.
-         * We use the data we already have from last query and perform
-         * the check on the last translation only if the job is older than 30 days
-         *
-         */
-        $lastUpdate  = new DateTime( $this->chunk->last_update );
-        $oneMonthAgo = new DateTime();
-        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
-
-        if ( $lastUpdate < $oneMonthAgo && !$this->job_cancelled ) {
-
-            $lastTranslationInJob = new Datetime( ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->jid )->translation_date );
-
-            if ( $lastTranslationInJob < $oneMonthAgo ) {
-                Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
-                $this->job_archived = true;
-            }
-
-        }
-
         $this->pid = $this->project->id;
         $this->cid = $this->project->id_customer;
         $this->source_code = $this->chunk->source;
@@ -173,32 +149,6 @@ class catController extends viewController {
 
         $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
         $this->template->user_keys = $userKeys->getKeys( $this->chunk->tm_keys ) ;
-
-        /**
-         * Retrieve information about job errors
-         * ( Note: these information are fed by the revision process )
-         * @see setRevisionController
-         */
-
-        $reviseClass = new Constants_Revise;
-
-        $jobQA = new Revise_JobQA(
-                $this->jid,
-                $this->password,
-                $this->wStruct->getTotal(),
-                $reviseClass
-        );
-
-        list( $jobQA, $reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $this->jid, $this->password, $this->wStruct->getTotal() );
-
-
-        $jobQA->retrieveJobErrorTotals();
-
-        $this->qa_data = json_encode( $jobQA->getQaData() );
-
-        $jobVote = $jobQA->evalJobVote();
-        $this->qa_overall = $jobVote[ 'minText' ];
-
 
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
 
@@ -326,9 +276,11 @@ class catController extends viewController {
             $this->template->support_mail        = INIT::$SUPPORT_MAIL;
             $this->template->owner_email         = INIT::$SUPPORT_MAIL;
 
+            if($this->user){
+                $this->template->owner = $this->user->getEmail();
+            }
+
             $team = $this->project->getTeam();
-
-
 
             if( !empty( $team ) ){
 
@@ -364,7 +316,7 @@ class catController extends viewController {
             }
 
             $this->template->job_not_found       = $this->job_not_found;
-            $this->template->job_archived        = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+            $this->template->job_archived        = ( $this->job_archived ) ? 1 : '';
             $this->template->job_cancelled       = $this->job_cancelled;
             $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
             $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
@@ -387,7 +339,7 @@ class catController extends viewController {
         $this->template->jobOwnerIsMe       = ( $this->user->email == $this->job_owner );
         $this->template->get_public_matches = ( !$this->chunk->only_private_tm );
         $this->template->job_not_found      = $this->job_not_found;
-        $this->template->job_archived       = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_archived       = ( $this->job_archived ) ? 1 : '';
         $this->template->job_cancelled      = $this->job_cancelled;
 
         $this->template->page        = 'cattool';
@@ -477,21 +429,21 @@ class catController extends viewController {
         $this->decorator->decorate();
 
         $this->featureSet->appendDecorators(
-            'CatDecorator',
-            $this,
-            $this->template
+                'CatDecorator',
+                $this,
+                $this->template
         );
     }
 
     public function getJobStats() {
-      return $this->job_stats ;
+        return $this->job_stats ;
     }
 
     /**
      * @return Chunks_ChunkStruct
      */
     public function getChunk() {
-      return $this->chunk ;
+        return $this->chunk ;
     }
 
     /**
@@ -501,8 +453,18 @@ class catController extends viewController {
         return $this->review_password ;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword(){
-        return $this->password;
+        return ($this->chunk !== null) ? $this->chunk->password : $this->password;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isJobSplitted(){
+        return ($this->chunk !== null) ? $this->chunk->isSplitted() : false;
     }
 
     /**
@@ -513,7 +475,7 @@ class catController extends viewController {
      */
     public function getRevisionNumber() {
         return catController::isRevision() ? (
-                $this->revision == null ? 1 : $this->revision
+        $this->revision == null ? 1 : $this->revision
         ) : null ;
     }
 

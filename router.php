@@ -8,12 +8,13 @@ use API\V2\Exceptions\ValidationError;
 use API\V2\Json\Error;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError as Model_ValidationError;
+use Klein\Klein;
 
 require_once './inc/Bootstrap.php';
 
 Bootstrap::start();
 
-$klein = new \Klein\Klein();
+$klein = new Klein();
 
 function route( $path, $method, $controller, $action ) {
     global $klein;
@@ -25,7 +26,7 @@ function route( $path, $method, $controller, $action ) {
     } );
 }
 
-$klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception $exception ) {
+$klein->onError( function ( Klein $klein, $err_msg, $err_type, Exception $exception ) {
     // TODO: still need to catch fatal errors here with 500 code
     $klein->response()->noCache();
 
@@ -50,7 +51,7 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
         $klein->response()->code( 403 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( NotFoundException $e ) {
-        \Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
+        Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
         $klein->response()->code( 404 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch( UnprocessableException $e ){
@@ -59,15 +60,15 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
     } catch ( ExternalServiceException $e ) {
         $klein->response()->code( 503 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
-    } catch ( \PDOException $e ) {
+    } catch ( PDOException $e ) {
         $klein->response()->code( 503 );
 //        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
-        \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-        \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+        Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
     } catch ( Exception $e ){
         $klein->response()->code( 500 );
-        \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-        \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+        Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
     }
 
 } );

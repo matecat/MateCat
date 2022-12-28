@@ -23,52 +23,6 @@ import NotificationBox from './es6/components/notificationsComponent/Notificatio
 import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
-  /**
-   * Open file menu in Header
-   * @returns {boolean}
-   */
-  toggleFileMenu: function () {
-    var jobMenu = $('#jobMenu')
-    if (jobMenu.is(':animated')) {
-      return false
-    } else {
-      var segment = SegmentStore.getCurrentSegment()
-      var currSegment = jobMenu.find('.currSegment')
-      if (segment) {
-        currSegment.removeClass('disabled')
-      } else {
-        currSegment.addClass('disabled')
-      }
-      var menuHeight = jobMenu.height()
-      if (LXQ.enabled()) {
-        var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible')
-        var lxqBoxHeight = lexiqaBoxIsOpen
-          ? $('#lexiqa-popup').outerHeight() + 8
-          : 0
-        jobMenu.css('top', lxqBoxHeight + 43 - menuHeight + 'px')
-      } else {
-        jobMenu.css('top', 43 - menuHeight + 'px')
-      }
-
-      if (jobMenu.hasClass('open')) {
-        jobMenu
-          .animate({top: '-=' + menuHeight + 'px'}, 500)
-          .removeClass('open')
-      } else {
-        jobMenu
-          .animate({top: '+=' + menuHeight + 'px'}, 300, function () {
-            $('body').on('click', function () {
-              if (jobMenu.hasClass('open')) {
-                UI.toggleFileMenu()
-              }
-            })
-          })
-          .addClass('open')
-      }
-      return true
-    }
-  },
-
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 
@@ -224,206 +178,6 @@ window.UI = {
     }
   },
 
-  getSegmentFileId: function (segment) {
-    if (typeof segment == 'undefined') return false
-    try {
-      segment = segment.closest('section')
-      return $(segment).attr('data-fid')
-    } catch (e) {
-      return false
-    }
-  },
-
-  getMoreSegments: function (where) {
-    if (where == 'after' && this.noMoreSegmentsAfter) {
-      return
-    }
-    if (where == 'before' && this.noMoreSegmentsBefore) {
-      return
-    }
-    if (this.loadingMore) {
-      return
-    }
-
-    console.log('Get more segments: ', where)
-
-    this.loadingMore = true
-
-    var segId =
-      where === 'after'
-        ? SegmentStore.getLastSegmentId()
-        : where === 'before'
-        ? SegmentStore.getFirstSegmentId()
-        : ''
-
-    if (where == 'before') {
-      $('section').each(function () {
-        if ($(this).offset().top > $(window).scrollTop()) {
-          UI.segMoving = UI.getSegmentId($(this))
-          return false
-        }
-      })
-    }
-
-    if (where == 'before') {
-      $('#outer').addClass('loadingBefore')
-    } else if (where == 'after') {
-      $('#outer').addClass('loadingAfter')
-    }
-
-    getSegments({
-      jid: config.id_job,
-      password: config.password,
-      step: UI.moreSegNum,
-      segment: segId,
-      where: where,
-    })
-      .then((data) => {
-        $(document).trigger('segments:load', data.data)
-        UI.getMoreSegments_success(data)
-      })
-      .catch((errors) => {
-        if (errors.length) this.processErrors(errors, 'getMoreSegments')
-        OfflineUtils.failedConnection(where, 'getMoreSegments')
-      })
-  },
-  getMoreSegments_success: function (d) {
-    var where = d.data.where
-    if (d.data.files && _.size(d.data.files)) {
-      this.renderFiles(d.data.files, where, false)
-
-      $(window).trigger('segmentsAdded', {resp: d.data.files})
-    }
-
-    if (Object.keys(d.data.files).length === 0 && where === 'before')
-      this.noMoreSegmentsBefore = true
-    if (
-      Object.keys(d.data.files).length === 0 &&
-      SegmentStore.getLastSegmentId() === config.last_job_segment &&
-      where === 'after'
-    )
-      this.noMoreSegmentsAfter = true
-
-    $('#outer').removeClass('loading loadingBefore loadingAfter')
-    this.loadingMore = false
-  },
-
-  getSegments: function (options) {
-    var where = this.startSegmentId ? 'center' : 'after'
-    $('#outer').addClass('loading')
-    var seg = options.segmentToOpen
-      ? options.segmentToOpen
-      : this.startSegmentId
-
-    return getSegments({
-      jid: config.id_job,
-      password: config.password,
-      step: 40,
-      segment: seg,
-      where: where,
-    })
-      .then((data) => {
-        $(document).trigger('segments:load', data.data)
-
-        if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
-        UI.getSegments_success(data, options)
-      })
-      .catch((errors) => {
-        if (errors.length) {
-          this.processErrors(errors, 'getSegments')
-        }
-        OfflineUtils.failedConnection(0, 'getSegments')
-      })
-  },
-  getSegments_success: function (d, options) {
-    var where = d.data.where
-
-    if (!this.startSegmentId) {
-      var firstFile = d.data.files[Object.keys(d.data.files)[0]]
-      this.startSegmentId = firstFile.segments[0].sid
-    }
-    this.body.addClass('loaded')
-
-    if (typeof d.data.files !== 'undefined') {
-      this.renderFiles(d.data.files, where, UI.firstLoad)
-      if (options.openCurrentSegmentAfter && !options.segmentToOpen) {
-        var seg = UI.firstLoad ? this.currentSegmentId : UI.startSegmentId
-        SegmentActions.openSegment(seg)
-      }
-    }
-    $('#outer').removeClass('loading loadingBefore loadingAfter')
-
-    this.loadingMore = false
-    CatToolActions.updateFooterStatistics()
-    $(document).trigger('getSegments_success')
-  },
-
-  /**
-   * removed the #outer div, taking care of extra cleaning needed, like unmounting
-   * react components, closing side panel etc.
-   */
-  unmountSegments: function () {
-    this.segmentsMountPoint.unmount()
-    UI.segmentsRendered = false
-
-    this.removeCacheObjects()
-    SegmentStore.removeAllSegments()
-    SegmentActions.closeSideSegments()
-  },
-
-  renderFiles: function (files, where, starting) {
-    // If we are going to re-render the articles first we remove them
-    if (where === 'center' && !starting) {
-      this.unmountSegments()
-    }
-    var segments = []
-    $.each(files, function () {
-      segments = segments.concat(this.segments)
-    })
-    UI.renderSegments(segments, false, where)
-    $(document).trigger('files:appended')
-
-    if (starting) {
-      this.init()
-    }
-  },
-
-  renderSegments: function (segments, justCreated, where) {
-    if (
-      typeof this.split_points_source == 'undefined' ||
-      !this.split_points_source.length ||
-      justCreated
-    ) {
-      if (!this.segmentsRendered) {
-        this.segmentsRendered = true
-        this.segmentsMountPoint = createRoot(
-          $('.article-segments-container')[0],
-        )
-        const CallbackAfterRender = () => {
-          useEffect(() => {
-            SegmentActions.renderSegments(segments, UI.startSegmentId)
-          })
-          return React.createElement(SegmentsContainer, {
-            // fid: fid,
-            isReview: Review.enabled(),
-            isReviewExtended: ReviewExtended.enabled(),
-            reviewType: Review.type,
-            enableTagProjection: UI.enableTagProjection,
-            tagModesEnabled: UI.tagModesEnabled,
-            startSegmentId: UI.startSegmentId,
-            firstJobSegment: config.first_job_segment,
-          })
-        }
-
-        this.segmentsMountPoint.render(<CallbackAfterRender />)
-        // SegmentActions.renderSegments(segments, this.startSegmentId)
-      } else {
-        SegmentActions.addSegments(segments, where)
-      }
-      UI.registerFooterTabs()
-    }
-  },
-
   getTranslationMismatches: function (id_segment) {
     getTranslationMismatches({
       password: config.password,
@@ -492,7 +246,7 @@ window.UI = {
     tte.data('raw-time-to-edit', this.totalTime)
   },
   goToFirstError: function () {
-    $('#point2seg').trigger('mousedown')
+    CatToolActions.toggleQaIssues()
     setTimeout(function () {
       $('.qa-issues-container ').first().click()
     }, 300)
@@ -576,7 +330,7 @@ window.UI = {
         successText: 'Download anyway',
         text:
           'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
+          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in Matecat </a> <br /><br /> If you' +
           ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
       },
       'Confirmation required',
@@ -584,6 +338,7 @@ window.UI = {
   },
 
   runDownload: function () {
+    const globalWarnings = SegmentStore.getGlobalWarnings()
     var continueDownloadFunction
 
     if ($('#downloadProject').hasClass('disabled')) return false
@@ -596,9 +351,8 @@ window.UI = {
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
     if (
-      $('#notifbox').hasClass('warningbox') &&
-      UI.globalWarnings.ERROR &&
-      UI.globalWarnings.ERROR.total > 0
+      globalWarnings.matecat.ERROR &&
+      globalWarnings.matecat.ERROR.total > 0
     ) {
       UI.showFixWarningsOnDownload(continueDownloadFunction)
     } else {
@@ -640,9 +394,6 @@ window.UI = {
       .then((data) => {
         //console.log('check warnings success');
         UI.startWarning()
-
-        UI.globalWarnings = data.details
-        //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
 
         //check for errors
         if (data.details) {
@@ -700,8 +451,8 @@ window.UI = {
     if (this.version != config.build_number) {
       var notification = {
         uid: 'checkVersion',
-        title: 'New version of MateCat',
-        text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+        title: 'New version of Matecat',
+        text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
         type: 'warning',
         allowHtml: true,
         position: 'bl',
@@ -712,52 +463,8 @@ window.UI = {
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
-      UI.segmentQA(UI.currentSegment)
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }, config.segmentQACheckInterval)
-  },
-  segmentQA: function ($segment) {
-    if (UI.tagMenuOpen) return
-
-    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment))
-    if (!segment) return
-    var dd = new Date()
-    var ts = dd.getTime()
-    var token = segment.sid + '-' + ts.toString()
-
-    var segment_status = segment.status
-
-    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
-    const trg_content = TagUtils.prepareTextToSend(segment.translation)
-
-    getLocalWarnings({
-      id: segment.sid,
-      token: token,
-      id_job: config.id_job,
-      password: config.password,
-      src_content: src_content,
-      trg_content: trg_content,
-      segment_status: segment_status,
-    })
-      .then((data) => {
-        if (UI.editAreaEditing) return
-        if (data.details && data.details.id_segment) {
-          SegmentActions.setSegmentWarnings(
-            data.details.id_segment,
-            data.details.issues_info,
-            data.details.tag_mismatch,
-          )
-        } else {
-          SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
-        }
-        $(document).trigger('getWarning:local:success', {
-          resp: data,
-          segment: segment,
-        })
-        SegmentActions.updateGlossaryData(data.data, segment.sid)
-      })
-      .catch(() => {
-        OfflineUtils.failedConnection(0, 'getWarning')
-      })
   },
 
   translationIsToSave: function (segment) {
@@ -1201,6 +908,31 @@ window.UI = {
 
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      let message =
+        'All segments are in <b>read-only mode</b> because this job is under review.'
+
+      if (config.chunk_completion_undoable && config.last_completion_event_id) {
+        message =
+          message +
+          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
+      }
+
+      CatToolActions.addNotification({
+        uid: 'translate-warning',
+        autoDismiss: false,
+        dismissable: true,
+        position: 'tc',
+        text: message,
+        title: 'Warning',
+        type: 'warning',
+        allowHtml: true,
+      })
+    }
     if (TextUtils.justSelecting('readonly')) return
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
@@ -1226,8 +958,15 @@ window.UI = {
     })
   },
   messageForClickOnReadonly: function () {
-    var msgArchived = 'Job has been archived and cannot be edited.'
-    var msgOther = 'This part has not been assigned to you.'
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      return 'This job is currently under review. Segments are in read-only mode.'
+    }
+    const msgArchived = 'Job has been archived and cannot be edited.'
+    const msgOther = 'This part has not been assigned to you.'
     return UI.body.hasClass('archived') ? msgArchived : msgOther
   },
   messageForClickOnIceMatch: function () {
@@ -1259,15 +998,4 @@ window.UI = {
 
 $(document).ready(function () {
   UI.start()
-})
-
-$(window).resize(function () {
-  // UI.fixHeaderHeightChange();
-  APP.fitText($('#pname-container'), $('#pname'), 25)
-})
-
-document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  const root = createRoot(mountPoint)
-  root.render(<NotificationBox />)
 })

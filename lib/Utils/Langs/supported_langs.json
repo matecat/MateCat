@@ -87,7 +87,7 @@
             "isocode":"asm",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"asm-IN"
+            "rfc3066code":"as-IN"
         }
     ,
         {
@@ -1633,16 +1633,6 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"nso-ZA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Norwegian"
-            }],
-            "isocode":"no",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"no-NO"
         }
     ,
         {

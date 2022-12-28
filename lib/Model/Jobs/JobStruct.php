@@ -245,6 +245,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
+     * @return bool
+     */
+    public function isSplitted() {
+
+        return count($this->getChunks()) > 1;
+    }
+
+    /**
      * @param Users_UserStruct $user
      * @param                  $role
      *

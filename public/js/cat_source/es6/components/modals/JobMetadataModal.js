@@ -64,7 +64,7 @@ class JobMetadataModal extends React.Component {
 
   createSingleFile() {
     const file = this.props.files.find(
-      (file) => file.id === this.props.currentFile,
+      (file) => parseInt(file.id) === parseInt(this.props.currentFile),
     )
     return (
       <div className="matecat-modal-text">

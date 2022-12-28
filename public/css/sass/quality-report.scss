@@ -708,6 +708,7 @@ header {
                             }
                             .qr-segment-title {
                               background: $grey4;
+                              flex-shrink: 0;
                             }
                           }
                         }

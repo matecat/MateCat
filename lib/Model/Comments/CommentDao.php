@@ -1,6 +1,7 @@
 <?php
 
 use Comments\OpenThreadsStruct;
+use DataAccess\ShapelessConcreteStruct;
 
 class Comments_CommentDao extends DataAccess_AbstractDao {
 
@@ -60,6 +61,78 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $id
+     *
+     * @return bool
+     */
+    public function deleteComment($id)
+    {
+        $sql = "DELETE from comments WHERE id = :id";
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( $sql ) ;
+
+        return $stmt->execute([
+                'id' => $id
+        ]);
+    }
+
+    /**
+     * @param $idSegment
+     *
+     * @return bool|int
+     */
+    public function destroySegmentIdCache($idSegment)
+    {
+        $con = $this->database->getConnection() ;
+        $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc" ) ;
+
+        return $this->_destroyObjectCache( $stmt, [
+            'id_segment' => $idSegment,
+            'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
+            'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
+        ] );
+    }
+
+    /**
+     * @param     $idSegment
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public function getBySegmentId($idSegment, $ttl = 7200)
+    {
+        $sql = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc";
+        $stmt = $this->_getStatementForCache($sql);
+
+        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_segment' => $idSegment,
+                'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
+                'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
+        ] );
+    }
+
+    /**
+     * @param     $id
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct
+     */
+    public function getById($id, $ttl = 86400)
+    {
+        $stmt = $this->_getStatementForCache("SELECT * from comments WHERE id = :id");
+
+        return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id' => $id
+        ] )[0];
+    }
+
+    /**
+     * @param Comments_CommentStruct $obj
+     *
+     * @return Comments_CommentStruct
+     * @throws Exception
+     */
     public function saveComment( Comments_CommentStruct $obj ) {
 
         if ( $obj->message_type == null ) {
@@ -82,6 +155,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 'message_type' => $obj->message_type,
                 'message'      => $obj->message
         ] );
+
+        $id = $this->database->last_insert();
+        $obj->id = (int)$id;
 
         return $obj;
     }
@@ -224,6 +300,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     public function getCommentsInJob( Comments_CommentStruct $obj ) {
 
         $query = "SELECT
+                      id,
                       id_job, 
                       id_segment, 
                       create_date, 
@@ -265,6 +342,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         foreach ( $array_result as $item ) {
 
             $build_arr = [
+                    'id'             => (int)$item[ 'id' ],
                     'id_job'         => $item[ 'id_job' ],
                     'id_segment'     => $item[ 'id_segment' ],
                     'create_date'    => $item[ 'create_date' ],

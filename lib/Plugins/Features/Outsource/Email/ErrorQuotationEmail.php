@@ -67,7 +67,7 @@ class ErrorQuotationEmail extends AbstractEmail {
         ];
     }
 
-    protected function _getLayoutVariables() {
+    protected function _getLayoutVariables($messageBody = null) {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 

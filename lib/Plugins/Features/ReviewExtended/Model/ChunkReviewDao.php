@@ -170,6 +170,8 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $chunkReview_partial = $data[ 'chunkReview_partials' ];
         $data[ 'force_pass_at' ]        = ReviewUtils::filterLQAModelLimit( $chunkReview_partial->getChunk()->getProject()->getLqaModel(), $chunkReview_partial->source_page );
 
+        // in MySQL a sum of a null value to an integer returns 0
+        // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division
         $sql = "INSERT INTO 
             qa_chunk_reviews ( id, id_job, password, penalty_points, reviewed_words_count, advancement_wc, total_tte ) 
         VALUES( 
@@ -181,14 +183,16 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
             :advancement_wc,
             :total_tte
         ) ON DUPLICATE KEY UPDATE
-        penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + VALUES( penalty_points ), 0 ),
+        penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 ),
         reviewed_words_count = GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ),
         advancement_wc = GREATEST( advancement_wc + VALUES( advancement_wc ), 0 ),
         total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 ),        
         is_pass = IF( 
-				( GREATEST( COALESCE( penalty_points, 0 ) + VALUES( penalty_points ), 0 ) ) 
-                / GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ) * 1000 
-                <= {$data[ 'force_pass_at' ]}, 1, 0
+				COALESCE(
+					( GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 ) ) 
+					/ GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ) * 1000 
+					, 0
+				) <= {$data[ 'force_pass_at' ]}, 1, 0
 		);";
 
         $conn = Database::obtain()->getConnection();

@@ -1,7 +1,6 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
 import Cookies from 'js-cookie'
-
+import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
@@ -23,6 +22,7 @@ const CommonUtils = {
     var tra = parseFloat(stats.TRANSLATED)
     var dra = parseFloat(stats.DRAFT)
     var rej = parseFloat(stats.REJECTED)
+    var todo = parseFloat(stats.TODO)
 
     // If second pass enabled
     if (config.secondRevisionsCount && stats.reviews) {
@@ -49,7 +49,7 @@ const CommonUtils = {
     if (dra) t = 'draft'
     if (rej) t = 'draft'
 
-    if (!tra && !dra && !rej && !app) {
+    if (!tra && !dra && !rej && !app && todo > 0) {
       t = 'draft'
     }
 
@@ -156,11 +156,12 @@ const CommonUtils = {
     let updateAppByPopState = () => {
       var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
       var currentSegment = SegmentStore.getCurrentSegment()
-      if (currentSegment.sid === segment.sid) return
+      if (segment && currentSegment.sid === segment.sid) return
       if (segment && !segment.opened) {
-        SegmentActions.openSegment(this.parsedHash.segmentId)
+        SegmentActions.openSegment(this.parsedHash.segmentId, true)
       }
     }
+
     window.onpopstate = () => {
       if (this.parsedHash.onlyActionRemoved(window.location.hash)) {
         return
@@ -174,6 +175,10 @@ const CommonUtils = {
 
       updateAppByPopState()
     }
+
+    window.addEventListener('historyChangeState', () => {
+      this.parsedHash = new ParsedHash(window.location.hash)
+    })
 
     this.parsedHash = new ParsedHash(window.location.hash)
     this.parsedHash.hashCleanupRequired() && this.parsedHash.cleanupHash()
@@ -521,6 +526,28 @@ const CommonUtils = {
     return timezoneToShow % 1 === 0
       ? 'GMT ' + timezoneToShow + ':00'
       : 'GMT ' + parseInt(timezoneToShow) + ':30'
+  },
+  checkJobIsSplitted: function () {
+    return config.job_is_splitted
+  },
+  //Plugins
+  parseFiles: (files) => {
+    return files
+  },
+
+  /**
+   * Returns true if the current OS is MacOS or iOS, false otherwise
+   *
+   * @returns {boolean}
+   */
+  isMacOS: () => {
+    const os = Platform.os && Platform.os.family
+    return (
+      os &&
+      (os.indexOf('Mac') >= 0 ||
+        os.indexOf('OS X') >= 0 ||
+        os.indexOf('iOS') >= 0)
+    )
   },
 }
 

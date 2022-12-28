@@ -175,11 +175,6 @@ class INIT {
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
-     * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
-     */
-    const JOB_ARCHIVABILITY_THRESHOLD = 90;
-
-    /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external
      * translation provider (translated.net by default).
      * You can set it to false, but We are happy if you keep this on.
@@ -367,6 +362,7 @@ class INIT {
 //                    'php'   => array( '', '', 'extxml' ),
                     'json'  => [ '', '', 'extxml' ],
                     'jsont' => [ '', '', 'extxml' ],
+                    'jsont2' => [ '', '', 'extxml' ],
                     'yaml'  => [ '', '', 'extxml' ],
                     'yml'   => [ '', '', 'extxml' ],
                     'md'    => [ '', '', 'extxml' ],

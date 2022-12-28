@@ -1,5 +1,6 @@
 <?php
 
+use Contribution\ContributionRequestStruct;
 use Contribution\Request;
 use Matecat\SubFiltering\MateCatFilter;
 
@@ -20,8 +21,8 @@ class getContributionController extends ajaxController {
     protected $id_before;
     protected $id_after;
 
-    private $__postInput = [];
-    private $cross_language = [];
+    private $__postInput;
+    private $cross_language;
 
     public function __construct() {
 
@@ -114,10 +115,10 @@ class getContributionController extends ajaxController {
 
         $this->readLoginInfo();
         if ( !$this->concordance_search ) {
-            $this->_getContexts($jobStruct->source, $jobStruct->target);
+            $this->_getContexts( $jobStruct->source, $jobStruct->target );
         }
 
-        $contributionRequest                    = new \Contribution\ContributionRequestStruct();
+        $contributionRequest                    = new ContributionRequestStruct();
         $contributionRequest->user              = $this->user;
         $contributionRequest->dataRefMap        = $dataRefMap;
         $contributionRequest->contexts          = [
@@ -152,9 +153,8 @@ class getContributionController extends ajaxController {
      *
      * @return array
      */
-    private function getCrossLanguages()
-    {
-        return explode(",", rtrim($this->cross_language[0], ','));
+    private function getCrossLanguages() {
+        return !empty( $this->cross_language ) ? explode( ",", rtrim( $this->cross_language[ 0 ], ',' ) ) : [];
     }
 
     /**
@@ -163,9 +163,9 @@ class getContributionController extends ajaxController {
      *
      * @throws \Exception
      */
-    protected function _getContexts($source, $target) {
+    protected function _getContexts( $source, $target ) {
 
-        $featureSet = $this->getFeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
 
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
@@ -180,16 +180,16 @@ class getContributionController extends ajaxController {
 
         $Filter = MateCatFilter::getInstance( $featureSet, $source, $target, [] );
 
-        if($segmentsList->id_before){
+        if ( $segmentsList->id_before ) {
             $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
         }
 
-        if($segmentsList->id_segment){
-            $this->text           = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
+        if ( $segmentsList->id_segment ) {
+            $this->text = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
         }
 
-        if($segmentsList->id_after){
-            $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+        if ( $segmentsList->id_after ) {
+            $this->context_after = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
         }
 
     }

@@ -62,14 +62,38 @@
                 <br class="clear" />
             </div>
             <div class="provider-field checkbox first">
-                <input class="required" data-field-name="preimport" type="checkbox" />
-                <label class="checkbox-label">Enable pre-import of TMs </label>
+                <tal:block tal:condition="isTranslatedUser">
+                    <input class="required" data-field-name="preimport" type="checkbox" disabled="disabled" />
+                    <label class="checkbox-label muted">Pre-import your TMs </label>
+                </tal:block>
+                <tal:block tal:condition="not:isTranslatedUser">
+                    <input class="required" data-field-name="preimport" type="checkbox" checked="checked" />
+                    <label class="checkbox-label">Pre-import your TMs </label>
+                </tal:block>
                 <span class="info-icon tooltip-preimport"/>
                 <br class="clear" />
             </div>
             <div class="provider-field checkbox">
-                <input class="required" data-field-name="pretranslate" type="checkbox" />
-                <label class="checkbox-label">Enable pre-translation</label>
+                <tal:block tal:condition="isTranslatedUser">
+                    <input class="required" data-field-name="context_analyzer" type="checkbox" disabled="disabled" />
+                    <label class="checkbox-label muted">Activate context analyzer</label>
+                </tal:block>
+                <tal:block tal:condition="not:isTranslatedUser">
+                    <input class="required" data-field-name="context_analyzer" type="checkbox" checked="checked" />
+                    <label class="checkbox-label">Activate context analyzer</label>
+                </tal:block>
+                <span class="info-icon tooltip-context_analyzer"/>
+                <br class="clear" />
+            </div>
+            <div class="provider-field checkbox">
+                <tal:block tal:condition="isTranslatedUser">
+                    <input class="required" data-field-name="pretranslate" type="checkbox" checked="checked" disabled="disabled" />
+                    <label class="checkbox-label">Pre-translate files</label>
+                </tal:block>
+                <tal:block tal:condition="not:isTranslatedUser">
+                    <input class="required" data-field-name="pretranslate" type="checkbox" />
+                    <label class="checkbox-label">Pre-translate files</label>
+                </tal:block>
                 <span class="info-icon tooltip-pretranslate"/>
                 <br class="clear" />
             </div>

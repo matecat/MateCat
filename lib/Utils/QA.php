@@ -1,6 +1,7 @@
 <?php
 
 use BxExG\Mapper;
+use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 use Matecat\SubFiltering\MateCatFilter;
@@ -770,9 +771,11 @@ class QA {
     public static function JSONtoExceptionList( $jsonString ) {
         $that      = new static( null, null );
         $jsonValue = json_decode( $jsonString, true );
-        array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
-            $that->addError( $errArray[ 'outcome' ] );
-        } );
+        if( is_array( $jsonValue ) ){
+            array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
+                $that->addError( $errArray[ 'outcome' ] );
+            } );
+        }
 
         return $that->exceptionList;
     }
@@ -1458,23 +1461,16 @@ class QA {
      */
     protected function _getTagDiff() {
 
-//        Log::doJsonLog( $this->source_seg );
-//        Log::doJsonLog( $this->target_seg );
-
         preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
         preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
-//        Log::doJsonLog( $malformedXmlSrcStruct );
-//        Log::doJsonLog( $malformedXmlTrgStruct );
-
         //this is for </g>
         preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
         $_closingSrcTag = $matches[ 1 ];
-//        Log::doJsonLog(  $matches );
+
         preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
-//        Log::doJsonLog(  $matches );
         $_closingTrgTag = $matches[ 1 ];
 
         $clonedSrc = $malformedXmlSrcStruct;
@@ -1517,11 +1513,7 @@ class QA {
             $totalResult[ 'target' ][] = $target_segment;
         }
 
-
-//        Log::doJsonLog($totalResult);
-
         $this->malformedXmlStructDiff = $totalResult;
-
     }
 
     /**
@@ -1611,61 +1603,151 @@ class QA {
      */
     protected function _checkTagPositions() {
 
-//        Log::doJsonLog( $this->source_seg );
-//        Log::doJsonLog( $this->target_seg );
-
+        // extract tag from source
         preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
-        $complete_malformedSrcStruct   = $matches[ 1 ];
+        $complete_malformedSrcStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
         $open_malformedXmlSrcStruct    = $matches[ 2 ];
         $closing_malformedXmlSrcStruct = $matches[ 3 ];
 
+        // extract tag from target
         preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->target_seg, $matches );
-        $complete_malformedTrgStruct   = $matches[ 1 ];
+        $complete_malformedTrgStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
         $open_malformedXmlTrgStruct    = $matches[ 2 ];
         $closing_malformedXmlTrgStruct = $matches[ 3 ];
 
-//        Log::doJsonLog($complete_malformedSrcStruct);
-//        Log::doJsonLog($open_malformedXmlSrcStruct);
-//        Log::doJsonLog($closing_malformedXmlSrcStruct);
-//
-//        Log::doJsonLog($complete_malformedTrgStruct);
-//        Log::doJsonLog($open_malformedXmlTrgStruct);
-//        Log::doJsonLog($closing_malformedXmlTrgStruct);
-
-        foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
-            if ( str_replace( " ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
-
-                return;
-            }
-        }
-
-        foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
-            if ( str_replace( " ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
-
-                return;
-            }
-        }
-
-        /*
-         * Check for corresponding self closing tags like <g id="pt673"/>
-         */
+        // extract self closing tags from source and target
         preg_match_all( '#(<[^>]+/>)#', $this->source_seg, $selfClosingTags_src );
         preg_match_all( '#(<[^>]+/>)#', $this->target_seg, $selfClosingTags_trg );
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
-        foreach ( $selfClosingTags_trg as $pos => $tag ) {
-            if ( str_replace( " ", "", $selfClosingTags_src[ $pos ] ) != str_replace( " ", "", $tag ) ) {
-                $this->addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $selfClosingTags_trg[ $pos ] );
+
+        //
+        // ===========================================
+        // Compare the tag ids and equiv-text content
+        // ===========================================
+        //
+        // 1. id
+        //
+        // In this case check for id order mismatch and throw a ERR_TAG_ORDER Warning
+        //
+        // 2. equiv-text
+        //
+        // In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
+        //
+
+        $srcOpIds = $this->extractIdAttributes($open_malformedXmlSrcStruct);
+        $trgOpIds = $this->extractIdAttributes($open_malformedXmlTrgStruct);
+        $srcClIds = $this->extractIdAttributes($closing_malformedXmlSrcStruct);
+        $trgClIds = $this->extractIdAttributes($closing_malformedXmlTrgStruct);
+        $srcOpEquivText = $this->extractEquivTextAttributes($open_malformedXmlSrcStruct);
+        $trgOpEquivText = $this->extractEquivTextAttributes($open_malformedXmlTrgStruct);
+        $srcClEquivText = $this->extractEquivTextAttributes($closing_malformedXmlSrcStruct);
+        $trgClEquivText = $this->extractEquivTextAttributes($closing_malformedXmlTrgStruct);
+        $scrSCIds = $this->extractIdAttributes($selfClosingTags_src);
+        $trgSCIds = $this->extractIdAttributes($selfClosingTags_trg);
+        $srcSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_src);
+        $trgSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_trg);
+
+        $this->checkContentAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+
+        // check for warnings only if there are no errors
+        if( !$this->thereAreErrors() ){
+            $this->checkTagPositionsAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            // $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        }
+
+        // If there are errors get tag diff for the UI
+        if ( $this->thereAreErrors() ) {
+            $this->_getTagDiff();
+        }
+    }
+
+    /**
+     * This function extracts id attributes from a tag array
+     *
+     * @param array $tags
+     *
+     * @return array|mixed
+     */
+    private function extractIdAttributes(array $tags) {
+
+        $matches = [];
+
+        foreach ($tags as $tag){
+            preg_match_all('/id\s*=\s*["\']([^"\']+)["\']\s*/', $tag, $idMatch);
+
+            if (!empty($idMatch[1][0])) {
+                $matches[] = $idMatch[1][0];
+            };
+        }
+
+        return $matches;
+    }
+
+    /**
+     * This function extracts equiv-text attributes from a tag array
+     *
+     * @param array $tags
+     *
+     * @return array|mixed
+     */
+    private function extractEquivTextAttributes(array $tags) {
+
+        $matches = [];
+
+        foreach ($tags as $tag){
+            preg_match_all('/equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/', $tag, $equivTextMatch);
+
+            if (!empty($equivTextMatch[1][0])) {
+                $matches[] = $equivTextMatch[1][0];
+            };
+        }
+
+        return $matches;
+    }
+
+    /**
+     * This function performs a positional check and throw a ERR_TAG_ORDER Warning
+     *
+     * @param array  $src
+     * @param array  $trg
+     * @param string $error
+     * @param array  $originalTargetValues
+     */
+    private function checkTagPositionsAddTagOrderError( array $src, array $trg, $error, array $originalTargetValues) {
+
+        foreach ($trg as $pos => $value){
+            if($value !== $src[$pos]){
+                $this->addError( $error );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
 
                 return;
             }
         }
+    }
 
+    /**
+     * This function performs a content check and throw a ERR_TAG_MISMATCH Error
+     *
+     * @param array  $src
+     * @param array  $trg
+     * @param string $error
+     * @param array  $originalTargetValues
+     */
+    private function checkContentAddTagMismatchError( array $src, array $trg, $error, array $originalTargetValues) {
+
+        foreach ($trg as $pos => $value){
+            if(!in_array($value, $src)){
+                $this->addError( $error );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
+
+                return;
+            }
+        }
     }
 
     /**
@@ -1902,12 +1984,12 @@ class QA {
             $deepDiffTagG = $this->_checkTagCountMismatch( count( @$this->srcDomMap[ 'g' ] ), count( @$this->trgDomMap[ 'g' ] ) );
         }
 
-        if ( $targetNumDiff == 0 ) {
-            //check for Tag ID MISMATCH
+        if ( $targetNumDiff == 0 && ( isset( $this->srcDomMap[ 'innerHTML' ] ) || isset( $this->trgDomMap[ 'innerHTML' ] ) ) ) {
+            // check for Tag ID MISMATCH (double check with content)
+            $innerHtmlArray = array_diff_assoc( $this->srcDomMap[ 'innerHTML' ], $this->trgDomMap[ 'innerHTML' ] );
             $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
-            if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
+            if ( !empty( $innerHtmlArray ) and  !empty( $diffArray ) and !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
                 $this->addError( self::ERR_TAG_ID );
-//            Log::doJsonLog($diffArray);
             }
         }
     }
@@ -2392,7 +2474,13 @@ class QA {
         // check size restriction
         if($this->id_segment){
             $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
-            $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $Filter->fromLayer1ToLayer2( $this->getTargetSeg() ) );
+
+            // remove trailing space
+            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg());
+            $preparedTargetToBeChecked = preg_replace('/&nbsp;/iu', ' ', $preparedTargetToBeChecked);
+            $preparedTargetToBeChecked = rtrim($preparedTargetToBeChecked);
+
+            $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $preparedTargetToBeChecked );
             if(false === $check){
                 $this->addError( self::ERR_SIZE_RESTRICTION  );
             }
@@ -2423,10 +2511,10 @@ class QA {
         if($has_blacklist){
             $data = [];
             $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                'src_content' => $this->source_seg,
-                'trg_content' => $this->target_seg,
-                'project'     => $this->chunk->getProject(),
-                'chunk'       => $this->chunk
+                    'src_content' => $this->source_seg,
+                    'trg_content' => $this->target_seg,
+                    'project'     => $this->chunk->getProject(),
+                    'chunk'       => $this->chunk
             ] );
 
             if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){

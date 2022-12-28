@@ -17,7 +17,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          ModalsActions.showModalComponent(ShortCutsModal, null, 'Shortcuts')
+          ModalsActions.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
         },
       )
       .on(
@@ -349,25 +349,16 @@ $.extend(window.UI, {
           SegmentActions.gotoNextUntranslatedSegment()
         }
       })
-    $('#point2seg').bind('mousedown', function (e) {
-      e.preventDefault()
-      CatToolActions.toggleQaIssues()
-    })
+
     $('#navSwitcher').on('click', function (e) {
       e.preventDefault()
-    })
-
-    $('.file-list').on('click', function (e) {
-      UI.closeAllMenus(e)
-      e.preventDefault()
-      UI.toggleFileMenu()
     })
     $('#jobNav .currseg').on('click', function (e) {
       e.preventDefault()
       var current = SegmentStore.getCurrentSegment()
       if (!current) {
-        UI.unmountSegments()
-        UI.render({
+        SegmentActions.removeAllSegments()
+        CatToolActions.onRender({
           firstLoad: false,
         })
       } else {

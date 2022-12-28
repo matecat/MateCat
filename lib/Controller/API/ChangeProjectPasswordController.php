@@ -12,10 +12,10 @@ use Exceptions\NotFoundException;
 
 class ChangeProjectPasswordController  extends ajaxController {
 
-    protected $api_output = array(
+    protected array $api_output = array(
             'status' => 'FAIL'
     );
-    private $id_project;
+    private         $id_project;
     private $new_password;
     private $old_password;
 

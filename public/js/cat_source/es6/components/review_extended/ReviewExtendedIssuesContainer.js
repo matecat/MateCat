@@ -1,13 +1,17 @@
 import _ from 'lodash'
-
+import React from 'react'
 import ReviewExtendedIssue from './ReviewExtendedIssue'
 import WrapperLoader from '../common/WrapperLoader'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
+import {SegmentContext} from '../segments/SegmentContext'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ReviewExtendedIssuesContainer extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     this.state = {
@@ -256,16 +260,16 @@ class ReviewExtendedIssuesContainer extends React.Component {
         issuesR2.push(
           <ReviewExtendedIssue
             lastIssueId={this.state.lastIssueAdded}
-            sid={this.props.segment.sid}
+            sid={this.context.segment.sid}
             isReview={this.props.isReview}
             currentReview={this.reviewType}
             issue={item}
             key={item.id}
             changeVisibility={this.changeVisibility.bind(this)}
             actions={
-              !SegmentUtils.isIceSegment(this.props.segment) ||
-              (SegmentUtils.isIceSegment(this.props.segment) &&
-                this.props.segment.unlocked)
+              !SegmentUtils.isIceSegment(this.context.segment) ||
+              (SegmentUtils.isIceSegment(this.context.segment) &&
+                this.context.segment.unlocked)
             }
           />,
         )
@@ -273,16 +277,16 @@ class ReviewExtendedIssuesContainer extends React.Component {
         issuesR1.push(
           <ReviewExtendedIssue
             lastIssueId={this.state.lastIssueAdded}
-            sid={this.props.segment.sid}
+            sid={this.context.segment.sid}
             isReview={this.props.isReview}
             currentReview={this.reviewType}
             issue={item}
             key={item.id}
             changeVisibility={this.changeVisibility.bind(this)}
             actions={
-              !SegmentUtils.isIceSegment(this.props.segment) ||
-              (SegmentUtils.isIceSegment(this.props.segment) &&
-                this.props.segment.unlocked)
+              !SegmentUtils.isIceSegment(this.context.segment) ||
+              (SegmentUtils.isIceSegment(this.context.segment) &&
+                this.context.segment.unlocked)
             }
           />,
         )
@@ -314,9 +318,9 @@ class ReviewExtendedIssuesContainer extends React.Component {
   }
 
   setLastIssueAdded(sid, id) {
-    if (sid === this.props.segment.sid) {
+    if (sid === this.context.segment.sid) {
       setTimeout(() => {
-        SegmentActions.openIssueComments(this.props.segment.sid, id)
+        SegmentActions.openIssueComments(this.context.segment.sid, id)
       }, 200)
     }
   }

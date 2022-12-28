@@ -3,7 +3,7 @@
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\MateCatFilter;
-use Validator\JobValidatorObject;
+use Validator\IsJobRevisionValidatorObject;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
 define( "GTPLACEHOLDER", "##GREATERTHAN##" );
@@ -421,7 +421,7 @@ class CatUtils {
          * heuristic, of course this regexp is not perfect, hoping it is not too greedy
          *
          */
-        $linkRegexp = '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d-_]+)?(?:[\p{Latin}\d-_]+\.[\p{Latin}\d-_]+\.[\p{Latin}\d#\?=\.-_]+)/u';
+        $linkRegexp = '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d\-_]+)?(?:[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#\?=\.\-_]+)/u';
 
 
         /**
@@ -904,22 +904,15 @@ class CatUtils {
      */
     public static function getIsRevisionFromIdJobAndPassword( $jid, $password ) {
 
-        $jobValidator = new \Validator\JobValidator();
+        $jobValidator = new \Validator\IsJobRevisionValidator();
 
         try {
-            /** @var JobValidatorObject $validatorObject */
-            $validatorObject = $jobValidator->validate( new JobValidatorObject(), [
-                    'jid'      => $jid,
-                    'password' => $password
-            ] );
 
-            if ( $validatorObject->t == 1 ) {
-                return false;
-            }
+            $jobValidatorObject = new IsJobRevisionValidatorObject();
+            $jobValidatorObject->jid = $jid;
+            $jobValidatorObject->password = $password;
 
-            if ( $validatorObject->r1 == 1 or $validatorObject->r2 == 1 ) {
-                return true;
-            }
+            return $jobValidator->validate($jobValidatorObject);
 
         } catch ( \Exception $exception ) {
             return null;

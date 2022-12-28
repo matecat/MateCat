@@ -22,7 +22,7 @@ class ModelDao extends DataAccess_AbstractDao {
      *
      * @return ModelStruct
      */
-    public static function findById( $id, $ttl = 86400 ) {
+    public static function findById( $id, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();

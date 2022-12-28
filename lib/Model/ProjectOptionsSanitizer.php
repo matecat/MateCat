@@ -14,6 +14,7 @@ class ProjectOptionsSanitizer {
             'af-ZA',
             'sq-AL',
             'ar-SA',
+            'as-IN',
             'fr-BE',
             'bn-IN',
             'bs-BA',
@@ -41,6 +42,7 @@ class ProjectOptionsSanitizer {
             'fr-CA',
             'fr-CH',
             'de-DE',
+            'ka-GE',
             'el-GR',
             'gu-IN',
             'hi-IN',
@@ -48,6 +50,7 @@ class ProjectOptionsSanitizer {
             'id-ID',
             'it-IT',
             'ja-JP',
+            'jv-ID',
             'ha-NG',
             'he-IL',
             'ko-KR',
@@ -65,6 +68,7 @@ class ProjectOptionsSanitizer {
             'ru-RU',
             'sr-Latn-RS',
             'sr-Cyrl-RS',
+            'si-LK',
             'sk-SK',
             'sl-SI',
             'es-ES',
@@ -82,6 +86,7 @@ class ProjectOptionsSanitizer {
             'tr-TR',
             'uk-UA',
             'ur-PK',
+            'uz-UZ',
             'vi-VN'
 
     ];
@@ -209,7 +214,7 @@ class ProjectOptionsSanitizer {
         $rules = [ 'patent', 'paragraph' ];
 
         if (
-                array_key_exists( 'segmentation_rule', $this->options ) &&
+                isset( $this->options[ 'segmentation_rule' ] ) &&
                 in_array( $this->options[ 'segmentation_rule' ], $rules )
         ) {
             $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
@@ -227,34 +232,30 @@ class ProjectOptionsSanitizer {
      * If Lexiqa is requested to be enabled, then check if language is in combination
      */
     private function sanitizeLexiQA() {
-        if ( $this->options[ 'lexiqa' ] == true && $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
-            $this->sanitized[ 'lexiqa' ] = true;
-        } else {
-            $this->sanitized[ 'lexiqa' ] = false;
-        }
+        $this->sanitized[ 'lexiqa' ] = ( $this->options[ 'lexiqa' ] == true and $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) );
     }
 
     /**
      * If tag project is requested to be enabled, check if language combination is allowed.
      */
     private function sanitizeTagProjection() {
-        if ( $this->options[ 'tag_projection' ] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
-            $this->sanitized[ 'tag_projection' ] = true;
-        } else {
-            $this->sanitized[ 'tag_projection' ] = false;
-
-        }
+        $this->sanitized[ 'tag_projection' ] = ( $this->options[ 'tag_projection' ] == true and $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) );
     }
 
+    /**
+     * @param array $langs
+     *
+     * @return bool
+     * @throws Exception
+     */
     private function checkSourceAndTargetAreInCombination( $langs ) {
         $this->__ensureLanguagesAreSet();
 
         $all_langs = array_merge( $this->target_lang, [ $this->source_lang ] );
-
         $all_langs = array_unique( $all_langs );
-
         $found = count( array_intersect( $langs, $all_langs ) );
-        return $found == 2;
+
+        return $found >= 2;
     }
 
     private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {

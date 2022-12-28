@@ -200,7 +200,11 @@ class Upload {
 
             // NOTE FOR ZIP FILES
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
-            if ( $fileSize >= INIT::$MAX_UPLOAD_FILE_SIZE ) {
+
+            $filePathInfo = pathinfo($fileName);
+            $fileMaxSize = ($filePathInfo['extension'] === 'tmx') ? INIT::$MAX_UPLOAD_TMX_FILE_SIZE : INIT::$MAX_UPLOAD_FILE_SIZE;
+
+            if ( $fileSize >= $fileMaxSize ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
                         new Exception ( __METHOD__ . " -> File Dimensions Not Allowed. '$out_filename'" )

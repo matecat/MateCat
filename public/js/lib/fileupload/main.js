@@ -103,7 +103,7 @@ window.UI = {
         var msg = '';
 
         if ( file.type.match( /^image/ ) ) {
-            msg = 'Images not allowed in MateCat';
+            msg = 'Images not allowed in Matecat';
         } else if (
                 (
                     //file.type == 'application/zip' ||
@@ -836,7 +836,8 @@ var isTMXAllowed = function () {
 }
 
 var enableAnalyze = function () {
-    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' ).focus();
+    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' );
+    if(document.activeElement.nodeName.toLowerCase() !== 'input') $( '.uploadbtn' ).focus();
 }
 
 var disableAnalyze = function () {

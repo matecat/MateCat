@@ -10,17 +10,18 @@ namespace Email;
 
 
 use Teams\TeamStruct;
+use Users_UserStruct;
 
 class MembershipDeletedEmail extends AbstractEmail {
 
     protected $title;
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user;
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $sender;
 
@@ -32,11 +33,11 @@ class MembershipDeletedEmail extends AbstractEmail {
     /**
      * MembershipDeletedEmail constructor.
      *
-     * @param \Users_UserStruct $sender
-     * @param \Users_UserStruct $removed_user
+     * @param Users_UserStruct $sender
+     * @param Users_UserStruct $removed_user
      * @param TeamStruct        $team
      */
-    public function __construct( \Users_UserStruct $sender, \Users_UserStruct $removed_user, TeamStruct $team ) {
+    public function __construct( Users_UserStruct $sender, Users_UserStruct $removed_user, TeamStruct $team ) {
         $this->user   = $removed_user;
         $this->sender = $sender;
         $this->title  = "You've been removed from team " . $team->name;
@@ -54,7 +55,7 @@ class MembershipDeletedEmail extends AbstractEmail {
         );
     }
 
-    protected function _getLayoutVariables() {
+    protected function _getLayoutVariables($messageBody = null) {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 

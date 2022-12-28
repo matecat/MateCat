@@ -286,6 +286,16 @@ class Utils {
     }
 
     /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function trimAndLowerCase($string)
+    {
+        return trim(strtolower($string));
+    }
+
+    /**
      * @param $params
      * @param $required_keys
      *
@@ -516,7 +526,7 @@ class Utils {
                 self::deleteDir( $fileInfo->getPathname() );
             } else {
                 $fileName = $fileInfo->getFilename();
-                if ( $fileName{0} == '.' ) {
+                if ( $fileName[0] == '.' ) {
                     continue;
                 }
                 $outcome = unlink( $fileInfo->getPathname() );

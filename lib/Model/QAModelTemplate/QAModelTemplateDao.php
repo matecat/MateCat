@@ -39,11 +39,14 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      */
     private static function validateJSON($json)
     {
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/qa_model/schema.json' );
+        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/qa_model.json' );
         $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator->validate($validatorObject);
 
-        if(!empty($validate = $validator->validate($json))){
-            throw $validate[0];
+        if(!$validator->isValid()){
+            throw $validator->getErrors()[0];
         }
     }
 
@@ -350,33 +353,45 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
         try {
             $stmt = $conn->prepare( "UPDATE qa_model_templates SET uid=:uid, version=:version, label=:label WHERE id=:id" );
             $stmt->execute([
-                    'version' => $modelTemplateStruct->version,
-                    'label' => $modelTemplateStruct->label,
-                    'uid' => $modelTemplateStruct->uid,
-                    'id' => $modelTemplateStruct->id,
+                'version' => $modelTemplateStruct->version,
+                'label' => $modelTemplateStruct->label,
+                'uid' => $modelTemplateStruct->uid,
+                'id' => $modelTemplateStruct->id,
             ]);
 
-            $stmt = $conn->prepare( "UPDATE qa_model_template_passfails SET id_template=:id_template, passfail_type= :passfail_type WHERE id=:id " );
+            // UPSERT
+            $stmt = $conn->prepare( "DELETE from qa_model_template_passfails WHERE id_template=:id_template " );
             $stmt->execute([
-                    'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
-                    'id_template' => $modelTemplateStruct->id,
-                    'id' => $modelTemplateStruct->passfail->id
+                'id_template' => $modelTemplateStruct->id,
             ]);
+
+            $stmt = $conn->prepare( "DELETE from qa_model_template_categories WHERE id_template=:id_template " );
+            $stmt->execute([
+                'id_template' => $modelTemplateStruct->id,
+            ]);
+
+            $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfails (id_template, passfail_type) VALUES (:id_template,:passfail_type )" );
+            $stmt->execute([
+                'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
+                'id_template' => $modelTemplateStruct->id,
+            ]);
+
+            $idPassfail = $conn->lastInsertId();
 
             foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct){
-                $stmt = $conn->prepare( "UPDATE qa_model_template_passfail_options SET id_passfail=:id_passfail, passfail_label=:passfail_label, passfail_value=:passfail_value WHERE id=:id " );
+                $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfail_options (id_passfail,passfail_label,passfail_value) 
+                    VALUES (:id_passfail,:passfail_label,:passfail_value) " );
                 $stmt->execute([
-                        'id_passfail' => $thresholdStruct->id_passfail,
-                        'passfail_label' => $thresholdStruct->passfail_label,
-                        'passfail_value' => $thresholdStruct->passfail_value,
-                        'id' => $thresholdStruct->id
+                    'id_passfail' => $idPassfail,
+                    'passfail_label' => $thresholdStruct->passfail_label,
+                    'passfail_value' => $thresholdStruct->passfail_value,
                 ]);
             }
 
             foreach ($modelTemplateStruct->categories as $categoryStruct){
-                $stmt = $conn->prepare( "UPDATE qa_model_template_categories SET id_template=:id_template, id_parent=:id_parent, category_label=:category_label, code=:code, sort=:sort  WHERE id=:id " );
+                $stmt = $conn->prepare( "INSERT INTO qa_model_template_categories (id_template,id_parent,category_label, code, sort) 
+                    VALUES (:id_template,:id_parent,:category_label,:code,:sort) " );
                 $stmt->execute([
-                        'id' => $categoryStruct->id,
                         'id_template' => $categoryStruct->id_template,
                         'id_parent' => ($categoryStruct->id_parent) ? $categoryStruct->id_parent : null,
                         'category_label' => $categoryStruct->category_label,
@@ -384,11 +399,13 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                         'sort' => ($categoryStruct->sort) ? $categoryStruct->sort : null,
                 ]);
 
+                $idCategory = $conn->lastInsertId();
+
                 foreach ($categoryStruct->severities as $severityStruct){
-                    $stmt = $conn->prepare( "UPDATE qa_model_template_severities SET id_category=:id_category, severity_label=:severity_label, severity_code=:severity_code, penalty=:penalty, dqf_id=:dqf_id, sort=:sort WHERE id=:id  " );
+                    $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category,severity_label,severity_code,penalty,dqf_id, sort)
+                        VALUES (:id_category, :severity_label, :severity_code, :penalty, :dqf_id, :sort) " );
                     $stmt->execute([
-                        'id' => $severityStruct->id,
-                        'id_category' => $categoryStruct->id,
+                        'id_category' => $idCategory,
                         'severity_label' => $severityStruct->severity_label,
                         'severity_code' => $severityStruct->severity_code,
                         'dqf_id' => ($severityStruct->dqf_id) ? $severityStruct->dqf_id : null,

@@ -1,5 +1,4 @@
 import React from 'react'
-import ModalsActions from '../../actions/ModalsActions'
 import ManageActions from '../../actions/ManageActions'
 class JobMenu extends React.Component {
   constructor(props) {
@@ -284,6 +283,10 @@ class JobMenu extends React.Component {
           <div className="divider" />
           <a className="item" onClick={this.props.activateJobFn}>
             <i className="icon-drawer unarchive-project icon" /> Resume job
+          </a>
+          <a className="item" onClick={this.props.deleteJobFn}>
+            <i className="icon-drawer delete-project icon" /> Delete job
+            permanently
           </a>
         </div>
       )
