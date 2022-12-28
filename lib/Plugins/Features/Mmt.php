@@ -639,8 +639,9 @@ class Mmt extends BaseFeature {
      */
     public function postUserKeyDelete($key, $uid){
 
-        $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
-        $engineToBeDeleted->uid = $uid;
+        $engineToBeDeleted         = EnginesModel_EngineStruct::getStruct();
+        $engineToBeDeleted->uid    = $uid;
+        $engineToBeDeleted->active = true;
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result    = $engineDAO->read( $engineToBeDeleted );
