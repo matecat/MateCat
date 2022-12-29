@@ -1067,7 +1067,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 p.id = :id_project
             AND 
                 p.password = :password
-            GROUP BY s.id
             LIMIT ".$limit." offset " .$offset;
 
         $stmt = $conn->prepare($query);
@@ -1106,7 +1105,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                  ste.source_page,
                  f.filename  ,
                  fp.tag_key,
-                 fp.tag_value
+                 fp.tag_value,
+                IF( LOCATE( '1', _page ) > 0, 1, null ) AS has_t,
+                IF( LOCATE( '2', _page ) > 0, 2, null ) AS has_r1,
+                IF( LOCATE( '3', _page ) > 0, 3, null ) AS has_r2
             FROM
                 jobs j
             JOIN
@@ -1116,7 +1118,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             LEFT JOIN
                 files f ON s.id_file = f.id
             LEFT JOIN
-                files_parts fp ON fp.id = s.id_file_part        
+                files_parts fp ON fp.id = s.id_file_part     
+            LEFT JOIN (
+                SELECT id_job, id_segment, group_concat( distinct source_page )  as _page
+                FROM segment_translation_events stex
+                JOIN
+                    jobs j ON stex.id_job = j.id
+                WHERE stex.id_job = j.id
+                    AND id_project = :id_project
+                GROUP BY stex.id_segment
+            ) AS XX ON XX.id_segment = st.id_segment   
             LEFT JOIN
                 (
                     SELECT 
@@ -1139,7 +1150,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             WHERE
                 j.id = :id_job
             AND j.password = :password
-            GROUP BY s.id
             LIMIT " .$limit. " OFFSET " .$offset;
         $stmt    = $conn->prepare($query);
 
