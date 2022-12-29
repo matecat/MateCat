@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const updateGlossaryItem = async (dataRequest) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/update`,
+    `${getMatecatApiDomain()}api/app/glossary/_update`,
     {
       method: 'POST',
       credentials: 'include',

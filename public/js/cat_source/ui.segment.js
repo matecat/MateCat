@@ -219,6 +219,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
     },
     setCurrentSegment: function () {
       var id_segment = this.currentSegmentId
+      if (!id_segment) return
       CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString())
       const requestData = {
         action: 'setCurrentSegment',

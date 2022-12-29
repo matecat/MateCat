@@ -38,6 +38,7 @@ export const SegmentFooterTabGlossary = ({
   segment,
   notifyLoadingStatus,
 }) => {
+  const [isActive, setIsActive] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -53,8 +54,8 @@ export const SegmentFooterTabGlossary = ({
   const [terms, setTerms] = useState(initialState.terms)
   const [modifyElement, setModifyElement] = useState()
   const [termForm, setTermForm] = useState(initialState.termForm)
-  const [isLoading, setIsLoading] = useState(false)
-  const [haveKeysGlossary, setHaveKeysGlossary] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [haveKeysGlossary, setHaveKeysGlossary] = useState(undefined)
   const [termsStatusDeleting, setTermsStatusDeleting] = useState([])
 
   const ref = useRef()
@@ -165,24 +166,21 @@ export const SegmentFooterTabGlossary = ({
 
   // get TM keys and add actions listener
   useEffect(() => {
+    const refreshCheckQa = () =>
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     const addGlossaryItem = () => {
       setTimeout(() => {
         setIsLoading(false)
         setSearchTerm('')
         resetForm()
         refreshGlossary()
+        refreshCheckQa()
       }, 500)
     }
-    const onReceiveGlossary = () => {
-      setIsLoading(false)
-      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
-    }
     const setDomains = ({entries}) => {
-      console.log('Domains---->', entries)
       setDomainsResponse(entries)
     }
     const setJobTmKeys = (keys) => {
-      console.log('Keys---->', segment.sid, keys)
       setKeys(keys)
     }
     const refreshGlossary = () =>
@@ -191,21 +189,29 @@ export const SegmentFooterTabGlossary = ({
         text: segment.segment,
         shouldRefresh: true,
       })
-    const onReceiveHaveKeysGlossary = (value) => setHaveKeysGlossary(value)
-    const onDeleteTerm = (sid, term) =>
+    const onReceiveHaveKeysGlossary = ({value, wasAlreadyVerified}) => {
+      setHaveKeysGlossary(value)
+      if (value && !wasAlreadyVerified) {
+        SegmentActions.getGlossaryForSegment({
+          sid: segment.sid,
+          text: segment.segment,
+        })
+      } else {
+        setIsLoading(false)
+      }
+    }
+    const onDeleteTerm = (sid, term) => {
       setTermsStatusDeleting((prevState) =>
         prevState.filter((value) => value !== term.term_id),
       )
+      refreshCheckQa()
+    }
 
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
       addGlossaryItem,
     )
     SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
-    SegmentStore.addListener(
-      SegmentConstants.SET_GLOSSARY_TO_CACHE,
-      onReceiveGlossary,
-    )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
     CatToolStore.addListener(
@@ -231,10 +237,6 @@ export const SegmentFooterTabGlossary = ({
       SegmentStore.removeListener(
         SegmentConstants.CHANGE_GLOSSARY,
         addGlossaryItem,
-      )
-      SegmentStore.removeListener(
-        SegmentConstants.SET_GLOSSARY_TO_CACHE,
-        onReceiveGlossary,
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
@@ -365,8 +367,9 @@ export const SegmentFooterTabGlossary = ({
           return -1
         }
       })
-    console.log('----> segment glossary', orderedByUpdateDate)
+    // console.log('----> segment glossary', orderedByUpdateDate)
     setTerms(orderedByUpdateDate)
+    setIsLoading(false)
   }, [segment?.glossary_search_results])
 
   useEffect(() => {
@@ -426,7 +429,7 @@ export const SegmentFooterTabGlossary = ({
       [TRANSLATED_EXAMPLE]: target.sentence,
     })
 
-    const domainsForActiveKeys = domainsResponse[metadata.key]?.map(
+    const domainsForActiveKeys = domainsResponse?.[metadata.key]?.map(
       ({domain, subdomains}, index) => ({
         id: index.toString(),
         name: domain,
@@ -453,10 +456,15 @@ export const SegmentFooterTabGlossary = ({
     notifyLoadingStatusToParent(isLoading)
   }, [isLoading, notifyLoadingStatusToParent])
 
+  useEffect(() => {
+    setIsActive(!!active_class)
+  }, [active_class])
+
   return (
     <TabGlossaryContext.Provider
       value={{
         ref,
+        isActive,
         segment,
         keys,
         domains,
@@ -501,13 +509,15 @@ export const SegmentFooterTabGlossary = ({
           </>
         ) : showForm ? (
           <TermForm />
-        ) : (
+        ) : haveKeysGlossary === false ? (
           <div className="no_keys_glossary">
             <p>No glossary available.</p>
             <button className="glossary__button-add" onClick={openForm}>
               + Click here to create one
             </button>
           </div>
+        ) : (
+          <span className="loading_label">Loading</span>
         )}
       </div>
     </TabGlossaryContext.Provider>

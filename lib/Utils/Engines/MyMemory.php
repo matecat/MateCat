@@ -591,15 +591,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param string $sourceLanguage
+     * @param string $targetLanguage
      * @param array $keys
      *
      * @return array
      */
-    public function glossaryKeys($keys = [])
+    public function glossaryKeys($sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                'keys' => $keys,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            'source_language' => $sourceLanguage,
+            'target_language' => $targetLanguage,
+            'keys' => $keys,
         ];
         $this->call( "glossary_keys_relative_url", $payload, true, true );
 
