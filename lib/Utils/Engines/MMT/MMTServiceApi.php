@@ -415,8 +415,11 @@ class MMTServiceApi {
             $options[ CURLOPT_HTTPHEADER ] = $headers;
         }
 
+        // Every API call MUST be a POST
+        // (X-HTTP-Method-Override will override the method)
+        $options[ CURLOPT_POST ] = 1;
+
         if ( $params ) {
-            $options[ CURLOPT_POST ]       = 1;
             $options[ CURLOPT_POSTFIELDS ] = $params;
         }
 

@@ -57,11 +57,15 @@ let TranslationMatches = {
     let matches = segmentObj.contributions
       ? segmentObj.contributions.matches
       : []
-    if (matches && matches.length > 0 && _.isUndefined(matches[0].error)) {
+    const match = matches.length ? matches[0].match : undefined
+    if (
+      matches &&
+      matches.length > 0 &&
+      _.isUndefined(matches[0].error) &&
+      (parseInt(match) > 70 || match === 'MT')
+    ) {
       var editareaLength = segmentObj.translation.length
       var translation = matches[0].translation
-
-      var match = matches[0].match
 
       if (editareaLength === 0) {
         SegmentActions.setChoosenSuggestion(segmentObj.sid, 1)

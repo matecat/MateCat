@@ -22,7 +22,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   clientId: undefined,
   tmKeys: null,
   keysDomains: null,
-  haveKeysGlossary: false,
+  haveKeysGlossary: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -213,10 +213,10 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.HAVE_KEYS_GLOSSARY:
       CatToolStore.setHaveKeysGlossary(action.value)
-      CatToolStore.emitChange(
-        CatToolConstants.HAVE_KEYS_GLOSSARY,
-        CatToolStore.haveKeysGlossary,
-      )
+      CatToolStore.emitChange(CatToolConstants.HAVE_KEYS_GLOSSARY, {
+        value: CatToolStore.haveKeysGlossary,
+        wasAlreadyVerified: action.wasAlreadyVerified,
+      })
       break
   }
 })

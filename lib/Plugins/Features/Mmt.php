@@ -98,8 +98,6 @@ class Mmt extends BaseFeature {
      */
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
-        //gestire il flag synca tutto o no
-
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
             return $newCreatedDbRowStruct;
         }
@@ -120,19 +118,8 @@ class Mmt extends BaseFeature {
 
                 /** @var TmKeyManagement_MemoryKeyStruct $key */
                 foreach ( self::_getKeyringOwnerKeysByUid($userStruct->uid) as $key){
-                    $engineMmt->createMemory($key->tm_key->name, null, $key->tm_key->key);
+                    $engineMmt->connectKeys([$key->tm_key->key]);
                 }
-            }
-
-            /**
-             * @var $newTestCreatedMT Engines_MMT
-             */
-            $me_result = $newTestCreatedMT->checkAccount();
-            Log::doJsonLog( $me_result );
-
-            $keyList = self::_getKeyringOwnerKeys( $userStruct );
-            if ( !empty( $keyList ) ) {
-                $newTestCreatedMT->connectKeys( $keyList );
             }
 
         } catch ( Exception $e ) {
@@ -179,15 +166,16 @@ class Mmt extends BaseFeature {
             if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
                 $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
 
-                // @TODO Devo controllare il parametro MMT-preimport?
                 $extraParams = $engineStruct->getExtraParamsAsArray();
-                $extraParams['MMT-preimport'];
+                $preImport = $extraParams['MMT-preimport'];
 
-                $mmt = new Engines_MMT($engineStruct);
-                $memories = $mmt->getAllMemories();
+                if($preImport === true){
+                    $mmt = new Engines_MMT($engineStruct);
+                    $memories = $mmt->getAllMemories();
 
-                foreach ($memories as $memory){
-                    $mmt->deleteMemory($memory['externalId']);
+                    foreach ($memories as $memory){
+                        $mmt->deleteMemory($memory['externalId']);
+                    }
                 }
             }
         }
@@ -667,9 +655,7 @@ class Mmt extends BaseFeature {
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
 
-        //usare solo se c'è la flag sync
-
-        if ( empty( $memoryKeyStructs ) || empty( $uid ) ) {
+        if ( empty( $memoryKeyStructs ) or empty( $uid ) ) {
             return;
         }
 
@@ -681,8 +667,14 @@ class Mmt extends BaseFeature {
              * @var Engines_MMT $MMTEngine
              */
             $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-            $MMTEngine->connectKeys( $memoryKeyStructs );
+            $engineStruct = $MMTEngine->getEngineRecord();
 
+            $extraParams = $engineStruct->getExtraParamsAsArray();
+            $preImport = $extraParams['MMT-preimport'];
+
+            if($preImport === true){
+                $MMTEngine->connectKeys( $memoryKeyStructs );
+            }
         }
     }
 }
