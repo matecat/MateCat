@@ -144,7 +144,11 @@ const NewProject = ({
 
     const updateUser = (user) => {
       setUser(user)
-      setSelectedTeam(APP.getLastTeamSelected(user.teams))
+      setSelectedTeam(
+        APP.getLastTeamSelected(
+          user.teams.map((team) => ({...team, id: team.id.toString()})),
+        ),
+      )
     }
     getTmKeys()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
@@ -180,6 +184,7 @@ const NewProject = ({
     () => CreateProjectActions.updateProjectParams({sourceLang, targetLangs}),
     [sourceLang, targetLangs],
   )
+
   return (
     <>
       <HeaderPortal>
@@ -220,10 +225,17 @@ const NewProject = ({
                   label="Team"
                   name={'project-team'}
                   showSearchBar={true}
-                  options={user?.teams ? user.teams : []}
+                  options={
+                    user?.teams
+                      ? user.teams.map((team) => ({
+                          ...team,
+                          id: team.id.toString(),
+                        }))
+                      : []
+                  }
                   activeOption={selectedTeam}
                   checkSpaceToReverse={false}
-                  isDisabled={!user || user.teams.length == 1}
+                  isDisabled={!user || user.teams.length === 1}
                   onSelect={(option) => setSelectedTeam(option)}
                 />
               </div>

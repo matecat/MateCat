@@ -18,15 +18,16 @@
 @import 'components/common/Dropdown';
 
 .translation-row {
-  display: grid;
-  justify-content: center;
-
   .translation-options,
   #additional-input-params {
-    display: grid;
-    grid-auto-flow: column;
-    /*grid-template-columns: repeat(8,auto);*/
-    grid-column-gap: 8px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .translation-options {
+    > :not(:last-child) {
+      margin-right: 8px;
+    }
   }
 }
 
@@ -328,32 +329,21 @@
   .translate-box.tmx-select {
     margin-right: 0;
   }
-  .wrapper-upload {
-    .translate-box {
-      div.dropdown {
-        width: 140px;
-      }
-    }
-  }
+  // .wrapper-upload {
+  //   .translate-box {
+  //     div.dropdown {
+  //       width: 140px;
+  //     }
+  //   }
+  // }
 }
 
 @media only screen and (min-width: 1600px) {
   .wrapper-upload {
     .translate-box {
-      input {
+      .select-with-label__wrapper,
+      .upload-input {
         width: 200px;
-      }
-      div.dropdown {
-        width: 200px;
-        .menu {
-          width: 280px;
-        }
-        .text {
-          /*overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-size: 16px;
-                    white-space: nowrap;*/
-        }
       }
     }
     #tmx-select {
@@ -368,27 +358,9 @@
 @media only screen and (max-width: 1599px) and (min-width: 1321px) {
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
         width: 162px;
-      }
-      div.dropdown {
-        width: 162px;
-        .text {
-          /*overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-size: 16px;
-                    white-space: nowrap;*/
-        }
-      }
-      #tmx-select {
-        width: 170px;
-      }
-      &.target {
-        #target-lang {
-          .multiple-none-text {
-            display: none;
-          }
-        }
       }
     }
   }
@@ -405,19 +377,9 @@
 
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
         width: 128px;
-      }
-      div.dropdown {
-        width: 128px;
-        .text {
-          /*overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-size: 16px;
-                    white-space: nowrap;*/
-        }
-      }
-      #tmx-select {
       }
     }
   }
@@ -434,13 +396,9 @@
 
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
         width: 128px;
-      }
-      div.dropdown {
-        width: 128px;
-      }
-      #tmx-select {
       }
     }
   }
@@ -449,10 +407,8 @@
 @media only screen and (max-width: 991px) {
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
-        width: 128px;
-      }
-      div.dropdown {
         width: 128px;
       }
     }

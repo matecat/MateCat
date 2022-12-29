@@ -1432,14 +1432,61 @@ button.ui-button::-moz-focus-inner {
 }
 
 .translate-box {
-  h2 {
+  h2,
+  .select-with-label__wrapper label {
     color: $grey1;
-    font-weight: 100;
+    font-size: 18px;
+    font-weight: normal;
+  }
+
+  .select-with-label__wrapper {
+    .select {
+      padding: 9px 46px 9px 12px;
+      border-radius: 2px;
+      border: 1px solid rgba(34, 36, 38, 0.15);
+      box-shadow: inset 0 1px 3px #ddd;
+
+      &:hover {
+        border-color: rgba(34, 36, 38, 0.35);
+        box-shadow: none;
+      }
+    }
+
+    .select--is-disabled {
+      background-color: #f3f3f3;
+    }
+
+    .custom-dropdown {
+      margin-top: 0;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    .select__dropdown-wrapper {
+      input:not([type='radio']),
+      textarea {
+        border: 1px solid $grey2;
+        border-radius: 4px;
+        padding: 4px 8px;
+        outline: none;
+        font-size: 14px;
+        line-height: 16px;
+        &:focus,
+        &:focus-visible {
+          border-color: $linkBlueTransparent;
+        }
+      }
+    }
   }
 }
 
 .translate-box.settings {
+  display: flex;
+  align-items: center;
   margin: 48px 0 0 0;
+  cursor: pointer;
 }
 
 .translate-box.qa-box {
@@ -1516,8 +1563,11 @@ button.ui-button::-moz-focus-inner {
   }
 }
 
-.wrapper-upload .translate-box h2 {
-  font-family: Calibri, Arial, Helvetica, sans-serif;
+.wrapper-upload {
+  .translate-box h2,
+  .select-with-label__wrapper label {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+  }
 }
 
 .wrapper-claim {
@@ -1841,7 +1891,6 @@ body {
 }
 
 .upload-input {
-  width: 230px;
   padding: 3px 5px 3px 9px;
   font-size: 16px !important;
   -moz-border-radius: 2px;
@@ -2489,7 +2538,6 @@ ul.test li {
 #swaplang {
   float: left;
   display: block;
-  width: 10px;
   text-decoration: none;
   height: 18px;
   margin: 52px 14px 0 5px;
