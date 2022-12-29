@@ -212,15 +212,20 @@ APP.getDQFParameters = function () {
   return dqf
 }
 
-APP.getCreateProjectParams = function () {
+APP.getCreateProjectParams = function ({
+  projectName,
+  sourceLang,
+  targetLang,
+  jobSubject,
+}) {
   var dqf = APP.getDQFParameters()
   return {
     action: 'createProject',
     file_name: APP.getFilenameFromUploadedFiles(),
-    project_name: $('#project-name').val(),
-    source_lang: $('#source-lang').dropdown('get value'),
-    target_lang: $('#target-lang').dropdown('get value'),
-    job_subject: $('#project-subject').dropdown('get value'),
+    project_name: projectName,
+    source_lang: sourceLang,
+    target_lang: targetLang,
+    job_subject: jobSubject,
     mt_engine: $('.mgmt-mt .activemt').data('id'),
     private_keys_list: UI.extractTMdataFromTable(),
     lang_detect_files: UI.skipLangDetectArr,
@@ -370,47 +375,47 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
-    $('input.uploadbtn').click(function () {
-      if (!$('.uploadbtn').hasClass('disabled')) {
-        if (!UI.allTMUploadsCompleted()) {
-          return false
-        }
-
-        $('body').addClass('creating')
-
-        $('.error-message').hide()
-        $('.uploadbtn')
-          .attr('value', 'Analyzing...')
-          .attr('disabled', 'disabled')
-          .addClass('disabled')
-
-        createProject(APP.getCreateProjectParams())
-          .then(({data}) => {
-            APP.handleCreationStatus(data.id_project, data.password)
-          })
-          .catch((errors) => {
-            let errorMsg
-            switch (errors[0].code) {
-              case -230: {
-                errorMsg =
-                  'Sorry, file name too long. Try shortening it and try again.'
-                break
-              }
-              case -235: {
-                errorMsg =
-                  'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
-                break
-              }
-              default:
-                errorMsg = errors[0].message
-            }
-            $('.error-message').find('p').text(errorMsg)
-            $('.error-message').show()
-            $('.uploadbtn').attr('value', 'Analyze')
-            $('body').removeClass('creating')
-          })
-      }
-    })
+    // $('input.uploadbtn').click(function () {
+    //   if (!$('.uploadbtn').hasClass('disabled')) {
+    //     if (!UI.allTMUploadsCompleted()) {
+    //       return false
+    //     }
+    //
+    //     // $('body').addClass('creating')
+    //
+    //     // $('.error-message').hide()
+    //     // $('.uploadbtn')
+    //     //   .attr('value', 'Analyzing...')
+    //     //   .attr('disabled', 'disabled')
+    //     //   .addClass('disabled')
+    //
+    //     createProject(APP.getCreateProjectParams())
+    //       .then(({data}) => {
+    //         APP.handleCreationStatus(data.id_project, data.password)
+    //       })
+    //       .catch((errors) => {
+    //         let errorMsg
+    //         switch (errors[0].code) {
+    //           case -230: {
+    //             errorMsg =
+    //               'Sorry, file name too long. Try shortening it and try again.'
+    //             break
+    //           }
+    //           case -235: {
+    //             errorMsg =
+    //               'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
+    //             break
+    //           }
+    //           default:
+    //             errorMsg = errors[0].message
+    //         }
+    //         $('.error-message').find('p').text(errorMsg)
+    //         $('.error-message').show()
+    //         $('.uploadbtn').attr('value', 'Analyze')
+    //         $('body').removeClass('creating')
+    //       })
+    //   }
+    // })
 
     //Error upload (??)
     $('.upload-table').on('click', 'a.skip_link', function () {

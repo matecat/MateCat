@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
@@ -11,6 +11,9 @@ import More from '../../../../img/icons/More'
 import UploadFile from '../components/createProject/UploadFile'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
+import {createProject} from '../api/createProject'
+import CreateProjectActions from '../actions/CreateProjectActions'
+import CreateProjectStore from '../stores/CreateProjectStore'
 
 const NewProject = ({
   isLoggedIn = false,
@@ -23,6 +26,7 @@ const NewProject = ({
   googleDriveEnabled,
   supportedFiles,
 }) => {
+  const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
   const [tmKeySelected, setTmKeySelected] = useState([])
@@ -40,6 +44,9 @@ const NewProject = ({
       : [languages[0]],
   )
   const [subject, setSubject] = useState(subjectsArray[0])
+  const [projectSent, setProjectSent] = useState(false)
+  const [errors, setErrors] = useState()
+  const [warnings, setWarnings] = useState()
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
   const swapLanguages = () => {
@@ -84,6 +91,32 @@ const NewProject = ({
         }),
       ),
     )
+  }
+
+  const createProject = () => {
+    if (!projectSent) {
+      if (!UI.allTMUploadsCompleted()) {
+        return false
+      }
+      setErrors()
+      setWarnings()
+      setProjectSent(true)
+      // createProject(
+      //   APP.getCreateProjectParams({
+      //     projectName: projectNameRef.current.value,
+      //     sourceLang: sourceLang.id,
+      //     targetLang: targetLangs.join(),
+      //     jobSubject: subject.id,
+      //   }),
+      // )
+      const createProjectParams = APP.getCreateProjectParams({
+        projectName: projectNameRef.current.value,
+        sourceLang: sourceLang.id,
+        targetLang: targetLangs.map((lang) => lang.id).join(),
+        jobSubject: subject.id,
+      })
+      console.log('Params', createProjectParams)
+    }
   }
 
   //TODO: Move it
@@ -142,6 +175,11 @@ const NewProject = ({
       $('#activetm').off('deleteTm')
     }
   }, [tmKeys, tmKeySelected])
+
+  useEffect(
+    () => CreateProjectActions.updateProjectParams({sourceLang, targetLangs}),
+    [sourceLang, targetLangs],
+  )
   return (
     <>
       <HeaderPortal>
@@ -172,6 +210,7 @@ const NewProject = ({
                 className="upload-input"
                 id="project-name"
                 autoFocus="autofocus"
+                ref={projectNameRef}
               />
             </div>
             {/* Team Select*/}
@@ -270,14 +309,20 @@ const NewProject = ({
           </div>
         </div>
         {/* TODO: ERROR MESSAGES*/}
-        <div className="warning-message">
-          <i className="icon-warning2 icon"> </i>
-          <p>Oops we got an error...</p>
-        </div>
-        <div className="error-message">
-          <i className="icon-error_outline icon"> </i>
-          <p>Oops we got an error... </p>
-        </div>
+        {warnings && (
+          <div className="warning-message">
+            <i className="icon-warning2 icon"> </i>
+            <p>Oops we got an error...</p>
+          </div>
+        )}
+
+        {errors && (
+          <div className="error-message">
+            <i className="icon-error_outline icon"> </i>
+            <p>Oops we got an error... </p>
+          </div>
+        )}
+
         <UploadFile />
       </div>
       <div className="wrapper-bottom">
@@ -310,14 +355,26 @@ const NewProject = ({
           </p>
         )}
         <div className="uploadbtn-box">
-          <span className="uploadloader"></span>
-          <input
-            name=""
-            type="button"
-            className="uploadbtn disabled"
-            value="Analyze"
-            disabled="disabled"
-          />
+          {!projectSent ? (
+            <input
+              name=""
+              type="button"
+              className="uploadbtn disabled"
+              value="Analyze"
+              onClick={() => createProject()}
+            />
+          ) : (
+            <>
+              <span className="uploadloader" />
+              <input
+                name=""
+                type="button"
+                className="uploadbtn disabled"
+                value="Analyzing..."
+                disabled="disabled"
+              />
+            </>
+          )}
           <p className="enter">Press Enter</p>
         </div>
       </div>

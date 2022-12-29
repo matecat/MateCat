@@ -14,6 +14,7 @@
 import Cookies from 'js-cookie'
 import {initFileUpload} from "../../cat_source/es6/api/initFileUpload";
 import {convertFileRequest} from "../../cat_source/es6/api/convertFileRequest";
+import CreateProjectStore from "../../cat_source/es6/stores/CreateProjectStore";
 
 window.UI = null;
 
@@ -563,8 +564,8 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
     convertFileRequest({
         action: 'convertFile',
         file_name: fname,
-        source_lang: $( '#source-lang' ).dropdown('get value'),
-        target_lang: $( '#target-lang' ).dropdown('get value'),
+        source_lang: CreateProjectStore.getSourceLang(),
+        target_lang: CreateProjectStore.getTargetLangs(),
         segmentation_rule: $( '#segm_rule' ).val(),
         signal
     }).then(function ( {data, errors} ) {

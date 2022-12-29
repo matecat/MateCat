@@ -2059,10 +2059,6 @@ span.gdrive-icon {
   display: none !important;
 }
 
-.creating .uploadloader {
-  display: block;
-}
-
 .error-content {
   padding-left: 45px;
   padding-right: 10px;
@@ -2085,7 +2081,6 @@ span.gdrive-icon {
   -moz-border-radius: 2px;
   border-radius: 2px;
   border: 1px solid #c45f5f;
-  display: none;
   .icon {
     float: left;
     font-size: 25px;
