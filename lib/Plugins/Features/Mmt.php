@@ -139,7 +139,7 @@ class Mmt extends BaseFeature {
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
             throw $e;
         }
-        
+
         $UserMetadataDao = new MetadataDao();
         $UserMetadataDao->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
 

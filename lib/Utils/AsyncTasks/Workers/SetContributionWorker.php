@@ -42,7 +42,7 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @param Engines_EngineInterface $_tms
      */
-    public function setEngine( $_tms ){
+    public function setEngine( $_tms ) {
         $this->_engine = $_tms;
     }
 
@@ -77,20 +77,20 @@ class SetContributionWorker extends AbstractWorker {
      * @throws Exception
      * @throws ValidationError
      */
-    protected function _execContribution( ContributionSetStruct $contributionStruct ){
+    protected function _execContribution( ContributionSetStruct $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
-        if( empty( $jobStruct ) ){
+        if ( empty( $jobStruct ) ) {
             throw new Exception( "Job not found. Password changed?" );
         }
 
         $this->_loadEngine( $contributionStruct );
 
-        $config = $this->_engine->getConfigStruct();
-        $config[ 'source' ]      = $jobStruct->source;
-        $config[ 'target' ]      = $jobStruct->target;
-        $config[ 'email' ]       = $contributionStruct->api_key;
+        $config             = $this->_engine->getConfigStruct();
+        $config[ 'source' ] = $jobStruct->source;
+        $config[ 'target' ] = $jobStruct->target;
+        $config[ 'email' ]  = $contributionStruct->api_key;
 
         $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
@@ -99,7 +99,7 @@ class SetContributionWorker extends AbstractWorker {
             $this->_update( $config, $contributionStruct );
             $this->_doLog( "Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment " );
 
-        } catch( ReQueueException $e ){
+        } catch ( ReQueueException $e ) {
             $this->_doLog( $e->getMessage() );
             throw $e;
         }
@@ -115,10 +115,10 @@ class SetContributionWorker extends AbstractWorker {
      * @throws Exception
      * @throws ValidationError
      */
-    protected function _loadEngine( ContributionSetStruct $contributionStruct ){
+    protected function _loadEngine( ContributionSetStruct $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
-        if( empty( $this->_engine ) ){
+        if ( empty( $this->_engine ) ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
@@ -131,7 +131,7 @@ class SetContributionWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws ValidationError
      */
-    protected function _set( Array $config, ContributionSetStruct $contributionStruct ){
+    protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
 
         $config[ 'segment' ]        = $contributionStruct->segment;
         $config[ 'translation' ]    = $contributionStruct->translation;
@@ -139,7 +139,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'context_before' ] = $contributionStruct->context_before;
 
         //get the Props
-        $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
+        $config[ 'prop' ] = json_encode( $contributionStruct->getProp() );
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
@@ -157,7 +157,7 @@ class SetContributionWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws ValidationError
      */
-    protected function _update( Array $config, ContributionSetStruct $contributionStruct ){
+    protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
 
         // update the contribution for every key in the job belonging to the user
         $config[ 'segment' ]        = $contributionStruct->oldSegment;
@@ -184,7 +184,7 @@ class SetContributionWorker extends AbstractWorker {
      * @return array
      * @throws Exception
      */
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
 
         if ( $contributionStruct->fromRevision ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -193,12 +193,12 @@ class SetContributionWorker extends AbstractWorker {
         }
 
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole  );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole );
 
         $config = [];
         if ( !empty( $tm_keys ) ) {
 
-            $config[ 'keys' ] = array();
+            $config[ 'keys' ] = [];
             foreach ( $tm_keys as $i => $tm_info ) {
                 $config[ 'id_user' ][] = $tm_info->key;
             }
@@ -215,12 +215,12 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      */
-    protected function _raiseException( $type, array $config ){
+    protected function _raiseException( $type, array $config ) {
         //reset the engine
-        $engineName = get_class( $this->_engine );
+        $engineName    = get_class( $this->_engine );
         $this->_engine = null;
 
-        switch( strtolower( $type ) ){
+        switch ( strtolower( $type ) ) {
             case 'update':
                 $errNum = self::ERR_UPDATE_FAILED;
                 break;
