@@ -1125,7 +1125,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 JOIN
                     jobs j ON stex.id_job = j.id
                 WHERE stex.id_job = j.id
-                    AND id_project = :id_project
                 GROUP BY stex.id_segment
             ) AS XX ON XX.id_segment = st.id_segment   
             LEFT JOIN
