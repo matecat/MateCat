@@ -55,14 +55,7 @@ class SegmentAnalysisController extends KleinController {
             exit();
         }
 
-        $segmentsCount = 0;
-
-        foreach ($this->project->getJobs() as $job){
-            $firstSegment = (int)$job->job_first_segment;
-            $lastSegment = (int)$job->job_last_segment;
-            $count = $lastSegment - $firstSegment + 1;
-            $segmentsCount = $segmentsCount + $count;
-        }
+        $segmentsCount = \CatUtils::getSegmentTranslationsCount($this->project);
 
         try {
             $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount));
