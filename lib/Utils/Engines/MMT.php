@@ -352,14 +352,6 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
-    public function createMemory($name, $description = null, $externalId = null) {
-
-        $client       = $this->_getClient();
-        $this->result = $client->createMemory( $name, $description, $externalId );
-
-        return $this->result;
-    }
-
     /**
      * @param $rawValue
      *
