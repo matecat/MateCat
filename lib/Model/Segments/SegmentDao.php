@@ -1017,9 +1017,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 f.filename,
                 fp.tag_key,
                 fp.tag_value,
-                ste1.source_page as has_t,
-                ste2.source_page as has_r1,
-                ste3.source_page as has_r2
+                IF( LOCATE( '1', _page ) > 0, 1, null ) AS has_t,
+                IF( LOCATE( '2', _page ) > 0, 2, null ) AS has_r1,
+                IF( LOCATE( '3', _page ) > 0, 3, null ) AS has_r2
             FROM
                 jobs j
             JOIN 
@@ -1032,12 +1032,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 files f ON s.id_file = f.id
             LEFT JOIN
                 files_parts fp ON fp.id = s.id_file_part     
-            LEFT JOIN 
-				segment_translation_events ste1 ON ste1.id_segment = st.id_segment AND ste1.source_page = 1
-			LEFT JOIN 
-				segment_translation_events ste2 ON ste2.id_segment = st.id_segment AND ste2.source_page = 2
-			LEFT JOIN 
-				segment_translation_events ste3 ON ste3.id_segment = st.id_segment AND ste3.source_page = 3   
+            LEFT JOIN (
+                SELECT id_job, id_segment, group_concat( distinct source_page )  as _page
+                FROM segment_translation_events stex
+                JOIN
+                    jobs j ON stex.id_job = j.id
+                WHERE stex.id_job = j.id
+                    AND id_project = :id_project
+                GROUP BY stex.id_segment
+            ) AS XX ON XX.id_segment = st.id_segment
             LEFT JOIN
                 (
                     SELECT 
