@@ -8,6 +8,7 @@ use Features\ReviewExtended\ReviewUtils;
 use LQA\EntryDao;
 use Url\JobUrlBuilder;
 use Exceptions\NotFoundException;
+use Url\JobUrlStruct;
 
 class SegmentAnalysisController extends KleinController {
 
@@ -22,6 +23,11 @@ class SegmentAnalysisController extends KleinController {
      * @var \Projects_ProjectStruct
      */
     private $project;
+
+    /**
+     * @var \Projects_ProjectDao
+     */
+    private $projectDao;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -43,8 +49,10 @@ class SegmentAnalysisController extends KleinController {
         $idProject = $this->request->param('id_project');
         $password = $this->request->param('password');
 
+        $this->projectDao = new \Projects_ProjectDao();
+
         try {
-            $this->project = (new \Projects_ProjectDao())->findByIdAndPassword($idProject, $password);
+            $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
         } catch (NotFoundException $exception) {
             $this->response->code( 500 );
             $this->response->json( [
@@ -122,107 +130,10 @@ class SegmentAnalysisController extends KleinController {
         $offset = ($page-1)*$perPage;
 
         $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
+        $projectPasswordsMap  = $this->projectDao->getPasswordsMap($this->project->id);
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis);
-        }
-
-        return $segments;
-    }
-
-    /**
-     * Segment list
-     * from id job/password
-     */
-    public function job() {
-
-        $page = ($this->request->param('page')) ? (int)$this->request->param('page') : 1;
-        $perPage = ($this->request->param('per_page')) ? (int)$this->request->param('per_page') : 50;
-
-        if($perPage > self::MAX_PER_PAGE){
-            $perPage = self::MAX_PER_PAGE;
-        }
-
-        $idJob = $this->request->param('id_job');
-        $password = $this->request->param('password');
-        $segmentsCount = \Chunks_ChunkDao::getSegmentsCount($idJob, $password, 0);
-
-        try {
-            $this->response->json($this->getSegmentsForAJob($idJob, $password, $page, $perPage, $segmentsCount));
-            exit();
-        } catch (\Exception $exception){
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
-            ] );
-        }
-    }
-
-    /**
-     * @param $idJob
-     * @param $password
-     * @param $page
-     * @param $perPage
-     * @param $segmentsCount
-     *
-     * @return array
-     * @throws \Exception
-     */
-    private function getSegmentsForAJob( $idJob, $password, $page, $perPage, $segmentsCount)
-    {
-        $totalPages = ceil($segmentsCount/$perPage);
-        $isLast = ((int)$page === (int)$totalPages);
-
-        if($page > $totalPages or $page <= 0){
-            throw new \Exception('Page number '.$page.' is not valid');
-        }
-
-        $chunk = \Chunks_ChunkDao::getByIdAndPassword($idJob, $password);
-
-        if($chunk === null){
-            throw new \Exception('Job not found');
-        }
-
-        $this->chunk = $chunk;
-
-        $prev = ($page > 1 ) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page-1)."&per_page=".$perPage : null;
-        $next = (!$isLast and $totalPages > 1) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page+1)."&per_page=".$perPage : null;
-        $items = $this->getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage);
-
-        return [
-                '_links' => [
-                        'page' => $page,
-                        'per_page' => $perPage,
-                        'total_pages' => $totalPages,
-                        'total_items' => $segmentsCount,
-                        'next_page' => $next,
-                        'prev_page' => $prev,
-                ],
-                'items' => $items
-        ];
-    }
-
-    /**
-     * @param $idJob
-     * @param $password
-     * @param $page
-     * @param $perPage
-     *
-     * @return array
-     * @throws \Exception
-     */
-    private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
-    {
-        $segments = [];
-        $limit = $perPage;
-        $offset = ($page-1)*$perPage;
-
-        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, 0);
-
-        foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis);
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap);
         }
 
         return $segments;
@@ -234,13 +145,8 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws \Exception
      */
-    private function formatSegment(\DataAccess_IDaoStruct $segmentForAnalysis)
+    private function formatSegment(\DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap)
     {
-        // urls
-        $urls = JobUrlBuilder::createFromCredentials($segmentForAnalysis->id_job, $segmentForAnalysis->job_password, [
-                'id_segment' => $segmentForAnalysis->id
-        ]);
-
         // id_request
         $idRequest = \Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request');
 
@@ -248,9 +154,6 @@ class SegmentAnalysisController extends KleinController {
         $issues_records = EntryDao::findAllBySegmentId( $segmentForAnalysis->id );
         $issues         = [];
         foreach ( $issues_records as $issue_record ) {
-
-            $sourcePageToHumanReadable =
-
             $issues[] = [
                     'source_page'         => $this->humanReadableSourcePage($issue_record->source_page),
                     'id_category'         => (int)$issue_record->id_category,
@@ -268,7 +171,7 @@ class SegmentAnalysisController extends KleinController {
                 'id_segment' => (int)$segmentForAnalysis->id,
                 'id_chunk' => (int)$segmentForAnalysis->id_job,
                 'chunk_password' => $segmentForAnalysis->job_password,
-                'urls' => $urls->getUrls(),
+                'urls' => $this->getJobUrls($segmentForAnalysis, $projectPasswordsMap),
                 'id_request' => ($idRequest) ? $idRequest->meta_value : null,
                 'filename' => $segmentForAnalysis->filename,
                 'original_filename' => $originalFile,
@@ -283,6 +186,35 @@ class SegmentAnalysisController extends KleinController {
                 'issues' => $issues,
                 'status' => $this->getStatusObject($segmentForAnalysis),
         ];
+    }
+
+    /**
+     * @param $segmentForAnalysis
+     * @param array $projectPasswordsMap
+     * @return array
+     */
+    private function getJobUrls($segmentForAnalysis, array $projectPasswordsMap = [])
+    {
+        $passwords = [];
+        foreach ($projectPasswordsMap as $map){
+            if($segmentForAnalysis->id_job == $map['id_job'] and $segmentForAnalysis->job_password == $map['t_password']){
+                $passwords[JobUrlStruct::LABEL_T] = $map['t_password'];
+                $passwords[JobUrlStruct::LABEL_R1] = $map['r_password'];
+                $passwords[JobUrlStruct::LABEL_R2] = $map['r2_password'];
+            }
+        }
+
+        $jobUrlStruct = new JobUrlStruct(
+            $segmentForAnalysis->id_job,
+            $segmentForAnalysis->project_name,
+            $segmentForAnalysis->source,
+            $segmentForAnalysis->target,
+            $passwords,
+            null,
+            $segmentForAnalysis->id
+        );
+
+        return $jobUrlStruct->getUrls();
     }
 
     /**
