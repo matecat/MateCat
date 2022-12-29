@@ -77,7 +77,7 @@ class Mmt extends BaseFeature {
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled   = $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
+        $engineEnabled   = $UserMetadataDao->get( $userStruct->uid, self::FEATURE_CODE );
 
         if ( !empty( $engineEnabled ) ) {
             unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
@@ -132,17 +132,16 @@ class Mmt extends BaseFeature {
 
             $keyList = self::_getKeyringOwnerKeys( $userStruct );
             if ( !empty( $keyList ) ) {
-                $newTestCreatedMT->activate( $keyList );
+                $newTestCreatedMT->connectKeys( $keyList );
             }
 
         } catch ( Exception $e ) {
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
             throw $e;
         }
-
-        // @TODO if I remove user_metadata what happens at row 391?
+        
         $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
+        $UserMetadataDao->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
 
         return $newCreatedDbRowStruct;
 
@@ -424,7 +423,7 @@ class Mmt extends BaseFeature {
                 //
 
                 $preimportIsDisabled = $engine->getEngineRecord()->extra_parameters[ 'MMT-preimport' ] === false;
-                $userIsLogged = isset( $_SESSION[ 'uid' ] ) and !empty($_SESSION[ 'uid' ] );
+                $userIsLogged = !empty( $_SESSION[ 'uid' ] );
 
                 if( $preimportIsDisabled and $userIsLogged ){
 
@@ -445,7 +444,7 @@ class Mmt extends BaseFeature {
                              * @var Engines_MMT $MMTEngine
                              */
                             $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                            $MMTEngine->activate( $memoryKeyStructs );
+                            $MMTEngine->connectKeys( $memoryKeyStructs );
                         }
                     }
                 }
@@ -675,14 +674,14 @@ class Mmt extends BaseFeature {
         }
 
         //retrieve OWNER MMT License
-        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->get( $uid, self::FEATURE_CODE ); // engine_id
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
              * @var Engines_MMT $MMTEngine
              */
             $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-            $MMTEngine->activate( $memoryKeyStructs );
+            $MMTEngine->connectKeys( $memoryKeyStructs );
 
         }
     }

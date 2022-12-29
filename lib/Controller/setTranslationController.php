@@ -133,8 +133,6 @@ class setTranslationController extends ajaxController {
         !is_null( $this->__postInput[ 'propagate' ] ) ? $this->propagate = $this->__postInput[ 'propagate' ] : null /* do nothing */
         ;
 
-        $this->propagate = $this->__postInput[ 'propagate' ]; //set by the client, mandatory
-
         $this->id_segment = $this->__postInput[ 'id_segment' ];
         $this->id_before  = $this->__postInput[ 'id_before' ];
         $this->id_after   = $this->__postInput[ 'id_after' ];
@@ -991,17 +989,6 @@ class setTranslationController extends ajaxController {
                 $this->project,
                 $this->segment
         );
-
-        /** TODO Remove , is only for debug purposes */
-        try {
-            $element         = new QueueElement();
-            $element->params = $contributionStruct;
-            $element->__toString();
-            Utils::raiseJsonExceptionError( true );
-        } catch ( Exception $e ) {
-            Log::doJsonLog( $contributionStruct );
-        }
-        /** TODO Remove */
 
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );

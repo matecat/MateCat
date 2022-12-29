@@ -85,9 +85,6 @@ class SetContributionWorker extends AbstractWorker {
             throw new Exception( "Job not found. Password changed?" );
         }
 
-//        $userInfoList = $contributionStruct->getUserInfo();
-//        $userInfo = array_pop( $userInfoList );
-
         $this->_loadEngine( $contributionStruct );
 
         $config = $this->_engine->getConfigStruct();
@@ -97,29 +94,13 @@ class SetContributionWorker extends AbstractWorker {
 
         $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-//        $redisSetKey = sprintf( static::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
-//        $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
-
         try {
 
-//            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
-                $this->_update( $config, $contributionStruct );
-                $this->_doLog( "Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment " );
-//            } else {
-//                $this->_set( $config, $contributionStruct );
-//                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
-//            }
-
-//            $this->_queueHandler->getRedisClient()->expire(
-//                    $redisSetKey,
-//                    60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
-//            ); //TTL 3 months, the time for job archivability
+            $this->_update( $config, $contributionStruct );
+            $this->_doLog( "Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment " );
 
         } catch( ReQueueException $e ){
             $this->_doLog( $e->getMessage() );
-//            if( $e->getCode() == self::ERR_SET_FAILED || $isANewSet ){
-//                $this->_queueHandler->getRedisClient()->del( [ $redisSetKey ] );
-//            }
             throw $e;
         }
 
@@ -239,13 +220,13 @@ class SetContributionWorker extends AbstractWorker {
         $engineName = get_class( $this->_engine );
         $this->_engine = null;
 
-        $errNum = self::ERR_SET_FAILED;
         switch( strtolower( $type ) ){
-            case 'set':
-                $errNum = self::ERR_SET_FAILED;
-                break;
             case 'update':
                 $errNum = self::ERR_UPDATE_FAILED;
+                break;
+            case 'set':
+            default:
+                $errNum = self::ERR_SET_FAILED;
                 break;
         }
 

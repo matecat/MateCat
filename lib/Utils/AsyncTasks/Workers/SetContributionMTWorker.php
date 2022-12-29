@@ -12,8 +12,10 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Exception;
+use Exceptions\ValidationError;
 use Jobs_JobStruct;
 use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
 
 class SetContributionMTWorker extends SetContributionWorker {
@@ -46,7 +48,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $res = $this->_engine->set( $config );
 
         if ( !$res ) {
-            $this->_raiseException( 'Set', $config );
+            $this->_raiseException( 'set', $config );
         }
 
     }
@@ -55,11 +57,21 @@ class SetContributionMTWorker extends SetContributionWorker {
      * @param array                 $config
      * @param ContributionSetStruct $contributionStruct
      *
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws ReQueueException
      */
     protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
-        $this->_set( $config, $contributionStruct );
+
+        $config[ 'segment' ]     = $contributionStruct->segment;
+        $config[ 'translation' ] = $contributionStruct->translation;
+        $config[ 'tuid' ] = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
+
+        // set the contribution for every key in the job belonging to the user
+        $res = $this->_engine->update( $config );
+
+        if ( !$res ) {
+            $this->_raiseException( 'update', $config );
+        }
+
     }
 
     protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
