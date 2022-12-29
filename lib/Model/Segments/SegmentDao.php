@@ -1002,6 +1002,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $query   = "
             SELECT 
+                p.name as project_name,
                 s.id,
                 j.id as id_job,
                 j.password as job_password,
