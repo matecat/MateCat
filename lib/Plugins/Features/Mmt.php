@@ -77,7 +77,7 @@ class Mmt extends BaseFeature {
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled   = $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
+        $engineEnabled   = $UserMetadataDao->get( $userStruct->uid, self::FEATURE_CODE );
 
         if ( !empty( $engineEnabled ) ) {
             unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
@@ -97,8 +97,6 @@ class Mmt extends BaseFeature {
      *
      */
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
-
-        //gestire il flag synca tutto o no
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
             return $newCreatedDbRowStruct;
@@ -120,19 +118,8 @@ class Mmt extends BaseFeature {
 
                 /** @var TmKeyManagement_MemoryKeyStruct $key */
                 foreach ( self::_getKeyringOwnerKeysByUid($userStruct->uid) as $key){
-                    $engineMmt->createMemory($key->tm_key->name, null, $key->tm_key->key);
+                    $engineMmt->connectKeys([$key->tm_key->key]);
                 }
-            }
-
-            /**
-             * @var $newTestCreatedMT Engines_MMT
-             */
-            $me_result = $newTestCreatedMT->checkAccount();
-            Log::doJsonLog( $me_result );
-
-            $keyList = self::_getKeyringOwnerKeys( $userStruct );
-            if ( !empty( $keyList ) ) {
-                $newTestCreatedMT->activate( $keyList );
             }
 
         } catch ( Exception $e ) {
@@ -140,9 +127,8 @@ class Mmt extends BaseFeature {
             throw $e;
         }
 
-        // @TODO if I remove user_metadata what happens at row 391?
         $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
+        $UserMetadataDao->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
 
         return $newCreatedDbRowStruct;
 
@@ -180,15 +166,16 @@ class Mmt extends BaseFeature {
             if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
                 $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
 
-                // @TODO Devo controllare il parametro MMT-preimport?
                 $extraParams = $engineStruct->getExtraParamsAsArray();
-                $extraParams['MMT-preimport'];
+                $preImport = $extraParams['MMT-preimport'];
 
-                $mmt = new Engines_MMT($engineStruct);
-                $memories = $mmt->getAllMemories();
+                if($preImport === true){
+                    $mmt = new Engines_MMT($engineStruct);
+                    $memories = $mmt->getAllMemories();
 
-                foreach ($memories as $memory){
-                    $mmt->deleteMemory($memory['externalId']);
+                    foreach ($memories as $memory){
+                        $mmt->deleteMemory($memory['externalId']);
+                    }
                 }
             }
         }
@@ -424,7 +411,7 @@ class Mmt extends BaseFeature {
                 //
 
                 $preimportIsDisabled = $engine->getEngineRecord()->extra_parameters[ 'MMT-preimport' ] === false;
-                $userIsLogged = isset( $_SESSION[ 'uid' ] ) and !empty($_SESSION[ 'uid' ] );
+                $userIsLogged = !empty( $_SESSION[ 'uid' ] );
 
                 if( $preimportIsDisabled and $userIsLogged ){
 
@@ -445,7 +432,7 @@ class Mmt extends BaseFeature {
                              * @var Engines_MMT $MMTEngine
                              */
                             $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                            $MMTEngine->activate( $memoryKeyStructs );
+                            $MMTEngine->connectKeys( $memoryKeyStructs );
                         }
                     }
                 }
@@ -668,22 +655,26 @@ class Mmt extends BaseFeature {
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
 
-        //usare solo se c'è la flag sync
-
-        if ( empty( $memoryKeyStructs ) || empty( $uid ) ) {
+        if ( empty( $memoryKeyStructs ) or empty( $uid ) ) {
             return;
         }
 
         //retrieve OWNER MMT License
-        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->get( $uid, self::FEATURE_CODE ); // engine_id
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
              * @var Engines_MMT $MMTEngine
              */
             $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-            $MMTEngine->activate( $memoryKeyStructs );
+            $engineStruct = $MMTEngine->getEngineRecord();
 
+            $extraParams = $engineStruct->getExtraParamsAsArray();
+            $preImport = $extraParams['MMT-preimport'];
+
+            if($preImport === true){
+                $MMTEngine->connectKeys( $memoryKeyStructs );
+            }
         }
     }
 }

@@ -210,6 +210,11 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
     public function update( $_config ) {
 
         $client = $this->_getClient();
@@ -217,13 +222,13 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         try {
             $client->updateMemoryContent(
+                    $_config[ 'tuid' ],
                     $_keys,
                     $_config[ 'source' ],
                     $_config[ 'target' ],
-                    $_config[ 'newsegment' ],
-                    $_config[ 'newtranslation' ],
                     $_config[ 'segment' ],
-                    $_config[ 'translation' ] );
+                    $_config[ 'translation' ]
+            );
         } catch ( Exception $e ) {
             return false;
         }
@@ -339,25 +344,15 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function activate( array $keyList ) {
+    public function connectKeys( array $keyList ) {
 
-        $keyList = array_map( function ( $kStruct ) {
-            return 'x_mm-' . $kStruct->tm_key->key;
-        }, $keyList );
+        $keyList = $this->_reMapKeyStructsList( $keyList );
 
         $client       = $this->_getClient();
         $this->result = $client->connectMemories( $keyList );
 
         return $this->result;
 
-    }
-
-    public function createMemory($name, $description = null, $externalId = null) {
-
-        $client       = $this->_getClient();
-        $this->result = $client->createMemory( $name, $description, $externalId );
-
-        return $this->result;
     }
 
     /**

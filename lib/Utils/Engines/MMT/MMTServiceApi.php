@@ -218,28 +218,25 @@ class MMTServiceApi {
     }
 
     /**
-     * @param $id
+     * @param $tuid
+     * @param string[] $memory_keys
      * @param $source
      * @param $target
      * @param $sentence
      * @param $translation
-     * @param $oldSentence
-     * @param $oldTranslation
      *
-     * @return mixed
+     * @return void
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function updateMemoryContent( $id, $source, $target, $sentence, $translation, $oldSentence, $oldTranslation ) {
-        if ( is_array( $id ) ) {
-            return $this->send( 'PUT', "$this->baseUrl/memories/content", [
-                    'memories'     => empty( $id ) ? null : implode( ',', $id ),
-                    'source'       => $source, 'target' => $target, 'sentence' => $sentence, 'translation' => $translation,
-                    'old_sentence' => $oldSentence, 'old_translation' => $oldTranslation
-            ] );
-        } else {
-            return $this->send( 'PUT', "$this->baseUrl/memories/$id/content", [
-                    'source'       => $source, 'target' => $target, 'sentence' => $sentence, 'translation' => $translation,
-                    'old_sentence' => $oldSentence, 'old_translation' => $oldTranslation
+    public function updateMemoryContent( $tuid, $memory_keys, $source, $target, $sentence, $translation ) {
+        foreach ( $memory_keys as $memory ) {
+            $debug = $this->send( 'PUT', "$this->baseUrl/memories/$memory/content", [
+                    'tuid'        => $tuid,
+                    'source'      => $source,
+                    'target'      => $target,
+                    'sentence'    => $sentence,
+                    'translation' => $translation
             ] );
         }
     }
@@ -369,28 +366,28 @@ class MMTServiceApi {
         $headers = [ "X-HTTP-Method-Override: $method" ];
 
         if ( $multipart ) {
-            array_push( $headers, 'Content-Type: multipart/form-data' );
+            $headers[] = 'Content-Type: multipart/form-data';
         } else {
-            array_push( $headers, 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' );
+            $headers[] = 'Content-Type: application/x-www-form-urlencoded; charset=utf-8';
             if ( $params ) {
                 $params = http_build_query( $params );
             }
         }
 
         if ( $this->license ) {
-            array_push( $headers, "MMT-ApiKey: $this->license" );
+            $headers[] = "MMT-ApiKey: $this->license";
         }
         if ( $this->client > 0 ) {
-            array_push( $headers, "MMT-ApiClient: $this->client" );
+            $headers[] = "MMT-ApiClient: $this->client";
         }
         if ( $this->pluginVersion ) {
-            array_push( $headers, "MMT-PluginVersion: $this->pluginVersion" );
+            $headers[] = "MMT-PluginVersion: $this->pluginVersion";
         }
         if ( $this->platform ) {
-            array_push( $headers, "MMT-Platform: $this->platform" );
+            $headers[] = "MMT-Platform: $this->platform";
         }
         if ( $this->platformVersion ) {
-            array_push( $headers, "MMT-PlatformVersion: $this->platformVersion" );
+            $headers[] = "MMT-PlatformVersion: $this->platformVersion";
         }
 
         $handler          = new MultiCurlHandler();
@@ -418,8 +415,11 @@ class MMTServiceApi {
             $options[ CURLOPT_HTTPHEADER ] = $headers;
         }
 
+        // Every API call MUST be a POST
+        // (X-HTTP-Method-Override will override the method)
+        $options[ CURLOPT_POST ] = 1;
+
         if ( $params ) {
-            $options[ CURLOPT_POST ]       = 1;
             $options[ CURLOPT_POSTFIELDS ] = $params;
         }
 
