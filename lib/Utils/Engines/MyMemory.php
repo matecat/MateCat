@@ -1,5 +1,6 @@
 <?php
 
+use Validator\Contracts\ValidatorErrorObject;
 use Validator\GlossaryCSVValidatorObject;
 
 /**
@@ -393,13 +394,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
-                // Allow also this format in the headers. Ex: en_US
-                if($index === 0){
-                    foreach ($line as $lineKey => $item){
-                        $line[$lineKey] = str_replace('_', '-', $item);
-                    }
-                }
-
                 if(in_array("1", $line)){
                     foreach ($line as $lineKey => $item){
                         if($item == "1"){
@@ -431,8 +425,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         // validate the CSV
-        if(!$this->validateCSVFile($file)){
-            throw new \Exception('File format not supported, please upload a glossary in XLSX, XLS or ODS format.');
+        $validateCSVFileErrors = $this->validateCSVFile($file);
+
+        if(count($validateCSVFileErrors) > 0){
+            throw new \Exception($validateCSVFileErrors[0]);
         }
 
         $postFields = [
@@ -673,8 +669,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @param $file
-     *
-     * @return bool
+     * @return ValidatorErrorObject[]
      * @throws Exception
      */
     private function validateCSVFile($file)
@@ -684,7 +679,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $validator = new \Validator\GlossaryCSVValidator();
         $validator->validate($validatorObject);
 
-        return $validator->isValid();
+        return $validator->getErrors();
     }
 
     public function import( $file, $key, $name = false ) {
