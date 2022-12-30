@@ -369,7 +369,24 @@ const NewProject = ({
                     UI.selectTm(option.id)
                   }
                 }}
-              />
+              >
+                {({index, onClose}) => ({
+                  ...(index === 0 && {
+                    beforeRow: (
+                      <button
+                        className="button-multiple-languages"
+                        onClick={() => {
+                          UI.openLanguageResourcesPanel('tm')
+                          onClose()
+                        }}
+                      >
+                        CREATE RESOURCE
+                        <span className="icon-plus3 icon"></span>
+                      </button>
+                    ),
+                  }),
+                })}
+              </Select>
             </div>
             <div
               className="translate-box settings"
