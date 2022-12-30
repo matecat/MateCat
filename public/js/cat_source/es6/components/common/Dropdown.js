@@ -35,7 +35,7 @@ export const Dropdown = ({
 
   const handleClick = (option) => {
     if (multipleSelect !== 'off') {
-      onToggleOption(option)
+      onToggleOption(option, onClose)
     } else {
       onSelect(option)
     }

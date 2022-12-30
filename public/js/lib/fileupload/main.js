@@ -209,7 +209,6 @@ window.UI = {
         return $( '.mgmt-tm td.uploadfile.uploading' ).length;
     },
     addEvents: function () {
-        console.log('# addEvents')
         // Initialize the jQuery File Upload widget:
         $( '#fileupload' ).fileupload();
 

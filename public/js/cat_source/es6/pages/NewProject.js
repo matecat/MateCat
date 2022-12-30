@@ -13,9 +13,10 @@ import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
 import CreateProjectActions from '../actions/CreateProjectActions'
-/*
+import LanguageSelector from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
-*/
+
+const SELECT_HEIGHT = 260
 
 const NewProject = ({
   isLoggedIn = false,
@@ -49,6 +50,9 @@ const NewProject = ({
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
+  const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
+    useState(false)
+
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
   const swapLanguages = () => {
@@ -248,6 +252,7 @@ const NewProject = ({
                 <Select
                   label="Team"
                   name={'project-team'}
+                  maxHeightDroplist={SELECT_HEIGHT}
                   showSearchBar={true}
                   options={
                     user?.teams
@@ -269,6 +274,7 @@ const NewProject = ({
               <Select
                 label="From"
                 name={'source-lang'}
+                maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={languages}
                 activeOption={sourceLang}
@@ -288,21 +294,50 @@ const NewProject = ({
               <Select
                 label="To"
                 name={'target-lang'}
+                maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={languages}
                 multipleSelect={'dropdown'}
                 activeOptions={targetLangs}
                 checkSpaceToReverse={false}
-                onToggleOption={(option) => {
-                  changeTargetLanguage(option)
+                onToggleOption={(option, onClose) => {
+                  if (
+                    targetLangs.length > 1 &&
+                    targetLangs.find(({id}) => id === option.id)
+                  ) {
+                    setTargetLangs((prevState) =>
+                      prevState.filter(({id}) => id !== option.id),
+                    )
+                  } else {
+                    setTargetLangs([option])
+                    onClose()
+                  }
                 }}
-              />
+              >
+                {({index, onClose}) => ({
+                  ...(index === 0 && {
+                    beforeRow: (
+                      <button
+                        className="button-multiple-languages"
+                        onClick={() => {
+                          setIsOpenMultiselectLanguages(true)
+                          onClose()
+                        }}
+                      >
+                        MULTIPLE LANGUAGES
+                        <span className="icon-plus3 icon"></span>
+                      </button>
+                    ),
+                  }),
+                })}
+              </Select>
             </div>
             {/*Project Subject*/}
             <div className="translate-box project-subject">
               <Select
                 label="Select subject"
                 name={'project-subject'}
+                maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={subjectsArray}
                 activeOption={subject}
@@ -315,6 +350,7 @@ const NewProject = ({
               <Select
                 label="TM & Glossary"
                 name={'tmx-select'}
+                maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 isDisabled={!tmKeys}
                 options={tmKeys}
@@ -414,6 +450,20 @@ const NewProject = ({
           <p className="enter">Press Enter</p>
         </div>
       </div>
+      {isOpenMultiselectLanguages && (
+        <LanguageSelector
+          selectedLanguagesFromDropdown={CreateProjectStore.getTargetLangs().split(
+            ',',
+          )}
+          languagesList={config.languages_array}
+          fromLanguage={CreateProjectStore.getSourceLang()}
+          onClose={() => setIsOpenMultiselectLanguages(false)}
+          onConfirm={(data) => {
+            setTargetLangs(data.map((item) => ({...item, id: item.code})))
+            setIsOpenMultiselectLanguages(false)
+          }}
+        />
+      )}
       <Footer />
     </>
   )

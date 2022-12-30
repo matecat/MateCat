@@ -41,6 +41,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
+  maxHeightDroplist = 128,
   children,
 }) => {
   const listRef = useRef()
@@ -119,7 +120,7 @@ export const Select = ({
         wrapperTopPosition -
         listTopPosition -
         16 // 16 = margins
-      if (availableHeight > 128) {
+      if (availableHeight > maxHeightDroplist) {
         listNode.style.maxHeight = `${availableHeight}px`
       } else {
         if (checkSpaceToReverse) {
@@ -132,11 +133,20 @@ export const Select = ({
           32 -
           (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
         listNode.style.maxHeight = `${
-          availableHeight > 128 ? availableHeight : 128
+          availableHeight > maxHeightDroplist
+            ? availableHeight
+            : maxHeightDroplist
         }px`
       }
     }
-  }, [isDropdownVisible, multipleSelect, label, showSearchBar, offsetParent])
+  }, [
+    isDropdownVisible,
+    multipleSelect,
+    label,
+    showSearchBar,
+    offsetParent,
+    maxHeightDroplist,
+  ])
 
   useEffect(() => {
     setSelectedLabel(renderSelection())
@@ -308,6 +318,7 @@ Select.propTypes = {
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
+  maxHeightDroplist: PropTypes.number,
   children: PropTypes.func,
 }
 

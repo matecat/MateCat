@@ -386,51 +386,6 @@ $.extend(UI.UPLOAD_PAGE, {
         $('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus()
       }
     })
-
-    //Multilanguage TODO
-    $('#add-multiple-lang').click(function (e) {
-      e.preventDefault()
-
-      var tlAr = CreateProjectStore.getTargetLangs().split(',')
-      var sourceLang = CreateProjectStore.getSourceLang()
-      const mountPoint = createRoot($('#languageSelector')[0])
-      mountPoint.render(
-        React.createElement(LanguageSelector, {
-          selectedLanguagesFromDropdown: tlAr,
-          languagesList: config.languages_array,
-          fromLanguage: sourceLang,
-          onClose: function () {
-            mountPoint.unmount()
-          },
-          onConfirm: function (data) {
-            if (data) {
-              const str = data.map((e) => e.name).join(',')
-              const vals = data.map((e) => e.code).join(',')
-              var direction = 'ltr' // todo: this not work. Check rtl from array
-              var op =
-                '<div id="extraTarget" class="item" data-selected="selected" data-direction="' +
-                direction +
-                '" data-value="' +
-                vals +
-                '">' +
-                str +
-                '</div>'
-              $('#extraTarget').remove()
-              $('#target-lang div.item').first().before(op)
-              setTimeout(function () {
-                $('#target-lang').dropdown('set selected', vals)
-              })
-
-              $('.translate-box.target h2 .extra').remove()
-              $('.translate-box.target h2').append(
-                `<span class="extra">(${vals.length} languages)</span>`,
-              )
-            }
-            mountPoint.unmount()
-          },
-        }),
-      )
-    })
   },
 })
 
