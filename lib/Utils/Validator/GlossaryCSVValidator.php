@@ -39,7 +39,7 @@ class GlossaryCSVValidator extends AbstractValidator {
 
         if(empty($languageMatches[0])){
 
-            $this->errors[] = 'Incorrect header matches, please refer to <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">official guide</a> for more info';
+            $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
 
             return false;
         }
@@ -99,7 +99,7 @@ class GlossaryCSVValidator extends AbstractValidator {
         foreach ($languages as $language){
             if(!in_array(Utils::trimAndLowerCase($language), $allowedLanguages)){
 
-                $error = (strpos($language, '_') !== false) ? 'The column header '.$language.' contains an underscore, please to replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : $language . ' is not a supported language, please consult the list of <a href="https://www.matecat.com/api/docs#/:~:text=Go%20to%20top-,Supported%20languages,-Language%20(%20Code%20)" target="_blank">supported languages here</a>.';
+                $error = (strpos($language, '_') !== false) ? 'The column header '.$language.' contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : $language . ' is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
 
                 return false;
