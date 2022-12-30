@@ -29,11 +29,13 @@ use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
 use Jobs\MetadataStruct;
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
 use NewController;
 use Projects_MetadataDao;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use stdClass;
 use TaskRunner\Commons\QueueElement;
@@ -367,40 +369,60 @@ class Mmt extends BaseFeature {
      * @see FastAnalysis::main()
      *
      */
-    public static function fastAnalysisComplete( array $segments, array $projectRows ) {
+    public static function beforeSendSegmentsToTheQueue( array $segments, array $projectRows ) {
 
-        $pid = $projectRows[ 'id' ];
+        $pid    = $projectRows[ 'id' ];
         $engine = Engine::getInstance( $projectRows[ 'id_mt_engine' ] );
 
         if ( $engine instanceof Engines_MMT ) {
 
-            $source       = $segments[ 0 ][ 'source' ];
-            $targets      = [];
-            $jobLanguages = [];
-            foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
-                list( $jobId, $target ) = explode( ":", $jid_Lang );
-                $jobLanguages[ $jobId ] = $source . "|" . $target;
-                $targets[]              = $target;
-            }
+            if ( !empty( self::getContextAnalyzer( $engine ) ) ) {
 
-            $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
-            $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
-            foreach ( $segments as $pos => $segment ) {
-                $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+                $source       = $segments[ 0 ][ 'source' ];
+                $targets      = [];
+                $jobLanguages = [];
+                foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
+                    list( $jobId, $target ) = explode( ":", $jid_Lang );
+                    $jobLanguages[ $jobId ] = $source . "|" . $target;
+                    $targets[]              = $target;
+                }
+
+                $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
+                $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
+                foreach ( $segments as $pos => $segment ) {
+                    $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+                }
+
+                try {
+
+                    /*
+                        $result = Array
+                        (
+                            [en-US|es-ES] => 1:0.14934476,2:0.08131008,3:0.047170084
+                            [en-US|it-IT] =>
+                        )
+                    */
+                    $result = $engine->getContext( $tmpFileObject, $source, $targets );
+
+                    $jMetadataDao = new \Jobs\MetadataDao();
+
+                    Database::obtain()->begin();
+                    foreach ( $result as $langPair => $context ) {
+                        $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
+                    }
+                    Database::obtain()->commit();
+
+                } catch ( Exception $e ) {
+                    Log::doJsonLog( $e->getMessage() );
+                    Log::doJsonLog( $e->getTraceAsString() );
+                }
+
+                unset( $tmpFileObject );
+                @unlink( $tmp_name );
+
             }
 
             try {
-
-                /*
-                    $result = Array
-                    (
-                        [en-US|es-ES] => 1:0.14934476,2:0.08131008,3:0.047170084
-                        [en-US|it-IT] =>
-                    )
-                */
-                $result = $engine->getContext( $tmpFileObject, $source, $targets );
-
-                $jMetadataDao = new \Jobs\MetadataDao();
 
                 //
                 // ==============================================
@@ -409,25 +431,36 @@ class Mmt extends BaseFeature {
                 // send user keys on a project basis
                 // ==============================================
                 //
+                $preImportIsDisabled = $engine->getEngineRecord()->extra_parameters[ 'MMT-preimport' ] === false;
+                $userIsLogged        = !empty( $projectRows[ 'id_customer' ] ) && $projectRows[ 'id_customer' ] != 'translated_user';
 
-                $preimportIsDisabled = $engine->getEngineRecord()->extra_parameters[ 'MMT-preimport' ] === false;
-                $userIsLogged = !empty( $_SESSION[ 'uid' ] );
+                $user = null;
+                if ( $userIsLogged ) {
+                    $user = ( new Users_UserDao )->getByEmail( $projectRows[ 'id_customer' ] );
+                }
 
-                if( $preimportIsDisabled and $userIsLogged ){
+                if ( $preImportIsDisabled and $userIsLogged ) {
 
                     // retrieve OWNER MMT License
-                    $uid = $_SESSION[ 'uid' ];
-                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE );
+                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, self::FEATURE_CODE );
                     if ( !empty( $ownerMmtEngineMetaData ) ) {
 
                         // get jobs keys
-                        $user = (new Users_UserDao)->getByUid($uid);
-                        $project = \Projects_ProjectDao::findById($pid);
+                        $project = Projects_ProjectDao::findById( $pid );
 
-                        foreach ($project->getJobs() as $job){
-                            $jStruct = \Jobs_JobDao::getByIdAndPassword($job->id, $job->password);
-                            $memoryKeyStructs = $jStruct->getClientKeys( $user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+                        foreach ( $project->getJobs() as $job ) {
 
+                            $memoryKeyStructs = [];
+                            $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+
+                            foreach ( $jobKeyList as $memKey ) {
+                                $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
+                                        [
+                                                'uid'    => $user->uid,
+                                                'tm_key' => $memKey
+                                        ]
+                                );
+                            }
                             /**
                              * @var Engines_MMT $MMTEngine
                              */
@@ -436,20 +469,10 @@ class Mmt extends BaseFeature {
                         }
                     }
                 }
-
-                Database::obtain()->begin();
-                foreach ( $result as $langPair => $context ) {
-                    $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
-                }
-                Database::obtain()->commit();
-
             } catch ( Exception $e ) {
                 Log::doJsonLog( $e->getMessage() );
                 Log::doJsonLog( $e->getTraceAsString() );
             }
-
-            unset( $tmpFileObject );
-            @unlink( $tmp_name );
 
         }
 
