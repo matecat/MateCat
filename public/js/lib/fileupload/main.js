@@ -24,7 +24,6 @@ window.UI = {
         this.conversionBlocked = false;
         this.RTLCheckDone = false;
         this.skipLangDetectArr = {};
-        setTimeout(()=>this.addEvents(), 2000);
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
@@ -210,6 +209,7 @@ window.UI = {
         return $( '.mgmt-tm td.uploadfile.uploading' ).length;
     },
     addEvents: function () {
+        console.log('# addEvents')
         // Initialize the jQuery File Upload widget:
         $( '#fileupload' ).fileupload();
 

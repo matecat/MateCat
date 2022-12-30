@@ -1458,13 +1458,27 @@ button.ui-button::-moz-focus-inner {
 
     .custom-dropdown {
       margin-top: 0;
+      padding-top: 12px;
 
       &::before {
         display: none;
       }
+
+      .dropdown__search-bar {
+        height: 34px;
+        margin: 0 12px 12px;
+        border-radius: 2px;
+        border: 1px solid rgba(34, 36, 38, 0.15);
+
+        .dropdown__search-bar-input {
+          padding: 8px 8px;
+        }
+      }
     }
 
     .select__dropdown-wrapper {
+      min-width: 280px;
+
       input:not([type='radio']),
       textarea {
         border: 1px solid $grey2;
@@ -1477,6 +1491,9 @@ button.ui-button::-moz-focus-inner {
         &:focus-visible {
           border-color: $linkBlueTransparent;
         }
+      }
+      .dropdown__search-bar {
+        box-shadow: none;
       }
     }
   }

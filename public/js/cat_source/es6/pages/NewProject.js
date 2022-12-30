@@ -159,6 +159,7 @@ const NewProject = ({
     APP.checkForSpeechToText()
     APP.checkForDqf()
     APP.checkGDriveEvents()
+    UI.addEvents()
 
     const updateUser = (user) => {
       setUser(user)
