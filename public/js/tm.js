@@ -20,7 +20,6 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
-
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -1632,11 +1631,11 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       if (APP.isCattool) {
         $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR)
       } else {
-        $('table.mgmt-mt tbody tr.activetm')
-          .removeClass('activetm')
+        $('table.mgmt-mt tbody tr.activemt')
+          .removeClass('activemt')
           .find('.enable-mt input')
-          .removeAttr('checked')
-        $('table.mgmt-mt tbody').prepend(newTR)
+          .click()
+        $('table.mgmt-mt.active-mt tbody').prepend(newTR)
       }
     },
 
