@@ -11,9 +11,11 @@ import More from '../../../../img/icons/More'
 import UploadFile from '../components/createProject/UploadFile'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
-import {createProject} from '../api/createProject'
+import {createProject as createProjectApi} from '../api/createProject'
 import CreateProjectActions from '../actions/CreateProjectActions'
+/*
 import CreateProjectStore from '../stores/CreateProjectStore'
+*/
 
 const NewProject = ({
   isLoggedIn = false,
@@ -72,7 +74,7 @@ const NewProject = ({
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
     APP.sourceLangChangedCallback()
-    APP.checkForTagProjectionLangs()
+    APP.checkForTagProjectionLangs(sourceLang)
   }
 
   const changeTargetLanguage = (option) => {
@@ -101,21 +103,37 @@ const NewProject = ({
       setErrors()
       setWarnings()
       setProjectSent(true)
-      // createProject(
-      //   APP.getCreateProjectParams({
-      //     projectName: projectNameRef.current.value,
-      //     sourceLang: sourceLang.id,
-      //     targetLang: targetLangs.join(),
-      //     jobSubject: subject.id,
-      //   }),
-      // )
-      const createProjectParams = APP.getCreateProjectParams({
-        projectName: projectNameRef.current.value,
-        sourceLang: sourceLang.id,
-        targetLang: targetLangs.map((lang) => lang.id).join(),
-        jobSubject: subject.id,
-      })
-      console.log('Params', createProjectParams)
+      createProjectApi(
+        APP.getCreateProjectParams({
+          projectName: projectNameRef.current.value,
+          sourceLang: sourceLang.id,
+          targetLang: targetLangs.map((lang) => lang.id).join(),
+          jobSubject: subject.id,
+          selectedTeam: selectedTeam.id,
+        }),
+      )
+        .then(({data}) => {
+          APP.handleCreationStatus(data.id_project, data.password)
+        })
+        .catch((errors) => {
+          let errorMsg
+          switch (errors[0].code) {
+            case -230: {
+              errorMsg =
+                'Sorry, file name too long. Try shortening it and try again.'
+              break
+            }
+            case -235: {
+              errorMsg =
+                'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
+              break
+            }
+            default:
+              errorMsg = errors[0].message
+          }
+          setErrors(errorMsg)
+          setProjectSent(false)
+        })
     }
   }
 
@@ -134,7 +152,7 @@ const NewProject = ({
       APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
     }
     APP.checkForLexiQALangs(sourceLang)
-    APP.checkForTagProjectionLangs(sourceLang, targetLangs)
+    APP.checkForTagProjectionLangs(sourceLang)
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
@@ -181,8 +199,13 @@ const NewProject = ({
   }, [tmKeys, tmKeySelected])
 
   useEffect(
-    () => CreateProjectActions.updateProjectParams({sourceLang, targetLangs}),
-    [sourceLang, targetLangs],
+    () =>
+      CreateProjectActions.updateProjectParams({
+        sourceLang,
+        targetLangs,
+        selectedTeam,
+      }),
+    [sourceLang, targetLangs, selectedTeam],
   )
 
   return (

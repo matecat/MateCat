@@ -12,6 +12,7 @@ import {createProject} from './cat_source/es6/api/createProject'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import NewProject from './cat_source/es6/pages/NewProject'
+import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -217,6 +218,7 @@ APP.getCreateProjectParams = function ({
   sourceLang,
   targetLang,
   jobSubject,
+  selectedTeam,
 }) {
   var dqf = APP.getDQFParameters()
   return {
@@ -240,7 +242,7 @@ APP.getCreateProjectParams = function ({
       $('#tagp_check').prop('checked') && !$('#tagp_check').prop('disabled')
     ),
     segmentation_rule: $('#segm_rule').val(),
-    id_team: UI.UPLOAD_PAGE.getSelectedTeam(),
+    id_team: selectedTeam,
     dqf: dqf.dqfEnabled,
     dqf_content_type: dqf.dqf_content_type,
     dqf_industry: dqf.dqf_industry,
@@ -341,15 +343,6 @@ $.extend(UI.UPLOAD_PAGE, {
     this.addEvents()
   },
 
-  getSelectedTeam: function () {
-    var selectedTeamId
-    if (config.isLoggedIn) {
-      //selectedTeamId = $('.team-dd').val();
-      selectedTeamId = $('#project-team').dropdown('get value')
-    }
-    return selectedTeamId
-  },
-
   restartConversions: function () {
     if ($('.template-download').length) {
       if (UI.conversionsAreToRestart()) {
@@ -375,48 +368,6 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
-    // $('input.uploadbtn').click(function () {
-    //   if (!$('.uploadbtn').hasClass('disabled')) {
-    //     if (!UI.allTMUploadsCompleted()) {
-    //       return false
-    //     }
-    //
-    //     // $('body').addClass('creating')
-    //
-    //     // $('.error-message').hide()
-    //     // $('.uploadbtn')
-    //     //   .attr('value', 'Analyzing...')
-    //     //   .attr('disabled', 'disabled')
-    //     //   .addClass('disabled')
-    //
-    //     createProject(APP.getCreateProjectParams())
-    //       .then(({data}) => {
-    //         APP.handleCreationStatus(data.id_project, data.password)
-    //       })
-    //       .catch((errors) => {
-    //         let errorMsg
-    //         switch (errors[0].code) {
-    //           case -230: {
-    //             errorMsg =
-    //               'Sorry, file name too long. Try shortening it and try again.'
-    //             break
-    //           }
-    //           case -235: {
-    //             errorMsg =
-    //               'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
-    //             break
-    //           }
-    //           default:
-    //             errorMsg = errors[0].message
-    //         }
-    //         $('.error-message').find('p').text(errorMsg)
-    //         $('.error-message').show()
-    //         $('.uploadbtn').attr('value', 'Analyze')
-    //         $('body').removeClass('creating')
-    //       })
-    //   }
-    // })
-
     //Error upload (??)
     $('.upload-table').on('click', 'a.skip_link', function () {
       var fname = decodeURIComponent($(this).attr('id').replace('skip_', ''))
@@ -440,8 +391,8 @@ $.extend(UI.UPLOAD_PAGE, {
     $('#add-multiple-lang').click(function (e) {
       e.preventDefault()
 
-      var tlAr = $('#target-lang').dropdown('get value').split(',')
-      var sourceLang = $('#source-lang').dropdown('get value')
+      var tlAr = CreateProjectStore.getTargetLangs().split(',')
+      var sourceLang = CreateProjectStore.getSourceLang()
       const mountPoint = createRoot($('#languageSelector')[0])
       mountPoint.render(
         React.createElement(LanguageSelector, {
@@ -618,10 +569,9 @@ APP.postProjectCreation = function (d) {
       if (Object.keys(d.target_language).length > 1) {
         //if multiple language selected show a job list
         d.files = []
-        d.trgLangHumanReadable = $('#target-lang')
-          .dropdown('get text')
-          .split(',')
-        d.srcLangHumanReadable = $('#source-lang').dropdown('get text')
+        d.trgLangHumanReadable =
+          CreateProjectStore.getTargetLangsNames.split(',')
+        d.srcLangHumanReadable = CreateProjectStore.getSourceLangName()
 
         $.each(d.target_language, function (idx, val) {
           d.files.push({

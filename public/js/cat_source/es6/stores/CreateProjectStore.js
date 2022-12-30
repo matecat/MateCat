@@ -10,7 +10,11 @@ import assign from 'object-assign'
 EventEmitter.prototype.setMaxListeners(0)
 
 let CreateProjectStore = assign({}, EventEmitter.prototype, {
-  projectData: {},
+  projectData: {
+    sourceLang: undefined,
+    targetLang: undefined,
+    selectedTeam: undefined,
+  },
   updateProject: function (data) {
     this.projectData = {
       ...this.projectData,
@@ -28,6 +32,16 @@ let CreateProjectStore = assign({}, EventEmitter.prototype, {
   getTargetLangs: function () {
     return this.projectData.targetLangs
       ? this.projectData.targetLangs.map((item) => item.id).join()
+      : undefined
+  },
+  getSourceLangName: function () {
+    return this.projectData.sourceLang
+      ? this.projectData.sourceLang.name
+      : undefined
+  },
+  getTargetLangsNames: function () {
+    return this.projectData.targetLangs
+      ? this.projectData.targetLangs.map((item) => item.name).join()
       : undefined
   },
 })
