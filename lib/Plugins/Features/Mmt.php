@@ -118,7 +118,6 @@ class Mmt extends BaseFeature {
 
                 $engineMmt = new Engines_MMT($newCreatedDbRowStruct);
 
-                /** @var TmKeyManagement_MemoryKeyStruct $key */
                 foreach ( self::_getKeyringOwnerKeysByUid($userStruct->uid) as $key){
                     $engineMmt->connectKeys([$key->tm_key->key]);
                 }
@@ -166,19 +165,22 @@ class Mmt extends BaseFeature {
         if ( $engineStruct->class_load == Constants_Engines::MMT ) {
 
             if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
-                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
+                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE ); // delete the engine from user
 
-                $extraParams = $engineStruct->getExtraParamsAsArray();
-                $preImport = $extraParams['MMT-preimport'];
+                // Commented this block because we don't want to remove all the keys from MMT when disconnecting a license, same license can be used on other tools
 
-                if($preImport === true){
-                    $mmt = new Engines_MMT($engineStruct);
-                    $memories = $mmt->getAllMemories();
+//                $extraParams = $engineStruct->getExtraParamsAsArray();
+//                $preImport = $extraParams['MMT-preimport'];
+//
+//                if($preImport === true){
+//                    $mmt = new Engines_MMT($engineStruct);
+//                    $memories = $mmt->getAllMemories();
+//
+//                    foreach ($memories as $memory){
+//                        $mmt->deleteMemory($memory['externalId']);
+//                    }
+//                }
 
-                    foreach ($memories as $memory){
-                        $mmt->deleteMemory($memory['externalId']);
-                    }
-                }
             }
         }
     }
@@ -536,8 +538,6 @@ class Mmt extends BaseFeature {
      */
     public function postPushTMX( stdClass $file, $user, $tm_key ) {
 
-        // chiedo tutte le chiavi di mymemory ( list o get singola chiave ) e se questa key c'è mando la tmx altrimenti no
-
         //Project is not anonymous
         if ( !empty( $user ) ) {
 
@@ -649,20 +649,25 @@ class Mmt extends BaseFeature {
      */
     public function postUserKeyDelete($key, $uid){
 
-        $engineToBeDeleted         = EnginesModel_EngineStruct::getStruct();
-        $engineToBeDeleted->uid    = $uid;
-        $engineToBeDeleted->active = true;
+        /*
+         * Comment for now, we have to decide if user can delete key imported in ModernMT directly from matecat, moreover it should have a choice.
+         * Maybe He wants to retain the key and the associated memories in its license.
+         */
 
-        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-        $result    = $engineDAO->read( $engineToBeDeleted );
-
-        if(empty($result)){
-            return;
-        }
-
-        $mmt = new Engines_MMT($result[0]);
-
-        $mmt->deleteMemory("x_mm-".$key);
+//        $engineToBeDeleted         = EnginesModel_EngineStruct::getStruct();
+//        $engineToBeDeleted->uid    = $uid;
+//        $engineToBeDeleted->active = true;
+//
+//        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+//        $result    = $engineDAO->read( $engineToBeDeleted );
+//
+//        if(empty($result)){
+//            return;
+//        }
+//
+//        $mmt = new Engines_MMT($result[0]);
+//
+//        $mmt->deleteMemory("x_mm-".$key);
     }
     /**
      * Called in @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
