@@ -447,7 +447,7 @@ class MMTServiceApi {
         $log               = $handler->getSingleLog( $resourceHashId );
         $log[ 'response' ] = $result;
 
-        Log::doJsonLog( $log );
+        Log::doJsonLog( $log, "mmt.log" );
 
         return $this->parse( $result );
 

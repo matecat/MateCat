@@ -337,18 +337,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     /**
      * @return bool
-     * @throws Exception
-     */
-    public function isArchiveable() {
-        $lastUpdate  = new DateTime( $this->last_update );
-        $oneMonthAgo = new DateTime();
-        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
-
-        return $lastUpdate < $oneMonthAgo && !$this->isCanceled() ;
-    }
-
-    /**
-     * @return bool
      */
     public function wasDeleted() {
         return $this->status_owner === Constants_JobStatus::STATUS_DELETED;

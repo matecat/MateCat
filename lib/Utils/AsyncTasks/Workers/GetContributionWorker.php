@@ -162,12 +162,9 @@ class GetContributionWorker extends AbstractWorker {
 
         $keyList = [];
         if ( !empty( $tm_keys ) ) {
-
-            $keyList = [];
             foreach ( $tm_keys as $i => $tm_info ) {
                 $keyList[] = $tm_info->key;
             }
-
         }
 
         return $keyList;
