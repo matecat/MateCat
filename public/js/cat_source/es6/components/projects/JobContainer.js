@@ -9,7 +9,7 @@ import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
-import ConfirmMessageModal from "../modals/ConfirmMessageModal";
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -265,18 +265,22 @@ class JobContainer extends React.Component {
   deleteJob() {
     const props = {
       text:
-          'You are about to delete this job permanently. This action cannot be undone.</br>' +
-          ' Are you sure you want to proceed?',
+        'You are about to delete this job permanently. This action cannot be undone.</br>' +
+        ' Are you sure you want to proceed?',
       successText: 'Yes, delete it',
-      successCallback:  () =>{
-        ManageActions.changeJobStatus(this.props.project, this.props.job, 'delete')
+      successCallback: () => {
+        ManageActions.changeJobStatus(
+          this.props.project,
+          this.props.job,
+          'delete',
+        )
       },
-      cancelCallback: ()=>{}
+      cancelCallback: () => {},
     }
     ModalsActions.showModalComponent(
-        ConfirmMessageModal,
-        props,
-        'Confirmation required',
+      ConfirmMessageModal,
+      props,
+      'Confirmation required',
     )
   }
 
@@ -456,9 +460,7 @@ class JobContainer extends React.Component {
       let keys = this.props.job.get('private_tm_key')
       let tooltipText = ''
       keys.forEach(function (key) {
-        let descript = key.get('name')
-          ? key.get('name')
-          : 'Private resource'
+        let descript = key.get('name') ? key.get('name') : 'Private resource'
         let item =
           '<div style="text-align: left"><span style="font-weight: bold">' +
           descript +

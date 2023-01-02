@@ -174,4 +174,24 @@ class EnginesModel_EngineStruct
         return $this->id . $this->name . $this->description;
     }
 
+    /**
+     * If, for some reasons, extra_parameters
+     * if NOT an array but a JSON
+     * this function normalize it
+     *
+     * @return array|mixed
+     */
+    public function getExtraParamsAsArray()
+    {
+        if(is_array($this->extra_parameters)){
+            return $this->extra_parameters;
+        }
+
+        if(empty($this->extra_parameters) or $this->extra_parameters === null){
+            return [];
+        }
+
+        return json_decode($this->extra_parameters, true);
+    }
+
 }

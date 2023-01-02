@@ -1773,6 +1773,7 @@ class ProjectManager {
              * @var $owner_key TmKeyManagement_TmKeyStruct
              */
             foreach ( $owner_tm_keys as $i => $owner_key ) {
+                $owner_key->complete_format = true;
                 $owner_tm_keys[ $i ] = $owner_key->toArray();
             }
 

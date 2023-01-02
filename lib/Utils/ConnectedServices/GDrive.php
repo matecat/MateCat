@@ -3,6 +3,7 @@
 
 namespace ConnectedServices;
 
+use Exception;
 use INIT;
 use ConnectedServices\GDrive\GoogleClientFactory;
 
@@ -36,7 +37,12 @@ class GDrive {
 
         if ( $client->isAccessTokenExpired() ) {
 
-            $client->refreshToken( $refresh_token );
+            $grants = $client->refreshToken( $refresh_token );
+
+            if ( isset( $grants[ 'error' ] ) ) {
+                throw new Exception( $grants[ 'error_description' ] );
+            }
+
             $access_token = $client->getAccessToken();
 
             //
@@ -44,8 +50,8 @@ class GDrive {
             // -------------------------
             // Google Api V3 return $access_token as an array, so we need to encode it to JSON string
             //
-            if(is_array($access_token)) {
-                $access_token = json_encode($access_token, true);
+            if ( is_array( $access_token ) ) {
+                $access_token = json_encode( $access_token, true );
             }
 
             return $access_token;

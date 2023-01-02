@@ -26,7 +26,6 @@ export const SearchTerms = () => {
 
     if (!searchTerm && searchTerm !== previousSearchTermRef.current) {
       // empty search glossary GET
-      console.log('Reset glossary GET')
       SegmentActions.setGlossaryForSegmentBySearch(segment.sid)
     } else if (searchTerm) {
       // start serching term with debounce
@@ -40,11 +39,13 @@ export const SearchTerms = () => {
           targetLanguage:
             searchingIn === 'Source' ? config.target_code : config.source_code,
         }
-        SegmentActions.searchGlossary(data)
+        SegmentActions.searchGlossary({
+          ...data,
+          isSearchingInTarget: searchingIn === 'Target',
+        })
         notifyLoadingStatusToParent(true)
       }
       debounce = setTimeout(() => {
-        console.log('Searching:', searchTerm)
         onSubmitSearch()
       }, 500)
     }

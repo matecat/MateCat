@@ -39,7 +39,7 @@ if (ReviewExtended.enabled()) {
 
     getSegmentVersionsIssuesHandler(sid) {
       var segment = SegmentStore.getSegmentByIdToJS(sid)
-      UI.getSegmentVersionsIssues(segment.original_sid)
+      if (segment) UI.getSegmentVersionsIssues(segment.original_sid)
     },
 
     getSegmentVersionsIssues: function (segmentId) {

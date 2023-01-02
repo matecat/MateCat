@@ -1,5 +1,6 @@
 <?php
 
+use Validator\Contracts\ValidatorErrorObject;
 use Validator\GlossaryCSVValidatorObject;
 
 /**
@@ -389,6 +390,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $newFile     = new SplFileObject( $tmpFileName, 'r+' );
             $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
+            $index = 0;
+
             foreach ( $origFile as $line_num => $line ) {
 
                 if(in_array("1", $line)){
@@ -400,6 +403,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 }
 
                 //copy stream to stream
+                $index++;
                 $newFile->fputcsv( $line );
             }
 
@@ -421,8 +425,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         // validate the CSV
-        if(!$this->validateCSVFile($file)){
-            throw new \Exception('The glossary file is not valid');
+        $validateCSVFileErrors = $this->validateCSVFile($file);
+
+        if(count($validateCSVFileErrors) > 0){
+            throw new \Exception($validateCSVFileErrors[0]);
         }
 
         $postFields = [
@@ -591,15 +597,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param string $sourceLanguage
+     * @param string $targetLanguage
      * @param array $keys
      *
      * @return array
      */
-    public function glossaryKeys($keys = [])
+    public function glossaryKeys($sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                'keys' => $keys,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            'source_language' => $sourceLanguage,
+            'target_language' => $targetLanguage,
+            'keys' => $keys,
         ];
         $this->call( "glossary_keys_relative_url", $payload, true, true );
 
@@ -663,8 +673,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @param $file
-     *
-     * @return bool
+     * @return ValidatorErrorObject[]
      * @throws Exception
      */
     private function validateCSVFile($file)
@@ -674,7 +683,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $validator = new \Validator\GlossaryCSVValidator();
         $validator->validate($validatorObject);
 
-        return $validator->isValid();
+        return $validator->getErrors();
     }
 
     public function import( $file, $key, $name = false ) {
@@ -1070,7 +1079,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 't' ]          = $config[ 'target' ];
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
-        $this->engineRecord->base_url                    .= ':10000';
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_FOLLOWLOCATION => true,
+        ] );
+
+        $this->engineRecord->base_url = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
+
         $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
 
         $this->call( 'tags_projection', $parameters );

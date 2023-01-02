@@ -72,30 +72,4 @@ class JobUrlBuilder {
                 $segmentId
         );
     }
-
-    /**
-     * Build the job url from job id/password
-     *
-     * Optional parameters:
-     * - id_segment
-     * - httphost
-     *
-     * Returns null in case of wrong parameters
-     *
-     * @param int    $jobId
-     * @param string $jobPassword
-     * @param array  $options
-     *
-     * @return JobUrlStruct
-     */
-    public static function createFromCredentials( $jobId, $jobPassword, $options = [] ) {
-
-        // 1. find the job
-        $job = \CatUtils::getJobFromIdAndAnyPassword( $jobId, $jobPassword );
-        if ( !$job ) {
-            return null;
-        }
-
-        return self::createFromJobStruct( $job, $options );
-    }
 }

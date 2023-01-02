@@ -118,7 +118,9 @@
   }
 }
 label
-  ~ .select__dropdown-wrapper:not(.select__dropdown-wrapper--is-multiselect).select__dropdown--is-reversed {
+  ~ .select__dropdown-wrapper:not(
+    .select__dropdown-wrapper--is-multiselect
+  ).select__dropdown--is-reversed {
   bottom: calc(100% - 32px); // 32px = label height
 }
 
