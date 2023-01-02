@@ -8,7 +8,7 @@
         config.userFullName = "${extended_user}";
         config.userShortName = "${logged_user}";
         config.isLoggedIn = ${isLoggedIn|string:false};
-        config.isTranslatedUser = ${isTranslatedUser|string:false};
+        config.isAnInternalUser = ${isAnInternalUser|string:false};
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         config.authURL = ${structure php:json_encode(authURL)} ;
         config.dqf_enabled = ${dqf_enabled} ;

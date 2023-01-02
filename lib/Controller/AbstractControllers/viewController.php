@@ -167,28 +167,15 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        $this->template->logged_user   = $this->user->shortName();
-        $this->template->extended_user = $this->user->fullName();
-
-        $this->template->isTranslatedUser = $this->isLoggedInATranslatedUser();
-        $this->template->isLoggedIn = $this->userIsLogged;
-        $this->template->userMail   = $this->user->email;
+        $this->template->logged_user      = $this->user->shortName();
+        $this->template->extended_user    = $this->user->fullName();
+        $this->template->isAnInternalUser = $this->featureSet->filter( "isAnInternalUser", $this->user->email );
+        $this->template->isLoggedIn       = $this->userIsLogged;
+        $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
 
-    }
-
-    /**
-     * @return bool
-     */
-    protected function isLoggedInATranslatedUser()
-    {
-        if(!$this->isLoggedIn()){
-            return false;
-        }
-
-        return strpos($this->user->email, '@translated.net') !== false or strpos($this->user->email, '@translated.com') !== false;
     }
 
     /**
@@ -228,7 +215,7 @@ abstract class viewController extends controller {
 
         $controller = static::getInstance();
 
-        if (isset($controller->id_job) and isset($controller->received_password)){
+        if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
             $jid        = $controller->jid;
             $password   = $controller->received_password;
             $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
