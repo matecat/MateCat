@@ -1596,6 +1596,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
               )
             }
             $('#mt_engine_int').val('none').trigger('change')
+            UI.decorateMMTRow && UI.decorateMMTRow()
           }
         })
         .catch((errors) => {
@@ -1615,9 +1616,9 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
         '<tr data-id="' +
         serverResponse.id +
         '">' +
-        '    <td class="mt-provider"> ' +
+        '    <td class="mt-provider">' +
         serverResponse.name +
-        ' </td>' +
+        '</td>' +
         '    <td class="engine-name">' +
         data.providerName +
         '</td>' +
