@@ -115,12 +115,8 @@ class Mmt extends BaseFeature {
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
             if($preImport === true){
-
                 $engineMmt = new Engines_MMT($newCreatedDbRowStruct);
-
-                foreach ( self::_getKeyringOwnerKeysByUid($userStruct->uid) as $key){
-                    $engineMmt->connectKeys([$key->tm_key->key]);
-                }
+                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid($userStruct->uid) );
             }
 
         } catch ( Exception $e ) {
