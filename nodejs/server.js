@@ -132,7 +132,7 @@ http.createServer( ( req, res ) => {
     }
 
 } ).listen( config.server.port, config.server.address, () => {
-    logger.debug( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
+    logger.info( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
 
 const checkCandidate = ( type, response, message ) => {
@@ -188,19 +188,25 @@ const stompMessageReceived = ( body ) => {
     try {
         message = JSON.parse( body );
     } catch ( e ) {
-        logger.debug( ["Invalid json payload received ", body] );
+        logger.error( ["Invalid json payload received ", body] );
         return;
     }
 
-    const dest = _.filter( browserChannel.connections, ( serverResponse ) => {
-        if ( typeof serverResponse._clientId === 'undefined' ) {
-            return false;
-        }
-        return checkCandidate( message._type, serverResponse, message );
-    } );
+    let dest = null;
+    if ( browserChannel.connections.length !== 0 ) {
+        dest = _.filter( browserChannel.connections, ( serverResponse ) => {
+            if ( typeof serverResponse._clientId === 'undefined' ) {
+                logger.error( ["No valid clientId found in message", message] );
+                return false;
+            }
+            return checkCandidate( message._type, serverResponse, message );
+        } );
+    }
 
-    if ( !dest || (dest && dest.length === 0) ) {
-        logger.debug( ["Unknown message type, no available recipient found ", message.data.id_client] );
+    if ( !dest ) {
+        logger.debug( ["No registered clients on this instance."] );
+    } else if ( dest && dest.length === 0 ) {
+        logger.debug( ["Skip message, no available recipient found ", message.data.id_client] );
         return;
     } else {
         logger.debug( ['candidate for ' + message._type, dest[0]._clientId] );
@@ -223,7 +229,7 @@ const startStompConnection = () => {
 
         if ( typeof client === 'undefined' ) {
             setTimeout( startStompConnection, 10000 );
-            logger.debug( "** client error, restarting connection in 10 seconds", error );
+            logger.error( "** client error, restarting connection in 10 seconds", error );
             return;
         }
 
@@ -234,10 +240,10 @@ const startStompConnection = () => {
 
         client.subscribe( subscribeHeaders, ( error, message ) => {
 
-            logger.debug( '** event received in client subscription' );
+            // logger.debug( '** event received in client subscription' );
 
             if ( error ) {
-                logger.debug( '!! subscribe error ' + error.message );
+                logger.error( '!! subscribe error ' + error.message );
 
                 client.disconnect();
                 startStompConnection();
@@ -248,7 +254,7 @@ const startStompConnection = () => {
             message.readString( 'utf-8', ( error, body ) => {
 
                 if ( error ) {
-                    logger.debug( '!! read message error ' + error.message );
+                    logger.error( '!! read message error ' + error.message );
                 } else {
                     stompMessageReceived( body );
                     client.ack( message );
