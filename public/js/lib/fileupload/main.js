@@ -15,6 +15,7 @@ import Cookies from 'js-cookie'
 import {initFileUpload} from "../../cat_source/es6/api/initFileUpload";
 import {convertFileRequest} from "../../cat_source/es6/api/convertFileRequest";
 import CreateProjectStore from "../../cat_source/es6/stores/CreateProjectStore";
+import CreateProjectActions from "../../cat_source/es6/actions/CreateProjectActions";
 
 window.UI = null;
 
@@ -155,16 +156,12 @@ window.UI = {
         APP.createTMKey().then(function (  ) {
             UI.checkTMKeysUpdateChecks();
         });
-        var textToDisplay = '<span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
+        var textToDisplay = <span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}> Settings panel</a>.</span>;
         if (extension && extension === "g") {
-            textToDisplay = '<span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
+            textToDisplay = <span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}>Settings panel</a>.</span>;
         }
+        CreateProjectActions.showWarning(textToDisplay)
 
-
-        $( '.warning-message' ).html( textToDisplay ).show();
-        $('.warning-message .translation-memory-option-panel').off('click').on('click', function() {
-            APP.openOptionsPanel("tm");
-        } );
 
     },
 
@@ -261,7 +258,7 @@ window.UI = {
         } ).bind( 'fileuploadsend', function ( e, data ) {
             console.log( 'FIRE fileuploadsend' );
             console.log( data.files );
-            $( '.progress', $( data.context[0] ) ).before( '<div class="operation">Uploading</div>' );
+            data.context && $( '.progress', $( data.context[0] ) ).before( '<div class="operation">Uploading</div>' );
         } ).bind( 'fileuploadprogress', function ( e, data ) {
             console.log( data.loaded );
         } ).bind( 'fileuploadstart', function ( e ) {
@@ -306,8 +303,7 @@ window.UI = {
 
                 if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
 
-                    $( '.error-message' ).find('p').text('');
-                    $( '.error-message' ).hide();
+                    CreateProjectActions.hideErrors()
 
                     $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                     $( '#add-files' ).removeClass( 'disabled' );
@@ -327,15 +323,12 @@ window.UI = {
                 disableAnalyze();
             }
 
-        } ).on( 'click', '.template-upload .cancel button', function ( e, data ) {
+        } ).on( 'click', '.template-upload .cancel button, .template-download .delete button', function ( e, data ) {
 
-            console.log( 'file canceled' );
+            CreateProjectActions.hideErrors()
             if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
 
                 if ( $( '.upload-table tr' ).length < (config.maxNumberFiles) ) {
-
-                    $( '.error-message' ).find('p').text('');
-                    $( '.error-message' ).hide();
 
                     $( '#fileupload' ).fileupload( 'option', 'dropZone', $( '.drag' ) );
                     $( '#add-files' ).removeClass( 'disabled' );
@@ -365,8 +358,8 @@ window.UI = {
             var maxnum = config.maxNumberFiles;
             if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
                 console.log( '10 files loaded' );
-                $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
-                $( '.wrapper-upload .error-message' ).show()
+                CreateProjectActions.showError('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' )
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
                 $( '#add-files' ).addClass( 'disabled' );
                 $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -377,7 +370,7 @@ window.UI = {
             /*
              * BUG FIXED: UTF16 / UTF8 File name conversion
              * Use Return String From AJAX RESULT ( safe raw url encoded )
-             *      and NOT data.files[0].name; ( INPUT TAG content )
+             *      and NOT data.files[0].name; ( INPUT TAG content )maxNumberFiles
              *
              *      fname: data.result[0].name,
              *
@@ -442,8 +435,8 @@ window.UI = {
 
             } else if ( fileSpecs.error ) {
                 disableAnalyze();
-                $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'An error occurred during upload.' );
-                $( '.wrapper-upload .error-message' ).show();
+                CreateProjectActions.showError('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' )
+
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
                 $( '#add-files' ).addClass( 'disabled' );
                 $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -475,13 +468,12 @@ window.UI = {
 
         $( '#clear-all-files' ).bind( 'click', function ( e ) {
             e.preventDefault();
-            $( '.wrapper-upload .error-message' ).hide();
+            CreateProjectActions.hideErrors()
             $( '.template-download .delete button, .template-upload .cancel button' ).click();
         } );
 
         $( '#delete-failed-conversions' ).bind( 'click', function ( e ) {
             e.preventDefault();
-            console.log( $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ) );
             $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ).click();
         } );
 

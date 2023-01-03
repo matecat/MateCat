@@ -56,6 +56,14 @@ AppDispatcher.register(function (action) {
         CreateProjectStore.projectData,
       )
       break
+    case NewProjectConstants.HIDE_ERROR_WARNING:
+      CreateProjectStore.emitChange(action.actionType)
+      break
+    case NewProjectConstants.SHOW_ERROR:
+    case NewProjectConstants.SHOW_WARNING:
+      CreateProjectStore.updateProject(action.data)
+      CreateProjectStore.emitChange(action.actionType, action.message)
+      break
   }
 })
 module.exports = CreateProjectStore

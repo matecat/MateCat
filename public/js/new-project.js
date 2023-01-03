@@ -13,6 +13,7 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import NewProject from './cat_source/es6/pages/NewProject'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
+import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -447,7 +448,7 @@ APP.postProjectCreation = function (d) {
   }
 
   if (typeof d.errors != 'undefined' && d.errors.length) {
-    $('.error-message').find('p').text('')
+    CreateProjectActions.hideErrors()
 
     $.each(d.errors, function () {
       switch (this.code) {
@@ -488,8 +489,7 @@ APP.postProjectCreation = function (d) {
       }
 
       //normal error management
-      $('.error-message').find('p').text(this.message)
-      $('.error-message').show()
+      CreateProjectActions.showError(this.message())
     })
 
     $('.uploadbtn').attr('value', 'Analyze')

@@ -3,6 +3,7 @@ import {changeGDriveSourceLang} from './cat_source/es6/api/changeGDriveSourceLan
 import {deleteGDriveUploadedFile} from './cat_source/es6/api/deleteGdriveUploadedFile'
 import {openGDriveFiles} from './cat_source/es6/api/openGDriveFiles'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
+import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
 APP.tryListGDriveFiles = function () {
   getGoogleDriveUploadedFiles().then((listFiles) => {
@@ -140,7 +141,7 @@ APP.addGDriveFile = function (exportIds) {
     CreateProjectStore.getTargetLangs(),
   ).then((response) => {
     $('.modal-gdrive').remove()
-    $('.error-message').hide()
+    CreateProjectActions.hideErrors()
     if (response.success) {
       APP.tryListGDriveFiles()
     } else {
@@ -151,8 +152,7 @@ APP.addGDriveFile = function (exportIds) {
           'There was an error retrieving the file from Google Drive: ' +
           response.error_msg
       }
-      $('.error-message').find('p').text(message)
-      $('.error-message').show()
+      CreateProjectActions.showError(message)
 
       console.error(
         'Error when processing request. Error class: ' +

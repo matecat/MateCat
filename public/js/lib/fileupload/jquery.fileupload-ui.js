@@ -12,7 +12,9 @@
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window, document, URL, webkitURL, FileReader */
 
-(function ( factory ) {
+import CreateProjectActions from "../../cat_source/es6/actions/CreateProjectActions";
+
+(function (factory ) {
     'use strict';
     if ( typeof define === 'function' && define.amd ) {
         // Register as an anonymous AMD module:
@@ -327,7 +329,7 @@
                 if ( !match ) {
                     //console.log( error );
                     _deleteRow( data.context );
-                    _deleteRow($('.error-message'));
+                    CreateProjectActions.hideErrors()
                     return false;
                 }
 

@@ -15,6 +15,7 @@ import {createProject as createProjectApi} from '../api/createProject'
 import CreateProjectActions from '../actions/CreateProjectActions'
 import LanguageSelector from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
+import NewProjectConstants from '../constants/NewProjectConstants'
 
 const SELECT_HEIGHT = 260
 
@@ -79,14 +80,6 @@ const NewProject = ({
     setSourceLang(option)
     APP.sourceLangChangedCallback()
     APP.checkForTagProjectionLangs(sourceLang)
-  }
-
-  const changeTargetLanguage = (option) => {
-    if (targetLangs.some((lang) => lang.id === option.id)) {
-      setTargetLangs(targetLangs.filter((lang) => lang.id !== option.id))
-    } else {
-      setTargetLangs(targetLangs.concat([option]))
-    }
   }
 
   const getTmKeys = () => {
@@ -173,16 +166,51 @@ const NewProject = ({
         ),
       )
     }
+    const hideAllErrors = () => {
+      setErrors()
+      setWarnings()
+    }
+    const showError = (message) => setErrors(message)
+
+    const showWarning = (message) => {
+      console.log('setWarnings-------------->', message)
+      setWarnings(message)
+    }
+
     getTmKeys()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
-
+    CreateProjectStore.addListener(
+      NewProjectConstants.HIDE_ERROR_WARNING,
+      hideAllErrors,
+    )
+    CreateProjectStore.addListener(NewProjectConstants.SHOW_ERROR, showError)
+    CreateProjectStore.addListener(
+      NewProjectConstants.SHOW_WARNING,
+      showWarning,
+    )
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
+      CreateProjectStore.removeListener(
+        NewProjectConstants.HIDE_ERROR_WARNING,
+        hideAllErrors,
+      )
+      CreateProjectStore.removeListener(
+        NewProjectConstants.SHOW_ERROR,
+        showError,
+      )
+      CreateProjectStore.removeListener(
+        NewProjectConstants.SHOW_WARNING,
+        showWarning,
+      )
     }
   }, [])
   useEffect(() => {
     const activateKey = (event, desc, key) => {
-      const tmSelected = tmKeys.find((item) => item.id === key)
+      let tmSelected = tmKeys.find((item) => item.id === key)
+      if (!tmSelected) {
+        tmSelected = {id: key, name: desc}
+        setTmKeys(tmKeys.concat(tmSelected))
+      }
       if (!tmKeySelected.find((item) => item.id === key)) {
         setTmKeySelected(tmKeySelected.concat([tmSelected]))
       }
@@ -401,14 +429,14 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p>Oops we got an error...</p>
+            <p>{warnings}</p>
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p>Oops we got an error... </p>
+            <p>{errors}</p>
           </div>
         )}
 
