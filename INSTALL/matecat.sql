@@ -1318,7 +1318,7 @@ DROP TABLE IF EXISTS `show_clients`;
 /*!50001 DROP VIEW IF EXISTS `show_clients`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `show_clients` AS SELECT 
+/*!50001 CREATE VIEW `show_clients` AS SELECT
  1 AS `host_short`,
  1 AS `users`,
  1 AS `COUNT(*)`*/;
@@ -1501,8 +1501,10 @@ USE `matecat`;
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
-INSERT INTO `engines` VALUES (11,'MyMemory (All Pairs)','TM','Machine translation from Google Translate and Microsoft Translator.','http://api.mymemory.translated.net','get','set','update','delete',
-                                 '{\"gloss_get_relative_url\":\"glossary/get\",\"gloss_set_relative_url\":\"glossary/set\",\"gloss_update_relative_url\":\"glossary/update\",\"glossary_import_relative_url\":\"glossary/import\",\"glossary_export_relative_url\":\"glossary/export\",\"gloss_delete_relative_url\":\"glossary/delete\",\"tmx_import_relative_url\":\"tmx/import\",\"tmx_status_relative_url\":\"tmx/status\",\"tmx_export_create_url\":\"tmx/export/create\",\"tmx_export_check_url\":\"tmx/export/check\",\"tmx_export_download_url\":\"tmx/export/download\",\"tmx_export_list_url\":\"tmx/export/list\",\"tmx_export_email_url\":\"tmx/export/create\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}','MyMemory','{}','1',0,1,NULL);
+INSERT INTO `engines`
+VALUES (11, 'MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)', 'TM', 'Machine translation by the MT engine best suited to your project', 'https://api.mymemory.translated.net', 'get', 'set', 'update', 'delete_by_id', '{"analyze_url":"analyze","api_key_check_auth_url":"authkey","api_key_create_user_url":"createranduser",
+"detect_language_url":"langdetect.php","glossary_check_relative_url":"v2/glossary/check","glossary_delete_relative_url":"v2/glossary/delete","glossary_domains_relative_url":"v2/glossary/domains","glossary_entry_status_relative_url":"v2/entry/status","glossary_export_relative_url":"v2/glossary/export","glossary_get_relative_url":"v2/glossary/get","glossary_import_relative_url":"v2/glossary/import","glossary_import_status_relative_url":"v2/import/status","glossary_keys_relative_url":"v2/glossary/keys","glossary_set_relative_url":"v2/glossary/set","glossary_update_relative_url":"v2/glossary/update","tmx_export_check_url":"tmx/export/check","tmx_export_create_url":"tmx/export/create","tmx_export_download_url":"tmx/export/download","tmx_export_email_url":"tmx/export/create","tmx_export_list_url":"tmx/export/list","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"tmx/status","tags_projection":"tags-projection"}',
+        'MyMemory', '', '1', 0, 1, null);
 
 UPDATE engines SET id = 0 WHERE id = 10 ;
 UPDATE engines SET id = 1 WHERE id = 11 ;
