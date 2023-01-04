@@ -1936,6 +1936,16 @@
             "rfc3066code":"sa-IN"
         }
     ,
+	{
+            "localized":[{
+                "en":"Santali"
+            }],
+            "isocode":"sat",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"sat-IN"
+        }
+    ,
         {
             "localized":[{
                 "en":"Scots Gaelic"
