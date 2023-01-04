@@ -1,6 +1,7 @@
 <?php
 
 use Validator\Contracts\ValidatorErrorObject;
+use Validator\GlossaryCSVValidator;
 use Validator\GlossaryCSVValidatorObject;
 
 /**
@@ -676,12 +677,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @return ValidatorErrorObject[]
      * @throws Exception
      */
-    private function validateCSVFile($file)
-    {
-        $validatorObject = new GlossaryCSVValidatorObject();
+    private function validateCSVFile( $file ) {
+        $validatorObject      = new GlossaryCSVValidatorObject();
         $validatorObject->csv = $file;
-        $validator = new \Validator\GlossaryCSVValidator();
-        $validator->validate($validatorObject);
+        $validator            = new GlossaryCSVValidator();
+        $validator->validate( $validatorObject );
 
         return $validator->getErrors();
     }
