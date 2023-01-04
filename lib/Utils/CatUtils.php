@@ -1019,5 +1019,22 @@ class CatUtils {
     public static function getLastCharacter($string) {
         return mb_substr(strip_tags($string), -1);
     }
+
+    /**
+     * @param Projects_ProjectStruct $projectStruct
+     * @return mixed
+     */
+    public static function getSegmentTranslationsCount(\Projects_ProjectStruct $projectStruct)
+    {
+        $idJobs = [];
+
+        foreach ($projectStruct->getJobs() as $job){
+            $idJobs[] = $job->id;
+        }
+
+        $idJobs = array_unique($idJobs);
+
+        return Jobs_JobDao::getSegmentTranslationsCount($idJobs);
+    }
 }
 

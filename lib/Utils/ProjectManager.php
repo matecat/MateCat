@@ -12,6 +12,8 @@ use ActivityLog\ActivityLogStruct;
 use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
+use Files\FilesPartsDao;
+use Files\FilesPartsStruct;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
@@ -1835,10 +1837,9 @@ class ProjectManager {
 
         $xliffParser = new XliffParser();
 
-        $xliffVersion = 1;
         try {
-            $xliff        = $xliffParser->xliffToArray( $xliff_file_content );
-            $xliffVersion = XliffVersionDetector::detect( $xliff_file_content );
+            $xliff     = $xliffParser->xliffToArray( $xliff_file_content );
+            $xliffInfo = XliffProprietaryDetect::getInfoByStringData( $xliff_file_content );
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
@@ -1871,12 +1872,12 @@ class ProjectManager {
 
             // files-part
             if ( isset( $xliff_file[ 'attr' ][ 'original' ] ) ) {
-                $filesPartsStruct          = new \Files\FilesPartsStruct();
+                $filesPartsStruct          = new FilesPartsStruct();
                 $filesPartsStruct->id_file = $fid;
                 $filesPartsStruct->key     = 'original';
                 $filesPartsStruct->value   = $xliff_file[ 'attr' ][ 'original' ];
 
-                $filePartsId = ( new \Files\FilesPartsDao() )->insert( $filesPartsStruct );
+                $filePartsId = ( new FilesPartsDao() )->insert( $filesPartsStruct );
 
                 // save `custom` meta data
                 if(isset($xliff_file[ 'attr' ][ 'custom' ]) and !empty($xliff_file[ 'attr' ][ 'custom' ])){
@@ -1899,7 +1900,7 @@ class ProjectManager {
                     $show_in_cattool = 0;
                 } else {
 
-                    $this->_manageAlternativeTranslations( $xliff_trans_unit, $xliff_file[ 'attr' ], $xliffVersion );
+                    $this->_manageAlternativeTranslations( $xliff_trans_unit, $xliff_file[ 'attr' ], $xliffInfo );
 
                     $trans_unit_reference = self::sanitizedUnitId( $xliff_trans_unit[ 'attr' ][ 'id' ], $fid );
 
@@ -1934,7 +1935,7 @@ class ProjectManager {
                                 $show_in_cattool = 0;
                             } else {
 
-                                $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ], $xliffVersion );
+                                $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ], $xliffInfo );
                                 $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
                                 $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
                                 $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
@@ -1943,7 +1944,7 @@ class ProjectManager {
 
                                     if ( $this->features->filter( 'populatePreTranslations', true ) ) {
 
-                                        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffVersion );
+                                        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
                                         // -----------------------------------------------
@@ -2081,14 +2082,14 @@ class ProjectManager {
                         if ( empty( $wordCount ) ) {
                             $show_in_cattool = 0;
                         } else {
-                            $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffVersion );
+                            $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffInfo );
                             $prec_tags                                     = empty( $extract_external[ 'prec' ] ) ? null : $extract_external[ 'prec' ];
                             $succ_tags                                     = empty( $extract_external[ 'succ' ] ) ? null : $extract_external[ 'succ' ];
                             $xliff_trans_unit[ 'source' ][ 'raw-content' ] = $extract_external[ 'seg' ];
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
-                                $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffVersion );
+                                $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
 
@@ -2518,7 +2519,14 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes, $xliffVersion = 1 ) {
+    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes, $xliffInfo = [
+            'info'                   => [],
+            'proprietary'            => false,
+            'proprietary_name'       => null,
+            'proprietary_short_name' => null,
+            'version'                => 1,
+            'converter_version'      => null,
+    ] ) {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
@@ -2563,15 +2571,15 @@ class ProjectManager {
             }
 
             if ( !empty( $xliff_trans_unit[ 'source' ] ) ) {
-                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffVersion );
+                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffInfo );
             }
 
             //Override with the alt-trans source value
             if ( !empty( $altTrans[ 'source' ] ) ) {
-                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ], $xliffVersion );
+                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ], $xliffInfo );
             }
 
-            $target_extract_external = $this->_strip_external( $altTrans[ 'target' ], $xliffVersion );
+            $target_extract_external = $this->_strip_external( $altTrans[ 'target' ], $xliffInfo );
 
             //wrong alt-trans content: source == target
             if ( $source_extract_external[ 'seg' ] == $target_extract_external[ 'seg' ] ) {
@@ -2711,7 +2719,8 @@ class ProjectManager {
     }
 
     /**
-     * @param $segment
+     * @param       $segment
+     * @param array $xliffInfo
      *
      * @return array
      * @throws \API\V2\Exceptions\AuthenticationError
@@ -2720,9 +2729,21 @@ class ProjectManager {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _strip_external( $segment, $xliffVersion = 1 ) {
+    protected function _strip_external( $segment, $xliffInfo = [
+            'info'                   => [],
+            'proprietary'            => false,
+            'proprietary_name'       => null,
+            'proprietary_short_name' => null,
+            'version'                => 1,
+            'converter_version'      => null,
+    ] ) {
 
-        if ( $xliffVersion == 2 ) {
+        // Definitely DISABLED
+        if ( true ) {
+            return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
+        }
+
+        if ( $xliffInfo[ 'version' ] == 2 ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
         }
 

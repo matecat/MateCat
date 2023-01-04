@@ -812,4 +812,26 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             'revisionNumber' => $revisionNumber
         ] );
     }
+
+    /**
+     * @param array $idJobs
+     * @param int $ttl
+     * @return int|null
+     */
+    public static function getSegmentTranslationsCount(array $idJobs, $ttl = 0)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+
+        $query = "select count(*) as total from segment_translations where id_job IN ( " . implode(', ' , $idJobs ) . " );";
+
+        $stmt = $conn->prepare($query  );
+        $records = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] );
+
+        if(empty($records)){
+            return null;
+        }
+
+        return (int)$records[0]->total;
+    }
 }
