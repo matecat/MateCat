@@ -595,4 +595,32 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    /**
+     * Get a password map (t, r1, r2)
+     *
+     * @param $pid
+     * @return array
+     */
+    public function getPasswordsMap($pid)
+    {
+        $db = Database::obtain();
+
+        $query = "select
+            j.id as id_job	,
+            j.job_first_segment,
+            j.job_last_segment,
+         j.password as t_password, 
+         r.review_password as r_password,
+         r2.review_password as r2_password
+         from jobs j
+         left join qa_chunk_reviews r on r.id_job = j.id and r.source_page = 2
+         left join qa_chunk_reviews r2 on r2.id_job = j.id and r2.source_page = 3
+         where j.id_project = :pid;";
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'pid' => $pid ] );
+
+        return $stmt->fetchAll();
+    }
 }
