@@ -27,20 +27,19 @@ class GlossaryCSVValidator extends AbstractValidator {
 
         $allowedLanguages = $this->allowedLanguages();
 
-        preg_match_all('/('.$allowedLanguages.')/', $headerString, $languageMatches);
-
-        if(empty($languageMatches[0]) or count($languageMatches[0]) < 2){
-
-            $this->errors[] = 'Minimum two language matches';
-
+        // 1. Validate languages
+        if($this->validateLanguages($headers) === false){
             return false;
         }
 
-        preg_match_all('/^(forbidden)?(domain)?(subdomain)?(definition)?((('.$allowedLanguages.')((notes)?(example of use)?){2,})+$)/', $headerString, $headerMatches);
+        $allowedLanguagesRegex = implode("|", $allowedLanguages);
+
+        // 2. Validate structure
+        preg_match_all('/^(forbidden)?(domain)?(subdomain)?(definition)?((('.$allowedLanguagesRegex.')((notes)?(example of use)?){2,})+$)/', $headerString, $headerMatches);
 
         if(empty($languageMatches[0])){
 
-            $this->errors[] = 'Incorrect header matches';
+            $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
 
             return false;
         }
@@ -48,9 +47,8 @@ class GlossaryCSVValidator extends AbstractValidator {
         return true;
     }
 
-
     /**
-     * @return string
+     * @return array
      */
     private function allowedLanguages()
     {
@@ -61,9 +59,51 @@ class GlossaryCSVValidator extends AbstractValidator {
         $langs = json_decode( $string, true );
 
         foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = Utils::trimAndLowerCase($lang['rfc3066code']);
+            $rfc3066code = Utils::trimAndLowerCase($lang['rfc3066code']);
+
+            $allowedLanguages[] = $rfc3066code;
         }
 
-        return implode("|", $allowedLanguages);
+        return $allowedLanguages;
+    }
+
+    /**
+     * @param $headers
+     * @return bool
+     */
+    private function validateLanguages($headers)
+    {
+        $skipKeys = [
+            "forbidden",
+            "domain",
+            "subdomain",
+            "definition",
+            "notes",
+            "example of use"
+        ];
+
+        $headersLowerCase = [];
+        foreach ($headers as $header){
+            $headersLowerCase[] = Utils::trimAndLowerCase($header);
+        }
+
+        $languages = array_diff($headersLowerCase, $skipKeys);
+        $allowedLanguages = $this->allowedLanguages();
+
+        if(count($languages) < 2){
+            $this->errors[] = 'Minimum two language matches';
+
+            return false;
+        }
+
+        foreach ($languages as $language){
+            if(!in_array(Utils::trimAndLowerCase($language), $allowedLanguages)){
+
+                $error = (strpos($language, '_') !== false) ? 'The column header '.$language.' contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : $language . ' is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
+                $this->errors[] = $error;
+
+                return false;
+            }
+        }
     }
 }
