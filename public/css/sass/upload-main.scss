@@ -17,6 +17,8 @@
 @import 'components/common/Select';
 @import 'components/common/Dropdown';
 
+@import 'commons/aria-label-tooltip';
+
 .translation-row {
   .translation-options,
   #additional-input-params {
@@ -27,6 +29,19 @@
   .translation-options {
     > :not(:last-child) {
       margin-right: 8px;
+    }
+  }
+
+  .label-tmx-select,
+  .label-tmx-select > span:last-of-type {
+    display: flex;
+    align-items: center;
+  }
+
+  .label-tmx-select > span:last-of-type {
+    &[aria-label]::after {
+      min-width: 260px;
+      white-space: normal;
     }
   }
 }
@@ -329,6 +344,7 @@
   .translate-box.tmx-select {
     margin-right: 0;
   }
+
   // .wrapper-upload {
   //   .translate-box {
   //     div.dropdown {

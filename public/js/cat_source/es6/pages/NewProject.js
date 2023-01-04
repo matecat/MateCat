@@ -376,7 +376,19 @@ const NewProject = ({
             {/*TM and glossary*/}
             <div className="translate-box tmx-select">
               <Select
-                label="TM & Glossary"
+                label={
+                  <div className="label-tmx-select">
+                    <span>TM & Glossary</span>
+                    <span
+                      aria-label="By updating MyMemory, you are contributing to making MateCat better 
+                      and helping fellow MateCat users improve their translations.
+                      For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel."
+                      tooltip-position="bottom"
+                    >
+                      <span className="icon-info icon" />
+                    </span>
+                  </div>
+                }
                 name={'tmx-select'}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
