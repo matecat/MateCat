@@ -277,13 +277,14 @@ export const Dropdown = ({
       }).length > 0
     const isNoResultsFound = option.id === 'noResultsFound'
     const showActiveOptionIcon = isActiveOption || isActiveOptions
-
+    console.log(option)
     const {beforeRow, row, afterRow, cancelHandleClick} =
       children?.({
         index,
         ...option,
         optionsLength: !isNoResultsFound ? getFilteredOptions().length : 1,
         queryFilter,
+        showActiveOptionIcon,
         resetQueryFilter: () => {
           setQueryFilter('')
           queryFilterRef.current = ''

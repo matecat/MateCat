@@ -44,6 +44,22 @@
       white-space: normal;
     }
   }
+
+  .tmx-dropdown-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+
+    > :first-child {
+      display: flex;
+      flex-direction: column;
+
+      > :first-child {
+        color: black;
+      }
+    }
+  }
 }
 
 .translate-box.target,

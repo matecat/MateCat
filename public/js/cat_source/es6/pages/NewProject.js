@@ -16,6 +16,7 @@ import CreateProjectActions from '../actions/CreateProjectActions'
 import LanguageSelector from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
 import NewProjectConstants from '../constants/NewProjectConstants'
+import Check from '../../../../img/icons/Check'
 
 const SELECT_HEIGHT = 260
 
@@ -410,7 +411,7 @@ const NewProject = ({
                   }
                 }}
               >
-                {({index, onClose}) => ({
+                {({index, onClose, name, key, showActiveOptionIcon}) => ({
                   ...(index === 0 && {
                     beforeRow: (
                       <button
@@ -425,6 +426,15 @@ const NewProject = ({
                       </button>
                     ),
                   }),
+                  row: (
+                    <div className="tmx-dropdown-row">
+                      <div>
+                        <span>{name}</span>
+                        <span>{key}</span>
+                      </div>
+                      {showActiveOptionIcon && <Check size={16} />}
+                    </div>
+                  ),
                 })}
               </Select>
             </div>
