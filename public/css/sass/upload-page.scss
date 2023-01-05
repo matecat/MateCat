@@ -1441,6 +1441,7 @@ button.ui-button::-moz-focus-inner {
 
   .select-with-label__wrapper {
     .select {
+      font-size: 16px;
       padding: 9px 46px 9px 12px;
       border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
@@ -1452,6 +1453,12 @@ button.ui-button::-moz-focus-inner {
       }
     }
 
+    .select--is-focused,
+    .select--is-focused:hover {
+      border: solid 1px #96c8da;
+      border-bottom: unset;
+    }
+
     .select--is-disabled {
       background-color: #f3f3f3;
     }
@@ -1459,6 +1466,8 @@ button.ui-button::-moz-focus-inner {
     .custom-dropdown {
       margin-top: 0;
       padding-top: 12px;
+      border-radius: unset;
+      background-color: white;
 
       &::before {
         display: none;
@@ -1481,10 +1490,18 @@ button.ui-button::-moz-focus-inner {
       .dropdown__option--is-no-results-found {
         color: $grey7;
       }
+
+      .dropdown__option--is-no-results-found {
+        background-color: unset;
+      }
     }
 
     .select__dropdown-wrapper {
       min-width: 280px;
+      border: solid 1px #96c8da;
+      border-top: unset;
+      z-index: 1;
+      margin-top: 1px;
 
       input:not([type='radio']),
       textarea {
@@ -1527,6 +1544,10 @@ button.ui-button::-moz-focus-inner {
           background-color: $grey4;
         }
       }
+    }
+
+    .select-with-icon__wrapper {
+      z-index: 2;
     }
   }
 }
