@@ -18,6 +18,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;

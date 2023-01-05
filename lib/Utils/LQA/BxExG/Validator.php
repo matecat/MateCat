@@ -2,7 +2,7 @@
 
 namespace LQA\BxExG;
 
-use QA;
+use LQA\QA;
 
 class Validator {
 

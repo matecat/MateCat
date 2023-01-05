@@ -1,9 +1,27 @@
 <?php
+namespace LQA;
 
+use API\V2\Exceptions\AuthenticationError;
+use CatUtils;
+use Chunks_ChunkStruct;
+use DOMDocument;
+use DOMElement;
+use DOMException;
+use DOMNode;
+use DOMNodeList;
+use DOMXPath;
+use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
+use FeatureSet;
+use Log;
+use LogicException;
 use LQA\BxExG\Validator;
-use LQA\SizeRestriction;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\MateCatFilter;
+use Segments_SegmentMetadataDao;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class errObject
@@ -1346,8 +1364,8 @@ class QA {
      *
      * @param DOMElement $element
      *
-     * @throws \Exception
      * @return bool
+     *@throws Exception
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
 
@@ -1951,7 +1969,7 @@ class QA {
                     $this->_resetDOMMaps();
                     $this->_prepareDOMStructures();
 
-                    return; //ALL RIGHT
+                    return null; //ALL RIGHT
                 }
 
 //                Log::doJsonLog($result);
@@ -2164,7 +2182,7 @@ class QA {
      * @param int $trgNodeCount
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
 
@@ -2516,11 +2534,11 @@ class QA {
     /**
      * Check glossary blacklist
      *
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     protected function _checkGlossaryBlacklist()
     {
