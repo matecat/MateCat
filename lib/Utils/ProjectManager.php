@@ -2390,7 +2390,7 @@ class ProjectManager {
             $segmentMetadataStruct = @$this->projectStructure[ 'segments-meta-data' ][ $fid ][ $position ];
 
             if ( isset( $segmentMetadataStruct ) and !empty( $segmentMetadataStruct ) ) {
-                $this->features->filter( 'saveSegmentMetadata', $id_segment, $segmentMetadataStruct );
+                $this->_saveSegmentMetadata( $id_segment, $segmentMetadataStruct );
             }
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
@@ -2510,6 +2510,23 @@ class ProjectManager {
                     return $value[ 'show_in_cattool' ] == 1;
                 } )
         );
+    }
+
+    /**
+     * Save segment metadata
+     *
+     * @param int                                 $id_segment
+     * @param Segments_SegmentMetadataStruct|null $metadataStruct
+     */
+    protected function _saveSegmentMetadata( $id_segment, Segments_SegmentMetadataStruct $metadataStruct = null ) {
+
+        if ( $metadataStruct !== null and
+                isset( $metadataStruct->meta_key ) and $metadataStruct->meta_key !== '' and
+                isset( $metadataStruct->meta_value ) and $metadataStruct->meta_value !== ''
+        ) {
+            $metadataStruct->id_segment = $id_segment;
+            Segments_SegmentMetadataDao::save( $metadataStruct );
+        }
     }
 
     /**

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "127e35efbd8994b1d57c2c14a090ebba",
+    "content-hash": "9ef947c2a37bb905fbe1dcae076cbccd",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1027,24 +1027,33 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.102",
+            "version": "v1.0.103-alpha1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "9f0943a5ff56346b77bb400df498b206b3a1f392"
+                "reference": "7096f480f67f89223695544a6b07c93f7b6e5e38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/9f0943a5ff56346b77bb400df498b206b3a1f392",
-                "reference": "9f0943a5ff56346b77bb400df498b206b3a1f392",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/7096f480f67f89223695544a6b07c93f7b6e5e38",
+                "reference": "7096f480f67f89223695544a6b07c93f7b6e5e38",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5"
+                "ext-dom": "*",
+                "ext-iconv": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-openssl": "*",
+                "ext-simplexml": "*",
+                "ext-xml": "*",
+                "php": ">=5.5",
+                "psr/log": "*"
             },
             "require-dev": {
+                "ext-curl": "*",
                 "fzaninotto/faker": "^1.9",
-                "phpunit/phpunit": "^8.2"
+                "phpunit/phpunit": "^5"
             },
             "type": "library",
             "autoload": {
@@ -1061,6 +1070,11 @@
                     "name": "Mauro Cassani",
                     "email": "maurocassani1978@gmail.com",
                     "homepage": "https://github.com/mauretto78"
+                },
+                {
+                    "name": "Domenico Lupinetti",
+                    "email": "ostico@gmail.com",
+                    "homepage": "https://github.com/ostico"
                 }
             ],
             "description": "A Xliff parser written in PHP",
@@ -1072,9 +1086,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.102"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.103-alpha1"
             },
-            "time": "2022-11-23T13:30:28+00:00"
+            "time": "2023-01-05T16:41:41+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -3978,7 +3992,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "matecat/xliff-parser": 15
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
