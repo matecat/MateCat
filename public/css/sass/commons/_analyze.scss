@@ -123,6 +123,7 @@ body.analyze {
             .complete {
               display: inline-block;
               font-size: 18px;
+              line-height: 18px;
               .number {
                 font-weight: 700;
               }
@@ -147,8 +148,8 @@ body.analyze {
               }
             }
             .analysisNotPerformed {
-              margin-top: -8px !important;
-              text-decoration: underline;
+              font-size: 18px;
+              line-height: 18px;
               display: inline-block;
             }
           }
