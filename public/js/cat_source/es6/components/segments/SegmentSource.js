@@ -164,8 +164,11 @@ class SegmentSource extends React.Component {
   }
 
   addGlossaryDecorator = () => {
-    let {glossary, segment, sid} = this.props.segment
-    const newDecorator = DraftMatecatUtils.activateGlossary(glossary, sid)
+    let {glossary, sid} = this.props.segment
+    const newDecorator = DraftMatecatUtils.activateGlossary(
+      glossary.filter(({isBlacklist}) => !isBlacklist),
+      sid,
+    )
     _.remove(
       this.decoratorsStructure,
       (decorator) =>
