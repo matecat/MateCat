@@ -1492,6 +1492,10 @@ button.ui-button::-moz-focus-inner {
         }
       }
 
+      .dropdown__option > span {
+        color: black;
+      }
+
       .dropdown__option--is-no-results-found {
         color: $grey7;
       }
@@ -1502,11 +1506,12 @@ button.ui-button::-moz-focus-inner {
 
       .dropdown__option--is-active-option {
         background-color: unset;
+        font-weight: bold;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: $grey8;
+        background-color: $grey5;
       }
     }
 
@@ -1534,14 +1539,16 @@ button.ui-button::-moz-focus-inner {
         box-shadow: none;
       }
 
-      .button-multiple-languages {
+      .button-top-of-list {
+        position: sticky;
+        top: 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
         cursor: pointer;
         border: none;
-        background: unset;
+        background-color: white;
         color: #39699a;
         font-size: 14px;
         font-weight: bold;
@@ -1562,6 +1569,10 @@ button.ui-button::-moz-focus-inner {
 
     .select-with-icon__wrapper {
       z-index: 2;
+
+      .select {
+        color: black;
+      }
     }
   }
 }

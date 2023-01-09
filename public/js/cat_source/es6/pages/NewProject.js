@@ -329,25 +329,21 @@ const NewProject = ({
                 multipleSelect={'dropdown'}
                 activeOptions={targetLangs}
                 checkSpaceToReverse={false}
-                onToggleOption={(option, onClose) => {
-                  if (
-                    targetLangs.length > 1 &&
-                    targetLangs.find(({id}) => id === option.id)
-                  ) {
-                    setTargetLangs((prevState) =>
-                      prevState.filter(({id}) => id !== option.id),
-                    )
-                  } else {
-                    setTargetLangs([option])
-                    onClose()
-                  }
+                onToggleOption={(option) => {
+                  setTargetLangs((prevState) =>
+                    prevState.some((item) => item.id === option.id)
+                      ? prevState.filter((item) => item.id !== option.id).length
+                        ? prevState.filter((item) => item.id !== option.id)
+                        : prevState
+                      : [...prevState, option],
+                  )
                 }}
               >
                 {({index, onClose}) => ({
                   ...(index === 0 && {
                     beforeRow: (
                       <button
-                        className="button-multiple-languages"
+                        className="button-top-of-list"
                         onClick={() => {
                           setIsOpenMultiselectLanguages(true)
                           onClose()
@@ -415,7 +411,7 @@ const NewProject = ({
                   ...(index === 0 && {
                     beforeRow: (
                       <button
-                        className="button-multiple-languages"
+                        className="button-top-of-list"
                         onClick={() => {
                           UI.openLanguageResourcesPanel('tm')
                           onClose()
