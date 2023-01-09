@@ -1485,6 +1485,11 @@ button.ui-button::-moz-focus-inner {
           padding: 8px 8px;
           background-color: unset;
         }
+
+        .dropdown__search-bar-input--highlighted {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
       }
 
       .dropdown__option--is-no-results-found {
@@ -1493,6 +1498,15 @@ button.ui-button::-moz-focus-inner {
 
       .dropdown__option--is-no-results-found {
         background-color: unset;
+      }
+
+      .dropdown__option--is-active-option {
+        background-color: unset;
+      }
+
+      .dropdown__option--is-highlighted-option,
+      .dropdown__option:hover {
+        background-color: $grey8;
       }
     }
 
