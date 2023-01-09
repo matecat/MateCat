@@ -86,7 +86,7 @@ class GlossaryCSVValidator extends AbstractValidator {
         $languages = array_diff( $headers, $skipKeys );
 
         if ( count( $languages ) < 2 ) {
-            $this->errors[] = 'Minimum two language matches';
+            $this->errors[] = 'Only one language detected, please upload a glossary with at least two languages. In case of doubts, refer to <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this page</a>.';
 
             return false;
         }
