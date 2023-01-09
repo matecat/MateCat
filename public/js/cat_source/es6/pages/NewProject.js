@@ -381,7 +381,7 @@ const NewProject = ({
                   <div className="label-tmx-select">
                     <span>TM & Glossary</span>
                     <span
-                      aria-label="By updating MyMemory, you are contributing to making MateCat better 
+                      aria-label="By updating MyMemory, you are contributing to making MateCat better
                       and helping fellow MateCat users improve their translations.
                       For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel."
                       tooltip-position="bottom"
@@ -447,7 +447,7 @@ const NewProject = ({
             </div>
           </div>
         </div>
-        {/* TODO: ERROR MESSAGES*/}
+
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
