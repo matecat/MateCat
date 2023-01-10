@@ -230,7 +230,7 @@ class Mmt extends BaseFeature {
             return null;
         }
 
-        $extraParameters = $engine->getEngineRecord()->extra_parameters;
+        $extraParameters = $engine->getEngineRecord()->getExtraParamsAsArray();
 
         if(!isset($extraParameters['MMT-context-analyzer'])){
             return null;
