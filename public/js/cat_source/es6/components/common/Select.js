@@ -44,7 +44,7 @@ export const Select = ({
   maxHeightDroplist = 128,
   children,
 }) => {
-  const listRef = useRef()
+  const dropDownRef = useRef()
   const wrapperRef = useRef()
   const selectedItemRef = useRef()
 
@@ -98,8 +98,14 @@ export const Select = ({
   }
 
   useEffect(() => {
-    if (isDropdownVisible && multipleSelect !== 'modal' && wrapperRef.current) {
-      const listNode = listRef.current
+    if (
+      isDropdownVisible &&
+      multipleSelect !== 'modal' &&
+      wrapperRef.current &&
+      dropDownRef.current
+    ) {
+      const {getListRef, setListMaxHeight} = dropDownRef.current
+      const listNode = getListRef()
       const wrapperNode = wrapperRef.current
       const listTopPosition =
         listNode.getBoundingClientRect().top -
@@ -121,7 +127,7 @@ export const Select = ({
         listTopPosition -
         16 // 16 = margins
       if (availableHeight > maxHeightDroplist) {
-        listNode.style.maxHeight = `${availableHeight}px`
+        setListMaxHeight(availableHeight)
       } else {
         if (checkSpaceToReverse) {
           setDropdownReversed(true)
@@ -132,11 +138,11 @@ export const Select = ({
           (label ? 32 : 0) -
           32 -
           (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
-        listNode.style.maxHeight = `${
+        setListMaxHeight(
           availableHeight > maxHeightDroplist
             ? availableHeight
-            : maxHeightDroplist
-        }px`
+            : maxHeightDroplist,
+        )
       }
     }
   }, [
@@ -259,11 +265,11 @@ export const Select = ({
         >
           <Dropdown
             {...{
+              ref: dropDownRef,
               className: 'select__dropdown',
               wrapper: wrapperRef,
               showSearchBar,
               searchPlaceholder,
-              listRef,
               activeOption,
               activeOptions,
               options,

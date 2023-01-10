@@ -1492,6 +1492,10 @@ button.ui-button::-moz-focus-inner {
         }
       }
 
+      .dropdown__option {
+        padding: 8px;
+      }
+
       .dropdown__option > span {
         color: black;
       }

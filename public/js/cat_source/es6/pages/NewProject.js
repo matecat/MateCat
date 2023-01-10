@@ -18,7 +18,7 @@ import CreateProjectStore from '../stores/CreateProjectStore'
 import NewProjectConstants from '../constants/NewProjectConstants'
 import Check from '../../../../img/icons/Check'
 
-const SELECT_HEIGHT = 260
+const SELECT_HEIGHT = 324
 
 const NewProject = ({
   isLoggedIn = false,
