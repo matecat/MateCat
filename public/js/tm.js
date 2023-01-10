@@ -19,10 +19,8 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
-;
-import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
-
-(function ($) {
+import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
+;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
     var winBottom = winTop + $(window).height()
@@ -245,16 +243,12 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
           }, 200)
         })
         .on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function () {
-          var keyValue = $('#new-tm-key').val()
-          var descKey = $('#new-tm-description').val()
-
-          if (config.isLoggedIn) {
-            UI.saveTMkey(keyValue, descKey).then(() => {
-              UI.checkTMKey('key')
-            })
-          } else {
-            UI.checkTMKey('key')
-            delete UI.newTmKey
+          UI.createNewTmKey()
+        })
+        .on('keydown', '.new #new-tm-description', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            UI.createNewTmKey()
           }
         })
         .on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function () {
@@ -420,10 +414,14 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
           e.preventDefault()
           UI.startExport(this, 'tmx')
         })
-        .on('mousedown', '.mgmt-tm .export-glossary .export-button', function (e) {
-          e.preventDefault()
-          UI.startExport(this, 'glossary')
-        })
+        .on(
+          'mousedown',
+          '.mgmt-tm .export-glossary .export-button',
+          function (e) {
+            e.preventDefault()
+            UI.startExport(this, 'glossary')
+          },
+        )
         .on('keydown', '.export-tmx .email-export.mgmt-input', function (e) {
           if (e.which == 13) {
             // enter
@@ -432,14 +430,18 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
           }
           UI.hideAllBoxOnTables()
         })
-        .on('keydown', '.export-glossary .email-export.mgmt-input', function (e) {
-          if (e.which == 13) {
-            // enter
-            e.preventDefault()
-            UI.startExport(this, 'glossary')
-          }
-          UI.hideAllBoxOnTables()
-        })
+        .on(
+          'keydown',
+          '.export-glossary .email-export.mgmt-input',
+          function (e) {
+            if (e.which == 13) {
+              // enter
+              e.preventDefault()
+              UI.startExport(this, 'glossary')
+            }
+            UI.hideAllBoxOnTables()
+          },
+        )
         .on('mousedown', '.mgmt-tm .canceladd-export', function (e) {
           e.preventDefault()
           UI.closeExport($(this).closest('tr'))
@@ -553,6 +555,19 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
             this.openLanguageResourcesPanel('tm')
             break
         }
+      }
+    },
+    createNewTmKey: function () {
+      const keyValue = $('#new-tm-key').val()
+      const descKey = $('#new-tm-description').val()
+
+      if (config.isLoggedIn) {
+        UI.saveTMkey(keyValue, descKey).then(() => {
+          UI.checkTMKey('key')
+        })
+      } else {
+        UI.checkTMKey('key')
+        delete UI.newTmKey
       }
     },
     checkCreateTmKeyFromQueryString: function () {
@@ -1100,7 +1115,10 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
           setTimeout(function () {
             //delay because server can take some time to process large file
             // TRcaller.removeClass('startUploading');
-            const uuid = type === 'glossary' && msg.data?.uuids?.length > 0 ? msg.data.uuids[0] : undefined
+            const uuid =
+              type === 'glossary' && msg.data?.uuids?.length > 0
+                ? msg.data.uuids[0]
+                : undefined
             UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
           }, 2000)
         } else {
@@ -1168,12 +1186,16 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.showStartUpload($(TDcaller))
 
-          if (response.data.total == null && response.data.totals === null ) {
+          if (response.data.total == null && response.data.totals === null) {
             setTimeout(function () {
               UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
             }, 1000)
           } else {
-            if ((type === 'tmx' && response.data.completed) || (type === 'glossary' && response.data.completed === response.data.totals) ) {
+            if (
+              (type === 'tmx' && response.data.completed) ||
+              (type === 'glossary' &&
+                response.data.completed === response.data.totals)
+            ) {
               var tr = $(TDcaller).parents('tr')
               UI.showSuccessUpload(tr)
 
@@ -1191,11 +1213,11 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
 
               return false
             }
-            const done = type === 'tmx' ? response.data.done : response.data.completed
-            const total = type === 'tmx' ? response.data.total : response.data.totals
-            var progress =
-              (parseInt(done) / parseInt(total)) *
-              100
+            const done =
+              type === 'tmx' ? response.data.done : response.data.completed
+            const total =
+              type === 'tmx' ? response.data.total : response.data.totals
+            var progress = (parseInt(done) / parseInt(total)) * 100
             $(TDcaller)
               .find('.progress .inner')
               .css('width', progress + '%')
@@ -1314,7 +1336,9 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
       var new_descr = field.text()
 
       if (new_descr === '') {
-        old_descr.length > 0 ? new_descr = old_descr : new_descr = 'Private resource'
+        old_descr.length > 0
+          ? (new_descr = old_descr)
+          : (new_descr = 'Private resource')
         field.text(new_descr)
       }
       if (old_descr === new_descr) {
@@ -1731,6 +1755,7 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
 
     openAddNewTm: function () {
       $('.mgmt-table-tm tr.new').removeClass('hide').show()
+      $('#new-tm-description').focus()
       // $('#new-tm-key').attr('disabled','disabled');
       if (UI.newTmKey) {
         UI.copyNewTMKey(UI.newTmKey)
@@ -1756,11 +1781,18 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
         .each(function () {
           $(this).addClass('disabled')
         })
-      const text = type === 'glossary' ?  'We will send a link to download the exported Glossary to this email:' : 'We will send a link to download the exported TM to this email:';
-      const className =  type === 'glossary' ?  'export-glossary' : 'export-tmx';
+      const text =
+        type === 'glossary'
+          ? 'We will send a link to download the exported Glossary to this email:'
+          : 'We will send a link to download the exported TM to this email:'
+      const className = type === 'glossary' ? 'export-glossary' : 'export-tmx'
       const exportDiv =
-        '<td class="download-container '+ className +'" style="display: none">' +
-        '<div class="message-export">'+text+'</div>' +
+        '<td class="download-container ' +
+        className +
+        '" style="display: none">' +
+        '<div class="message-export">' +
+        text +
+        '</div>' +
         '<div class="message-export-success"></div>' +
         '<input type="email" required class="email-export mgmt-input" value="' +
         config.userMail +
@@ -1898,17 +1930,16 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
       var successText = 'You should receive the link at ' + email
 
       line.find('.uploadloader').show()
-      line
-        .find('.export-button, .canceladd-export')
-        .addClass('disabled')
+      line.find('.export-button, .canceladd-export').addClass('disabled')
       const tm_key = $('.privatekey', line).text().trim()
       const tm_name = $('.description', line).text().trim()
       const params = {
         key: tm_key,
         name: tm_name,
-        email
+        email,
       }
-      const promise = type === 'glossary' ? downloadGlossary(params) : downloadTMXApi(params)
+      const promise =
+        type === 'glossary' ? downloadGlossary(params) : downloadTMXApi(params)
       promise
         .then((response) => {
           var time = Math.round(response.data.estimatedTime / 60)
@@ -1917,11 +1948,7 @@ import {downloadGlossary} from "./cat_source/es6/api/downloadGlossary";
           setTimeout(function () {
             line.find('.message-export-success').html(successText)
             line.find('.uploadloader').hide()
-            line
-              .find(
-                '.export-button, .canceladd-export, .email-export',
-              )
-              .hide()
+            line.find('.export-button, .canceladd-export, .email-export').hide()
             line.find('.message-export').hide()
             line
               .find('.message-export-success, .email-export-email-sent')
