@@ -17,7 +17,6 @@ use Contribution\ContributionSetStruct;
 use createProjectController;
 use Database;
 use Engine;
-use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_MMT;
@@ -28,8 +27,6 @@ use Exception;
 use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
-use Jobs\MetadataStruct;
-use Jobs_JobDao;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
@@ -37,10 +34,9 @@ use NewController;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use SplFileObject;
 use stdClass;
 use TaskRunner\Commons\QueueElement;
-use TmKeyManagement\UserKeysModel;
-use TmKeyManagement_Filter;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -109,14 +105,14 @@ class Mmt extends BaseFeature {
         try {
 
             $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
-            $preImport = $extraParams['MMT-preimport'];
+            $preImport   = $extraParams[ 'MMT-preimport' ];
 
             // if the MMT-preimport flag is enabled,
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
-            if($preImport === true){
-                $engineMmt = new Engines_MMT($newCreatedDbRowStruct);
-                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid($userStruct->uid) );
+            if ( $preImport === true ) {
+                $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
+                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
             }
 
         } catch ( Exception $e ) {
@@ -205,10 +201,13 @@ class Mmt extends BaseFeature {
                 return $tm_key->key;
             }, $tm_keys );
 
-            $contextRs              = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
-            $mt_context             = @array_pop( $contextRs );
+            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
+            $mt_context = @array_pop( $contextRs );
 
-            $config[ 'mt_context' ] = self::getContextAnalyzer($engine, $mt_context);
+            if ( !empty( $mt_context ) ) {
+                $config[ 'mt_context' ] = $mt_context->value;
+            }
+
             $config[ 'job_id' ]     = $jobStruct->id;
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'normal';
@@ -219,33 +218,17 @@ class Mmt extends BaseFeature {
 
     }
 
-    /**
-     * @param Engines_AbstractEngine $engine
-     * @param MetadataStruct|null $mt_context
-     * @return string|null
-     */
-    private static function getContextAnalyzer(Engines_AbstractEngine $engine, MetadataStruct $mt_context = null)
-    {
-        if(empty($mt_context)){
-            return null;
-        }
-
-        $extraParameters = $engine->getEngineRecord()->getExtraParamsAsArray();
-
-        if(!isset($extraParameters['MMT-context-analyzer'])){
-            return null;
-        }
-
-        if($extraParameters['MMT-context-analyzer'] === false){
-            return null;
-        }
-
-        return $mt_context->value;
-    }
-
     public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ) {
 
         if ( $engine instanceof Engines_MMT ) {
+
+            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $queueElement->params->id_job, 'mt_context' );
+            $mt_context = @array_pop( $contextRs );
+
+            if ( !empty( $mt_context ) ) {
+                $config[ 'mt_context' ] = $mt_context->value;
+            }
+
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'background';
         }
@@ -270,7 +253,7 @@ class Mmt extends BaseFeature {
      * @return TmKeyManagement_MemoryKeyStruct[]
      * @throws Exception
      */
-    private static function _getKeyringOwnerKeysByUid( $uid) {
+    private static function _getKeyringOwnerKeysByUid( $uid ) {
 
         /*
          * Take the keys of the user
@@ -295,7 +278,7 @@ class Mmt extends BaseFeature {
      */
     protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
 
-        return self::_getKeyringOwnerKeysByUid($LoggedUser->uid);
+        return self::_getKeyringOwnerKeysByUid( $LoggedUser->uid );
     }
 
     /**
@@ -374,7 +357,7 @@ class Mmt extends BaseFeature {
 
         if ( $engine instanceof Engines_MMT ) {
 
-            if ( !empty( self::getContextAnalyzer( $engine ) ) ) {
+            if ( !empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
 
                 $source       = $segments[ 0 ][ 'source' ];
                 $targets      = [];
@@ -386,7 +369,7 @@ class Mmt extends BaseFeature {
                 }
 
                 $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
-                $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
+                $tmpFileObject = new SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
                 foreach ( $segments as $pos => $segment ) {
                     $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
                 }
@@ -413,10 +396,10 @@ class Mmt extends BaseFeature {
                 } catch ( Exception $e ) {
                     Log::doJsonLog( $e->getMessage() );
                     Log::doJsonLog( $e->getTraceAsString() );
+                } finally {
+                    unset( $tmpFileObject );
+                    @unlink( $tmp_name );
                 }
-
-                unset( $tmpFileObject );
-                @unlink( $tmp_name );
 
             }
 
@@ -429,7 +412,7 @@ class Mmt extends BaseFeature {
                 // send user keys on a project basis
                 // ==============================================
                 //
-                $preImportIsDisabled = $engine->getEngineRecord()->extra_parameters[ 'MMT-preimport' ] === false;
+                $preImportIsDisabled = $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] === false;
                 $userIsLogged        = !empty( $projectRows[ 'id_customer' ] ) && $projectRows[ 'id_customer' ] != 'translated_user';
 
                 $user = null;
@@ -561,11 +544,11 @@ class Mmt extends BaseFeature {
                     //
 
                     $associatedMemories = $MMTEngine->getAllMemories();
-                    foreach ($associatedMemories as $memory){
+                    foreach ( $associatedMemories as $memory ) {
 
-                        if('x_mm-' . trim( $tm_key ) === $memory['externalId']){
-                            $fileName  = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
-                            $result    = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
+                        if ( 'x_mm-' . trim( $tm_key ) === $memory[ 'externalId' ] ) {
+                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                            $result   = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
 
                             if ( $result->responseStatus >= 400 ) {
                                 throw new Exception( $result->error->message );
@@ -626,8 +609,8 @@ class Mmt extends BaseFeature {
             $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = $data->engineData[ 'context_analyzer' ];
 
             $newEngineStruct = $featureSet->filter( 'disableMMTPreimport', (object)[
-                'logged_user'  => $logged_user,
-                'newEngineStruct'   => $newEngineStruct
+                    'logged_user'     => $logged_user,
+                    'newEngineStruct' => $newEngineStruct
             ] );
 
             return $newEngineStruct;
@@ -643,7 +626,7 @@ class Mmt extends BaseFeature {
      *
      * @throws Exception
      */
-    public function postUserKeyDelete($key, $uid){
+    public function postUserKeyDelete( $key, $uid ) {
 
         /*
          * Comment for now, we have to decide if user can delete key imported in ModernMT directly from matecat, moreover it should have a choice.
@@ -665,6 +648,7 @@ class Mmt extends BaseFeature {
 //
 //        $mmt->deleteMemory("x_mm-".$key);
     }
+
     /**
      * Called in @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
      *
@@ -690,13 +674,13 @@ class Mmt extends BaseFeature {
             /**
              * @var Engines_MMT $MMTEngine
              */
-            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+            $MMTEngine    = Engine::getInstance( $ownerMmtEngineMetaData->value );
             $engineStruct = $MMTEngine->getEngineRecord();
 
             $extraParams = $engineStruct->getExtraParamsAsArray();
-            $preImport = $extraParams['MMT-preimport'];
+            $preImport   = $extraParams[ 'MMT-preimport' ];
 
-            if($preImport === true){
+            if ( $preImport === true ) {
                 $MMTEngine->connectKeys( $memoryKeyStructs );
             }
         }
