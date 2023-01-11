@@ -169,7 +169,7 @@ abstract class viewController extends controller {
 
         $this->template->logged_user      = $this->user->shortName();
         $this->template->extended_user    = $this->user->fullName();
-        $this->template->isAnInternalUser = $this->featureSet->filter( "isAnInternalUser", $this->user->email );
+        $this->template->isAnInternalUser = $this->featureSet->filter( "isAnInternalUser", $this->user->email);
         $this->template->isLoggedIn       = $this->userIsLogged;
         $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
