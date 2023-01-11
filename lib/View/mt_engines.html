@@ -62,11 +62,14 @@
                 <br class="clear" />
             </div>
             <div class="provider-field checkbox first">
-                <tal:block tal:condition="isAnInternalUser">
+
+
+
+                <tal:block tal:condition="php:true === isAnInternalUser">
                     <input class="required" data-field-name="preimport" type="checkbox" disabled="disabled" />
                     <label class="checkbox-label muted">Pre-import your TMs </label>
                 </tal:block>
-                <tal:block tal:condition="not:isAnInternalUser">
+                <tal:block tal:condition="php:false === isAnInternalUser">
                     <input class="required" data-field-name="preimport" type="checkbox" checked="checked" />
                     <label class="checkbox-label">Pre-import your TMs </label>
                 </tal:block>
@@ -74,11 +77,11 @@
                 <br class="clear" />
             </div>
             <div class="provider-field checkbox">
-                <tal:block tal:condition="isAnInternalUser">
+                <tal:block tal:condition="php:true === isAnInternalUser">
                     <input class="required" data-field-name="context_analyzer" type="checkbox" disabled="disabled" />
                     <label class="checkbox-label muted">Activate context analyzer</label>
                 </tal:block>
-                <tal:block tal:condition="not:isAnInternalUser">
+                <tal:block tal:condition="php:false === isAnInternalUser">
                     <input class="required" data-field-name="context_analyzer" type="checkbox" checked="checked" />
                     <label class="checkbox-label">Activate context analyzer</label>
                 </tal:block>
