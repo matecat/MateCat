@@ -40,7 +40,11 @@
                             </tal:block>
 
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-tm">New resource</a>
+                                <button class="btn-ok clear add-shared-tm">
+                                    <a class="icon-owner icon-users icon-owner-shared"></a>
+                                    Add shared resource
+                                </button>
+                                <button class="btn-ok clear add-tm">New resource</button>
                                 <h3 class="pull-left">Active Resources</h3>
                             </div>
                             <div class="active-tm-container">
@@ -142,19 +146,13 @@
                                             <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
                                         </td>
                                         <td class="description">
-                                            <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Please insert a name for the resource" ></textarea>
+                                            <input class="mgmt-input" id="new-tm-description" placeholder="Please insert a name for the resource" ></input>
                                         </td>
                                         <td class="privatekey">
-                                            <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
-                                            <!--<a class="btn-ok pull-right">Create a New TM</a>-->
-    <!--                                    <span class="text pull-left text-req">*required</span> -->
+                                            <input class="mgmt-input pull-left hide" type="text" id="shared-tm-key" placeholder="Add the shared key here" />
                                         </td>
-
                                         <td class="action">
-
-
-
-                                             <a class="pull-left btn-ok uploadtm disabled">
+                                             <a class="pull-left btn-ok uploadtm">
                                                 <span class="text uploadkey">Confirm</span>
                                             </a>
                                             <a class="pull-left btn-grey canceladdtmx">
@@ -332,10 +330,10 @@
 
                             <div class="block pull-right ">
                                 <tal:block tal:condition="php: empty(logged_user)">
-                                    <a class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</a>
+                                    <button class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</button>
                                 </tal:block>
                                 <tal:block tal:condition="php: !empty(logged_user)">
-                                    <a class="btn-ok clear add-tm add-mt-engine">Add MT engine</a>
+                                    <button class="btn-ok clear add-tm add-mt-engine">Add MT engine</button>
                                 </tal:block>
                             </div>
                             <div class="block pull-right ">
