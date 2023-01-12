@@ -204,7 +204,8 @@ class LanguageSelector extends React.Component {
       .map((e) => e.code)
       .indexOf(language.code)
     if (indexSearch > -1) {
-      newSelectedLanguages.splice(indexSearch, 1)
+      if (selectedLanguages.length > 1)
+        newSelectedLanguages.splice(indexSearch, 1)
     } else {
       newSelectedLanguages.push(language)
     }

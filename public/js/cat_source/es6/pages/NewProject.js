@@ -16,9 +16,17 @@ import CreateProjectActions from '../actions/CreateProjectActions'
 import LanguageSelector from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
 import NewProjectConstants from '../constants/NewProjectConstants'
-import Check from '../../../../img/icons/Check'
+import {CreateProjectContext} from '../components/createProject/CreateProjectContext'
+import {TargetLanguagesSelect} from '../components/createProject/TargetLanguagesSelect'
+import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
+import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 
 const SELECT_HEIGHT = 324
+
+const historySourceTargets = {
+  // source: 'es-ES',
+  // targets: 'it-IT,es-ES,es-MX||',
+}
 
 const NewProject = ({
   isLoggedIn = false,
@@ -243,7 +251,20 @@ const NewProject = ({
   )
 
   return (
-    <>
+    <CreateProjectContext.Provider
+      value={{
+        SELECT_HEIGHT,
+        languages,
+        targetLangs,
+        setTargetLangs,
+        setIsOpenMultiselectLanguages,
+        tmKeys,
+        tmKeySelected,
+        setTmKeySelected,
+        sourceLang,
+        changeSourceLanguage,
+      }}
+    >
       <HeaderPortal>
         <Header
           showModals={false}
@@ -300,62 +321,30 @@ const NewProject = ({
             )}
             {/*Source Language*/}
             <div className="translate-box source">
-              <Select
-                label="From"
-                name={'source-lang'}
-                maxHeightDroplist={SELECT_HEIGHT}
-                showSearchBar={true}
-                options={languages}
-                activeOption={sourceLang}
-                checkSpaceToReverse={false}
-                onSelect={(option) => changeSourceLanguage(option)}
+              <SourceLanguageSelect
+                history={
+                  historySourceTargets?.source
+                    ? historySourceTargets.source.split(',')
+                    : []
+                }
               />
             </div>
-            <a
-              id="swaplang"
-              title="Swap languages"
-              onClick={() => swapLanguages()}
-            >
+            <a id="swaplang" title="Swap languages" onClick={swapLanguages}>
               <span>Swap languages</span>
             </a>
             {/*Target Language*/}
             <div className="translate-box target">
-              <Select
-                label="To"
-                name={'target-lang'}
-                maxHeightDroplist={SELECT_HEIGHT}
-                showSearchBar={true}
-                options={languages}
-                multipleSelect={'dropdown'}
-                activeOptions={targetLangs}
-                checkSpaceToReverse={false}
-                onToggleOption={(option) => {
-                  setTargetLangs((prevState) =>
-                    prevState.some((item) => item.id === option.id)
-                      ? prevState.filter((item) => item.id !== option.id).length
-                        ? prevState.filter((item) => item.id !== option.id)
-                        : prevState
-                      : [...prevState, option],
-                  )
-                }}
-              >
-                {({index, onClose}) => ({
-                  ...(index === 0 && {
-                    beforeRow: (
-                      <button
-                        className="button-top-of-list"
-                        onClick={() => {
-                          setIsOpenMultiselectLanguages(true)
-                          onClose()
-                        }}
-                      >
-                        MULTIPLE LANGUAGES
-                        <span className="icon-plus3 icon"></span>
-                      </button>
-                    ),
-                  }),
-                })}
-              </Select>
+              <TargetLanguagesSelect
+                history={
+                  historySourceTargets?.targets
+                    ? historySourceTargets.targets
+                        .split('||')
+                        .flatMap((item) =>
+                          item.length ? [item.split(',')] : [],
+                        )
+                    : []
+                }
+              />
             </div>
             {/*Project Subject*/}
             <div className="translate-box project-subject">
@@ -372,72 +361,9 @@ const NewProject = ({
             </div>
             {/*TM and glossary*/}
             <div className="translate-box tmx-select">
-              <Select
-                label={
-                  <div className="label-tmx-select">
-                    <span>TM & Glossary</span>
-                    <span
-                      aria-label="By updating MyMemory, you are contributing to making MateCat better
-                      and helping fellow MateCat users improve their translations.
-                      For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel."
-                      tooltip-position="bottom"
-                    >
-                      <span className="icon-info icon" />
-                    </span>
-                  </div>
-                }
-                name={'tmx-select'}
-                maxHeightDroplist={SELECT_HEIGHT}
-                showSearchBar={true}
-                isDisabled={!tmKeys}
-                options={tmKeys}
-                multipleSelect={'dropdown'}
-                activeOptions={tmKeySelected}
-                placeholder={'MyMemory Collaborative TM'}
-                checkSpaceToReverse={false}
-                onToggleOption={(option) => {
-                  if (tmKeySelected?.some((item) => item.id === option.id)) {
-                    setTmKeySelected(
-                      tmKeySelected.filter((item) => item.id !== option.id),
-                    )
-                    UI.disableTm(option.id)
-                  } else {
-                    setTmKeySelected(tmKeySelected.concat([option]))
-                    UI.selectTm(option.id)
-                  }
-                }}
-              >
-                {({index, onClose, name, key, showActiveOptionIcon}) => ({
-                  ...(index === 0 && {
-                    beforeRow: (
-                      <button
-                        className="button-top-of-list"
-                        onClick={() => {
-                          UI.openLanguageResourcesPanel('tm')
-                          onClose()
-                        }}
-                      >
-                        CREATE RESOURCE
-                        <span className="icon-plus3 icon"></span>
-                      </button>
-                    ),
-                  }),
-                  row: (
-                    <div className="tmx-dropdown-row">
-                      <div>
-                        <span>{name}</span>
-                        <span>{key}</span>
-                      </div>
-                      {showActiveOptionIcon && <Check size={16} />}
-                    </div>
-                  ),
-                })}
-              </Select>
+              <TmGlossarySelect />
             </div>
-            <div
-              className="translate-box settings"
-              onClick={() => openTmPanel()}
-            >
+            <div className="translate-box settings" onClick={openTmPanel}>
               <More size={24} />
               <span className="text">More settings</span>
             </div>
@@ -496,7 +422,7 @@ const NewProject = ({
               type="button"
               className="uploadbtn disabled"
               value="Analyze"
-              onClick={() => createProject()}
+              onClick={createProject}
             />
           ) : (
             <>
@@ -528,7 +454,7 @@ const NewProject = ({
         />
       )}
       <Footer />
-    </>
+    </CreateProjectContext.Provider>
   )
 }
 
