@@ -164,6 +164,7 @@
                                         </td>
                                     </tr>
 
+
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="dragrow"><div class="status"></div></td>
