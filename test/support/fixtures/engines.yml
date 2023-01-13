@@ -1,0 +1,35 @@
+engine0:
+    id: 999999999
+    name: NONE
+    type: NONE
+    description: No MT
+    base_url: ""
+    translate_relative_url:
+    contribute_relative_url: NULL
+    update_relative_url: NULL
+    delete_relative_url: NULL
+    others: "{}"
+    class_load: NONE
+    extra_parameters: ""
+    google_api_compliant_version: NULL
+    penalty: 100
+    active: 0
+    uid: NULL
+
+engine1:
+    id: 1
+    name: MyMemory (All Pairs)
+    type: TM
+    description: Machine translation from Google Translate and Microsoft Translator.
+    base_url: http://api.mymemory.translated.net
+    translate_relative_url: get
+    contribute_relative_url: set
+    update_relative_url: update
+    delete_relative_url: delete
+    others: '{"gloss_get_relative_url":"glossary/get","gloss_set_relative_url":"glossary/set","gloss_update_relative_url":"glossary/update","glossary_import_relative_url":"glossary/import","glossary_export_relative_url":"glossary/export","gloss_delete_relative_url":"glossary/delete","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"tmx/status","tmx_export_create_url":"tmx/export/create","tmx_export_check_url":"tmx/export/check","tmx_export_download_url":"tmx/export/download","tmx_export_list_url":"tmx/export/list","tmx_export_email_url":"tmx/export/create","api_key_create_user_url":"createranduser","api_key_check_auth_url":"authkey","analyze_url":"analyze","detect_language_url":"langdetect.php"}'
+    class_load: MyMemory
+    extra_parameters: "{}"
+    google_api_compliant_version: 1
+    penalty: 0
+    active: 1
+    uid: NULL
