@@ -2,7 +2,9 @@
 putenv( 'phpunit=1' );
 
 declare( ticks = 10 );
+
 require( 'support/functions.php' );
+
 setupSignalHandler();
 
 define( 'PROJECT_ROOT', realpath( dirname( __FILE__ ) . '/../' ) . DIRECTORY_SEPARATOR );
@@ -12,7 +14,6 @@ set_include_path( get_include_path() . PATH_SEPARATOR . TEST_DIR );
 
 require( 'lib/IntegrationTest.php' );
 require( 'support/php_versions_override.php' );
-
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 
 register_shutdown_function( function () {
@@ -38,4 +39,3 @@ Bootstrap::start();
 //startConnection();
 //
 //INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);
-

@@ -48,8 +48,8 @@ function integrationSetChunkAsComplete( $options ) {
     $test->path   = '?action=Features_ProjectCompletion_SetChunkCompleted';
     $test->method = 'POST';
     $test->params = [
-        'id_job'   => $options[ 'params' ][ 'id_job' ],
-        'password' => $options[ 'params' ][ 'password' ]
+            'id_job'   => $options[ 'params' ][ 'id_job' ],
+            'password' => $options[ 'params' ][ 'password' ]
     ];
 
     $response = $test->getResponse();
@@ -89,10 +89,10 @@ function prepare_file_in_upload_folder( $path, $upload_session ) {
 function get_sessid_for_user( Users_UserStruct $user ) {
 
     list( $new_cookie_data, $new_expire_date ) = AuthCookie::generateSignedAuthCookie(
-        $user->email, $user->uid
+            $user->email, $user->uid
     );
     $cookie = [
-        INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/'
+            INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/'
     ];
 
     $sessidCurl          = new CurlTest();
@@ -155,6 +155,7 @@ function integrationCreateTestProject( $options = [] ) {
     }
 
     $test->params = [
+
         'project_name' => 'foo',
         'target_lang'  => 'it-IT',
         'source_lang'  => 'en-US'
@@ -192,6 +193,7 @@ function splitJob( $params, $options = [] ) {
         'job_pass'     => $params[ 'job_pass' ],
         'num_split'    => $params[ 'num_split' ],
         'split_values' => $params[ 'split_values' ]
+
     ];
 
     $response = $test->getResponse();
@@ -213,10 +215,11 @@ function mergeJob( $params, $options = [] ) {
     $test->path   = '?action=splitJob';
     $test->method = 'POST';
     $test->params = [
-        'job_id'       => $params[ 'id_job' ],
-        'project_id'   => $params[ 'id_project' ],
-        'exec'         => 'merge',
-        'project_pass' => $params[ 'project_pass' ],
+            'job_id'       => $params[ 'id_job' ],
+            'project_id'   => $params[ 'id_project' ],
+            'exec'         => 'merge',
+            'project_pass' => $params[ 'project_pass' ],
+
     ];
 
     $response = $test->getResponse();
@@ -237,10 +240,11 @@ function integrationSetSegmentsTranslated( $project_id ) {
         $segments = $chunk->getSegments();
         foreach ( $segments as $segment ) {
             integrationSetTranslation( [
-                'id_segment' => $segment->id,
-                'id_job'     => $chunk->id,
-                'password'   => $chunk->password,
-                'status'     => 'translated'
+                    'id_segment' => $segment->id,
+                    'id_job'     => $chunk->id,
+                    'password'   => $chunk->password,
+                    'status'     => 'translated'
+
             ] );
         }
     }
@@ -254,11 +258,12 @@ function integrationSetTranslation( $options ) {
         // 'id_job' => 12,
         // 'password' => '8ec640b5c874',
         // 'status' => 'draft',
-        'translation'   => "simulated translation during tests",
-        'id_translator' => false,
-        'version'       => time(),
-        'propagate'     => false,
-        'status'        => 'draft'
+            'translation'   => "simulated translation during tests",
+            'id_translator' => false,
+            'version'       => time(),
+            'propagate'     => false,
+            'status'        => 'draft'
+
     ];
 
     $test         = new CurlTest();
@@ -310,9 +315,10 @@ function toggleChunkOptions( $options ) {
     $test->params = $options[ 'features' ];
     $test->method = 'POST';
     $test->path   = sprintf(
-        '/api/v2/jobs/%s/%s/options',
-        $options[ 'id_job' ],
-        $options[ 'job_pass' ]
+            '/api/v2/jobs/%s/%s/options',
+            $options[ 'id_job' ],
+            $options[ 'job_pass' ]
+
     );
 
     $response = $test->getResponse();
