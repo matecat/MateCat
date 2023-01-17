@@ -26,7 +26,7 @@ class GetStatementForCacheJobTest extends AbstractTest
     }
 
     public function test__getStatementForCache(){
-        $result= $this->method->invoke($this->reflectedClass);
+        $result= $this->method->invoke($this->reflectedClass, "");
         $this->assertTrue($result instanceof PDOStatement);
         $this->assertEquals("SELECT * FROM jobs WHERE " . " id = :id_job AND password = :password ", $result->queryString);
 

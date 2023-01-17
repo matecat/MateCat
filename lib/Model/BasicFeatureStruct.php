@@ -24,7 +24,12 @@ class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements D
      */
     public function toNewObject() {
         $name = Features::getPluginClass( $this->feature_code );
-        return new $name($this);
+
+        if(class_exists($name)){
+            return new $name($this);
+        }
+
+        return null;
     }
 
 }
