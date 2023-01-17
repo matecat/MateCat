@@ -296,6 +296,23 @@ class Utils {
     }
 
     /**
+     * Removes the empty elements from the end of an array
+     *
+     * @param array $array
+     * @return array|mixed
+     */
+    public static function popArray(array $array)
+    {
+        if(end($array) === ''){
+            array_pop($array);
+
+            return self::popArray($array);
+        }
+
+        return $array;
+    }
+
+    /**
      * @param $params
      * @param $required_keys
      *
