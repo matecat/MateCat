@@ -28,15 +28,10 @@ class TestHelper {
      * @throws Exception
      */
     static function resetDb() {
-
-        var_dump("dsa");
-        die();
-
-
         TestHelper::$SCHEMA_HELPER->createDatabase() ;
         TestHelper::$SCHEMA_HELPER->prepareSchemaTables();
         TestHelper::$SCHEMA_HELPER->resetAllTables();
-        TestHelper::$FIXTURES->loadFixtures();
+        //TestHelper::$FIXTURES->loadFixtures();
     }
 
     public static function parseConfigFile( $env ) {

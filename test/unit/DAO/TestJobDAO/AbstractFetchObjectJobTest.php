@@ -123,7 +123,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
          * Params
          */
 
-        $this->stmt_param = $this->method_getStatementForCache->invoke( $this->job_Dao );
+        $this->stmt_param = $this->method_getStatementForCache->invoke( $this->job_Dao, "" );
 
 
         $this->fetchClass_param           = new \Jobs_JobStruct();

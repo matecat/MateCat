@@ -115,7 +115,7 @@ class CacheBehaviourJobTest extends AbstractTest {
         $method    = $reflector->getMethod( "_getStatementForCache" );
         $method->setAccessible( true );
 
-        $statement = $method->invoke( $this->job_Dao );
+        $statement = $method->invoke( $this->job_Dao , "");
 
         //check that there is no cache
         $this->assertEmpty( unserialize(

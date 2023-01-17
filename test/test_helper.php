@@ -27,8 +27,6 @@ Bootstrap::start();
 TestHelper::init();
 TestHelper::resetDb();
 
-
-
 function startConnection() {
     $conn = Database::obtain(
             INIT::$DB_SERVER, INIT::$DB_USER,

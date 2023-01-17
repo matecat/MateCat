@@ -2,7 +2,6 @@
 
 use Features\Airbnb;
 use Features\Ebay;
-use Features\Microsoft;
 use Features\ReviewImproved;
 
 /**
@@ -37,10 +36,6 @@ class FeaturesSetTest extends AbstractTest {
 
     protected function _testForDependenciesOrder( $dependenciesSet ) {
 
-        foreach ( self::$microsoftDependencies as $dep ) {
-            $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ Microsoft::FEATURE_CODE ] );
-        }
-
         foreach ( self::$ebayDependencies as $dep ) {
             $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ Ebay::FEATURE_CODE ] );
         }
@@ -67,7 +62,8 @@ class FeaturesSetTest extends AbstractTest {
 
         for ( $i = 0; $i < 2000; $i++ ) {
 
-            $codes = explode( ",", "qa_check_glossary,airbnb,ebay,review_improved,microsoft,translation_versions,project_completion,review_extended,translated,qa_check_blacklist" );
+            // removed microsoft
+            $codes = explode( ",", "qa_check_glossary,airbnb,ebay,review_improved,translation_versions,project_completion,review_extended,translated,qa_check_blacklist" );
             shuffle( $codes );
             shuffle( $codes );
             $code_string = implode( ",", $codes );
@@ -77,8 +73,9 @@ class FeaturesSetTest extends AbstractTest {
 
             $set = array_flip( array_values( $featureSet->getCodes() ) );
 
-            $this->assertEquals( 10, count( $featureSet->getCodes() ) );
-            $this->assertEquals( 10, count( $set ) );
+
+            $this->assertEquals( 9, count( $featureSet->getCodes() ) );
+            $this->assertEquals( 9, count( $set ) );
 
             $this->assertTrue( $this->_testForDependenciesOrder( $set ) );
 
