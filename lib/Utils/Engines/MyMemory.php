@@ -942,8 +942,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 ]
         );
 
+        $this->engineRecord['base_url'] = "https://analyze.mymemory.translated.net/api/v1";
 
-        $this->call( "analyze_url", $parameters, true );
+        $this->call( "analyze_url", array_values( $segs_array ), true, true );
 
         return $this->result;
 
