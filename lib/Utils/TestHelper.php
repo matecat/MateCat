@@ -31,7 +31,7 @@ class TestHelper {
         TestHelper::$SCHEMA_HELPER->createDatabase() ;
         TestHelper::$SCHEMA_HELPER->prepareSchemaTables();
         TestHelper::$SCHEMA_HELPER->resetAllTables();
-        //TestHelper::$FIXTURES->loadFixtures();
+       // TestHelper::$FIXTURES->loadFixtures();
     }
 
     public static function parseConfigFile( $env ) {

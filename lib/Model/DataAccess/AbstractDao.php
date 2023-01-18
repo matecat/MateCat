@@ -549,17 +549,16 @@ abstract class DataAccess_AbstractDao {
         if ( $stmt->execute( $data ) ) {
             if ( count( static::$auto_increment_field ) ) {
                 return $conn->lastInsertId();
-            } else {
-                return $stmt->rowCount();
-            }
-        } else {
-
-            if ( $options[ 'raise' ] ) {
-                throw new Exception( $stmt->errorInfo() );
             }
 
-            return false;
+            return $stmt->rowCount();
         }
+
+        if ( $options[ 'raise' ] ) {
+            throw new Exception( $stmt->errorInfo() );
+        }
+
+        return false;
     }
 
     /**
