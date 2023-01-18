@@ -2,6 +2,8 @@
 
 namespace LQA;
 
+use CJKLangUtils;
+
 class SizeRestriction {
 
     /**
@@ -66,6 +68,20 @@ class SizeRestriction {
      * @return int
      */
     private function getCleanedStringLength() {
-        return mb_strlen( $this->cleanedString );
+
+        $wordsArray = mb_str_split($this->cleanedString);
+
+        $stringLength = 0;
+
+        foreach ($wordsArray as $word){
+
+            if(CJKLangUtils::isCjk($word)){
+                $stringLength = $stringLength + 2;
+            } else {
+                $stringLength++;
+            }
+        }
+
+        return $stringLength;
     }
 }
