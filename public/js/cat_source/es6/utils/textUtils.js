@@ -412,7 +412,8 @@ const TEXT_UTILS = {
       let matchArr, start, end
       while ((matchArr = regex.exec(text)) !== null) {
         try {
-          start = matchArr.index > 0 ? matchArr.index + 1 : 0
+          const difference = matchArr[0].length - matchArr[2].length ?? 0
+          start = matchArr.index + difference
           end = start + matchArr[2].length
           callback(start, end)
         } catch (e) {
