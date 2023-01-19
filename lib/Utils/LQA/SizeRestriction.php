@@ -70,7 +70,6 @@ class SizeRestriction {
     private function getCleanedStringLength() {
 
         $wordsArray = mb_str_split($this->cleanedString);
-
         $stringLength = 0;
 
         foreach ($wordsArray as $word){

@@ -15,8 +15,6 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
 
         $sizeRestriction = new SizeRestriction( $string, 55 );
 
-        var_dump($sizeRestriction->getCharactersRemaining());
-
         $this->assertFalse( $sizeRestriction->checkLimit() );
         $this->assertEquals( -84, $sizeRestriction->getCharactersRemaining() );
     }
@@ -60,42 +58,47 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
-    public function test_with_a_chinese_string() {
-        $string = '在結個發我者從改區及老亮:許了聲來而演下感收不臺的港';
+    public function test_CJK_string() {
 
-        $sizeRestriction = new SizeRestriction( $string, 51 );
+        $strings = [
+            'ch' => [
+                '「AirCover」？' => 14,
+                '？' => 2,
+                '什么是「AirCover 四海无忧」？' => 29,
+                '我們有關於你 Airbnb 帳號的重要消息。' => 36,
+            ],
+            'jp' => [
+                'これを受け、今後Airbnbでは予約やホスティングを行えませんのでご了承ください。' => 76,
+                'あなたのカテゴリ' => 16,
+                'Airbnb Plusのリ​⁠​ス​⁠​テ​⁠​ィ​⁠​ン​⁠​グ​⁠​を管​⁠​理​⁠​す​⁠​る新​⁠​し​⁠​い​⁠​方​⁠​法' => 84,
+                'AirCoverとは？' => 14,
+                'Aon 在 FCA 的登记号为 310451。' => 30,
+                '9検オフユハ報37覚安チヘリヨ稿漢前のたむほ面今めンざれ握面みレ' => 61,
+                '皆さんこんにちは、トウフグのコウイチでございます。ハロー！' => 58,
+            ],
+            'ko' => [
+                '​2023년 1월 24일 또는 그 후에 에어비앤비 계정을 만들었어요. ' => 60,
+                '안녕하세요' => 10,
+                '어떤 약관이 적용되나요?' => 23,
+                ' (기본)' => 7,
+                '내 카테고리' => 11,
+            ],
+        ];
 
-        $this->assertTrue( $sizeRestriction->checkLimit() );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
+        foreach($strings as $lang => $langStrings){
+            foreach ($langStrings as $string => $limit){
+                $this->sizeRestrictionAsserts($string, $limit);
+            }
+        }
     }
 
     /**
-     * @test
+     * @param $string
+     * @param $limit
      */
-    public function test_with_a_japanese_string() {
-        $string = '9検オフユハ報37覚安チヘリヨ稿漢前のたむほ面今めンざれ握面みレ';
-
-        $sizeRestriction = new SizeRestriction( $string, 61);
-
-        $this->assertTrue( $sizeRestriction->checkLimit() );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
-
-        $string = '皆さんこんにちは、トウフグのコウイチでございます。ハロー！';
-
-        $sizeRestriction = new SizeRestriction( $string, 57);
-
-        $this->assertTrue( $sizeRestriction->checkLimit() );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
-    }
-
-    /**
-     * @test
-     */
-    public function test_with_a_korean_string() {
-        $string = '안녕하세요';
-
-        $sizeRestriction = new SizeRestriction( $string, 10 );
-
+    private function sizeRestrictionAsserts($string, $limit)
+    {
+        $sizeRestriction = new SizeRestriction( $string, $limit );
         $this->assertTrue( $sizeRestriction->checkLimit() );
         $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
     }
