@@ -683,6 +683,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         ? term.matching_words.filter((value) => value)
         : [],
     }))
+    if (!this._segments.size) return
     const index = this.getSegmentIndex(sid)
     const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
     const glossary = isGlossaryAlreadyExist
