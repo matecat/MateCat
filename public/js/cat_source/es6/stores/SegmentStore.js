@@ -196,6 +196,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             openComments: false,
             openSplit: false,
             metadata: segment.metadata,
+            ...(segment.id_file_part && {id_file_part: segment.id_file_part}),
           }
           newSegments.push(segData)
           segData = null
