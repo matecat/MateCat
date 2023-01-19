@@ -23,7 +23,11 @@ class SizeRestriction {
      * @param $limit
      */
     public function __construct( $string, $limit ) {
-        $this->cleanedString = $this->clearStringFromTags( $string );
+
+        $string = $this->clearStringFromTags( $string );
+        $string = $this->removeHiddenCharacters( $string );
+
+        $this->cleanedString = $string;
         $this->limit         = $limit;
     }
 
@@ -51,6 +55,22 @@ class SizeRestriction {
     }
 
     /**
+     * Remove every hidden character like word joiner or half spaces
+     *
+     * @param $string
+     * @return string
+     */
+    private function removeHiddenCharacters($string)
+    {
+        $cleanedText = str_replace("&#8203;", "", $string);
+        $cleanedText = str_replace("\xE2\x80\x8C", "", $cleanedText);
+        $cleanedText = str_replace("\xE2\x80\x8B", "", $cleanedText);
+        $cleanedText = str_replace("⁠", "", $cleanedText);
+
+        return $cleanedText;
+    }
+
+    /**
      * @return bool
      */
     public function checkLimit() {
@@ -73,7 +93,6 @@ class SizeRestriction {
         $stringLength = 0;
 
         foreach ($wordsArray as $word){
-
             if(CJKLangUtils::isCjk($word)){
                 $stringLength = $stringLength + 2;
             } else {
