@@ -3,6 +3,7 @@
 namespace LQA;
 
 use CJKLangUtils;
+use EmojiUtils;
 
 class SizeRestriction {
 
@@ -93,7 +94,7 @@ class SizeRestriction {
         $stringLength = 0;
 
         foreach ($wordsArray as $word){
-            if(CJKLangUtils::isCjk($word)){
+            if(CJKLangUtils::isCjk($word) or EmojiUtils::isEmoji($word)){
                 $stringLength = $stringLength + 2;
             } else {
                 $stringLength++;
