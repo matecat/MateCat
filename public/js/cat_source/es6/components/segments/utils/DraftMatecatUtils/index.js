@@ -19,6 +19,7 @@ import {
   unescapeHTMLLeaveTags,
   decodeTagsToPlainText,
   formatText,
+  getCharactersCounter,
 } from './textUtils'
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
@@ -95,6 +96,7 @@ const DraftMatecatUtils = {
   activateQaCheckGlossary,
   activateQaCheckBlacklist,
   prepareTextForLexiqa,
+  getCharactersCounter,
 }
 
 export default DraftMatecatUtils

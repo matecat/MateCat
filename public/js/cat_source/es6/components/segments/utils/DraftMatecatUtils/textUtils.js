@@ -2,6 +2,7 @@ import {getXliffRegExpression} from './tagModel'
 import {Base64} from 'js-base64'
 
 import TagUtils from '../../../../utils/tagUtils'
+import TEXT_UTILS from '../../../../utils/textUtils'
 
 /**
  *
@@ -125,3 +126,12 @@ export const formatText = (text, format) => {
 
 export const regexWordDelimiter =
   /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
+
+export const getCharactersCounter = (value) => {
+  const {isCJK, isEmoji, removeHiddenCharacters} = TEXT_UTILS
+  const cleanContent = removeHiddenCharacters(value)
+  const counter = cleanContent
+    .split('')
+    .reduce((acc, cur) => acc + (isCJK(cur) || isEmoji(cur) ? 2 : 1), 0)
+  return counter
+}
