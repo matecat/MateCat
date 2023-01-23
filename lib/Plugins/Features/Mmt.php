@@ -231,6 +231,8 @@ class Mmt extends BaseFeature {
 
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'background';
+            $config[ 'keys' ]       = @$config[ 'id_user' ];
+
         }
 
         return $config;
