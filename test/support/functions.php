@@ -155,10 +155,9 @@ function integrationCreateTestProject( $options = [] ) {
     }
 
     $test->params = [
-
-        'project_name' => 'foo',
-        'target_lang'  => 'it-IT',
-        'source_lang'  => 'en-US'
+            'project_name' => 'foo',
+            'target_lang'  => 'it-IT',
+            'source_lang'  => 'en-US'
     ];
 
     if ( array_key_exists( 'params', $options ) ) {
@@ -186,14 +185,13 @@ function splitJob( $params, $options = [] ) {
     $test->path   = '?action=splitJob';
     $test->method = 'POST';
     $test->params = [
-        'job_id'       => $params[ 'id_job' ],
-        'project_id'   => $params[ 'id_project' ],
-        'project_pass' => $params[ 'project_pass' ],
-        'exec'         => 'apply',
-        'job_pass'     => $params[ 'job_pass' ],
-        'num_split'    => $params[ 'num_split' ],
-        'split_values' => $params[ 'split_values' ]
-
+            'job_id'       => $params[ 'id_job' ],
+            'project_id'   => $params[ 'id_project' ],
+            'project_pass' => $params[ 'project_pass' ],
+            'exec'         => 'apply',
+            'job_pass'     => $params[ 'job_pass' ],
+            'num_split'    => $params[ 'num_split' ],
+            'split_values' => $params[ 'split_values' ]
     ];
 
     $response = $test->getResponse();
@@ -219,7 +217,6 @@ function mergeJob( $params, $options = [] ) {
             'project_id'   => $params[ 'id_project' ],
             'exec'         => 'merge',
             'project_pass' => $params[ 'project_pass' ],
-
     ];
 
     $response = $test->getResponse();
@@ -244,7 +241,6 @@ function integrationSetSegmentsTranslated( $project_id ) {
                     'id_job'     => $chunk->id,
                     'password'   => $chunk->password,
                     'status'     => 'translated'
-
             ] );
         }
     }
@@ -263,7 +259,6 @@ function integrationSetTranslation( $options ) {
             'version'       => time(),
             'propagate'     => false,
             'status'        => 'draft'
-
     ];
 
     $test         = new CurlTest();
@@ -318,7 +313,6 @@ function toggleChunkOptions( $options ) {
             '/api/v2/jobs/%s/%s/options',
             $options[ 'id_job' ],
             $options[ 'job_pass' ]
-
     );
 
     $response = $test->getResponse();

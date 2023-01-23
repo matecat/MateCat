@@ -13,6 +13,7 @@ inc/*.dat
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
+inc/config.ini*
 inc/config.test.ini
 inc/config.development.ini
 inc/.globalmessage.ini

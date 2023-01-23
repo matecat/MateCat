@@ -7,6 +7,7 @@ use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\TranslationVersionsHandler;
+use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;

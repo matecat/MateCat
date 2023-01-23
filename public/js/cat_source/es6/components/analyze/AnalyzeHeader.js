@@ -127,9 +127,16 @@ class AnalyzeHeader extends React.Component {
       html = (
         <div className="analysis-create">
           <div className="search-tm-matches">
-            <div className="complete">This job is too big.</div>
+            <div className="complete">
+              We are having issues with the analysis of this project.
+            </div>
             <div className="analysisNotPerformed">
-              The analysis was not performed.
+              {' '}
+              Please contact us at{' '}
+              <a href="mailto: + config.support_mail + ">
+                {config.support_mail}{' '}
+              </a>{' '}
+              for more information.
             </div>
           </div>
         </div>

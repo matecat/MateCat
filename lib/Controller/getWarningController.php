@@ -2,6 +2,7 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
+use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Translations\WarningDao;
 

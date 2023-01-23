@@ -1,10 +1,27 @@
 <?php
+namespace LQA;
 
-use BxExG\Mapper;
-use Matecat\SubFiltering\Filters\LtGtDecode;
+use API\V2\Exceptions\AuthenticationError;
+use CatUtils;
+use Chunks_ChunkStruct;
+use DOMDocument;
+use DOMElement;
+use DOMException;
+use DOMNode;
+use DOMNodeList;
+use DOMXPath;
+use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
+use FeatureSet;
+use Log;
+use LogicException;
+use LQA\BxExG\Validator;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 use Matecat\SubFiltering\MateCatFilter;
+use Segments_SegmentMetadataDao;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class errObject
@@ -395,6 +412,8 @@ class QA {
             4000 => 'Glossary blacklist match detected',
 
     ];
+
+    const SIZE_RESTRICTION = "sizeRestriction";
 
     /**
      * <code>
@@ -1345,8 +1364,8 @@ class QA {
      *
      * @param DOMElement $element
      *
-     * @throws \Exception
      * @return bool
+     *@throws Exception
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
 
@@ -1623,16 +1642,17 @@ class QA {
 
         //
         // ===========================================
-        // Compare the tag ids and equiv-text content
+        // Compare the tag id(s) and equiv-text content
         // ===========================================
         //
         // 1. id
         //
-        // In this case check for id order mismatch and throw a ERR_TAG_ORDER Warning
+        // - In this case of id mismatch and throw a ERR_TAG_MISMATCH Error
+        // - In this case check for id order mismatch and throw a ERR_TAG_ORDER Warning
         //
-        // 2. equiv-text
+        // 2. equiv-text (for <ph> and <pc> tags from Xliff 2.0. files)
         //
-        // In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
+        // - In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
         //
 
         $srcOpIds = $this->extractIdAttributes($open_malformedXmlSrcStruct);
@@ -1648,16 +1668,21 @@ class QA {
         $srcSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_src);
         $trgSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_trg);
 
-        $this->checkContentAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        // check in equiv-text
+        $this->checkContentAndAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+
+        // check for id mismatch
+        $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // check for warnings only if there are no errors
         if( !$this->thereAreErrors() ){
-            $this->checkTagPositionsAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            $this->checkTagPositionsAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            // $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAndAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAndAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAndAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
         }
 
         // If there are errors get tag diff for the UI
@@ -1718,7 +1743,7 @@ class QA {
      * @param string $error
      * @param array  $originalTargetValues
      */
-    private function checkTagPositionsAddTagOrderError( array $src, array $trg, $error, array $originalTargetValues) {
+    private function checkTagPositionsAndAddTagOrderError(array $src, array $trg, $error, array $originalTargetValues) {
 
         foreach ($trg as $pos => $value){
             if($value !== $src[$pos]){
@@ -1738,7 +1763,7 @@ class QA {
      * @param string $error
      * @param array  $originalTargetValues
      */
-    private function checkContentAddTagMismatchError( array $src, array $trg, $error, array $originalTargetValues) {
+    private function checkContentAndAddTagMismatchError(array $src, array $trg, $error, array $originalTargetValues) {
 
         foreach ($trg as $pos => $value){
             if(!in_array($value, $src)){
@@ -1950,7 +1975,7 @@ class QA {
                     $this->_resetDOMMaps();
                     $this->_prepareDOMStructures();
 
-                    return; //ALL RIGHT
+                    return null; //ALL RIGHT
                 }
 
 //                Log::doJsonLog($result);
@@ -2095,7 +2120,7 @@ class QA {
      */
     protected function _checkBxAndExInsideG() {
 
-        $bxExGValidator = new \BxExG\Validator($this);
+        $bxExGValidator = new Validator($this);
         $errors = $bxExGValidator->validate();
 
         foreach ($errors as $error){
@@ -2163,7 +2188,7 @@ class QA {
      * @param int $trgNodeCount
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
 
@@ -2469,32 +2494,57 @@ class QA {
         }
     }
 
-    protected function _checkSizeRestriction()
-    {
+    protected function _checkSizeRestriction() {
         // check size restriction
-        if($this->id_segment){
+        if ( $this->id_segment ) {
+
             $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
 
             // remove trailing space
-            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg());
-            $preparedTargetToBeChecked = preg_replace('/&nbsp;/iu', ' ', $preparedTargetToBeChecked);
-            $preparedTargetToBeChecked = rtrim($preparedTargetToBeChecked);
+            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg() );
+            $preparedTargetToBeChecked = preg_replace( '/&nbsp;/iu', ' ', $preparedTargetToBeChecked );
+            $preparedTargetToBeChecked = rtrim( $preparedTargetToBeChecked );
 
-            $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $preparedTargetToBeChecked );
-            if(false === $check){
-                $this->addError( self::ERR_SIZE_RESTRICTION  );
+            if ( false === $this->_filterCheckSizeRestriction( $this->id_segment, $preparedTargetToBeChecked ) ) {
+                $this->addError( self::ERR_SIZE_RESTRICTION );
             }
+
         }
+    }
+
+    /**
+     * @param int    $segmentId
+     * @param string $text
+     *
+     * @return bool
+     */
+    private function _filterCheckSizeRestriction( $segmentId, $text ) {
+
+        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION );
+
+        if ( $limit ) {
+
+            // Ignore sizeRestriction = 0
+            if ( $limit->meta_value == 0 ) {
+                return true;
+            }
+
+            $sizeRestriction = new SizeRestriction( $text, $limit->meta_value );
+
+            return $sizeRestriction->checkLimit();
+        }
+
+        return true;
     }
 
     /**
      * Check glossary blacklist
      *
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     protected function _checkGlossaryBlacklist()
     {

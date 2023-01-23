@@ -2,7 +2,9 @@
 
 namespace Validator;
 
+use Exception;
 use Files\CSV;
+use INIT;
 use Utils;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
@@ -15,7 +17,7 @@ class GlossaryCSVValidator extends AbstractValidator {
     public function validate( ValidatorObject $object ) {
 
         if ( !$object instanceof GlossaryCSVValidatorObject ) {
-            throw new \Exception( 'Object given is not a valid instance of GlossaryCSVValidatorObject' );
+            throw new Exception( 'Object given is not a valid instance of GlossaryCSVValidatorObject' );
         }
 
         $headers          = $this->getHeaders( $object->csv );
@@ -58,7 +60,7 @@ class GlossaryCSVValidator extends AbstractValidator {
     private function allowedLanguages() {
         $allowedLanguages = [];
 
-        $file   = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $file   = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
         $string = file_get_contents( $file );
         $langs  = json_decode( $string, true );
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace BxExG;
+namespace LQA\BxExG;
 
 class Element {
 

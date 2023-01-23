@@ -3,7 +3,7 @@
 namespace Features;
 
 use AMQHandler;
-use QA;
+use LQA\QA;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
 use WorkerClient;
