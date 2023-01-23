@@ -10,7 +10,7 @@
 namespace API\V2\Json;
 
 
-use QA;
+use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 
 class QALocalWarning extends QAWarning {

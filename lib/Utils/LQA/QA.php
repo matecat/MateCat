@@ -1,10 +1,27 @@
 <?php
+namespace LQA;
 
-use BxExG\Mapper;
-use Matecat\SubFiltering\Filters\LtGtDecode;
+use API\V2\Exceptions\AuthenticationError;
+use CatUtils;
+use Chunks_ChunkStruct;
+use DOMDocument;
+use DOMElement;
+use DOMException;
+use DOMNode;
+use DOMNodeList;
+use DOMXPath;
+use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
+use FeatureSet;
+use Log;
+use LogicException;
+use LQA\BxExG\Validator;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 use Matecat\SubFiltering\MateCatFilter;
+use Segments_SegmentMetadataDao;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class errObject
@@ -395,6 +412,8 @@ class QA {
             4000 => 'Glossary blacklist match detected',
 
     ];
+
+    const SIZE_RESTRICTION = "sizeRestriction";
 
     /**
      * <code>
@@ -1345,8 +1364,8 @@ class QA {
      *
      * @param DOMElement $element
      *
-     * @throws \Exception
      * @return bool
+     *@throws Exception
      */
     protected function _addThisElementToDomMap( DOMElement $element) {
 
@@ -1956,7 +1975,7 @@ class QA {
                     $this->_resetDOMMaps();
                     $this->_prepareDOMStructures();
 
-                    return; //ALL RIGHT
+                    return null; //ALL RIGHT
                 }
 
 //                Log::doJsonLog($result);
@@ -2101,7 +2120,7 @@ class QA {
      */
     protected function _checkBxAndExInsideG() {
 
-        $bxExGValidator = new \BxExG\Validator($this);
+        $bxExGValidator = new Validator($this);
         $errors = $bxExGValidator->validate();
 
         foreach ($errors as $error){
@@ -2169,7 +2188,7 @@ class QA {
      * @param int $trgNodeCount
      *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
 
@@ -2475,32 +2494,57 @@ class QA {
         }
     }
 
-    protected function _checkSizeRestriction()
-    {
+    protected function _checkSizeRestriction() {
         // check size restriction
-        if($this->id_segment){
+        if ( $this->id_segment ) {
+
             $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
 
             // remove trailing space
-            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg());
-            $preparedTargetToBeChecked = preg_replace('/&nbsp;/iu', ' ', $preparedTargetToBeChecked);
-            $preparedTargetToBeChecked = rtrim($preparedTargetToBeChecked);
+            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg() );
+            $preparedTargetToBeChecked = preg_replace( '/&nbsp;/iu', ' ', $preparedTargetToBeChecked );
+            $preparedTargetToBeChecked = rtrim( $preparedTargetToBeChecked );
 
-            $check = $this->featureSet->filter( 'filterCheckSizeRestriction', $this->id_segment, $preparedTargetToBeChecked );
-            if(false === $check){
-                $this->addError( self::ERR_SIZE_RESTRICTION  );
+            if ( false === $this->_filterCheckSizeRestriction( $this->id_segment, $preparedTargetToBeChecked ) ) {
+                $this->addError( self::ERR_SIZE_RESTRICTION );
             }
+
         }
+    }
+
+    /**
+     * @param int    $segmentId
+     * @param string $text
+     *
+     * @return bool
+     */
+    private function _filterCheckSizeRestriction( $segmentId, $text ) {
+
+        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION );
+
+        if ( $limit ) {
+
+            // Ignore sizeRestriction = 0
+            if ( $limit->meta_value == 0 ) {
+                return true;
+            }
+
+            $sizeRestriction = new SizeRestriction( $text, $limit->meta_value );
+
+            return $sizeRestriction->checkLimit();
+        }
+
+        return true;
     }
 
     /**
      * Check glossary blacklist
      *
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     protected function _checkGlossaryBlacklist()
     {

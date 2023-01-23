@@ -116,7 +116,9 @@ class Editarea extends React.Component {
     const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
       DraftMatecatUtils.cleanSegmentString(translation),
     )
-    this.props.updateCounter(cleanTagsTranslation.length)
+    this.props.updateCounter(
+      DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
+    )
 
     this.updateTranslationDebounced = _.debounce(
       this.updateTranslationInStore,
@@ -234,7 +236,9 @@ class Editarea extends React.Component {
       const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
         DraftMatecatUtils.cleanSegmentString(translation),
       )
-      this.props.updateCounter(cleanTagsTranslation.length)
+      this.props.updateCounter(
+        DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
+      )
       this.setState(
         {
           editorState: newEditorState,
@@ -312,7 +316,9 @@ class Editarea extends React.Component {
       const cleanTranslation = TagUtils.decodePlaceholdersToPlainText(
         DraftMatecatUtils.cleanSegmentString(decodedSegment),
       )
-      this.props.updateCounter(cleanTranslation.length)
+      this.props.updateCounter(
+        DraftMatecatUtils.getCharactersCounter(cleanTranslation),
+      )
       // console.log('updatingTranslationInStore');
       UI.registerQACheck()
     } else {

@@ -1,5 +1,6 @@
-<?php include_once INIT::$UTILS_ROOT . '/Log.php';
-include_once INIT::$UTILS_ROOT . '/QA.php';
+<?php
+
+use LQA\QA;
 
 class PostProcess extends QA {
 
@@ -35,7 +36,7 @@ class PostProcess extends QA {
             $this->trgDom     = $this->_loadDom( $target_seg, self::ERR_TARGET );
             $this->_resetDOMMaps();
             $this->_prepareDOMStructures();
-            return; //ALL RIGHT
+            //ALL RIGHT
         } else {
 
             $this->addError( self::ERR_TAG_MISMATCH );

@@ -7,6 +7,7 @@
  */
 
 use API\V2\Json\QALocalWarning;
+use LQA\QA;
 
 
 class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
@@ -156,7 +157,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
 
-        $QA = new \QA( $this->segment, $this->translation );
+        $QA = new QA( $this->segment, $this->translation );
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
         $QA->setChunk($chunk);
