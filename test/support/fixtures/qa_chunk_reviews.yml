@@ -1,0 +1,15 @@
+cr1:
+  id: NULL
+  id_project: @REF:projects:dqf_project_1:id
+  id_job: @REF:jobs:job2:id
+  password: @REF:jobs:job2:password
+  review_password: 05023cf84288
+  penalty_points: NULL
+  num_errors: 0
+  is_pass: 0
+  force_pass_at: NULL
+  reviewed_words_count: 0
+  undo_data: NULL
+  advancement_wc: 0
+  total_tte: 0
+  avg_pee: 0

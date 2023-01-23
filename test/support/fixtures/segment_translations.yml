@@ -1,0 +1,103 @@
+st1:
+  id_segment: @REF:segments:segment1:id
+  id_job: @REF:jobs:job2:id
+  segment_hash: f88037cf8f5d27f475cee79c603cecae
+  autopropagated_from: NULL
+  status: TRANSLATED
+  translation: Ciao Ciao mondo 4WD &amp; ampolla %{variable}%
+  translation_date: NULL
+  time_to_edit: 0
+  match_type: NO_MATCH
+  context_hash: NULL
+  eq_word_count: 3.00
+  standard_word_count: 3.00
+  suggestions_array: NULL
+  suggestion: NULL
+  suggestion_match: NULL
+  suggestion_source: NULL
+  suggestion_position: NULL
+  mt_qe: 0.00000000000000
+  tm_analysis_status: UNDONE
+  locked: 0
+  warning: 0
+  serialized_errors_list: NULL
+  version_number: 0
+  edit_distance: NULL
+
+st2:
+  id_segment: @REF:segments:segment2:id
+  id_job: @REF:jobs:job2:id
+  segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
+  autopropagated_from: NULL
+  status: TRANSLATED
+  translation: Ciao mondo &#13;&#13;
+  translation_date: NULL
+  time_to_edit: 0
+  match_type: 95%-99%
+  context_hash: NULL
+  eq_word_count: 1.20
+  standard_word_count: 1.20
+  suggestions_array: NULL
+  suggestion: NULL
+  suggestion_match: NULL
+  suggestion_source: NULL
+  suggestion_position: NULL
+  mt_qe: 0.00000000000000
+  tm_analysis_status: UNDONE
+  locked: 0
+  warning: 0
+  serialized_errors_list: NULL
+  version_number: 0
+  edit_distance: NULL
+
+st3:
+  id_segment: @REF:segments:segment3:id
+  id_job: @REF:jobs:job2:id
+  segment_hash: 37d2a389ba71f6de1df030220703785d
+  autopropagated_from: NULL
+  status: TRANSLATED
+  translation: Anche questa unità ha un &quot;commento&quot;;
+  translation_date: NULL
+  time_to_edit: 0
+  match_type: NO_MATCH
+  context_hash: NULL
+  eq_word_count: 6.00
+  standard_word_count: 6.00
+  suggestions_array: NULL
+  suggestion: NULL
+  suggestion_match: NULL
+  suggestion_source: NULL
+  suggestion_position: NULL
+  mt_qe: 0.00000000000000
+  tm_analysis_status: UNDONE
+  locked: 0
+  warning: 0
+  serialized_errors_list: NULL
+  version_number: 0
+  edit_distance: NULL
+
+st4:
+  id_segment: @REF:segments:segment4:id
+  id_job: @REF:jobs:job2:id
+  segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
+  autopropagated_from: NULL
+  status: TRANSLATED
+  translation: Ciao mondo
+  translation_date: NULL
+  time_to_edit: 0
+  match_type: REPETITIONS
+  context_hash: NULL
+  eq_word_count: 0.60
+  standard_word_count: 0.60
+  suggestions_array: NULL
+  suggestion: NULL
+  suggestion_match: NULL
+  suggestion_source: NULL
+  suggestion_position: NULL
+  mt_qe: 0.00000000000000
+  tm_analysis_status: UNDONE
+  locked: 0
+  warning: 0
+  serialized_errors_list: NULL
+  version_number: 0
+  edit_distance: NULL
