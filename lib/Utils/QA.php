@@ -1623,16 +1623,17 @@ class QA {
 
         //
         // ===========================================
-        // Compare the tag ids and equiv-text content
+        // Compare the tag id(s) and equiv-text content
         // ===========================================
         //
         // 1. id
         //
-        // In this case check for id order mismatch and throw a ERR_TAG_ORDER Warning
+        // - In this case of id mismatch and throw a ERR_TAG_MISMATCH Error
+        // - In this case check for id order mismatch and throw a ERR_TAG_ORDER Warning
         //
-        // 2. equiv-text
+        // 2. equiv-text (for <ph> and <pc> tags from Xliff 2.0. files)
         //
-        // In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
+        // - In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
         //
 
         $srcOpIds = $this->extractIdAttributes($open_malformedXmlSrcStruct);
@@ -1648,16 +1649,21 @@ class QA {
         $srcSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_src);
         $trgSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_trg);
 
-        $this->checkContentAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        // check in equiv-text
+        $this->checkContentAndAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+
+        // check for id mismatch
+        $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // check for warnings only if there are no errors
         if( !$this->thereAreErrors() ){
-            $this->checkTagPositionsAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            $this->checkTagPositionsAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            $this->checkTagPositionsAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            // $this->checkContentAddTagMismatchError($complete_malformedTrgStruct, $complete_malformedSrcStruct, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAndAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAndAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+            $this->checkTagPositionsAndAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
         }
 
         // If there are errors get tag diff for the UI
@@ -1718,7 +1724,7 @@ class QA {
      * @param string $error
      * @param array  $originalTargetValues
      */
-    private function checkTagPositionsAddTagOrderError( array $src, array $trg, $error, array $originalTargetValues) {
+    private function checkTagPositionsAndAddTagOrderError(array $src, array $trg, $error, array $originalTargetValues) {
 
         foreach ($trg as $pos => $value){
             if($value !== $src[$pos]){
@@ -1738,7 +1744,7 @@ class QA {
      * @param string $error
      * @param array  $originalTargetValues
      */
-    private function checkContentAddTagMismatchError( array $src, array $trg, $error, array $originalTargetValues) {
+    private function checkContentAndAddTagMismatchError(array $src, array $trg, $error, array $originalTargetValues) {
 
         foreach ($trg as $pos => $value){
             if(!in_array($value, $src)){
