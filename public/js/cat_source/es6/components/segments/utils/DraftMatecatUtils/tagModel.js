@@ -66,7 +66,7 @@ const tagSignatures = {
     selfClosing: false,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /&lt;g .*?id="(.*?)".*?&gt;/,
+    placeholderRegex: /&lt;g .*?\bid="(.*?)".*?&gt;/,
     decodeNeeded: false,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
