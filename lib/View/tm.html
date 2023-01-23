@@ -40,7 +40,11 @@
                             </tal:block>
 
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-tm">New resource</a>
+                                <button class="btn-ok clear add-shared-tm">
+                                    <a class="icon-owner icon-users icon-owner-shared"></a>
+                                    Add shared resource
+                                </button>
+                                <button class="btn-ok clear add-tm">New resource</button>
                                 <h3 class="pull-left">Active Resources</h3>
                             </div>
                             <div class="active-tm-container">
@@ -71,13 +75,16 @@
                                         <td class="activate text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
 
                                         <tal:block tal:condition="php: page == 'cattool'">
-                                            <td class="lookup text-center check"><div><input type="checkbox" tal:attributes="disabled php: !jobOwnerIsMe; checked php: get_public_matches "/></div></td>
+                                            <td class="lookup text-center check"><div><input tal:condition="php: !empty(logged_user)" type="checkbox"
+                                                                                             tal:attributes="disabled php: !jobOwnerIsMe; checked php: get_public_matches "/></div></td>
+                                            <td class="update text-center check"><div><input tal:condition="php: !empty(logged_user)" type="checkbox" disabled="true" checked="true"/></div></td>
                                         </tal:block>
                                         <tal:block tal:condition="php: page == 'home'">
                                             <td class="lookup text-center check"><div><input type="checkbox" tal:attributes="checked php: get_public_matches " /></div></td>
+                                            <td class="update text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
                                         </tal:block>
 
-                                        <td class="update text-center check"><div><input type="checkbox" disabled="true" checked="true"/></div></td>
+
                                         <td class="description">
                                             <div class="mymemory-descr" data-descr="MyMemory: Collaborative translation memory shared with all MateCat users.">MyMemory: Collaborative translation memory shared with all Matecat users.</div>
                                         </td>
@@ -92,9 +99,15 @@
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                             <td class="dragrow"><div class="status"></div></td>
-<!--                                            <td class="activate text-center check"><input type="checkbox" checked="checked" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>-->
-                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>
-                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
+                                            <td class="activate text-center check"><input type="checkbox" checked="checked" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>
+                                            <td class="lookup text-center check">
+                                                <input tal:condition="php:  key.edit  || ( key.owner && jobOwnerIsMe )" type="checkbox"
+                                                       tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/>
+                                            </td>
+                                            <td class="update text-center check">
+                                                <input tal:condition="php: key.edit || ( key.owner && jobOwnerIsMe )" type="checkbox"
+                                                       tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w"/>
+                                            </td>
                                             <td class="description">
                                                 <div class="edit-desc" data-descr="${php: key.name}">
                                                     ${php: key.name}
@@ -133,19 +146,13 @@
                                             <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
                                         </td>
                                         <td class="description">
-                                            <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Private resource (edit description)" ></textarea>
+                                            <input class="mgmt-input" id="new-tm-description" placeholder="Please insert a name for the resource" ></input>
                                         </td>
                                         <td class="privatekey">
-                                            <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
-                                            <!--<a class="btn-ok pull-right">Create a New TM</a>-->
-    <!--                                    <span class="text pull-left text-req">*required</span> -->
+                                            <input class="mgmt-input pull-left hide" type="text" id="shared-tm-key" placeholder="Add the shared key here" />
                                         </td>
-
                                         <td class="action">
-
-
-
-                                             <a class="pull-left btn-ok uploadtm disabled">
+                                             <a class="pull-left btn-ok uploadtm">
                                                 <span class="text uploadkey">Confirm</span>
                                             </a>
                                             <a class="pull-left btn-grey canceladdtmx">
@@ -156,6 +163,7 @@
                                             <div id="uploadCallback"></div>
                                         </td>
                                     </tr>
+
 
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
@@ -323,10 +331,10 @@
 
                             <div class="block pull-right ">
                                 <tal:block tal:condition="php: empty(logged_user)">
-                                    <a class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</a>
+                                    <button class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</button>
                                 </tal:block>
                                 <tal:block tal:condition="php: !empty(logged_user)">
-                                    <a class="btn-ok clear add-tm add-mt-engine">Add MT engine</a>
+                                    <button class="btn-ok clear add-tm add-mt-engine">Add MT engine</button>
                                 </tal:block>
                             </div>
                             <div class="block pull-right ">
