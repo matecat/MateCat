@@ -359,10 +359,7 @@ export const SegmentFooterTabGlossary = ({
         }
       })
       .sort((a, b) => {
-        if (
-          new Date(a.metadata.last_update_date).getTime() <
-          new Date(b.metadata.last_update_date).getTime()
-        ) {
+        if (a.source.term > b.source.term) {
           return 1
         } else {
           return -1
