@@ -397,7 +397,7 @@ class downloadFileController extends downloadController {
                         // always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
 
-                        $filename = $this->generateFilename($oContent->output_filename);
+                        $filename = $this->generateFilename($oContent->output_filename, $_target_lang);
 
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $filename );
