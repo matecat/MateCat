@@ -2007,7 +2007,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       var label, format
       if (type == 'tmx') {
         label =
-          '<p class="pull-left">Select one or more TMX files to be imported</p>'
+          '<p class="pull-left">Select up to 10 TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2016,7 +2016,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select one or more glossaries in XLSX, XLS or ODS format ' +
+          '<p class="pull-left">Select up to 10 glossaries in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls, .ods'
