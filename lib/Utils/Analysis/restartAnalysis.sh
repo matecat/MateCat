@@ -4,8 +4,8 @@
 #  DEPRECATED  #
 ################
 
-DIR=$( cd "$( dirname "$0")"; pwd )
-cd ${DIR}
+DIR=$( cd "$( dirname "$0")" || exit; pwd )
+cd "${DIR}" || exit
 /bin/bash killAnalysis.sh
 
 # get last return code, if != 0 don't wait
@@ -16,8 +16,8 @@ if [[ ${rc} -eq 0 ]]; then
 fi
 
 
-pid_fast=`ps faux|grep -E "*. FastAnalysis.php" |grep -v grep|grep -i SCREEN|awk '{print $2}'`
-pid_tm=`ps faux|grep -E ".* TmAnalysis.php" |grep -v grep|grep -i SCREEN|awk '{print $2}'`
+pid_fast=$(ps faux|grep -E ".* FastAnalysis.php" |grep -v grep|grep -i SCREEN|awk '{print $2}')
+pid_tm=$(ps faux|grep -E ".* TmAnalysis.php" |grep -v grep|grep -i SCREEN|awk '{print $2}')
 
 #if up, exit, ERROR
 if [[ -n ${pid_fast} ]] || [[ -n ${pid_tm} ]];
