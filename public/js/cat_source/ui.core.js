@@ -248,7 +248,7 @@ window.UI = {
   goToFirstError: function () {
     CatToolActions.toggleQaIssues()
     setTimeout(function () {
-      $('.qa-issues-container ').first().click()
+      $('.button.qa-issue').first().click()
     }, 300)
   },
   setDownloadStatus: function (stats) {
