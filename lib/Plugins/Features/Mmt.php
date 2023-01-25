@@ -414,7 +414,7 @@ class Mmt extends BaseFeature {
                 // send user keys on a project basis
                 // ==============================================
                 //
-                $preImportIsDisabled = $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] === false;
+                $preImportIsDisabled = empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
                 $userIsLogged        = !empty( $projectRows[ 'id_customer' ] ) && $projectRows[ 'id_customer' ] != 'translated_user';
 
                 $user = null;
