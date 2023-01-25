@@ -2,7 +2,7 @@ import React from 'react'
 import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
 import _ from 'lodash'
-import {flushSync} from 'react-dom'
+import ReactDOM, {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
@@ -20,6 +20,7 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
 import NotificationBox from '../notificationsComponent/NotificationBox'
+import {CookieConsent} from '../common/CookieConsent'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -473,6 +474,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    const cookieBannerMountPoint = document.getElementsByTagName('footer')[0]
     return (
       <React.Fragment>
         <DashboardHeader>
@@ -495,6 +497,7 @@ class Dashboard extends React.Component {
             <div className="ui massive text loader">Loading Projects</div>
           </div>
         )}
+        {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
       </React.Fragment>
     )
   }

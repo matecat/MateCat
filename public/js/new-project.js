@@ -4,7 +4,6 @@ import {createRoot} from 'react-dom/client'
 import React from 'react'
 
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
-import LanguageSelector from './cat_source/es6/components/languageSelector/LanguageSelector'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'

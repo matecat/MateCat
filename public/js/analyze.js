@@ -9,6 +9,7 @@ import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
 import {getProject} from './cat_source/es6/api/getProject'
 import {getVolumeAnalysis} from './cat_source/es6/api/getVolumeAnalysis'
 import {getJobVolumeAnalysis} from './cat_source/es6/api/getJobVolumeAnalysis'
+import {CookieConsent} from './cat_source/es6/components/common/CookieConsent'
 
 window.UI = null
 
@@ -37,7 +38,10 @@ window.UI = {
         jobsInfo: config.jobs,
       }),
     )
-
+    const cookieBannerMountPoint = createRoot(
+      document.getElementsByTagName('footer')[0],
+    )
+    cookieBannerMountPoint.render(React.createElement(CookieConsent))
     this.getProjectVolumeAnalysisData()
   },
   reloadAnalysis: function () {
