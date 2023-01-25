@@ -284,25 +284,9 @@ class Dashboard extends React.Component {
       window.open(urlWarnings, '_blank')
     }
 
-    //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+    //the translation mismatches are not a server Error, but only a warn, so don't display Error Popup
     if (job.warnings_count > 0) {
-      const props = {
-        text:
-          'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. ' +
-          '<a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in Matecat </a> <br /><br />' +
-          'If you continue downloading, part of the content may be untranslated - ' +
-          'look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-        successText: 'Download anyway',
-        successCallback: continueDownloadFunction,
-        warningText: 'Fix errors',
-        warningCallback: openUrl,
-      }
-      ModalsActions.showModalComponent(
-        ConfirmMessageModal,
-        props,
-        'Confirmation required',
-      )
+      ModalsActions.showDownloadWarningsModal(continueDownloadFunction, openUrl)
     } else {
       continueDownloadFunction()
     }
