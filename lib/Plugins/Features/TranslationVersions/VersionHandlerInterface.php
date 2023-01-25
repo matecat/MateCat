@@ -31,5 +31,8 @@ interface VersionHandlerInterface {
      *
      * @return mixed
      */
-    public function evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation );
+    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation );
+
+    public function storeTranslationEvent( $params );
+
 }

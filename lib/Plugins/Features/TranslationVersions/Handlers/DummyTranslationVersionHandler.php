@@ -32,7 +32,11 @@ class DummyTranslationVersionHandler implements VersionHandlerInterface {
      *
      * @return bool
      */
-    public function evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
         return false;
     }
+
+    public function storeTranslationEvent( $params ) {}
+
+
 }

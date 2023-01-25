@@ -10,7 +10,8 @@
 namespace API\V2\Json;
 
 
-use QA;
+
+use LQA\QA;
 
 class QAGlobalWarning extends QAWarning {
 

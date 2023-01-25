@@ -1,5 +1,7 @@
 <?php
 
+use Validator\Contracts\ValidatorErrorObject;
+use Validator\GlossaryCSVValidator;
 use Validator\GlossaryCSVValidatorObject;
 
 /**
@@ -389,6 +391,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $newFile     = new SplFileObject( $tmpFileName, 'r+' );
             $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
+            $index = 0;
+
             foreach ( $origFile as $line_num => $line ) {
 
                 if(in_array("1", $line)){
@@ -400,6 +404,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 }
 
                 //copy stream to stream
+                $index++;
                 $newFile->fputcsv( $line );
             }
 
@@ -421,8 +426,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         // validate the CSV
-        if(!$this->validateCSVFile($file)){
-            throw new \Exception('The glossary file is not valid');
+        $validateCSVFileErrors = $this->validateCSVFile($file);
+
+        if(count($validateCSVFileErrors) > 0){
+            throw new \Exception($validateCSVFileErrors[0]);
         }
 
         $postFields = [
@@ -667,18 +674,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @param $file
-     *
-     * @return bool
+     * @return ValidatorErrorObject[]
      * @throws Exception
      */
-    private function validateCSVFile($file)
-    {
-        $validatorObject = new GlossaryCSVValidatorObject();
+    private function validateCSVFile( $file ) {
+        $validatorObject      = new GlossaryCSVValidatorObject();
         $validatorObject->csv = $file;
-        $validator = new \Validator\GlossaryCSVValidator();
-        $validator->validate($validatorObject);
+        $validator            = new GlossaryCSVValidator();
+        $validator->validate( $validatorObject );
 
-        return $validator->isValid();
+        return $validator->getErrors();
     }
 
     public function import( $file, $key, $name = false ) {

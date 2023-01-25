@@ -274,29 +274,28 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
           e.preventDefault()
           UI.addFormUpload(this, 'glossary')
         })
-        .on('change paste', '#new-tm-key', function () {
+        .on('paste', '#shared-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
             UI.checkTMKey('change')
           }, 200)
         })
+        .on('input', '#shared-tm-key', function () {
+          // set Timeout to get the text value after paste event, otherwise it is empty
+          $('#activetm tr.new .uploadtm').removeClass('disabled')
+        })
         .on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function () {
-          var keyValue = $('#new-tm-key').val()
-          var descKey = $('#new-tm-description').val()
-
-          if (config.isLoggedIn) {
-            UI.saveTMkey(keyValue, descKey).then(() => {
-              UI.checkTMKey('key')
-            })
-          } else {
-            UI.checkTMKey('key')
-            delete UI.newTmKey
+          UI.createNewTmKey()
+        })
+        .on('keydown', '.new #new-tm-description', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            UI.createNewTmKey()
           }
         })
         .on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function () {
           $(this).addClass('disabled')
           $(this).parents('.uploadfile').find('.error').text('').hide()
-
           UI.execAddTMOrGlossary(this, 'tmx')
         })
         .on(
@@ -550,8 +549,12 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       })
 
       $('.mgmt-table-tm .add-tm').click(function () {
-        $(this).hide()
+        // $(this).hide()
         UI.openAddNewTm()
+      })
+      $('.mgmt-table-tm .add-shared-tm').click(function () {
+        // $(this).hide()
+        UI.openAddNewTmShared()
       })
       $(
         '.mgmt-tm tr.new .canceladdtmx, .mgmt-tm tr.new .canceladdglossary',
@@ -598,6 +601,38 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
             break
         }
       }
+    },
+    createNewTmKey: function () {
+      if ($('#shared-tm-key').is(':visible')) {
+        UI.addSharedTmKey()
+        return
+      }
+      const descKey = $('#new-tm-description').val()
+      UI.saveTMkey(descKey)
+    },
+    addSharedTmKey: function () {
+      const descKey = $('#new-tm-description').val()
+      const key = $('#shared-tm-key').val()
+      UI.checkTMKey('key', key).then((success) => {
+        if (success) {
+          createNewTmKey({
+            key: key,
+            description: descKey,
+          })
+            .then(() => {
+              UI.hideAllBoxOnTables()
+            })
+            .catch((errors) => {
+              setTimeout(function () {
+                if (errors[0].code === '23000') {
+                  UI.showErrorOnActiveTMTable('The key you entered is invalid.')
+                } else {
+                  UI.showErrorOnActiveTMTable(errors[0].message)
+                }
+              }, 200)
+            })
+        }
+      })
     },
     checkCreateTmKeyFromQueryString: function () {
       var keyParam = CommonUtils.getParameterByName('private_tm_key')
@@ -675,12 +710,11 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       })
     },
 
-    checkTMKey: function (operation) {
+    checkTMKey: function (operation, keyValue) {
       //check if the key already exists, it can not be sent nor added twice
-      var keyValue = $('#new-tm-key').val()
       if (keyValue === '') {
         UI.showErrorOnKeyInput()
-        return false
+        return Promise.resolve(false)
       }
 
       var keyActive = this.checkTMKeyIsActive(keyValue)
@@ -688,7 +722,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
 
       if (keyActive) {
         UI.showErrorOnKeyInput('The key is already present in this project.')
-        return false
+        return Promise.resolve(false)
       } else if (keyInactive) {
         UI.showErrorOnKeyInput(
           'The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link activate-key">Click here to activate it</a>',
@@ -700,22 +734,24 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
             UI.activateInactiveKey(keyValue)
           })
         }, 500)
-        return false
+        return Promise.resolve(false)
       }
 
-      checkTMKey({
+      const promise = checkTMKey({
         tmKey: keyValue,
-      }).then((data) => {
-        if (data.success === true) {
-          UI.removeErrorOnKeyInput()
-          if (operation == 'key') {
-            UI.addTMKeyToList(false)
-            UI.clearTMUploadPanel()
+      })
+        .then((data) => {
+          if (data.success === true) {
+            UI.removeErrorOnKeyInput()
+            if (operation == 'key') {
+              UI.addTMKeyToList(false, keyValue)
+              UI.clearTMUploadPanel()
+            }
+            return true
           }
-        } else {
-          UI.showErrorOnKeyInput(
-            'The key is not valid. <a class="active-tm-key-link">Restore generated key</a>',
-          )
+        })
+        .catch(() => {
+          UI.showErrorOnKeyInput('The key is not valid.')
           setTimeout(function () {
             $('.active-tm-key-link').off('click')
             $('.active-tm-key-link').on('click', function () {
@@ -723,8 +759,9 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
               UI.removeErrorOnKeyInput()
             })
           }, 500)
-        }
-      })
+          return false
+        })
+      return promise
     },
     checkTMKeyIsActive: function (key) {
       var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey')
@@ -896,24 +933,31 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       $('.addtmxrow').hide()
     },
     execAddTMOrGlossary: function (el, type) {
-      var action =
+      const action =
         type == 'glossary' ? '/api/v2/glossaries/import/' : '/?action=loadTMX'
-      var line = $(el).parents('tr')
+      const line = $(el).parents('tr')
       line.find('.uploadfile').addClass('uploading')
-      var form = line.find('.add-TM-Form')[0]
+      const form = line.find('.add-TM-Form')[0]
+      const filesLength = $(form).find('input[type=file]').get(0).files.length
+      if (filesLength > 10) {
+        UI.showErrorUpload(
+          $(form).parents('.uploadfile'),
+          'You can only upload a maximum of 10 files',
+        )
+        return
+      }
       var path = line.find('.uploadfile').find('input[type="file"]').val()
       var file = path.split('\\')[path.split('\\').length - 1]
       this.fileUpload(form, action, 'uploadCallback', file, type)
     },
-    addTMKeyToList: function (uploading) {
+    addTMKeyToList: function (uploading, key) {
       var descr = $('#new-tm-description').val()
-      var key = $('#new-tm-key').val()
       descr = descr.length ? descr : 'Private resource'
       var keyParams = {
         r: $('#new-tm-read').is(':checked'),
         w: $('#new-tm-write').is(':checked'),
         desc: descr,
-        TMKey: $('#new-tm-key').val(),
+        TMKey: key,
       }
 
       this.appendNewTmKeyToPanel(keyParams)
@@ -1022,13 +1066,11 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       }, 1000)
     },
     clearTMUploadPanel: function () {
-      $('#new-tm-key, #new-tm-description').val('')
-      $('#new-tm-key').removeAttr('disabled')
+      $('#shared-tm-key, #new-tm-description').val('')
       $('#new-tm-read, #new-tm-write').prop('checked', true)
     },
     clearAddTMRow: function () {
       $('#new-tm-description').val('')
-      $('#new-tm-key').removeAttr('disabled')
       $('#activetm .fileupload').val('')
       $('.mgmt-tm tr.new').removeClass('badkey badgrants')
       $('.mgmt-tm tr.new .message').text('')
@@ -1168,8 +1210,8 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       }
     },
     showErrorUpload: function ($tr, text) {
-      var msg = text ? text : 'Error uploading your file. Please try again.'
-      var msg2 = 'Error uploading your file. Please try again.'
+      var msg = text ? text : 'Error uploading your files. Please try again.'
+      var msg2 = text ? text : 'Error uploading your files. Please try again.'
       $tr.find('.addtmxfile, .addglossaryfile, .uploadprogress').hide()
       $tr.find('.upload-file-msg-error').text(msg2).show()
       $tr.find('.canceladdglossary, .canceladdtmx').show()
@@ -1331,7 +1373,6 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
     },
 
     saveTMdata: function (closeAfter) {
-      $('.popup-tm').addClass('saving')
       if (closeAfter) {
         UI.closeTMPanel()
         UI.clearTMPanel()
@@ -1347,7 +1388,6 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
         dataTm: data,
       })
         .then(() => {
-          $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
           // TODO: update keys for glossary
           CatToolActions.onTMKeysChangeStatus()
@@ -1379,40 +1419,42 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       })
         .then(() => {
           tr.find('.edit-desc').data('descr', new_descr)
-          $('.popup-tm').removeClass('saving')
           UI.hideAllBoxOnTables()
         })
         .catch((errors) => {
           UI.showErrorOnActiveTMTable(errors[0].message)
         })
     },
-    saveTMkey: function (key, desc) {
-      delete UI.newTmKey
+    saveTMkey: function (desc) {
       if (desc.length == 0) {
         desc = 'Private resource'
       }
 
-      const promise = createNewTmKey({
-        key: key,
-        description: desc,
+      //call API
+      return tmCreateRandUser().then((response) => {
+        const {key} = response.data
+        if (!config.isLoggedIn) {
+          UI.checkTMKey('key', key)
+          return
+        }
+        createNewTmKey({
+          key: key,
+          description: desc,
+        })
+          .then(() => {
+            UI.checkTMKey('key', key)
+            UI.hideAllBoxOnTables()
+          })
+          .catch((errors) => {
+            setTimeout(function () {
+              if (errors[0].code === '23000') {
+                UI.showErrorOnActiveTMTable('The key you entered is invalid.')
+              } else {
+                UI.showErrorOnActiveTMTable(errors[0].message)
+              }
+            }, 200)
+          })
       })
-
-      promise
-        .then(() => {
-          $('.popup-tm').removeClass('saving')
-          UI.hideAllBoxOnTables()
-        })
-        .catch((errors) => {
-          setTimeout(function () {
-            if (errors[0].code === '23000') {
-              UI.showErrorOnActiveTMTable('The key you entered is invalid.')
-            } else {
-              UI.showErrorOnActiveTMTable(errors[0].message)
-            }
-          }, 200)
-        })
-
-      return promise
     },
 
     closeTMPanel: function () {
@@ -1784,25 +1826,18 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
     },
 
     openAddNewTm: function () {
+      UI.removeErrorOnKeyInput()
+      $('#shared-tm-key').addClass('hide')
       $('.mgmt-table-tm tr.new').removeClass('hide').show()
-      // $('#new-tm-key').attr('disabled','disabled');
-      if (UI.newTmKey) {
-        UI.copyNewTMKey(UI.newTmKey)
-        return false
-      }
-      //call API
-      tmCreateRandUser().then((response) => {
-        const {data} = response
-        //put value into input field
-        UI.newTmKey = data.key
-        UI.copyNewTMKey(UI.newTmKey)
-      })
+      $('#new-tm-description').focus()
     },
-    copyNewTMKey: function (key) {
-      $('#new-tm-key').val(key)
-      $('#activetm tr.new').removeClass('badkey')
-      UI.checkTMAddAvailability()
+    openAddNewTmShared: function () {
+      UI.removeErrorOnKeyInput()
+      $('#shared-tm-key').removeClass('hide')
+      $('.mgmt-table-tm tr.new').removeClass('hide').show()
+      $('#new-tm-description').focus()
     },
+
     openExport: function (elem, type) {
       $(elem)
         .parents('.action')
@@ -1899,7 +1934,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
             '<td class="share-tmx-container" style="display: none">' +
             '<div class="message-share-tmx">Share ownership of the resource by sharing the key. This action cannot be undone.</div>' +
             '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>' +
-            '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
+            '<a class="pull-right btn-grey cancelsharetmx"><span class="text"></span>   </a>' +
             '<div class="pull-right btn-ok share-button">Share</div>' +
             '</td>'
         } else if (users.length > 0) {
@@ -2011,7 +2046,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       var label, format
       if (type == 'tmx') {
         label =
-          '<p class="pull-left">Select one or more TMX files to be imported</p>'
+          '<p class="pull-left">Select up to 10 TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2020,7 +2055,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select one or more glossaries in XLSX, XLS or ODS format ' +
+          '<p class="pull-left">Select up to 10 glossaries in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls, .ods'

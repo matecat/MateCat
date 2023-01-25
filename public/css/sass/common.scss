@@ -1423,11 +1423,12 @@ form.add-TM-Form {
   //border: 1px solid #797979;
   font-weight: bold;
   text-decoration: none;
-  padding: 8px 19px;
+  padding: 8px 18px;
   border-radius: 2px;
   font-size: 18px;
-  margin-right: 0px;
   cursor: pointer;
+  border: 0;
+  line-height: 18px;
 }
 
 .btn-cancel.in-popup {
@@ -1460,6 +1461,7 @@ form.add-TM-Form {
   );
   background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
   background: linear-gradient(top, #f6f6f6, #e2e3e5);
+  line-height: 20px;
 }
 
 #sign-in-o,
@@ -1613,6 +1615,10 @@ div.mgmt-container {
   font-size: 13px;
 }
 
+.mgmt-tm .new td.privatekey {
+  width: 195px !important;
+}
+
 td.description,
 th.description {
   width: 491px !important;
@@ -1733,6 +1739,12 @@ select#mt_engine_int {
   height: 30px;
   margin: 20px 0;
   width: 90%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('../../img/icons/icon-down.svg');
+  background-position: right 10px top 50%;
+  background-repeat: no-repeat;
 }
 
 .mgmt-tm .progress {
@@ -1814,7 +1826,7 @@ input.error {
 }
 
 .mgmt-tm .btn-grey {
-  padding: 7px 0px !important;
+  padding: 5px 0px !important;
 }
 
 .mgmt-tm .btn-ok,
@@ -1830,7 +1842,7 @@ input.error {
 }
 
 .mgmt-tm .btn-ok {
-  padding: 7px 5px !important;
+  padding: 6px 5px !important;
   width: 119px;
   margin-left: 5px;
 }
@@ -1911,7 +1923,8 @@ td.uploadfile {
 }
 
 .canceladdtmx.btn-grey,
-.canceladdglossary.btn-grey {
+.canceladdglossary.btn-grey,
+.cancelsharetmx.btn-grey {
   background: #f26522;
 }
 
@@ -2191,7 +2204,6 @@ input.email-export {
 }
 
 .mgmt-tm .btn-ok.export-button {
-  padding: 0px 5px !important;
   margin-right: 9px;
 }
 
@@ -2370,7 +2382,6 @@ span.email-export-email-error {
 .btn-grey.canceladd-export {
   background: #f26522;
   width: 35px;
-  padding: 0px !important;
   margin: 0px;
   text-align: center;
   color: #fff;
@@ -3064,23 +3075,20 @@ a.memory-mgmt.pull-right {
   padding: 0 25px;
 }
 
-input#new-tm-key {
+input#shared-tm-key {
   width: 85%;
   margin: 0 0 10px 0;
-  height: 0px;
 }
 
-#activetm input#new-tm-key,
+#activetm input#shared-tm-key,
 input.email-export {
   width: 170px;
-  padding: 12px 5px;
   margin: 0;
-  height: 0px;
   box-shadow: inset 0 1px 2px #ddd;
   -webkit-box-shadow: inset 0 1px 2px #ddd;
 }
 
-input#new-tm-key {
+input#shared-tm-key {
   margin-right: 15px !important;
 }
 
@@ -3088,12 +3096,8 @@ input.email-export {
   width: 200px;
 }
 
-.badkey input#new-tm-key {
+.badkey input#shared-tm-key {
   outline: 2px solid red !important;
-}
-
-input#new-tm-description {
-  height: 40px;
 }
 
 tr.new.badgrants .fileupload {
@@ -3776,6 +3780,7 @@ icon-iconmoon:before,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
 .canceladdglossary.btn-grey .text:before,
+.cancelsharetmx.btn-grey .text:before,
 .deleteTM .text:before,
 .sorting:after,
 .splitbtn:before,
@@ -4039,9 +4044,11 @@ header .filter:before {
 }
 
 .canceladdtmx.btn-grey .text:before,
+.cancelsharetmx.btn-grey .text:before,
 .canceladdglossary.btn-grey .text:before {
   content: '\f00d';
   vertical-align: text-top;
+  color: white;
 }
 
 .insert-tm .canceladdtmx.btn-grey .text:before,
@@ -4137,7 +4144,13 @@ a.resume-project:after {
 .add-tm:before {
   content: '\f067';
   padding: 0 10px 0 0;
-  vertical-align: middle;
+}
+.add-shared-tm {
+  margin-right: 10px;
+  .icon-owner-shared {
+    color: white;
+    padding-right: 8px;
+  }
 }
 
 .uploadkey:before {
@@ -5073,6 +5086,7 @@ a.pull-right,
 
 a#add-mt-provider-cancel {
   margin-right: 0;
+  padding: 10px 18px;
 }
 
 /*#activetm td.action {
@@ -5088,10 +5102,8 @@ a.existingKey,
   width: 108px;
 }
 
-a.pull-right.btn-orange-small.cancelsharetmx {
-  height: 35px;
+a.pull-right.btn-grey.cancelsharetmx {
   position: relative;
-  line-height: 35px;
   margin-left: 4px;
   margin-right: -6px;
   width: 35px;

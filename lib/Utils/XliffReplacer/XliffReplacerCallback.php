@@ -2,9 +2,9 @@
 
 namespace XliffReplacer;
 
+use LQA\QA;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
-use QA;
 use Matecat\SubFiltering\MateCatFilter;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {

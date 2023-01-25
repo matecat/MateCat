@@ -119,10 +119,15 @@ class Segment extends React.Component {
       if (wasOriginatedFromBrowserHistory) {
         history.replaceState(null, null, hashUrl)
       } else {
-        history.pushState(null, document.title, hashUrl)
+        history.pushState(null, null, hashUrl)
       }
       var historyChangeStateEvent = new Event('historyChangeState')
       window.dispatchEvent(historyChangeStateEvent)
+
+      // Update document title with hash segment id
+      document.title = `${document.title?.split('#')[0]} #${
+        this.props.segment.sid
+      }`
     }
   }
 
