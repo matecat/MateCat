@@ -10,8 +10,8 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
 import CommonUtils from '../../utils/commonUtils'
 import CatToolActions from '../../actions/CatToolActions'
-import ModalsActions from "../../actions/ModalsActions";
-import ConfirmMessageModal from "../modals/ConfirmMessageModal";
+import ModalsActions from '../../actions/ModalsActions'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -152,18 +152,18 @@ class ProjectContainer extends React.Component {
   deleteProject() {
     const props = {
       text:
-          'You are about to delete this project permanently. This action cannot be undone.' +
-          ' Are you sure you want to proceed?',
+        'You are about to delete this project permanently. This action cannot be undone.' +
+        ' Are you sure you want to proceed?',
       successText: 'Yes, delete it',
-      successCallback:  () =>{
+      successCallback: () => {
         ManageActions.updateStatusProject(this.props.project, 'delete')
       },
-      cancelCallback: ()=>{}
+      cancelCallback: () => {},
     }
     ModalsActions.showModalComponent(
-        ConfirmMessageModal,
-        props,
-        'Confirmation required',
+      ConfirmMessageModal,
+      props,
+      'Confirmation required',
     )
   }
 

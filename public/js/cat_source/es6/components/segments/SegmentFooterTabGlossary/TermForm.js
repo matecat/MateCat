@@ -167,7 +167,11 @@ const TermForm = () => {
       </div>
 
       <div className="glossary-form-line">
-        <div className={`input-with-label__wrapper ${config.isSourceRTL ? ' rtl' : ''}`}>
+        <div
+          className={`input-with-label__wrapper ${
+            config.isSourceRTL ? ' rtl' : ''
+          }`}
+        >
           <label>Original term*</label>
           <input
             className={`${
@@ -182,7 +186,11 @@ const TermForm = () => {
             }
           />
         </div>
-        <div className={`input-with-label__wrapper ${config.isTargetRTL ? ' rtl' : ''}`}>
+        <div
+          className={`input-with-label__wrapper ${
+            config.isTargetRTL ? ' rtl' : ''
+          }`}
+        >
           <label>Translated term*</label>
           <input
             className={`${
@@ -201,7 +209,11 @@ const TermForm = () => {
       {showMore && (
         <div className="glossary-form-line more-line">
           <div>
-            <div className={`input-with-label__wrapper ${config.isTargetRTL ? ' rtl' : ''}`}>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+            >
               <label>Notes</label>
               <textarea
                 className="input-large"
@@ -212,7 +224,11 @@ const TermForm = () => {
                 }
               />
             </div>
-            <div className={`input-with-label__wrapper ${config.isSourceRTL ? ' rtl' : ''}`}>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isSourceRTL ? ' rtl' : ''
+              }`}
+            >
               <label>Example of use</label>
               <textarea
                 className="input-large"
@@ -225,7 +241,11 @@ const TermForm = () => {
             </div>
           </div>
           <div>
-            <div className={`input-with-label__wrapper ${config.isTargetRTL ? ' rtl' : ''}`}>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+            >
               <label>Notes</label>
               <textarea
                 className="input-large"
@@ -236,7 +256,11 @@ const TermForm = () => {
                 }
               />
             </div>
-            <div className={`input-with-label__wrapper ${config.isTargetRTL ? ' rtl' : ''}`}>
+            <div
+              className={`input-with-label__wrapper ${
+                config.isTargetRTL ? ' rtl' : ''
+              }`}
+            >
               <label>Example of use</label>
               <textarea
                 className="input-large"

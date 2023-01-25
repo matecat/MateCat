@@ -115,6 +115,44 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
           $('.step3').show()
           $('#add-mt-provider-confirm').removeClass('hide')
         }
+        if (provider === 'mmt') {
+          $('.mgmt-container .tooltip-preimport').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+              'If the option is enabled, all the TMs linked to your Matecat account' +
+              '<br/> will be automatically imported to your ModernMT account for adaptation purposes.' +
+              '<br/>If the option is not enabled, the only TMs imported to your ModernMT account' +
+              '<br/> will be those used on projects that use ModernMT as their MT engine.</div>',
+          )
+          $('.mgmt-container .tooltip-preimport').powerTip({
+            placement: 's',
+          })
+
+          $('.mgmt-container .tooltip-context_analyzer').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+              'If the option is enabled, ModernMT will adapt the suggestions provided for a job' +
+              '<br/> using mainly the content of the TMs that you activate for that job and your corrections during translation,' +
+              '<br/>but it will also scan all your other TMs for further adaptation based on the context of the document that you are translating.' +
+              '<br/> If the option is not enabled, ModernMT will only adapt based on the TMs that you activate for a job and on your corrections during translation.</div>',
+          )
+          $('.mgmt-container .tooltip-context_analyzer').powerTip({
+            placement: 's',
+          })
+
+          $('.mgmt-container .tooltip-pretranslate').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +
+              'If the option is enabled, ModernMT is used during the analysis phase.' +
+              '<br/> This makes downloading drafts from the translation interface quicker, ' +
+              '<br/>but may lead to additional charges for plans other than the "Professional" one.' +
+              '<br>If the option is not enabled, ModernMT is only used to provide adaptive ' +
+              '<br/>suggestions when opening segments.</div>',
+          )
+          $('.mgmt-container .tooltip-pretranslate').powerTip({
+            placement: 's',
+          })
+        }
         if (provider === 'letsmt') {
           // Tilde MT (letsmt) uses a standalone web component
           // we'll hide the button because it's easier to use the webcomponent's builtin buttons
@@ -1600,6 +1638,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
               )
             }
             $('#mt_engine_int').val('none').trigger('change')
+            UI.decorateMMTRow && UI.decorateMMTRow()
           }
         })
         .catch((errors) => {
@@ -1619,9 +1658,9 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
         '<tr data-id="' +
         serverResponse.id +
         '">' +
-        '    <td class="mt-provider"> ' +
+        '    <td class="mt-provider">' +
         serverResponse.name +
-        ' </td>' +
+        '</td>' +
         '    <td class="engine-name">' +
         data.providerName +
         '</td>' +
@@ -1635,11 +1674,11 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       if (APP.isCattool) {
         $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR)
       } else {
-        $('table.mgmt-mt tbody tr.activetm')
-          .removeClass('activetm')
+        $('table.mgmt-mt tbody tr.activemt')
+          .removeClass('activemt')
           .find('.enable-mt input')
-          .removeAttr('checked')
-        $('table.mgmt-mt tbody').prepend(newTR)
+          .click()
+        $('table.mgmt-mt.active-mt tbody').prepend(newTR)
       }
     },
 
