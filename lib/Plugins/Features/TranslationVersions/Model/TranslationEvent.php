@@ -8,6 +8,7 @@ use Constants_TranslationStatus;
 use Database;
 use Exception;
 use Exceptions\ValidationError;
+use LQA\ChunkReviewStruct;
 use Segments_SegmentDao;
 use Segments_SegmentStruct;
 use Translations_SegmentTranslationStruct;
@@ -90,137 +91,87 @@ class TranslationEvent {
         return $this->old_translation;
     }
 
-    /**
-     * Origin source page can be missing. This can happen in case of ICE matches, or pre-transalted
-     * segments or just because we are evaluating a transition from NEW to TRANSLATED status.
-     *
-     * In such case we need to make assumptions on the `source_page` variable because that's what we use
-     * to decide where to move revised words and advancement words around.
-     * @return mixed
-     * @throws Exception
-     */
-    public function isBeingUpperReviewed() {
-        return $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isReviewedStatus() &&
-                $this->isUpperRevision();
-    }
-
     public function isBeingLowerReviewed() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->wanted_translation->isReviewedStatus() &&
-                $this->isLowerRevision();
+                $this->isLowerTransition();
     }
 
     public function isBeingLowerReviewedOrTranslated() {
-        return $this->isLowerRevision();
-    }
-
-    /**
-     * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
-     *
-     * @return int
-     */
-    public function getSourcePageDirection() {
-        $originSourcePage      = $this->getPreviousEventSourcePage();
-        $destinationSourcePage = $this->getCurrentEventSourcePage();
-
-        return $originSourcePage < $destinationSourcePage ? 1 : (
-        $originSourcePage == $destinationSourcePage ? null : -1
-        );
+        return $this->isLowerTransition();
     }
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function isEnteringReviewedState() {
-        return (
-                        $this->old_translation->isTranslationStatus() &&
-                        $this->wanted_translation->isReviewedStatus() &&
-                        !$this->isUnmodifiedICE()
-                )
-                ||
-                (
-                        $this->old_translation->isICE() &&
-                        $this->old_translation->isReviewedStatus() &&
-                        $this->wanted_translation->isReviewedStatus() &&
-                        // we are moving an ICE directly from T to R2 ( previous sourcePage is equal to current )
-                        $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
-                        $this->getCurrentEventSourcePage() > Constants::SOURCE_PAGE_REVISION
-                );
-    }
-
-    /**
-     * This should happen only with Ebay because is not possible anymore to change the status to "translated" from rev1 page
-     *
-     * WHEN we are changing an ICE 'APPROVED' to TRANSLATE
-     * AND we are in Revision 1 ( NOT Revision 2 )
-     * AND the content IS changed FOR THE FIRST TIME ( old version_number == 0 )
-     *
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function isModifyingICEFromTranslationForTheFirstTime() {
-        return $this->old_translation->isICE() &&
+    public function iceIsAboutToBeReviewedForTheFirstTime() {
+        return $this->isIceOrPreTranslated() &&
                 $this->old_translation->isReviewedStatus() &&
+                $this->wanted_translation->isReviewedStatus() &&
+                // we are moving an ICE directly from R1 or R2 ( previous sourcePage is equal to current )
+                // or from its initial status
+                // because those 2 values are equals even if an ice is approved with no modifications for the first time ( no previous event )
+                $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
+                $this->getCurrentEventSourcePage() >= Constants::SOURCE_PAGE_REVISION;
+    }
+
+    public function isIceOrPreTranslated() {
+        return $this->old_translation->isICE() || $this->old_translation->isPreTranslated();
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function isDowngradedToTranslated() {
+        return $this->old_translation->isReviewedStatus() &&
                 $this->wanted_translation->isTranslationStatus() &&
-                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation !== $this->wanted_translation->translation &&
-                $this->old_translation->version_number == 0;
+                $this->isLowerTransition();
     }
 
     /**
      * @return bool
-     * @throws Exception
      */
-    public function isModifyingICEFromRevisionOne() {
-        return $this->old_translation->isICE() &&
-                $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
-                $this->getPreviousEventSourcePage() == Constants::SOURCE_PAGE_REVISION &&
-                $this->old_translation->translation !== $this->wanted_translation->translation &&
-                $this->old_translation->version_number == 0;
-    }
-
-    /**
-     * We need to know if the record is an unmodified ICE
-     * Unmodified ICEs are locked ICEs which have new version number equal to 0.
-     *
-     * @return bool
-     */
-    protected function isUnmodifiedICE() {
-        return $this->old_translation->isICE() &&               // segment is ICE
-                $this->wanted_translation->version_number == 0  // version number is not changing
+    public function isModifiedIce() {
+        return $this->isIceOrPreTranslated() && // segment is ICE
+                $this->wanted_translation->version_number != 0  // version number is changing
                 ;
     }
 
     /**
      * @return bool
      */
-    public function isFirstTimeIceChange() {
-        return ( $this->old_translation->isICE() &&
+    public function iceIsChangingForTheFirstTime() {
+        return $this->isIceOrPreTranslated() &&
                 $this->old_translation->version_number == 0 &&
-                $this->wanted_translation->version_number == 1
-        );
+                $this->wanted_translation->version_number == 1;
     }
 
     /**
-     * Exits reviewed state when it's not editing an ICE for the first time.
      * @return bool
+     * @throws Exception
      */
-    public function isExitingReviewedState() {
-        return $this->old_translation->isReviewedStatus() &&
-                $this->wanted_translation->isTranslationStatus() &&
-                !$this->isFirstTimeIceChange() &&
-                !$this->isChangingICEtoTranslatedWithNoChange();
+    public function isR1() {
+        return $this->isRevisionNumber( 2 );
     }
 
-    protected function isChangingICEtoTranslatedWithNoChange() {
-        return $this->old_translation->isICE() &&
-                $this->wanted_translation->isTranslationStatus() &&
-                $this->old_translation->isReviewedStatus() &&
-                $this->old_translation->version_number == $this->wanted_translation->version_number;
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function isR2() {
+        return $this->isRevisionNumber( 3 );
+    }
+
+    /**
+     * @param $x
+     *
+     * @return bool
+     * @throws Exception
+     */
+    protected function isRevisionNumber( $x ) {
+        return $this->getCurrentEventSourcePage() == $x;
     }
 
     /**
@@ -249,22 +200,35 @@ class TranslationEvent {
      */
     public function isEditingCurrentRevision() {
         return $this->getCurrentEventSourcePage() == $this->getPreviousEventSourcePage() &&
-                $this->wanted_translation->translation != $this->old_translation->translation;
+                $this->wanted_translation->translation != $this->old_translation->translation &&
+                !$this->iceIsChangingForTheFirstTime();
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunkReview
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function lastEventWasOnThisChunk( ChunkReviewStruct $chunkReview ) {
+        return $this->getPreviousEventSourcePage() == $chunkReview->source_page;
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunkReview
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function currentEventIsOnThisChunk( ChunkReviewStruct $chunkReview ) {
+        return $this->getCurrentEventSourcePage() == $chunkReview->source_page;
     }
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function isUpperRevision() {
-        return $this->getPreviousEventSourcePage() < $this->getCurrentEventSourcePage();
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    public function isLowerRevision() {
+    public function isLowerTransition() {
         return $this->getPreviousEventSourcePage() > $this->getCurrentEventSourcePage();
     }
 
@@ -272,10 +236,13 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function isChangingSourcePage() {
-        return $this->getPreviousEventSourcePage() != $this->getCurrentEventSourcePage();
+    public function isUpperTransition() {
+        return $this->getCurrentEventSourcePage() > $this->getPreviousEventSourcePage();
     }
 
+    /**
+     * @return bool
+     */
     public function isPersisted() {
         return isset( $this->current_event ) && !is_null( $this->current_event->id );
     }
@@ -304,6 +271,16 @@ class TranslationEvent {
             throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );
         }
 
+
+        /*
+         * This is true IF:
+         * - the translation content is different from previous
+         * OR
+         * - the status is changed
+         * OR
+         * - the action event happened on a different page than the previous
+         *    ( unmodified ICEs always have the previous event source page equals to the actual one )
+         */
         if ( !$this->_saveRequired() ) {
             return;
         }

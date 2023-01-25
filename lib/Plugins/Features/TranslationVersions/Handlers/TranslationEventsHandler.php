@@ -8,7 +8,10 @@
 
 namespace Features\TranslationVersions\Handlers;
 
+use BasicFeatureStruct;
 use Chunks_ChunkStruct;
+use Exception;
+use Features\ReviewExtended;
 use Features\TranslationVersions\Model\TranslationEvent;
 use FeatureSet;
 use TransactionableTrait;
@@ -95,7 +98,7 @@ class TranslationEventsHandler {
     /**
      * Save events
      *
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
      */
     public function save() {
         $this->openTransaction();
@@ -104,8 +107,16 @@ class TranslationEventsHandler {
             $event->save();
         }
 
-        $this->_featureSet->run( 'translationVersionSaved', $this );
+        $basicFeatureStruct = $this->_featureSet->getFeaturesStructs();
+
+        if( isset( $basicFeatureStruct[ 'review_extended' ] ) ){
+            /** @var $reviewExtended ReviewExtended */
+            $reviewExtended = $basicFeatureStruct[ 'review_extended' ]->toNewObject();
+            $reviewExtended->processReviewTransitions( $this );
+        }
+
         $this->commitTransaction();
+
     }
 
     /**
