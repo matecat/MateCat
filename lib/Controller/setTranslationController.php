@@ -77,7 +77,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var TranslationVersionsHandler|TranslationVersions\DummyTranslationVersionHandler
+     * @var TranslationVersions\Handlers\TranslationVersionsHandler|TranslationVersions\Handlers\DummyTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -133,8 +133,6 @@ class setTranslationController extends ajaxController {
          */
         !is_null( $this->__postInput[ 'propagate' ] ) ? $this->propagate = $this->__postInput[ 'propagate' ] : null /* do nothing */
         ;
-
-        $this->propagate = $this->__postInput[ 'propagate' ]; //set by the client, mandatory
 
         $this->id_segment = $this->__postInput[ 'id_segment' ];
         $this->id_before  = $this->__postInput[ 'id_before' ];
@@ -402,8 +400,8 @@ class setTranslationController extends ajaxController {
          */
         $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
 
-        // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
-        $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+        // if saveVersionAndIncrement() return true it means that it was persisted a new version of the parent segment
+        $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -621,7 +619,7 @@ class setTranslationController extends ajaxController {
          * This is also the init handler of all R1/R2 handling and Qr score calculation by
          *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
          */
-        $this->featureSet->run( 'preSetTranslationCommitted', [
+        $this->VersionsHandler->storeTranslationEvent( [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
                 'propagation'       => $propagationTotal,
@@ -992,17 +990,6 @@ class setTranslationController extends ajaxController {
                 $this->project,
                 $this->segment
         );
-
-        /** TODO Remove , is only for debug purposes */
-        try {
-            $element         = new QueueElement();
-            $element->params = $contributionStruct;
-            $element->__toString();
-            Utils::raiseJsonExceptionError( true );
-        } catch ( Exception $e ) {
-            Log::doJsonLog( $contributionStruct );
-        }
-        /** TODO Remove */
 
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );

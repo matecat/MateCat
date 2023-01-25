@@ -81,7 +81,12 @@ class getSegmentsController extends ajaxController {
                 $this->step,
                 $this->id_segment,
                 $this->where,
-                $this->getOptionalQueryFields()
+                [
+                        'optional_fields' => [
+                                'st.edit_distance',
+                                'st.version_number'
+                        ]
+                ]
         );
 
         $this->prepareNotes( $data );
@@ -119,7 +124,7 @@ class getSegmentsController extends ajaxController {
             $data_ref_map          = json_decode( $seg[ 'data_ref_map' ], true );
             $seg[ 'data_ref_map' ] = $data_ref_map;
 
-            $Filter     = MateCatFilter::getInstance( $featureSet, $this->job->source, $this->job->target, null !== $data_ref_map ? $data_ref_map : [] );
+            $Filter = MateCatFilter::getInstance( $featureSet, $this->job->source, $this->job->target, null !== $data_ref_map ? $data_ref_map : [] );
 
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
@@ -132,7 +137,7 @@ class getSegmentsController extends ajaxController {
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
             $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
 
-            $seg['metadata'] = Segments_SegmentMetadataDao::getAll($seg[ 'sid' ]);
+            $seg[ 'metadata' ] = Segments_SegmentMetadataDao::getAll( $seg[ 'sid' ] );
 
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );
@@ -144,19 +149,6 @@ class getSegmentsController extends ajaxController {
         $this->result[ 'data' ][ 'where' ] = $this->where;
 
         $this->result[ 'data' ] = $featureSet->filter( 'filterGetSegmentsResult', $this->result[ 'data' ], $this->job );
-    }
-
-    private function getOptionalQueryFields() {
-        $feature = $this->job->getProject()->isFeatureEnabled( 'translation_versions' );
-        $options = [];
-
-        if ( $feature ) {
-            $options[ 'optional_fields' ] = [ 'st.version_number' ];
-        }
-
-        $options = $this->featureSet->filter( 'filter_get_segments_optional_fields', $options );
-
-        return $options;
     }
 
     private function attachNotes( &$segment ) {

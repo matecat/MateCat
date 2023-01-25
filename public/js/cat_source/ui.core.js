@@ -248,7 +248,7 @@ window.UI = {
   goToFirstError: function () {
     CatToolActions.toggleQaIssues()
     setTimeout(function () {
-      $('.qa-issues-container ').first().click()
+      $('.button.qa-issue').first().click()
     }, 300)
   },
   setDownloadStatus: function (stats) {
@@ -320,22 +320,6 @@ window.UI = {
       UI.reEnableDownloadButton.bind(this),
     )
   },
-  showFixWarningsOnDownload: function (continueDownloadFunction) {
-    ModalsActions.showModalComponent(
-      ConfirmMessageModal,
-      {
-        cancelText: 'Fix errors',
-        cancelCallback: () => UI.goToFirstError(),
-        successCallback: () => continueDownloadFunction(),
-        successText: 'Download anyway',
-        text:
-          'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in Matecat </a> <br /><br /> If you' +
-          ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-      },
-      'Confirmation required',
-    )
-  },
 
   runDownload: function () {
     const globalWarnings = SegmentStore.getGlobalWarnings()
@@ -354,7 +338,10 @@ window.UI = {
       globalWarnings.matecat.ERROR &&
       globalWarnings.matecat.ERROR.total > 0
     ) {
-      UI.showFixWarningsOnDownload(continueDownloadFunction)
+      ModalsActions.showDownloadWarningsModal(
+        continueDownloadFunction,
+        UI.goToFirstError,
+      )
     } else {
       continueDownloadFunction()
     }
