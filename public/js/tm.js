@@ -895,11 +895,19 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       $('.addtmxrow').hide()
     },
     execAddTMOrGlossary: function (el, type) {
-      var action =
+      const action =
         type == 'glossary' ? '/api/v2/glossaries/import/' : '/?action=loadTMX'
-      var line = $(el).parents('tr')
+      const line = $(el).parents('tr')
       line.find('.uploadfile').addClass('uploading')
-      var form = line.find('.add-TM-Form')[0]
+      const form = line.find('.add-TM-Form')[0]
+      const filesLength = $(form).find('input[type=file]').get(0).files.length
+      if (filesLength > 10) {
+        UI.showErrorUpload(
+          $(form).parents('.uploadfile'),
+          'You can only upload a maximum of 10 files',
+        )
+        return
+      }
       var path = line.find('.uploadfile').find('input[type="file"]').val()
       var file = path.split('\\')[path.split('\\').length - 1]
       this.fileUpload(form, action, 'uploadCallback', file, type)
@@ -1164,8 +1172,8 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       }
     },
     showErrorUpload: function ($tr, text) {
-      var msg = text ? text : 'Error uploading your file. Please try again.'
-      var msg2 = 'Error uploading your file. Please try again.'
+      var msg = text ? text : 'Error uploading your files. Please try again.'
+      var msg2 = text ? text : 'Error uploading your files. Please try again.'
       $tr.find('.addtmxfile, .addglossaryfile, .uploadprogress').hide()
       $tr.find('.upload-file-msg-error').text(msg2).show()
       $tr.find('.canceladdglossary, .canceladdtmx').show()
@@ -1999,7 +2007,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       var label, format
       if (type == 'tmx') {
         label =
-          '<p class="pull-left">Select one or more TMX files to be imported</p>'
+          '<p class="pull-left">Select up to 10 TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2008,7 +2016,7 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select one or more glossaries in XLSX, XLS or ODS format ' +
+          '<p class="pull-left">Select up to 10 glossaries in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls, .ods'
