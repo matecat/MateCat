@@ -1511,11 +1511,12 @@ button.ui-button::-moz-focus-inner {
       .dropdown__option--is-active-option {
         background-color: unset;
         font-weight: bold;
+        background-color: $grey5;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: $grey5;
+        background-color: $grey4;
       }
     }
 
