@@ -14,9 +14,13 @@ class CJKLangUtils
     {
         $count = 0;
 
-        preg_match_all(self::CHINESE_REGEX, $string, $chineseMatches);
+        // The chinese regex is a subset of the japanese one.
+        // So, we rely only on the japanese regex to get the match count
         preg_match_all(self::JAPANESE_REGEX, $string, $japaneseMatches);
         preg_match_all(self::KOREAN_REGEX, $string, $korenMatches);
+
+        $count = $count + count($japaneseMatches[0]);
+        $count = $count + count($korenMatches[0]);
 
         return $count;
     }
