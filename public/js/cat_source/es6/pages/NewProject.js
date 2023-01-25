@@ -37,7 +37,6 @@ const NewProject = ({
   conversionEnabled,
   formatsNumber,
   googleDriveEnabled,
-  supportedFiles,
 }) => {
   const projectNameRef = useRef()
   const [user, setUser] = useState()
@@ -395,7 +394,7 @@ const NewProject = ({
               onClick={() => {
                 ModalsActions.showModalComponent(
                   SupportedFilesModal,
-                  {supportedFiles},
+                  {},
                   'Supported file formats',
                   {minWidth: '80%', height: '80%'},
                 )

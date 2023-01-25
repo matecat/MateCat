@@ -621,7 +621,6 @@ $(document).ready(function () {
       conversionEnabled={config.conversionEnabled}
       formatsNumber={config.formats_number}
       googleDriveEnabled={config.googleDriveEnabled}
-      supportedFiles={config.supported_file_types_array}
     />,
   )
 

@@ -2531,9 +2531,17 @@ header {
 .supported-formats {
   height: 100%;
   .fileformat {
+    h3 {
+      padding: 0 30px;
+      background-color: #efefef;
+      text-align: center;
+    }
     display: flex;
     flex-direction: row;
     height: calc(100% - 50px);
+    padding: 12px;
+    gap: 8px;
+    justify-content: space-between;
     overflow: auto;
     span {
       padding: 10px 0px 10px 40px;
@@ -2544,16 +2552,21 @@ header {
       background-size: 25px !important;
     }
     .format-box {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      ul {
-        display: flex;
-        flex-wrap: wrap;
-      }
-      li {
-        width: 100px;
-        height: 50px;
+      float: none;
+      flex: 1 1 auto;
+      max-width: 300px;
+      .file-list {
+        float: left;
+        margin: 0 auto;
+        float: none;
+        overflow: hidden;
+        > div {
+          width: 110px;
+          margin: 0;
+          padding: 0 5px;
+          float: left;
+          text-align: left;
+        }
       }
     }
   }
