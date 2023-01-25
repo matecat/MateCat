@@ -90,16 +90,20 @@ class SizeRestriction {
      */
     private function getCleanedStringLength() {
 
-        $wordsArray = mb_str_split($this->cleanedString);
+        $cjkMatches = CJKLangUtils::getMatches($this->cleanedString);
+        $emojiMatches = EmojiUtils::getMatches($this->cleanedString);
+
+
+        //$wordsArray = mb_str_split($this->cleanedString);
         $stringLength = 0;
 
-        foreach ($wordsArray as $word){
-            if(CJKLangUtils::isCjk($word) or EmojiUtils::isEmoji($word)){
-                $stringLength = $stringLength + 2;
-            } else {
-                $stringLength++;
-            }
-        }
+//        foreach ($wordsArray as $word){
+//            if(CJKLangUtils::isCjk($this->cleanedString) or EmojiUtils::isEmoji($this->cleanedString) ){
+//                $stringLength = $stringLength + 2;
+//            } else {
+//                $stringLength++;
+//            }
+//        }
 
         return $stringLength;
     }

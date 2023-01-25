@@ -231,7 +231,7 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
     {
         $sizeRestriction = new SizeRestriction( $string, $limit );
 
-        $this->assertTrue( $sizeRestriction->checkLimit() );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
+        $this->assertTrue( $sizeRestriction->checkLimit(), "Failed: '" . $string . "'" );
+        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining(), "Failed: '" . $string . "'" );
     }
 }
