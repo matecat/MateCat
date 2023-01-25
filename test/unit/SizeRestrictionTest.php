@@ -84,6 +84,17 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
                 ' (기본)' => 7,
                 '내 카테고리' => 11,
             ],
+            'others' => [
+                'रिमाइंडर: कागदपत्र आता अपलोड करा' => 32,            // emoji conflict
+                'ভেনিছতকৈ অধিক খালৰ সৈতে' => 24,               // CJK conflict
+                'वेनिस की तुलना में अधिक नहरों के साथ' => 37,           // CJK conflict
+                'ವೆನಿಸ್‌ಗಿಂತ ಹೆಚ್ಚಿನ ಕಾಲುವೆಗಳೊಂದಿಗೆ' => 34,              // CJK conflict
+                'വെനീസിനേക്കാളും' => 15,
+                'වැනීසියට වඩා වැඩි' => 17,
+                'வெனிஸை' => 6,
+                'ตัวอักษรไทย' => 11,
+                'తెలుగు లిపి' => 11,
+            ]
         ];
 
         foreach($strings as $lang => $langStrings){
@@ -219,6 +230,7 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
     private function sizeRestrictionAsserts($string, $limit)
     {
         $sizeRestriction = new SizeRestriction( $string, $limit );
+
         $this->assertTrue( $sizeRestriction->checkLimit() );
         $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
     }
