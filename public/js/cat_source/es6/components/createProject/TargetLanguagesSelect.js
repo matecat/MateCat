@@ -22,14 +22,15 @@ export const TargetLanguagesSelect = ({history = []}) => {
       multipleSelect={'dropdown'}
       activeOptions={targetLangs}
       checkSpaceToReverse={false}
-      onToggleOption={(option) => {
-        setTargetLangs((prevState) =>
-          prevState.some((item) => item.id === option.id)
-            ? prevState.filter((item) => item.id !== option.id).length
-              ? prevState.filter((item) => item.id !== option.id)
-              : prevState
-            : [...prevState, option],
-        )
+      onToggleOption={(option, onClose) => {
+        const result = targetLangs.some((item) => item.id === option.id)
+          ? targetLangs.filter((item) => item.id !== option.id).length
+            ? targetLangs.filter((item) => item.id !== option.id)
+            : targetLangs
+          : [option]
+        setTargetLangs(result)
+
+        if (!targetLangs.some((item) => item.id === option.id)) onClose()
       }}
     >
       {({index, onClose}) => ({
