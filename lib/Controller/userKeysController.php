@@ -134,6 +134,7 @@ class userKeysController extends ajaxController {
             switch ( $this->exec ) {
                 case 'delete':
                     $userMemoryKeys = $mkDao->disable( $memoryKeyToUpdate );
+                    $this->featureSet->run('postUserKeyDelete', $userMemoryKeys->tm_key->key, $this->user->uid );
                     break;
                 case 'update':
                     $userMemoryKeys = $mkDao->atomicUpdate( $memoryKeyToUpdate );
@@ -141,7 +142,6 @@ class userKeysController extends ajaxController {
                 case 'newKey':
                     $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
                     $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
-
                     break;
                 case 'info':
                     $userMemoryKeys = $mkDao->read( $memoryKeyToUpdate );
@@ -159,7 +159,6 @@ class userKeysController extends ajaxController {
             if ( !$userMemoryKeys ) {
                 throw new Exception( "This key wasn't found in your keyring.", -3 );
             }
-
 
         } catch ( Exception $e ) {
             $this->result[ 'data' ]     = 'KO';

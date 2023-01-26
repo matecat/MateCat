@@ -196,6 +196,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             openComments: false,
             openSplit: false,
             metadata: segment.metadata,
+            ...(segment.id_file_part && {id_file_part: segment.id_file_part}),
           }
           newSegments.push(segData)
           segData = null
@@ -682,6 +683,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         ? term.matching_words.filter((value) => value)
         : [],
     }))
+    if (!this._segments.size) return
     const index = this.getSegmentIndex(sid)
     const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
     const glossary = isGlossaryAlreadyExist

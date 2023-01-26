@@ -549,6 +549,7 @@ const CommonUtils = {
         os.indexOf('iOS') >= 0)
     )
   },
+  isAllowedLinkRedirect: () => false,
 }
 
 const ParsedHash = function (hash) {

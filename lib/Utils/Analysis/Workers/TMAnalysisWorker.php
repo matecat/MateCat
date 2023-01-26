@@ -24,6 +24,7 @@ use Engines_Results_MyMemory_TMS;
 use Exception;
 use FeatureSet;
 use Jobs_JobDao;
+use LQA\QA;
 use PDOException;
 use PostProcess;
 use Predis\Connection\ConnectionException;
@@ -654,7 +655,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
 
                 //TODO check fo BUG in html encoding html_entity_decode
-                $qaRealign = new \QA( $queueElement->params->segment, html_entity_decode( $this->_matches[ 0 ][ 'raw_translation' ] ) );
+                $qaRealign = new QA( $queueElement->params->segment, html_entity_decode( $this->_matches[ 0 ][ 'raw_translation' ] ) );
                 $qaRealign->setFeatureSet( $this->featureSet );
                 $qaRealign->tryRealignTagID();
 

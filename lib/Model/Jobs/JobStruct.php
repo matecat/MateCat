@@ -227,6 +227,15 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
+     * @return Translations_SegmentTranslationStruct
+     */
+    public function findLatestTranslation() {
+        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+
+        return $dao->lastTranslationByJobOrChunk( $this );
+    }
+
+    /**
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks() {
@@ -243,6 +252,12 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         return count($this->getChunks()) > 1;
     }
 
+    /**
+     * @param Users_UserStruct $user
+     * @param                  $role
+     *
+     * @return array
+     */
     public function getClientKeys( Users_UserStruct $user, $role ){
         $uKModel = new \TmKeyManagement\UserKeysModel( $user, $role );
         return $uKModel->getKeys( $this->tm_keys );

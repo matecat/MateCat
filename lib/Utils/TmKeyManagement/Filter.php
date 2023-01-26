@@ -219,7 +219,6 @@ class TmKeyManagement_Filter {
      * @param $tm_key Array
      *
      * @return bool
-     * @throws Exception
      */
     protected function _hasRightGrants( $tm_key, $role ){
 
@@ -253,7 +252,6 @@ class TmKeyManagement_Filter {
      * @param $tm_key Array
      *
      * @return bool
-     * @throws Exception
      */
     protected function _isTheRightType( $tm_key ){
 

@@ -1,0 +1,32 @@
+stv1:
+  id: @EVER_INCREMENT
+  id_segment: @REF:segments:segment1:id
+  id_job: @REF:jobs:job2:id
+  translation: Mondo, ciao
+  version_number: 0
+  creation_date: 2017-07-12 13:00:00
+  propagated_from: NULL
+  time_to_edit: 2345
+  is_review: 0
+
+stv2:
+  id: @EVER_INCREMENT
+  id_segment: @REF:segments:segment1:id
+  id_job: @REF:jobs:job2:id
+  translation: Mondo  ciao
+  version_number: 1
+  creation_date: 2017-07-12 13:00:10
+  propagated_from: NULL
+  time_to_edit: 2345
+  is_review: 0
+
+stv3:
+  id: @EVER_INCREMENT
+  id_segment: @REF:segments:segment1:id
+  id_job: @REF:jobs:job2:id
+  translation: Ciao... mondo
+  version_number: 2
+  creation_date: 2017-07-12 13:00:20
+  propagated_from: NULL
+  time_to_edit: 2345
+  is_review: 0

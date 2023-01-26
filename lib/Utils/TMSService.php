@@ -199,12 +199,25 @@ class TMSService {
                     case "400" :
                         throw new Exception( "Can't load Glossary file right now, try later", -15 );
                         break;
-                    case "403" :
-                        throw new Exception( "Invalid key provided", -15 );
+
+                    case "404":
+                        throw new Exception('File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15);
                         break;
-                    case "406" :
+
+                    case "406":
                         throw new Exception( $importStatus->responseDetails, -15 );
                         break;
+
+                    case "403" :
+                        $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
+
+                        if($importStatus->responseDetails === 'HEADER DON\'T MATCH THE CORRECT STRUCTURE'){
+                            $message = 'The file header does not match the accepted structure. Please change the header structure to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">the user guide page</a> and retry upload.';
+                        }
+
+                        throw new Exception( $message, -15 );
+                        break;
+
                     default:
                 }
 
