@@ -256,9 +256,12 @@ test('renders properly', async () => {
   const elModal = document.createElement('div')
   elModal.id = 'modal'
 
+  const footer = document.createElement('footer')
+
   document.body.appendChild(elHeader)
   document.body.appendChild(elAnalyzeContainer)
   document.body.appendChild(elModal)
+  document.body.appendChild(footer)
 
   await import('./analyze')
   act(() => {
