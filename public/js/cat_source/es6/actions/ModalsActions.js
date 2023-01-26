@@ -44,12 +44,12 @@ let ModalsActions = {
     this.showModalComponent(SplitJobModal, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {
-    var props = {
+    const props = {
       text:
         'This will cause the merging of all chunks in only one job. ' +
         'This operation cannot be canceled.',
       successText: 'Continue',
-      successCallback: function () {
+      successCallback: () => {
         mergeJobChunks(project, job).then(function () {
           if (successCallback) {
             successCallback.call()
@@ -58,7 +58,7 @@ let ModalsActions = {
         this.onCloseModal()
       },
       cancelText: 'Cancel',
-      cancelCallback: function () {
+      cancelCallback: () => {
         this.onCloseModal()
       },
     }
