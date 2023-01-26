@@ -29,8 +29,10 @@ TestHelper::resetDb();
 
 function startConnection() {
     $conn = Database::obtain(
-            INIT::$DB_SERVER, INIT::$DB_USER,
-            INIT::$DB_PASS, INIT::$DB_DATABASE
+            INIT::$DB_SERVER,
+            INIT::$DB_USER,
+            INIT::$DB_PASS,
+            INIT::$DB_DATABASE
     );
     $conn->getConnection();
 }
