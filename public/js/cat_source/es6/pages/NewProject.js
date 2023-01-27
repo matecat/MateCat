@@ -440,14 +440,15 @@ const NewProject = ({
       </div>
       {isOpenMultiselectLanguages && (
         <LanguageSelector
-          selectedLanguagesFromDropdown={CreateProjectStore.getTargetLangs().split(
-            ',',
-          )}
+          selectedLanguagesFromDropdown={
+            targetLangs.length > 1 ? targetLangs.map(({code}) => code) : []
+          }
           languagesList={config.languages_array}
           fromLanguage={CreateProjectStore.getSourceLang()}
           onClose={() => setIsOpenMultiselectLanguages(false)}
           onConfirm={(data) => {
-            setTargetLangs(data.map((item) => ({...item, id: item.code})))
+            if (data.length)
+              setTargetLangs(data.map((item) => ({...item, id: item.code})))
             setIsOpenMultiselectLanguages(false)
           }}
         />

@@ -18,7 +18,7 @@ class LanguageSelector extends React.Component {
   componentDidMount() {
     const {selectedLanguagesFromDropdown, languagesList, fromLanguage} =
       this.props
-    document.addEventListener('keydown', this.pressEscKey)
+    document.addEventListener('keydown', this.keyHandler)
 
     this.setState({
       fromLanguage: languagesList.filter((i) => i.code === fromLanguage)[0],
@@ -32,7 +32,7 @@ class LanguageSelector extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.pressEscKey)
+    document.removeEventListener('keydown', this.keyHandler)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -204,8 +204,7 @@ class LanguageSelector extends React.Component {
       .map((e) => e.code)
       .indexOf(language.code)
     if (indexSearch > -1) {
-      if (selectedLanguages.length > 1)
-        newSelectedLanguages.splice(indexSearch, 1)
+      newSelectedLanguages.splice(indexSearch, 1)
     } else {
       newSelectedLanguages.push(language)
     }
@@ -242,12 +241,15 @@ class LanguageSelector extends React.Component {
     this.setState({querySearch: ''})
   }
 
-  pressEscKey = (event) => {
+  keyHandler = (event) => {
     const {onClose} = this.props
     const keyCode = event.keyCode
 
     if (keyCode === 27) {
       onClose()
+    }
+    if (event.ctrlKey && event.key === 'Enter') {
+      this.onConfirm()
     }
 
     //27
