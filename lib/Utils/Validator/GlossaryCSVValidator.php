@@ -41,10 +41,15 @@ class GlossaryCSVValidator extends AbstractValidator {
         return true;
     }
 
+    /**
+     * @param $filePath
+     * @return array
+     */
     private function getHeaders( $filePath ) {
         $headers = CSV::headers( $filePath );
+        $headers = array_map( 'Utils::trimAndLowerCase', $headers );
 
-        return array_map( 'Utils::trimAndLowerCase', $headers );
+        return Utils::popArray($headers);
     }
 
     /**
@@ -86,7 +91,7 @@ class GlossaryCSVValidator extends AbstractValidator {
         $languages = array_diff( $headers, $skipKeys );
 
         if ( count( $languages ) < 2 ) {
-            $this->errors[] = 'Minimum two language matches';
+            $this->errors[] = 'Only one language detected, please upload a glossary with at least two languages. In case of doubts, refer to <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this page</a>.';
 
             return false;
         }
