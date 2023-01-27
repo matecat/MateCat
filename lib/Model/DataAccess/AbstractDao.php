@@ -523,12 +523,13 @@ abstract class DataAccess_AbstractDao {
      * Returns FALSE on failure.
      *
      * @param DataAccess_IDaoStruct $struct
-     * @param array                 $options
+     * @param array $options
+     * @param PDO|null $conn
      *
      * @return bool|string
      * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
+    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = [], $conn = null ) {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
@@ -540,7 +541,10 @@ abstract class DataAccess_AbstractDao {
 
         $sql = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields );
 
-        $conn = Database::obtain()->getConnection();
+        if($conn === null){
+            $conn = Database::obtain()->getConnection();
+        }
+
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
@@ -570,14 +574,15 @@ abstract class DataAccess_AbstractDao {
      *
      * @param       $struct
      * @param array $options
+     * @param PDO|null $conn
      *
      * @return bool|string
      * @throws Exception
      */
-    public static function insertStructWithAutoIncrements( $struct, $options = [] ) {
+    public static function insertStructWithAutoIncrements( $struct, $options = [], $conn = null ) {
         $auto_increment_fields        = static::$auto_increment_field;
         static::$auto_increment_field = [];
-        $id                           = self::insertStruct( $struct, $options );
+        $id                           = self::insertStruct( $struct, $options, $conn );
         static::$auto_increment_field = $auto_increment_fields;
 
         return $id;

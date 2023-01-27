@@ -11,13 +11,9 @@ use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Symfony\Component\Yaml\Yaml;
 
-class FixturesLoader {
+class FixturesLoader extends SchemaCopy {
 
     protected $fixtures_map = [] ;
-
-    public function __construct() {
-
-    }
 
     public function loadFixtures() {
         $this->fixtures_map = [] ;
@@ -49,7 +45,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['users'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Users_UserStruct( $record ) ;
-            Users_UserDao::insertStructWithAutoIncrements( $struct ) ;
+            Users_UserDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -59,7 +55,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['user_metadata'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new \Users\MetadataStruct( $record ) ;
-            \Users\MetadataDao::insertStruct( $struct ) ;
+            \Users\MetadataDao::insertStruct( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -69,7 +65,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['qa_categories'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new CategoryStruct( $record ) ;
-            CategoryDao::insertStruct( $struct ) ;
+            CategoryDao::insertStruct( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -79,7 +75,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['segments'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Segments_SegmentStruct( $record ) ;
-            Segments_SegmentDao::insertStructWithAutoIncrements( $struct ) ;
+            Segments_SegmentDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -89,7 +85,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['segment_translations'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Translations_SegmentTranslationStruct( $record ) ;
-            Translations_SegmentTranslationDao::insertStruct( $struct ) ;
+            Translations_SegmentTranslationDao::insertStruct( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -100,7 +96,7 @@ class FixturesLoader {
             $this->replaceTokens( $record ) ;
             $struct = new TranslationVersionStruct( $record ) ;
             $struct->creation_date = Utils::mysqlTimestamp( $record['creation_date'] ) ;
-            $insert = TranslationVersionDao::insertStruct( $struct ) ;
+            $insert = TranslationVersionDao::insertStruct( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -110,7 +106,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['qa_chunk_reviews'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new ChunkReviewStruct( $record ) ;
-            ChunkReviewDao::insertStruct( $struct ) ;
+            ChunkReviewDao::insertStruct( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -120,7 +116,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['files_job'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new FilesJobStruct( $record ) ;
-            FilesJobDao::insertStruct( $struct ) ;
+            FilesJobDao::insertStruct( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -130,7 +126,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['files'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Files_FileStruct( $record ) ;
-            Files_FileDao::insertStructWithAutoIncrements( $struct ) ;
+            Files_FileDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -140,7 +136,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['qa_models'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new \LQA\ModelStruct( $record  ) ;
-            ModelDao::insertStructWithAutoIncrements( $struct ) ;
+            ModelDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -150,7 +146,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['jobs'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Jobs_JobStruct( $record ) ;
-            Jobs_JobDao::insertStructWithAutoIncrements( $struct ) ;
+            Jobs_JobDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -160,7 +156,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['projects'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Projects_ProjectStruct( $record ) ;
-            Projects_ProjectDao::insertStructWithAutoIncrements( $struct ) ;
+            Projects_ProjectDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -171,7 +167,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['project_metadata'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new Projects_MetadataStruct( $record ) ;
-            Projects_MetadataDao::insertStructWithAutoIncrements( $struct ) ;
+            Projects_MetadataDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 
@@ -181,7 +177,7 @@ class FixturesLoader {
         foreach( $this->fixtures_map['job_metadata'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
             $struct = new \Jobs\MetadataStruct( $record ) ;
-            \Jobs\MetadataDao::insertStructWithAutoIncrements( $struct ) ;
+            \Jobs\MetadataDao::insertStructWithAutoIncrements( $struct, [], $this->getDbConn() ) ;
         }
     }
 

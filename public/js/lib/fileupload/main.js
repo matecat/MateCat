@@ -381,15 +381,15 @@ $( function () {
             $( '#clear-all-files' ).click();
         }
         var maxnum = config.maxNumberFiles;
-        if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
-            console.log( '10 files loaded' );
-            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
-            $( '.wrapper-upload .error-message' ).show()
-            $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
-            $( '#add-files' ).addClass( 'disabled' );
-            $( '#add-files input' ).attr( 'disabled', 'disabled' );
+            if ( $( '.upload-table tr' ).length > (maxnum - 1) ) {
+                console.log( '10 files loaded' );
+                $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).find('p').text( 'No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' );
+                $( '.wrapper-upload .error-message' ).show()
+                $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
+                $( '#add-files' ).addClass( 'disabled' );
+                $( '#add-files input' ).attr( 'disabled', 'disabled' );
 
-        }
+            }
 
         $( 'body' ).addClass( 'initialized' );
         /*

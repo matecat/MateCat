@@ -1,25 +1,26 @@
 <?php
 
 class SchemaCopy {
+
     public $conn;
     public $dbConn;
 
-    function getDbConn( $config ) {
-        $string = "mysql:host={$config['DB_SERVER']};dbname={$config['DB_DATABASE']};charset=UTF8";
+    public function getDbConn() {
+        $string = "mysql:host={$this->config['DB_SERVER']};dbname={$this->config['DB_DATABASE']};charset=UTF8";
 
         if ( $this->dbConn == null ) {
-            $this->dbConn = new PDO( $string, $config[ 'DB_USER' ], $config[ 'DB_PASS' ] );
+            $this->dbConn = new PDO( $string, $this->config[ 'DB_USER' ], $this->config[ 'DB_PASS' ] );
             $this->dbConn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
         }
 
         return $this->dbConn;
     }
 
-    function getConn( $config ) {
-        $string = "mysql:host={$config['DB_SERVER']};charset=UTF8";
+    public  function getConn() {
+        $string = "mysql:host={$this->config['DB_SERVER']};charset=UTF8";
 
         if ( $this->conn == null ) {
-            $this->conn = new PDO( $string, $config[ 'DB_USER' ], $config[ 'DB_PASS' ] );
+            $this->conn = new PDO( $string, $this->config[ 'DB_USER' ], $this->config[ 'DB_PASS' ] );
             $this->conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
         }
 
@@ -33,17 +34,17 @@ class SchemaCopy {
     }
 
     function dropDatabase() {
-        $conn = $this->getConn( $this->config );
+        $conn = $this->getConn();
         $conn->query( "DROP DATABASE IF EXISTS {$this->config['DB_DATABASE']}" );
     }
 
     function createDatabase() {
-        $conn = $this->getConn( $this->config );
+        $conn = $this->getConn();
         $conn->query( "CREATE DATABASE IF NOT EXISTS {$this->config['DB_DATABASE']}" );
     }
 
     function useDatabase() {
-        $conn = $this->getConn( $this->config );
+        $conn = $this->getConn();
         $conn->query( "USE {$this->config['DB_DATABASE']}" );
     }
 
@@ -55,14 +56,14 @@ class SchemaCopy {
     }
 
     function getTables() {
-        $conn = $this->getDbConn( $this->config );
+        $conn = $this->getDbConn();
         $st   = $conn->query( "SHOW FULL TABLES WHERE Table_type NOT LIKE 'VIEW' " );
 
         return $st->fetchAll();
     }
 
     function getTablesStatements() {
-        $conn   = $this->getDbConn( $this->config );
+        $conn   = $this->getDbConn();
         $result = [];
         foreach ( $this->getTables() as $k => $v ) {
             $table_name = $v[ 0 ];
@@ -82,7 +83,7 @@ class SchemaCopy {
     }
 
     function resetAllTables() {
-        $conn = $this->getDbConn( $this->config );
+        $conn = $this->getDbConn();
         foreach ( $this->getTables() as $k => $v ) {
             $table_name = $v[ 0 ];
             // $conn->query( "TRUNCATE TABLE $table_name ");
@@ -119,6 +120,6 @@ class SchemaCopy {
     }
 
     function execSql( $sql ) {
-        $this->getDbConn( $this->config )->query( $sql );
+        $this->getDbConn()->query( $sql );
     }
 }

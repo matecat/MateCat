@@ -4,13 +4,17 @@ class TestHelper {
     /**
      * @var FixturesLoader
      */
-    public static $FIXTURES ;
+    public $fixturesLoader;
+
     /**
      * @var SchemaCopy
      */
-    public static $SCHEMA_HELPER ;
+    public $schemaHelper;
 
-    static function init() {
+    /**
+     * TestHelper constructor.
+     */
+    public function __construct() {
         $test_ini = TestHelper::parseConfigFile( 'test' );
 
         if ( @$test_ini[ 'TEST_URL_BASE' ] != null ) {
@@ -20,21 +24,25 @@ class TestHelper {
             $GLOBALS[ 'TEST_URL_BASE' ] = 'localhost';
         }
 
-        TestHelper::$SCHEMA_HELPER = new SchemaCopy( $test_ini[ 'test' ] );
-        TestHelper::$FIXTURES = new FixturesLoader();
+        $this->schemaHelper = new SchemaCopy( $test_ini[ 'test' ] );
+        $this->fixturesLoader = new FixturesLoader( $test_ini[ 'test' ] );
     }
 
     /**
      * @throws Exception
      */
-    static function resetDb() {
-        TestHelper::$SCHEMA_HELPER->createDatabase() ;
-        TestHelper::$SCHEMA_HELPER->prepareSchemaTables();
-        TestHelper::$SCHEMA_HELPER->resetAllTables();
-        TestHelper::$FIXTURES->loadFixtures();
+    public function resetDb() {
+        $this->schemaHelper->createDatabase() ;
+        $this->schemaHelper->prepareSchemaTables();
+        $this->schemaHelper->resetAllTables();
+        $this->fixturesLoader->loadFixtures();
     }
 
-    public static function parseConfigFile( $env ) {
+    /**
+     * @param $env
+     * @return array|false
+     */
+    public function parseConfigFile( $env ) {
         return parse_ini_file(PROJECT_ROOT . '/inc/config.' . $env . '.ini', true);
     }
 }

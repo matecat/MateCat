@@ -20,23 +20,24 @@ register_shutdown_function( function () {
     restoreDevelopmentConfigFile();
 } );
 
-setTestConfigFile();
 
+setTestConfigFile();
 Bootstrap::start();
 
-TestHelper::init();
-TestHelper::resetDb();
+$testHelper = new TestHelper();
+$testHelper->resetDb();
+$test_ini = $testHelper->parseConfigFile( 'test' );
 
-function startConnection() {
+function startConnection($test_ini) {
     $conn = Database::obtain(
-            INIT::$DB_SERVER,
-            INIT::$DB_USER,
-            INIT::$DB_PASS,
-            INIT::$DB_DATABASE
+        isset($test_ini['test']['DB_SERVER']) ? $test_ini['test']['DB_SERVER'] : INIT::$DB_SERVER,
+        isset($test_ini['test']['DB_USER']) ? $test_ini['test']['DB_USER'] : INIT::$DB_USER,
+        isset($test_ini['test']['DB_PASS']) ? $test_ini['test']['DB_PASS'] :INIT::$DB_PASS,
+        isset($test_ini['test']['DB_DATABASE']) ? $test_ini['test']['DB_DATABASE'] : INIT::$DB_DATABASE
     );
     $conn->getConnection();
 }
 
-startConnection();
+startConnection($test_ini);
 
 INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);
