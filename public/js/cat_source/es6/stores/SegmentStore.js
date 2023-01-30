@@ -825,8 +825,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
   },
   setQACheck(sid, data) {
-    const {missing_terms: missingTerms, blacklisted_terms: blacklistedTerms} =
-      data || {}
+    const {
+      missing_terms: missingTerms = [],
+      blacklisted_terms: blacklistedTerms = [],
+    } = data || {}
     const terms = missingTerms.map((term) => ({
       ...term,
       missingTerm: true,

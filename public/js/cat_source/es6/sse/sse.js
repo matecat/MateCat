@@ -130,8 +130,7 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_check', function (ev, message) {
-      if (message?.data)
-        SegmentActions.addQaCheck(message.data.id_segment, message.data)
+      SegmentActions.addQaCheck(message.data.id_segment, message.data)
     })
     $(document).on('sse:glossary_keys', function (ev, message) {
       CatToolActions.setHaveKeysGlossary(message.data.has_glossary)
