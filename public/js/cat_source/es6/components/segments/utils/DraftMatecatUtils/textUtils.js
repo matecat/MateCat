@@ -130,20 +130,15 @@ export const regexWordDelimiter =
 export const getCharactersCounter = (value) => {
   const {getCJKMatches, getEmojiMatches, removeHiddenCharacters} = TEXT_UTILS
   const cleanContent = removeHiddenCharacters(value)
-  const matchesCJK = getCJKMatches(cleanContent)
-  const matchesEmoji = getEmojiMatches(cleanContent)
-  console.log('matchesCJK', matchesCJK)
-  console.log('matchesEmoji', matchesEmoji)
-  const counter = cleanContent
-    .split('')
-    .reduce(
-      (acc, cur, index) =>
-        acc +
-        (matchesCJK.find((cjk) => cjk.index === index) ||
-        matchesEmoji.find((emoji) => emoji.index === index)
-          ? 2
-          : 1),
-      0,
-    )
+  const matches = [getCJKMatches(cleanContent), getEmojiMatches(cleanContent)]
+
+  const counter = cleanContent.split('').reduce((acc, cur, index) => {
+    const result = matches.flatMap((collection) =>
+      collection.find((match) => match.index === index)
+        ? collection.find((match) => match.index === index)
+        : [],
+    )[0]
+    return acc + (result ? result.counterValue : 1)
+  }, 0)
   return counter
 }
