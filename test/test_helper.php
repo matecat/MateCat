@@ -1,4 +1,5 @@
 <?php
+
 putenv( 'phpunit=1' );
 
 declare( ticks = 10 );
@@ -19,7 +20,6 @@ register_shutdown_function( function () {
     echo "** Resetting environment to development\n\n";
     restoreDevelopmentConfigFile();
 } );
-
 
 setTestConfigFile();
 Bootstrap::start();

@@ -20,7 +20,7 @@ class TestHelper {
         if ( @$test_ini[ 'TEST_URL_BASE' ] != null ) {
             $GLOBALS[ 'TEST_URL_BASE' ] = $test_ini[ 'TEST_URL_BASE' ];
         } else {
-            echo "** TEST_URL_BASE is not set, using localhost \n";
+            //echo "** TEST_URL_BASE is not set, using localhost \n"; // @TODO Throws Cannot modify header information - headers already sent by
             $GLOBALS[ 'TEST_URL_BASE' ] = 'localhost';
         }
 

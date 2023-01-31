@@ -70,7 +70,7 @@ class Utils {
         }
 
         // unsupported browsers: hack for home page
-        if ( $_SERVER[ 'REQUEST_URI' ] == "/" ) {
+        if ( @$_SERVER[ 'REQUEST_URI' ] == "/" ) {
             return -2;
         }
 
@@ -78,7 +78,7 @@ class Utils {
     }
 
     static public function getBrowser() {
-        $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
+        $u_agent = @$_SERVER[ 'HTTP_USER_AGENT' ];
 
         //First get the platform?
         if ( preg_match( '/linux/i', $u_agent ) ) {

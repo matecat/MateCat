@@ -307,7 +307,7 @@ function setupSignalHandler() {
     pcntl_signal( SIGTERM, "sig_handler" );
     pcntl_signal( SIGHUP, "sig_handler" );
     pcntl_signal( SIGINT, "sig_handler" );
-    echo "\033[0;30;42m" . str_pad( "Signal handler installed.", 35, " ", STR_PAD_BOTH ) . "\033[0m\n";
+   // echo "\033[0;30;42m" . str_pad( "Signal handler installed.", 35, " ", STR_PAD_BOTH ) . "\033[0m\n"; // @TODO Throws Cannot modify header information - headers already sent by
 }
 
 function toggleChunkOptions( $options ) {

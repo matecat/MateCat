@@ -38,7 +38,7 @@ trait TimeLogger {
 
         /** @var $this IController|TimeLogger */
 
-        $_request_uri = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $_request_uri = parse_url( @$_SERVER[ 'REQUEST_URI' ] );
         if( isset( $_request_uri[ 'query' ] ) ){
             parse_str( $_request_uri[ 'query' ], $str );
             $_request_uri[ 'query' ] = $str;
