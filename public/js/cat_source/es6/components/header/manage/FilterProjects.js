@@ -6,6 +6,8 @@ import SearchInput from './SearchInput'
 import ManageActions from '../../../actions/ManageActions'
 import ManageConstants from '../../../constants/ManageConstants'
 import CommonUtils from '../../../utils/commonUtils'
+import IconSearch from '../../icons/IconSearch'
+import IconClose from '../../icons/IconClose'
 
 class FilterProjects extends React.Component {
   constructor(props) {
@@ -17,6 +19,7 @@ class FilterProjects extends React.Component {
     this.dropDownUsersInitialized = false
     this.state = {
       currentStatus: 'active',
+      searchMember: '',
     }
     this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER
   }
@@ -24,7 +27,6 @@ class FilterProjects extends React.Component {
   componentDidUpdate() {
     let self = this
     if (this.props.selectedTeam) {
-      2297
       if (this.teamChanged) {
         if (
           !this.dropDownUsersInitialized &&
@@ -37,6 +39,7 @@ class FilterProjects extends React.Component {
           }
           $(this.dropdownUsers).dropdown({
             fullTextSearch: 'exact',
+            selectOnKeydown: false,
             onChange: function (value) {
               self.changeUser(value)
             },
@@ -46,6 +49,21 @@ class FilterProjects extends React.Component {
         this.teamChanged = false
       }
     }
+    if (this.searchUserRef) {
+      this.searchUserRef.addEventListener(
+        'keydown',
+        this.stopProgationWhenSearchTyping,
+      )
+    }
+  }
+
+  stopProgationWhenSearchTyping(event) {
+    if (
+      event.key !== 'ArrowUp' &&
+      event.key !== 'ArrowDown' &&
+      event.key !== 'Escape'
+    )
+      event.stopPropagation()
   }
 
   getSnapshotBeforeUpdate(propsBefore) {
@@ -125,7 +143,19 @@ class FilterProjects extends React.Component {
       this.props.selectedTeam.get('members') &&
       this.props.selectedTeam.get('members').size > 1
     ) {
-      let members = this.props.selectedTeam.get('members').map((member) => {
+      const teamMembers = this.props.selectedTeam.get('members')
+      const filteredMembers = teamMembers.filter((member) => {
+        const {searchMember} = this.state
+        const user = member.get('user')
+        const fullName = `${user.get('first_name')} ${user.get('last_name')}`
+        const regex = new RegExp(searchMember, 'i')
+        if (!searchMember) return true
+        else return regex.test(fullName)
+      })
+
+      const isSelectedAnUser = typeof this.selectedUser === 'object'
+
+      let members = filteredMembers.map((member) => {
         let classDisable = member.get('projects') === 0 ? 'disabled' : ''
         let userIcon = (
           <a className="ui circular label">
@@ -142,7 +172,13 @@ class FilterProjects extends React.Component {
         }
         return (
           <div
-            className={'item ' + classDisable}
+            className={`item ${classDisable}${
+              isSelectedAnUser &&
+              member.get('user').get('uid') ===
+                this.selectedUser.get('user').get('uid')
+                ? ' active selected'
+                : ''
+            }`}
             data-value={member.get('user').get('uid')}
             key={'user' + member.get('user').get('uid')}
           >
@@ -159,7 +195,40 @@ class FilterProjects extends React.Component {
         )
       })
 
+      if (this.searchUserRef) {
+        this.searchUserRef.removeEventListener(
+          'keydown',
+          this.stopProgationWhenSearchTyping,
+        )
+      }
+
       let item = (
+        <div
+          ref={(searchUserRef) => (this.searchUserRef = searchUserRef)}
+          className="search-member-container"
+          key="search-member-0"
+        >
+          <IconSearch />
+          <input
+            name="search_member"
+            placeholder="Search Member"
+            value={this.state.searchMember}
+            onChange={this.onChangeSearchMember.bind(this)}
+          />
+          <div
+            className={`reset_button ${
+              this.state.searchMember
+                ? 'reset_button--visible'
+                : 'reset_button--hidden'
+            }`}
+            onClick={() => this.setState({searchMember: ''})}
+          >
+            <IconClose />
+          </div>
+        </div>
+      )
+      members = members.unshift(item)
+      item = (
         <div className="item" data-value="-1" key={'user' + -1}>
           <a className="ui all label">ALL</a>
           <div className="user-projects">
@@ -200,12 +269,17 @@ class FilterProjects extends React.Component {
     return result
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate(nextProps, nextState) {
     return (
       _.isUndefined(this.props.selectedTeam) ||
       (!_.isUndefined(nextProps.selectedTeam) &&
-        !nextProps.selectedTeam.equals(this.props.selectedTeam))
+        !nextProps.selectedTeam.equals(this.props.selectedTeam)) ||
+      nextState.searchMember !== this.state.searchMember
     )
+  }
+
+  onChangeSearchMember(event) {
+    this.setState({searchMember: event.target.value})
   }
 
   render() {
