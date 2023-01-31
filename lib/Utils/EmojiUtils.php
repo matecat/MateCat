@@ -3,6 +3,7 @@
 class EmojiUtils
 {
     /**
+
      * @see https://github.com/spatie/emoji/blob/main/src/Emoji.php
      */
     const EMOJI_LIST = [
@@ -3785,10 +3786,10 @@ class EmojiUtils
      */
     public static function isEmoji($string)
     {
+
         preg_match(self::regex(), $string, $matches);
 
         return !empty($matches);
-
     }
 
     /**
@@ -3799,3 +3800,4 @@ class EmojiUtils
         return '/'.implode("|", self::EMOJI_LIST).'/iu';
     }
 }
+

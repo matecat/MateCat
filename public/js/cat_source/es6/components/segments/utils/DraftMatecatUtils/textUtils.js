@@ -128,6 +128,7 @@ export const regexWordDelimiter =
   /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
 
 export const getCharactersCounter = (value) => {
+
   const {getCJKMatches, getEmojiMatches, removeHiddenCharacters} = TEXT_UTILS
   const cleanContent = removeHiddenCharacters(value)
   const matches = [getCJKMatches(cleanContent), getEmojiMatches(cleanContent)]
@@ -140,5 +141,6 @@ export const getCharactersCounter = (value) => {
     )[0]
     return acc + (result ? result.counterValue : 1)
   }, 0)
+
   return counter
 }

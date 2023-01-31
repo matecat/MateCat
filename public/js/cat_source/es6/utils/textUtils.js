@@ -528,6 +528,7 @@ const TEXT_UTILS = {
       }
     }, [])
   },
+
   charactersCounterValue: {
     cjk: 2,
     emoji: 2,
@@ -565,6 +566,7 @@ const TEXT_UTILS = {
 
     return result
   },
+
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
 }
 

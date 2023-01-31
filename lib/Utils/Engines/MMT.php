@@ -52,6 +52,14 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRecord()
+    {
+        return $this->engineRecord;
+    }
+
+    /**
      * MMT exception name from tag_projection call
      * @see Engines_MMT::_decode
      */
@@ -61,10 +69,19 @@ class Engines_MMT extends Engines_AbstractEngine {
             'LanguagePairNotSupportedException' => self::LanguagePairNotSupportedException
     ];
 
+    /**
+     * Get MMTServiceApi client
+     *
+     * @return MMTServiceApi
+     */
     protected function _getClient() {
+
+        $extraParams = $this->engineRecord->getExtraParamsAsArray();
+        $license = $extraParams[ 'MMT-License' ];
+
         return Engines\MMT\MMTServiceApi::newInstance()
                 ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
-                ->setLicense( $this->engineRecord->extra_parameters[ 'MMT-License' ] );
+                ->setLicense( $license );
     }
 
     /**
@@ -193,6 +210,11 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
     public function update( $_config ) {
 
         $client = $this->_getClient();
@@ -200,13 +222,13 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         try {
             $client->updateMemoryContent(
+                    $_config[ 'tuid' ],
                     $_keys,
                     $_config[ 'source' ],
                     $_config[ 'target' ],
-                    $_config[ 'newsegment' ],
-                    $_config[ 'newtranslation' ],
                     $_config[ 'segment' ],
-                    $_config[ 'translation' ] );
+                    $_config[ 'translation' ]
+            );
         } catch ( Exception $e ) {
             return false;
         }
@@ -322,11 +344,9 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function activate( array $keyList ) {
+    public function connectKeys( array $keyList ) {
 
-        $keyList = array_map( function ( $kStruct ) {
-            return 'x_mm-' . $kStruct->tm_key->key;
-        }, $keyList );
+        $keyList = $this->_reMapKeyStructsList( $keyList );
 
         $client       = $this->_getClient();
         $this->result = $client->connectMemories( $keyList );
@@ -382,4 +402,49 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * Delete a memory associated to an MMT account
+     * (id can be an external account)
+     *
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function deleteMemory($id)
+    {
+        $client = $this->_getClient();
+
+        return $client->deleteMemory($id);
+    }
+
+    /**
+     * Get all memories associated to an MMT account
+     * (id can be an external account)
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function getAllMemories()
+    {
+        $client = $this->_getClient();
+
+        return $client->getAllMemories();
+    }
+
+    /**
+     * Get a memory associated to an MMT account
+     * (id can be an external account)
+     *
+     * @param $id
+     *
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function getMemory($id)
+    {
+        $client = $this->_getClient();
+
+        return $client->getMemory($id);
+    }
 }

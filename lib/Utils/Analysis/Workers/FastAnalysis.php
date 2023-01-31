@@ -225,7 +225,7 @@ class FastAnalysis extends AbstractDaemon {
                 self::_TimeStampMsg( "Inserting segments..." );
 
                 try {
-                    $insertReportRes = $this->_insertFastAnalysis( $pid, PayableRates::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+                    $insertReportRes = $this->_insertFastAnalysis( $pid, PayableRates::$DEFAULT_PAYABLE_RATES, $featureSet, $perform_Tms_Analysis );
                 } catch ( Exception $e ) {
                     //Logging done and email sent
                     //set to error
@@ -432,7 +432,7 @@ class FastAnalysis extends AbstractDaemon {
      * @return mixed
      * @throws Exception
      */
-    protected function _insertFastAnalysis( $pid, $equivalentWordMapping, $perform_Tms_Analysis = true ) {
+    protected function _insertFastAnalysis( $pid, $equivalentWordMapping, FeatureSet $featureSet, $perform_Tms_Analysis = true ) {
 
         /**
          * Ensure we have fresh data from master node
@@ -579,6 +579,8 @@ class FastAnalysis extends AbstractDaemon {
 
             return $e->getCode() * -1;
         }
+
+        $featureSet->run( 'beforeSendSegmentsToTheQueue', array_values( $this->segments ), $this->actual_project_row );
 
         /*
          *  $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use,
@@ -847,7 +849,7 @@ HD;
         }
 
         $query = "
-        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm
+        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE status_analysis = :project_status $and_InstanceId
