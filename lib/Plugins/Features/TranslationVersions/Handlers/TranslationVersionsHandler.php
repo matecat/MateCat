@@ -4,10 +4,17 @@ namespace Features\TranslationVersions\Handlers;
 
 use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
+use Exception;
+use Exceptions\ControllerReturnException;
+use Exceptions\ValidationError;
 use Features;
+use Features\TranslationVersions\Model\TranslationEvent;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
+use FeatureSet;
+use Jobs_JobDao;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Translations_SegmentTranslationStruct;
@@ -76,13 +83,17 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     }
 
     /**
+     * Save the current version and perform up-count
+     *
+     * If returns true it means that a new version of the parent segment was persisted
+     *
      * @param Translations_SegmentTranslationStruct $new_translation
      * @param Translations_SegmentTranslationStruct $old_translation
      *
-     * @return bool|int|mixed
+     * @return false|int
      * @throws ReflectionException
      */
-    public function evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
 
         $version_saved = $this->saveVersion( $new_translation, $old_translation );
 
@@ -153,4 +164,96 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         return $this->dao->saveVersion( $new_version );
     }
+
+
+    /**
+     * @throws ControllerReturnException
+     */
+    public function storeTranslationEvent( $params ) {
+
+        // evaluate if the record is to be created, either the
+        // status changed or the translation changed
+        $user = $params[ 'user' ];
+
+        /** @var Translations_SegmentTranslationStruct $translation */
+        $translation = $params[ 'translation' ];
+
+        /** @var Translations_SegmentTranslationStruct $old_translation */
+        $old_translation = $params[ 'old_translation' ];
+
+        $source_page_code = $params[ 'source_page_code' ];
+
+        /** @var Chunks_ChunkStruct $chunk */
+        $chunk = $params[ 'chunk' ];
+
+        /** @var FeatureSet $features */
+        $features = $params[ 'features' ];
+
+        /** @var Projects_ProjectStruct $project */
+        $project = $params[ 'project' ];
+
+        $sourceEvent = new TranslationEvent(
+                $old_translation,
+                $translation,
+                $user,
+                $source_page_code
+        );
+
+        $translationEventsHandler = new TranslationEventsHandler( $chunk );
+        $translationEventsHandler->setFeatureSet( $features );
+        $translationEventsHandler->addEvent( $sourceEvent );
+        $translationEventsHandler->setProject( $project );
+
+        // If propagated segments exist, start cycle here
+        // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
+        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) and false === empty( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) ) {
+
+            $segments_for_propagation = $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ];
+            $segmentTranslations      = [];
+
+            if ( false === empty( $segments_for_propagation[ 'not_ice' ] ) ) {
+                $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'not_ice' ][ 'object' ] );
+            }
+
+            if ( false === empty( $segments_for_propagation[ 'ice' ] ) ) {
+                $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'ice' ][ 'object' ] );
+            }
+
+            foreach ( $segmentTranslations as $segmentTranslationBeforeChange ) {
+
+                /** @var Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
+                $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
+                $propagatedSegmentAfterChange->translation         = $translation->translation;
+                $propagatedSegmentAfterChange->status              = $translation->status;
+                $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment;
+                $propagatedSegmentAfterChange->time_to_edit        = 0;
+
+                $propagatedEvent = new TranslationEvent(
+                        $segmentTranslationBeforeChange,
+                        $propagatedSegmentAfterChange,
+                        $user,
+                        $source_page_code
+                );
+
+                $propagatedEvent->setPropagationSource( false );
+                $translationEventsHandler->addEvent( $propagatedEvent );
+            }
+        }
+
+        try {
+            $translationEventsHandler->save();
+            // $event->setChunkReviewsList( $chunkReviews ) ;
+            ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
+            Projects_ProjectDao::destroyCacheById( $chunk->id_project );
+        } catch ( Exception $e ) {
+            $params[ 'controller_result' ][ 'errors' ] [] = [
+                    'code'    => -2000,
+                    'message' => $e->getMessage()
+            ];
+            throw new ControllerReturnException( $e->getMessage(), -2000 );
+        }
+
+
+    }
+
 }

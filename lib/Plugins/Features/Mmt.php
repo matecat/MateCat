@@ -32,7 +32,9 @@ use Klein\Klein;
 use Log;
 use NewController;
 use Projects_MetadataDao;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use SplFileObject;
 use stdClass;
 use TaskRunner\Commons\QueueElement;
 use TmKeyManagement_MemoryKeyDao;
@@ -73,7 +75,7 @@ class Mmt extends BaseFeature {
     public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
 
         $UserMetadataDao = new MetadataDao();
-        $engineEnabled   = $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->get( $userStruct->uid, self::FEATURE_CODE );
+        $engineEnabled   = $UserMetadataDao->get( $userStruct->uid, self::FEATURE_CODE );
 
         if ( !empty( $engineEnabled ) ) {
             unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
@@ -94,8 +96,6 @@ class Mmt extends BaseFeature {
      */
     public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
-        //gestire il flag synca tutto o no
-
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
             return $newCreatedDbRowStruct;
         }
@@ -104,15 +104,15 @@ class Mmt extends BaseFeature {
 
         try {
 
-            /**
-             * @var $newTestCreatedMT Engines_MMT
-             */
-            $me_result = $newTestCreatedMT->checkAccount();
-            Log::doJsonLog( $me_result );
+            $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
+            $preImport   = $extraParams[ 'MMT-preimport' ];
 
-            $keyList = self::_getKeyringOwnerKeys( $userStruct );
-            if ( !empty( $keyList ) ) {
-                $newTestCreatedMT->activate( $keyList );
+            // if the MMT-preimport flag is enabled,
+            // then all the user's MyMemory keys must be sent to MMT
+            // when the engine is created
+            if ( $preImport === true ) {
+                $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
+                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
             }
 
         } catch ( Exception $e ) {
@@ -120,9 +120,8 @@ class Mmt extends BaseFeature {
             throw $e;
         }
 
-        // @TODO if I remove user_metadata what happens at row 391?
         $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
+        $UserMetadataDao->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
 
         return $newCreatedDbRowStruct;
 
@@ -147,8 +146,8 @@ class Mmt extends BaseFeature {
 
     /**
      * Called in @param EnginesModel_EngineStruct $engineStruct
+     * @throws Exception
      * @see engineController::disable()
-     *
      */
     public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ) {
 
@@ -158,11 +157,24 @@ class Mmt extends BaseFeature {
         if ( $engineStruct->class_load == Constants_Engines::MMT ) {
 
             if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
-                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE );
+                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE ); // delete the engine from user
+
+                // Commented this block because we don't want to remove all the keys from MMT when disconnecting a license, same license can be used on other tools
+
+//                $extraParams = $engineStruct->getExtraParamsAsArray();
+//                $preImport = $extraParams['MMT-preimport'];
+//
+//                if($preImport === true){
+//                    $mmt = new Engines_MMT($engineStruct);
+//                    $memories = $mmt->getAllMemories();
+//
+//                    foreach ($memories as $memory){
+//                        $mmt->deleteMemory($memory['externalId']);
+//                    }
+//                }
+
             }
-
         }
-
     }
 
     /**
@@ -189,9 +201,13 @@ class Mmt extends BaseFeature {
                 return $tm_key->key;
             }, $tm_keys );
 
-            $contextRs              = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
-            $mt_context             = @array_pop( $contextRs );
-            $config[ 'mt_context' ] = ( !empty( $mt_context ) ? $mt_context->value : "" );
+            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
+            $mt_context = @array_pop( $contextRs );
+
+            if ( !empty( $mt_context ) ) {
+                $config[ 'mt_context' ] = $mt_context->value;
+            }
+
             $config[ 'job_id' ]     = $jobStruct->id;
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'normal';
@@ -205,8 +221,18 @@ class Mmt extends BaseFeature {
     public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ) {
 
         if ( $engine instanceof Engines_MMT ) {
+
+            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $queueElement->params->id_job, 'mt_context' );
+            $mt_context = @array_pop( $contextRs );
+
+            if ( !empty( $mt_context ) ) {
+                $config[ 'mt_context' ] = $mt_context->value;
+            }
+
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'background';
+            $config[ 'keys' ]       = @$config[ 'id_user' ];
+
         }
 
         return $config;
@@ -224,18 +250,19 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param Users_UserStruct $LoggedUser
+     * @param $uid
      *
      * @return TmKeyManagement_MemoryKeyStruct[]
+     * @throws Exception
      */
-    protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
+    private static function _getKeyringOwnerKeysByUid( $uid ) {
 
         /*
          * Take the keys of the user
          */
         try {
             $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $LoggedUser->uid ] );
+            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
             $keyList = [];
@@ -243,7 +270,17 @@ class Mmt extends BaseFeature {
         }
 
         return $keyList;
+    }
 
+    /**
+     * @param Users_UserStruct $LoggedUser
+     *
+     * @return TmKeyManagement_MemoryKeyStruct[]
+     * @throws Exception
+     */
+    protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
+
+        return self::_getKeyringOwnerKeysByUid( $LoggedUser->uid );
     }
 
     /**
@@ -315,52 +352,110 @@ class Mmt extends BaseFeature {
      * @see FastAnalysis::main()
      *
      */
-    public static function fastAnalysisComplete( array $segments, array $projectRows ) {
+    public static function beforeSendSegmentsToTheQueue( array $segments, array $projectRows ) {
 
+        $pid    = $projectRows[ 'id' ];
         $engine = Engine::getInstance( $projectRows[ 'id_mt_engine' ] );
 
         if ( $engine instanceof Engines_MMT ) {
 
-            $source       = $segments[ 0 ][ 'source' ];
-            $targets      = [];
-            $jobLanguages = [];
-            foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
-                list( $jobId, $target ) = explode( ":", $jid_Lang );
-                $jobLanguages[ $jobId ] = $source . "|" . $target;
-                $targets[]              = $target;
-            }
+            if ( !empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
 
-            $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
-            $tmpFileObject = new \SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
-            foreach ( $segments as $pos => $segment ) {
-                $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+                $source       = $segments[ 0 ][ 'source' ];
+                $targets      = [];
+                $jobLanguages = [];
+                foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
+                    list( $jobId, $target ) = explode( ":", $jid_Lang );
+                    $jobLanguages[ $jobId ] = $source . "|" . $target;
+                    $targets[]              = $target;
+                }
+
+                $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
+                $tmpFileObject = new SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
+                foreach ( $segments as $pos => $segment ) {
+                    $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+                }
+
+                try {
+
+                    /*
+                        $result = Array
+                        (
+                            [en-US|es-ES] => 1:0.14934476,2:0.08131008,3:0.047170084
+                            [en-US|it-IT] =>
+                        )
+                    */
+                    $result = $engine->getContext( $tmpFileObject, $source, $targets );
+
+                    $jMetadataDao = new \Jobs\MetadataDao();
+
+                    Database::obtain()->begin();
+                    foreach ( $result as $langPair => $context ) {
+                        $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
+                    }
+                    Database::obtain()->commit();
+
+                } catch ( Exception $e ) {
+                    Log::doJsonLog( $e->getMessage() );
+                    Log::doJsonLog( $e->getTraceAsString() );
+                } finally {
+                    unset( $tmpFileObject );
+                    @unlink( $tmp_name );
+                }
+
             }
 
             try {
 
-                /*
-                    $result = Array
-                    (
-                        [en-US|es-ES] => 1:0.14934476,2:0.08131008,3:0.047170084
-                        [en-US|it-IT] =>
-                    )
-                */
-                $result = $engine->getContext( $tmpFileObject, $source, $targets );
+                //
+                // ==============================================
+                // If the MMT-preimport flag is disabled
+                // and user is logged in
+                // send user keys on a project basis
+                // ==============================================
+                //
+                $preImportIsDisabled = empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
+                $userIsLogged        = !empty( $projectRows[ 'id_customer' ] ) && $projectRows[ 'id_customer' ] != 'translated_user';
 
-                $jMetadataDao = new \Jobs\MetadataDao();
-                Database::obtain()->begin();
-                foreach ( $result as $langPair => $context ) {
-                    $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
+                $user = null;
+                if ( $userIsLogged ) {
+                    $user = ( new Users_UserDao )->getByEmail( $projectRows[ 'id_customer' ] );
                 }
-                Database::obtain()->commit();
 
+                if ( $preImportIsDisabled and $userIsLogged ) {
+
+                    // retrieve OWNER MMT License
+                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, self::FEATURE_CODE );
+                    if ( !empty( $ownerMmtEngineMetaData ) ) {
+
+                        // get jobs keys
+                        $project = Projects_ProjectDao::findById( $pid );
+
+                        foreach ( $project->getJobs() as $job ) {
+
+                            $memoryKeyStructs = [];
+                            $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+
+                            foreach ( $jobKeyList as $memKey ) {
+                                $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
+                                        [
+                                                'uid'    => $user->uid,
+                                                'tm_key' => $memKey
+                                        ]
+                                );
+                            }
+                            /**
+                             * @var Engines_MMT $MMTEngine
+                             */
+                            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                            $MMTEngine->connectKeys( $memoryKeyStructs );
+                        }
+                    }
+                }
             } catch ( Exception $e ) {
                 Log::doJsonLog( $e->getMessage() );
                 Log::doJsonLog( $e->getTraceAsString() );
             }
-
-            unset( $tmpFileObject );
-            @unlink( $tmp_name );
 
         }
 
@@ -424,8 +519,6 @@ class Mmt extends BaseFeature {
      */
     public function postPushTMX( stdClass $file, $user, $tm_key ) {
 
-        //chiedo tutte le chiavi di mymemory ( list o get singola chiave ) e se questa key c'è mando la tmx altrimenti no
-
         //Project is not anonymous
         if ( !empty( $user ) ) {
 
@@ -439,17 +532,31 @@ class Mmt extends BaseFeature {
             try {
 
                 if ( !empty( $ownerMmtEngineMetaData ) ) {
+
                     /**
                      * @var Engines_MMT $MMTEngine
                      */
                     $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                    $fileName  = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
-                    $result    = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
 
-                    if ( $result->responseStatus >= 400 ) {
-                        throw new Exception( $result->error->message );
+                    //
+                    // ==============================================
+                    // Call MMT only if the tmx is already imported
+                    // over an existing key in MMT
+                    // ==============================================
+                    //
+
+                    $associatedMemories = $MMTEngine->getAllMemories();
+                    foreach ( $associatedMemories as $memory ) {
+
+                        if ( 'x_mm-' . trim( $tm_key ) === $memory[ 'externalId' ] ) {
+                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                            $result   = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
+
+                            if ( $result->responseStatus >= 400 ) {
+                                throw new Exception( $result->error->message );
+                            }
+                        }
                     }
-
                 }
 
             } catch ( Exception $e ) {
@@ -469,12 +576,22 @@ class Mmt extends BaseFeature {
      *                          ]
      *
      * @return EnginesModel_EngineStruct|bool
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      * @see engineController::add()
      *
      */
     public function buildNewEngineStruct( $isValid, $data ) {
 
         if ( strtolower( Constants_Engines::MMT ) == $data->providerName ) {
+
+            /**
+             * @var $featureSet FeatureSet
+             */
+            $featureSet = $data->featureSet;
 
             /**
              * @var $logged_user Users_UserStruct
@@ -486,16 +603,52 @@ class Mmt extends BaseFeature {
              */
             $newEngineStruct = EnginesModel_MMTStruct::getStruct();
 
-            $newEngineStruct->uid                                    = $logged_user->uid;
-            $newEngineStruct->type                                   = Constants_Engines::MT;
-            $newEngineStruct->extra_parameters[ 'MMT-License' ]      = $data->engineData[ 'secret' ];
-            $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ] = $data->engineData[ 'pretranslate' ];
+            $newEngineStruct->uid                                        = $logged_user->uid;
+            $newEngineStruct->type                                       = Constants_Engines::MT;
+            $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $data->engineData[ 'secret' ];
+            $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ]     = $data->engineData[ 'pretranslate' ];
+            $newEngineStruct->extra_parameters[ 'MMT-preimport' ]        = $data->engineData[ 'preimport' ];
+            $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = $data->engineData[ 'context_analyzer' ];
+
+            $newEngineStruct = $featureSet->filter( 'disableMMTPreimport', (object)[
+                    'logged_user'     => $logged_user,
+                    'newEngineStruct' => $newEngineStruct
+            ] );
 
             return $newEngineStruct;
         }
 
         return $isValid;
 
+    }
+
+    /**
+     * @param $key
+     * @param $uid
+     *
+     * @throws Exception
+     */
+    public function postUserKeyDelete( $key, $uid ) {
+
+        /*
+         * Comment for now, we have to decide if user can delete key imported in ModernMT directly from matecat, moreover it should have a choice.
+         * Maybe He wants to retain the key and the associated memories in its license.
+         */
+
+//        $engineToBeDeleted         = EnginesModel_EngineStruct::getStruct();
+//        $engineToBeDeleted->uid    = $uid;
+//        $engineToBeDeleted->active = true;
+//
+//        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+//        $result    = $engineDAO->read( $engineToBeDeleted );
+//
+//        if(empty($result)){
+//            return;
+//        }
+//
+//        $mmt = new Engines_MMT($result[0]);
+//
+//        $mmt->deleteMemory("x_mm-".$key);
     }
 
     /**
@@ -512,26 +665,27 @@ class Mmt extends BaseFeature {
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
 
-        //usare solo se c'è la flag sync
-
-        if ( empty( $memoryKeyStructs ) || empty( $uid ) ) {
+        if ( empty( $memoryKeyStructs ) or empty( $uid ) ) {
             return;
         }
 
         //retrieve OWNER MMT License
-        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uid, self::FEATURE_CODE ); // engine_id
+        $ownerMmtEngineMetaData = ( new MetadataDao() )->get( $uid, self::FEATURE_CODE ); // engine_id
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
              * @var Engines_MMT $MMTEngine
              */
-            $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-            $MMTEngine->activate( $memoryKeyStructs );
+            $MMTEngine    = Engine::getInstance( $ownerMmtEngineMetaData->value );
+            $engineStruct = $MMTEngine->getEngineRecord();
 
+            $extraParams = $engineStruct->getExtraParamsAsArray();
+            $preImport   = $extraParams[ 'MMT-preimport' ];
+
+            if ( $preImport === true ) {
+                $MMTEngine->connectKeys( $memoryKeyStructs );
+            }
         }
-
-
     }
-
 }
 

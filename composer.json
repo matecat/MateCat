@@ -32,6 +32,8 @@
         "ext-posix": "*",
         "ext-zip": "*",
         "ext-fileinfo": "*",
-        "ext-mbstring": "*"
+        "ext-mbstring": "*",
+        "ext-zlib": "*"
+
     }
 }

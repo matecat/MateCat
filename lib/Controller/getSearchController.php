@@ -195,8 +195,8 @@ class getSearchController extends ajaxController {
         }
 
         try {
-            $strictMode = (null !== $this->queryParams[ 'strictMode' ]) ? $this->queryParams[ 'strictMode' ] : true;
-            $res = $this->searchModel->search($strictMode);
+            $strictMode = ( null !== $this->queryParams[ 'strictMode' ] ) ? $this->queryParams[ 'strictMode' ] : true;
+            $res        = $this->searchModel->search( $strictMode );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -1000, "message" => "internal error: see the log" ];
 
@@ -217,7 +217,7 @@ class getSearchController extends ajaxController {
         $search_results = [];
 
         // perform a regular search
-        $this->doSearch(true);
+        $this->doSearch( true );
 
         // and then hydrate the $search_results array
         foreach ( $this->result[ 'segments' ] as $segmentId ) {
@@ -434,10 +434,10 @@ class getSearchController extends ajaxController {
             $new_translation->version_number = $version_number;
 
             // Save version
-            $versionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+            $versionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
 
             // preSetTranslationCommitted
-            $this->featureSet->run( 'preSetTranslationCommitted', [
+            $versionsHandler->storeTranslationEvent( [
                     'translation'       => $new_translation,
                     'old_translation'   => $old_translation,
                     'propagation'       => $propagationTotal,

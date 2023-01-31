@@ -1340,6 +1340,21 @@ CREATE TABLE `sequences`
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+
+-- Temporary view structure for view `show_clients`
+--
+
+DROP TABLE IF EXISTS `show_clients`;
+/*!50001 DROP VIEW IF EXISTS `show_clients`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `show_clients` AS SELECT
+ 1 AS `host_short`,
+ 1 AS `users`,
+ 1 AS `COUNT(*)`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `teams`
 --
 

@@ -24,7 +24,6 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
         $this->view->logged_user   = ( $this->isLoggedIn() ) ? $this->user->shortName() : "";
         $this->view->extended_user = ( $this->isLoggedIn() ) ? $this->user->fullName() : "";
         $this->view->userMail      = $this->user->email;
-
         $oauth_client = OauthClient::getInstance()->getClient();
         $this->view->authURL = $oauth_client->createAuthUrl();
         $this->view->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
@@ -41,6 +40,4 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
     private function isLoggedIn() {
         return !is_null( $this->getUser() );
     }
-
-
 }

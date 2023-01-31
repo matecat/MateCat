@@ -53,11 +53,31 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
      */
     public function getLimit() {
         $options = json_decode( $this->pass_options, true);
+
         if ( ! array_key_exists('limit', $options) ) {
             throw new Exception( 'limit is not defined in JSON options');
         }
-        return $options['limit'];
 
+        return $this->normalizeLimits($options['limit']);
+    }
+
+    /**
+     * This function normalizes the limits.
+     *
+     * Ex: {"limit":{"1":"8","2":"5"}} is normalized to [0 => 8, 1 => 5]
+     *
+     * @param $limits
+     * @return array
+     */
+    private function normalizeLimits($limits){
+
+        $normalized = [];
+
+        foreach($limits as $limit){
+            $normalized[] = (int)$limit;
+        }
+
+        return $normalized;
     }
 
     /**
