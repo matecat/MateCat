@@ -34,5 +34,6 @@
         "ext-fileinfo": "*",
         "ext-mbstring": "*",
         "ext-zlib": "*"
+
     }
 }
