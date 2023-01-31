@@ -94,6 +94,7 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
                 'வெனிஸை' => 6,
                 'ตัวอักษรไทย' => 11,
                 'తెలుగు లిపి' => 11,
+                'https://www.uber.com/blog/perficient-simplifying-business-travel/' => 65,
             ]
         ];
 
