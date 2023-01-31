@@ -16,6 +16,21 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     protected static $primary_keys         = [ 'id' ];
 
     /**
+     * @param $name
+     * @param int $ttl
+     * @return DataAccess_IDaoStruct[]
+     */
+    public function getByName($name, $ttl = 0)
+    {
+        $sql = "SELECT * from engines WHERE name = :engine_name order by id asc";
+        $stmt = $this->_getStatementForCache($sql);
+
+        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new EnginesModel_EngineStruct(), [
+            'engine_name' => $name,
+        ] );
+    }
+
+    /**
      * Build the query,
      * needed for get the exact query when invalidating cache
      *
@@ -175,6 +190,11 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param EnginesModel_EngineStruct $obj
+     * @return EnginesModel_EngineStruct|null
+     * @throws Exception
+     */
     public function atomicUpdate( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( clone $obj );
 
