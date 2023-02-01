@@ -39,7 +39,7 @@
         },
         "label": {
           "type": "string",
-          "maxLength": 100
+          "maxLength": 255
         },
         "code": {
           "type": "string",
