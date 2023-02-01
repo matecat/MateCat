@@ -12,6 +12,7 @@ use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use CatUtils;
 use Langs_Languages;
+use LQA\SizeRestriction;
 
 
 class CountWordController extends KleinController {
@@ -26,6 +27,10 @@ class CountWordController extends KleinController {
             throw new ValidationError( "Invalid text field", 400 );
         }
 
+        if ( $this->request->limit === null or $this->request->limit === '') {
+            throw new ValidationError( "Invalid limit field", 400 );
+        }
+
         $langs = Langs_Languages::getInstance();
 
         try {
@@ -37,7 +42,16 @@ class CountWordController extends KleinController {
     }
 
     public function rawWords() {
-        $words_count                 = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
-        $this->response->json( [ 'word_count' => $words_count ] );
+        $words_count = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
+        $size_restriction = new SizeRestriction($this->request->text, $this->request->limit);
+
+        $this->response->json( [
+            'word_count' => $words_count,
+            'character_count' => [
+                'valid' => $size_restriction->checkLimit(),
+                'length' => $size_restriction->getCleanedStringLength(),
+                'remaining_characters' => $size_restriction->getCharactersRemaining(),
+            ],
+        ] );
     }
 }

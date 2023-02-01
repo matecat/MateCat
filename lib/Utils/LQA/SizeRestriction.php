@@ -88,7 +88,7 @@ class SizeRestriction {
     /**
      * @return int
      */
-    private function getCleanedStringLength() {
+    public function getCleanedStringLength() {
 
         $cjkMatches = CJKLangUtils::getMatches($this->cleanedString);
         $emojiMatches = EmojiUtils::getMatches($this->cleanedString);
