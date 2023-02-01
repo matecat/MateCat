@@ -5,6 +5,7 @@ import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
 import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
+import TEXT_UTILS from '../../utils/textUtils'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -217,7 +218,7 @@ class ModifyTeam extends React.Component {
       const {searchMember} = this.state
       const user = member.get('user')
       const fullName = `${user.get('first_name')} ${user.get('last_name')}`
-      const regex = new RegExp(searchMember, 'i')
+      const regex = new RegExp(TEXT_UTILS.escapeRegExp(searchMember), 'i')
       if (!searchMember) return true
       else return regex.test(fullName) || regex.test(user.get('email'))
     })
@@ -472,7 +473,7 @@ class ModifyTeam extends React.Component {
           <div className="matecat-modal-middle" style={middleContainerStyle}>
             <div className="ui grid left aligned">
               <div className="sixteen wide column">
-                <h2>Invite Members</h2>
+                <h2>Manage Members</h2>
                 {/* <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
@@ -490,7 +491,7 @@ class ModifyTeam extends React.Component {
                 >
                   <input name="tags" type="hidden" />
                   <div className="default text">
-                    insert email or emails separated by commas or press enter
+                    Add new people (separate email addresses with a comma)
                   </div>
                 </div>
                 {this.state.inputUserError ? (

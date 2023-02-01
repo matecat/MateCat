@@ -1233,7 +1233,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
           .mini.ui.button.right.floated {
             margin-top: 6px;
             border: 1px solid #797979;
-            display: none;
+            display: inherit;
             border-radius: 2px;
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
               sans-serif;

@@ -8,6 +8,7 @@ import ManageConstants from '../../../constants/ManageConstants'
 import CommonUtils from '../../../utils/commonUtils'
 import IconSearch from '../../icons/IconSearch'
 import IconClose from '../../icons/IconClose'
+import TEXT_UTILS from '../../../utils/textUtils'
 
 class FilterProjects extends React.Component {
   constructor(props) {
@@ -148,7 +149,7 @@ class FilterProjects extends React.Component {
         const {searchMember} = this.state
         const user = member.get('user')
         const fullName = `${user.get('first_name')} ${user.get('last_name')}`
-        const regex = new RegExp(searchMember, 'i')
+        const regex = new RegExp(TEXT_UTILS.escapeRegExp(searchMember), 'i')
         if (!searchMember) return true
         else return regex.test(fullName)
       })
