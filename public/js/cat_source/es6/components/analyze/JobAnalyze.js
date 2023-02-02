@@ -9,6 +9,7 @@ class JobAnalyze extends React.Component {
   constructor(props) {
     super(props)
     this.showDetails = this.showDetails.bind(this)
+    setTimeout(()=>this.showDetails())
   }
 
   getChunks() {
@@ -38,8 +39,8 @@ class JobAnalyze extends React.Component {
     return ''
   }
 
-  showDetails(idJob) {
-    if (idJob == this.props.idJob && this.props.showAnalysis) {
+  showDetails() {
+    if (this.props.jobToScroll == this.props.idJob && this.props.showAnalysis) {
       this.scrollElement()
     }
   }
@@ -51,7 +52,7 @@ class JobAnalyze extends React.Component {
       this.container.classList.add('show-details')
       $('html, body').animate(
         {
-          scrollTop: $(itemComponent).offset().top,
+          scrollTop: $(itemComponent).offset().top - 200,
         },
         500,
       )

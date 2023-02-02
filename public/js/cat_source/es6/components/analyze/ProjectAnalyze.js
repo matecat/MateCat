@@ -42,7 +42,8 @@ class ProjectAnalyze extends React.Component {
   shouldComponentUpdate(nextProps) {
     return (
       !nextProps.volumeAnalysis.equals(this.props.volumeAnalysis) ||
-      nextProps.status !== this.props.status
+      nextProps.status !== this.props.status ||
+      nextProps.jobToScroll !== this.props.jobToScroll
     )
   }
 

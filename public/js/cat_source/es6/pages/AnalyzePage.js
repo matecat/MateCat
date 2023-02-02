@@ -97,7 +97,9 @@ const AnalyzePage = () => {
 }
 
 export default AnalyzePage
+document.addEventListener("DOMContentLoaded", () => {
+  const analyzePage = createRoot(document.getElementsByClassName('analyze-page')[0],
+  )
+  analyzePage.render(React.createElement(AnalyzePage))
+});
 
-const analyzePage = createRoot(document.getElementsByClassName('analyze-page')[0],
-)
-analyzePage.render(React.createElement(AnalyzePage))

@@ -22,7 +22,7 @@ class AnalyzeChunksResume extends React.Component {
     if ($(evt.target).parents('.outsource-container').length === 0) {
       evt.preventDefault()
       evt.stopPropagation()
-      this.props.openAnalysisReport(idJob)
+      this.props.openAnalysisReport(idJob, true)
     }
   }
   openSplitModal = (id) => (e) => {

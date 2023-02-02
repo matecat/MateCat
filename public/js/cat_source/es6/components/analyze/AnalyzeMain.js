@@ -33,8 +33,8 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     </div>
   )
 
-  const openAnalysisReport = (idJob) => {
-    setShowAnalysis((showAnalysis) => !showAnalysis)
+  const openAnalysisReport = (idJob, forceOpen) => {
+    setShowAnalysis((showAnalysis) => forceOpen ? forceOpen : !showAnalysis)
     setJobToScroll(idJob)
   }
 
