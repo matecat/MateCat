@@ -8,6 +8,7 @@ import {getJobVolumeAnalysis} from '../api/getJobVolumeAnalysis'
 import {getProject} from '../api/getProject'
 import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
 import Immutable from "immutable";
+import {createRoot} from "react-dom/client";
 
 let pollingTime = 10000
 const segmentsThreshold = 50000
@@ -96,3 +97,7 @@ const AnalyzePage = () => {
 }
 
 export default AnalyzePage
+
+const analyzePage = createRoot(document.getElementsByClassName('analyze-page')[0],
+)
+analyzePage.render(React.createElement(AnalyzePage))
