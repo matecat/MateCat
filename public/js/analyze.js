@@ -5,23 +5,26 @@ import {createRoot} from 'react-dom/client'
 import TeamsStore from './cat_source/es6/stores/TeamsStore'
 import Header from './cat_source/es6/components/header/Header'
 import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
-import AnalyzeActions from './cat_source/es6/actions/AnalyzeActions'
+import AnalyzePage from "./cat_source/es6/pages/AnalyzePage";
 import {getProject} from './cat_source/es6/api/getProject'
 import {getVolumeAnalysis} from './cat_source/es6/api/getVolumeAnalysis'
 import {getJobVolumeAnalysis} from './cat_source/es6/api/getJobVolumeAnalysis'
-import {CookieConsent} from './cat_source/es6/components/common/CookieConsent'
+// import {CookieConsent} from './cat_source/es6/components/common/CookieConsent'
 
 window.UI = null
 
 window.UI = {
   init: function () {
-    this.pollingTime = 1000
+    /*this.pollingTime = 1000
     this.segmentsThreshold = 50000
-    this.reloadAnalysis = this.reloadAnalysis.bind(this)
+    this.reloadAnalysis = this.reloadAnalysis.bind(this)*/
     UI.render()
   },
   render: function () {
-    const header = createRoot($('header')[0])
+    const analyzePage = createRoot(document.getElementsByClassName('analyze-page')[0],
+    )
+    analyzePage.render(React.createElement(AnalyzePage))
+    /*const header = createRoot($('header')[0])
     header.render(
       React.createElement(Header, {
         loggedUser: config.isLoggedIn,
@@ -32,7 +35,6 @@ window.UI = {
       }),
     )
 
-    const root = createRoot($('#analyze-container')[0])
     root.render(
       React.createElement(AnalyzeMain, {
         jobsInfo: config.jobs,
@@ -42,13 +44,13 @@ window.UI = {
       document.getElementsByTagName('footer')[0],
     )
     cookieBannerMountPoint.render(React.createElement(CookieConsent))
-    this.getProjectVolumeAnalysisData()
+    this.getProjectVolumeAnalysisData()*/
   },
-  reloadAnalysis: function () {
+/*  reloadAnalysis: function () {
     window.location.reload()
     // UI.getProjectVolumeAnalysisData()
-  },
-  getProjectVolumeAnalysisData: function () {
+  },*/
+  /*getProjectVolumeAnalysisData: function () {
     var self = this
     if (config.jobAnalysis) {
       getJobVolumeAnalysis().then((response) => {
@@ -69,11 +71,11 @@ window.UI = {
         self.pollData(response)
       })
     }
-  },
-  renderAnalysisPage: function () {
+  },*/
+/*  renderAnalysisPage: function () {
     AnalyzeActions.renderAnalysis(UI.volumeAnalysis, UI.currentOutsourceProject)
-  },
-  pollData: function (response) {
+  },*/
+  /*pollData: function (response) {
     if (
       response.data.summary.STATUS !== 'DONE' &&
       response.data.summary.STATUS !== 'NOT_TO_ANALYZE'
@@ -102,28 +104,10 @@ window.UI = {
         })
       }, UI.pollingTime)
     }
-  },
-  parseVolumeAnalysisData: function (volumeAnalysisData) {
+  },*/
+/*  parseVolumeAnalysisData: function (volumeAnalysisData) {
     UI.volumeAnalysis = volumeAnalysisData.data
-  },
-  downloadAnalysisReport: function () {
-    var pid = config.id_project
-    var ppassword = config.password
-
-    var form =
-      '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
-      '				<input type=hidden name="action" value="downloadAnalysisReport">' +
-      '				<input type=hidden name="id_project" value="' +
-      pid +
-      '">' +
-      '				<input type=hidden name="password" value="' +
-      ppassword +
-      '">' +
-      '				<input type=hidden name="download_type" value="XTRF">' +
-      '			</form>'
-    $('body').append(form)
-    $('#downloadAnalysisReportForm').submit()
-  },
+  },*/
 }
 
 $(document).ready(function () {

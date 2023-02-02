@@ -4,8 +4,6 @@ import _ from 'lodash'
 import JobAnalyzeHeader from './JobAnalyzeHeader'
 import JobTableHeader from './JobTableHeader'
 import ChunkAnalyze from './ChunkAnalyze'
-import AnalyzeConstants from '../../constants/AnalyzeConstants'
-import AnalyzeStore from '../../stores/AnalyzeStore'
 
 class JobAnalyze extends React.Component {
   constructor(props) {
@@ -41,7 +39,7 @@ class JobAnalyze extends React.Component {
   }
 
   showDetails(idJob) {
-    if (idJob == this.props.idJob) {
+    if (idJob == this.props.idJob && this.props.showAnalysis) {
       this.scrollElement()
     }
   }
@@ -69,18 +67,15 @@ class JobAnalyze extends React.Component {
     }
   }
 
-  componentDidMount() {
-    AnalyzeStore.addListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails)
-  }
-
-  componentWillUnmount() {
-    AnalyzeStore.removeListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails)
-  }
-
   shouldComponentUpdate() {
     return true
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.jobToScroll !== this.props.jobToScroll) {
+      this.showDetails();
+    }
+  }
   render() {
     return (
       <div className="job ui grid">

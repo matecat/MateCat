@@ -2,19 +2,16 @@ import React, {useEffect, useState} from 'react'
 import _ from 'lodash'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
-import AnalyzeConstants from '../../constants/AnalyzeConstants'
-import AnalyzeActions from '../../actions/AnalyzeActions'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
-import AnalyzeStore from '../../stores/AnalyzeStore'
 
-const AnalyzeMain = ({}) => {
-  const [volumeAnalysis, setVolumeAnalysis] = useState()
-  const [project, setProject] = useState()
-  const [showAnalysis, setShowAnalysis] = useState()
+const AnalyzeMain = ({volumeAnalysis, project}) => {
+
+  const [showAnalysis, setShowAnalysis] = useState(false)
   const [intervalId, setIntervalId] = useState()
   const [scrollTop, setScrollTop] = useState()
+  const [jobToScroll, setJobToScroll] = useState()
 
   const jobsInfo = config.jobs
 
@@ -36,46 +33,9 @@ const AnalyzeMain = ({}) => {
     </div>
   )
 
-  // constructor(props) {
-  //   super(props)
-  //   this.state = {
-  //     volumeAnalysis: null,
-  //     project: null,
-  //     showAnalysis: false,
-  //     intervalId: 0,
-  //     scrollTop: 0,
-  //   }
-  //   this.updateAll = this.updateAll.bind(this)
-  //   this.updateAnalysis = this.updateAnalysis.bind(this)
-  //   this.updateProject = this.updateProject.bind(this)
-  //   this.showDetails = this.showDetails.bind(this)
-  // }
-
-  const updateAll = (volumeAnalysis, project) => {
-    setProject(project)
-    setVolumeAnalysis(volumeAnalysis)
-  }
-
-  const updateAnalysis = (volumeAnalysis) => {
-    setVolumeAnalysis(volumeAnalysis)
-  }
-
-  const updateProject = (project) => {
-    setProject(project)
-  }
-
-  const openAnalysisReport = () => {
-    setShowAnalysis((prev) => !prev)
-  }
-
-  const showDetails = (idJob) => {
-    if (showAnalysis) {
-      setShowAnalysis(true)
-
-      setTimeout(() => {
-        AnalyzeActions.showDetails(idJob)
-      }, 500)
-    }
+  const openAnalysisReport = (idJob) => {
+    setShowAnalysis((showAnalysis) => !showAnalysis)
+    setJobToScroll(idJob)
   }
 
   const scrollStep = () => {
@@ -95,22 +55,8 @@ const AnalyzeMain = ({}) => {
   }
   useEffect(() => {
     window.addEventListener('scroll', _.debounce(handleScroll, 200))
-    AnalyzeStore.addListener(AnalyzeConstants.RENDER_ANALYSIS, updateAll)
-    AnalyzeStore.addListener(AnalyzeConstants.UPDATE_ANALYSIS, updateAnalysis)
-    AnalyzeStore.addListener(AnalyzeConstants.UPDATE_PROJECT, updateProject)
-    AnalyzeStore.addListener(AnalyzeConstants.SHOW_DETAILS, showDetails)
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      AnalyzeStore.removeListener(AnalyzeConstants.RENDER_ANALYSIS, updateAll)
-      AnalyzeStore.removeListener(
-        AnalyzeConstants.UPDATE_ANALYSIS,
-        updateAnalysis,
-      )
-      AnalyzeStore.removeListener(
-        AnalyzeConstants.UPDATE_PROJECT,
-        updateProject,
-      )
-      AnalyzeStore.removeListener(AnalyzeConstants.SHOW_DETAILS, showDetails)
     }
   })
 
@@ -142,7 +88,8 @@ const AnalyzeMain = ({}) => {
               jobsInfo={jobsInfo}
               project={project}
               status={volumeAnalysis.get('summary').get('STATUS')}
-              openAnalysisReport={() => openAnalysisReport()}
+              showAnalysis={showAnalysis}
+              openAnalysisReport={ openAnalysisReport }
             />
 
             {showAnalysis ? (
@@ -158,6 +105,9 @@ const AnalyzeMain = ({}) => {
                       project={project}
                       jobsInfo={jobsInfo}
                       status={volumeAnalysis.get('summary').get('STATUS')}
+                      jobToScroll={jobToScroll}
+                      showAnalysis={showAnalysis}
+
                     />
                   </CSSTransition>
                 </TransitionGroup>

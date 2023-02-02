@@ -1,7 +1,6 @@
 import React from 'react'
 import _ from 'lodash'
 
-import AnalyzeActions from '../../actions/AnalyzeActions'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import ModalsActions from '../../actions/ModalsActions'
 
@@ -12,7 +11,6 @@ class AnalyzeChunksResume extends React.Component {
     this.payableValuesChenged = []
     this.containers = {}
     this.state = {
-      openDetails: false,
       openOutsource: false,
       outsourceJobId: null,
     }
@@ -24,10 +22,7 @@ class AnalyzeChunksResume extends React.Component {
     if ($(evt.target).parents('.outsource-container').length === 0) {
       evt.preventDefault()
       evt.stopPropagation()
-      AnalyzeActions.showDetails(idJob)
-      this.setState({
-        openDetails: true,
-      })
+      this.props.openAnalysisReport(idJob)
     }
   }
   openSplitModal = (id) => (e) => {
@@ -37,7 +32,7 @@ class AnalyzeChunksResume extends React.Component {
     let job = project.get('jobs').find((item) => {
       return item.get('id') == id
     })
-    ModalsActions.openSplitJobModal(job, project, UI.reloadAnalysis)
+    ModalsActions.openSplitJobModal(job, project, ()=>window.location.reload())
   }
 
   openMergeModal = (id) => (e) => {
@@ -47,7 +42,7 @@ class AnalyzeChunksResume extends React.Component {
     let job = this.props.project.get('jobs').find((item) => {
       return item.get('id') == id
     })
-    ModalsActions.openMergeModal(project.toJS(), job.toJS(), UI.reloadAnalysis)
+    ModalsActions.openMergeModal(project.toJS(), job.toJS(), ()=>window.location.reload())
   }
 
   thereIsChunkOutsourced = () => {
@@ -527,9 +522,6 @@ class AnalyzeChunksResume extends React.Component {
     e.preventDefault()
     e.stopPropagation()
     this.props.openAnalysisReport()
-    this.setState({
-      openDetails: !this.state.openDetails,
-    })
   }
 
   componentDidUpdate() {
@@ -562,21 +554,9 @@ class AnalyzeChunksResume extends React.Component {
     })
   }
 
-  componentWillUnmount() {}
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      !nextProps.jobsAnalysis.equals(this.props.jobsAnalysis) ||
-      nextProps.status !== this.props.status ||
-      nextState.openDetails !== this.state.openDetails ||
-      nextState.outsourceJobId !== this.state.outsourceJobId ||
-      !nextProps.project.equals(this.props.project)
-    )
-  }
-
   render() {
-    let showHideText = this.state.openDetails ? 'Hide Details' : 'Show Details'
-    let iconClass = this.state.openDetails ? 'open' : ''
+    let showHideText = this.props.showAnalysis ?  'Show Details' :'Hide Details'
+    let iconClass = this.props.showAnalysis ? '' : 'open'
     let html = this.getResumeJobs()
     return (
       <div className="project-top ui grid">
