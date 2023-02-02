@@ -386,8 +386,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     lxqDecodedTranslation,
   ) {
     var index = this.getSegmentIndex(sid)
-    if (index === -1) return
-    let segment = this._segments.get(index)
+    const segment = this._segments.get(index)
+    if (!segment) return
 
     //Check segment is modified
     if (segment.get('originalDecodedTranslation') !== decodedTranslation) {
@@ -623,15 +623,18 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       matching_words: term.matching_words.filter((value) => value),
     }))
     const index = this.getSegmentIndex(sid)
+    const segment = this._segments.get(index)
+    if (!segment) return
+
     const pendingGlossaryUpdates = this._segments
       .get(index)
       .get('pendingGlossaryUpdates')
-      ? this._segments.get(index).get('pendingGlossaryUpdates').toJS()
+      ? segment.get('pendingGlossaryUpdates').toJS()
       : []
 
-    const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
+    const isGlossaryAlreadyExist = !!segment.get('glossary')
     const glossary = isGlossaryAlreadyExist
-      ? this._segments.get(index).get('glossary').toJS()
+      ? segment.get('glossary').toJS()
       : []
 
     this._segments = this._segments.setIn(
@@ -653,16 +656,20 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   setGlossarySearchToCache: function (sid, terms) {
     const index = this.getSegmentIndex(sid)
+    const segment = this._segments.get(index)
+    if (!segment) return
+
     this._segments = this._segments.setIn(
       [index, 'glossary_search_results'],
-      Immutable.fromJS(
-        terms ? terms : this._segments.get(index).get('glossary'),
-      ),
+      Immutable.fromJS(terms ? terms : segment.get('glossary')),
     )
   },
   deleteFromGlossary: function (sid, term) {
-    let index = this.getSegmentIndex(sid)
-    let glossary = this._segments.get(index).get('glossary').toJS()
+    const index = this.getSegmentIndex(sid)
+    const segment = this._segments.get(index)
+    if (!segment) return
+
+    let glossary = segment.get('glossary').toJS()
     const updatedGlossary = glossary.filter(
       ({term_id}) => term.term_id !== term_id,
     )
@@ -685,9 +692,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }))
     if (!this._segments.size) return
     const index = this.getSegmentIndex(sid)
-    const isGlossaryAlreadyExist = !!this._segments.get(index).get('glossary')
+    const segment = this._segments.get(index)
+    if (!segment) return
+
+    const isGlossaryAlreadyExist = !!segment.get('glossary')
     const glossary = isGlossaryAlreadyExist
-      ? this._segments.get(index).get('glossary').toJS()
+      ? segment.get('glossary').toJS()
       : []
 
     const updatedGlossary = [
@@ -1173,7 +1183,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         return segment.get('sid') === sid
       }
     })
-    return index > 0 ? index : 0
+    return index
   },
   getLastSegmentId() {
     return this._segments?.last()?.get('sid')
