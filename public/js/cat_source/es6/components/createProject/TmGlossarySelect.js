@@ -22,6 +22,7 @@ export const TmGlossarySelect = () => {
           </span>
         </div>
       }
+      id='tmx-select'
       name={'tmx-select'}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}

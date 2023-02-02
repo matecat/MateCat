@@ -24,6 +24,7 @@ const mergeClassNames = (...args) => {
 export const Select = ({
   className,
   label,
+  id,
   name,
   placeholder,
   options,
@@ -223,6 +224,7 @@ export const Select = ({
     <div
       className={`select-with-label__wrapper ${className ? className : ''}`}
       ref={wrapperRef}
+      id={id? id: null}
     >
       <input type="hidden" name={`${name}-hidden`} value={inputValue} />{' '}
       {label && (
@@ -294,6 +296,7 @@ export const Select = ({
 Select.propTypes = {
   className: PropTypes.string,
   label: PropTypes.node,
+  id: PropTypes.string,
   name: PropTypes.string,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(

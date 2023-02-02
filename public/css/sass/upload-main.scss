@@ -96,8 +96,9 @@
 .translate-box.project-team {
   #project-subject,
   #source-lang,
-  #target-lang {
-    /* width:164px;*/
+  #target-lang,
+  #tmx-select{
+     width:164px;
   }
   #target-lang {
     .multiple-none-text {
@@ -115,10 +116,6 @@
     &:hover {
       box-shadow: none !important;
     }
-  }
-  .menu-dropdown {
-    max-height: none !important;
-    overflow: hidden !important;
   }
   div#add-tmx-option:hover,
   div#add-multiple-lang:hover {
@@ -283,7 +280,7 @@
         width: 150px;
       }
     }
-    .menu-dropdown {
+    .select-with-label__wrapper {
       max-height: none !important;
       overflow: hidden !important;
     }
@@ -369,6 +366,11 @@
   //     }
   //   }
   // }
+  .translate-box.settings {
+    .text {
+      display: none;
+    }
+  }
 }
 
 @media only screen and (min-width: 1600px) {
@@ -412,7 +414,7 @@
     .translate-box {
       .select-with-label__wrapper,
       .upload-input {
-        width: 128px;
+        width: 128px !important;
       }
     }
   }
@@ -442,7 +444,7 @@
     .translate-box {
       .select-with-label__wrapper,
       .upload-input {
-        width: 128px;
+        width: 128px !important;
       }
     }
   }

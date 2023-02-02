@@ -300,6 +300,7 @@ const NewProject = ({
               <div className="translate-box project-team">
                 <Select
                   label="Team"
+                  id="project-team"
                   name={'project-team'}
                   maxHeightDroplist={SELECT_HEIGHT}
                   showSearchBar={true}
@@ -349,6 +350,7 @@ const NewProject = ({
             <div className="translate-box project-subject">
               <Select
                 label="Select subject"
+                id="project-subject"
                 name={'project-subject'}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}

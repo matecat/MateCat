@@ -10,6 +10,7 @@ export const SourceLanguageSelect = ({history = []}) => {
   return (
     <Select
       label="From"
+      id="source-lang"
       name={'source-lang'}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
