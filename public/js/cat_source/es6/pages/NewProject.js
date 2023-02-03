@@ -114,7 +114,7 @@ const NewProject = ({
           sourceLang: sourceLang.id,
           targetLang: targetLangs.map((lang) => lang.id).join(),
           jobSubject: subject.id,
-          selectedTeam: selectedTeam.id,
+          selectedTeam: selectedTeam ? selectedTeam.id : undefined,
         }),
       )
         .then(({data}) => {
