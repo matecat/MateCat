@@ -193,13 +193,4 @@ class EnginesModel_EngineStruct
 
         return json_decode($this->extra_parameters, true);
     }
-
-    /**
-     * @param $param
-     * @return bool
-     */
-    public function hasExtraParam($param)
-    {
-        return array_key_exists($param, $this->getExtraParamsAsArray());
-    }
 }
