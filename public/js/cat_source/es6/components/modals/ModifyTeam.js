@@ -350,29 +350,24 @@ class ModifyTeam extends React.Component {
       var inviteResended = self.state.resendInviteArray.indexOf(mail) > -1
       return (
         <div className="item pending-invitation" key={'user-invitation' + i}>
-          {inviteResended ? (
-            <div className="ui right floated content invite-sent-msg">
-              Invite sent
-            </div>
-          ) : (
-            <div>
-              <div
-                className="mini ui button right floated"
-                onClick={self.resendInvite.bind(self, mail)}
-              >
-                Resend Invite
-              </div>
-              <div className="ui right floated content pending-msg">
-                Pending user
-              </div>
-            </div>
-          )}
-
           <div className="ui tiny image label">
             {mail.substring(0, 1).toUpperCase()}
           </div>
-          <div className="middle aligned content">
-            <div className="content user">{mail}</div>
+          <span className="email content user">{mail}</span>
+          <div>
+            {inviteResended ? (
+              <span className="content pending-msg">Invite sent</span>
+            ) : (
+              <>
+                <span className="content pending-msg">Pending user</span>
+                <div
+                  className="mini ui button right floated"
+                  onClick={self.resendInvite.bind(self, mail)}
+                >
+                  Resend Invite
+                </div>
+              </>
+            )}
           </div>
         </div>
       )
@@ -510,26 +505,26 @@ class ModifyTeam extends React.Component {
 
               <div className="sixteen wide column">
                 <div className="ui members-list team">
-                  <div className="ui divided list">
-                    <div className="search-member-container">
-                      <IconSearch />
-                      <input
-                        name="search_member"
-                        placeholder="Search Member"
-                        value={this.state.searchMember}
-                        onChange={this.onChangeSearchMember.bind(this)}
-                      />
-                      <div
-                        className={`reset_button ${
-                          this.state.searchMember
-                            ? 'reset_button--visible'
-                            : 'reset_button--hidden'
-                        }`}
-                        onClick={() => this.setState({searchMember: ''})}
-                      >
-                        <IconClose />
-                      </div>
+                  <div className="search-member-container">
+                    <IconSearch />
+                    <input
+                      name="search_member"
+                      placeholder="Search Member"
+                      value={this.state.searchMember}
+                      onChange={this.onChangeSearchMember.bind(this)}
+                    />
+                    <div
+                      className={`reset_button ${
+                        this.state.searchMember
+                          ? 'reset_button--visible'
+                          : 'reset_button--hidden'
+                      }`}
+                      onClick={() => this.setState({searchMember: ''})}
+                    >
+                      <IconClose />
                     </div>
+                  </div>
+                  <div className="ui divided list">
                     {pendingUsers}
                     {userlist}
                   </div>

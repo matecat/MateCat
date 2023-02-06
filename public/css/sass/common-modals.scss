@@ -1190,7 +1190,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
       &.team {
         .item {
-          padding: 5px 0;
+          padding: 5px 5px 5px 0;
+
           &:hover {
             .mini.ui.button.right.floated {
               display: inherit;
@@ -1222,12 +1223,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             font-size: 14px;
             color: $grey1;
           }
-          .content.pending-msg,
-          .content.invite-sent-msg {
+          .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
             color: $grey1;
-            margin-top: 13px;
+            white-space: nowrap;
           }
 
           .mini.ui.button.right.floated {
@@ -1240,6 +1240,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             font-size: 14px;
             padding: 6px 15px;
             background-color: #f6f6f6;
+            white-space: nowrap;
+
             &:hover {
               box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -1278,6 +1280,25 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             vertical-align: bottom;
             border: 1px solid #797979;
             border-radius: 2px;
+          }
+        }
+
+        .pending-invitation {
+          display: flex;
+          align-items: center;
+
+          .email {
+            padding-left: 0.5em;
+          }
+
+          .mini.ui.button.right.floated {
+            margin-top: 0;
+          }
+
+          > :last-child {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
           }
         }
       }
