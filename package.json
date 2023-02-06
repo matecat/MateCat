@@ -64,5 +64,5 @@
     "prettier": "^2.2.1",
     "whatwg-fetch": "^3.6.2"
   },
-  "version": "2.20.7"
+  "version": "2.20.18"
 }
