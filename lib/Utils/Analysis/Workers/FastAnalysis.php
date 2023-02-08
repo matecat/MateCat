@@ -210,7 +210,7 @@ class FastAnalysis extends AbstractDaemon {
 
                 foreach ( $fastResultData as $k => $v ) {
 
-                    if ( in_array( $v[ 'type' ], [ "50%-74%" ] ) ) {
+                    if ( $v[ 'type' ] == "50%-74%" ) {
                         $fastResultData[ $k ][ 'type' ] = "NO_MATCH";
                     }
 
@@ -305,6 +305,7 @@ class FastAnalysis extends AbstractDaemon {
             $fastSegmentsRequest[ $pos ][ 'segment' ]      = $segment[ 'segment' ];
             $fastSegmentsRequest[ $pos ][ 'segment_hash' ] = $segment[ 'segment_hash' ];
             $fastSegmentsRequest[ $pos ][ 'source' ]       = $segment[ 'source' ];
+            $fastSegmentsRequest[ $pos ][ 'count' ]        = $segment[ 'raw_word_count' ];
 
             //set a reverse lookup array to get the right segment is by its position
             $this->segment_hashes[ $segment[ 'jsid' ] ] = $pos;
