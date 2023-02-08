@@ -773,12 +773,7 @@ footer #statistics {
   display: none;
 }
 
-.mgmt-popup-outer {
-  display: none;
-}
-
-.popup-outer,
-.mgmt-popup-outer {
+.popup-outer {
   background: #000;
   position: fixed;
   top: 0;
@@ -787,10 +782,6 @@ footer #statistics {
   height: 100%;
   z-index: 12;
   opacity: 0.4;
-}
-
-.mgmt-popup-outer {
-  z-index: 99999999999999;
 }
 
 .popup {
@@ -1149,12 +1140,10 @@ input.email-export {
 
 .uploadloader {
   background: url(../../img/loader.gif) center center no-repeat;
-  display: block;
   width: 20px;
   height: 20px;
   float: right;
   margin-top: 3px;
-  display: none;
   position: absolute;
   right: 233px;
   background-size: 20px 20px;
@@ -2757,33 +2746,6 @@ tr.disabled td {
 .header-menu .wrapper-dropdown-5 .dropdown li {
   padding: 0 !important;
   height: auto !important;
-}
-
-.fileformat span {
-  padding: 10px 15px 10px 40px;
-  margin: 5px 0 0 0;
-  width: 70px;
-  height: 15px;
-  float: left;
-  background-size: 25px !important;
-}
-
-.fileformat.popup-box {
-  margin: 0 10px;
-}
-
-.fileformat.popup-box span {
-  line-height: 15px;
-}
-
-.fileformat.popup-box h3 {
-  padding: 0 30px;
-  background-color: #efefef;
-}
-
-.format-box:nth-child(3) h3,
-.format-box:nth-child(4) h3 {
-  padding: 0 15px;
 }
 
 .wrapper-dropdown-5 .dropdown li a,
@@ -4628,7 +4590,6 @@ body.side-popup {
     min-width: unset;
     background-color: #f5f6f7;
     .started header,
-    .wrapper-claim,
     .wrapper-upload,
     footer,
     #template-upload,

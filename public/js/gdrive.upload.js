@@ -2,6 +2,8 @@ import {getGoogleDriveUploadedFiles} from './cat_source/es6/api/getGoogleDriveUp
 import {changeGDriveSourceLang} from './cat_source/es6/api/changeGDriveSourceLang'
 import {deleteGDriveUploadedFile} from './cat_source/es6/api/deleteGdriveUploadedFile'
 import {openGDriveFiles} from './cat_source/es6/api/openGDriveFiles'
+import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
+import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
 APP.tryListGDriveFiles = function () {
   getGoogleDriveUploadedFiles().then((listFiles) => {
@@ -94,7 +96,7 @@ APP.tryListGDriveFiles = function () {
 }
 
 APP.restartGDriveConversions = function () {
-  var sourceLang = $('#source-lang').dropdown('get value')
+  var sourceLang = CreateProjectStore.getSourceLang()
   changeGDriveSourceLang(sourceLang).then((response) => {
     if (response.success) {
       console.log('Source language changed.')
@@ -135,11 +137,11 @@ APP.addGDriveFile = function (exportIds) {
   $(html).appendTo($('body'))
   openGDriveFiles(
     encodedJson,
-    $('#source-lang').dropdown('get value'),
-    $('#target-lang').dropdown('get value'),
+    CreateProjectStore.getSourceLang(),
+    CreateProjectStore.getTargetLangs(),
   ).then((response) => {
     $('.modal-gdrive').remove()
-    $('.error-message').hide()
+    CreateProjectActions.hideErrors()
     if (response.success) {
       APP.tryListGDriveFiles()
     } else {
@@ -150,8 +152,7 @@ APP.addGDriveFile = function (exportIds) {
           'There was an error retrieving the file from Google Drive: ' +
           response.error_msg
       }
-      $('.error-message').find('p').text(message)
-      $('.error-message').show()
+      CreateProjectActions.showError(message)
 
       console.error(
         'Error when processing request. Error class: ' +

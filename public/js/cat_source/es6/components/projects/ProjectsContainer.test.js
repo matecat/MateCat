@@ -1,4 +1,4 @@
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen, waitFor, act} from '@testing-library/react'
 import React from 'react'
 import Immutable from 'immutable'
 import {rest} from 'msw'
@@ -165,8 +165,10 @@ test('Rendering elements', async () => {
 
   // set ProjectStore state
   const {data, dataTeam, dataTeams} = fakeProjectsData.projects
-  ManageActions.renderProjects(data, dataTeam, dataTeams)
-  ManageActions.storeSelectedTeam(dataTeam)
+  act(() => {
+    ManageActions.renderProjects(data, dataTeam, dataTeams)
+    ManageActions.storeSelectedTeam(dataTeam)
+  })
 
   await waitFor(() => {
     projects.map((project) => {

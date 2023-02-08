@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import {Dropdown} from './../common/Dropdown'
 import TEXT_UTILS from '../../utils/textUtils'
+import ChevronDown from '../../../../../img/icons/ChevronDown'
 
 const mergeClassNames = (...args) => {
   return (
@@ -23,6 +24,7 @@ const mergeClassNames = (...args) => {
 export const Select = ({
   className,
   label,
+  id,
   name,
   placeholder,
   options,
@@ -41,9 +43,10 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
+  maxHeightDroplist = 128,
   children,
 }) => {
-  const listRef = useRef()
+  const dropDownRef = useRef()
   const wrapperRef = useRef()
   const selectedItemRef = useRef()
 
@@ -97,8 +100,14 @@ export const Select = ({
   }
 
   useEffect(() => {
-    if (isDropdownVisible && multipleSelect !== 'modal' && wrapperRef.current) {
-      const listNode = listRef.current
+    if (
+      isDropdownVisible &&
+      multipleSelect !== 'modal' &&
+      wrapperRef.current &&
+      dropDownRef.current
+    ) {
+      const {getListRef, setListMaxHeight} = dropDownRef.current
+      const listNode = getListRef()
       const wrapperNode = wrapperRef.current
       const listTopPosition =
         listNode.getBoundingClientRect().top -
@@ -119,8 +128,8 @@ export const Select = ({
         wrapperTopPosition -
         listTopPosition -
         16 // 16 = margins
-      if (availableHeight > 128) {
-        listNode.style.maxHeight = `${availableHeight}px`
+      if (availableHeight > maxHeightDroplist) {
+        setListMaxHeight(availableHeight)
       } else {
         if (checkSpaceToReverse) {
           setDropdownReversed(true)
@@ -131,12 +140,21 @@ export const Select = ({
           (label ? 32 : 0) -
           32 -
           (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
-        listNode.style.maxHeight = `${
-          availableHeight > 128 ? availableHeight : 128
-        }px`
+        setListMaxHeight(
+          availableHeight > maxHeightDroplist
+            ? availableHeight
+            : maxHeightDroplist,
+        )
       }
     }
-  }, [isDropdownVisible, multipleSelect, label, showSearchBar, offsetParent])
+  }, [
+    isDropdownVisible,
+    multipleSelect,
+    label,
+    showSearchBar,
+    offsetParent,
+    maxHeightDroplist,
+  ])
 
   useEffect(() => {
     setSelectedLabel(renderSelection())
@@ -206,6 +224,7 @@ export const Select = ({
     <div
       className={`select-with-label__wrapper ${className ? className : ''}`}
       ref={wrapperRef}
+      id={id? id: null}
     >
       <input type="hidden" name={`${name}-hidden`} value={inputValue} />{' '}
       {label && (
@@ -249,11 +268,11 @@ export const Select = ({
         >
           <Dropdown
             {...{
+              ref: dropDownRef,
               className: 'select__dropdown',
               wrapper: wrapperRef,
               showSearchBar,
               searchPlaceholder,
-              listRef,
               activeOption,
               activeOptions,
               options,
@@ -277,6 +296,7 @@ export const Select = ({
 Select.propTypes = {
   className: PropTypes.string,
   label: PropTypes.node,
+  id: PropTypes.string,
   name: PropTypes.string,
   placeholder: PropTypes.string,
   options: PropTypes.arrayOf(
@@ -308,19 +328,6 @@ Select.propTypes = {
   optionsSelectedCopyPlural: PropTypes.func,
   resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
+  maxHeightDroplist: PropTypes.number,
   children: PropTypes.func,
-}
-
-const ChevronDown = () => {
-  return (
-    <svg width="14" height="8" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="m1 1 6 6 6-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
 }

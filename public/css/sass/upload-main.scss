@@ -14,17 +14,52 @@
 @import 'modals/language-selector';
 
 @import 'upload-page';
+@import 'components/common/Select';
+@import 'components/common/Dropdown';
+@import 'components/common/CookieConsent';
+
+@import 'commons/aria-label-tooltip';
 
 .translation-row {
-  display: grid;
-  justify-content: center;
-
   .translation-options,
   #additional-input-params {
-    display: grid;
-    grid-auto-flow: column;
-    /*grid-template-columns: repeat(8,auto);*/
-    grid-column-gap: 8px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .translation-options {
+    > :not(:last-child) {
+      margin-right: 8px;
+    }
+  }
+
+  .label-tmx-select,
+  .label-tmx-select > span:last-of-type {
+    display: flex;
+    align-items: center;
+  }
+
+  .label-tmx-select > span:last-of-type {
+    &[aria-label]::after {
+      min-width: 260px;
+      white-space: normal;
+    }
+  }
+
+  .tmx-dropdown-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+
+    > :first-child {
+      display: flex;
+      flex-direction: column;
+
+      > :first-child {
+        color: black;
+      }
+    }
   }
 }
 
@@ -61,8 +96,9 @@
 .translate-box.project-team {
   #project-subject,
   #source-lang,
-  #target-lang {
-    /* width:164px;*/
+  #target-lang,
+  #tmx-select{
+     width:164px;
   }
   #target-lang {
     .multiple-none-text {
@@ -80,10 +116,6 @@
     &:hover {
       box-shadow: none !important;
     }
-  }
-  .menu-dropdown {
-    max-height: none !important;
-    overflow: hidden !important;
   }
   div#add-tmx-option:hover,
   div#add-multiple-lang:hover {
@@ -248,7 +280,7 @@
         width: 150px;
       }
     }
-    .menu-dropdown {
+    .select-with-label__wrapper {
       max-height: none !important;
       overflow: hidden !important;
     }
@@ -326,16 +358,16 @@
   .translate-box.tmx-select {
     margin-right: 0;
   }
-  .wrapper-upload {
-    .translate-box {
-      div.dropdown {
-        width: 140px;
-      }
-    }
-  }
 
-  div.more-options-cont {
-    span.text {
+  // .wrapper-upload {
+  //   .translate-box {
+  //     div.dropdown {
+  //       width: 140px;
+  //     }
+  //   }
+  // }
+  .translate-box.settings {
+    .text {
       display: none;
     }
   }
@@ -344,20 +376,9 @@
 @media only screen and (min-width: 1600px) {
   .wrapper-upload {
     .translate-box {
-      input {
+      .select-with-label__wrapper,
+      .upload-input {
         width: 200px;
-      }
-      div.dropdown {
-        width: 200px;
-        .menu {
-          width: 280px;
-        }
-        .text {
-          /*overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-size: 16px;
-                    white-space: nowrap;*/
-        }
       }
     }
     #tmx-select {
@@ -372,27 +393,9 @@
 @media only screen and (max-width: 1599px) and (min-width: 1321px) {
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
         width: 162px;
-      }
-      div.dropdown {
-        width: 162px;
-        .text {
-          /*overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-size: 16px;
-                    white-space: nowrap;*/
-        }
-      }
-      #tmx-select {
-        width: 170px;
-      }
-      &.target {
-        #target-lang {
-          .multiple-none-text {
-            display: none;
-          }
-        }
       }
     }
   }
@@ -409,19 +412,9 @@
 
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
-        width: 128px;
-      }
-      div.dropdown {
-        width: 128px;
-        .text {
-          /*overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-size: 16px;
-                    white-space: nowrap;*/
-        }
-      }
-      #tmx-select {
+        width: 128px !important;
       }
     }
   }
@@ -438,13 +431,9 @@
 
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
         width: 128px;
-      }
-      div.dropdown {
-        width: 128px;
-      }
-      #tmx-select {
       }
     }
   }
@@ -453,11 +442,9 @@
 @media only screen and (max-width: 991px) {
   .wrapper-upload {
     .translate-box {
+      .select-with-label__wrapper,
       .upload-input {
-        width: 128px;
-      }
-      div.dropdown {
-        width: 128px;
+        width: 128px !important;
       }
     }
   }
