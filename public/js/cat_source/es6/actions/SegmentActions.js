@@ -1270,8 +1270,8 @@ const SegmentActions = {
 
     var segment_status = segment.status
 
-    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
-    const trg_content = TagUtils.prepareTextToSend(segment.translation)
+    const src_content = segment.updatedSource
+    const trg_content = segment.translation
 
     getLocalWarnings({
       id: segment.sid,
