@@ -100,19 +100,16 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
+        /** @var Engines_MMT $newTestCreatedMT */
         $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
         try {
 
-            $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
-            $preImport   = $extraParams[ 'MMT-preimport' ];
-
             // if the MMT-preimport flag is enabled,
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
-            if ( $preImport === true ) {
-                $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
-                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
+            if ( !empty( $newTestCreatedMT->extra_parameters[ 'MMT-preimport' ] ) ) {
+                $newTestCreatedMT->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
             }
 
         } catch ( Exception $e ) {
