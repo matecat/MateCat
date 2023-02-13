@@ -28,6 +28,7 @@ class SizeRestriction {
      *
      * @param $string
      * @param $limit
+     * @param FeatureSet $featureSet
      */
     public function __construct( $string, $limit, FeatureSet $featureSet ) {
 
@@ -37,16 +38,6 @@ class SizeRestriction {
         $this->cleanedString = $string;
         $this->limit         = $limit;
         $this->featureSet    = $featureSet;
-
-        /*
-            $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                    'src_content' => $this->source_seg,
-                    'trg_content' => $this->target_seg,
-                    'project'     => $this->chunk->getProject(),
-                    'chunk'       => $this->chunk
-            ] );
-         */
-
     }
 
     /**
@@ -107,14 +98,19 @@ class SizeRestriction {
      */
     private function getCleanedStringLength() {
 
-        $counts = [
-                "baseLength"   => mb_strlen( $this->cleanedString ),
-                "cjkMatches"   => CJKLangUtils::getMatches( $this->cleanedString ),
-                "emojiMatches" => EmojiUtils::getMatches( $this->cleanedString ),
-        ];
-
         try {
-            return array_sum( $this->featureSet->filter( 'characterLengthCount', $counts ) );
+
+            $featureCounts = $this->featureSet->filter( 'characterLengthCount', $this->cleanedString );
+
+            if(is_array($featureCounts)){
+                return array_sum($featureCounts);
+            }
+
+            return array_sum([
+                "baseLength"   => strlen( $this->cleanedString ),
+                "cjkMatches"   => 0,
+                "emojiMatches" => 0,
+            ]);
         } catch ( Exception $e ) {
         }
 
