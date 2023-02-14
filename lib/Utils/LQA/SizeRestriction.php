@@ -4,6 +4,8 @@ namespace LQA;
 
 use CJKLangUtils;
 use EmojiUtils;
+use Exception;
+use FeatureSet;
 
 class SizeRestriction {
 
@@ -16,20 +18,26 @@ class SizeRestriction {
      * @var int
      */
     private $limit;
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet;
 
     /**
      * SizeRestriction constructor.
      *
      * @param $string
      * @param $limit
+     * @param FeatureSet $featureSet
      */
-    public function __construct( $string, $limit ) {
+    public function __construct( $string, $limit, FeatureSet $featureSet ) {
 
         $string = $this->clearStringFromTags( $string );
         $string = $this->removeHiddenCharacters( $string );
 
         $this->cleanedString = $string;
         $this->limit         = $limit;
+        $this->featureSet    = $featureSet;
     }
 
     /**
@@ -59,14 +67,14 @@ class SizeRestriction {
      * Remove every hidden character like word joiner or half spaces
      *
      * @param $string
+     *
      * @return string
      */
-    private function removeHiddenCharacters($string)
-    {
-        $cleanedText = str_replace("&#8203;", "", $string);
-        $cleanedText = str_replace("\xE2\x80\x8C", "", $cleanedText);
-        $cleanedText = str_replace("\xE2\x80\x8B", "", $cleanedText);
-        $cleanedText = str_replace("⁠", "", $cleanedText);
+    private function removeHiddenCharacters( $string ) {
+        $cleanedText = str_replace( "&#8203;", "", $string );
+        $cleanedText = str_replace( "\xE2\x80\x8C", "", $cleanedText );
+        $cleanedText = str_replace( "\xE2\x80\x8B", "", $cleanedText );
+        $cleanedText = str_replace( "⁠", "", $cleanedText );
 
         return $cleanedText;
     }
@@ -90,10 +98,23 @@ class SizeRestriction {
      */
     public function getCleanedStringLength() {
 
-        $cjkMatches = CJKLangUtils::getMatches($this->cleanedString);
-        $emojiMatches = EmojiUtils::getMatches($this->cleanedString);
-        $baseLength = mb_strlen($this->cleanedString);
+        try {
 
-        return $baseLength + $cjkMatches + $emojiMatches;
+            $featureCounts = $this->featureSet->filter( 'characterLengthCount', $this->cleanedString );
+
+            if(is_array($featureCounts)){
+                return array_sum($featureCounts);
+            }
+
+            return array_sum([
+                "baseLength"   => strlen( $this->cleanedString ),
+                "cjkMatches"   => 0,
+                "emojiMatches" => 0,
+            ]);
+        } catch ( Exception $e ) {
+        }
+
+        return 0;
+
     }
 }

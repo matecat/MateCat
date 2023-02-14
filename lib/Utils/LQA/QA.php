@@ -2529,7 +2529,7 @@ class QA {
                 return true;
             }
 
-            $sizeRestriction = new SizeRestriction( $text, $limit->meta_value );
+            $sizeRestriction = new SizeRestriction( $text, $limit->meta_value, $this->featureSet );
 
             return $sizeRestriction->checkLimit();
         }
