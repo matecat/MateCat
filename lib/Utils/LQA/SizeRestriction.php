@@ -15,10 +15,6 @@ class SizeRestriction {
     private $cleanedString;
 
     /**
-     * @var int
-     */
-    private $limit;
-    /**
      * @var FeatureSet
      */
     private $featureSet;
@@ -27,16 +23,14 @@ class SizeRestriction {
      * SizeRestriction constructor.
      *
      * @param $string
-     * @param $limit
      * @param FeatureSet $featureSet
      */
-    public function __construct( $string, $limit, FeatureSet $featureSet ) {
+    public function __construct( $string, FeatureSet $featureSet ) {
 
         $string = $this->clearStringFromTags( $string );
         $string = $this->removeHiddenCharacters( $string );
 
         $this->cleanedString = $string;
-        $this->limit         = $limit;
         $this->featureSet    = $featureSet;
     }
 
@@ -80,17 +74,19 @@ class SizeRestriction {
     }
 
     /**
+     * @param $limit
      * @return bool
      */
-    public function checkLimit() {
-        return $this->getCleanedStringLength() <= $this->limit;
+    public function checkLimit($limit) {
+        return $this->getCleanedStringLength() <= $limit;
     }
 
     /**
+     * @param $limit
      * @return int
      */
-    public function getCharactersRemaining() {
-        return $this->limit - $this->getCleanedStringLength();
+    public function getCharactersRemaining($limit) {
+        return $limit - $this->getCleanedStringLength();
     }
 
     /**

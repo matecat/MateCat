@@ -27,10 +27,6 @@ class CountWordController extends KleinController {
             throw new ValidationError( "Invalid text field", 400 );
         }
 
-        if ( $this->request->limit === null or $this->request->limit === '') {
-            throw new ValidationError( "Invalid limit field", 400 );
-        }
-
         $langs = Langs_Languages::getInstance();
 
         try {
@@ -42,16 +38,23 @@ class CountWordController extends KleinController {
     }
 
     public function rawWords() {
+
+        $this->featureSet->loadFromUserEmail( $this->user->email );
         $words_count = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
-        $size_restriction = new SizeRestriction($this->request->text, $this->request->limit);
+        $size_restriction = new SizeRestriction($this->request->text, $this->featureSet);
+
+        $character_count = [
+            'length' => $size_restriction->getCleanedStringLength(),
+        ];
+
+        if(isset($this->request->limit) and is_numeric($this->request->limit)){
+            $character_count['valid'] = $size_restriction->checkLimit($this->request->limit);
+            $character_count['remaining_characters'] = $size_restriction->getCharactersRemaining($this->request->limit);
+        }
 
         $this->response->json( [
             'word_count' => $words_count,
-            'character_count' => [
-                'valid' => $size_restriction->checkLimit(),
-                'length' => $size_restriction->getCleanedStringLength(),
-                'remaining_characters' => $size_restriction->getCharactersRemaining(),
-            ],
+            'character_count' => $character_count,
         ] );
     }
 }
