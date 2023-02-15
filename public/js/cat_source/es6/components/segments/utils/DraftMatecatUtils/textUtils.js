@@ -128,8 +128,8 @@ export const regexWordDelimiter =
   /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
 
 export const getCharactersCounter = (value) => {
-  const {getCharsValue, removeHiddenCharacters} = TEXT_UTILS
+  const {getCharsSize, removeHiddenCharacters} = TEXT_UTILS
   const content = removeHiddenCharacters(value)
 
-  return getCharsValue(content)
+  return getCharsSize(content)
 }
