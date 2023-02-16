@@ -24,6 +24,7 @@ class AnalysisDao extends DataAccess_AbstractDao {
         SELECT
                 st.id_job AS jid,
                 j.password as jpassword,
+                j.target as target,
                 st.id_segment AS sid,
                 s.id_file,
                 s.id_file_part,

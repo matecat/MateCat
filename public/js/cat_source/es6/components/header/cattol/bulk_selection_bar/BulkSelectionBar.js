@@ -3,6 +3,7 @@ import React from 'react'
 import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 class BulkSelectionBar extends React.Component {
   constructor(props) {
@@ -80,12 +81,14 @@ class BulkSelectionBar extends React.Component {
       SegmentActions.approveFilteredSegments(this.state.segmentsArray).then(
         () => {
           this.onClickBack()
-          UI.reloadQualityReport()
+          CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
+          CatToolActions.reloadQualityReport()
         },
       )
     } else {
       SegmentActions.translateFilteredSegments(this.state.segmentsArray).then(
         () => {
+          CatToolActions.onRender({segmentToOpen: this.state.segmentsArray[0]})
           this.onClickBack()
         },
       )

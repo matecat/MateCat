@@ -7,6 +7,7 @@
  */
 
 use API\V2\Json\QALocalWarning;
+use LQA\QA;
 
 
 class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
@@ -143,6 +144,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         }
 
         return $post_editing_effort;
+        
     }
 
 
@@ -153,10 +155,17 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         return $segment;
     }
 
-    public function getLocalWarning(){
-        $QA = new \QA( $this->segment, $this->translation );
+    public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
+
+        $QA = new QA( $this->segment, $this->translation );
+        $QA->setSourceSegLang($chunk->source);
+        $QA->setTargetSegLang($chunk->target);
+        $QA->setChunk($chunk);
+        $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
+
         $local_warning = new QALocalWarning($QA, $this->sid);
+
         return $local_warning->render();
     }
 }

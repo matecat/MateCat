@@ -5,6 +5,7 @@
 import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
+import SegmentUtils from '../../utils/segmentUtils'
 
 class SegmentHeader extends React.PureComponent {
   constructor(props) {
@@ -15,6 +16,8 @@ class SegmentHeader extends React.PureComponent {
       classname: '',
       createdBy: '',
       visible: false,
+      isActiveCharactersCounter: SegmentUtils.isCharacterCounterEnable(),
+      charactersCounter: {},
     }
     this.changePercentuage = this.changePercentuage.bind(this)
     this.hideHeader = this.hideHeader.bind(this)
@@ -50,6 +53,14 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.HIDE_SEGMENT_HEADER,
       this.hideHeader,
     )
+    SegmentStore.addListener(
+      SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+      this.onToggleCharacterCounter,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.CHARACTER_COUNTER,
+      this.onCharacterCounter,
+    )
   }
 
   componentWillUnmount() {
@@ -61,6 +72,31 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.HIDE_SEGMENT_HEADER,
       this.hideHeader,
     )
+    SegmentStore.removeListener(
+      SegmentConstants.TOGGLE_CHARACTER_COUNTER,
+      this.onToggleCharacterCounter,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.CHARACTER_COUNTER,
+      this.onCharacterCounter,
+    )
+    this.setState({
+      charactersCounter: {},
+    })
+  }
+
+  onToggleCharacterCounter = () => {
+    const isActiveCharactersCounter = !this.state.isActiveCharactersCounter
+    this.setState({
+      isActiveCharactersCounter,
+    })
+    SegmentUtils.setCharacterCounterOptionValue(isActiveCharactersCounter)
+  }
+
+  onCharacterCounter = (charactersCounter) => {
+    this.setState({
+      charactersCounter,
+    })
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -77,34 +113,75 @@ class SegmentHeader extends React.PureComponent {
   }
 
   render() {
-    var autopropagated = ''
-    var percentageHtml = ''
-    if (this.state.autopropagated) {
-      autopropagated = <span className="repetition">Autopropagated</span>
-    } else if (this.props.repetition) {
-      autopropagated = <span className="repetition">Repetition</span>
-    } else if (this.state.visible && this.state.percentage != '') {
+    let autopropagatedHtml
+    let percentageHtml
+    const {repetition, splitted, segmentOpened, sid, saving} = this.props
+    const {autopropagated, visible, percentage, createdBy, classname} =
+      this.state
+    if (autopropagated && !splitted) {
+      autopropagatedHtml = <span className="repetition">Autopropagated</span>
+    } else if (repetition && !splitted) {
+      autopropagatedHtml = <span className="repetition">Repetition</span>
+    }
+    if (visible && percentage != '') {
       percentageHtml = (
         <h2
-          title={'Created by ' + this.state.createdBy}
-          className={' visible percentuage ' + this.state.classname}
+          title={'Created by ' + createdBy}
+          className={' visible percentuage ' + classname}
         >
-          {this.state.percentage}
+          {percentage}
         </h2>
       )
     }
-
-    return this.props.segmentOpened ? (
-      <div
-        className="header toggle"
-        id={'segment-' + this.props.sid + '-header'}
-      >
-        {autopropagated}
-        {percentageHtml}
+    const savingHtml = (
+      <div className={'header-segment-saving'}>
+        <div className={'header-segment-saving-loader'} />
+        <span>Saving</span>
       </div>
-    ) : this.state.autopropagated || this.props.repetition ? (
-      <div className={'header header-closed'}>{autopropagated}</div>
-    ) : null
+    )
+    const {isActiveCharactersCounter, charactersCounter} = this.state
+    const shouldDisplayCharactersCounter =
+      charactersCounter?.sid === sid &&
+      (isActiveCharactersCounter || charactersCounter.limit)
+
+    return segmentOpened ? (
+      <div className="header toggle" id={'segment-' + sid + '-header'}>
+        {autopropagated ? autopropagatedHtml : percentageHtml}
+        {/* Characters counter */}
+        {!autopropagated && !saving && shouldDisplayCharactersCounter && (
+          <div
+            className={`segment-counter ${
+              charactersCounter.counter > charactersCounter.limit
+                ? `segment-counter-limit-error`
+                : charactersCounter > charactersCounter.limit - 20
+                ? 'segment-counter-limit-warning'
+                : ''
+            }`}
+          >
+            <span>Character count: </span>
+            <span className="segment-counter-current">
+              {charactersCounter.counter}
+            </span>
+            {charactersCounter.limit > 0 && (
+              <>
+                /
+                <span className={'segment-counter-limit'}>
+                  {charactersCounter.limit}
+                </span>
+              </>
+            )}
+          </div>
+        )}
+        {saving ? savingHtml : null}{' '}
+      </div>
+    ) : autopropagated || repetition ? (
+      <div className={'header header-closed'}>
+        {autopropagatedHtml}
+        {saving ? savingHtml : null}
+      </div>
+    ) : (
+      <div className={'header header-closed'}>{saving ? savingHtml : null}</div>
+    )
   }
 }
 

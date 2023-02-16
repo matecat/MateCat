@@ -9,6 +9,8 @@ import Speech2Text from '../../../utils/speech2text'
 import DraftMatecatUtils from './DraftMatecatUtils'
 import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
+import {getContributions} from '../../../api/getContributions'
+import {deleteContribution} from '../../../api/deleteContribution'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -42,7 +44,6 @@ let TranslationMatches = {
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
-      segmentObj.id_file,
       data.matches,
       data.errors,
     )
@@ -56,11 +57,15 @@ let TranslationMatches = {
     let matches = segmentObj.contributions
       ? segmentObj.contributions.matches
       : []
-    if (matches && matches.length > 0 && _.isUndefined(matches[0].error)) {
+    const match = matches.length ? matches[0].match : undefined
+    if (
+      matches &&
+      matches.length > 0 &&
+      _.isUndefined(matches[0].error) &&
+      (parseInt(match) > 70 || match === 'MT')
+    ) {
       var editareaLength = segmentObj.translation.length
       var translation = matches[0].translation
-
-      var match = matches[0].match
 
       if (editareaLength === 0) {
         SegmentActions.setChoosenSuggestion(segmentObj.sid, 1)
@@ -98,23 +103,23 @@ let TranslationMatches = {
     }
   },
   getContribution: function (segmentSid, next, force) {
+    const segment = SegmentStore.getSegmentByIdToJS(segmentSid)
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded')
-      this.segmentQA(segment)
+      SegmentActions.addClassToSegment(segment.sid, 'loaded')
+      SegmentActions.getSegmentsQa(segment)
       var deferred = new jQuery.Deferred()
       return deferred.resolve()
     }
-    var txt
     var currentSegment =
       next === 0
-        ? SegmentStore.getSegmentByIdToJS(segmentSid)
+        ? segment
         : next == 1
         ? SegmentStore.getNextSegment(segmentSid)
         : SegmentStore.getNextSegment(segmentSid, null, 8)
 
     if (!currentSegment) return
 
-    if (currentSegment.ice_locked === '1' && !currentSegment.unlocked) {
+    if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
       const deferred = new jQuery.Deferred()
       return deferred.resolve()
@@ -154,20 +159,10 @@ let TranslationMatches = {
     var id = currentSegment.original_sid
     var id_segment_original = id.split('-')[0]
 
-    txt = TagUtils.prepareTextToSend(currentSegment.segment)
-
-    txt = TextUtils.view2rawxliff(txt)
-    // Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
-
     // `next` and `untranslated next` are the same
     if (next === 2 && UI.nextSegmentId === UI.nextUntranslatedSegmentId) {
       return $.Deferred().resolve()
     }
-
-    var contextBefore = UI.getContextBefore(id)
-    var idBefore = UI.getIdBefore(id)
-    var contextAfter = UI.getContextAfter(id)
-    var idAfter = UI.getIdAfter(id)
 
     if (_.isUndefined(config.id_client)) {
       setTimeout(function () {
@@ -177,43 +172,15 @@ let TranslationMatches = {
       return $.Deferred().resolve()
     }
 
-    //Cross language matches
-    if (UI.crossLanguageSettings) {
-      var crossLangsArray = [
-        UI.crossLanguageSettings.primary,
-        UI.crossLanguageSettings.secondary,
-      ]
-    }
-
-    return APP.doRequest({
-      data: {
-        action: 'getContribution',
-        password: config.password,
-        is_concordance: 0,
-        id_segment: id_segment_original,
-        text: txt,
-        id_job: config.id_job,
-        num_results: UI.numContributionMatchesResults,
-        id_translator: config.id_translator,
-        context_before: contextBefore,
-        id_before: idBefore,
-        context_after: contextAfter,
-        id_after: idAfter,
-        id_client: config.id_client,
-        cross_language: crossLangsArray,
-        current_password: config.currentPassword,
-      },
-      context: $('#segment-' + id),
-      error: function () {
-        OfflineUtils.failedConnection(0, 'getContribution')
-        TranslationMatches.showContributionError(this)
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          UI.processErrors(d.errors, 'getContribution')
-          TranslationMatches.renderContributionErrors(d.errors, this)
-        }
-      },
+    return getContributions({
+      idSegment: id_segment_original,
+      target: currentSegment.segment,
+      crossLanguages: UI.crossLanguageSettings
+        ? [UI.crossLanguageSettings.primary, UI.crossLanguageSettings.secondary]
+        : [],
+    }).catch((errors) => {
+      UI.processErrors(errors, 'getContribution')
+      TranslationMatches.renderContributionErrors(errors, $('#segment-' + id))
     })
   },
 
@@ -224,48 +191,21 @@ let TranslationMatches = {
     }
   },
 
-  showContributionError: function (segment) {
-    SegmentActions.setSegmentContributions(
-      UI.getSegmentId(segment),
-      UI.getSegmentFileId(segment),
-      [],
-      [{}],
-    )
-  },
-
   autoCopySuggestionEnabled: function () {
     return !!config.translation_matches_enabled
   },
 
   renderContributionErrors: function (errors, segment) {
-    SegmentActions.setSegmentContributions(
-      UI.getSegmentId(segment),
-      UI.getSegmentFileId(segment),
-      [],
-      errors,
-    )
+    SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id) {
-    return APP.doRequest({
-      data: {
-        action: 'deleteContribution',
-        source_lang: config.source_rfc,
-        target_lang: config.target_rfc,
-        id_job: config.id_job,
-        password: config.password,
-        seg: source,
-        tra: target,
-        id_translator: config.id_translator,
-        id_match: id,
-        current_password: config.currentPassword,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(0, 'deleteContribution')
-      },
-      success: function (d) {
-        TranslationMatches.setDeleteSuggestion_success(d)
-      },
+    return deleteContribution({
+      source,
+      target,
+      id,
+    }).catch(() => {
+      OfflineUtils.failedConnection(0, 'deleteContribution')
     })
   },
   setDeleteSuggestion_success: function (d) {

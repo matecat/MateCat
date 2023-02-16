@@ -1,0 +1,119 @@
+{
+  "type": "object",
+  "properties": {
+    "model": {
+      "type": "object",
+      "$ref": "#/definitions/model"
+    }
+  },
+  "required": ["model"],
+  "definitions": {
+    "model": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string"
+        },
+        "categories": {
+          "type": "array",
+          "maxItems": 9,
+          "items": {
+            "$ref": "#/definitions/category"
+          }
+        },
+        "passfail": {
+          "type": "object",
+          "$ref": "#/definitions/passfail"
+        }
+      },
+      "required": ["version", "label", "categories", "passfail"]
+    },
+    "category": {
+      "type": "object",
+      "properties": {
+        "id_parent": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 255
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "severities": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/definitions/severity"
+          }
+        }
+      },
+      "required": ["code", "label", "severities"]
+    },
+    "severity": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "dqf_id": {
+          "type": "integer"
+        },
+        "penalty": {
+          "type": "number",
+          "format": "currency",
+          "examples": [
+            "0",
+            "0.00",
+            "0.05",
+            "19.95"
+          ]
+        }
+      },
+      "required": ["code", "label", "penalty"]
+    },
+    "passfail": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "points_per_thousand"
+          ]
+        },
+        "thresholds": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/definitions/passfailThreshold"
+          }
+        }
+      },
+      "required": ["type", "thresholds"]
+    },
+    "passfailThreshold": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "R1", "R2"
+          ]
+        },
+        "value": {
+          "type": "integer"
+        }
+      },
+      "required": ["label", "value"]
+    }
+  }
+}

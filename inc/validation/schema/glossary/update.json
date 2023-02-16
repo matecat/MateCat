@@ -1,0 +1,123 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_client": {
+      "type": "string"
+    },
+    "id_segment": {
+      "type": ["integer","string"]
+    },
+    "id_job": {
+      "type": ["integer","string"]
+    },
+    "password": {
+      "type": "string"
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term_id": {
+          "type": "string"
+        },
+        "source_language": {
+          "type": "string"
+        },
+        "target_language": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "term": {
+              "type": "string"
+            },
+            "note": {
+              "type": ["null","string"]
+            },
+            "sentence": {
+              "type": ["null","string"]
+            }
+          },
+          "required": ["term"]
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "term": {
+              "type": "string"
+            },
+            "note": {
+              "type": ["null","string"]
+            },
+            "sentence": {
+              "type": ["null","string"]
+            }
+          },
+          "required": ["term"]
+        },
+        "matching_words": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "definition": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string"
+            },
+            "key_name": {
+              "type": "string"
+            },
+            "domain": {
+              "type": "string"
+            },
+            "subdomain": {
+              "type": "string"
+            },
+            "create_date": {
+              "type": "string"
+            },
+            "last_update": {
+              "type": ["null","string"]
+            }
+          },
+          "required": [
+            "definition",
+            "key",
+            "key_name",
+            "domain",
+            "subdomain",
+            "create_date",
+            "last_update"
+          ]
+        }
+      },
+      "required": [
+        "term_id",
+        "source_language",
+        "target_language",
+        "source",
+        "target",
+        "matching_words",
+        "metadata"
+      ]
+    }
+  },
+  "required": [
+    "id_client",
+    "id_segment",
+    "id_job",
+    "password",
+    "term"
+  ]
+}

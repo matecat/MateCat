@@ -4,6 +4,11 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
 import TextUtils from '../../../../utils/textUtils'
+import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
+import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
+import AlertModal from '../../../modals/AlertModal'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -24,13 +29,14 @@ let SearchUtils = {
   execFind: function (params) {
     $('section.currSearchSegment').removeClass('currSearchSegment')
 
-    let searchSource = params.searchSource
+    let nbspRegexp = new RegExp(tagSignatures.nbsp.placeholder, 'g')
+    let searchSource = params.searchSource.replace(nbspRegexp, ' ')
     if (searchSource !== '' && searchSource !== ' ') {
       this.searchParams.source = searchSource
     } else {
       delete this.searchParams.source
     }
-    let searchTarget = params.searchTarget
+    let searchTarget = params.searchTarget.replace(nbspRegexp, ' ')
     if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
@@ -53,14 +59,20 @@ let SearchUtils = {
     }
     this.searchParams['match-case'] = params.matchCase
     this.searchParams['exact-match'] = params.exactMatch
+    this.searchParams['strict_mode'] = !params.entireJob
+
     if (
       _.isUndefined(this.searchParams.source) &&
       _.isUndefined(this.searchParams.target) &&
       this.searchParams.status == 'all'
     ) {
-      APP.alert({
-        msg: 'Enter text in source or target input boxes<br /> or select a status.',
-      })
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'Enter text in source or target input boxes or select a status.',
+        },
+        'Search Alert',
+      )
       return false
     }
     SegmentActions.disableTagLock()
@@ -89,24 +101,18 @@ let SearchUtils = {
     UI.body.addClass('searchActive')
     let makeSearchFn = () => {
       let dd = new Date()
-      APP.doRequest({
-        data: {
-          action: 'getSearch',
-          function: 'find',
-          job: config.id_job,
-          token: dd.getTime(),
-          password: config.password,
-          source: source,
-          target: target,
-          status: this.searchParams.status,
-          matchcase: this.searchParams['match-case'],
-          exactmatch: this.searchParams['exact-match'],
-          replace: replace,
-          revision_number: config.revisionNumber,
-        },
-        success: function (d) {
-          SearchUtils.execFind_success(d)
-        },
+
+      searchTermIntoSegments({
+        token: dd.getTime(),
+        source,
+        target,
+        status: this.searchParams.status,
+        matchcase: this.searchParams['match-case'],
+        exactmatch: this.searchParams['exact-match'],
+        strictMode: this.searchParams['strict_mode'],
+        replace,
+      }).then((data) => {
+        SearchUtils.execFind_success(data)
       })
     }
     //Save the current segment to not lose the translation
@@ -215,7 +221,12 @@ let SearchUtils = {
       searchResultsDictionary = {}
     let searchParams = {}
     searchParams.source = this.searchParams.source
+      ? this.searchParams.source.replace(/ /g, tagSignatures.nbsp.placeholder)
+      : null
+
     searchParams.target = this.searchParams.target
+      ? this.searchParams.target.replace(/ /g, tagSignatures.nbsp.placeholder)
+      : null
     searchParams.ingnoreCase = !!this.searchParams['match-case']
     searchParams.exactMatch = this.searchParams['exact-match']
     let searchResults = segments.map((sid) => {
@@ -226,14 +237,14 @@ let SearchUtils = {
           let textSource = segment.decodedSource
           const matchesSource = this.getMatchesInText(
             textSource,
-            this.searchParams.source,
+            searchParams.source,
             searchParams.ingnoreCase,
             this.searchParams['exact-match'],
           )
           let textTarget = segment.decodedTranslation
           const matchesTarget = this.getMatchesInText(
             textTarget,
-            this.searchParams.target,
+            searchParams.target,
             searchParams.ingnoreCase,
             this.searchParams['exact-match'],
           )
@@ -264,7 +275,7 @@ let SearchUtils = {
             let text = segment.decodedSource
             const matchesSource = this.getMatchesInText(
               text,
-              this.searchParams.source,
+              searchParams.source,
               searchParams.ingnoreCase,
               this.searchParams['exact-match'],
             )
@@ -280,7 +291,7 @@ let SearchUtils = {
             let text = segment.decodedTranslation
             const matchesTarget = this.getMatchesInText(
               text,
-              this.searchParams.target,
+              searchParams.target,
               searchParams.ingnoreCase,
               this.searchParams['exact-match'],
             )
@@ -347,19 +358,31 @@ let SearchUtils = {
     }
 
     let searchTarget = params.searchTarget
-    if (searchTarget !== '' && searchTarget !== ' ' && searchTarget !== '"') {
+    if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
-      APP.alert({msg: 'You must specify the Target value to replace.'})
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'You must specify the Target value to replace.',
+        },
+        'Search Alert',
+      )
       delete this.searchParams.target
       return false
     }
 
     let replaceTarget = params.replaceTarget
-    if (replaceTarget !== '"') {
+    if (replaceTarget !== '') {
       this.searchParams.replace = replaceTarget
     } else {
-      APP.alert({msg: 'You must specify the replacement value.'})
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'You must specify the replacement value.',
+        },
+        'Search Alert',
+      )
       delete this.searchParams.replace
       return false
     }
@@ -380,21 +403,14 @@ let SearchUtils = {
     let replace = p.replace ? p.replace : ''
     let dd = new Date()
 
-    return APP.doRequest({
-      data: {
-        action: 'getSearch',
-        function: 'replaceAll',
-        job: config.id_job,
-        token: dd.getTime(),
-        password: config.password,
-        source: source,
-        target: target,
-        status: p.status,
-        matchcase: p['match-case'],
-        exactmatch: p['exact-match'],
-        replace: replace,
-        revision_number: config.revisionNumber,
-      },
+    return replaceAllIntoSegments({
+      token: dd.getTime(),
+      source,
+      target,
+      status: p.status,
+      matchcase: p['match-case'],
+      exactmatch: p['exact-match'],
+      replace,
     })
   },
 
@@ -402,43 +418,42 @@ let SearchUtils = {
     this.featuredSearchResult = value
   },
 
-  prepareTextToReplace(text) {
-    var LTPLACEHOLDER = '##LESSTHAN##'
-    var GTPLACEHOLDER = '##GREATERTHAN##'
-    let spanArray = []
-    // text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
-    // text = text.replace(/(&lt;[/]*(span|mark|a).*?&gt;)/g, function ( match, text ) {
-    //     spanArray.push(text);
-    //     return "$&";
-    // });
-    text = text.replace(/>/g, function () {
-      return GTPLACEHOLDER
-    })
-    text = text.replace(/</g, function () {
-      return LTPLACEHOLDER
-    })
-    let tagsIntervals = []
-    let matchFind = 0
-    let regGtp = new RegExp(GTPLACEHOLDER, 'g')
-    text = text.replace(regGtp, function (match, index) {
-      let interval = {end: index}
-      tagsIntervals.push(interval)
-      matchFind++
-      return match
-    })
-    matchFind = 0
-    let regLtp = new RegExp(LTPLACEHOLDER, 'g')
-    text = text.replace(regLtp, function (match, index) {
-      if (tagsIntervals[matchFind] && tagsIntervals[matchFind].end) {
-        tagsIntervals[matchFind].start = index
+  prepareTextToReplace: (text) => {
+    const getIndex = (regExp, source) => {
+      const matchedIndex = []
+      let result
+      while ((result = regExp.exec(source))) {
+        const {index} = result
+        matchedIndex.push(index)
       }
-      matchFind++
-      return match
-    })
+      return matchedIndex
+    }
+
+    const LTPLACEHOLDER = '##LESSTHAN##'
+    const GTPLACEHOLDER = '##GREATERTHAN##'
+
+    const cleaned = text
+      .replace(/</g, LTPLACEHOLDER)
+      .replace(/>/g, GTPLACEHOLDER)
+    const LTP_REGEX = new RegExp(LTPLACEHOLDER, 'g')
+    const GTP_REGEX = new RegExp(GTPLACEHOLDER, 'g')
+
+    const indexes = [
+      ...getIndex(LTP_REGEX, cleaned).map((value, index) => ({
+        start: value,
+        index,
+      })),
+      ...getIndex(GTP_REGEX, cleaned).map((value, index) => ({
+        end: value,
+        index,
+      })),
+    ].flatMap((item, index, arr) =>
+      item.end ? {start: arr[item.index].start, end: item.end} : [],
+    )
+
     return {
-      text: text,
-      tagsIntervals: tagsIntervals,
-      tagsArray: spanArray,
+      text: cleaned,
+      tagsIntervals: indexes,
     }
   },
 
@@ -487,7 +502,6 @@ let SearchUtils = {
     let {text, tagsIntervals, tagsArray} = this.prepareTextToReplace(textToMark)
 
     let matchIndex = 0
-    text = TextUtils.htmlEncode(text)
     text = text.replace(reg, (match, text, index) => {
       let intervalSpan = _.find(
         tagsIntervals,

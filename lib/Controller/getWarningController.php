@@ -2,6 +2,7 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
+use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Translations\WarningDao;
 
@@ -155,36 +156,12 @@ class getWarningController extends ajaxController {
     }
 
     /**
-     * Performs a check on single segment
-     *
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function __segmentWarningsCall() {
-
-        $this->result[ 'total' ] = 0;
-
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
-
-        $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
-        $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
-
-        $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
-        $QA->setFeatureSet( $featureSet );
-        $QA->setSourceSegLang( $this->chunk->source );
-        $QA->setTargetSegLang( $this->chunk->target );
-        $QA->performConsistencyCheck();
-
-        $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
-
-        $this->invokeLocalWarningsOnFeatures();
-    }
-
-
     private function invokeGlobalWarningsOnFeatures() {
 
         $this->result = $this->featureSet->filter( 'filterGlobalWarnings', $this->result, [
@@ -193,14 +170,41 @@ class getWarningController extends ajaxController {
 
     }
 
+    /**
+     * Performs a check on single segment
+     *
+     * @throws Exception
+     */
+    private function __segmentWarningsCall() {
+
+        $this->result[ 'total' ] = 0;
+
+        $featureSet = $this->getFeatureSet();
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
+
+        $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
+        $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
+
+        $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
+        $QA->setFeatureSet( $featureSet );
+        $QA->setChunk( $this->chunk );
+        $QA->setIdSegment( $this->__postInput->id );
+        $QA->setSourceSegLang( $this->chunk->source );
+        $QA->setTargetSegLang( $this->chunk->target );
+        $QA->performConsistencyCheck();
+
+        $this->invokeLocalWarningsOnFeatures();
+
+        $this->result = array_merge( $this->result, ( new QALocalWarning( $QA, $this->__postInput->id ) )->render() );
+    }
+
     private function invokeLocalWarningsOnFeatures() {
         $data = [];
-
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                'src_content' => $this->__postInput->src_content,
-                'trg_content' => $this->__postInput->trg_content,
-                'project'     => $this->project,
-                'chunk'       => $this->chunk
+            'src_content' => $this->__postInput->src_content,
+            'trg_content' => $this->__postInput->trg_content,
+            'project'     => $this->project,
+            'chunk'       => $this->chunk
         ] );
 
         $this->result[ 'data' ] = $data;

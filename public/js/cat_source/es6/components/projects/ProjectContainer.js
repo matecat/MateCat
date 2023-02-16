@@ -8,6 +8,10 @@ import TeamsActions from '../../actions/TeamsActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
+import CommonUtils from '../../utils/commonUtils'
+import CatToolActions from '../../actions/CatToolActions'
+import ModalsActions from '../../actions/ModalsActions'
+import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -67,7 +71,7 @@ class ProjectContainer extends React.Component {
           allowHtml: true,
           timer: 3000,
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       }
     }
   }
@@ -134,15 +138,33 @@ class ProjectContainer extends React.Component {
   }
 
   removeProject() {
-    ManageActions.updateStatusProject(this.props.project, 'cancelled')
+    ManageActions.updateStatusProject(this.props.project, 'cancel')
   }
 
   archiveProject() {
-    ManageActions.updateStatusProject(this.props.project, 'archived')
+    ManageActions.updateStatusProject(this.props.project, 'archive')
   }
 
   activateProject() {
     ManageActions.updateStatusProject(this.props.project, 'active')
+  }
+
+  deleteProject() {
+    const props = {
+      text:
+        'You are about to delete this project permanently. This action cannot be undone.' +
+        ' Are you sure you want to proceed?',
+      successText: 'Yes, delete it',
+      successCallback: () => {
+        ManageActions.updateStatusProject(this.props.project, 'delete')
+      },
+      cancelCallback: () => {},
+    }
+    ModalsActions.showModalComponent(
+      ConfirmMessageModal,
+      props,
+      'Confirmation required',
+    )
   }
 
   changeUser(value) {
@@ -249,6 +271,10 @@ class ProjectContainer extends React.Component {
             <a className="item" onClick={this.activateProject.bind(this)}>
               <i className="icon-drawer unarchive-project icon" /> Resume
               Project
+            </a>
+            <a className="item" onClick={this.deleteProject.bind(this)}>
+              <i className="icon-drawer icon-trash-o icon" /> Delete project
+              permanently
             </a>
           </div>
         </div>
@@ -435,7 +461,7 @@ class ProjectContainer extends React.Component {
       let user = member.get('user')
       let userIcon = (
         <a className="ui circular label">
-          {APP.getUserShortName(member.get('user').toJS())}
+          {CommonUtils.getUserShortName(member.get('user').toJS())}
         </a>
       )
       if (member.get('user_metadata')) {
@@ -707,8 +733,10 @@ class ProjectContainer extends React.Component {
                     >
                       {this.state.projectName}
                     </div>
-                    {state}
                   </div>
+                  {(state !== '' || this.props.project.get('is_cancelled')) && (
+                    <div className="project-header-more">{state}</div>
+                  )}
                   {this.moreProjectInfo()}
                 </div>
               </div>

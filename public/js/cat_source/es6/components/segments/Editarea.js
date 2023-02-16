@@ -18,6 +18,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
+import CommonUtils from '../../utils/commonUtils'
 import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
@@ -29,6 +30,10 @@ import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
+import TagUtils from '../../utils/tagUtils'
+import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
+import {SegmentContext} from './SegmentContext'
+import CatToolStore from '../../stores/CatToolStore'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -39,7 +44,20 @@ const editorSync = {
   onComposition: false,
 }
 
+// typing chars sequence
+const typingWordJoiner = matchTypingSequence(
+  [
+    [50, 98],
+    [48, 96],
+    [54, 102],
+    [48, 96],
+  ],
+  2000,
+)
+
 class Editarea extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
@@ -96,7 +114,15 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
       },
+      previousSourceTagMap: null,
     }
+    const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
+      DraftMatecatUtils.cleanSegmentString(translation),
+    )
+    this.props.updateCounter(
+      DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
+    )
+
     this.updateTranslationDebounced = _.debounce(
       this.updateTranslationInStore,
       100,
@@ -201,6 +227,7 @@ class Editarea extends React.Component {
       const contentEncoded = DraftMatecatUtils.encodeContent(
         editorState,
         DraftMatecatUtils.unescapeHTMLLeaveTags(translation),
+        this.props.segment.sourceTagMap,
       )
       // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
       let {editorState: newEditorState} = contentEncoded
@@ -209,6 +236,12 @@ class Editarea extends React.Component {
         editorState,
         newContentState,
         'insert-fragment',
+      )
+      const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.cleanSegmentString(translation),
+      )
+      this.props.updateCounter(
+        DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
       )
       this.setState(
         {
@@ -284,8 +317,16 @@ class Editarea extends React.Component {
         missingTags,
         lxqDecodedTranslation,
       )
+      const cleanTranslation = TagUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.cleanSegmentString(decodedSegment),
+      )
+      this.props.updateCounter(
+        DraftMatecatUtils.getCharactersCounter(cleanTranslation),
+      )
       // console.log('updatingTranslationInStore');
       UI.registerQACheck()
+    } else {
+      this.props.updateCounter(0)
     }
   }
 
@@ -304,10 +345,11 @@ class Editarea extends React.Component {
       if (
         qaBlacklistGlossary &&
         qaBlacklistGlossary.length > 0 &&
+        !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] /* &&
         (_.isUndefined(prevQaBlacklistGlossary) ||
           !Immutable.fromJS(prevQaBlacklistGlossary).equals(
             Immutable.fromJS(qaBlacklistGlossary),
-          ))
+          )) */
       ) {
         activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
         changedDecorator = true
@@ -337,6 +379,9 @@ class Editarea extends React.Component {
         )
 
       if (
+        //Condition to understand if the job has tm keys or if the check glossary request has been made (blacklist must take precedence over lexiqa)
+        (CatToolStore.getHaveKeysGlossary() === false ||
+          Array.isArray(qaBlacklistGlossary)) &&
         currentLexiqaTarget &&
         (!prevLexiqaTarget ||
           lexiqaChanged ||
@@ -386,9 +431,11 @@ class Editarea extends React.Component {
 
     if (changedDecorator) {
       const decorator = new CompositeDecorator(this.decoratorsStructure)
-      this.setState({
-        editorState: EditorState.set(editorState, {decorator}),
-        activeDecorators,
+      setTimeout(() => {
+        this.setState({
+          editorState: EditorState.set(editorState, {decorator}),
+          activeDecorators,
+        })
       })
     }
   }
@@ -464,6 +511,18 @@ class Editarea extends React.Component {
     ) {
       this.checkDecorators(prevProps)
     }
+
+    // update editor state when receive prop of segment "sourceTagMap"
+    if (
+      this.props.segment.sourceTagMap?.length &&
+      !_.isEqual(
+        this.state.previousSourceTagMap,
+        this.props.segment.sourceTagMap,
+      )
+    ) {
+      this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
+      this.setNewTranslation(this.props.segment.sid, this.props.translation)
+    }
   }
 
   replaceWordAt = ({newWord, start, end}) => {
@@ -514,13 +573,13 @@ class Editarea extends React.Component {
     if (this.props.segment) {
       lang = config.target_rfc.toLowerCase()
       readonly =
-        this.props.readonly ||
-        this.props.locked ||
+        this.context.readonly ||
+        this.context.locked ||
         this.props.segment.muted ||
         !this.props.segment.opened
     }
     let classes = this.state.editAreaClasses.slice()
-    if (this.props.locked || this.props.readonly) {
+    if (this.context.locked || this.context.readonly) {
       classes.push('area')
     } else {
       classes.push('editarea')
@@ -634,17 +693,17 @@ class Editarea extends React.Component {
       return e.shiftKey ? null : 'insert-tab-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      isCtrlKeyCommand(e) &&
-      e.shiftKey
+      ((isCtrlKeyCommand(e) && e.shiftKey) ||
+        (CommonUtils.isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
     ) {
-      return 'insert-nbsp-tag' // Windows
+      return 'insert-nbsp-tag' // Windows && Mac
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       !e.shiftKey &&
       e.altKey &&
-      (isOptionKeyCommand(e) || isChromeBook)
+      isChromeBook
     ) {
-      return 'insert-nbsp-tag' // MacOS && Chromebook
+      return 'insert-nbsp-tag' // Chromebook
     } else if (e.key === 'ArrowLeft' && !e.altKey) {
       if (e.shiftKey) {
         if (handleCursorMovement(-1, true, config.isTargetRTL))
@@ -663,6 +722,21 @@ class Editarea extends React.Component {
       }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
+    } else if (
+      (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+      ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
+    ) {
+      return 'insert-word-joiner-tag'
+    } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
+      const {get, reset} = typingWordJoiner
+      if (e.key !== 'Alt') {
+        const result = get(e.keyCode)
+        if (result) {
+          return 'insert-word-joiner-tag'
+        }
+      } else {
+        reset()
+      }
     }
     return getDefaultKeyBinding(e)
   }
@@ -719,6 +793,9 @@ class Editarea extends React.Component {
         insertTagAtSelection('nbsp')
         return 'handled'
       case 'add-issue':
+        return 'handled'
+      case 'insert-word-joiner-tag':
+        insertTagAtSelection('wordJoiner')
         return 'handled'
       case 'translate':
         return 'not-handled'
@@ -897,7 +974,7 @@ class Editarea extends React.Component {
     if (contentChanged) {
       // Stop checking decorators while typing...
       editorSync.onComposition = true
-      // ...remove unwanted decorators like lexiqa...
+      // ...remove unwanted decorators like lexiqa and qa blacklist...
       if (activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]) {
         editorState = this.disableDecorator(
           editorState,
@@ -906,6 +983,16 @@ class Editarea extends React.Component {
         newActiveDecorators = {
           ...newActiveDecorators,
           [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+        }
+      }
+      if (activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]) {
+        editorState = this.disableDecorator(
+          editorState,
+          DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
+        )
+        newActiveDecorators = {
+          ...newActiveDecorators,
+          [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         }
       }
       editorState = EditorState.acceptSelection(
@@ -1442,7 +1529,7 @@ class Editarea extends React.Component {
         segmentTargetTagMap,
         [],
       )
-      UI.segmentQA(UI.getSegmentById(this.props.segment.sid))
+      SegmentActions.getSegmentsQa(this.props.segment)
     }, 100)
   }
 }

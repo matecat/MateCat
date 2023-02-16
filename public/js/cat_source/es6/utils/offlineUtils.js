@@ -1,4 +1,6 @@
 import SegmentActions from '../actions/SegmentActions'
+import {checkConnectionPing} from '../api/checkConnectionPing'
+import CatToolActions from '../actions/CatToolActions'
 
 const OfflineUtils = {
   offline: false,
@@ -14,8 +16,8 @@ const OfflineUtils = {
       this.offline = true
       UI.body.attr('data-offline-mode', 'light-off')
 
-      this.removeOldConnectionNotification()
-      var notification = {
+      const notification = {
+        uid: 'offline-counter',
         title:
           '<div class="message-offline-icons"><span class="icon-power-cord"/><span class="icon-power-cord2"/></div>No connection available',
         text:
@@ -28,7 +30,7 @@ const OfflineUtils = {
         allowHtml: true,
         timer: 7000,
       }
-      this.offlineNotification = APP.addNotification(notification)
+      CatToolActions.addNotification(notification)
 
       this.checkingConnection = setInterval(() => {
         this.checkConnection('Recursive Check authorized')
@@ -39,8 +41,8 @@ const OfflineUtils = {
   endOfflineMode: function () {
     if (this.offline) {
       this.offline = false
-      this.removeOldConnectionNotification()
       var notification = {
+        uid: 'offline-back',
         title: 'Connection is back',
         text: 'We are saving translated segments in the database.',
         type: 'success',
@@ -48,10 +50,10 @@ const OfflineUtils = {
         autoDismiss: true,
         timer: 10000,
         openCallback: () => {
-          this.removeOldConnectionNotification()
+          CatToolActions.removeAllNotifications()
         },
       }
-      this.offlineNotification = APP.addNotification(notification)
+      CatToolActions.addNotification(notification)
 
       clearInterval(this.currentConnectionCountdown)
       clearInterval(this.checkingConnection)
@@ -75,13 +77,6 @@ const OfflineUtils = {
       }, 3000)
     }
   },
-
-  removeOldConnectionNotification: function () {
-    if (typeof this.offlineNotification != 'undefined') {
-      APP.removeNotification(this.offlineNotification)
-    }
-  },
-
   failedConnection: function (reqArguments, operation) {
     this.startOfflineMode()
 
@@ -121,7 +116,7 @@ const OfflineUtils = {
       OfflineUtils.checkConnection('Click from Human Authorized')
     })
 
-    this.removeOldConnectionNotification()
+    CatToolActions.removeAllNotifications()
     let timeleft = 30
     let countdown = setInterval(() => {
       if (timeleft === 0) {
@@ -139,19 +134,8 @@ const OfflineUtils = {
     console.log(message)
     console.log('check connection')
 
-    APP.doRequest({
-      data: {
-        action: 'ajaxUtils',
-        exec: 'ping',
-      },
-      error: function () {
-        /**
-         * do Nothing there are already a thread running
-         * @see UI.startOfflineMode
-         * @see UI.endOfflineMode
-         */
-      },
-      success: () => {
+    checkConnectionPing()
+      .then(() => {
         console.log('check connection success')
         //check status completed
         if (!this.restoringAbortedOperations) {
@@ -164,8 +148,14 @@ const OfflineUtils = {
           //reset counter
           this.offlineCacheRemaining = this.offlineCacheSize
         }
-      },
-    })
+      })
+      .catch(() => {
+        /**
+         * do Nothing there are already a thread running
+         * @see UI.startOfflineMode
+         * @see UI.endOfflineMode
+         */
+      })
   },
 
   /**
@@ -192,10 +182,7 @@ const OfflineUtils = {
       var operation = this.operation
       if (operation === 'getSegments') {
         UI[operation]()
-      } else if (operation === 'setRevision') {
-        UI[operation](args)
       } else if (operation === 'getMoreSegments') {
-        UI.loadingMore = false
         UI[operation](args)
       }
     })
@@ -208,10 +195,8 @@ const OfflineUtils = {
     }
   },
   decrementOfflineCacheRemaining: function () {
-    if (typeof this.offlineNotification != 'undefined') {
-      APP.removeNotification(this.offlineNotification)
-    }
     var notification = {
+      uid: 'offline-counter',
       title:
         '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
       text:
@@ -224,7 +209,7 @@ const OfflineUtils = {
       allowHtml: true,
       timer: 7000,
     }
-    this.offlineNotification = APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
 
     this.checkOfflineCacheSize()
   },

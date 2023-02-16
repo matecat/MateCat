@@ -16,7 +16,7 @@ use Constants_JobStatus;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
 use Projects_ProjectStruct;
@@ -91,12 +91,12 @@ class QualityReportController extends BaseChunkController {
 
         if ( count( $segments_ids ) > 0 ) {
 
-            $segmentTranslationEventDao = new SegmentTranslationEventDao();
+            $segmentTranslationEventDao = new TranslationEventDao();
             $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-            $filesInfo        = $filesInfoUtility->getInfo();
+            $filesInfo        = $filesInfoUtility->getInfo(false);
 
             $segments = $this->_formatSegments( $segments, $ttlArray, $filesInfo );
 
@@ -142,7 +142,7 @@ class QualityReportController extends BaseChunkController {
                 "prev"            => null,
         ];
 
-        $filter_query = http_build_query( [ 'filter' => array_filter( $filter ) ] );
+        $filter_query = http_build_query( [ 'filter' => array_filter( empty( $filter ) ? [] : $filter ) ] );
         if ( $this->chunk->job_last_segment > end( $segments_id ) ) {
             $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
                             null );
@@ -204,7 +204,7 @@ class QualityReportController extends BaseChunkController {
 
             // add fileInfo
             foreach ( $filesInfo[ 'files' ] as $file ) {
-                if ( $file[ 'id' ] === $segment->id_file ) {
+                if ( $file[ 'id' ] == $segment->id_file ) {
                     $seg[ 'file' ] = $file;
                 }
             }
@@ -255,6 +255,10 @@ class QualityReportController extends BaseChunkController {
 
                 $return[ $key ] = (int)$tte->tte;
             }
+        }
+
+        if ( false === isset( $return[ 'translation' ] ) ) {
+            $return[ 'translation' ] = 0;
         }
 
         if ( false === isset( $return[ 'revise' ] ) ) {

@@ -22,6 +22,7 @@ class getSearchController extends ajaxController {
     private $isExactMatchRequested;
     private $matchCase;
     private $exactMatch;
+    private $strictMode;
     private $revisionNumber;
 
     private $queryParams = [];
@@ -67,6 +68,7 @@ class getSearchController extends ajaxController {
                 'password'        => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'matchcase'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'exactmatch'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'strict_mode'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'revision_number' => [ 'filter' => FILTER_VALIDATE_INT ]
         ];
 
@@ -82,6 +84,7 @@ class getSearchController extends ajaxController {
         $this->password              = $__postInput[ 'password' ];
         $this->isMatchCaseRequested  = $__postInput[ 'matchcase' ];
         $this->isExactMatchRequested = $__postInput[ 'exactmatch' ];
+        $this->strictMode            = $__postInput[ 'strict_mode' ];
         $this->revisionNumber        = $__postInput[ 'revision_number' ];
 
         if ( empty( $this->status ) ) {
@@ -110,6 +113,7 @@ class getSearchController extends ajaxController {
                 'replacement'           => $this->replace,
                 'isMatchCaseRequested'  => $this->isMatchCaseRequested,
                 'isExactMatchRequested' => $this->isExactMatchRequested,
+                'strictMode'            => $this->strictMode,
         ] );
 
         if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
@@ -131,8 +135,7 @@ class getSearchController extends ajaxController {
         $this->job_data = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
 
         /** @var MateCatFilter $filter */
-        $featureSet        = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $filter            = MateCatFilter::getInstance( $featureSet, $this->job_data->source, $this->job_data->target, [] );
+        $filter            = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target, [] );
         $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
@@ -174,10 +177,8 @@ class getSearchController extends ajaxController {
 
     /**
      * Perform a regular search
-     *
-     * @param bool $strictMode
      */
-    private function doSearch($strictMode = false) {
+    private function doSearch() {
 
         if ( !empty( $this->source ) and !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'coupled';
@@ -194,7 +195,8 @@ class getSearchController extends ajaxController {
         }
 
         try {
-            $res = $this->searchModel->search($strictMode);
+            $strictMode = ( null !== $this->queryParams[ 'strictMode' ] ) ? $this->queryParams[ 'strictMode' ] : true;
+            $res        = $this->searchModel->search( $strictMode );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -1000, "message" => "internal error: see the log" ];
 
@@ -215,7 +217,7 @@ class getSearchController extends ajaxController {
         $search_results = [];
 
         // perform a regular search
-        $this->doSearch(true);
+        $this->doSearch( true );
 
         // and then hydrate the $search_results array
         foreach ( $this->result[ 'segments' ] as $segmentId ) {
@@ -270,7 +272,8 @@ class getSearchController extends ajaxController {
                 $this->queryParams->replacement,
                 true,
                 $this->queryParams->isExactMatchRequested,
-                $this->queryParams->isMatchCaseRequested
+                $this->queryParams->isMatchCaseRequested,
+                true
         );
 
         return ( !empty( $replacedSegmentTranslation ) ) ? $replacedSegmentTranslation[ 'replacement' ] : $translation;
@@ -406,8 +409,7 @@ class getSearchController extends ajaxController {
                 }
             }
 
-            $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-            $filter              = MateCatFilter::getInstance( $featureSet, $this->job_data->source, $this->job_data->target, [] );
+            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target, [] );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 
@@ -432,10 +434,10 @@ class getSearchController extends ajaxController {
             $new_translation->version_number = $version_number;
 
             // Save version
-            $versionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+            $versionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
 
             // preSetTranslationCommitted
-            $this->featureSet->run( 'preSetTranslationCommitted', [
+            $versionsHandler->storeTranslationEvent( [
                     'translation'       => $new_translation,
                     'old_translation'   => $old_translation,
                     'propagation'       => $propagationTotal,

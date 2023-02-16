@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
+import {createRoot} from 'react-dom/client'
 
-import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import TeamsStore from './cat_source/es6/stores/TeamsStore'
 import Header from './cat_source/es6/components/header/Header'
 import AnalyzeMain from './cat_source/es6/components/analyze/AnalyzeMain'
@@ -20,8 +20,8 @@ window.UI = {
     UI.render()
   },
   render: function () {
-    var headerMountPoint = $('header')[0]
-    ReactDOM.render(
+    const header = createRoot($('header')[0])
+    header.render(
       React.createElement(Header, {
         loggedUser: config.isLoggedIn,
         showSubHeader: false,
@@ -29,15 +29,13 @@ window.UI = {
         changeTeam: false,
         user: TeamsStore.getUser(),
       }),
-      headerMountPoint,
     )
 
-    var analyzeMountPoint = $('#analyze-container')[0]
-    ReactDOM.render(
+    const root = createRoot($('#analyze-container')[0])
+    root.render(
       React.createElement(AnalyzeMain, {
         jobsInfo: config.jobs,
       }),
-      analyzeMountPoint,
     )
 
     this.getProjectVolumeAnalysisData()

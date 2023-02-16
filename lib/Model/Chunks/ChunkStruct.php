@@ -1,5 +1,7 @@
 <?php
 
+use LQA\ChunkReviewStruct;
+
 class Chunks_ChunkStruct extends Jobs_JobStruct {
 
     /** @return Segments_SegmentStruct[]
@@ -54,7 +56,7 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
 
         $qClass = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $this, $featureSet, $chunkReviews );
 
-        if ( 'LQA\ChunkReviewStruct' === get_class( $qClass ) ) {
+        if ( $qClass instanceof ChunkReviewStruct ) {
             return null ;
         }
         else {

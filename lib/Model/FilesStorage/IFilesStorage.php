@@ -2,6 +2,8 @@
 
 namespace FilesStorage;
 
+use FileStorage\Exceptions\FileSystemException;
+
 /**
  * Interface IFilesStorage
  *
@@ -41,6 +43,7 @@ interface IFilesStorage {
      * @param      $xliffPath
      *
      * @return mixed
+     * @throws FileSystemException
      */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
 
@@ -217,4 +220,26 @@ interface IFilesStorage {
      * @throws \Exception
      */
     public function transferFiles($source, $destination);
+
+    /**
+     **********************************************************************************************
+     * 7. BLACKLIST FILE
+     **********************************************************************************************
+     */
+
+    /**
+     * @param /** $filePath
+     *
+     * @return mixed
+     */
+    public function deleteBlacklistFile($filePath);
+
+    /**
+     * @param string              $filePath
+     * @param \Chunks_ChunkStruct $chunkStruct
+     * @param                     $uid
+     *
+     * @return mixed
+     */
+    public function saveBlacklistFile($filePath, \Chunks_ChunkStruct $chunkStruct, $uid);
 }

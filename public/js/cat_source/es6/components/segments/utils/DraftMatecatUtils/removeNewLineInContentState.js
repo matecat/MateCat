@@ -13,7 +13,7 @@ const removeNewLineInContentState = (editorState) => {
 
   const lineFeedRegex = /##\$(_0A)\$##/gi
   const carriageReturnRegex = /##\$(_0D)\$##/gi
-  const mixedCRLFRegex = /##\$_0D\$####\$_0A\$##/
+  const mixedCRLFRegex = /##\$_0D\$####\$_0A\$##/g
 
   // start replacing
   blocks.forEach((contentBlock) => {

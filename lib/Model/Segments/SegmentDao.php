@@ -98,11 +98,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $password
      * @param $id_segment
+     * @param $ttl (default 86400 = 24 hours)
      *
-     * @return \Segments_SegmentStruct
+     * @return \Segments_SegmentStruct|\DataAccess_IDaoStruct
      */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment ) {
-        $conn = $this->database->getConnection();
+    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, $ttl = 86400  ) {
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -112,17 +112,17 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 " AND segments.id_file = f.id " .
                 " AND segments.id = :id_segment ";
 
-        $stmt = $conn->prepare( $query );
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( $query );
 
-        $stmt->execute( [
+        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [
                 'id_job'     => $id_job,
                 'password'   => $password,
                 'id_segment' => $id_segment
         ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
-
-        return $stmt->fetch();
+        return isset($fetched[0]) ? $fetched[0] : null;
     }
 
     /**
@@ -662,6 +662,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $query = "SELECT j.id AS jid,
                 s.id_file,
+                s.id_file_part,
                 files.filename,
                 s.id AS sid,
                 s.segment,
@@ -986,4 +987,94 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param     $idProject
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, $ttl = 0)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $query   = "
+            SELECT 
+                p.name as project_name,
+                s.id,
+                j.id as id_job,
+                j.password as job_password,
+                j.source,
+                j.target,
+                s.segment,
+                st.translation,
+                st.status,  
+                s.raw_word_count,
+                st.eq_word_count,
+                st.match_type,
+                ste.source_page,
+                f.filename,
+                fp.tag_key,
+                fp.tag_value,
+                IF( LOCATE( '1', _page ) > 0, 1, null ) AS has_t,
+                IF( LOCATE( '2', _page ) > 0, 2, null ) AS has_r1,
+                IF( LOCATE( '3', _page ) > 0, 3, null ) AS has_r2
+            FROM
+                jobs j
+            JOIN 
+                projects p ON p.id = j.id_project
+            JOIN
+                segment_translations st ON j.id = st.id_job AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+            JOIN 
+                segments s on s.id = st.id_segment 
+            LEFT JOIN
+                files f ON s.id_file = f.id
+            LEFT JOIN
+                files_parts fp ON fp.id = s.id_file_part     
+            LEFT JOIN (
+                SELECT id_job, id_segment, group_concat( distinct source_page )  as _page
+                FROM segment_translation_events stex
+                JOIN
+                    jobs j ON stex.id_job = j.id
+                WHERE stex.id_job = j.id
+                    AND id_project = :id_project
+                GROUP BY stex.id_segment
+            ) AS XX ON XX.id_segment = st.id_segment
+            LEFT JOIN
+                (
+                    SELECT 
+                       id_segment AS ste_id_segment, source_page
+                    FROM
+                        segment_translation_events
+                    JOIN (
+                        SELECT 
+                            MAX(ste.id) AS _m_id
+                                FROM
+                            segment_translation_events ste
+                        JOIN 
+                            jobs j ON ste.id_job = j.id
+                        JOIN 
+                            projects p ON p.id = j.id_project
+                        WHERE
+                            p.id = :id_project
+                        AND id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+                            GROUP BY id_segment
+                        ) AS X ON _m_id = segment_translation_events.id
+                    LIMIT ".$limit." OFFSET " .$offset. " 
+                ) ste ON ste.ste_id_segment = st.id_segment
+            WHERE
+                p.id = :id_project
+            AND 
+                p.password = :password
+            LIMIT ".$limit." offset " .$offset;
+
+        $stmt = $conn->prepare($query);
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_project'   => $idProject,
+                'password' => $password,
+        ] );
+    }
 }

@@ -12,6 +12,8 @@
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global $, window, document */
 import Cookies from 'js-cookie'
+import {initFileUpload} from "../../cat_source/es6/api/initFileUpload";
+import {convertFileRequest} from "../../cat_source/es6/api/convertFileRequest";
 
 window.UI = null;
 
@@ -101,7 +103,7 @@ window.UI = {
         var msg = '';
 
         if ( file.type.match( /^image/ ) ) {
-            msg = 'Images not allowed in MateCat';
+            msg = 'Images not allowed in Matecat';
         } else if (
                 (
                     //file.type == 'application/zip' ||
@@ -163,7 +165,7 @@ window.UI = {
         if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
         if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
 
-        APP.createTMKey().done(function (  ) {
+        APP.createTMKey().then(function (  ) {
             UI.checkTMKeysUpdateChecks();
         });
         var textToDisplay = '<span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" class="translation-memory-option-panel">Settings panel</a>.</span>';
@@ -502,9 +504,9 @@ $( function () {
     } );
 
     // Load existing files:
-    $( '#fileupload' ).each( function () {
+    $( '#upload-files-list #fileupload' ).each( function () {
         var that = this;
-        $.getJSON( this.action, function ( result ) {
+        initFileUpload().then((result)=>{
             if ( result && result.length ) {
                 $( that ).fileupload( 'option', 'done' )
                         .call( that, null, {result: result} );
@@ -572,187 +574,179 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
     filerow.removeClass( 'ready' ).addClass( 'converting' ).data( 'session', session );
 
-    var request = $.ajax( {
-        url: 'action/convertFile/',
-        data: {
-            action: 'convertFile',
-            file_name: fname,
-            source_lang: $( '#source-lang' ).dropdown('get value'),
-            target_lang: $( '#target-lang' ).dropdown('get value'),
-            segmentation_rule: $( '#segm_rule' ).val()
-        },
-        type: 'POST',
-        dataType: 'json',
-        context: firstEnforceConversion,
-        error: function ( d ) {
-            if ( $( filerow ).hasClass( 'restarting' ) ) {
-                $( filerow ).removeClass( 'restarting' );
-                return;
+    const controller = new AbortController()
+    const signal = controller.signal
+    convertFileRequest({
+        action: 'convertFile',
+        file_name: fname,
+        source_lang: $( '#source-lang' ).dropdown('get value'),
+        target_lang: $( '#target-lang' ).dropdown('get value'),
+        segmentation_rule: $( '#segm_rule' ).val(),
+        signal
+    }).then(function ( {data, errors} ) {
+
+        filerow.removeClass( 'converting' );
+        filerow.addClass( 'ready' );
+        if ( data.code == 1 || data.code == 2 ) {
+
+            $( '.ui-progressbar-value', filerow ).addClass( 'completed' ).css( 'width', '100%' );
+
+            if ( checkAnalyzability( 'convertfile on success' ) ) {
+                enableAnalyze();
             }
-            filerow.removeClass( 'converting' );
-            console.log( 'conversion error' );
-            console.log( $( '.progress', filerow ) );
+            $( '.operation', filerow ).fadeOut( 'slow', function () {
+                // Animation complete.
+            } );
+            $( '.progress', filerow ).fadeOut( 'slow', function () {
+                // Animation complete.
+            } );
+
+            //if this conversion is related to a Zip File
+            if ( typeof data.data != 'undefined' && typeof data.data['zipFiles'] !== 'undefined' ) {
+                //zip files has been loaded
+                //print internal file list
+
+                var zipFiles = $.parseJSON( data.data['zipFiles'] );
+
+                //START editing by Roberto Tucci <roberto@translated.net>
+                $.each( zipFiles, function ( i, file ) {
+
+                    //clone the main row and edit its fields
+                    var rowClone = filerow.clone();
+
+                    rowClone.removeClass( 'converting' );
+                    rowClone.addClass( 'ready' );
+
+                    var rawPath = file['name'].split( "/" );
+                    var zipFile = rawPath[0];
+
+                    var fileExt = file['name'].split( "." ).pop();
+
+                    //change name to the file
+                    $( rowClone ).find( '.name' ).first()
+                        .data( "zipfile", zipFile )
+                        .attr( "data-zipfile", zipFile )
+                        .html( "<i class='icon-make-group icon'/>" + "<span class=\"zip_internal_file\">" + file['name'].replace(/&/g,"&amp;") + "</span>" );
+
+                    $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize( file['size'] ) );
+
+                    var oldDataUrl = $( 'button[data-url]', rowClone ).data( "url" );
+
+                    var newExtClass = getIconClass( fileExt );
+                    $( rowClone ).find( '.preview span' ).first().attr( "class", newExtClass );
+
+
+                    $( rowClone ).find( '.operation' ).first().parent().first().html( '' );
+
+                    var newDataUrl = oldDataUrl.replace( /file=[^&]+/g, "file=" + encodeURI( file['name'] ) );
+
+                    $( 'button[data-url]', rowClone )
+                        .data( "url", newDataUrl )
+                        .attr( "data-url", newDataUrl )
+                        .removeClass( 'zip_row' );
+
+                    for ( var k = 0; k < errors.length; k++ ) {
+
+                        if ( errors[k].debug == file['name'] ) {
+                            $( 'td.size', rowClone )
+                                .html("")
+                                .next()
+                                .addClass( 'file_upload_error' )
+                                .empty().attr( 'colspan', '2' )
+                                .css( {'font-size': '14px'} )
+                                .append(
+                                    '<span class="label label-important">' +
+                                    errors[k].message +
+                                    '</span>'
+                                );
+                            $( rowClone ).addClass( 'failed' );
+                            setTimeout( function () {
+                                $( '.progress', filerow ).remove();
+                                $( '.operation', filerow ).remove();
+                            }, 50 );
+                        }
+
+                    }
+
+                    var thisIsATMXFile       = file['name'].split( "." ).pop().toLowerCase() == 'tmx';
+                    var thereIsAKeyInTmPanel = $( '#activetm' ).find( 'tr.mine' ).length;
+
+                    /* c'è almeno un file tmx e non ho già generato la chiave => genera la chiave */
+                    if( thisIsATMXFile && !thereIsAKeyInTmPanel ){
+                        UI.createKeyByTMX();
+                    }
+
+                    $( filerow ).after( rowClone );
+
+                    $( 'button[data-url]', filerow ).addClass( "zip_row" );
+
+
+                } );
+
+                if ( errors.length > 0 ) {
+                    UI.checkFailedConversionsNumber();
+                    disableAnalyze();
+                    return false;
+                }
+                //END editing by Roberto Tucci <roberto@translated.net>
+
+                var notTranslationFileCount = 0;
+                $( ".name" ).each( function () {
+                    var currSplitLength = $( this ).text().split( "." ).length - 1;
+                    if ( $( this ).text().split( "." )[currSplitLength] == "tmx" ||
+                        $( this ).text().split( "." )[currSplitLength - 1] == "tmx" ||
+                        $( this ).text().split( "." )[currSplitLength] == "g" ||
+                        $( this ).text().split( "." )[currSplitLength - 1] == "g" ||
+                        $( this ).text().split( "." )[currSplitLength] == "zip" ) {
+                        notTranslationFileCount++;
+                    }
+                } );
+                if ( notTranslationFileCount == $( ".name" ).length ) {
+                    disableAnalyze();
+                }
+            }
+
+        } else if ( data.code <= 0 || errors.length > 0 ) {
+
+            console.log( errors[0].message );
+
+            $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).css( {'font-size': '14px'} ).append( '<span class="label label-important">' + errors[0].message + '</span>' );
+            $( filerow ).addClass( 'failed' );
             setTimeout( function () {
                 $( '.progress', filerow ).remove();
                 $( '.operation', filerow ).remove();
             }, 50 );
-
-            $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).append( '<span class="label label-important">Error: </span>Server error, try again.' );
-            $( filerow ).addClass( 'has-errors' );
             UI.checkFailedConversionsNumber();
-            return false;
-        },
-        success: function ( d ) {
 
-            var falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
-            filerow.removeClass( 'converting' );
-            filerow.addClass( 'ready' );
-            if ( d.code == 1 || d.code == 2 ) {
-
-                $( '.ui-progressbar-value', filerow ).addClass( 'completed' ).css( 'width', '100%' );
-
-                if ( checkAnalyzability( 'convertfile on success' ) ) {
-                    enableAnalyze();
-                }
-                $( '.operation', filerow ).fadeOut( 'slow', function () {
-                    // Animation complete.
-                } );
-                $( '.progress', filerow ).fadeOut( 'slow', function () {
-                    // Animation complete.
-                } );
-
-                //if this conversion is related to a Zip File
-                if ( typeof d.data != 'undefined' && typeof d.data['zipFiles'] !== 'undefined' ) {
-                    //zip files has been loaded
-                    //print internal file list
-
-                    var zipFiles = $.parseJSON( d.data['zipFiles'] );
-
-                    //START editing by Roberto Tucci <roberto@translated.net>
-                    var rowParent = filerow.parent().first();
-                    $.each( zipFiles, function ( i, file ) {
-
-                        //clone the main row and edit its fields
-                        var rowClone = filerow.clone();
-
-                        rowClone.removeClass( 'converting' );
-                        rowClone.addClass( 'ready' );
-
-                        var rawPath = file['name'].split( "/" );
-                        var zipFile = rawPath[0];
-
-                        var fileExt = file['name'].split( "." ).pop();
-
-                        //change name to the file
-                        $( rowClone ).find( '.name' ).first()
-                                .data( "zipfile", zipFile )
-                                .attr( "data-zipfile", zipFile )
-                                .html( "<i class='icon-make-group icon'/>" + "<span class=\"zip_internal_file\">" + file['name'].replace(/&/g,"&amp;") + "</span>" );
-
-                        $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize( file['size'] ) );
-
-                        var oldDataUrl = $( 'button[data-url]', rowClone ).data( "url" );
-
-                        var newExtClass = getIconClass( fileExt );
-                        $( rowClone ).find( '.preview span' ).first().attr( "class", newExtClass );
-
-
-                        $( rowClone ).find( '.operation' ).first().parent().first().html( '' );
-
-                        var newDataUrl = oldDataUrl.replace( /file=[^&]+/g, "file=" + encodeURI( file['name'] ) );
-
-                        $( 'button[data-url]', rowClone )
-                                .data( "url", newDataUrl )
-                                .attr( "data-url", newDataUrl )
-                                .removeClass( 'zip_row' );
-
-                        for ( var k = 0; k < d.errors.length; k++ ) {
-
-                            if ( d.errors[k].debug == file['name'] ) {
-                                $( 'td.size', rowClone )
-                                        .html("")
-                                        .next()
-                                        .addClass( 'file_upload_error' )
-                                        .empty().attr( 'colspan', '2' )
-                                        .css( {'font-size': '14px'} )
-                                        .append(
-                                        '<span class="label label-important">' +
-                                        d.errors[k].message +
-                                        '</span>'
-                                );
-                                $( rowClone ).addClass( 'failed' );
-                                setTimeout( function () {
-                                    $( '.progress', filerow ).remove();
-                                    $( '.operation', filerow ).remove();
-                                }, 50 );
-                            }
-
-                        }
-
-                        var thisIsATMXFile       = file['name'].split( "." ).pop().toLowerCase() == 'tmx';
-                        var thereIsAKeyInTmPanel = $( '#activetm' ).find( 'tr.mine' ).length;
-
-                        /* c'è almeno un file tmx e non ho già generato la chiave => genera la chiave */
-                        if( thisIsATMXFile && !thereIsAKeyInTmPanel ){
-                            UI.createKeyByTMX();
-                        }
-
-                        $( filerow ).after( rowClone );
-
-                        $( 'button[data-url]', filerow ).addClass( "zip_row" );
-
-
-                    } );
-
-                    if ( d.errors.length > 0 ) {
-                        UI.checkFailedConversionsNumber();
-                        disableAnalyze();
-                        return false;
-                    }
-                    //END editing by Roberto Tucci <roberto@translated.net>
-
-                    var notTranslationFileCount = 0;
-                    $( ".name" ).each( function () {
-                        var currSplitLength = $( this ).text().split( "." ).length - 1;
-                        if ( $( this ).text().split( "." )[currSplitLength] == "tmx" ||
-                                $( this ).text().split( "." )[currSplitLength - 1] == "tmx" ||
-                                $( this ).text().split( "." )[currSplitLength] == "g" ||
-                                $( this ).text().split( "." )[currSplitLength - 1] == "g" ||
-                                $( this ).text().split( "." )[currSplitLength] == "zip" ) {
-                            notTranslationFileCount++;
-                        }
-                    } );
-                    if ( notTranslationFileCount == $( ".name" ).length ) {
-                        disableAnalyze();
-                    }
-                }
-
-            } else if ( d.code <= 0 || d.errors.length > 0 ) {
-
-                console.log( d.errors[0].message );
-
-                $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).css( {'font-size': '14px'} ).append( '<span class="label label-important">' + d.errors[0].message + '</span>' );
-                $( filerow ).addClass( 'failed' );
-                setTimeout( function () {
-                    $( '.progress', filerow ).remove();
-                    $( '.operation', filerow ).remove();
-                }, 50 );
-                UI.checkFailedConversionsNumber();
-
-                //filters ocr warning
-                if ( d.code == -20 ){
-                        enableAnalyze();
-                }
-
-            } else {
-
+            //filters ocr warning
+            if ( data.code == -20 ){
+                enableAnalyze();
             }
 
         }
-    } );
+
+    }).catch(function ( d ) {
+        if ( $( filerow ).hasClass( 'restarting' ) ) {
+            $( filerow ).removeClass( 'restarting' );
+            return;
+        }
+        filerow.removeClass( 'converting' );
+        console.log( 'conversion error' );
+        console.log( $( '.progress', filerow ) );
+        setTimeout( function () {
+            $( '.progress', filerow ).remove();
+            $( '.operation', filerow ).remove();
+        }, 50 );
+
+        $( 'td.size', filerow ).next().addClass( 'file_upload_error' ).empty().attr( 'colspan', '2' ).append( '<span class="label label-important">Error: </span>Server error, try again.' );
+        $( filerow ).addClass( 'has-errors' );
+        UI.checkFailedConversionsNumber();
+        return false;
+    })
+
     var r = {};
     r.session = session;
-    r.request = request;
+    r.request = controller;
     UI.conversionRequests.push( r );
 
     $( '.size', filerow ).next().append( '<div class="operation">Importing</div><div class="converting progress progress-success progress-striped active ui-progressbar ui-widget ui-widget-content ui-corner-all" aria-valuenow="0" aria-valuemax="100" aria-valuemin="0" role="progressbar"><div class="ui-progressbar-value ui-widget-header ui-corner-left" style="width: 0%;"></div></div>' );
@@ -842,7 +836,8 @@ var isTMXAllowed = function () {
 }
 
 var enableAnalyze = function () {
-    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' ).focus();
+    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' );
+    if(document.activeElement.nodeName.toLowerCase() !== 'input') $( '.uploadbtn' ).focus();
 }
 
 var disableAnalyze = function () {
@@ -859,30 +854,6 @@ var unsupported = function () {
     var jj = $( '<div/>' ).html( config.unsupportedFileTypes ).text();
     return $.parseJSON( jj );
 };
-
-function goodbye( e ) {
-    if ( $( '.popup-tm .notify' ).length ) {
-        var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-        var leave_message = 'You have a pending operation. Are you sure you want to quit?';
-        if ( dont_confirm_leave !== 1 ) {
-            if ( !e ) e = window.event;
-            //e.cancelBubble is supported by IE - this will kill the bubbling process.
-            e.cancelBubble = true;
-            e.returnValue = leave_message;
-            //e.stopPropagation works in Firefox.
-            if ( e.stopPropagation ) {
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-        }
-
-        //return works for Chrome and Safari
-        clearNotCompletedUploads();
-
-        return leave_message;
-    }
-}
 
 var getIconClass = function ( ext ) {
     switch ( ext ) {

@@ -1,0 +1,607 @@
+@import '../../commons/colors';
+.tab.glossary {
+  outline: none;
+
+  .glossary-select,
+  .input-with-label__wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      line-height: 16px;
+      color: $grey6;
+    }
+  }
+  .glossary-select {
+    .select-with-icon__wrapper {
+      z-index: 2;
+      svg {
+        color: $grey2;
+      }
+    }
+    .select {
+      border-radius: 4px;
+    }
+    .select__dropdown-wrapper .custom-dropdown {
+      margin-top: 0;
+
+      .dropdown__search-bar {
+        box-shadow: none;
+        padding: 0;
+        box-sizing: border-box;
+
+        svg {
+          display: none;
+        }
+        input {
+          width: 100%;
+        }
+      }
+
+      .dropdown__list {
+        .glossary-option {
+          display: flex;
+          flex-direction: row;
+          width: 100%;
+
+          input[type='checkbox'] {
+            accent-color: $translatedBlue;
+          }
+          label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0 0 0 8px;
+          }
+        }
+        .dropdown__option span {
+          width: 90%;
+        }
+        .dropdown__option--is-active-option {
+          background-color: unset;
+          color: unset;
+        }
+        .dropdown__option--is-no-results-found {
+          background-color: unset;
+          color: $grey7;
+        }
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
+          background-color: $grey8;
+        }
+        .button-create-glossary-key {
+          color: $grey6;
+          font-style: italic;
+          font-size: 14px;
+          border: none;
+          background: none;
+          cursor: pointer;
+          padding: 0;
+
+          &:hover {
+            color: $grey6;
+          }
+        }
+      }
+    }
+    .select__dropdown-wrapper .custom-dropdown::before {
+      content: none;
+    }
+  }
+  .domain-select {
+    .select__dropdown-wrapper .custom-dropdown {
+      .dropdown__list {
+        .dropdown__option--is-active-option {
+          background-color: $grey4;
+          color: $grey6;
+        }
+        .dropdown__option--is-no-results-found {
+          display: none;
+        }
+        .dropdown__option--is-highlighted-option,
+        .dropdown__option:hover {
+          background-color: $grey8;
+        }
+        .domain-option {
+          border: 1px solid $grey7;
+          border-radius: 12px;
+          padding: 0 6px 0 6px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 18px;
+          text-align: center;
+        }
+        .button-create-option {
+          color: $grey7;
+          font-style: italic;
+          font-size: 12px;
+          border: none;
+          background: none;
+          cursor: pointer;
+
+          &:hover {
+            color: $grey6;
+          }
+        }
+      }
+    }
+  }
+  input:not([type='radio']),
+  textarea {
+    border: 1px solid $grey2;
+    border-radius: 4px;
+    padding: 4px 8px;
+    outline: none;
+    font-size: 14px;
+    line-height: 16px;
+    &:focus,
+    &:focus-visible {
+      border-color: $linkBlueTransparent;
+    }
+    &.input-large {
+      height: 64px;
+    }
+  }
+
+  textarea {
+    resize: none;
+  }
+
+  .glossary_search {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding: 24px 32px;
+    border-bottom: 1px solid $grey3;
+    justify-content: space-between;
+  }
+
+  .glossary_search-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 1px solid #aebdcd;
+    border-radius: 4px;
+    padding: 4px;
+
+    svg {
+      color: $grey2;
+    }
+  }
+
+  .glossary__button-add-container {
+    display: flex;
+    align-items: center;
+  }
+
+  input.glossary_search-input {
+    width: 300px;
+    font-size: 16px;
+    border: none;
+
+    &:disabled {
+      background: unset;
+    }
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      background-color: transparent !important;
+      -webkit-box-shadow: 0 0 0 50px white inset;
+    }
+  }
+  .glossary__button-add {
+    display: flex;
+    flex-direction: row;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    margin-left: 4px;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 16px;
+    line-height: 20px;
+    background: $translatedBlue;
+    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+    background: linear-gradient(top, $translatedBlue, #119ec4);
+    user-select: none;
+    border: none;
+    white-space: nowrap;
+    cursor: pointer;
+    &:hover {
+      background-color: $translatedBlueHover;
+    }
+  }
+  .glossary__button-cancel {
+    color: $translatedBlue;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 16px;
+    line-height: 20px;
+    background: $white;
+    user-select: none;
+    border: none;
+    white-space: nowrap;
+    cursor: pointer;
+    &:hover {
+      color: $translatedBlueHover;
+    }
+  }
+  .glossary_items {
+    max-height: 423px;
+    min-height: 42px;
+    overflow: auto;
+    .glossary_item {
+      padding: 24px 32px;
+      color: $grey6;
+      font: 14px/16px calibri, Arial, Helvetica, sans-serif;
+      text-align: left;
+      &:nth-child(even) {
+        background: $grey5;
+      }
+      .glossary_item-header {
+        display: flex;
+      }
+      .glossary_badge {
+        display: flex;
+        flex-shrink: 0;
+        > span {
+          color: $grey6;
+          font-size: 12px;
+          line-height: 15px;
+          border: 1px solid $grey6;
+          border-radius: 12px;
+          padding: 0 4px;
+          overflow: hidden;
+          margin-left: 8px;
+          min-width: 18px;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 140px;
+        }
+      }
+
+      .glossary_definition-container {
+        display: flex;
+        width: 100%;
+        border-radius: 4px;
+        align-items: center;
+        line-height: 16px;
+      }
+
+      .glossary_definition {
+        margin-right: auto;
+        font-style: italic;
+        align-items: center;
+        display: flex;
+        svg {
+          margin-right: 8px;
+          flex-shrink: 0;
+        } /* 
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        } */
+      }
+      .glossary_definition--hidden {
+        visibility: hidden;
+      }
+
+      .glossary_source_details {
+        display: flex;
+        flex-direction: row;
+        margin-left: 10px;
+        flex-shrink: 0;
+
+        > span {
+          color: $grey7;
+          font-size: 10px;
+          margin-left: 8px;
+        }
+      }
+
+      .glossary_source {
+        font-size: 12px;
+        max-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        span {
+          color: $grey7;
+        }
+      }
+      .glossary_item-actions {
+        width: 40px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-left: 16px;
+        color: $grey7;
+        svg:hover {
+          color: $grey6;
+        }
+
+        > * {
+          cursor: pointer;
+        }
+      }
+      .glossary_item-actions--disabled {
+        gap: 0px;
+
+        > * {
+          cursor: unset;
+        }
+
+        > *:not(.locked-button) {
+          opacity: 0.4;
+          svg:hover {
+            color: unset;
+          }
+        }
+      }
+      .glossary_item-body {
+        display: flex;
+        padding: 16px 0;
+      }
+
+      .glossary_item-body-no-bottom-padding {
+        display: flex;
+        padding-bottom: 0;
+      }
+
+      .glossary-item_column {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        row-gap: 8px;
+        .glossary_word {
+          font-weight: 700;
+          font-size: 16px;
+          line-height: 20px;
+          color: $black;
+          display: flex;
+          align-items: center;
+          > div {
+            display: flex;
+            align-items: center;
+            svg {
+              cursor: pointer;
+              color: $grey7;
+            }
+          }
+
+          .target_label {
+            cursor: pointer;
+          }
+
+          .info-icon {
+            font-weight: normal;
+            margin-left: 8px;
+          }
+
+          .forbidden-badge {
+            background-color: $grey4;
+            font-weight: normal;
+            font-size: 14px;
+            color: $grey6;
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin-left: 10px;
+
+            > :first-child {
+              cursor: unset;
+              margin-right: 4px;
+            }
+          }
+        }
+
+        .glossary-description {
+          &[aria-label]::after {
+            max-width: 400px;
+            white-space: normal;
+          }
+
+          > p {
+            white-space: break-spaces;
+          }
+          > p:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+          }
+          > p:not(:first-child) {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .glossary_word--highlight {
+      animation: pulse 4s ease-in-out;
+    }
+
+    .glossary_word--highlight-check {
+      --highlightColor: 255, 169, 2;
+    }
+    .glossary_word--highlight-glossary {
+      --highlightColor: 0, 153, 204;
+    }
+    .glossary_word--highlight-blacklist {
+      --highlightColor: 255, 47, 34;
+    }
+
+    .no-terms-result {
+      padding-top: 10px;
+    }
+
+    @keyframes pulse {
+      20% {
+        background-color: rgba(var(--highlightColor), 0.4);
+      }
+      80% {
+        background-color: rgba(var(--highlightColor), 0.4);
+      }
+      100% {
+        background-color: rgba(var(--highlightColor), 0);
+      }
+    }
+  }
+  .glossary_add-container {
+    padding: 24px;
+    .glossary-form-line {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 8px;
+      &.more-line {
+        padding-top: 24px;
+
+        & > * > :not(:first-child) {
+          margin-left: 10px;
+        }
+      }
+
+      > div {
+        display: flex;
+        flex-shrink: 0;
+        width: 49%;
+        .input-with-label__wrapper {
+          width: 100%;
+        }
+      }
+      .glossary-tm-container > div {
+        width: calc(100% / 3) !important;
+      }
+
+      .glossary-tm-container > :not(:first-child) {
+        margin-left: 10px;
+      }
+    }
+    .glossary_buttons-container {
+      padding-top: 24px;
+      display: flex;
+      gap: 0;
+      justify-content: space-between;
+      color: $grey2;
+      > div {
+        width: auto;
+        display: flex;
+        flex-direction: row;
+      }
+      > div:first-child {
+        width: 128px;
+      }
+      .glossary-more {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        cursor: pointer;
+        svg {
+          -webkit-transition: -webkit-transform 0.2s ease-in-out;
+          -ms-transition: -ms-transform 0.2s ease-in-out;
+          transition: transform 0.2s ease-in-out;
+        }
+        &.show-more {
+          svg {
+            transform: rotate(180deg);
+          }
+        }
+      }
+    }
+  }
+
+  .no_keys_glossary {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    > p {
+      font-size: 16px;
+    }
+  }
+
+  .select--is-disabled {
+    background-color: $grey4;
+  }
+
+  .segmented-control {
+    background-color: $grey3;
+    .segmented-control__cursor {
+      padding: unset;
+      height: 74%;
+      margin-top: 4px;
+
+      &::before {
+        width: 88%;
+        margin-left: 4px;
+      }
+    }
+    .segmented-control__label {
+      line-height: 32px;
+      padding: 0 14px 0 14px;
+    }
+  }
+
+  .search-type {
+    margin-left: 14px;
+  }
+
+  .search_term_reset_button {
+    display: flex;
+    cursor: pointer;
+  }
+  .search_term_reset_button--hidden {
+    visibility: hidden;
+  }
+  .search_term_reset_button--visible {
+    visibility: visible;
+  }
+
+  .select_highlight_mandatory {
+    .select-with-icon__wrapper {
+      .select {
+        border: 1px solid red;
+      }
+    }
+  }
+
+  .highlight_mandatory {
+    border: 1px solid red !important;
+  }
+
+  .loader.loader_on {
+    position: relative;
+    left: 0;
+    bottom: 0;
+    margin-right: 8px;
+  }
+
+  .rtl {
+    span,
+    input,
+    textarea,
+    p {
+      direction: rtl;
+      text-align: right;
+    }
+  }
+
+  .loading_label {
+    display: block;
+    margin-top: 10px;
+  }
+}

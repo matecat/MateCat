@@ -278,12 +278,19 @@ class downloadFileController extends downloadController {
 
             $convertResult = Filters::xliffToTarget( $files_to_be_converted );
 
+            // check for errors and log them on fatal_errors.txt
+            foreach ( $convertResult as $id => $result ){
+                if($result['isSuccess'] === false and isset($result['errorMessage'])){
+                    Log::$fileName = 'fatal_errors.txt';
+                    Log::doJsonLog( "FILE CONVERSION ERROR: " . $result['errorMessage'] );
+                }
+            }
+
             foreach ( array_keys( $files_to_be_converted ) as $pos => $fileID ) {
 
                 Filters::logConversionToTarget( $convertResult[ $fileID ], $files_to_be_converted[ $fileID ][ 'out_xliff_name' ], $jobData, $chunk[ $pos ] );
 
                 $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
-
 
                 /**
                  * Because of a bug in the filters for the cjk languages ( Exception when downloading translations )

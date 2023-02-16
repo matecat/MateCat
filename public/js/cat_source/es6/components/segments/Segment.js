@@ -20,6 +20,8 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
+import ModalsActions from '../../actions/ModalsActions'
+import {SegmentContext} from '../segments/SegmentContext'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -68,17 +70,17 @@ class Segment extends React.Component {
     this.timeoutScroll
   }
 
-  openSegment() {
+  openSegment(wasOriginatedFromBrowserHistory) {
     if (!this.$section.length) return
     if (!this.checkIfCanOpenSegment()) {
       if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
-        alertNoTranslatedSegments()
+        this.alertNoTranslatedSegments()
       } else {
-        alertNotTranslatedYet(this.props.segment.sid)
+        this.alertNotTranslatedYet(this.props.segment.sid)
       }
     } else {
       if (this.props.segment.translation.length !== 0) {
-        UI.segmentQA(this.$section)
+        SegmentActions.getSegmentsQa(this.props.segment)
       }
 
       // TODO Remove this block
@@ -106,22 +108,54 @@ class Segment extends React.Component {
       /************/
       UI.editStart = new Date()
       if (config.id_client) {
-        SegmentActions.getGlossaryForSegment(
-          this.props.segment.sid,
-          this.props.fid,
-          this.props.segment.segment,
-        )
+        SegmentActions.getGlossaryForSegment({
+          sid: this.props.segment.sid,
+          fid: this.props.fid,
+          text: this.props.segment.segment,
+        })
       }
 
-      history.replaceState(
-        null,
-        null,
-        document.location.pathname + '#' + this.props.segment.sid,
-      )
+      const hashUrl = document.location.pathname + '#' + this.props.segment.sid
+      if (wasOriginatedFromBrowserHistory) {
+        history.replaceState(null, null, hashUrl)
+      } else {
+        history.pushState(null, null, hashUrl)
+      }
+      var historyChangeStateEvent = new Event('historyChangeState')
+      window.dispatchEvent(historyChangeStateEvent)
+
+      // Update document title with hash segment id
+      document.title = `${document.title?.split('#')[0]} #${
+        this.props.segment.sid
+      }`
     }
   }
 
-  openSegmentFromAction(sid) {
+  alertNotTranslatedYet = (sid) => {
+    setTimeout(() =>
+      ModalsActions.showModalComponent(ConfirmMessageModal, {
+        cancelText: 'Close',
+        successCallback: () => UI.openNextTranslated(sid),
+        successText: 'Open next translated segment',
+        text: UI.alertNotTranslatedMessage,
+      }),
+    )
+  }
+
+  alertNoTranslatedSegments = () => {
+    var props = {
+      text: 'There are no translated segments to revise in this job.',
+      successText: 'Ok',
+      successCallback: function () {
+        ModalsActions.onCloseModal()
+      },
+    }
+    setTimeout(() =>
+      ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning'),
+    )
+  }
+
+  openSegmentFromAction(sid, wasOriginatedFromBrowserHistory) {
     sid = sid + ''
     if (
       (sid === this.props.segment.sid ||
@@ -129,7 +163,7 @@ class Segment extends React.Component {
           this.props.segment.firstOfSplit)) &&
       !this.props.segment.opened
     ) {
-      this.openSegment()
+      this.openSegment(wasOriginatedFromBrowserHistory)
     }
   }
 
@@ -142,7 +176,7 @@ class Segment extends React.Component {
     }
 
     if (
-      (this.props.segment.ice_locked === '1' && !readonly) ||
+      (SegmentUtils.isIceSegment(this.props.segment) && !readonly) ||
       this.secondPassLocked
     ) {
       if (this.props.segment.unlocked) {
@@ -361,10 +395,10 @@ class Segment extends React.Component {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
         successText: 'Ok',
         successCallback: function () {
-          APP.ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
       }
-      APP.ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Modify locked and approved segment ',
@@ -403,8 +437,9 @@ class Segment extends React.Component {
   openRevisionPanel = (data) => {
     if (
       parseInt(data.sid) === parseInt(this.props.segment.sid) &&
-      (this.props.segment.ice_locked == 0 ||
-        (this.props.segment.ice_locked == 1 && this.props.segment.unlocked))
+      (!SegmentUtils.isIceSegment(this.props.segment) ||
+        (SegmentUtils.isIceSegment(this.props.segment) &&
+          this.props.segment.unlocked))
     ) {
       this.setState({
         selectedTextObj: data.selection,
@@ -436,7 +471,8 @@ class Segment extends React.Component {
   onClickEvent = () => {
     if (
       this.state.readonly ||
-      (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')
+      (!this.props.segment.unlocked &&
+        SegmentUtils.isIceSegment(this.props.segment))
     ) {
       UI.handleClickOnReadOnly($(this.section).closest('section'))
     } else if (this.props.segment.muted) {
@@ -454,8 +490,7 @@ class Segment extends React.Component {
         this.props.segment.opened &&
         !this.props.segment.openComments &&
         !this.props.segment.openIssues &&
-        !UI.body.hasClass('search-open') &&
-        !UI.tagMenuOpen
+        !UI.body.hasClass('search-open')
       ) {
         if (!this.props.segment.openSplit) {
           SegmentActions.closeSegment(this.props.segment.sid)
@@ -473,11 +508,11 @@ class Segment extends React.Component {
 
   clientConnected = () => {
     if (this.props.segment.opened) {
-      SegmentActions.getGlossaryForSegment(
-        this.props.segment.sid,
-        this.props.fid,
-        this.props.segment.segment,
-      )
+      SegmentActions.getGlossaryForSegment({
+        sid: this.props.segment.sid,
+        fid: this.props.fid,
+        text: this.props.segment.segment,
+      })
     }
   }
 
@@ -599,7 +634,7 @@ class Segment extends React.Component {
         if (
           this.props.segment.opened &&
           !config.isReview &&
-          !SegmentStore.segmentHasIssues(this.props.segment.sid)
+          !SegmentStore.segmentHasIssues(this.props.segment)
         ) {
           SegmentActions.closeSegmentIssuePanel(this.props.segment.sid)
         }
@@ -624,7 +659,7 @@ class Segment extends React.Component {
 
     let readonly = this.state.readonly
     let showLockIcon =
-      this.props.segment.ice_locked === '1' || this.secondPassLocked
+      SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked
     let segment_classes = this.checkSegmentClasses()
 
     let split_group = this.props.segment.split_group || []
@@ -647,176 +682,182 @@ class Segment extends React.Component {
     let translationIssues = this.getTranslationIssues()
     let locked =
       !this.props.segment.unlocked &&
-      (this.props.segment.ice_locked === '1' || this.secondPassLocked)
-    const segmentHasIssues = SegmentStore.segmentHasIssues(
-      this.props.segment.sid,
-    )
-    return (
-      <section
-        ref={(section) => (this.section = section)}
-        id={'segment-' + this.props.segment.sid}
-        className={segment_classes.join(' ')}
-        data-hash={this.props.segment.segment_hash}
-        data-autopropagated={this.state.autopropagated}
-        data-propagable={autoPropagable}
-        data-version={this.props.segment.version}
-        data-split-group={split_group}
-        data-split-original-id={originalId}
-        data-tagmode="crunched"
-        data-tagprojection={this.dataAttrTagged}
-        data-fid={this.props.segment.id_file}
-        data-modified={this.props.segment.modified}
-      >
-        <div className="sid" title={this.props.segment.sid}>
-          <div className="txt">{this.props.segment.sid}</div>
+      (SegmentUtils.isIceSegment(this.props.segment) || this.secondPassLocked)
+    const segmentHasIssues = SegmentStore.segmentHasIssues(this.props.segment)
 
-          {showLockIcon ? (
-            !readonly ? (
-              this.props.segment.unlocked ? (
-                <div
-                  className="ice-locked-icon"
-                  onClick={this.lockUnlockSegment.bind(this)}
-                >
-                  <button className="unlock-button unlocked icon-unlocked3" />
+    const getContextProps = () => {
+      const {
+        enableTagProjection,
+        isReview,
+        isReviewExtended,
+        reviewType,
+        segImmutable,
+        segment,
+        files,
+        speech2textEnabledFn,
+        tagModesEnabled,
+      } = this.props
+      return {
+        enableTagProjection: enableTagProjection && !this.props.segment.tagged,
+        isReview,
+        isReviewExtended,
+        reviewType,
+        segImmutable,
+        segment,
+        files,
+        speech2textEnabledFn,
+        tagModesEnabled,
+        readonly: this.state.readonly,
+        locked,
+        removeSelection: this.removeSelection.bind(this),
+        openSegment: this.openSegment,
+        isReviewImproved: this.props.isReviewImproved,
+      }
+    }
+
+    return (
+      <SegmentContext.Provider value={{...getContextProps()}}>
+        <section
+          ref={(section) => (this.section = section)}
+          id={'segment-' + this.props.segment.sid}
+          className={segment_classes.join(' ')}
+          data-hash={this.props.segment.segment_hash}
+          data-autopropagated={this.state.autopropagated}
+          data-propagable={autoPropagable}
+          data-split-group={split_group}
+          data-split-original-id={originalId}
+          data-tagmode="crunched"
+          data-tagprojection={this.dataAttrTagged}
+          data-fid={this.props.segment.id_file}
+          data-modified={this.props.segment.modified}
+        >
+          <div className="sid" title={this.props.segment.sid}>
+            <div className="txt">{this.props.segment.sid}</div>
+
+            {showLockIcon ? (
+              !readonly ? (
+                this.props.segment.unlocked ? (
+                  <div
+                    className="ice-locked-icon"
+                    onClick={this.lockUnlockSegment.bind(this)}
+                  >
+                    <button className="unlock-button unlocked icon-unlocked3" />
+                  </div>
+                ) : (
+                  <div
+                    className="ice-locked-icon"
+                    onClick={this.lockUnlockSegment.bind(this)}
+                  >
+                    <button className="icon-lock unlock-button locked" />
+                  </div>
+                )
+              ) : null
+            ) : null}
+
+            <div className="txt segment-add-inBulk">
+              <input
+                type="checkbox"
+                ref={(node) => (this.bulk = node)}
+                checked={this.props.segment.inBulk}
+                onClick={this.handleChangeBulk}
+              />
+            </div>
+
+            {this.props.segment.ice_locked !== '1' &&
+            config.splitSegmentEnabled &&
+            this.props.segment.opened ? (
+              !this.props.segment.openSplit ? (
+                <div className="actions">
+                  <button
+                    className="split"
+                    title="Click to split segment"
+                    onClick={() =>
+                      SegmentActions.openSplitSegment(this.props.segment.sid)
+                    }
+                  >
+                    <i className="icon-split" />
+                  </button>
+                  <p className="split-shortcut">CTRL + S</p>
                 </div>
               ) : (
-                <div
-                  className="ice-locked-icon"
-                  onClick={this.lockUnlockSegment.bind(this)}
-                >
-                  <button className="icon-lock unlock-button locked" />
+                <div className="actions">
+                  <button
+                    className="split cancel"
+                    title="Click to close split segment"
+                    onClick={() => SegmentActions.closeSplitSegment()}
+                  >
+                    <i className="icon-split" />
+                  </button>
+                  {/*<p className="split-shortcut">CTRL + W</p>*/}
                 </div>
               )
-            ) : null
-          ) : null}
-
-          <div className="txt segment-add-inBulk">
-            <input
-              type="checkbox"
-              ref={(node) => (this.bulk = node)}
-              checked={this.props.segment.inBulk}
-              onClick={this.handleChangeBulk}
-            />
+            ) : null}
           </div>
+          {job_marker}
 
-          {this.props.segment.ice_locked !== '1' &&
-          config.splitSegmentEnabled &&
-          this.props.segment.opened ? (
-            !this.props.segment.openSplit ? (
-              <div className="actions">
-                <button
-                  className="split"
-                  title="Click to split segment"
-                  onClick={() =>
-                    SegmentActions.openSplitSegment(this.props.segment.sid)
-                  }
-                >
-                  <i className="icon-split" />
-                </button>
-                <p className="split-shortcut">CTRL + S</p>
-              </div>
-            ) : (
-              <div className="actions">
-                <button
-                  className="split cancel"
-                  title="Click to close split segment"
-                  onClick={() => SegmentActions.closeSplitSegment()}
-                >
-                  <i className="icon-split" />
-                </button>
-                {/*<p className="split-shortcut">CTRL + W</p>*/}
-              </div>
-            )
-          ) : null}
-        </div>
-        {job_marker}
-
-        <div className="body">
-          <SegmentHeader
-            sid={this.props.segment.sid}
-            autopropagated={this.state.autopropagated}
-            segmentOpened={this.props.segment.opened}
-            repetition={autoPropagable}
-          />
-          <SegmentBody
-            segment={this.props.segment}
-            segImmutable={this.props.segImmutable}
-            readonly={this.state.readonly}
-            tagModesEnabled={this.props.tagModesEnabled}
-            speech2textEnabledFn={this.props.speech2textEnabledFn}
-            enableTagProjection={
-              this.props.enableTagProjection && !this.props.segment.tagged
-            }
-            locked={locked}
-            removeSelection={this.removeSelection.bind(this)}
-            openSegment={this.openSegment}
-            isReview={this.props.isReview}
-            isReviewExtended={this.props.isReviewExtended}
-            reviewType={this.props.reviewType}
-            isReviewImproved={this.props.isReviewImproved}
-            onClick={this.onClickEvent}
-          />
-          <div
-            className="timetoedit"
-            data-raw-time-to-edit={this.props.segment.time_to_edit}
-          >
-            {timeToEdit}
-          </div>
-          {SegmentFilter && SegmentFilter.enabled() ? (
-            <div className="edit-distance">
-              Edit Distance: {this.props.segment.edit_distance}
-            </div>
-          ) : null}
-
-          {this.props.segment.opened ? (
-            <SegmentFooter
-              segment={this.props.segment}
+          <div className="body">
+            <SegmentHeader
               sid={this.props.segment.sid}
-              fid={this.props.fid}
+              autopropagated={this.state.autopropagated}
+              segmentOpened={this.props.segment.opened}
+              repetition={autoPropagable}
+              splitted={this.props.segment.splitted}
+              saving={this.props.segment.saving}
             />
-          ) : null}
-        </div>
-
-        {/*//!-- TODO: place this element here only if it's not a split --*/}
-        <div className="segment-side-buttons">
-          {config.comments_enabled &&
-          (!this.props.segment.openComments || !this.props.segment.opened) ? (
-            <SegmentsCommentsIcon {...this.props} />
-          ) : null}
-
-          {this.props.isReviewExtended && (
+            <SegmentBody onClick={this.onClickEvent} />
             <div
-              data-mount="translation-issues-button"
-              className="translation-issues-button"
-              data-sid={this.props.segment.sid}
+              className="timetoedit"
+              data-raw-time-to-edit={this.props.segment.time_to_edit}
             >
-              {translationIssues}
+              {timeToEdit}
             </div>
-          )}
-        </div>
-        <div className="segment-side-container">
-          {config.comments_enabled && this.props.segment.openComments ? (
-            <SegmentCommentsContainer {...this.props} />
-          ) : null}
-          {this.props.isReviewExtended &&
-          this.props.segment.openIssues &&
-          this.props.segment.opened &&
-          (config.isReview || (!config.isReview && segmentHasIssues)) ? (
-            <div className="review-balloon-container">
-              {!this.props.segment.versions ? null : (
-                <ReviewExtendedPanel
-                  reviewType={this.props.reviewType}
-                  segment={this.props.segment}
-                  sid={this.props.segment.sid}
-                  isReview={config.isReview}
-                  selectionObj={this.state.selectedTextObj}
-                  removeSelection={this.removeSelection.bind(this)}
-                />
-              )}
-            </div>
-          ) : null}
-        </div>
-      </section>
+            {SegmentFilter && SegmentFilter.enabled() ? (
+              <div className="edit-distance">
+                Edit Distance: {this.props.segment.edit_distance}
+              </div>
+            ) : null}
+
+            {this.props.segment.opened ? <SegmentFooter /> : null}
+          </div>
+
+          {/*//!-- TODO: place this element here only if it's not a split --*/}
+          <div className="segment-side-buttons">
+            {config.comments_enabled &&
+            (!this.props.segment.openComments || !this.props.segment.opened) ? (
+              <SegmentsCommentsIcon />
+            ) : null}
+
+            {this.props.isReview && (
+              <div
+                data-mount="translation-issues-button"
+                className="translation-issues-button"
+                data-sid={this.props.segment.sid}
+              >
+                {translationIssues}
+              </div>
+            )}
+          </div>
+          <div className="segment-side-container">
+            {config.comments_enabled && this.props.segment.openComments ? (
+              <SegmentCommentsContainer />
+            ) : null}
+            {this.props.isReviewExtended &&
+            this.props.segment.openIssues &&
+            this.props.segment.opened &&
+            (config.isReview || (!config.isReview && segmentHasIssues)) ? (
+              <div className="review-balloon-container">
+                {!this.props.segment.versions ? null : (
+                  <ReviewExtendedPanel
+                    segment={this.props.segment}
+                    isReview={config.isReview}
+                    selectionObj={this.state.selectedTextObj}
+                  />
+                )}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      </SegmentContext.Provider>
     )
   }
 }

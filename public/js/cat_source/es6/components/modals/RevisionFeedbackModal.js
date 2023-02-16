@@ -1,6 +1,7 @@
 import React from 'react'
 
 import CatToolActions from '../../actions/CatToolActions'
+import ModalsActions from '../../actions/ModalsActions'
 
 class RevisionFeedbackModal extends React.Component {
   constructor(props) {
@@ -18,14 +19,14 @@ class RevisionFeedbackModal extends React.Component {
     })
     CatToolActions.sendRevisionFeedback(this.state.feedback)
       .then(() => {
-        UI.reloadQualityReport()
-        APP.ModalWindow.onCloseModal()
+        setTimeout(() => CatToolActions.reloadQualityReport())
+        ModalsActions.onCloseModal()
         var notification = {
-          title: 'Feedback sent',
-          text: 'Feedback has been sent correctly',
+          title: 'Feedback submitted',
+          text: 'Feedback has been submitted correctly',
           type: 'success',
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
       .catch(() => {
         var notification = {
@@ -33,7 +34,7 @@ class RevisionFeedbackModal extends React.Component {
           text: 'An error occurred while sending feedback please try again or contact support.',
           type: 'error',
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
       })
   }
 
@@ -86,7 +87,7 @@ class RevisionFeedbackModal extends React.Component {
             <div className="column">
               <div
                 className="ui button cancel-button"
-                onClick={() => APP.ModalWindow.onCloseModal()}
+                onClick={() => ModalsActions.onCloseModal()}
               >
                 {this.props.feedback ? 'Close' : "I'll do it later"}
               </div>

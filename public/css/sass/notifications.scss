@@ -93,17 +93,25 @@
   border-top: 3px solid $notification-info;
 }
 
-.notifications-cat-smiling {
-  background: url('/public/img/matecat_smiling.png') no-repeat 90% bottom;
-  padding-top: 64px;
-  background-size: 60px;
-  margin-bottom: -10px;
-  @include transition(0.3s ease-in-out);
-  opacity: 0;
-  bottom: -200px;
-  position: relative;
+.notifications-position-bl {
+  .notifications-cat-smiling {
+    background: url('/public/img/matecat_smiling.png') no-repeat 90% bottom;
+    padding-top: 64px;
+    background-size: 60px;
+    margin-bottom: -10px;
+    @include transition(0.3s ease-in-out);
+    position: absolute;
+    top: -67px;
+    right: 40px;
+    width: 60px;
+    display: none;
+  }
+  .notification-type-info:first-child {
+    .notifications-cat-smiling {
+      display: block;
+    }
+  }
 }
-
 .notification-message {
   .warning-call-to {
     text-transform: uppercase;

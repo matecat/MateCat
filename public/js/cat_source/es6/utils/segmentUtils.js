@@ -57,10 +57,83 @@ const SegmentUtils = {
   },
   //********** Tag Projection code end ******************/
 
+  isIceSegment: function (segment) {
+    return segment.ice_locked === '1'
+  },
   isUnlockedSegment: function (segment) {
-    // var readonly = UI.isReadonlySegment(segment) ;
-    // return (segment.ice_locked === "1" && !readonly) && !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
     return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+  },
+
+  /**
+   * Characters counter local storage
+   */
+  isCharacterCounterEnable: () =>
+    !!JSON.parse(window.localStorage.getItem('characterCounter'))?.find(
+      (item) => Object.keys(item)[0] === config.id_job,
+    ),
+  setCharacterCounterOptionValue: (isActive) => {
+    const MAX_ITEMS = 2000
+
+    const cachedItems =
+      JSON.parse(window.localStorage.getItem('characterCounter')) ?? []
+    if (cachedItems.length > MAX_ITEMS) cachedItems.shift()
+    const prevValue = cachedItems.filter(
+      (item) => Object.keys(item)[0] !== config.id_job,
+    )
+
+    window.localStorage.setItem(
+      'characterCounter',
+      JSON.stringify([
+        ...prevValue,
+        ...(isActive ? [{[config.id_job]: true}] : []),
+      ]),
+    )
+  },
+  /**
+   * Selected keys glossary job local storage
+   */
+  getSelectedKeysGlossary: (keys) => {
+    const prevValue = JSON.parse(
+      window.localStorage.getItem('selectedKeysGlossary'),
+    )?.find((item) => Object.keys(item)[0] === config.id_job)?.[config.id_job]
+    const result =
+      prevValue?.flatMap((item) =>
+        keys.find(({id}) => id === item)
+          ? [keys.find(({id}) => id === item)]
+          : [],
+      ) ?? []
+    SegmentUtils.setSelectedKeysGlossary(result)
+    return result
+  },
+  setSelectedKeysGlossary: (keys) => {
+    const MAX_ITEMS = 100
+
+    const cachedItems =
+      JSON.parse(window.localStorage.getItem('selectedKeysGlossary')) ?? []
+    if (cachedItems.length > MAX_ITEMS) cachedItems.shift()
+    const prevValue = cachedItems.filter(
+      (item) => Object.keys(item)[0] !== config.id_job,
+    )
+
+    window.localStorage.setItem(
+      'selectedKeysGlossary',
+      JSON.stringify([...prevValue, {[config.id_job]: keys.map(({id}) => id)}]),
+    )
+  },
+  segmentHasNote: (segment) => {
+    return segment.notes ||
+      segment.context_groups?.context_json ||
+      segment.metadata?.lenght > 0
+      ? true
+      : false
+  },
+  /**
+   * Retrieve the file id of a segment
+   * NOTE: used by plugins
+   * @param segment
+   */
+  getSegmentFileId: (segment) => {
+    return segment.id_file
   },
 }
 

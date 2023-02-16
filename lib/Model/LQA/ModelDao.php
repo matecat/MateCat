@@ -22,7 +22,7 @@ class ModelDao extends DataAccess_AbstractDao {
      *
      * @return ModelStruct
      */
-    public static function findById( $id, $ttl = 86400 ) {
+    public static function findById( $id, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
@@ -42,14 +42,15 @@ class ModelDao extends DataAccess_AbstractDao {
 
         $model_hash = static::_getModelHash( $data );
 
-        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options, `hash` ) " .
-            " VALUES ( :label, :pass_type, :pass_options, :hash ) ";
+        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
+            " VALUES ( :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
 
         $struct = new ModelStruct( [
-                'label'        => @$data[ 'label' ],
-                'pass_type'    => $data[ 'passfail' ][ 'type' ],
-                'pass_options' => json_encode( $data[ 'passfail' ][ 'options' ] ),
-                'hash'         => $model_hash
+            'label'                => @$data[ 'label' ],
+            'pass_type'            => $data[ 'passfail' ][ 'type' ],
+            'pass_options'         => json_encode( $data[ 'passfail' ][ 'options' ] ),
+            'hash'                 => $model_hash,
+            'qa_model_template_id' => (isset($data[ 'id_template' ])) ? $data[ 'id_template' ] : null,
         ] );
         $struct->ensureValid();
 
@@ -57,7 +58,7 @@ class ModelDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->toArray(
-                [ 'label', 'pass_type', 'pass_options', 'hash' ]
+                [ 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id' ]
         ) );
 
         $struct->id = $conn->lastInsertId();
@@ -73,8 +74,10 @@ class ModelDao extends DataAccess_AbstractDao {
             $h_string .= $category[ 'code' ];
         }
 
-        foreach( $model_root[ 'severities' ] as $severity ){
-            $h_string .= $severity[ 'penalty' ];
+        if(isset($model_root[ 'severities' ])){
+            foreach( $model_root[ 'severities' ] as $severity ){
+                $h_string .= $severity[ 'penalty' ];
+            }
         }
 
         $h_string .= $model_root[ 'passfail' ][ 'type' ] . implode( "", $model_root[ 'passfail' ][ 'options' ][ 'limit' ] );
@@ -96,7 +99,7 @@ class ModelDao extends DataAccess_AbstractDao {
         $model_root = $json['model'];
         $model = ModelDao::createRecord( $model_root );
 
-        $default_severities = $model_root['severities'];
+        $default_severities = isset($model_root['severities']) ? $model_root['severities'] : [];
         $categories         = $model_root['categories'];
 
         foreach($categories as $category) {
@@ -136,5 +139,4 @@ class ModelDao extends DataAccess_AbstractDao {
             }
         }
     }
-
 }

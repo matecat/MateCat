@@ -1,7 +1,8 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
 import _ from 'lodash'
+import {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
@@ -18,6 +19,7 @@ import {getProjects} from '../../api/getProjects'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
+import NotificationBox from '../notificationsComponent/NotificationBox'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -31,10 +33,12 @@ class Dashboard extends React.Component {
     this.state = {
       teams: [],
       selectedTeam: undefined,
-      showProjects: false,
+      fetchingProjects: true,
       selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
+  }
 
+  getData = () => {
     getUserData().then((data) => {
       TeamsActions.renderTeams(data.teams)
       const selectedTeam = APP.getLastTeamSelected(data.teams)
@@ -46,11 +50,13 @@ class Dashboard extends React.Component {
       this.getTeamStructure(selectedTeam).then(() => {
         TeamsActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
-
+        this.setState({fetchingProjects: true})
         getProjects({team: selectedTeam, searchFilter: this.Search})
           .then((res) => {
-            this.setState({showProjects: true})
-            ManageActions.renderProjects(res.data, selectedTeam, teams)
+            this.setState({fetchingProjects: false})
+            setTimeout(() =>
+              ManageActions.renderProjects(res.data, selectedTeam, teams),
+            )
             ManageActions.storeSelectedTeam(selectedTeam)
           })
           .catch((err) => {
@@ -75,9 +81,11 @@ class Dashboard extends React.Component {
   }
 
   updateTeams = (teams) => {
-    this.setState({
-      teams: teams.toJS(),
-    })
+    flushSync(() =>
+      this.setState({
+        teams: teams.toJS(),
+      }),
+    )
   }
 
   updateProjects = (id) => {
@@ -258,43 +266,27 @@ class Dashboard extends React.Component {
 
     if (project.remote_file_service == 'gdrive') {
       continueDownloadFunction = function () {
-        APP.ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadGDriveFile(null, job.id, job.password, callback)
       }
     } else {
       continueDownloadFunction = function () {
-        APP.ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
         APP.downloadFile(job.id, job.password, callback)
       }
     }
 
     const openUrl = function () {
-      APP.ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
       ManageActions.enableDownloadButton(job.id)
       window.open(urlWarnings, '_blank')
     }
 
-    //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+    //the translation mismatches are not a server Error, but only a warn, so don't display Error Popup
     if (job.warnings_count > 0) {
-      const props = {
-        text:
-          'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. ' +
-          '<a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-          ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br />' +
-          'If you continue downloading, part of the content may be untranslated - ' +
-          'look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-        successText: 'Download anyway',
-        successCallback: continueDownloadFunction,
-        warningText: 'Fix errors',
-        warningCallback: openUrl,
-      }
-      APP.ModalWindow.showModalComponent(
-        ConfirmMessageModal,
-        props,
-        'Confirmation required',
-      )
+      ModalsActions.showDownloadWarningsModal(continueDownloadFunction, openUrl)
     } else {
       continueDownloadFunction()
     }
@@ -366,6 +358,7 @@ class Dashboard extends React.Component {
   /*********************************/
 
   componentDidMount() {
+    this.getData()
     window.addEventListener('scroll', this.scrollDebounceFn())
     let self = this
     $(window).on('blur focus', function (e) {
@@ -473,14 +466,13 @@ class Dashboard extends React.Component {
             loggedUser={true}
           />
         </DashboardHeader>
-        {this.state.selectedTeam &&
-        this.state.teams &&
-        this.state.showProjects ? (
+        {this.state.selectedTeam && this.state.teams ? (
           <ProjectsContainer
             downloadTranslationFn={this.downloadTranslation}
             teams={Immutable.fromJS(this.state.teams)}
             team={Immutable.fromJS(this.state.selectedTeam)}
             selectedUser={this.state.selectedUser}
+            fetchingProjects={this.state.fetchingProjects}
           />
         ) : (
           <div className="ui active inverted dimmer">
@@ -495,6 +487,12 @@ class Dashboard extends React.Component {
 export default Dashboard
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = document.getElementById('manage-container')
-  ReactDOM.render(React.createElement(Dashboard, {}), mountPoint)
+  const mountPoint = createRoot(document.getElementById('manage-container'))
+  mountPoint.render(React.createElement(Dashboard, {}))
+
+  //Toast Notifications
+  const mountPointNotifications = createRoot(
+    document.getElementsByClassName('notifications-wrapper')[0],
+  )
+  mountPointNotifications.render(<NotificationBox />)
 })

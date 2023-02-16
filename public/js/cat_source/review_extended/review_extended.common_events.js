@@ -3,6 +3,7 @@
  */
 
 import SegmentActions from '../es6/actions/SegmentActions'
+import CatToolActions from '../es6/actions/CatToolActions'
 
 if (ReviewExtended.enabled()) {
   $(document).on('files:appended', function () {
@@ -21,8 +22,8 @@ if (ReviewExtended.enabled()) {
   })
 
   $(document).on('translation:change', function (e, data) {
-    UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment))
-    UI.reloadQualityReport()
+    UI.getSegmentVersionsIssues(data.sid)
+    CatToolActions.reloadQualityReport()
   })
 
   $(document).on('header-tool:open', function (e, data) {

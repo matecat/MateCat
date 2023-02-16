@@ -33,7 +33,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      */
     public function read( Jobs_JobStruct $jobQuery ) {
 
-        $stmt = $this->_getStatementForCache();
+        $stmt = $this->_getStatementForCache( null );
 
         return $this->_fetchObject( $stmt,
                 $jobQuery,
@@ -49,7 +49,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * @return PDOStatement
      */
-    protected function _getStatementForCache() {
+    protected function _getStatementForCache( $query ) {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
@@ -80,7 +80,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         /*
         * build the query
         */
-        $stmt = $this->_getStatementForCache();
+        $stmt = $this->_getStatementForCache( null );
 
         return $this->_destroyObjectCache( $stmt,
                 [
@@ -112,6 +112,30 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 'id_segment' => $translation->id_segment
         ] )[ 0 ];
 
+    }
+
+    /**
+     * @param     $id_job
+     * @param     $password
+     * @param int $ttl
+     *
+     * @return int
+     */
+    public static function getSegmentsCount($id_job, $password, $ttl = 0) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare(
+                "SELECT (job_last_segment - job_first_segment + 1 ) as segments_count FROM jobs WHERE " .
+                " id = :id_job AND password = :password "
+        );
+
+        $struct = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'   => $id_job,
+                'password' => $password
+        ] )[ 0 ];
+
+        return ($struct->segments_count) ? (int)$struct->segments_count : 0;
     }
 
     /**
@@ -615,10 +639,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     /**
      * @param Jobs_JobStruct $chunkStruct
+     * @param int            $ttl
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function getFirstSegmentOfFilesInJob( Jobs_JobStruct $chunkStruct ) {
+    public static function getFirstSegmentOfFilesInJob( Jobs_JobStruct $chunkStruct, $ttl = 0  ) {
 
         $thisDao = new self();
         $thisDao->getDatabaseHandler();
@@ -643,7 +668,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->setCacheTTL($ttl)->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job' => $chunkStruct->id
         ] );
     }
@@ -786,5 +811,27 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             'password' => $password,
             'revisionNumber' => $revisionNumber
         ] );
+    }
+
+    /**
+     * @param array $idJobs
+     * @param int $ttl
+     * @return int|null
+     */
+    public static function getSegmentTranslationsCount(array $idJobs, $ttl = 0)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+
+        $query = "select count(*) as total from segment_translations where id_job IN ( " . implode(', ' , $idJobs ) . " );";
+
+        $stmt = $conn->prepare($query  );
+        $records = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] );
+
+        if(empty($records)){
+            return null;
+        }
+
+        return (int)$records[0]->total;
     }
 }

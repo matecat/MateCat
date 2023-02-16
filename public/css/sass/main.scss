@@ -4,6 +4,7 @@
 @import 'commons/matecat_fonts';
 @import 'commons/icons';
 @import 'commons/buttons';
+@import 'commons/aria-label-tooltip';
 @import 'common-main';
 @import 'style';
 @import 'mbc-style';
@@ -14,8 +15,10 @@
 @import 'components/header/segmentsFilter';
 @import 'revise';
 //components
+@import 'commons/nav-bar';
 @import 'components/segment/segment';
 @import 'components/segment/segmentFooter';
+@import 'components/segment/segmentFooterTabGlossary';
 @import 'components/segment/issuesContainer';
 @import 'components/segment/tagsMenu';
 @import 'components/segment/Tag';
@@ -26,6 +29,12 @@
 @import 'components/header/search';
 @import 'components/header/qaComponent';
 @import 'components/header/header';
+@import 'components/SegmentsContainer.scss';
+@import 'components/header/FilesMenu';
+@import 'components/common/FilenameLabel';
+@import 'components/common/Select';
+@import 'components/common/Dropdown';
+@import 'components/common/SegmentedControl';
 
 @import 'cattool';
 

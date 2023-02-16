@@ -1,6 +1,8 @@
 import React from 'react'
 import Immutable from 'immutable'
 import _ from 'lodash'
+import CommonUtils from '../../utils/commonUtils'
+import TEXT_UTILS from '../../utils/textUtils'
 
 class SegmentFooterTabMessages extends React.Component {
   constructor(props) {
@@ -12,6 +14,21 @@ class SegmentFooterTabMessages extends React.Component {
   getNotes() {
     let notesHtml = []
     let self = this
+
+    const getNoteContentStructure = (note) =>
+      TEXT_UTILS.getContentWithAllowedLinkRedirect(note).length > 1
+        ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
+            (content, index) =>
+              typeof content === 'object' && content.isLink ? (
+                <a key={index} href={content.link} target="_blank">
+                  {content.link}
+                </a>
+              ) : (
+                content
+              ),
+          )
+        : note
+
     if (this.props.notes) {
       this.props.notes.forEach(function (item, index) {
         if (item.note && item.note !== '') {
@@ -25,7 +42,7 @@ class SegmentFooterTabMessages extends React.Component {
           let html = (
             <div className="note" key={'note-' + index}>
               <span className="note-label">Note: </span>
-              <span>{note}</span>
+              <span>{getNoteContentStructure(note)}</span>
             </div>
           )
           notesHtml.push(html)
@@ -37,7 +54,9 @@ class SegmentFooterTabMessages extends React.Component {
           Object.keys(item.json).forEach(function (key, index) {
             let html = (
               <div className="note" key={'note-json' + index}>
-                <span className="note-label">{key.toUpperCase()}: </span>
+                <span className="note-label">
+                  {key.charAt(0).toUpperCase() + key.slice(1)}:{' '}
+                </span>
                 <span> {item.json[key]} </span>
               </div>
             )
@@ -81,29 +100,26 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     // metadata notes
-    if (this.props.metadata) {
-      for (const [index, item] of this.props.metadata.entries()) {
-        const {meta_key: label, meta_value: body} = item
-        notesHtml.push(this.getMetadataNoteTemplate({index, label, body}))
-      }
-    }
-
-    if (notesHtml.length === 0) {
-      let html = (
-        <div className="note" key={'note-0'}>
-          There are no notes available
-        </div>
-      )
-      notesHtml.push(html)
+    if (this.props.metadata?.length > 0) {
+      notesHtml.push(this.getMetadataNoteTemplate())
     }
     return notesHtml
   }
 
-  getMetadataNoteTemplate({index = 0, label, body}) {
+  getMetadataNoteTemplate() {
+    let metadataNotes = []
+    for (const [index, item] of this.props.metadata.entries()) {
+      const {meta_key: label, meta_value: body} = item
+      metadataNotes.push(
+        <div className="note" key={`meta-${index}`}>
+          <span className="note-label">{label}: </span>
+          <span>{body}</span>
+        </div>,
+      )
+    }
     return (
-      <div className="note" key={`meta-${index}`}>
-        <span className="note-label">{label}: </span>
-        <span>{body}</span>
+      <div className="metadata-notes" key="metadata-notes">
+        {metadataNotes}
       </div>
     )
   }
@@ -139,7 +155,7 @@ class SegmentFooterTabMessages extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           <div className="segment-notes-container">

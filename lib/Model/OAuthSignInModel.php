@@ -2,6 +2,8 @@
 
 use Email\WelcomeEmail;
 use Teams\TeamDao;
+use Users\MetadataDao;
+use Users\RedeemableProject;
 
 /**
  * Created by PhpStorm.
@@ -34,7 +36,7 @@ class OAuthSignInModel {
 
     public function setAccessToken( $token ) {
         $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
-                $token
+                json_encode( $token )
         );
     }
 
@@ -65,14 +67,14 @@ class OAuthSignInModel {
             $this->_updateProfilePicture() ;
         }
 
-        $project = new \Users\RedeemableProject($this->user, $_SESSION)  ;
+        $project = new RedeemableProject($this->user, $_SESSION)  ;
         $project->tryToRedeem()  ;
 
         return true ;
     }
 
     protected function _updateProfilePicture() {
-        $dao = new \Users\MetadataDao();
+        $dao = new MetadataDao();
         $dao->set($this->user->uid, 'gplus_picture', $this->profilePictureUrl );
     }
 

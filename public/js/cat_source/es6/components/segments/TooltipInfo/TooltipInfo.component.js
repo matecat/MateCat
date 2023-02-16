@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-// import "./TooltipInfo.scss";
 
 class TooltipInfo extends Component {
   state = {}

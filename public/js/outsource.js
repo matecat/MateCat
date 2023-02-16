@@ -1,5 +1,8 @@
 import ManageActions from './cat_source/es6/actions/ManageActions'
 import {addJobTranslator} from './cat_source/es6/api/addJobTranslator'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
 if (!window.UI) {
   window.UI = {}
 }
@@ -8,7 +11,7 @@ $.extend(window.UI, {
   sendJobToTranslator: function (email, date, timezone, job, project) {
     addJobTranslator(email, date, timezone, job)
       .then(function (data) {
-        APP.ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
         if (data.job) {
           UI.checkShareToTranslatorResponse(data, email, date, job, project)
         } else {
@@ -53,7 +56,7 @@ $.extend(window.UI, {
       allowHtml: true,
       timer: 10000,
     }
-    APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
     ManageActions.changeJobPasswordFromOutsource(
       project,
       job,
@@ -94,9 +97,9 @@ $.extend(window.UI, {
 
   shareToTranslatorDateChangeNotification: function (email, oldDate, newDate) {
     oldDate = $.format.date(oldDate, 'yyyy-MM-d hh:mm a')
-    oldDate = APP.getGMTDate(oldDate)
+    oldDate = CommonUtils.getGMTDate(oldDate)
     newDate = $.format.date(newDate, 'yyyy-MM-d hh:mm a')
-    newDate = APP.getGMTDate(newDate)
+    newDate = CommonUtils.getGMTDate(newDate)
     return {
       title: 'Job delivery update',
       text:
@@ -161,7 +164,7 @@ $.extend(window.UI, {
     }
   },
   showShareTranslatorError: function () {
-    APP.ModalWindow.onCloseModal()
+    ModalsActions.onCloseModal()
     var notification = {
       title: 'Problems sending the job',
       text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
@@ -170,6 +173,6 @@ $.extend(window.UI, {
       allowHtml: true,
       timer: 10000,
     }
-    APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
   },
 })

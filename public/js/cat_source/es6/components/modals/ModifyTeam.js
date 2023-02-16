@@ -2,6 +2,10 @@ import TeamConstants from '../../constants/TeamConstants'
 import TeamsStore from '../../stores/TeamsStore'
 import ManageActions from '../../actions/ManageActions'
 import React from 'react'
+import CommonUtils from '../../utils/commonUtils'
+import IconSearch from '../icons/IconSearch'
+import IconClose from '../icons/IconClose'
+import TEXT_UTILS from '../../utils/textUtils'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -12,6 +16,7 @@ class ModifyTeam extends React.Component {
       showRemoveMessageUserID: null,
       readyToSend: false,
       resendInviteArray: [],
+      searchMember: '',
     }
     this.updateTeam = this.updateTeam.bind(this)
     this.onLabelCreate = this.onLabelCreate.bind(this)
@@ -21,7 +26,7 @@ class ModifyTeam extends React.Component {
     var self = this
 
     // if ( APP.checkEmail(text) && event.key === 'Enter') {
-    if (APP.checkEmail(text)) {
+    if (CommonUtils.checkEmail(text)) {
       $(this.inputNewUSer).dropdown('set selected', value)
       this.setState({
         inputUserError: false,
@@ -49,7 +54,7 @@ class ModifyTeam extends React.Component {
 
   createLabel(text) {
     var self = this
-    if (APP.checkEmail(text)) {
+    if (CommonUtils.checkEmail(text)) {
       $(this.inputNewUSer).find('input.search').val('')
       $(this.inputNewUSer).dropdown('set selected', text)
       this.setState({
@@ -88,7 +93,7 @@ class ModifyTeam extends React.Component {
   removeUser(user) {
     ManageActions.removeUserFromTeam(this.state.team, user)
     if (user.get('uid') === APP.USER.STORE.user.uid) {
-      APP.ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
     }
     this.setState({
       showRemoveMessageUserID: null,
@@ -142,7 +147,7 @@ class ModifyTeam extends React.Component {
   }
 
   addUser() {
-    if (APP.checkEmail(this.inputNewUSer.value)) {
+    if (CommonUtils.checkEmail(this.inputNewUSer.value)) {
       ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value)
       var resendInviteArray = this.state.resendInviteArray
       resendInviteArray.push(this.inputNewUSer.value)
@@ -201,14 +206,27 @@ class ModifyTeam extends React.Component {
       this.addUsers()
     }
     if (teamNameOk) {
-      APP.ModalWindow.onCloseModal()
+      ModalsActions.onCloseModal()
     }
   }
 
   getUserList() {
     let self = this
 
-    return this.state.team.get('members').map(function (member, i) {
+    const teamMembers = this.state.team.get('members')
+    const filteredMembers = teamMembers.filter((member) => {
+      const {searchMember} = this.state
+      const user = member.get('user')
+      const fullName = `${user.get('first_name')} ${user.get('last_name')}`
+      const regex = new RegExp(TEXT_UTILS.escapeRegExp(searchMember), 'i')
+      if (!searchMember) return true
+      else return regex.test(fullName) || regex.test(user.get('email'))
+    })
+
+    if (!filteredMembers.size)
+      return <span className="no-result">No results!</span>
+
+    return filteredMembers.map(function (member, i) {
       let user = member.get('user')
       if (
         user.get('uid') == APP.USER.STORE.user.uid &&
@@ -303,7 +321,7 @@ class ModifyTeam extends React.Component {
               />
             ) : (
               <div className="ui tiny image label">
-                {APP.getUserShortName(user.toJS())}
+                {CommonUtils.getUserShortName(user.toJS())}
               </div>
             )}
 
@@ -332,29 +350,24 @@ class ModifyTeam extends React.Component {
       var inviteResended = self.state.resendInviteArray.indexOf(mail) > -1
       return (
         <div className="item pending-invitation" key={'user-invitation' + i}>
-          {inviteResended ? (
-            <div className="ui right floated content invite-sent-msg">
-              Invite sent
-            </div>
-          ) : (
-            <div>
-              <div
-                className="mini ui button right floated"
-                onClick={self.resendInvite.bind(self, mail)}
-              >
-                Resend Invite
-              </div>
-              <div className="ui right floated content pending-msg">
-                Pending user
-              </div>
-            </div>
-          )}
-
           <div className="ui tiny image label">
             {mail.substring(0, 1).toUpperCase()}
           </div>
-          <div className="middle aligned content">
-            <div className="content user">{mail}</div>
+          <span className="email content user">{mail}</span>
+          <div>
+            {inviteResended ? (
+              <span className="content pending-msg">Invite sent</span>
+            ) : (
+              <>
+                <span className="content pending-msg">Pending user</span>
+                <div
+                  className="mini ui button right floated"
+                  onClick={self.resendInvite.bind(self, mail)}
+                >
+                  Resend Invite
+                </div>
+              </>
+            )}
           </div>
         </div>
       )
@@ -392,8 +405,13 @@ class ModifyTeam extends React.Component {
       nextState.inputNameError !== this.state.inputNameError ||
       nextState.showRemoveMessageUserID !==
         this.state.showRemoveMessageUserID ||
-      nextState.readyToSend !== this.state.readyToSend
+      nextState.readyToSend !== this.state.readyToSend ||
+      nextState.searchMember !== this.state.searchMember
     )
+  }
+
+  onChangeSearchMember(event) {
+    this.setState({searchMember: event.target.value})
   }
 
   render() {
@@ -450,7 +468,7 @@ class ModifyTeam extends React.Component {
           <div className="matecat-modal-middle" style={middleContainerStyle}>
             <div className="ui grid left aligned">
               <div className="sixteen wide column">
-                <h2>Invite Members</h2>
+                <h2>Manage Members</h2>
                 {/* <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
@@ -468,7 +486,7 @@ class ModifyTeam extends React.Component {
                 >
                   <input name="tags" type="hidden" />
                   <div className="default text">
-                    insert email or emails separated by commas or press enter
+                    Add new people (separate email addresses with a comma)
                   </div>
                 </div>
                 {this.state.inputUserError ? (
@@ -487,6 +505,25 @@ class ModifyTeam extends React.Component {
 
               <div className="sixteen wide column">
                 <div className="ui members-list team">
+                  <div className="search-member-container">
+                    <IconSearch />
+                    <input
+                      name="search_member"
+                      placeholder="Search Member"
+                      value={this.state.searchMember}
+                      onChange={this.onChangeSearchMember.bind(this)}
+                    />
+                    <div
+                      className={`reset_button ${
+                        this.state.searchMember
+                          ? 'reset_button--visible'
+                          : 'reset_button--hidden'
+                      }`}
+                      onClick={() => this.setState({searchMember: ''})}
+                    >
+                      <IconClose />
+                    </div>
+                  </div>
                   <div className="ui divided list">
                     {pendingUsers}
                     {userlist}

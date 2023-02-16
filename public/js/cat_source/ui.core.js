@@ -1,8 +1,7 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
+import React, {useEffect} from 'react'
 import Cookies from 'js-cookie'
-import ReactDOM from 'react-dom'
-import React from 'react'
+import {createRoot} from 'react-dom/client'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
@@ -11,58 +10,19 @@ import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import SegmentUtils from './es6/utils/segmentUtils'
 import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
+import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
+import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
+import {getLocalWarnings} from './es6/api/getLocalWarnings'
+import {getSegments} from './es6/api/getSegments'
+import {setTranslation} from './es6/api/setTranslation'
+import AlertModal from './es6/components/modals/AlertModal'
+import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
+import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
-  /**
-   * Open file menu in Header
-   * @returns {boolean}
-   */
-  toggleFileMenu: function () {
-    var jobMenu = $('#jobMenu')
-    if (jobMenu.is(':animated')) {
-      return false
-    } else {
-      var segment = SegmentStore.getCurrentSegment()
-      var currSegment = jobMenu.find('.currSegment')
-      if (segment) {
-        currSegment.removeClass('disabled')
-      } else {
-        currSegment.addClass('disabled')
-      }
-      var menuHeight = jobMenu.height()
-      if (LXQ.enabled()) {
-        var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible')
-        var lxqBoxHeight = lexiqaBoxIsOpen
-          ? $('#lexiqa-popup').outerHeight() + 8
-          : 0
-        jobMenu.css('top', lxqBoxHeight + 43 - menuHeight + 'px')
-      } else {
-        jobMenu.css('top', 43 - menuHeight + 'px')
-      }
-
-      if (jobMenu.hasClass('open')) {
-        jobMenu
-          .animate({top: '-=' + menuHeight + 'px'}, 500)
-          .removeClass('open')
-      } else {
-        jobMenu
-          .animate({top: '+=' + menuHeight + 'px'}, 300, function () {
-            $('body').on('click', function () {
-              if (jobMenu.hasClass('open')) {
-                UI.toggleFileMenu()
-              }
-            })
-          })
-          .addClass('open')
-      }
-      return true
-    }
-  },
-
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 
@@ -126,12 +86,10 @@ window.UI = {
 
     if (this.autopropagateConfirmNeeded(opts.propagation)) {
       var text = !_.isUndefined(segment.alternatives)
-        ? 'There are other identical segments with <b>translation conflicts</b>. <br><br>Would you ' +
-          'like to propagate the translation and the status to all of them, ' +
-          'or keep this translation only for this segment?'
-        : 'There are other identical segments. <br><br>Would you ' +
-          'like to propagate the translation and the status to all of them, ' +
-          'or keep this translation only for this segment?'
+        ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
+          'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
+        : 'The translation you are confirming for this segment is different from the version confirmed for other identical segments. <br><br>Would you ' +
+          'like to propagate this translation to all other identical segments and replace the other version or keep it only for this segment?'
       // var optionsStr = opts;
       var props = {
         text: text,
@@ -140,20 +98,20 @@ window.UI = {
           opts.propagation = false
           opts.autoPropagation = false
           UI.preExecChangeStatus(opts)
-          APP.ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         cancelText: 'Propagate to All',
         cancelCallback: function () {
           opts.propagation = true
           opts.autoPropagation = false
           UI.execChangeStatus(opts)
-          APP.ModalWindow.onCloseModal()
+          ModalsActions.onCloseModal()
         },
         onClose: function () {
           UI.preExecChangeStatus(opts)
         },
       }
-      APP.ModalWindow.showModalComponent(
+      ModalsActions.showModalComponent(
         ConfirmMessageModal,
         props,
         'Confirmation required ',
@@ -198,7 +156,6 @@ window.UI = {
       {
         id_segment: options.segment_id,
         status: status,
-        caller: false,
         propagate: propagation,
         autoPropagation: options.autoPropagation,
       },
@@ -221,261 +178,25 @@ window.UI = {
     }
   },
 
-  getSegmentFileId: function (segment) {
-    if (typeof segment == 'undefined') return false
-    try {
-      segment = segment.closest('section')
-      return $(segment).attr('data-fid')
-    } catch (e) {
-      return false
-    }
-  },
-
-  getMoreSegments: function (where) {
-    if (where == 'after' && this.noMoreSegmentsAfter) {
-      return
-    }
-    if (where == 'before' && this.noMoreSegmentsBefore) {
-      return
-    }
-    if (this.loadingMore) {
-      return
-    }
-
-    console.log('Get more segments: ', where)
-
-    this.loadingMore = true
-
-    var segId =
-      where === 'after'
-        ? SegmentStore.getLastSegmentId()
-        : where === 'before'
-        ? SegmentStore.getFirstSegmentId()
-        : ''
-
-    if (where == 'before') {
-      $('section').each(function () {
-        if ($(this).offset().top > $(window).scrollTop()) {
-          UI.segMoving = UI.getSegmentId($(this))
-          return false
+  getTranslationMismatches: function (id_segment) {
+    getTranslationMismatches({
+      password: config.password,
+      id_segment: id_segment.toString(),
+      id_job: config.id_job,
+    })
+      .then((data) => {
+        UI.detectTranslationAlternatives(data, id_segment)
+      })
+      .catch((errors) => {
+        if (errors.length) {
+          UI.processErrors(errors, 'setTranslation')
+        } else {
+          OfflineUtils.failedConnection(id_segment, 'getTranslationMismatches')
         }
       })
-    }
-
-    if (where == 'before') {
-      $('#outer').addClass('loadingBefore')
-    } else if (where == 'after') {
-      $('#outer').addClass('loading')
-    }
-
-    APP.doRequest({
-      data: {
-        action: 'getSegments',
-        jid: config.id_job,
-        password: config.password,
-        step: UI.moreSegNum,
-        segment: segId,
-        where: where,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(where, 'getMoreSegments')
-      },
-      success: function (d) {
-        $(document).trigger('segments:load', d.data)
-        UI.getMoreSegments_success(d)
-      },
-    })
-  },
-  getMoreSegments_success: function (d) {
-    if (d.errors.length) this.processErrors(d.errors, 'getMoreSegments')
-    var where = d.data.where
-    if (d.data.files && _.size(d.data.files)) {
-      this.renderFiles(d.data.files, where, false)
-
-      $(window).trigger('segmentsAdded', {resp: d.data.files})
-    }
-
-    if (
-      d.data.files.length === 0 ||
-      SegmentStore.getLastSegmentId() === config.last_job_segment
-    ) {
-      if (where == 'after') this.noMoreSegmentsAfter = true
-      if (where == 'before') this.noMoreSegmentsBefore = true
-    }
-    $('#outer').removeClass('loading loadingBefore')
-    this.loadingMore = false
-  },
-
-  getSegments: function (options) {
-    var where = this.startSegmentId ? 'center' : 'after'
-    $('#outer').addClass('loading')
-    var seg = options.segmentToOpen
-      ? options.segmentToOpen
-      : this.startSegmentId
-
-    return APP.doRequest({
-      data: {
-        action: 'getSegments',
-        jid: config.id_job,
-        password: config.password,
-        step: 40,
-        // step: step,
-        segment: seg,
-        where: where,
-      },
-      error: function () {
-        OfflineUtils.failedConnection(0, 'getSegments')
-      },
-      success: function (d) {
-        $(document).trigger('segments:load', d.data)
-
-        if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
-        UI.getSegments_success(d, options)
-      },
-    })
-  },
-  getSegments_success: function (d, options) {
-    if (d.errors.length) {
-      this.processErrors(d.errors, 'getSegments')
-    }
-
-    var where = d.data.where
-
-    if (!this.startSegmentId) {
-      var firstFile = d.data.files[Object.keys(d.data.files)[0]]
-      this.startSegmentId = firstFile.segments[0].sid
-    }
-    this.body.addClass('loaded')
-
-    if (typeof d.data.files !== 'undefined') {
-      this.renderFiles(d.data.files, where, UI.firstLoad)
-      if (options.openCurrentSegmentAfter && !options.segmentToOpen) {
-        var seg = UI.firstLoad ? this.currentSegmentId : UI.startSegmentId
-        SegmentActions.openSegment(seg)
-      }
-    }
-    $('#outer').removeClass('loading loadingBefore')
-
-    this.loadingMore = false
-    CatToolActions.updateFooterStatistics()
-    $(document).trigger('getSegments_success')
-  },
-
-  /**
-   * removed the #outer div, taking care of extra cleaning needed, like unmounting
-   * react components, closing side panel etc.
-   */
-  unmountSegments: function () {
-    $('.article-segments-container').each(function (index, value) {
-      ReactDOM.unmountComponentAtNode(value)
-      delete UI.SegmentsContainers
-    })
-    this.removeCacheObjects()
-    SegmentStore.removeAllSegments()
-    SegmentActions.closeSideSegments()
-    $('#outer').empty()
-  },
-
-  renderFiles: function (files, where, starting) {
-    // If we are going to re-render the articles first we remove them
-    if (where === 'center' && !starting) {
-      this.unmountSegments()
-    }
-    var segments = []
-    $.each(files, function () {
-      var newFile = ''
-      var articleToAdd = !$('#file').length
-      if (articleToAdd) {
-        newFile +=
-          '<article id="file" class="loading mbc-commenting-closed">' +
-          '   <div class="article-segments-container"></div>' +
-          '</article>'
-      }
-
-      if (articleToAdd) {
-        $('#outer').append(newFile)
-        $('#outer').append('   <div id="loader-getMoreSegments"/>')
-      }
-      segments = segments.concat(this.segments)
-    })
-    UI.renderSegments(segments, false, where)
-    $(document).trigger('files:appended')
-
-    if (starting) {
-      this.init()
-      // LXQ.getLexiqaWarnings();
-    }
-  },
-
-  renderSegments: function (segments, justCreated, where) {
-    if (
-      typeof this.split_points_source == 'undefined' ||
-      !this.split_points_source.length ||
-      justCreated
-    ) {
-      if (!this.SegmentsContainers) {
-        if (!this.SegmentsContainers) {
-          this.SegmentsContainers = []
-        }
-        var mountPoint = $('.article-segments-container')[0]
-        this.SegmentsContainers[0] = ReactDOM.render(
-          React.createElement(SegmentsContainer, {
-            // fid: fid,
-            isReview: Review.enabled(),
-            isReviewExtended: ReviewExtended.enabled(),
-            reviewType: Review.type,
-            enableTagProjection: UI.enableTagProjection,
-            tagModesEnabled: UI.tagModesEnabled,
-            startSegmentId: this.startSegmentId,
-          }),
-          mountPoint,
-        )
-        SegmentActions.renderSegments(segments, this.startSegmentId)
-      } else {
-        SegmentActions.addSegments(segments, where)
-      }
-      UI.registerFooterTabs()
-    }
-  },
-
-  getTranslationMismatches: function (id_segment) {
-    APP.doRequest({
-      data: {
-        action: 'getTranslationMismatches',
-        password: config.password,
-        id_segment: id_segment.toString(),
-        id_job: config.id_job,
-      },
-      context: id_segment,
-      error: function () {
-        OfflineUtils.failedConnection(this, 'getTranslationMismatches')
-      },
-      success: function (d) {
-        if (d.errors.length) {
-          UI.processErrors(d.errors, 'setTranslation')
-        } else {
-          UI.detectTranslationAlternatives(d, id_segment)
-        }
-      },
-    })
   },
 
   detectTranslationAlternatives: function (d, id_segment) {
-    /**
-     *
-     * the three rows below are commented because business logic has changed, now auto-propagation info
-     * is sent as response in getMoreSegments and added as data in the "section" Tag and
-     * rendered/prepared in renderFiles/createHeader
-     * and managed in propagateTranslation
-     *
-     * TODO
-     * I leave them here but they should be removed
-     *
-     * @see renderFiles
-     * @see createHeader
-     * @see propagateTranslation
-     *
-     */
     var sameContentIndex = -1
     var segmentObj = SegmentStore.getSegmentByIdToJS(id_segment)
     $.each(d.data.editable, function (ind) {
@@ -525,9 +246,9 @@ window.UI = {
     tte.data('raw-time-to-edit', this.totalTime)
   },
   goToFirstError: function () {
-    $('#point2seg').trigger('mousedown')
+    CatToolActions.toggleQaIssues()
     setTimeout(function () {
-      $('.qa-issues-container ').first().click()
+      $('.button.qa-issue').first().click()
     }, 300)
   },
   setDownloadStatus: function (stats) {
@@ -570,16 +291,6 @@ window.UI = {
     $('#action-download').removeClass('disabled')
   },
 
-  downloadFileURL: function (openOriginalFiles) {
-    return sprintf(
-      '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
-      config.basepath,
-      config.id_job,
-      config.password,
-      openOriginalFiles,
-    )
-  },
-
   continueDownloadWithGoogleDrive: function (openOriginalFiles) {
     if ($('#downloadProject').hasClass('disabled')) {
       return
@@ -609,40 +320,30 @@ window.UI = {
       UI.reEnableDownloadButton.bind(this),
     )
   },
-  showFixWarningsOnDownload: function (continueDownloadFunction) {
-    APP.confirm({
-      name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
-      cancelTxt: 'Fix errors',
-      onCancel: 'goToFirstError',
-      callback: continueDownloadFunction,
-      okTxt: 'Download anyway',
-      msg:
-        'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-        ' href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you' +
-        ' continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-    })
-  },
 
   runDownload: function () {
+    const globalWarnings = SegmentStore.getGlobalWarnings()
     var continueDownloadFunction
 
     if ($('#downloadProject').hasClass('disabled')) return false
 
     if (config.isGDriveProject) {
-      continueDownloadFunction = 'continueDownloadWithGoogleDrive'
+      continueDownloadFunction = UI.continueDownloadWithGoogleDrive
     } else {
-      continueDownloadFunction = 'continueDownload'
+      continueDownloadFunction = UI.continueDownload
     }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
     if (
-      $('#notifbox').hasClass('warningbox') &&
-      UI.globalWarnings.ERROR &&
-      UI.globalWarnings.ERROR.total > 0
+      globalWarnings.matecat.ERROR &&
+      globalWarnings.matecat.ERROR.total > 0
     ) {
-      UI.showFixWarningsOnDownload(continueDownloadFunction)
+      ModalsActions.showDownloadWarningsModal(
+        continueDownloadFunction,
+        UI.goToFirstError,
+      )
     } else {
-      UI[continueDownloadFunction]()
+      continueDownloadFunction()
     }
   },
   startWarning: function () {
@@ -658,20 +359,6 @@ window.UI = {
   },
 
   checkWarnings: function () {
-    var dd = new Date()
-    var ts = dd.getTime()
-    var seg =
-      typeof this.currentSegmentId == 'undefined'
-        ? this.startSegmentId
-        : this.currentSegmentId
-    var token = seg + '-' + ts.toString()
-    var dataMix = {
-      action: 'getWarning',
-      id_job: config.id_job,
-      password: config.password,
-      token: token,
-    }
-
     // var mock = {
     //     ERRORS: {
     //         categories: {
@@ -690,19 +377,10 @@ window.UI = {
     //         }
     //     }
     // };
-
-    APP.doRequest({
-      data: dataMix,
-      error: function () {
-        UI.warningStopped = true
-        OfflineUtils.failedConnection(0, 'getWarning')
-      },
-      success: function (data) {
+    getGlobalWarnings({id_job: config.id_job, password: config.password})
+      .then((data) => {
         //console.log('check warnings success');
         UI.startWarning()
-
-        UI.globalWarnings = data.details
-        //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
 
         //check for errors
         if (data.details) {
@@ -718,10 +396,11 @@ window.UI = {
         }
 
         $(document).trigger('getWarning:global:success', {resp: data})
-
-        SegmentActions.updateGlossaryData(data.data)
-      },
-    })
+      })
+      .catch((errors) => {
+        UI.warningStopped = true
+        OfflineUtils.failedConnection(0, 'getWarning')
+      })
   },
   displayMessage: function (messages) {
     var self = this
@@ -749,7 +428,7 @@ window.UI = {
             })
           },
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
         self.displayedMessages.push(elem.token)
         return false
       }
@@ -758,69 +437,21 @@ window.UI = {
   checkVersion: function () {
     if (this.version != config.build_number) {
       var notification = {
-        title: 'New version of MateCat',
-        text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+        uid: 'checkVersion',
+        title: 'New version of Matecat',
+        text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
         type: 'warning',
         allowHtml: true,
         position: 'bl',
       }
-      APP.addNotification(notification)
+      CatToolActions.addNotification(notification)
     }
   },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
-      UI.segmentQA(UI.currentSegment)
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     }, config.segmentQACheckInterval)
-  },
-  segmentQA: function ($segment) {
-    if (UI.tagMenuOpen) return
-
-    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment))
-    if (!segment) return
-    var dd = new Date()
-    var ts = dd.getTime()
-    var token = segment.sid + '-' + ts.toString()
-
-    var segment_status = segment.status
-
-    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
-    const trg_content = TagUtils.prepareTextToSend(segment.translation)
-
-    APP.doRequest(
-      {
-        data: {
-          action: 'getWarning',
-          id: segment.sid,
-          token: token,
-          id_job: config.id_job,
-          password: config.password,
-          src_content: src_content,
-          trg_content: trg_content,
-          segment_status: segment_status,
-        },
-        error: function () {
-          OfflineUtils.failedConnection(0, 'getWarning')
-        },
-        success: function (d) {
-          if (UI.editAreaEditing) return
-          if (d.details && d.details.id_segment) {
-            SegmentActions.setSegmentWarnings(
-              d.details.id_segment,
-              d.details.issues_info,
-              d.details.tag_mismatch,
-            )
-          } else {
-            SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
-          }
-          $(document).trigger('getWarning:local:success', {
-            resp: d,
-            segment: segment,
-          })
-        },
-      },
-      'local',
-    )
   },
 
   translationIsToSave: function (segment) {
@@ -848,7 +479,6 @@ window.UI = {
   setTranslation: function (options, callback) {
     var id_segment = options.id_segment
     var status = options.status
-    var caller = options.caller || false
     var propagate = options.propagate || false
 
     var segment = SegmentStore.getSegmentByIdToJS(id_segment)
@@ -862,7 +492,6 @@ window.UI = {
     var item = {
       id_segment: id_segment,
       status: status,
-      caller: caller,
       propagate: propagate,
       autoPropagation: options.autoPropagation,
     }
@@ -874,7 +503,7 @@ window.UI = {
     } else {
       this.updateToSetTranslationTail(item)
     }
-
+    SegmentActions.setSegmentSaving(id_segment, true)
     // If is offline and is in the tail I decrease the counter
     // else I execute the tail
     if (OfflineUtils.offline && config.offlineModeEnabled) {
@@ -912,7 +541,6 @@ window.UI = {
     $.each(UI.setTranslationTail, function () {
       if (this.id_segment == item.id_segment) {
         this.status = item.status
-        this.caller = item.caller
         this.callback = item.callback
         this.propagate = item.propagate
       }
@@ -929,20 +557,14 @@ window.UI = {
   execSetTranslation: function (options, callback_to_execute) {
     var id_segment = options.id_segment
     var status = options.status
-    var caller = options.caller
     var propagate = options.propagate
     var sourceSegment, translation
     this.executingSetTranslation.push(id_segment)
     var reqArguments = arguments
-    var segment = SegmentStore.getSegmentByIdToJS(id_segment)
-    var contextBefore = UI.getContextBefore(id_segment)
-    var idBefore = UI.getIdBefore(id_segment)
-    var contextAfter = UI.getContextAfter(id_segment)
-    var idAfter = UI.getIdAfter(id_segment)
+    let segment = SegmentStore.getSegmentByIdToJS(id_segment)
 
     this.lastTranslatedSegmentId = id_segment
 
-    caller = typeof caller == 'undefined' ? false : caller
     try {
       // Attention, to be modified when we will lock tags
       translation = TagUtils.prepareTextToSend(segment.translation)
@@ -962,9 +584,6 @@ window.UI = {
       }
       return false
     }
-    var time_to_edit = UI.editTime
-    var id_translator = config.id_translator
-    var autosave = caller == 'autosave'
 
     var isSplitted = segment.splitted
     if (isSplitted) {
@@ -974,86 +593,30 @@ window.UI = {
         '.source',
       )
     }
-    this.tempReqArguments = {
-      id_segment: id_segment,
-      id_job: config.id_job,
-      password: config.password,
+    let requestArgs = {
+      segment,
       status: status,
       translation: translation,
-      segment: sourceSegment,
-      time_to_edit: time_to_edit,
-      id_translator: id_translator,
-      chosen_suggestion_index: segment.choosenSuggestionIndex,
-      autosave: autosave,
-      version: segment.version,
+      source: sourceSegment,
+      chosenSuggestionIndex: segment.choosenSuggestionIndex,
       propagate: propagate,
-      context_before: contextBefore,
-      id_before: idBefore,
-      context_after: contextAfter,
-      id_after: idAfter,
-      by_status: false,
-      revision_number: config.revisionNumber,
-      guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment),
-      current_password: config.currentPassword,
     }
     if (isSplitted) {
       SegmentActions.setStatus(segment.original_sid, null, status)
-      this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(
+      requestArgs.splitStatuses = this.collectSplittedStatuses(
         segment.original_sid,
         segment.sid,
         status,
       ).toString()
     }
-    if (!propagate) {
-      this.tempReqArguments.propagate = false
-    }
-    var reqData = this.tempReqArguments
-    reqData.action = 'setTranslation'
+
     if (callback_to_execute) {
       callback_to_execute.call(this)
     }
-    return APP.doRequest({
-      data: reqData,
-      context: [reqArguments, options],
-      error: function (response) {
-        var idSegment = this[0][0].id_segment
-        var index = UI.executingSetTranslation.indexOf(idSegment)
-        if (index > -1) {
-          UI.executingSetTranslation.splice(index, 1)
-        }
-        if (response.status === 409) {
-          SegmentActions.addClassToSegment(idSegment, 'setTranslationError')
-          var callback = function () {
-            UI.reloadToSegment(idSegment)
-          }
-          var props = {
-            text:
-              'There was an error saving segment ' +
-              idSegment +
-              '.</br></br>' +
-              'Press OK to refresh segments.',
-            successText: 'Ok',
-            successCallback: function () {
-              APP.ModalWindow.onCloseModal()
-            },
-          }
-          APP.ModalWindow.showModalComponent(
-            ConfirmMessageModal,
-            props,
-            'Error saving segment',
-            {},
-            callback,
-          )
-          return false
-        } else {
-          UI.addToSetTranslationTail(this[1])
-          OfflineUtils.changeStatusOffline(this[0][0].id_segment)
-          OfflineUtils.failedConnection(this[0], 'setTranslation')
-          OfflineUtils.decrementOfflineCacheRemaining()
-        }
-      },
-      success: function (data) {
-        var idSegment = this[0][0].id_segment
+
+    setTranslation(requestArgs)
+      .then((data) => {
+        var idSegment = options.id_segment
         var index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)
@@ -1062,8 +625,8 @@ window.UI = {
           callback(data)
         }
         UI.execSetTranslationTail()
-        UI.setTranslation_success(data, this[1])
-
+        UI.setTranslation_success(data, options)
+        SegmentActions.setSegmentSaving(id_segment, false)
         data.translation.segment = segment
         $(document).trigger('translation:change', data.translation)
         data.segment = segment
@@ -1071,8 +634,22 @@ window.UI = {
         if (config.alternativesEnabled) {
           UI.getTranslationMismatches(id_segment)
         }
-      },
-    })
+      })
+      .catch(({errors}) => {
+        if (errors && errors.length) {
+          this.processErrors(errors, 'setTranslation')
+        } else {
+          var idSegment = options.id_segment
+          var index = UI.executingSetTranslation.indexOf(idSegment)
+          if (index > -1) {
+            UI.executingSetTranslation.splice(index, 1)
+          }
+          UI.addToSetTranslationTail(options)
+          OfflineUtils.changeStatusOffline(idSegment)
+          OfflineUtils.failedConnection(reqArguments, 'setTranslation')
+          OfflineUtils.decrementOfflineCacheRemaining()
+        }
+      })
   },
 
   collectSplittedStatuses: function (sid, splittedSid, status) {
@@ -1119,17 +696,25 @@ window.UI = {
 
       if (operation === 'setTranslation') {
         if (codeInt !== -10) {
-          APP.alert({
-            msg: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
-          })
+          ModalsActions.showModalComponent(
+            AlertModal,
+            {
+              text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+            },
+            'Error',
+          )
         }
       }
 
       if (codeInt === -10 && operation !== 'getSegments') {
-        APP.alert({
-          msg: 'Job canceled or assigned to another translator',
-          callback: 'location.reload',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'Job canceled or assigned to another translator',
+            successCallback: () => location.reload,
+          },
+          'Error',
+        )
       }
       if (codeInt === -1000 || codeInt === -101) {
         console.log('ERROR ' + codeInt)
@@ -1137,7 +722,13 @@ window.UI = {
       }
 
       if (codeInt <= -2000 && !_.isUndefined(this.message)) {
-        APP.alert({msg: this.message})
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: this.message,
+          },
+          'Error',
+        )
       }
     })
   },
@@ -1147,9 +738,7 @@ window.UI = {
     var propagate = options.propagate
     var segment = $('#segment-' + id_segment)
 
-    if (response.errors.length) {
-      this.processErrors(response.errors, 'setTranslation')
-    } else if (response.data == 'OK') {
+    if (response.data == 'OK') {
       SegmentActions.setStatus(id_segment, null, status)
       this.setDownloadStatus(response.stats)
       CatToolActions.setProgress(response.stats)
@@ -1160,8 +749,6 @@ window.UI = {
 
       this.checkWarnings(false)
       $(segment).attr('data-version', response.version)
-
-      this.tempReqArguments = null
 
       UI.checkSegmentsPropagation(
         propagate,
@@ -1224,8 +811,8 @@ window.UI = {
         allowHtml: true,
         position: 'bl',
       }
-      APP.removeAllNotifications()
-      APP.addNotification(notification)
+      CatToolActions.removeAllNotifications()
+      CatToolActions.addNotification(notification)
     } else {
       SegmentActions.setSegmentPropagation(id_segment, null, false)
     }
@@ -1308,11 +895,42 @@ window.UI = {
 
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      let message =
+        'All segments are in <b>read-only mode</b> because this job is under review.'
+
+      if (config.chunk_completion_undoable && config.last_completion_event_id) {
+        message =
+          message +
+          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
+      }
+
+      CatToolActions.addNotification({
+        uid: 'translate-warning',
+        autoDismiss: false,
+        dismissable: true,
+        position: 'tc',
+        text: message,
+        title: 'Warning',
+        type: 'warning',
+        allowHtml: true,
+      })
+    }
     if (TextUtils.justSelecting('readonly')) return
     clearTimeout(UI.selectingReadonly)
     if (section.hasClass('ice-locked') || section.hasClass('ice-unlocked')) {
       UI.selectingReadonly = setTimeout(function () {
-        APP.alert({msg: UI.messageForClickOnIceMatch()})
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: UI.messageForClickOnIceMatch(),
+          },
+          'Ice Match',
+        )
       }, 200)
       return
     }
@@ -1322,11 +940,20 @@ window.UI = {
     }, 200)
   },
   readonlyClickDisplay: function () {
-    APP.alert({msg: UI.messageForClickOnReadonly()})
+    ModalsActions.showModalComponent(AlertModal, {
+      text: UI.messageForClickOnReadonly(),
+    })
   },
   messageForClickOnReadonly: function () {
-    var msgArchived = 'Job has been archived and cannot be edited.'
-    var msgOther = 'This part has not been assigned to you.'
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      return 'This job is currently under review. Segments are in read-only mode.'
+    }
+    const msgArchived = 'Job has been archived and cannot be edited.'
+    const msgOther = 'This part has not been assigned to you.'
     return UI.body.hasClass('archived') ? msgArchived : msgOther
   },
   messageForClickOnIceMatch: function () {
@@ -1358,9 +985,4 @@ window.UI = {
 
 $(document).ready(function () {
   UI.start()
-})
-
-$(window).resize(function () {
-  // UI.fixHeaderHeightChange();
-  APP.fitText($('#pname-container'), $('#pname'), 25)
 })

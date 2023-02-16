@@ -1,74 +1,76 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 
-class NotificationItem extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      visible: false,
-      removed: false,
+const NotificationItem = ({
+  uid,
+  position,
+  title,
+  text,
+  type,
+  autoDismiss,
+  closeCallback,
+  openCallback,
+  allowHtml,
+  timer,
+  dismissable,
+  onRemove,
+  remove,
+}) => {
+  const [visible, setVisible] = useState(false)
+  const [removed, setRemoved] = useState(false)
+
+  let _isMounted = useRef()
+
+  const styleNameContainer = 'notification-type-' + type
+  const styleNameTitle = 'notification-title-' + type
+  let _notificationTimer = useRef()
+
+  const hideNotification = () => {
+    if (_notificationTimer.current) {
+      clearTimeout(_notificationTimer.current)
     }
-    this._isMounted = false
-    this.dismissNotification = this.dismissNotification.bind(this)
-    this.hideNotification = this.hideNotification.bind(this)
 
-    this.styleNameContainer = 'notification-type-' + this.props.type
-    this.styleNameTitle = 'notification-title-' + this.props.type
-  }
-
-  dismissNotification() {
-    this.hideNotification()
-  }
-
-  hideNotification() {
-    var self = this
-    if (this._notificationTimer) {
-      clearTimeout(this._notificationTimer)
-    }
-
-    if (this._isMounted) {
-      this.setState({
-        visible: false,
-        removed: true,
-      })
-      this.props.hideMateCat(self.props.uid)
+    if (_isMounted.current) {
+      setVisible(false)
+      setRemoved(true)
     }
     setTimeout(function () {
-      self.props.onRemove(self.props.uid)
+      onRemove(uid)
     }, 1000)
 
-    if (this.props.closeCallback) {
-      this.props.closeCallback.call()
+    if (closeCallback) {
+      closeCallback.call()
     }
   }
 
-  componentDidMount() {
-    this._isMounted = true
-    var self = this
-    setTimeout(function () {
-      self.setState({
-        visible: true,
-      })
-      self.props.showMateCat()
+  useEffect(() => {
+    _isMounted.current = true
+    setTimeout(() => {
+      setVisible(true)
     }, 50)
 
-    if (this.props.autoDismiss) {
-      this._notificationTimer = setTimeout(function () {
-        self.hideNotification()
-      }, this.props.timer)
+    if (autoDismiss) {
+      _notificationTimer.current = setTimeout(() => {
+        hideNotification()
+      }, timer)
     }
-    if (this.props.openCallback) {
-      this.props.openCallback.call()
+    if (openCallback) {
+      openCallback.call()
     }
-  }
+  }, [])
 
-  allowHTML(string) {
+  useEffect(() => {
+    if (remove && visible) {
+      hideNotification()
+    }
+  }, [remove])
+
+  const allowHTML = (string) => {
     return {__html: string}
   }
 
-  getCssPropertyByPosition() {
-    var position = this.props.position
-    var css = {}
+  const getCssPropertyByPosition = () => {
+    let css = {}
 
     switch (position) {
       case 'bl':
@@ -93,22 +95,19 @@ class NotificationItem extends React.Component {
     return css
   }
 
-  render() {
-    var autoDismiss,
-      message,
-      title = null
-    var notificationStyle = {}
-    var cssByPos = this.getCssPropertyByPosition()
-    if (!this.state.visible && !this.state.removed) {
+  const getNotificationStyle = () => {
+    let notificationStyle = {}
+    let cssByPos = getCssPropertyByPosition()
+    if (!visible && !removed) {
       notificationStyle[cssByPos.property] = cssByPos.value
     }
 
-    if (this.state.visible && !this.state.removed) {
+    if (visible && !removed) {
       notificationStyle[cssByPos.property] = 0
       notificationStyle.opacity = 1
     }
 
-    if (this.state.removed) {
+    if (removed) {
       notificationStyle.overflow = 'hidden'
       notificationStyle.opacity = 0
       notificationStyle[cssByPos.property] = cssByPos.value
@@ -118,42 +117,41 @@ class NotificationItem extends React.Component {
       notificationStyle.paddingBottom = 0
       notificationStyle.borderTop = 0
     }
+    return notificationStyle
+  }
 
-    if (this.props.dismissable) {
-      autoDismiss = (
+  return (
+    <div className={styleNameContainer} style={getNotificationStyle()}>
+      {position === 'bl' && type === 'info' ? (
+        <div className="notifications-cat-smiling" />
+      ) : null}
+      {dismissable ? (
         <span
           className={'notification-close-button'}
-          onClick={this.dismissNotification}
+          onClick={hideNotification}
         >
           ×
         </span>
-      )
-    }
-    if (this.props.allowHtml) {
-      title = (
-        <div
-          className={this.styleNameTitle}
-          dangerouslySetInnerHTML={this.allowHTML(this.props.title)}
-        ></div>
-      )
-      message = (
-        <div
-          className={'notification-message'}
-          dangerouslySetInnerHTML={this.allowHTML(this.props.text)}
-        ></div>
-      )
-    } else {
-      title = <div className={this.styleNameTitle}> {this.props.title}</div>
-      message = <div className={'notification-message'}>{this.props.text}</div>
-    }
-    return (
-      <div className={this.styleNameContainer} style={notificationStyle}>
-        {autoDismiss}
-        {title}
-        {message}
-      </div>
-    )
-  }
+      ) : null}
+      {allowHtml ? (
+        <>
+          <div
+            className={styleNameTitle}
+            dangerouslySetInnerHTML={allowHTML(title)}
+          />
+          <div
+            className={'notification-message'}
+            dangerouslySetInnerHTML={allowHTML(text)}
+          />
+        </>
+      ) : (
+        <>
+          <div className={styleNameTitle}> {title}</div>
+          <div className={'notification-message'}>{text}</div>
+        </>
+      )}
+    </div>
+  )
 }
 
 NotificationItem.propTypes = {

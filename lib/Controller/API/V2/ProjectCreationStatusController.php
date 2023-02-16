@@ -23,6 +23,17 @@ class ProjectCreationStatusController extends KleinController {
 
     public function get(){
 
+        // validate id_project
+        if(!is_numeric($this->request->id_project)){
+
+            $response = [];
+            $response[] = new Exception( "ID project is not a valid integer", -1 );
+
+            $this->response->code( 400 );
+            $this->response->json( ( new Error( (object)$response ) )->render() );
+            exit();
+        }
+
         $result = Queue::getPublishedResults( $this->request->id_project );
 
         if ( empty( $result ) ) {
@@ -33,7 +44,7 @@ class ProjectCreationStatusController extends KleinController {
 
             $response = [];
             foreach( $result[ 'errors' ] as $error ){
-                $response[] = new Exception( $error[ 'message' ], $error[ 'code' ] );
+                $response[] = new Exception( $error[ 'message' ], (int)$error[ 'code' ] );
             }
 
             $this->response->code( 500 );

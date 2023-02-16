@@ -2,6 +2,7 @@
 
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FilesStorage\FilesStorageFactory;
+use Behat\Transliterator\Transliterator;
 
 class Utils {
 
@@ -164,6 +165,9 @@ class Utils {
         $find   = [ ' ', '&', '\r\n', '\n', '+', ',' ];
         $string = str_replace( $find, '-', $string );
 
+        // transliterate string
+        $string = Transliterator::transliterate($string);
+
         //delete and replace rest of special chars
         $find   = [ '/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/' ];
         $repl   = [ '', '-', '' ];
@@ -279,6 +283,33 @@ class Utils {
 
     public static function underscoreToCamelCase( $string ) {
         return str_replace( ' ', '', ucwords( str_replace( '_', ' ', $string ) ) );
+    }
+
+    /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function trimAndLowerCase($string)
+    {
+        return trim(strtolower($string));
+    }
+
+    /**
+     * Removes the empty elements from the end of an array
+     *
+     * @param array $array
+     * @return array|mixed
+     */
+    public static function popArray(array $array)
+    {
+        if(end($array) === ''){
+            array_pop($array);
+
+            return self::popArray($array);
+        }
+
+        return $array;
     }
 
     /**
@@ -512,7 +543,7 @@ class Utils {
                 self::deleteDir( $fileInfo->getPathname() );
             } else {
                 $fileName = $fileInfo->getFilename();
-                if ( $fileName{0} == '.' ) {
+                if ( $fileName[0] == '.' ) {
                     continue;
                 }
                 $outcome = unlink( $fileInfo->getPathname() );

@@ -9,6 +9,10 @@ import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
+import AlertModal from '../../../modals/AlertModal'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import CommonUtils from '../../../../utils/commonUtils'
 
 class Search extends React.Component {
   constructor(props) {
@@ -21,10 +25,12 @@ class Search extends React.Component {
         enableReplace: false,
         matchCase: false,
         exactMatch: false,
+        entireJob: false,
         replaceTarget: '',
         selectStatus: 'all',
         searchTarget: '',
         searchSource: '',
+        previousIsTagProjectionEnabled: false,
       },
       focus: true,
       funcFindButton: true, // true=find / false=next
@@ -46,6 +52,7 @@ class Search extends React.Component {
     this.handelKeydownFunction = this.handelKeydownFunction.bind(this)
     this.updateSearch = this.updateSearch.bind(this)
     this.dropdownInit = false
+    this.jobIsSplitted = false
   }
 
   resetSearch() {
@@ -65,7 +72,15 @@ class Search extends React.Component {
     }
     this.setState({
       funcFindButton: false,
+      ...(config.tag_projection_enabled === 1 && {
+        previousIsTagProjectionEnabled: true,
+      }),
     })
+    // disable tag projection
+    if (config.tag_projection_enabled === 1) {
+      UI.disableTagProjectionInJob()
+      UI.setTagProjectionChecked(false)
+    }
   }
 
   setResults(data) {
@@ -177,7 +192,7 @@ class Search extends React.Component {
     if (UI.segmentIsLoaded(UI.currentSegmentId)) {
       setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId))
     } else {
-      UI.render({
+      CatToolActions.onRender({
         firstLoad: false,
         segmentToOpen: UI.currentSegmentId,
       })
@@ -201,6 +216,21 @@ class Search extends React.Component {
     })
   }
 
+  handleKeyDown(e, name) {
+    if (e.code == 'Space' && e.ctrlKey && e.shiftKey) {
+      let textToInsert = tagSignatures.nbsp.placeholder
+      let cursorPosition = e.target.selectionStart
+      let textBeforeCursorPosition = e.target.value.substring(0, cursorPosition)
+      let textAfterCursorPosition = e.target.value.substring(
+        cursorPosition,
+        e.target.value.length,
+      )
+      e.target.value =
+        textBeforeCursorPosition + textToInsert + textAfterCursorPosition
+      this.handleInputChange(name, e)
+    }
+  }
+
   resetStatusFilter() {
     $(this.statusDropDown).dropdown('restore defaults')
   }
@@ -213,19 +243,25 @@ class Search extends React.Component {
       text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
       successText: 'Continue',
       successCallback: function () {
-        SearchUtils.execReplaceAll(self.state.search).then((d) => {
-          if (d.errors.length) {
-            APP.alert({msg: d.errors[0].message})
-            return false
-          }
-          const currentId = SegmentStore.getCurrentSegmentId()
-          UI.unmountSegments()
-          UI.render({
-            firstLoad: false,
-            segmentToOpen: currentId,
+        SearchUtils.execReplaceAll(self.state.search)
+          .then(() => {
+            const currentId = SegmentStore.getCurrentSegmentId()
+            SegmentActions.removeAllSegments()
+            CatToolActions.onRender({
+              firstLoad: false,
+              segmentToOpen: currentId,
+            })
           })
-        })
-        APP.ModalWindow.onCloseModal()
+          .catch((errors) => {
+            ModalsActions.showModalComponent(
+              AlertModal,
+              {
+                text: errors[0].message,
+              },
+              'Replace All Alert',
+            )
+          })
+        ModalsActions.onCloseModal()
         CatToolActions.storeSearchResults({
           total: 0,
           searchResults: [],
@@ -236,10 +272,10 @@ class Search extends React.Component {
       },
       cancelText: 'Cancel',
       cancelCallback: function () {
-        APP.ModalWindow.onCloseModal()
+        ModalsActions.onCloseModal()
       },
     }
-    APP.ModalWindow.showModalComponent(
+    ModalsActions.showModalComponent(
       ConfirmMessageModal,
       props,
       'Confirmation required',
@@ -248,7 +284,13 @@ class Search extends React.Component {
 
   handleReplaceClick() {
     if (this.state.search.searchTarget === this.state.search.replaceTarget) {
-      APP.alert({msg: 'Attention: you are replacing the same text!'})
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'Attention: you are replacing the same text!',
+        },
+        'Replace Alert',
+      )
       return false
     }
 
@@ -263,7 +305,6 @@ class Search extends React.Component {
       UI.setTranslation({
         id_segment: segment.original_sid,
         status: segment.status,
-        caller: 'replace',
       })
     })
   }
@@ -318,6 +359,7 @@ class Search extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.active) {
+      this.jobIsSplitted = CommonUtils.checkJobIsSplitted()
       if (!prevProps.active) {
         if (this.sourceEl && this.state.focus) {
           this.sourceEl.focus()
@@ -346,6 +388,21 @@ class Search extends React.Component {
         })
       }
       this.dropdownInit = false
+    }
+
+    // reset tag projection
+    if (!this.props.active && prevProps.active) {
+      this.setState({
+        previousIsTagProjectionEnabled: false,
+      })
+    }
+    if (
+      !this.props.active &&
+      this.props.active !== prevProps.active &&
+      this.state.previousIsTagProjectionEnabled
+    ) {
+      UI.enableTagProjectionInJob()
+      UI.setTagProjectionChecked(true)
     }
   }
   getResultsHtml() {
@@ -498,7 +555,7 @@ class Search extends React.Component {
     }
   }
   componentDidMount() {
-    document.addEventListener('keydown', this.handelKeydownFunction, false)
+    document.addEventListener('keydown', this.handelKeydownFunction, true)
     CatToolStore.addListener(
       CattolConstants.STORE_SEARCH_RESULT,
       this.setResults.bind(this),
@@ -510,7 +567,7 @@ class Search extends React.Component {
     SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch)
   }
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handelKeydownFunction, false)
+    document.removeEventListener('keydown', this.handelKeydownFunction)
     CatToolStore.removeListener(
       CattolConstants.STORE_SEARCH_RESULT,
       this.setResults,
@@ -600,6 +657,7 @@ class Search extends React.Component {
                       tabIndex={1}
                       value={this.state.search.searchSource}
                       placeholder="Find in source"
+                      onKeyDown={(e) => this.handleKeyDown(e, 'searchSource')}
                       onChange={this.handleInputChange.bind(
                         this,
                         'searchSource',
@@ -623,6 +681,7 @@ class Search extends React.Component {
                     </div>
                     <div className="exact-match">
                       <input
+                        ref={(ref) => (this.sourceInput = ref)}
                         type="checkbox"
                         tabIndex={4}
                         checked={this.state.search.exactMatch}
@@ -639,6 +698,7 @@ class Search extends React.Component {
                   <div className="find-element ui input">
                     <div className="find-in-target">
                       <input
+                        ref={(ref) => (this.targetInput = ref)}
                         type="text"
                         tabIndex={2}
                         placeholder="Find in target"
@@ -647,6 +707,7 @@ class Search extends React.Component {
                           this,
                           'searchTarget',
                         )}
+                        onKeyDown={(e) => this.handleKeyDown(e, 'searchTarget')}
                         className={
                           !this.state.search.searchTarget &&
                           this.state.search.enableReplace
@@ -654,25 +715,25 @@ class Search extends React.Component {
                             : null
                         }
                       />
-                      {this.state.showReplaceOptionsInSearch ? (
-                        <div
-                          className={
-                            'enable-replace-check ' + replaceCheckboxClass
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            tabIndex={5}
-                            checked={this.state.search.enableReplace}
-                            onChange={this.handleInputChange.bind(
-                              this,
-                              'enableReplace',
-                            )}
-                          />
-                          <label> Replace with</label>
-                        </div>
-                      ) : null}
                     </div>
+                    {this.state.showReplaceOptionsInSearch ? (
+                      <div
+                        className={
+                          'enable-replace-check ' + replaceCheckboxClass
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          tabIndex={5}
+                          checked={this.state.search.enableReplace}
+                          onChange={this.handleInputChange.bind(
+                            this,
+                            'enableReplace',
+                          )}
+                        />
+                        <label> Replace with</label>
+                      </div>
+                    ) : null}
                   </div>
                   {this.state.showReplaceOptionsInSearch &&
                   this.state.search.enableReplace ? (
@@ -732,27 +793,45 @@ class Search extends React.Component {
                 </div>
               </div>
               {this.state.showReplaceOptionsInSearch ? (
-                <div className="find-actions">
-                  <button
-                    className={
-                      'ui basic tiny button ' + findButtonClassDisabled
-                    }
-                    onClick={this.handleSubmit.bind(this)}
-                  >
-                    FIND
-                  </button>
-                  <button
-                    className={'ui basic tiny button ' + replaceButtonsClass}
-                    onClick={this.handleReplaceClick.bind(this)}
-                  >
-                    REPLACE
-                  </button>
-                  <button
-                    className={'ui basic tiny button ' + replaceAllButtonsClass}
-                    onClick={this.handleReplaceAllClick.bind(this)}
-                  >
-                    REPLACE ALL
-                  </button>
+                <div>
+                  <div className="find-actions">
+                    <button
+                      className={
+                        'ui basic tiny button ' + findButtonClassDisabled
+                      }
+                      onClick={this.handleSubmit.bind(this)}
+                    >
+                      FIND
+                    </button>
+                    <button
+                      className={'ui basic tiny button ' + replaceButtonsClass}
+                      onClick={this.handleReplaceClick.bind(this)}
+                    >
+                      REPLACE
+                    </button>
+                    <button
+                      className={
+                        'ui basic tiny button ' + replaceAllButtonsClass
+                      }
+                      onClick={this.handleReplaceAllClick.bind(this)}
+                    >
+                      REPLACE ALL
+                    </button>
+                  </div>
+                  {this.jobIsSplitted && (
+                    <div className="find-option">
+                      <input
+                        type="checkbox"
+                        tabIndex={5}
+                        checked={this.state.search.entireJob}
+                        onChange={this.handleInputChange.bind(
+                          this,
+                          'entireJob',
+                        )}
+                      />
+                      <label> Search all chunks</label>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="find-actions">

@@ -14,8 +14,12 @@ class ProjectOptionsSanitizer {
             'af-ZA',
             'sq-AL',
             'ar-SA',
+            'hy-AM',
+            'as-IN',
+            'az-AZ',
             'fr-BE',
             'bn-IN',
+            'be-BY',
             'bs-BA',
             'bg-BG',
             'my-MM',
@@ -41,6 +45,7 @@ class ProjectOptionsSanitizer {
             'fr-CA',
             'fr-CH',
             'de-DE',
+            'ka-GE',
             'el-GR',
             'gu-IN',
             'hi-IN',
@@ -48,14 +53,20 @@ class ProjectOptionsSanitizer {
             'id-ID',
             'it-IT',
             'ja-JP',
+            'jv-ID',
             'ha-NG',
             'he-IL',
+            'ht-HT',
+            'kk-KZ',
+            'rn-BI',
             'ko-KR',
+            'ky-KG',
             'lv-LV',
             'lt-LT',
             'mk-MK',
             'ms-MY',
             'mr-IN',
+            'ne-NP',
             'nb-NO',
             'fa-IR',
             'pl-PL',
@@ -65,11 +76,14 @@ class ProjectOptionsSanitizer {
             'ru-RU',
             'sr-Latn-RS',
             'sr-Cyrl-RS',
+            'si-LK',
             'sk-SK',
             'sl-SI',
             'es-ES',
             'es-CO',
             'es-MX',
+            'es-US',
+            'es-419',
             'sw-KE',
             'sv-SE',
             'de-CH',
@@ -80,6 +94,7 @@ class ProjectOptionsSanitizer {
             'tr-TR',
             'uk-UA',
             'ur-PK',
+            'uz-UZ',
             'vi-VN'
 
     ];
@@ -105,15 +120,41 @@ class ProjectOptionsSanitizer {
             'en-ja' => 'English - Japanese',
             'en-et' => 'English - Estonian',
             'en-sk' => 'English - Slovak',
+            'en-bg' => 'English - Bulgarian',
+            'en-bs' => 'English - Bosnian',
+            'en-ar' => 'English - Arabic',
+            'en-ca' => 'English - Catalan',
+            'en-zh' => 'English - Chinese',
+            'en-he' => 'English - Hebrew',
+            'en-hr' => 'English - Croatian',
+            'en-id' => 'English - Indonesian',
+            'en-is' => 'English - Icelandic',
+            'en-ko' => 'English - Korean',
+            'en-lv' => 'English - Latvian',
+            'en-mk' => 'English - Macedonian',
+            'en-ms' => 'English - Malay',
+            'en-mt' => 'English - Maltese',
+            'en-nb' => 'English - Norwegian Bokmål',
+            'en-nn' => 'English - Norwegian Nynorsk',
+            'en-ro' => 'English - Romanian',
+            'en-sl' => 'English - Slovenian',
+            'en-sq' => 'English - Albanian',
+            'en-sr' => 'English - Montenegrin',
+            'en-th' => 'English - Thai',
+            'en-tr' => 'English - Turkish',
+            'en-uk' => 'English - Ukrainian',
+            'en-vi' => 'English - Vietnamese',
             'de-it' => 'German - Italian',
             'de-fr' => 'German - French',
+            'de-cs' => 'German - Czech',
             'fr-it' => 'French - Italian',
             'fr-nl' => 'French - Dutch',
             'it-es' => 'Italian - Spanish',
-            'nl-fi' => 'Dutch - Finnish',
             'da-sv' => 'Danish - Swedish',
             'nl-pt' => 'Dutch - Portuguese',
+            'nl-fi' => 'Dutch - Finnish',
             'zh-en' => 'Chinese - English',
+            'sv-da' => 'Swedish - Danish',
             'cs-de' => 'Czech - German',
     ];
 
@@ -181,7 +222,7 @@ class ProjectOptionsSanitizer {
         $rules = [ 'patent', 'paragraph' ];
 
         if (
-                array_key_exists( 'segmentation_rule', $this->options ) &&
+                isset( $this->options[ 'segmentation_rule' ] ) &&
                 in_array( $this->options[ 'segmentation_rule' ], $rules )
         ) {
             $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
@@ -199,34 +240,30 @@ class ProjectOptionsSanitizer {
      * If Lexiqa is requested to be enabled, then check if language is in combination
      */
     private function sanitizeLexiQA() {
-        if ( $this->options[ 'lexiqa' ] == true && $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
-            $this->sanitized[ 'lexiqa' ] = true;
-        } else {
-            $this->sanitized[ 'lexiqa' ] = false;
-        }
+        $this->sanitized[ 'lexiqa' ] = ( $this->options[ 'lexiqa' ] == true and $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) );
     }
 
     /**
      * If tag project is requested to be enabled, check if language combination is allowed.
      */
     private function sanitizeTagProjection() {
-        if ( $this->options[ 'tag_projection' ] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
-            $this->sanitized[ 'tag_projection' ] = true;
-        } else {
-            $this->sanitized[ 'tag_projection' ] = false;
-
-        }
+        $this->sanitized[ 'tag_projection' ] = ( $this->options[ 'tag_projection' ] == true and $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) );
     }
 
+    /**
+     * @param array $langs
+     *
+     * @return bool
+     * @throws Exception
+     */
     private function checkSourceAndTargetAreInCombination( $langs ) {
         $this->__ensureLanguagesAreSet();
 
         $all_langs = array_merge( $this->target_lang, [ $this->source_lang ] );
-
         $all_langs = array_unique( $all_langs );
-
         $found = count( array_intersect( $langs, $all_langs ) );
-        return $found == 2;
+
+        return $found >= 2;
     }
 
     private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {

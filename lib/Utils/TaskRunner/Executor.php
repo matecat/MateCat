@@ -91,11 +91,10 @@ class Executor implements SplObserver {
      * Logging method
      *
      * @param      $_msg
-     * @param bool $from_self
      */
-    protected function _logMsg( $_msg, $from_self = true ) {
+    protected function _logMsg( $_msg ) {
         if ( INIT::$DEBUG ) {
-            echo "[" . date( DATE_RFC822 ) . "] " . $_msg . "\n";
+            echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
             Log::doJsonLog( $_msg );
         }
     }
@@ -176,6 +175,7 @@ class Executor implements SplObserver {
         }
 
         static::$__INSTANCE = new static( $queueContext );
+
 //        static::$__INSTANCE->_logMsg( $msg );
 
         return static::$__INSTANCE;
@@ -248,7 +248,7 @@ class Executor implements SplObserver {
                 /**
                  * Do not re-instantiate an already existent object
                  */
-                if ( ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
+                if ( $this->_worker == null || ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
                     $this->_worker->attach( $this );
                     $this->_worker->setPid( $this->_executor_instance_id );
@@ -328,12 +328,12 @@ class Executor implements SplObserver {
 
                 $queueElement = json_decode( $msgFrame->body, true );
 
-                if( empty( $queueElement ) ){
+                if ( empty( $queueElement ) ) {
 
                     $this->_queueHandler->ack( $msgFrame );
                     $msg = \Utils::raiseJsonExceptionError( false );
                     $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . $msg, 'FRAME' => $msgFrame->body ] );
-                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1);
+                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1 );
 
                 }
 
@@ -411,7 +411,7 @@ class Executor implements SplObserver {
 
     }
 
-    public function forceAck( SplSubject $subject ){
+    public function forceAck( SplSubject $subject ) {
         //TODO
     }
 
@@ -424,13 +424,13 @@ class Executor implements SplObserver {
 //$argv[ 1 ] = '{"queue_name":"analysis_queue_P1","pid_set_name":"ch_pid_set_p1","max_executors":"1","redis_key":"p1_list","loggerName":"tm_analysis_P1.log"}';
 //$argv[ 1 ] = '{"queue_name":"activity_log","pid_set_name":"ch_pid_activity_log","max_executors":"1","redis_key":"activity_log_list","loggerName":"activity_log.log"}';
 //$argv[ 1 ] = '{"queue_name":"project_queue","pid_set_name":"ch_pid_project_queue","max_executors":"1","redis_key":"project_queue_list","loggerName":"project_queue.log"}';
-// $argv[ 1 ] = '{"queue_name":"dqf","pid_set_name":"ch_pid_dqf","max_executors":"1","redis_key":"dqf_list","loggerName":"dqf.log"}';
+//$argv[ 1 ] = '{"queue_name":"dqf","pid_set_name":"ch_pid_dqf","max_executors":"1","redis_key":"dqf_list","loggerName":"dqf.log"}';
 //$argv[ 1 ] = '{"queue_length":0,"queue_name":"set_contribution_mt","pid_set_name":"ch_pid_set_contribution_mt","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"set_contribution_mt.log"}';
 //$argv[ 1 ] = '{"queue_name":"jobs","pid_set_name":"ch_pid_jobs","max_executors":"1","redis_key":"jobs_list","loggerName":"jobs.log"}';
 //$argv[ 1 ] = '{"queue_name":"qa_checks","pid_set_name":"qa_checks_set","max_executors":"1","redis_key":"qa_checks_key","loggerName":"qa_checks.log"}';
+//$argv[ 1 ] = '{"queue_name":"get_contribution","pid_set_name":"ch_pid_get_contribution","max_executors":"1","redis_key":"get_contribution_list","loggerName":"get_contribution.log"}';
 //$argv[ 1 ] = '{"queue_name":"aligner_align_job","pid_set_name":"ch_pid_align_job","max_executors":"1","redis_key":"align_job_list","loggerName":"align_job.log"}';
 //$argv[ 1 ] = '{"queue_name":"aligner_tmx_import","pid_set_name":"ch_pid_tmx_import","max_executors":"1","redis_key":"tmx_import_list","loggerName":"tmx_import.log"}';
-//$argv[ 1 ] = '{"queue_name":"get_contribution","pid_set_name":"ch_pid_get_contribution","max_executors":"1","redis_key":"get_contribution_list","loggerName":"get_contribution.log"}';
 //$argv[ 1 ] = '{"queue_name":"aligner_segment_create","pid_set_name":"ch_pid_segment_create","max_executors":"1","redis_key":"segment_create_list","loggerName":"segment_create.log"}';
 
 

@@ -5,6 +5,7 @@ import ShortCutsModal from './es6/components/modals/ShortCutsModal'
 import SegmentStore from './es6/stores/SegmentStore'
 import CommonUtils from './es6/utils/commonUtils'
 import Shortcuts from './es6/utils/shortcuts'
+import ModalsActions from './es6/actions/ModalsActions'
 
 $.extend(window.UI, {
   bindShortcuts: function () {
@@ -16,7 +17,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')
+          ModalsActions.showModalComponent(ShortCutsModal, {}, 'Shortcuts')
         },
       )
       .on(
@@ -340,7 +341,7 @@ $.extend(window.UI, {
         e.preventDefault()
         $('.alert').remove()
       })
-      .on('click', '#statistics .meter a, #stat-todo', function (e) {
+      .on('click', '#statistics .meter a', function (e) {
         e.preventDefault()
         if (config.isReview) {
           UI.openNextTranslated()
@@ -348,25 +349,16 @@ $.extend(window.UI, {
           SegmentActions.gotoNextUntranslatedSegment()
         }
       })
-    $('#point2seg').bind('mousedown', function (e) {
-      e.preventDefault()
-      CatToolActions.toggleQaIssues()
-    })
+
     $('#navSwitcher').on('click', function (e) {
       e.preventDefault()
-    })
-
-    $('.file-list').on('click', function (e) {
-      UI.closeAllMenus(e)
-      e.preventDefault()
-      UI.toggleFileMenu()
     })
     $('#jobNav .currseg').on('click', function (e) {
       e.preventDefault()
       var current = SegmentStore.getCurrentSegment()
       if (!current) {
-        UI.unmountSegments()
-        UI.render({
+        SegmentActions.removeAllSegments()
+        CatToolActions.onRender({
           firstLoad: false,
         })
       } else {

@@ -1,5 +1,6 @@
 import React from 'react'
 import Cookies from 'js-cookie'
+import ModalsActions from '../../actions/ModalsActions'
 
 class CopySourceModal extends React.Component {
   constructor(props) {
@@ -9,13 +10,13 @@ class CopySourceModal extends React.Component {
   copyAllSources() {
     this.props.confirmCopyAllSources()
     this.checkCheckbox()
-    APP.ModalWindow.onCloseModal()
+    ModalsActions.onCloseModal()
   }
 
   copySegmentOnly() {
     this.props.abortCopyAllSources()
     this.checkCheckbox()
-    APP.ModalWindow.onCloseModal()
+    ModalsActions.onCloseModal()
   }
 
   checkCheckbox() {
@@ -42,6 +43,8 @@ class CopySourceModal extends React.Component {
       <div className="copy-source-modal">
         <h3 className="text-container-top">
           Do you really want to copy source to target for all new segments?
+          <br />
+          This action cannot be undone.
         </h3>
 
         <div className="buttons-popup-container">
@@ -52,9 +55,7 @@ class CopySourceModal extends React.Component {
           <a className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>
             This segment only
           </a>
-          <div className="notes-action">
-            <b>Note</b>: This action cannot be undone.
-          </div>
+          <div className="notes-action"></div>
         </div>
         <div className="boxed">
           <input

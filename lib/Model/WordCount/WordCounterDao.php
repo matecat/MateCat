@@ -111,39 +111,54 @@ class WordCounterDao extends DataAccess_AbstractDao {
      */
     public static function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
+        /*
+         * -- TOTAL field is not used, but we keep here to easy check the values and for documentation
+         *
+         * In the segment_translations table we always have the correct value for eq_word_count, such value is taken by multiplying the raw word count value by the payable rate discount ( / 100 )
+         *
+         * In the case of pre-translation, the rows in this table are marked as ICEs, set as locked = 0,  and the equivalent word count is set as previous described.
+         *
+         * But the pre-translations must be shown in the UI as part of the TOTAL ( this does not apply to the true ICEs because they will set everytime as equivalent even if their values is Zero ).
+         *
+         * To disambiguate the case on which pre-translated rows has Zero payable rate, we need 3 conditions:
+         * - match_type is ICE
+         * - suggestion_match IS NULL ( since those segments are not sent to the TM analysis )
+         * - equivalent_word_count = 0 ( case to disambiguate ) and raw_word_count != 0 ( this means that the payable rate is Zero )
+         *
+         */
         $query = "
             SELECT
-                j.id,
-                SUM(
-                        IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count )
-                   ) as TOTAL,
-                SUM(
-                        IF(
-                            st.status IS NULL OR
-                            st.status = 'NEW',
-                            IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
-                   ) as NEW,
-                SUM(
-                        IF( 
-                            st.status IS NULL OR st.status = 'DRAFT' OR st.status = 'NEW',
-                            IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
-                   ) as DRAFT,
-                SUM(
-                        IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
-                   ) as TRANSLATED,
-                   
-                SUM(
-                        IF(st.status='APPROVED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
-                   ) as APPROVED,
-                SUM(
-                        IF(st.status='REJECTED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
-                   ) as REJECTED
-			FROM jobs AS j
-			INNER JOIN files_job as fj on j.id = fj.id_job
-			INNER join segments as s on fj.id_file = s.id_file
-			LEFT join segment_translations as st on s.id = st.id_segment and st.id_job = j.id
-			WHERE j.id = :id_job
-			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                    j.id,
+                    SUM(
+                            IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count )
+                       ) as TOTAL,
+                    SUM(
+                            IF(
+                                st.status IS NULL OR
+                                st.status = 'NEW',
+                                IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                       ) as NEW,
+                    SUM(
+                            IF( 
+                                st.status IS NULL OR st.status = 'DRAFT' OR st.status = 'NEW',
+                                IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                       ) as DRAFT,
+                    SUM(
+                            IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                       ) as TRANSLATED,
+                       
+                    SUM(
+                            IF(st.status='APPROVED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                       ) as APPROVED,
+                    SUM(
+                            IF(st.status='REJECTED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                       ) as REJECTED
+                FROM jobs AS j
+                INNER JOIN files_job as fj on j.id = fj.id_job
+                INNER join segments as s on fj.id_file = s.id_file
+                LEFT join segment_translations as st on s.id = st.id_segment and st.id_job = j.id
+                WHERE j.id = :id_job
+ 			    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			";
 
         $db = Database::obtain();

@@ -97,7 +97,7 @@ class setRevisionController extends ajaxController {
             return;
         }
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = $this->getFeatureSet();
 
         $job_data = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password_job );
         $project  = $job_data->getProject();

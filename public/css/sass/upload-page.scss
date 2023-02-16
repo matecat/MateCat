@@ -2299,16 +2299,33 @@ header {
 
 .supported-formats .popup {
   margin: auto;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
-  width: 1045px;
-  height: 620px;
-  max-width: unset;
-}
+  min-width: 700px;
+  max-width: none;
+  width: 80%;
+  height: 76%;
 
+  .fileformat {
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 50px);
+    overflow: auto;
+
+    .format-box {
+      float: none;
+      flex: 1 1 auto;
+    }
+  }
+}
+@media (max-width: 1100px) {
+  .supported-formats .popup {
+    width: 95%;
+  }
+}
 .popup-tm .popup {
   width: 94% !important;
   margin: 0 !important;
@@ -2397,13 +2414,6 @@ header {
   padding: 1px 5px;
 }
 
-#deselectMultilang {
-  margin-left: 30px;
-  font-size: 70%;
-  font-weight: normal;
-  color: #fff;
-}
-
 .close {
   background: url(../../img/x.png) center 1px no-repeat;
   width: 22px;
@@ -2478,18 +2488,6 @@ header {
 
 .translate-box h2 span.extra {
   margin-left: 10px;
-}
-
-.grayed {
-  display: none;
-  background: #000;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  opacity: 0.2;
-  z-index: 9;
 }
 
 .format-box {

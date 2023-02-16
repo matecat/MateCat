@@ -105,14 +105,10 @@ abstract class viewController extends controller {
      */
     public function finalize() {
 
-        try {
-            $this->setInitialTemplateVars();
-            $this->setTemplateVars();
-            $this->featureSet->run( 'appendDecorators', $this, $this->template );
-            $this->setTemplateFinalVars();
-        } catch ( Exception $ignore ) {
-            Log::doJsonLog( $ignore );
-        }
+        $this->setInitialTemplateVars();
+        $this->setTemplateVars();
+        $this->featureSet->run( 'appendDecorators', $this, $this->template );
+        $this->setTemplateFinalVars();
 
         ob_get_contents();
         ob_get_clean();
@@ -171,11 +167,11 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        $this->template->logged_user   = $this->user->shortName();
-        $this->template->extended_user = $this->user->fullName();
-
-        $this->template->isLoggedIn = $this->userIsLogged;
-        $this->template->userMail   = $this->user->email;
+        $this->template->logged_user      = $this->user->shortName();
+        $this->template->extended_user    = $this->user->fullName();
+        $this->template->isAnInternalUser = $this->featureSet->filter( "isAnInternalUser", $this->user->email);
+        $this->template->isLoggedIn       = $this->userIsLogged;
+        $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
@@ -219,7 +215,7 @@ abstract class viewController extends controller {
 
         $controller = static::getInstance();
 
-        if (isset($controller->id_job) and isset($controller->received_password)){
+        if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
             $jid        = $controller->jid;
             $password   = $controller->received_password;
             $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );

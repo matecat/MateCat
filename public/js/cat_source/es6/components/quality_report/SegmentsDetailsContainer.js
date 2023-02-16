@@ -21,7 +21,9 @@ class SegmentsDetails extends React.Component {
             revisionToShow={this.props.revisionToShow}
             key={fileObj.get('id')}
             file={fileObj}
-            segments={this.props.segmentsFiles.get(fileObj.get('id'))}
+            segments={this.props.segmentsFiles.get(
+              fileObj.get('id').toString(),
+            )}
             urls={this.props.urls}
             secondPassReviewEnabled={this.props.secondPassReviewEnabled}
           />
@@ -41,8 +43,8 @@ class SegmentsDetails extends React.Component {
 
   onScroll() {
     if (
-      $(window).scrollTop() + $(window).height() >
-      $(document).height() - 200
+      window.innerHeight + window.scrollY >
+      document.body.scrollHeight - 200
     ) {
       console.log('Load More Segments!')
       if (this.props.moreSegments) {

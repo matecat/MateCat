@@ -1,7 +1,10 @@
 import React from 'react'
+import {createRoot} from 'react-dom/client'
 
 import {ModalContainer} from './ModalContainer'
 import {ModalOverlay} from './ModalOverlay'
+import ModalsConstants from '../../constants/ModalsConstants'
+import CatToolStore from '../../stores/CatToolStore'
 
 const initialState = {
   isShowingModal: false,
@@ -13,6 +16,31 @@ const initialState = {
   styleContainer: '',
   onCloseCallback: false,
 }
+
+const componentStatus = (() => {
+  const obj = {}
+  let _isMounted = false
+  let _resolve
+
+  Object.defineProperty(obj, 'isMounted', {
+    get: () => _isMounted,
+    set: (value) => {
+      _isMounted = value
+      if (_isMounted && _resolve) _resolve()
+    },
+  })
+  Object.defineProperty(obj, 'resolve', {
+    enumerable: false,
+    set: (value) => {
+      _resolve = value
+      if (_isMounted) _resolve()
+    },
+  })
+  return obj
+})()
+
+export const onModalWindowMounted = () =>
+  new Promise((resolve) => (componentStatus.resolve = resolve))
 
 export class ModalWindow extends React.Component {
   state = initialState
@@ -34,11 +62,35 @@ export class ModalWindow extends React.Component {
     this.setState({
       title,
       component,
-      compProps: props,
+      compProps: {
+        ...props,
+        onClose: this.onCloseModal,
+        closeOnSuccess: props.closeOnSuccess ? props.closeOnSuccess : true,
+      },
       styleContainer: style,
       onCloseCallback: onCloseCallback,
       isShowingModal: true,
     })
+  }
+
+  componentDidMount() {
+    CatToolStore.addListener(
+      ModalsConstants.SHOW_MODAL,
+      this.showModalComponent,
+    )
+    CatToolStore.addListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
+
+    componentStatus.isMounted = true
+  }
+
+  componentWillUnmount() {
+    CatToolStore.removeListener(
+      ModalsConstants.SHOW_MODAL,
+      this.showModalComponent,
+    )
+    CatToolStore.removeListener(ModalsConstants.CLOSE_MODAL, this.onCloseModal)
+
+    componentStatus.isMounted = false
   }
 
   render() {
@@ -68,4 +120,7 @@ export class ModalWindow extends React.Component {
   }
 }
 
-export default ModalWindow
+document.addEventListener('DOMContentLoaded', () => {
+  const mountPoint = createRoot(document.getElementById('modal'))
+  mountPoint.render(React.createElement(ModalWindow, {}))
+})

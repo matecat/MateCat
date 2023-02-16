@@ -169,7 +169,7 @@ class TMSService {
 
     /**
      * Import TMX file in MyMemory
-     * @return bool
+     * @return array
      * @throws Exception
      */
     public function addGlossaryInMyMemory() {
@@ -180,6 +180,8 @@ class TMSService {
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
+
+            $uuids = [];
 
             foreach ( $this->file as $k => $fileInfo ) {
 
@@ -197,22 +199,62 @@ class TMSService {
                     case "400" :
                         throw new Exception( "Can't load Glossary file right now, try later", -15 );
                         break;
-                    case "403" :
-                        throw new Exception( "Invalid key provided", -15 );
+
+                    case "404":
+                        throw new Exception('File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15);
                         break;
-                    case "406" :
+
+                    case "406":
                         throw new Exception( $importStatus->responseDetails, -15 );
                         break;
+
+                    case "403" :
+                        $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
+
+                        if($importStatus->responseDetails === 'HEADER DON\'T MATCH THE CORRECT STRUCTURE'){
+                            $message = 'The file header does not match the accepted structure. Please change the header structure to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">the user guide page</a> and retry upload.';
+                        }
+
+                        throw new Exception( $message, -15 );
+                        break;
+
                     default:
+                }
+
+                if(isset($importStatus->responseData['UUID'])){
+                    $uuids[] = $importStatus->responseData['UUID'];
                 }
             }
 
-            return true;
+            return $uuids;
 
         } else {
             throw new Exception( "Can't find uploaded Glossary files", -15 );
         }
 
+    }
+
+    /**
+     * @param $uuid
+     *
+     * @return array
+     */
+    public function glossaryUploadStatus($uuid)
+    {
+        return $this->mymemory_engine->getGlossaryImportStatus($uuid);
+    }
+
+    /**
+     * @param $key
+     * @param $keyName
+     * @param $userEmail
+     * @param $userName
+     *
+     * @return array
+     */
+    public function glossaryExport($key, $keyName, $userEmail, $userName)
+    {
+       return $this->mymemory_engine->glossaryExport($key, $keyName, $userEmail, $userName);
     }
 
     /**

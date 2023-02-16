@@ -7,7 +7,7 @@ use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\SegmentTranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
@@ -85,9 +85,9 @@ class SegmentTranslationIssueValidator extends Base {
      */
     protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber() {
 
-        $latestSegmentEvent = ( new SegmentTranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
+        $latestSegmentEvent = ( new TranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
 
-        if ( !$latestSegmentEvent && $this->translation->isICE() ) {
+        if ( !$latestSegmentEvent && ( $this->translation->isICE() || $this->translation->isPreTranslated()) ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );
         } elseif ( $latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on

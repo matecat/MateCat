@@ -48,6 +48,7 @@ class INIT {
     public static $QUEUE_CREDENTIALS;
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
+    public static $BLACKLIST_FILE_SIZE_MAX = 2097152;
 
 
     /**
@@ -79,6 +80,7 @@ class INIT {
     public static $FILES_REPOSITORY;
     public static $CACHE_REPOSITORY;
     public static $ZIP_REPOSITORY;
+    public static $BLACKLIST_REPOSITORY;
     public static $ANALYSIS_FILES_REPOSITORY;
     public static $QUEUE_PROJECT_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
@@ -110,8 +112,8 @@ class INIT {
     public static $AUTHCOOKIEDURATION           = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE         = 62914560;         // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024; // bytes
-    public static $MAX_NUM_FILES    = 100;
-    public static $MAX_SOURCE_WORDS = 250000;
+    public static $MAX_NUM_FILES                = 100;
+    public static $MAX_SOURCE_WORDS             = 250000;
 
     /**
      * DQF configuration
@@ -173,11 +175,6 @@ class INIT {
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
-     * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
-     */
-    const JOB_ARCHIVABILITY_THRESHOLD = 90;
-
-    /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external
      * translation provider (translated.net by default).
      * You can set it to false, but We are happy if you keep this on.
@@ -192,8 +189,8 @@ class INIT {
      * MateCat Filters configuration
      */
     public static $FILTERS_USER_AGENT                    = "MateCat Community Instance";
-    public static $FILTERS_ADDRESS                       = "https://translated-matecat-filters-v1.p.mashape.com";
-    public static $FILTERS_MASHAPE_KEY                   = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
+    public static $FILTERS_ADDRESS                       = "https://translated-matecat-filters-v1.p.rapidapi.com";
+    public static $FILTERS_RAPIDAPI_KEY                  = "https://rapidapi.com/translated/api/matecat-filters to obtain your RapidAPI Key";
     public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
     public static $FILTERS_EMAIL_FAILURES                = false;
 
@@ -222,7 +219,7 @@ class INIT {
     public static $DEFAULT_TM_KEY = '';
 
 
-    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari' ]; //, 'firefox');
+    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge' ]; //, 'firefox');
 
     // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
     // This occurs especially in mobile environment. As an example, when you try to open a link from within
@@ -365,6 +362,7 @@ class INIT {
 //                    'php'   => array( '', '', 'extxml' ),
                     'json'  => [ '', '', 'extxml' ],
                     'jsont' => [ '', '', 'extxml' ],
+                    'jsont2' => [ '', '', 'extxml' ],
                     'yaml'  => [ '', '', 'extxml' ],
                     'yml'   => [ '', '', 'extxml' ],
                     'md'    => [ '', '', 'extxml' ],

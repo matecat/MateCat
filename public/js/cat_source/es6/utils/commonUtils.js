@@ -1,10 +1,11 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
-
+import Cookies from 'js-cookie'
+import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
 import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import AlertModal from '../components/modals/AlertModal'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -21,6 +22,7 @@ const CommonUtils = {
     var tra = parseFloat(stats.TRANSLATED)
     var dra = parseFloat(stats.DRAFT)
     var rej = parseFloat(stats.REJECTED)
+    var todo = parseFloat(stats.TODO)
 
     // If second pass enabled
     if (config.secondRevisionsCount && stats.reviews) {
@@ -47,7 +49,7 @@ const CommonUtils = {
     if (dra) t = 'draft'
     if (rej) t = 'draft'
 
-    if (!tra && !dra && !rej && !app) {
+    if (!tra && !dra && !rej && !app && todo > 0) {
       t = 'draft'
     }
 
@@ -136,28 +138,30 @@ const CommonUtils = {
    * @returns {*}
    */
   genericErrorAlertMessage() {
-    return APP.alert({
-      msg: sprintf(
-        'There was an error while saving data to server, please try again. ' +
-          'If the problem persists please contact %s reporting the web address of the current browser tab.',
-        sprintf(
-          '<a href="mailto:%s">%s</a>',
-          config.support_mail,
-          config.support_mail,
-        ),
-      ),
-    })
+    ModalsActions.showModalComponent(
+      AlertModal,
+      {
+        text:
+          'There was an error while saving data to server, please try again. <br/>If the problem persists please contact <a href="mailto:' +
+          config.support_mail +
+          '">' +
+          config.support_mail +
+          '</a> reporting the web address of the current browser tab',
+      },
+      'Search  Alert',
+    )
   },
 
   setBrowserHistoryBehavior() {
     let updateAppByPopState = () => {
       var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
       var currentSegment = SegmentStore.getCurrentSegment()
-      if (currentSegment.sid === segment.sid) return
+      if (segment && currentSegment.sid === segment.sid) return
       if (segment && !segment.opened) {
-        SegmentActions.openSegment(this.parsedHash.segmentId)
+        SegmentActions.openSegment(this.parsedHash.segmentId, true)
       }
     }
+
     window.onpopstate = () => {
       if (this.parsedHash.onlyActionRemoved(window.location.hash)) {
         return
@@ -171,6 +175,10 @@ const CommonUtils = {
 
       updateAppByPopState()
     }
+
+    window.addEventListener('historyChangeState', () => {
+      this.parsedHash = new ParsedHash(window.location.hash)
+    })
 
     this.parsedHash = new ParsedHash(window.location.hash)
     this.parsedHash.hashCleanupRequired() && this.parsedHash.cleanupHash()
@@ -406,7 +414,12 @@ const CommonUtils = {
     }
   },
   getLanguageNameFromLocale: function (code) {
-    return config.languages_array.find((e) => e.code === code).name
+    try {
+      return config.languages_array.find((e) => e.code === code).name
+    } catch (e) {
+      console.error('Unknown Language', e)
+      return ''
+    }
   },
   addCommas: function (nStr) {
     nStr += ''
@@ -446,8 +459,97 @@ const CommonUtils = {
     }
     return url
   },
+  checkEmail: function (text) {
+    var re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    if (!re.test(text.trim())) {
+      return false
+    }
+    return true
+  },
+  validateEmailList: (emails) => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    let result = true
+    let error = null
+    emails.split(',').forEach(function (email) {
+      if (!re.test(email.trim())) {
+        result = false
+        error = email
+      }
+    })
+    return {result, emails: error}
+  },
+  getUserShortName: function (user) {
+    if (user && user.first_name && user.last_name) {
+      return (user.first_name[0] + user.last_name[0]).toUpperCase()
+    } else {
+      return 'AU'
+    }
+  },
 
-  /******************************/
+  getGMTDate: function (date, timeZoneFrom) {
+    if (typeof date === 'string' && date.indexOf('-') > -1) {
+      date = date.replace(/-/g, '/')
+    }
+    var timezoneToShow = Cookies.get('matecat_timezone')
+    if (timezoneToShow == '') {
+      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
+    }
+    var dd = new Date(date)
+    timeZoneFrom = timeZoneFrom
+      ? timeZoneFrom
+      : -1 * (new Date().getTimezoneOffset() / 60) //TODO UTC0 ? Why the browser gmt
+    dd.setMinutes(dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60)
+    var timeZone = this.getGMTZoneString()
+    return {
+      day: $.format.date(dd, 'd'),
+      month: $.format.date(dd, 'MMMM'),
+      time:
+        $.format.date(dd, 'hh') +
+        ':' +
+        $.format.date(dd, 'mm') +
+        ' ' +
+        $.format.date(dd, 'a'),
+      time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
+      year: $.format.date(dd, 'yyyy'),
+      gmt: timeZone,
+    }
+  },
+  getGMTZoneString: function () {
+    // var timezoneToShow = "";
+    var timezoneToShow = Cookies.get('matecat_timezone')
+    if (timezoneToShow == '') {
+      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
+    }
+    timezoneToShow = timezoneToShow > 0 ? '+' + timezoneToShow : timezoneToShow
+    return timezoneToShow % 1 === 0
+      ? 'GMT ' + timezoneToShow + ':00'
+      : 'GMT ' + parseInt(timezoneToShow) + ':30'
+  },
+  checkJobIsSplitted: function () {
+    return config.job_is_splitted
+  },
+  //Plugins
+  parseFiles: (files) => {
+    return files
+  },
+
+  /**
+   * Returns true if the current OS is MacOS or iOS, false otherwise
+   *
+   * @returns {boolean}
+   */
+  isMacOS: () => {
+    const os = Platform.os && Platform.os.family
+    return (
+      os &&
+      (os.indexOf('Mac') >= 0 ||
+        os.indexOf('OS X') >= 0 ||
+        os.indexOf('iOS') >= 0)
+    )
+  },
+  isAllowedLinkRedirect: () => false,
 }
 
 const ParsedHash = function (hash) {

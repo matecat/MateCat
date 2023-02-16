@@ -134,6 +134,7 @@ $reference = [
                 [
                         0 => 'json',
                         1 => 'jsont',
+                        2 => 'jsont2',
                 ],
         'application/jsonml+json'                                                   =>
                 [
@@ -1550,9 +1551,17 @@ $reference = [
                 [
                         0 => 'xlsx',
                 ],
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheetapplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => // REMOVE IN PHP 8.1 https://bugs.php.net/bug.php?id=77784
+                [
+                        0 => 'xlsx',
+                ],
         'application/vnd.openxmlformats-officedocument.spreadsheetml.template'      =>
                 [
                         0 => 'xltx',
+                ],
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.documentapplication/vnd.openxmlformats-officedocument.wordprocessingml.document' => // REMOVE IN PHP 8.1 https://bugs.php.net/bug.php?id=77784
+                [
+                        0 => 'docx',
                 ],
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   =>
                 [
@@ -3033,6 +3042,10 @@ $reference = [
                         3 => 'man',
                         4 => 'me',
                         5 => 'ms',
+                ],
+        'text/x-tex'                                                              =>
+                [
+                        0 => 'md',
                 ],
 //            'text/turtle'                      =>
 //                    array(

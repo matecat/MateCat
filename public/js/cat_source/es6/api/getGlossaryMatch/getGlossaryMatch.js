@@ -3,47 +3,43 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Retrieve glossary match
  *
- * @param {string} idSegment
- * @param {string} source
- * @param {string} fromTarget
- * @param {string} [idJob=config.id_job]
- * @param {string} [password=config.password]
- * @param {string} [currentPassword=config.currentPassword]
- * @param {string} [idClient=config.id_client]
+ * @param {Object} options
+ * @param {string} options.sentence
+ * @param {string} options.idSegment
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.password=config.password]
+ * @param {string} [options.idClient=config.id_client]
+ * @param {string} [options.sourceLanguage=config.source_code]
+ * @param {string} [options.targetLanguage=config.target_code]
  * @returns {Promise<object>}
  */
-export const getGlossaryMatch = async (
+export const getGlossaryMatch = async ({
+  sentence,
   idSegment,
-  source,
-  fromTarget,
   idJob = config.id_job,
   password = config.password,
-  currentPassword = config.currentPassword,
   idClient = config.id_client,
-) => {
+  sourceLanguage = config.source_code,
+  targetLanguage = config.target_code,
+}) => {
   const dataParams = {
-    action: 'glossary',
-    exec: 'get',
-    segment: source,
-    automatic: false,
-    translation: null,
-    from_target: fromTarget,
+    sentence,
+    id_segment: idSegment,
     id_job: idJob,
     password: password,
-    current_password: currentPassword,
     id_client: idClient,
-    id_segment: idSegment,
+    source_language: sourceLanguage,
+    target_language: targetLanguage,
   }
-  const formData = new FormData()
 
-  Object.keys(dataParams).forEach((key) => {
-    formData.append(key, dataParams[key])
-  })
-  const response = await fetch(`${getMatecatApiDomain()}?action=glossary`, {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/glossary/_search`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(dataParams),
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

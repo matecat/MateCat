@@ -9,8 +9,12 @@ import Shortcuts from '../../utils/shortcuts'
 import ShortCutsModal from '../modals/ShortCutsModal'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
+import SegmentUtils from '../../utils/segmentUtils'
+import {SegmentContext} from '../segments/SegmentContext'
 
 class ReviewExtendedPanel extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     this.removeMessageType = 0
@@ -30,7 +34,7 @@ class ReviewExtendedPanel extends React.Component {
 
   removeSelection() {
     this.setCreationIssueLoader(false)
-    this.props.removeSelection()
+    this.context.removeSelection()
     this.setState({
       showAddIssueMessage: false,
       showAddIssueToSelectedTextMessage: false,
@@ -123,11 +127,9 @@ class ReviewExtendedPanel extends React.Component {
           <i className="icon-cancel3 icon" />
         </a>
         <ReviewExtendedIssuesContainer
-          reviewType={this.props.reviewType}
           loader={this.state.issueInCreation}
           issues={issues}
           isReview={this.props.isReview}
-          segment={this.props.segment}
         />
         {this.state.showAddIssueMessage ? (
           <div className="re-warning-not-added-issue">
@@ -137,7 +139,7 @@ class ReviewExtendedPanel extends React.Component {
               <br />
               <a
                 onClick={() =>
-                  APP.ModalWindow.showModalComponent(
+                  ModalsActions.showModalComponent(
                     ShortCutsModal,
                     null,
                     'Shortcuts',
@@ -165,16 +167,14 @@ class ReviewExtendedPanel extends React.Component {
 
         {this.props.isReview &&
         !(
-          this.props.segment.ice_locked == 1 && !this.props.segment.unlocked
+          SegmentUtils.isIceSegment(this.props.segment) &&
+          !this.props.segment.unlocked
         ) ? (
           <ReviewExtendedIssuePanel
-            sid={this.props.segment.sid}
             selection={this.props.selectionObj}
             segmentVersion={this.state.versionNumber}
             submitIssueCallback={this.removeSelection.bind(this)}
-            reviewType={this.props.reviewType}
             newtranslation={this.state.newtranslation}
-            segment={this.props.segment}
             setCreationIssueLoader={this.setCreationIssueLoader.bind(this)}
           />
         ) : null}

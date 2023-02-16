@@ -1,6 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-// import $ from 'jquery'
+import {createRoot} from 'react-dom/client'
 
 import JobSummary from './JobSummary'
 import SegmentsDetails from './SegmentsDetailsContainer'
@@ -257,38 +256,29 @@ class QualityReport extends React.Component {
 
 export default QualityReport
 
-let headerMountPoint = $('header')[0]
+const headerMountPoint = createRoot($('header')[0])
+const mountPoint = createRoot(document.getElementById('qr-root'))
 
 if (config.isLoggedIn) {
   getUserData().then((data) => {
-    ReactDOM.render(
+    headerMountPoint.render(
       React.createElement(Header, {
-        showJobInfo: true,
         showModals: true,
         showTeams: false,
         isQualityReport: true,
         user: data,
       }),
-      headerMountPoint,
     )
-    ReactDOM.render(
-      React.createElement(QualityReport),
-      document.getElementById('qr-root'),
-    )
+    mountPoint.render(React.createElement(QualityReport))
   })
 } else {
-  ReactDOM.render(
+  headerMountPoint.render(
     React.createElement(Header, {
-      showJobInfo: true,
       showModals: true,
       showTeams: false,
       isQualityReport: true,
       loggedUser: false,
     }),
-    headerMountPoint,
   )
-  ReactDOM.render(
-    React.createElement(QualityReport),
-    document.getElementById('qr-root'),
-  )
+  mountPoint.render(React.createElement(QualityReport))
 }

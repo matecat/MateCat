@@ -1,12 +1,10 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
-
-import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
-import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 window.APP = null
 
@@ -23,457 +21,7 @@ window.APP = {
       })
     }
     this.isCattool = $('body').hasClass('cattool')
-    $('body')
-      .on('click', '.modal .x-popup', function (e) {
-        e.preventDefault()
-        APP.closePopup()
-      })
-      .on('click', '.modal[data-type=alert] .btn-ok', function (e) {
-        e.preventDefault()
-        APP.closePopup()
-        if ($(this).attr('data-callback')) {
-          if (typeof UI[$(this).attr('data-callback')] === 'function') {
-            UI[$(this).attr('data-callback')]()
-            APP.confirmValue = true
-          }
-        }
-      })
-      .on(
-        'click',
-        '.modal[data-type=confirm] .btn-ok:not(.disabled), .modal[data-type=confirm_checkbox] .btn-ok:not(.disabled)',
-        function (e) {
-          e.preventDefault()
-          var dataType = $(this).closest('.modal').attr('data-type')
-
-          if (
-            $('.modal[data-type=' + dataType + ']').hasClass('closeOnSuccess')
-          ) {
-            APP.closePopup()
-          }
-          if ($(this).attr('data-callback')) {
-            if (typeof UI[$(this).attr('data-callback')] === 'function') {
-              var context = $(this).attr('data-context') || ''
-              UI[$(this).attr('data-callback')](decodeURI(context))
-              APP.confirmValue = true
-            } else {
-              APP.confirmValue = APP.confirmCallbackFunction()
-            }
-          }
-          APP.waitingConfirm = false
-          APP.cancelValue = false
-        },
-      )
-      .on(
-        'click',
-        '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup',
-        function (e) {
-          e.preventDefault()
-          APP.closePopup()
-          var el = $(this).parents('.modal').find('.btn-cancel')
-          if ($(el).attr('data-callback')) {
-            if (typeof UI[$(el).attr('data-callback')] === 'function') {
-              var context = $(el).attr('data-context') || ''
-              UI[$(el).attr('data-callback')](decodeURI(context))
-            } else {
-              APP.cancelValue = APP.cancelCallbackFunction()
-            }
-          }
-          APP.confirmValue = false
-          APP.waitingConfirm = false
-          APP.cancelValue = true
-        },
-      )
-      .on('click', '.popup-outer.closeClickingOutside', function (e) {
-        e.preventDefault()
-        $(this).parents('.modal').find('.x-popup').click()
-      })
-      .on('keyup', function (e) {
-        if (e.keyCode == 27 && $('body').hasClass('side-popup')) {
-          APP.ModalWindow.onCloseModal()
-          e.preventDefault()
-          e.stopPropagation()
-        }
-      })
-
-    this.checkGlobalMassages()
-  },
-  alert: function (options) {
-    //FIXME
-    // Alert message, NEVER displayed if there are a redirect after it because html div popups are no-blocking
-    // Transform alert to a function like confirm with a callable function passed as callback
-
-    if (typeof options == 'string') {
-      options.callback = false
-      options.msg = options
-    }
-    var callback = typeof options == 'string' ? false : options.callback
-    var content = typeof options == 'string' ? options : options.msg
-    this.popup({
-      type: 'alert',
-      onConfirm: callback,
-      closeClickingOutside: true,
-      title: options.title || 'Warning',
-      content: content,
-    })
-  },
-
-  confirm: function (options) {
-    this.waitingConfirm = true
-    this.popup({
-      type: options.type || 'confirm',
-      name: options.name,
-      onConfirm: options.callback,
-      caller: options.caller,
-      onCancel: options.onCancel,
-      title: options.title || 'Confirmation required',
-      cancelTxt: options.cancelTxt,
-      okTxt: options.okTxt,
-      content: options.msg,
-      context: options.context,
-      closeOnSuccess: options.closeOnSuccess || false,
-    })
-    return APP.confirmValue // TODO: this return value is clearly meaningless
-  },
-  doRequest: function (req, log) {
-    var logTxt = typeof log == 'undefined' ? '' : '&type=' + log
-    var version =
-      typeof config.build_number == 'undefined'
-        ? ''
-        : '-v' + config.build_number
-    var builtURL = req.url
-      ? req.url
-      : getMatecatApiDomain() +
-        '?action=' +
-        req.data.action +
-        logTxt +
-        this.appendTime() +
-        version +
-        ',jid=' +
-        config.id_job +
-        (typeof req.data.id_segment != 'undefined'
-          ? ',sid=' + req.data.id_segment
-          : '')
-    var reqType = req.type ? req.type : 'POST'
-    var setup = {
-      url: builtURL,
-
-      data: req.data,
-      type: reqType,
-      dataType: 'json',
-      xhrFields: {withCredentials: true},
-      //TODO set timeout longer than server curl for TM/MT
-    }
-
-    // Callbacks
-    if (typeof req.success === 'function') setup.success = req.success
-    if (typeof req.complete === 'function') setup.complete = req.complete
-    if (typeof req.context != 'undefined') setup.context = req.context
-    if (typeof req.error === 'function') setup.error = req.error
-    if (typeof req.beforeSend === 'function') setup.beforeSend = req.beforeSend
-
-    return $.ajax(setup)
-  },
-  appendTime: function () {
-    var t = new Date()
-    return '&time=' + t.getTime()
-  },
-  disableLink: function (e) {
-    e.preventDefault()
-  },
-  popup: function (conf) {
-    this.closePopup()
-
-    var _tpl_newPopup =
-      '' + '<div class="modal">' + ' <div class="popup-outer"></div>' + '</div>'
-
-    var _tpl_popupInner =
-      '' +
-      '<div class="popup">' +
-      ' <a href="javascript:;" class="x-popup remove"></a>' +
-      ' <h1></h1>' +
-      ' <p class="text-container-top"></p>' +
-      ' <p class="buttons-popup-container button-aligned-right">' +
-      '</p>' +
-      '</div>'
-
-    var _tpl_button = '' + '<a href="javascript:;" class="btn-ok">Ok</a>'
-
-    var _tpl_checkbox =
-      '' +
-      '<div class="boxed">' +
-      ' <input type="checkbox" id="popup-checkbox" class="confirm_checkbox"><label></label>' +
-      '</div>'
-
-    var _tpl_checkbox_dontshow =
-      '' +
-      '<div class="boxed">' +
-      ' <input type="checkbox" class="dont_show"><label></label>' +
-      '</div>'
-
-    var renderOkButton = function (options) {
-      var filled_tpl = $(_tpl_button)
-
-      if (typeof options['callback'] != 'undefined') {
-        filled_tpl
-          .data('callback', options['callback'])
-          .attr('data-callback', options['callback'])
-      }
-
-      if (typeof options['txt'] != 'undefined') {
-        filled_tpl.html(options['txt'])
-      }
-
-      if (typeof options['context'] != 'undefined') {
-        filled_tpl
-          .data('context', options['context'])
-          .attr('data-context', options['context'])
-      }
-
-      return filled_tpl
-    }
-
-    var renderCancelButton = function (options) {
-      var filled_tpl = $(_tpl_button)
-
-      filled_tpl.attr('class', '').addClass('btn-cancel').html('Cancel')
-
-      if (typeof options['callback'] != 'undefined') {
-        filled_tpl
-          .data('callback', options['callback'])
-          .attr('data-callback', options['callback'])
-      }
-
-      if (typeof options['context'] != 'undefined') {
-        filled_tpl
-          .data('context', options['context'])
-          .attr('data-context', options['context'])
-      }
-
-      if (typeof options['txt'] != 'undefined') {
-        filled_tpl.html(options['txt'])
-      }
-      return filled_tpl
-    }
-
-    var renderButton = function (options) {
-      var filled_tpl = $(_tpl_button)
-
-      if (typeof options['callback'] != 'undefined') {
-        var params = ''
-
-        if (typeof options['params'] != 'undefined') {
-          params = options['params']
-        }
-
-        filled_tpl.attr(
-          'onClick',
-          'UI.' + options['callback'] + "('" + params + "');return false;",
-        )
-      }
-
-      if (typeof options['btn-type'] != 'undefined') {
-        filled_tpl.addClass('btn-' + options['btn-type'])
-      }
-
-      if (typeof options['context'] != 'undefined') {
-        filled_tpl
-          .data('context', options['context'])
-          .attr('data-context', options['context'])
-      }
-
-      if (typeof options['txt'] != 'undefined') {
-        filled_tpl.html(options['txt'])
-      }
-      return filled_tpl
-    }
-
-    var renderCheckbox = function (options) {
-      var filled_tpl = $(_tpl_checkbox)
-
-      if (typeof options['checkbox_label'] != 'undefined') {
-        filled_tpl
-          .find('.confirm_checkbox + label')
-          .html(options['checkbox_label'])
-      }
-      return filled_tpl
-    }
-
-    var renderDontShowCheckbox = function (options) {
-      var filled_tpl = $(_tpl_checkbox_dontshow)
-
-      if (typeof options['checkbox_label'] != 'undefined') {
-        filled_tpl
-          .find('.dont_show + label')
-          .html(" Don't show this dialog again for the current job")
-      }
-      return filled_tpl
-    }
-
-    var renderPopupInner = function (options) {
-      var filled_tpl = $(_tpl_popupInner)
-      if (typeof options['type'] != 'undefined') {
-        switch (options['type']) {
-          case 'alert':
-            filled_tpl.addClass('popup-alert')
-            break
-
-          case 'confirm':
-            filled_tpl.addClass('popup-confirm')
-            break
-          default:
-            break
-        }
-      }
-
-      if (typeof options['title'] != 'undefined') {
-        filled_tpl.find('h1').html(options['title'])
-      }
-
-      if (typeof options['content'] != 'undefined') {
-        filled_tpl.find('p.text-container-top').html(options['content'])
-      }
-
-      return filled_tpl
-    }
-
-    var renderPopup = function (options) {
-      var filled_tpl = $(_tpl_newPopup)
-
-      if (typeof options['closeOnSuccess'] != 'undefined') {
-        filled_tpl.addClass('closeOnSuccess')
-      }
-
-      if (conf.closeClickingOutside) {
-        filled_tpl.find('.popup-outer').addClass('closeClickingOutside')
-      }
-
-      filled_tpl.attr('data-name', '').data('name', '')
-
-      if (typeof options['name'] != 'undefined') {
-        filled_tpl
-          .attr('data-name', options['name'])
-          .data('name', options['name'])
-      }
-
-      filled_tpl.append(renderPopupInner(options))
-
-      if (typeof options['type'] != 'undefined') {
-        filled_tpl
-          .attr('data-type', options['type'])
-          .data('type', options['type'])
-        switch (options['type']) {
-          case 'alert':
-            filled_tpl.find('.popup .buttons-popup-container').append(
-              renderOkButton({
-                context: options['context'],
-                callback: options['onConfirm'],
-                txt: options['okTxt'],
-              }),
-            )
-            break
-          case 'confirm':
-          case 'confirm_checkbox':
-            if (options['type'] == 'confirm_checkbox') {
-              filled_tpl
-                .find('.popup p.buttons-popup-container')
-                .append(renderCheckbox(options))
-            }
-
-            filled_tpl
-              .find('.popup')
-              .addClass('confirm_checkbox')
-              .addClass('popup-confirm')
-              .find('.buttons-popup-container')
-              .append(
-                renderCancelButton({
-                  context: options['context'],
-                  callback: options['onCancel'],
-                  txt: options['cancelTxt'],
-                }),
-              )
-              .append(
-                renderOkButton({
-                  context: options['context'],
-                  callback: options['onConfirm'],
-                  txt: options['okTxt'],
-                }),
-              )
-
-            APP.confirmCallbackFunction = options.onConfirm
-              ? options.onConfirm
-              : null
-            APP.cancelCallbackFunction = options.onCancel
-              ? options.onCancel
-              : null
-            APP.callerObject = options.caller ? options.caller : null
-
-            if (options['type'] == 'confirm_checkbox') {
-              filled_tpl.find('.popup').append(renderDontShowCheckbox(options))
-
-              disableOk(filled_tpl)
-
-              $('body').on('click', '#popup-checkbox', function () {
-                if ($('#popup-checkbox').is(':checked')) {
-                  enableOk(filled_tpl)
-                } else {
-                  disableOk(filled_tpl)
-                }
-              })
-            }
-            break
-
-          case 'free':
-            filled_tpl.find('.popup .buttons-popup-container').append(
-              renderButton({
-                callback: this.callback,
-                'btn-type': this.type,
-                params: this.params,
-                txt: this.text,
-              }),
-            )
-            break
-          default:
-            break
-        }
-      }
-      return filled_tpl
-    }
-
-    var disableOk = function (context) {
-      var callback = context.find('.btn-ok').attr('data-callback')
-
-      context
-        .find('.btn-ok')
-        .addClass('disabled')
-        .attr('disabled', 'disabled')
-        .removeAttr('data-callback')
-        .attr('data-callback-disabled', callback)
-        .bind('click', APP.disableLink)
-    }
-
-    var enableOk = function (context) {
-      var callback = context.find('.btn-ok').attr('data-callback-disabled')
-      context
-        .find('.btn-ok')
-        .removeClass('disabled')
-        .removeAttr('disabled')
-        .removeAttr('data-callback-disabled')
-        .attr('data-callback', callback)
-        .unbind('click', APP.disableLink)
-    }
-
-    var newPopup = renderPopup(conf)
-
-    $('body').append(newPopup)
-  },
-
-  closePopup: function () {
-    $('.modal[data-type=view]').hide()
-    $('.modal:not([data-type=view])').remove()
-    // TODO: not sure this is still useful
-    $(window).trigger({
-      type: 'modalClosed',
-    })
+    setTimeout(() => this.checkGlobalMassages(), 1000)
   },
 
   fitText: function (
@@ -532,64 +80,7 @@ window.APP = {
     return false
   },
 
-  /**
-   * Function to add notifications to the interface
-   * notification object with the following properties
-   *
-   * title:           (String) Title of the notification.
-   * text:            (String) Message of the notification
-   * type:            (String, Default "info") Level of the notification. Available: success, error, warning and info.
-   * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
-   *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
-   * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
-   * openCallback     (Function) A callback function that will be called when the notification is successfully added.
-   * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
-   * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
-   *
-   */
-
-  addNotification: function (notification) {
-    if (!APP.notificationBox) {
-      APP.notificationBox = ReactDOM.render(
-        React.createElement(NotificationBox),
-        $('.notifications-wrapper')[0],
-      )
-    }
-
-    return APP.notificationBox.addNotification(notification)
-  },
-  removeNotification: function (notification) {
-    if (APP.notificationBox) {
-      APP.notificationBox.removeNotification(notification)
-    }
-  },
-
-  removeAllNotifications: function () {
-    if (APP.notificationBox) {
-      APP.notificationBox.removeAllNotifications()
-    }
-  },
   /*************************************************************************************************************/
-
-  evalFlashMessagesForNotificationBox: function () {
-    if (config.flash_messages && Object.keys(config.flash_messages).length) {
-      _.each(['warning', 'notice', 'error'], function (type) {
-        if (config.flash_messages[type]) {
-          _.each(config.flash_messages[type], function (obj) {
-            APP.addNotification({
-              autoDismiss: false,
-              dismissable: true,
-              position: 'bl',
-              text: obj.value,
-              title: type,
-              type: type,
-              allowHtml: true,
-            })
-          })
-        }
-      })
-    }
-  },
 
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
@@ -623,27 +114,10 @@ window.APP = {
               })
             },
           }
-          APP.addNotification(notification)
+          CatToolActions.addNotification(notification)
           return false
         }
       })
-    }
-  },
-
-  checkEmail: function (text) {
-    var re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    if (!re.test(text.trim())) {
-      return false
-    }
-    return true
-  },
-
-  getUserShortName: function (user) {
-    if (user && user.first_name && user.last_name) {
-      return (user.first_name[0] + user.last_name[0]).toUpperCase()
-    } else {
-      return 'AU'
     }
   },
 
@@ -662,6 +136,33 @@ window.APP = {
       } else {
         return teams[0]
       }
+    }
+  },
+  setTeamNameInMenu: function () {
+    if (APP.USER.STORE.teams) {
+      var team = this.getLastTeamSelected(APP.USER.STORE.teams)
+      $('.user-menu-container .organization-name').text(team.name) //??
+    } else {
+      var self = this
+      APP.USER.loadUserData().then(function () {
+        self.setTeamNameInMenu.bind(self)
+      })
+    }
+  },
+
+  setUserImage: function () {
+    if (APP.USER.STORE.user) {
+      if (!APP.USER.STORE.metadata || !APP.USER.STORE.metadata.gplus_picture)
+        return
+      var urlImage = APP.USER.STORE.metadata.gplus_picture
+      var html =
+        '<img class="ui-user-top-image-general user-menu-preferences" src="' +
+        urlImage +
+        '"/>'
+      $('.user-menu-container .ui-user-top-image').replaceWith(html)
+      /*$('.user-menu-preferences').on('click', function (e) {*/
+    } else {
+      setTimeout(this.setUserImage.bind(this), 500)
     }
   },
 
@@ -705,12 +206,7 @@ window.APP = {
            */
           var tokenData = $.parseJSON(token)
           if (parseInt(tokenData.code) < 0) {
-            var notification = {
-              title: 'Error',
-              text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact support@matecat.com',
-              type: 'error',
-            }
-            APP.addNotification(notification)
+            APP.showDownloadErrorMessage()
           }
           if (callback) {
             callback()
@@ -760,6 +256,17 @@ window.APP = {
     iFrameDownload.contents().find('#fileDownload').submit()
   },
 
+  showDownloadErrorMessage: function () {
+    const notification = {
+      title: 'Error',
+      text:
+        'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact ' +
+        config.support_mail,
+      type: 'error',
+    }
+    CatToolActions.addNotification(notification)
+  },
+
   downloadGDriveFile: function (openOriginalFiles, jobId, pass, callback) {
     if (typeof openOriginalFiles === 'undefined') {
       openOriginalFiles = 0
@@ -773,21 +280,21 @@ window.APP = {
       window.googleDriveWindows = {}
     }
 
-    if (UI.isSafari) {
+    if (CommonUtils.isSafari) {
       var windowReference = window.open()
     }
     var driveUpdateDone = function (data) {
       if (!data.urls || data.urls.length === 0) {
         var props = {
           text:
-            'MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and' +
-            ' grant Google Drive privileges to MateCat.',
+            'Matecat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and' +
+            ' grant Google Drive privileges to Matecat.',
           successText: 'Ok',
           successCallback: function () {
-            APP.ModalWindow.onCloseModal()
+            ModalsActions.onCloseModal()
           },
         }
-        APP.ModalWindow.showModalComponent(
+        ModalsActions.showModalComponent(
           ConfirmMessageModal,
           props,
           'Download fail',
@@ -799,7 +306,7 @@ window.APP = {
 
       $.each(data.urls, function (index, item) {
         winName = 'window' + item.localId
-        if (UI.isSafari) {
+        if (CommonUtils.isSafari) {
           windowReference.location = item.alternateLink
         } else if (
           window.googleDriveWindows[winName] &&
@@ -829,22 +336,15 @@ window.APP = {
         }
         var cookie = Cookies.get(downloadToken)
         if (cookie) {
-          var notification = {
-            title: 'Error',
-            text:
-              'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact ' +
-              config.support_mail,
-            type: 'error',
-          }
-          APP.addNotification(notification)
+          this.showDownloadErrorMessage()
           var props = {
             text: cookie.message,
             successText: 'Ok',
             successCallback: function () {
-              APP.ModalWindow.onCloseModal()
+              ModalsActions.onCloseModal()
             },
           }
-          APP.ModalWindow.showModalComponent(
+          ModalsActions.showModalComponent(
             ConfirmMessageModal,
             props,
             'Download fail',
@@ -852,137 +352,6 @@ window.APP = {
           Cookies.delete(downloadToken)
         }
       })
-  },
-
-  downloadFileURL: function (openOriginalFiles, idJob, pass, downloadToken) {
-    return sprintf(
-      '%s?action=downloadFile&id_job=%s&password=%s&original=%s&downloadToken=%s',
-      config.basepath,
-      idJob,
-      pass,
-      openOriginalFiles,
-      downloadToken,
-    )
-  },
-
-  setTeamNameInMenu: function () {
-    if (APP.USER.STORE.teams) {
-      var team = this.getLastTeamSelected(APP.USER.STORE.teams)
-      $('.user-menu-container .organization-name').text(team.name) //??
-      $('.user-menu-container .organization-name').text(team.name) //??
-    } else {
-      var self = this
-      APP.USER.loadUserData().then(function () {
-        self.setTeamNameInMenu.bind(self)
-      })
-    }
-  },
-
-  setUserImage: function () {
-    if (APP.USER.STORE.user) {
-      if (!APP.USER.STORE.metadata || !APP.USER.STORE.metadata.gplus_picture)
-        return
-      var urlImage = APP.USER.STORE.metadata.gplus_picture
-      var html =
-        '<img class="ui-user-top-image-general user-menu-preferences" src="' +
-        urlImage +
-        '"/>'
-      $('.user-menu-container .ui-user-top-image').replaceWith(html)
-      /*$('.user-menu-preferences').on('click', function (e) {*/
-    } else {
-      setTimeout(this.setUserImage.bind(this), 500)
-    }
-  },
-
-  fromDateToString: function (date) {
-    var dd = new Date(date)
-    return {
-      day: $.format.date(dd, 'd'),
-      month: $.format.date(dd, 'MMMM'),
-      year: $.format.date(dd, 'yy'),
-      time:
-        $.format.date(dd, 'hh') +
-        ':' +
-        $.format.date(dd, 'mm') +
-        ' ' +
-        $.format.date(dd, 'a'),
-    }
-  },
-
-  getGMTDate: function (date, timeZoneFrom) {
-    if (typeof date === 'string' && date.indexOf('-') > -1) {
-      date = date.replace(/-/g, '/')
-    }
-    var timezoneToShow = APP.readCookie('matecat_timezone')
-    if (timezoneToShow == '') {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-    }
-    var dd = new Date(date)
-    timeZoneFrom = timeZoneFrom
-      ? timeZoneFrom
-      : -1 * (new Date().getTimezoneOffset() / 60) //TODO UTC0 ? Why the browser gmt
-    dd.setMinutes(dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60)
-    var timeZone = this.getGMTZoneString()
-    return {
-      day: $.format.date(dd, 'd'),
-      month: $.format.date(dd, 'MMMM'),
-      time:
-        $.format.date(dd, 'hh') +
-        ':' +
-        $.format.date(dd, 'mm') +
-        ' ' +
-        $.format.date(dd, 'a'),
-      time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
-      year: $.format.date(dd, 'yyyy'),
-      gmt: timeZone,
-    }
-  },
-
-  getGMTZoneString: function () {
-    // var timezoneToShow = "";
-    var timezoneToShow = APP.readCookie('matecat_timezone')
-    if (timezoneToShow == '') {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-    }
-    timezoneToShow = timezoneToShow > 0 ? '+' + timezoneToShow : timezoneToShow
-    return timezoneToShow % 1 === 0
-      ? 'GMT ' + timezoneToShow + ':00'
-      : 'GMT ' + parseInt(timezoneToShow) + ':30'
-  },
-
-  getDefaultTimeZone: function () {
-    var timezoneToShow = APP.readCookie('matecat_timezone')
-    if (timezoneToShow == '') {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-    }
-    return timezoneToShow
-  },
-
-  readCookie: function (cookieName) {
-    cookieName += '='
-    var cookies = document.cookie.split(';')
-
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i].trim()
-
-      if (cookie.indexOf(cookieName) == 0)
-        return cookie.substring(cookieName.length, cookie.length)
-    }
-    return ''
-  },
-
-  setCookie: function (cookieName, cookieValue, expiration) {
-    if (typeof expiration == 'undefined') {
-      expiration = new Date()
-      expiration.setYear(new Date().getFullYear() + 1)
-    }
-    document.cookie =
-      cookieName +
-      '=' +
-      cookieValue +
-      '; expires=' +
-      expiration.toUTCString() +
-      '; path=/'
   },
 }
 

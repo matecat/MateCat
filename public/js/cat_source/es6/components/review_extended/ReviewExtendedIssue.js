@@ -6,6 +6,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import CommonUtils from '../../utils/commonUtils'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ReviewExtendedIssue extends React.Component {
   constructor(props) {
@@ -16,20 +17,19 @@ class ReviewExtendedIssue extends React.Component {
       visible:
         _.isUndefined(this.props.issue.visible) || this.props.issue.visible,
     }
+    this.issueCategories = JSON.parse(config.lqa_nested_categories).categories
   }
 
   getCategory() {
-    let id_category = this.props.issue.id_category
-    config.lqa_flat_categories = config.lqa_flat_categories
-      .replace(/\"\[/g, '[')
-      .replace(/\]"/g, ']')
-      .replace(/\"\{/g, '{')
-      .replace(/\}"/g, '}')
-    return _(JSON.parse(config.lqa_flat_categories))
-      .filter(function (e) {
-        return parseInt(e.id) == id_category
-      })
-      .first()
+    const id_category = this.props.issue.id_category
+    return this.issueCategories.find((cat) => parseInt(cat.id) == id_category)
+  }
+  getSeverity() {
+    const id_category = this.props.issue.id_category
+    const {severity} = this.props.issue
+    return this.issueCategories
+      .find((cat) => parseInt(cat.id) == id_category)
+      .severities.find((sev) => sev.label === severity)
   }
 
   deleteIssue(event) {
@@ -40,7 +40,7 @@ class ReviewExtendedIssue extends React.Component {
       visible: false,
     })
     let self = this
-    APP.removeAllNotifications()
+    CatToolActions.removeAllNotifications()
     let notification = {
       title: 'Issue deleted',
       text:
@@ -53,13 +53,13 @@ class ReviewExtendedIssue extends React.Component {
       timer: 10000,
       closeCallback: function () {
         if (!self.state.visible) {
-          SegmentActions.deleteIssue(self.props.issue, self.props.sid, true)
+          SegmentActions.deleteIssue(self.props.issue, self.props.sid)
         }
       },
     }
-    let boxUndo = APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
     window.onbeforeunload = function () {
-      SegmentActions.deleteIssue(self.props.issue, self.props.sid, true)
+      SegmentActions.deleteIssue(self.props.issue, self.props.sid)
     }
     setTimeout(function () {
       let $button = $('.undo-issue-deleted-' + self.props.issue.id)
@@ -69,7 +69,7 @@ class ReviewExtendedIssue extends React.Component {
           visible: true,
         })
         self.props.changeVisibility(self.props.issue.id, true)
-        APP.removeAllNotifications()
+        CatToolActions.removeAllNotifications()
         notification = {
           title: 'Issue deleted',
           text: 'The issue has been restored.',
@@ -77,7 +77,7 @@ class ReviewExtendedIssue extends React.Component {
           position: 'bl',
           timer: 5000,
         }
-        APP.addNotification(notification)
+        CatToolActions.addNotification(notification)
         window.onbeforeunload = null
       })
     }, 500)
@@ -150,12 +150,12 @@ class ReviewExtendedIssue extends React.Component {
     this.setState({sendDisabled: true})
 
     SegmentActions.submitComment(this.props.sid, this.props.issue.id, data)
-      .done(function () {
+      .then(function () {
         self.setState({
           comment_text: '',
         })
       })
-      .fail(this.handleFail)
+      .catch(this.handleFail)
   }
 
   handleFail() {
@@ -231,7 +231,8 @@ class ReviewExtendedIssue extends React.Component {
 
   render() {
     if (this.state.visible) {
-      let category = this.getCategory()
+      const category = this.getCategory()
+      const severity = this.getSeverity()
       // let formatted_date = moment(this.props.issue.created_at).format('lll');
 
       let commentViewButtonClass = this.state.commentView ? 're-active' : ''
@@ -298,8 +299,12 @@ class ReviewExtendedIssue extends React.Component {
                 {category.label}
               </span>
               <b>
-                <span title="Type of severity">
-                  [{this.props.issue.severity.substring(0, 3)}]
+                <span title="Type of severity" title={severity.label}>
+                  [
+                  {severity.code
+                    ? severity.code
+                    : severity.label.substring(0, 3)}
+                  ]
                 </span>
               </b>
             </div>

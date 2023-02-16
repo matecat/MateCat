@@ -1,27 +1,23 @@
 import _ from 'lodash'
-import {sprintf} from 'sprintf-js'
-import moment from 'moment'
 
-import {getMatecatApiDomain} from '../es6/utils/getMatecatApiDomain'
 import CommonUtils from '../es6/utils/commonUtils'
-import OfflineUtils from '../es6/utils/offlineUtils'
 import SegmentActions from '../es6/actions/SegmentActions'
 import SegmentStore from '../es6/stores/SegmentStore'
 import {getSegmentVersionsIssues} from '../es6/api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssue} from '../es6/api/sendSegmentVersionIssue'
 import {sendSegmentVersionIssueComment} from '../es6/api/sendSegmentVersionIssueComment'
+import {deleteSegmentIssue as deleteSegmentIssueApi} from '../es6/api/deleteSegmentIssue'
+import CatToolActions from '../es6/actions/CatToolActions'
 
 if (ReviewExtended.enabled()) {
   $.extend(ReviewExtended, {
     submitIssue: function (sid, data) {
-      var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
-
       const promise = sendSegmentVersionIssue(sid, {
         ...data,
       })
       promise.then(() => {
-        UI.getSegmentVersionsIssues(sid, fid)
-        UI.reloadQualityReport()
+        UI.getSegmentVersionsIssues(sid)
+        CatToolActions.reloadQualityReport()
       })
 
       return promise
@@ -30,80 +26,44 @@ if (ReviewExtended.enabled()) {
     submitComment: function (id_segment, id_issue, data) {
       const promise = sendSegmentVersionIssueComment(id_segment, id_issue, data)
       promise.then(() => {
-        var fid = UI.getSegmentFileId(UI.getSegmentById(id_segment))
-        UI.getSegmentVersionsIssues(id_segment, fid)
+        UI.getSegmentVersionsIssues(id_segment)
       })
       return promise
     },
   })
 
-  var originalRender = UI.render
   $.extend(UI, {
-    render: function (options) {
-      var promise = new $.Deferred().resolve()
-      originalRender.call(this, options)
-      return promise
-    },
-
     submitIssues: function (sid, data) {
       return ReviewExtended.submitIssue(sid, data)
     },
 
     getSegmentVersionsIssuesHandler(sid) {
       var segment = SegmentStore.getSegmentByIdToJS(sid)
-      UI.getSegmentVersionsIssues(segment.original_sid, segment.id_file)
+      if (segment) UI.getSegmentVersionsIssues(segment.original_sid)
     },
 
-    getSegmentVersionsIssues: function (segmentId, fileId) {
+    getSegmentVersionsIssues: function (segmentId) {
       getSegmentVersionsIssues(segmentId).then((response) => {
-        UI.addIssuesToSegment(fileId, segmentId, response.versions)
+        SegmentActions.addTranslationIssuesToSegment(
+          segmentId,
+          response.versions,
+        )
       })
-    },
-
-    /**
-     * To show the issues in the segment footer
-     * @param fileId
-     * @param segmentId
-     * @param versions
-     */
-    addIssuesToSegment: function (fileId, segmentId, versions) {
-      SegmentActions.addTranslationIssuesToSegment(fileId, segmentId, versions)
     },
 
     /**
      * To delete a segment issue
      * @param context
      */
-    deleteTranslationIssue: function (context) {
-      var parsed = JSON.parse(context)
-      var issue_path = sprintf(
-        getMatecatApiDomain() +
-          'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
-        config.id_job,
-        config.review_password,
-        parseInt(parsed.id_segment),
-        parsed.id_issue,
-      )
-      var issue_id = parsed.id_issue
-      var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment))
-      $.ajax({
-        url: issue_path,
-        type: 'DELETE',
-        xhrFields: {withCredentials: true},
-      }).done(function () {
-        UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id)
-        UI.reloadQualityReport()
+    deleteTranslationIssue: function (idSegment, idIssue) {
+      deleteSegmentIssueApi({
+        idSegment,
+        idIssue,
+      }).then(() => {
+        SegmentActions.confirmDeletedIssue(idSegment, idIssue)
+        UI.getSegmentVersionsIssues(idSegment)
+        CatToolActions.reloadQualityReport()
       })
-    },
-    /**
-     * To remove Segment issue from the segment footer
-     * @param fid
-     * @param id_segment
-     * @param issue_id
-     */
-    deleteSegmentIssues: function (fid, id_segment, issue_id) {
-      SegmentActions.confirmDeletedIssue(id_segment, issue_id)
-      UI.getSegmentVersionsIssues(id_segment, fid)
     },
     /**
      * To know if a segment has been modified but not yet approved
@@ -142,53 +102,8 @@ if (ReviewExtended.enabled()) {
       return true
     },
 
-    deleteIssue: function (issue, sid, dontShowMessage) {
-      var message = ''
-      if (issue.target_text) {
-        message = sprintf(
-          "You are about to delete the issue on string <span style='font-style: italic;'>'%s'</span> " +
-            'posted on %s.',
-          issue.target_text,
-          moment(issue.created_at).format('lll'),
-        )
-      } else {
-        message = sprintf(
-          'You are about to delete the issue posted on %s.',
-          moment(issue.created_at).format('lll'),
-        )
-      }
-      if (!dontShowMessage) {
-        APP.confirm({
-          name: 'Confirm issue deletion',
-          callback: 'deleteTranslationIssue',
-          msg: message,
-          okTxt: 'Yes delete this issue',
-          context: JSON.stringify({
-            id_segment: sid,
-            id_issue: issue.id,
-          }),
-        })
-      } else {
-        UI.deleteTranslationIssue(
-          JSON.stringify({
-            id_segment: sid,
-            id_issue: issue.id,
-          }),
-        )
-      }
-    },
-    setRevision: function (data) {
-      APP.doRequest({
-        data: data,
-        error: function () {
-          OfflineUtils.failedConnection(data, 'setRevision')
-        },
-        success: function (d) {
-          window.quality_report_btn_component.setState({
-            vote: d.data.overall_quality_class,
-          })
-        },
-      })
+    deleteIssue: function (issue, sid) {
+      UI.deleteTranslationIssue(sid, issue.id)
     },
 
     getSegmentRevisionIssues(segment, revisionNumber) {
@@ -213,11 +128,16 @@ if (ReviewExtended.enabled()) {
       var sid = segment.sid
 
       let issues = this.getSegmentRevisionIssues(segment, config.revisionNumber)
+      /* If segment is modified and there aren't issues and is not an ICE force to add an Issue.
+         If is an ICE we allow to change the translation because is not possible to add an issue
+       */
+
       if (
         config.isReview &&
         !segment.splitted &&
         segment.modified &&
-        issues.length === 0
+        issues.length === 0 &&
+        segment.ice_locked !== '1'
       ) {
         SegmentActions.openIssuesPanel({sid: segment.sid}, true)
         setTimeout(() => SegmentActions.showIssuesMessage(segment.sid, 1))
@@ -265,12 +185,13 @@ if (ReviewExtended.enabled()) {
       // find in next segments
       if (nextApprovedSegment) {
         SegmentActions.openSegment(nextApprovedSegment.sid)
-        // else find from the beginning of the currently loaded segments in all files
-      } else if (this.noMoreSegmentsBefore && nextApprovedSegmentInPrevious) {
-        SegmentActions.openSegment(nextApprovedSegmentInPrevious.sid)
-      } else if (!this.noMoreSegmentsBefore || !this.noMoreSegmentsAfter) {
+      } else {
         // find in not loaded segments or go to the next approved
-        SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer)
+        SegmentActions.openSegment(
+          UI.nextUntranslatedSegmentIdByServer
+            ? UI.nextUntranslatedSegmentIdByServer
+            : nextApprovedSegmentInPrevious.sid,
+        )
       }
     },
   })

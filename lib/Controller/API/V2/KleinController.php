@@ -8,8 +8,10 @@ use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use CookieManager;
 use Exception;
 use FeatureSet;
+use INIT;
 use Users_UserDao;
 
 /**
@@ -269,13 +271,16 @@ abstract class KleinController implements IController {
             $cookieContent = $tokenContent;
         }
 
-        setcookie(
-                $this->downloadToken,
+        CookieManager::setCookie( $this->downloadToken,
                 $cookieContent,
-                time() + 3600            // expires in 1 hour
-                , '/; samesite=None',
-                \INIT::$COOKIE_DOMAIN,
-                true
+                [
+                        'expires'  => time() + 3600,            // expires in 1 hour
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
         );
 
         $this->downloadToken = null;

@@ -2,6 +2,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import LXQ from './cat_source/es6/utils/lxq.main'
 import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 import Speech2Text from './cat_source/es6/utils/speech2text'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import SegmentActions from './cat_source/es6/actions/SegmentActions'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -9,17 +11,25 @@ import Speech2Text from './cat_source/es6/utils/speech2text'
       var speech2textCheck = $('.s2t-box #s2t_check')
       var tagProjectionCheck = $('.tagp #tagp_check')
       var dqfCheck = $('.dqf-box #dqf_switch')
+      var segmentationRule =
+        config.segmentation_rule === '' ||
+        config.segmentation_rule === 'standard'
+          ? ''
+          : config.segmentation_rule
 
       $('.mgmt-table-options .options-box.dqf_options_box').hide()
       $('.mgmt-table-options .options-box.seg_rule select#segm_rule')
-        .val(config.segmentation_rule)
+        .val(segmentationRule)
         .attr('disabled', true)
       $('.mgmt-table-options .options-box.seg_rule').on('click', function () {
-        APP.alert({
-          title: 'Option not editable',
-          okTxt: 'Continue',
-          msg: 'Segment rules settings can only be edited <br/> when creating the project.    ',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'Segment rules settings can only be edited when creating the project.',
+            buttonText: 'Continue',
+          },
+          'Option not editable',
+        )
       })
       //Check Lexiqa check
       if (LXQ.checkCanActivate()) {
@@ -97,11 +107,14 @@ import Speech2Text from './cat_source/es6/utils/speech2text'
           .find('.option-s2t-box-chrome-label')
           .css('display', 'inline')
         speech2textContainer.find('.onoffswitch').on('click', function () {
-          APP.alert({
-            title: 'Option not available',
-            okTxt: 'Continue',
-            msg: 'This options is only available on Chrome browser.',
-          })
+          ModalsActions.showModalComponent(
+            AlertModal,
+            {
+              text: 'This options is only available on your browser.',
+              buttonText: 'Continue',
+            },
+            'Option not available',
+          )
         })
         speech2textCheck.addClass('option-unavailable')
       } else {
@@ -123,6 +136,11 @@ import Speech2Text from './cat_source/es6/utils/speech2text'
           ModalsActions.openDQFModal()
         })
       }
+
+      // Check character counter
+      const charscounterCheck = document.getElementById('charscounter_check')
+      charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
+      charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
     },
 
     toggleLexiqaOption: function () {
@@ -146,5 +164,7 @@ import Speech2Text from './cat_source/es6/utils/speech2text'
     checkDqfIsActive: function () {
       return config.dqf_active_on_project
     },
+    setTagProjectionChecked: (value) =>
+      ($('.tagp #tagp_check')[0].checked = value),
   })
 })(jQuery, UI)

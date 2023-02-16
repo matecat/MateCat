@@ -3,6 +3,7 @@ import {getStyleForName} from '../tagModel'
 
 const TagSuggestion = React.forwardRef((props, ref) => {
   const tagStyle = getStyleForName(props.suggestion.data.name).join(' ')
+  const {index} = props.suggestion.data
   return (
     <div
       className={`tag-menu-suggestion ${props.isFocused ? `active` : ''}`}
@@ -19,6 +20,7 @@ const TagSuggestion = React.forwardRef((props, ref) => {
           <div className={'tag-container'}>
             <div className={`tag ${tagStyle} tag-placeholder`}>
               <span>{props.suggestion.data.placeholder}</span>
+              {index >= 0 && <span className="index-counter">{index + 1}</span>}
             </div>
           </div>
         ) : (

@@ -93,7 +93,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * @return PDOStatement
      */
-    protected function _getStatementForCache() {
+    protected function _getStatementForCache( $query = null ) {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(

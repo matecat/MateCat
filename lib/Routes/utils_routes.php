@@ -71,9 +71,32 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
+route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST',  'API\App\FilesController', 'segments' );
 
 $klein->with( '/api/app/api-key', function () {
     route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );
     route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
     route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
+} );
+
+route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'project' );
+
+route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
+route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'job' );
+
+// TM Keys
+$klein->with( '/api/app/tm-keys', function () {
+    route( '/[:id_job]/[:password]', 'GET', '\API\App\TmKeyManagementController', 'getByJob' );
+} );
+
+// Glossary
+$klein->with( '/api/app/glossary', function () {
+    route( '/_check', 'POST', '\API\App\GlossaryController', 'check' );
+    route( '/_delete', 'POST', '\API\App\GlossaryController', 'delete' );
+    route( '/_domains', 'POST', '\API\App\GlossaryController', 'domains' );
+    route( '/_get', 'POST', '\API\App\GlossaryController', 'get' );
+    route( '/_keys', 'POST', '\API\App\GlossaryController', 'keys' );
+    route( '/_search', 'POST', '\API\App\GlossaryController', 'search' );
+    route( '/_set', 'POST', '\API\App\GlossaryController', 'set' );
+    route( '/_update', 'POST', '\API\App\GlossaryController', 'update' );
 } );

@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import {SelectionState, Modifier, EditorState} from 'draft-js'
+import TextUtils from '../../../../utils/textUtils'
 /**
  *
  * @param editorState
@@ -11,7 +12,7 @@ import {SelectionState, Modifier, EditorState} from 'draft-js'
  *
  */
 const replaceOccurrences = (editorState, oldText, newText, index) => {
-  const regex = new RegExp(oldText, 'gi')
+  const regex = new RegExp(TextUtils.escapeRegExp(oldText), 'gi')
   //recupero editor state
   const selectionsToReplace = []
   //recuper la mappa dei blocchi

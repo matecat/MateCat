@@ -13,13 +13,12 @@ use INIT;
 use Log;
 use WorkerClient;
 
-abstract class AbstractEmail
-{
+abstract class AbstractEmail {
 
     protected $title;
 
-    protected $_layout_path ;
-    protected $_template_path ;
+    protected $_layout_path;
+    protected $_template_path;
 
     /**
      * @return array
@@ -30,18 +29,22 @@ abstract class AbstractEmail
     /**
      * @return mixed
      */
-    abstract function send() ;
+    abstract function send();
 
     protected function _setLayout( $layout ) {
-        $this->_layout_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $layout ;
+        $this->_layout_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $layout;
+    }
+
+    protected function _setLayoutByPath( $path ) {
+        $this->_layout_path = $path ;
     }
 
     protected function _setTemplate( $template ) {
-        $this->_template_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $template ;
+        $this->_template_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $template;
     }
 
     protected function _setTemplateByPath( $path ) {
-        $this->_template_path = $path ;
+        $this->_template_path = $path;
     }
 
     /**
@@ -49,68 +52,68 @@ abstract class AbstractEmail
      *
      * @param $mailConf
      */
-    protected function _enqueueEmailDelivery($mailConf) {
+    protected function _enqueueEmailDelivery( $mailConf ) {
         WorkerClient::init( new AMQHandler() );
-        \WorkerClient::enqueue(
-            'MAIL',
-            '\AsyncTasks\Workers\MailWorker',
-            $mailConf,
-            array( 'persistent' => WorkerClient::$_HANDLER->persistent )
+        WorkerClient::enqueue(
+                'MAIL',
+                '\AsyncTasks\Workers\MailWorker',
+                $mailConf,
+                [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
         );
 
         Log::doJsonLog( 'Message has been sent' );
     }
 
-    protected function _buildMessageContent(){
+    protected function _buildMessageContent() {
         ob_start();
         extract( $this->_getTemplateVariables(), EXTR_OVERWRITE );
-        /** @noinspection PhpIncludeInspection */
-        include( $this->_template_path ) ;
+        include( $this->_template_path );
+
         return ob_get_clean();
     }
 
-    protected function _buildHTMLMessage( $messageContent = null ){
+    protected function _buildHTMLMessage( $messageContent = null ) {
         ob_start();
         extract( $this->_getLayoutVariables( $messageContent ), EXTR_OVERWRITE );
-        /** @noinspection PhpIncludeInspection */
         include( $this->_layout_path );
+
         return ob_get_clean();
     }
 
     protected function _getLayoutVariables( $messageBody = null ) {
 
         if ( isset( $this->title ) ) {
-            $title = $this->title ;
+            $title = $this->title;
         } else {
-            $title = 'MateCat' ;
+            $title = 'MateCat';
         }
 
-        return array(
-                'title' => $title,
+        return [
+                'title'       => $title,
                 'messageBody' => ( !empty( $messageBody ) ? $messageBody : $this->_buildMessageContent() ),
                 'closingLine' => "Kind regards, ",
-                'showTitle' => false
-        );
+                'showTitle'   => false
+        ];
     }
 
     protected function _getDefaultMailConf() {
 
-        $mailConf = array();
+        $mailConf = [];
 
-        $mailConf[ 'Host' ]       = INIT::$SMTP_HOST;
-        $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
-        $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
-        $mailConf[ 'hostname' ]   = INIT::$SMTP_HOSTNAME;
+        $mailConf[ 'Host' ]     = INIT::$SMTP_HOST;
+        $mailConf[ 'port' ]     = INIT::$SMTP_PORT;
+        $mailConf[ 'sender' ]   = INIT::$SMTP_SENDER;
+        $mailConf[ 'hostname' ] = INIT::$SMTP_HOSTNAME;
 
         $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
         $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
         $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
-        return $mailConf ;
+        return $mailConf;
 
     }
 
-    protected function sendTo($address, $name){
+    protected function sendTo( $address, $name ) {
         $recipient = [ $address, $name ];
 
         $this->doSend( $recipient, $this->title,
@@ -119,14 +122,14 @@ abstract class AbstractEmail
         );
     }
 
-    protected function doSend($address, $subject, $htmlBody, $altBody) {
+    protected function doSend( $address, $subject, $htmlBody, $altBody ) {
         $mailConf = $this->_getDefaultMailConf();
 
-        $mailConf[ 'address' ] = $address ;
-        $mailConf[ 'subject' ] = $subject ;
+        $mailConf[ 'address' ] = $address;
+        $mailConf[ 'subject' ] = $subject;
 
-        $mailConf[ 'htmlBody' ] = $htmlBody ;
-        $mailConf[ 'altBody' ]  = $altBody ;
+        $mailConf[ 'htmlBody' ] = $htmlBody;
+        $mailConf[ 'altBody' ]  = $altBody;
 
         $this->_enqueueEmailDelivery( $mailConf );
 
@@ -139,13 +142,14 @@ abstract class AbstractEmail
      * @return string
      * @internal param $title
      */
-    protected function _buildTxtMessage( $messageBody ){
+    protected function _buildTxtMessage( $messageBody ) {
         $messageBody = preg_replace( "#<[/]*span[^>]*>#i", "", $messageBody );
         $messageBody = preg_replace( "#<[/]*strong[^>]*>#i", "", $messageBody );
         $messageBody = preg_replace( "#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody );
         $messageBody = preg_replace( "#<[/]*(p)[^>]*>#i", "", $messageBody );
         $messageBody = preg_replace( "#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody );
         $messageBody = html_entity_decode( $messageBody );
+
         return preg_replace( "#<br[^>]*>#i", "\r\n", $messageBody );
     }
 

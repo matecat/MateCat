@@ -8,6 +8,7 @@ import TranslationMatches from './utils/translationMatches'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import CommonUtils from '../../utils/commonUtils'
 
 class SegmentFooterTabMatches extends React.Component {
   constructor(props) {
@@ -25,7 +26,7 @@ class SegmentFooterTabMatches extends React.Component {
   processContributions(matches) {
     var self = this
     var matchesProcessed = []
-    // SegmentActions.createFooter(this.props.id_segment);
+    // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
       if (
         _.isUndefined(this.segment) ||
@@ -39,6 +40,7 @@ class SegmentFooterTabMatches extends React.Component {
       item.cb = this.created_by
       item.segment = this.segment
       item.translation = this.translation
+      item.target = this.target
       if (
         'sentence_confidence' in this &&
         this.sentence_confidence !== '' &&
@@ -78,7 +80,7 @@ class SegmentFooterTabMatches extends React.Component {
 
       if (
         this.match !== 'MT' &&
-        parseInt(this.match) > 74 &&
+        parseInt(this.match) > 70 &&
         parseInt(this.match) < 100
       ) {
         item.sourceDiff = TextUtils.getDiffHtml(
@@ -114,7 +116,7 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   chooseSuggestion(sid, index) {
-    if (this.props.id_segment === sid) {
+    if (this.props.segment.sid === sid) {
       this.suggestionDblClick(this.props.segment.contributions, index)
     }
   }
@@ -149,6 +151,11 @@ class SegmentFooterTabMatches extends React.Component {
       <ul className="graysmall-details">
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         <li>{match.suggestion_info}</li>
+        <li className={'graydesc'}>
+          <span className={'bold'} style={{fontSize: '14px'}}>
+            {CommonUtils.getLanguageNameFromLocale(match.target)}
+          </span>
+        </li>
         <li className="graydesc">
           Source:
           <span className="bold" style={{fontSize: '14px'}}>
@@ -156,6 +163,7 @@ class SegmentFooterTabMatches extends React.Component {
             {match.cb}
           </span>
         </li>
+
         {this.getMatchInfoMetadata(match)}
       </ul>
     )
@@ -191,7 +199,6 @@ class SegmentFooterTabMatches extends React.Component {
    * Do not delete, overwritten by plugin
    */
   componentDidUpdate(prevProps) {
-    setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment))
     if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
       SegmentActions.getContribution(this.props.segment.sid)
     }
@@ -232,7 +239,7 @@ class SegmentFooterTabMatches extends React.Component {
           ''
         ) : (
           <span
-            id={self.props.id_segment + '-tm-' + match.id + '-delete'}
+            id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
             className="trash"
             title="delete this row"
             onClick={self.deleteSuggestion.bind(self, match, index)}
@@ -249,7 +256,7 @@ class SegmentFooterTabMatches extends React.Component {
           >
             <li className="sugg-source">
               <span
-                id={self.props.id_segment + '-tm-' + match.id + '-source'}
+                id={self.props.segment.sid + '-tm-' + match.id + '-source'}
                 className="suggestion_source"
                 dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}
               ></span>
@@ -260,7 +267,7 @@ class SegmentFooterTabMatches extends React.Component {
                 {self.suggestionShortcutLabel + (index + 1)}
               </span>
               <span
-                id={self.props.id_segment + '-tm-' + match.id + '-translation'}
+                id={self.props.segment.sid + '-tm-' + match.id + '-translation'}
                 className="translation"
                 dangerouslySetInnerHTML={self.allowHTML(
                   match.translationDecodedHtml,
@@ -278,7 +285,7 @@ class SegmentFooterTabMatches extends React.Component {
       this.props.segment.contributions.matches &&
       this.props.segment.contributions.matches.length === 0
     ) {
-      if (config.mt_enabled && !config.id_translator) {
+      if (config.mt_enabled) {
         matchesHtml.push(
           <ul key={0} className="graysmall message">
             <li>
@@ -349,7 +356,7 @@ class SegmentFooterTabMatches extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (

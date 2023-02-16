@@ -78,6 +78,13 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       }
       CommentsStore.db.refreshHistory()
     },
+    deleteSegment: function (idComment, idSegment) {
+      const segmentComments = CommentsStore.db.segments[idSegment]
+      CommentsStore.db.segments[idSegment] = segmentComments.filter(
+        ({id}) => id !== idComment,
+      )
+      CommentsStore.db.refreshHistory()
+    },
 
     getCommentsBySegment: function (s) {
       var s = Number(s)
@@ -148,6 +155,10 @@ AppDispatcher.register(function (action) {
     case CommentsConstants.SET_TEAM_USERS:
       CommentsStore.users = action.users
       CommentsStore.emitChange(action.actionType, action.users)
+      break
+    case CommentsConstants.DELETE_COMMENT:
+      CommentsStore.db.deleteSegment(action.idComment, action.sid)
+      CommentsStore.emitChange(action.actionType, action.sid)
       break
     default:
       CommentsStore.emitChange(action.actionType, action.data)

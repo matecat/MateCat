@@ -132,6 +132,16 @@
         }
       }
     }
+
+    .button-all-languages {
+      display: flex;
+      margin-left: 48px;
+
+      button span {
+        display: inline-block;
+        margin: 2px 4px 0 0;
+      }
+    }
   }
 
   /* Modal Body */
@@ -220,10 +230,9 @@
           display: none;
         }
 
-        &:hover:not(.selected),
-        &.hover:not(.selected) {
-          background: $light-gray;
-          color: $medium-blue;
+        &:hover,
+        &.hover {
+          color: white;
           padding-left: 26px;
 
           &:before {
@@ -233,6 +242,17 @@
             content: '';
             border-style: solid;
             border-width: 5px 0 5px 5px;
+            border-color: transparent transparent transparent white;
+          }
+        }
+
+        &:hover:not(.selected),
+        &.hover:not(.selected) {
+          background: $light-gray;
+          color: $medium-blue;
+          padding-left: 26px;
+
+          &:before {
             border-color: transparent transparent transparent $medium-blue;
           }
         }

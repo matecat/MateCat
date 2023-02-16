@@ -1,7 +1,28 @@
 const Shortcuts = {
   shortCutsKeyType: navigator.platform === 'MacIntel' ? 'mac' : 'standard',
+  cattol_formatting_characters: {
+    label: 'Formatting characters',
+    events: {
+      nonBreakingSpace: {
+        label: 'Non-breaking space',
+        equivalent: '',
+        keystrokes: {
+          standard: 'ctrl+shift+space',
+          mac: 'option+space',
+        },
+      },
+      wordJoiner: {
+        label: 'Word joiner',
+        equivalent: '',
+        keystrokes: {
+          standard: 'ctrl+alt+space',
+          mac: 'shift+space',
+        },
+      },
+    },
+  },
   cattol: {
-    label: 'Translate/Revise',
+    label: 'Edit page operations',
     events: {
       openShortcutsModal: {
         label: 'Open shortcuts window',
@@ -56,7 +77,7 @@ const Shortcuts = {
         equivalent: 'click on > between source and target',
         keystrokes: {
           standard: 'ctrl+i',
-          mac: 'alt+ctrl+i',
+          mac: 'ctrl+i',
         },
       },
       undoInSegment: {
@@ -124,7 +145,7 @@ const Shortcuts = {
         },
         keystrokes: {
           standard: 'ctrl+alt+arrows-enter',
-          mac: 'ctrl+alt+arrows-enter',
+          mac: 'ctrl+option+arrows-enter',
         },
       },
       copyContribution1: {
@@ -164,15 +185,15 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'alt+t',
-          mac: 'alt+t',
+          mac: 'option+t',
         },
       },
       navigateTabs: {
-        label: 'Navigate segments Tabs',
+        label: 'Navigate segment tabs',
         equivalent: '',
         keystrokes: {
           standard: 'alt+s',
-          mac: 'ctrl+alt+s',
+          mac: 'ctrl+option+s',
         },
       },
     },

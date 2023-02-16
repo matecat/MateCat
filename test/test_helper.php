@@ -15,26 +15,10 @@ require( 'php_versions_override.php' );
 
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 
-register_shutdown_function( function () {
-    echo "** Resetting environment to development\n\n";
-    restoreDevelopmentConfigFile();
-} );
-
-setTestConfigFile();
+//register_shutdown_function( function () {
+//    echo "** Resetting environment to development\n\n";
+//    restoreDevelopmentConfigFile();
+//} );
+//setTestConfigFile();
 
 Bootstrap::start();
-
-TestHelper::init();
-TestHelper::resetDb();
-
-function startConnection() {
-    $conn = Database::obtain(
-            INIT::$DB_SERVER, INIT::$DB_USER,
-            INIT::$DB_PASS, INIT::$DB_DATABASE
-    );
-    $conn->getConnection();
-}
-
-startConnection();
-
-INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);

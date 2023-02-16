@@ -1,9 +1,14 @@
 <?php
 
+use Constants\ConversionHandlerStatus;
+use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use LQA\ModelDao;
+use LQA\ModelStruct;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
+use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 
@@ -46,7 +51,10 @@ class NewController extends ajaxController {
     const MAX_NUM_KEYS = 6;
 
     private static $allowed_seg_rules = [
-            'standard', 'patent', ''
+            'standard',
+            'patent',
+            'paragraph',
+            ''
     ];
 
     protected $api_output = [
@@ -59,7 +67,17 @@ class NewController extends ajaxController {
      */
     protected $team;
 
+    /**
+     * @var ModelStruct
+     */
+    protected $qaModel;
+
     protected $projectStructure;
+
+    /**
+     * @var QAModelTemplateStruct
+     */
+    protected $qaModelTemplate;
 
     /**
      * @var ProjectManager
@@ -73,6 +91,24 @@ class NewController extends ajaxController {
      */
     protected $files_storage;
 
+    protected $httpHeader = "HTTP/1.0 200 OK";
+
+    private function setBadRequestHeader() {
+        $this->httpHeader = 'HTTP/1.0 400 Bad Request';
+    }
+
+    private function setUnauthorizedHeader() {
+        $this->httpHeader = 'HTTP/1.0 401 Unauthorized';
+    }
+
+    private function setInternalErrorHeader(){
+        $this->httpHeader = 'HTTP/1.0 500 Internal Server Error';
+    }
+
+    private function setInternalTimeoutHeader(){
+        $this->httpHeader = 'HTTP/1.0 504 Gateway Timeout';
+    }
+
     public function __construct() {
 
         parent::__construct();
@@ -81,9 +117,9 @@ class NewController extends ajaxController {
         header( "Connection: close" );
 
         if ( !$this->__validateAuthHeader() ) {
-            header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = 'Authentication failed';
+            $this->setUnauthorizedHeader();
             $this->finalize();
             die();
         }
@@ -121,13 +157,15 @@ class NewController extends ajaxController {
                 'pretranslate_100'   => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
-                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT ],
-                'lexiqa'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'instructions'    => [
+                'id_team'              => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model'          => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model_template' => [ 'filter' => FILTER_VALIDATE_INT ],
+                'lexiqa'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'instructions'         => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
@@ -138,6 +176,18 @@ class NewController extends ajaxController {
 
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+
+        /**
+         * ----------------------------------
+         * Note 2022-10-13
+         * ----------------------------------
+         *
+         * We trim every space private_tm_key
+         * in order to avoid mispelling errors
+         *
+         */
+        $this->postInput['instructions'] = $this->featureSet->filter('encodeInstructions', $_POST['instructions']);
+
         /**
          * ----------------------------------
          * Note 2021-05-28
@@ -147,15 +197,15 @@ class NewController extends ajaxController {
          * in order to avoid mispelling errors
          *
          */
-        $this->postInput[ 'private_tm_key' ] = preg_replace("/\s+/", "", $this->postInput[ 'private_tm_key' ]);
+        $this->postInput[ 'private_tm_key' ] = preg_replace( "/\s+/", "", $this->postInput[ 'private_tm_key' ] );
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
         if ( empty( $_FILES ) ) {
+            $this->setBadRequestHeader();
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file. Not Sent." ];
-
             return -1;
         }
 
@@ -167,13 +217,15 @@ class NewController extends ajaxController {
             $this->__validateSegmentationRules();
             $this->__validateTmAndKeys();
             $this->__validateTeam();
+            $this->__validateQaModelTemplate();
+            $this->__validateQaModel();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = $ex->getMessage();
             Log::doJsonLog( $ex->getMessage() );
-
+            $this->setBadRequestHeader();
             return $ex->getCode();
         }
 
@@ -248,7 +300,7 @@ class NewController extends ajaxController {
         if ( $this->postInput[ 'project_completion' ] ) {
             $feature                 = new BasicFeatureStruct();
             $feature->feature_code   = 'project_completion';
-            $this->projectFeatures[] = $feature;
+            $this->projectFeatures[ $feature->feature_code ] = $feature;
         }
 
         $this->projectFeatures = $this->featureSet->filter(
@@ -302,6 +354,7 @@ class NewController extends ajaxController {
     }
 
     public function finalize() {
+        header( $this->httpHeader );
         $toJson = json_encode( $this->api_output );
         echo $toJson;
     }
@@ -311,6 +364,7 @@ class NewController extends ajaxController {
         $fs = FilesStorageFactory::create();
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
+            $this->setBadRequestHeader();
             return -1;
         }
 
@@ -319,6 +373,7 @@ class NewController extends ajaxController {
         try {
             $stdResult = $uploadFile->uploadFiles( $_FILES );
         } catch ( Exception $e ) {
+            $this->setBadRequestHeader();
             $stdResult                     = [];
             $this->result                  = [
                     'errors' => [
@@ -353,13 +408,15 @@ class NewController extends ajaxController {
             $msg = "Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
-
+            $this->setBadRequestHeader();
             return -1; //exit code
         }
 
         $cookieDir = $uploadFile->getDirUploadToken();
         $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
         $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+
+        $status = [];
 
         foreach ( $arFiles as $file_name ) {
             $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
@@ -374,8 +431,6 @@ class NewController extends ajaxController {
             $conversionHandler->setErrDir( $errDir );
             $conversionHandler->setFeatures( $this->featureSet );
             $conversionHandler->setUserIsLogged( $this->userIsLogged );
-
-            $status = [];
 
             if ( $ext == "zip" ) {
                 // this makes the conversionhandler accumulate eventual errors on files and continue
@@ -397,20 +452,8 @@ class NewController extends ajaxController {
 
                         $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
-                        /*
-                         * TODO
-                         * return error code is 2 because
-                         *      <=0 is for errors
-                         *      1   is OK
-                         *
-                         * In this case, we raise warnings, hence the return code must be a new code
-                         */
-                        $this->result[ 'code' ]                      = 2;
-                        $this->result[ 'errors' ][ $brokenFileName ] = [
-                                'code'    => $fileError->error[ 'code' ],
-                                'message' => $fileError->error[ 'message' ],
-                                'debug'   => $brokenFileName
-                        ];
+                        $this->result = new ConvertedFileModel( $fileError->error[ 'code' ] );
+                        $this->result->addError($fileError->error[ 'message' ], $brokenFileName);
                     }
 
                 }
@@ -476,27 +519,25 @@ class NewController extends ajaxController {
 
                 $status = $errors = $converter->checkResult();
                 if ( count( $errors ) > 0 ) {
-//                    $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
-                    $this->result[ 'code' ] = 2;
+
+                    $this->result = new ConvertedFileModel(ConversionHandlerStatus::ZIP_HANDLING);
                     foreach ( $errors as $__err ) {
+
+                        $savedErrors = $this->result->getErrors();
                         $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
-                        if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
-                            $this->result[ 'errors' ][ $brokenFileName ] = [
-                                    'code'    => $__err[ 'code' ],
-                                    'message' => $__err[ 'message' ],
-                                    'debug'   => $brokenFileName
-                            ];
+                        if( !isset( $savedErrors[$brokenFileName] ) ){
+                            $this->result->addError($__err[ 'message' ], $brokenFileName);
                         }
                     }
                 }
             } else {
+
                 $conversionHandler->doAction();
 
-                $this->result = $conversionHandler->getResult();
-
-                if ( $this->result[ 'code' ] > 0 ) {
-                    $this->result = [];
+                $result = $conversionHandler->getResult();
+                if ( $result->getCode() < 0 ) {
+                    $status[] = $result;
                 }
 
             }
@@ -509,7 +550,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = $status;
             $this->result[ 'errors' ]      = $status;
             Log::doJsonLog( $status );
-
+            $this->setBadRequestHeader();
             return -1;
         }
         /* Do conversions here */
@@ -560,7 +601,7 @@ class NewController extends ajaxController {
         $arMeta  = [];
 
         // create array_files_meta
-        foreach ($arFiles as $arFile){
+        foreach ( $arFiles as $arFile ) {
             $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
         }
 
@@ -606,6 +647,15 @@ class NewController extends ajaxController {
             $this->projectManager->setTeam( $this->team );
         }
 
+        // with the qa template id
+        if( $this->qaModelTemplate ) {
+            $projectStructure[ 'qa_model_template' ] = $this->qaModelTemplate->getDecodedModel();
+        }
+
+        if( $this->qaModel ) {
+            $projectStructure[ 'qa_model' ] = $this->qaModel->getDecodedModel();
+        }
+
         //set features override
         $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
@@ -614,7 +664,7 @@ class NewController extends ajaxController {
         } catch ( Exception $e ) {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->api_output[ 'debug' ]   = $e->getCode();
-
+            $this->setBadRequestHeader();
             return -1;
         }
 
@@ -645,14 +695,14 @@ class NewController extends ajaxController {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function getFileMetadata($filename) {
+    private function getFileMetadata( $filename ) {
         $info          = XliffProprietaryDetect::getInfo( $filename );
         $isXliff       = XliffFiles::isXliff( $filename );
         $isGlossary    = XliffFiles::isGlossaryFile( $filename );
         $isTMX         = XliffFiles::isTMXFile( $filename );
         $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
-        $forceXliff = $this->getFeatureSet()->filter(
+        $forceXliff      = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',
                 INIT::$FORCE_XLIFF_CONVERSION,
                 $this->userIsLogged,
@@ -684,12 +734,13 @@ class NewController extends ajaxController {
             $this->api_output[ 'status' ]  = 504;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = 'Execution timeout';
+            $this->setInternalTimeoutHeader();
         } elseif ( !empty( $this->result[ 'errors' ] ) ) {
             //errors already logged
             $this->api_output[ 'status' ]  = 500;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = array_values( $this->result[ 'errors' ] );
-
+            $this->setInternalErrorHeader();
         } else {
             //everything ok
             $this->_outputForSuccess();
@@ -792,7 +843,9 @@ class NewController extends ajaxController {
      */
     private static function __sanitizeTmKeyArr( $elem ) {
 
-        $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+        $element = new TmKeyManagement_TmKeyStruct( $elem );
+        $element->complete_format = true;
+        $elem = TmKeyManagement_TmKeyManagement::sanitize( $element );
 
         return $elem->toArray();
 
@@ -842,8 +895,11 @@ class NewController extends ajaxController {
             $this->metadata[ 'project_completion' ] = $this->postInput[ 'project_completion' ];
         }
 
-        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
+        if ( !empty( $this->postInput[ 'segmentation_rule' ] ) ) {
+            $this->metadata[ 'segmentation_rule' ] = $this->postInput[ 'segmentation_rule' ];
+        }
 
+        $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
         $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
                 'input' => $this->postInput
         ] );
@@ -851,10 +907,10 @@ class NewController extends ajaxController {
     }
 
     private static function __parseTmKeyInput( $tmKeyString ) {
-        $tmKeyString = trim($tmKeyString);
-        $tmKeyInfo = explode( ":", $tmKeyString );
-        $read      = true;
-        $write     = true;
+        $tmKeyString = trim( $tmKeyString );
+        $tmKeyInfo   = explode( ":", $tmKeyString );
+        $read        = true;
+        $write       = true;
 
         $permissionString = @$tmKeyInfo[ 1 ];
 
@@ -1006,6 +1062,50 @@ class NewController extends ajaxController {
             if ( $this->user ) {
                 $this->team = $this->user->getPersonalTeam();
             }
+        }
+    }
+
+    private function __validateQaModelTemplate()
+    {
+        if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
+            $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get([
+                    'id' => $this->postInput[ 'id_qa_model_template' ],
+                    'uid' => $this->getUser()->uid
+            ]);
+
+            // check if qa_model template exists
+            if(null === $qaModelTemplate){
+                throw new \Exception('This QA Model template does not exists or does not belongs to the logged in user');
+            }
+
+            $this->qaModelTemplate = $qaModelTemplate;
+        }
+    }
+
+    /**
+     * Checks if id_qa_model is valid
+     *
+     * @throws Exception
+     */
+    private function __validateQaModel() {
+        if ( !empty( $this->postInput[ 'id_qa_model' ] ) ) {
+
+            $qaModel = ModelDao::findById($this->postInput[ 'id_qa_model' ]);
+
+            // check if qa_model exists
+            if(null === $qaModel){
+                throw new \Exception('This QA Model does not exists');
+            }
+
+            // check featureSet
+            $qaModelLabel = strtolower($qaModel->label);
+            $featureSetCodes = $this->getFeatureSet()->getCodes();
+
+            if($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)){
+                throw new \Exception('This QA Model does not belong to the authenticated user');
+            }
+
+            $this->qaModel = $qaModel;
         }
     }
 

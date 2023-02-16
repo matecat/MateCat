@@ -41,6 +41,7 @@ class Constants_Engines {
             self::GOOGLE_TRANSLATE => self::GOOGLE_TRANSLATE,
             self::MTHUB            => self::MTHUB,
             self::INTENTO          => self::INTENTO,
+            self::MMT              => self::MMT,
     ];
 
     /**

@@ -1,9 +1,8 @@
-import {sprintf} from 'sprintf-js'
-
 import SegmentStore from '../../../../stores/SegmentStore'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import CommonUtils from '../../../../utils/commonUtils'
+import {getFilteredSegments} from '../../../../api/getFilteredSegments'
 
 let SegmentFilterUtils = {
   enabled: () => config.segmentFilterEnabled,
@@ -21,8 +20,6 @@ let SegmentFilterUtils = {
     return listOfSegments.indexOf(segmentId) !== -1
   },
 
-  notification: null,
-
   callbackForSegmentNotInSample: (segmentId) => {
     var title = 'Segment not in sample'
     var text =
@@ -32,10 +29,8 @@ let SegmentFilterUtils = {
       'segment is no longer in the sample'
 
     return (function () {
-      if (SegmentFilterUtils.notification)
-        APP.removeNotification(SegmentFilterUtils.notification)
-
-      SegmentFilterUtils.notification = APP.addNotification({
+      CatToolActions.addNotification({
+        uid: 'segment-filter',
         autoDismiss: false,
         dismissable: true,
         position: 'bl',
@@ -148,23 +143,19 @@ let SegmentFilterUtils = {
     return localStorage.removeItem(SegmentFilterUtils.keyForLocalStorage())
   },
 
-  filterSubmit: function (params, extendendLocalStorageValues) {
+  filterSubmit: function (filter, extendendLocalStorageValues) {
     if (!extendendLocalStorageValues) {
       extendendLocalStorageValues = {}
     }
     SegmentFilterUtils.filteringSegments = true
-    var data = {filter: params}
-    data.revision_number = params.revision_number
-    data.filter.revision = config.isReview
+    filter.revision = config.isReview
     var password = config.isReview ? config.review_password : config.password
-    var path = sprintf(
-      '/api/v2/jobs/%s/%s/segments-filter?%s',
+    getFilteredSegments(
       config.id_job,
       password,
-      $.param(data),
-    )
-
-    return $.getJSON(path).pipe(function (data) {
+      filter,
+      filter.revision_number,
+    ).then((data) => {
       CommonUtils.clearStorage('SegmentFilter')
 
       SegmentActions.removeAllMutedSegments()

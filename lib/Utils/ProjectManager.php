@@ -12,10 +12,17 @@ use ActivityLog\ActivityLogStruct;
 use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
+use Files\FilesPartsDao;
+use Files\FilesPartsStruct;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use LQA\QA;
+use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
+use Matecat\SubFiltering\Filters\PhCounter;
+use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -97,6 +104,11 @@ class ProjectManager {
     protected $filter;
 
     /**
+     * @var \Files\MetadataDao
+     */
+    protected $metadataDao;
+
+    /**
      * ProjectManager constructor.
      *
      * @param ArrayObject|null $projectStructure
@@ -125,7 +137,7 @@ class ProjectManager {
                             'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
-                            'array_files_meta'             => [], //list of file names
+                            'array_files_meta'             => [], //list of file meta data
                             'file_id_list'                 => [],
                             'source_language'              => null,
                             'target_language'              => null,
@@ -146,6 +158,7 @@ class ProjectManager {
                             'segments_metadata'            => [], //array of segments_metadata
                             'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
                             'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
+                            'file-metadata'                => [], //array of files metadata
                             'translations'                 => [],
                             'notes'                        => [],
                             'context-group'                => [],
@@ -173,6 +186,7 @@ class ProjectManager {
                             'sanitize_project_options'     => true,
                             'file_segments_count'          => [],
                             'due_date'                     => null,
+                            'qa_model'                     => null,
                             'target_language_mt_engine_id' => [],
                             'standard_analysis_wc'         => 0
                     ] );
@@ -215,6 +229,8 @@ class ProjectManager {
         }
 
         $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
+
+        $this->metadataDao = new \Files\MetadataDao();
     }
 
     protected function _log( $_msg ) {
@@ -233,6 +249,7 @@ class ProjectManager {
                  */
                 $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
             }
+
             $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
         }
 
@@ -610,127 +627,129 @@ class ProjectManager {
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         $totalFilesStructure = [];
-        foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
-            //converted file is inside cache directory
-            //get hash from file name inside UUID dir
-            $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
-            $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
+        if ( isset( $linkFiles[ 'conversionHashes' ] ) and isset( $linkFiles[ 'conversionHashes' ][ 'sha' ] ) ) {
+            foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
+                //converted file is inside cache directory
+                //get hash from file name inside UUID dir
+                $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
+                $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
 
-            // Example:
-            // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
-            // $hashFile[ 1 ] = it-it
-            $sha1_original = $hashFile[ 0 ];
-            $lang          = $hashFile[ 1 ];
+                // Example:
+                // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
+                // $hashFile[ 1 ] = it-it
+                $sha1_original = $hashFile[ 0 ];
+                $lang          = $hashFile[ 1 ];
 
-            //use hash and lang to fetch file from package
-            $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
+                //use hash and lang to fetch file from package
+                $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
 
-            //associate the hash to the right file in upload directory
-            //get original file name, to insert into DB and cp in storage
-            //PLEASE NOTE, this can be an array when the same file added more
-            // than once and with different names
-            $_originalFileNames = $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $linkFile ];
+                //associate the hash to the right file in upload directory
+                //get original file name, to insert into DB and cp in storage
+                //PLEASE NOTE, this can be an array when the same file added more
+                // than once and with different names
+                $_originalFileNames = $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $linkFile ];
 
-            unset( $hashFile );
+                unset( $hashFile );
 
-            try {
+                try {
 
-                if ( count( $_originalFileNames ) === 0 ) {
-                    throw new Exception( 'No hash files found', -6 );
-                }
-
-                if ( AbstractFilesStorage::isOnS3() ) {
-                    if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
+                    if ( count( $_originalFileNames ) === 0 ) {
+                        throw new Exception( 'No hash files found', -6 );
                     }
-                } else {
-                    if ( !file_exists( $cachedXliffFilePathName ) ) {
-                        throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
-                    }
-                }
 
-                $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
-
-                if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
-                    throw new Exception( "Failed to find converted Xliff", -3 );
-                }
-
-                $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
-
-                if ( count( $filesStructure ) === 0 ) {
-                    throw new Exception( 'Files could not be saved in database.', -6 );
-                }
-
-                //check if the files language equals the source language. If not, set an error message.
-                if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
-                    $this->validateFilesLanguages();
-                }
-
-            } catch ( Exception $e ) {
-
-                if ( $e->getCode() == -10 ) {
-
-                    //Failed to store the original Zip
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -10, "message" => $e->getMessage()
-                    ];
-
-                } elseif ( $e->getCode() == -11 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
-                    ];
-                } elseif ( $e->getCode() == -12 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -7, "message" => "Failed to store reference files in database"
-                    ];
-                } // SEVERE EXCEPTIONS HERE
-                elseif ( $e->getCode() == -6 ) {
-                    //"File not found on server after upload."
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -6,
-                            "message" => $e->getMessage()
-                    ];
-                } elseif ( $e->getCode() == -3 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -7,
-                            "message" => "File not found. Failed to save XLIFF conversion on disk."
-                    ];
-                } elseif ( $e->getCode() == -13 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -13, "message" => $e->getMessage()
-                    ];
-                    //we can not write to disk!! Break project creation
-                } // S3 EXCEPTIONS HERE
-                elseif ( $e->getCode() == -200 ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -200,
-                            "message" => $e->getMessage()
-                    ];
-                } else {
-                    if ( $e->getCode() == 0 ) {
-
-                        // check for 'Invalid copy source encoding' error
-                        $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
-
-                        if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
-                            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                    "code"    => -200,
-                                    "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
-                            ];
+                    if ( AbstractFilesStorage::isOnS3() ) {
+                        if ( null === $cachedXliffFilePathName ) {
+                            throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
+                        }
+                    } else {
+                        if ( !file_exists( $cachedXliffFilePathName ) ) {
+                            throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
                         }
                     }
+
+                    $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
+
+                    if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
+                        throw new Exception( "Failed to find converted Xliff", -3 );
+                    }
+
+                    $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
+
+                    if ( count( $filesStructure ) === 0 ) {
+                        throw new Exception( 'Files could not be saved in database.', -6 );
+                    }
+
+                    //check if the files language equals the source language. If not, set an error message.
+                    if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
+                        $this->validateFilesLanguages();
+                    }
+
+                } catch ( Exception $e ) {
+
+                    if ( $e->getCode() == -10 ) {
+
+                        //Failed to store the original Zip
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -10, "message" => $e->getMessage()
+                        ];
+
+                    } elseif ( $e->getCode() == -11 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
+                        ];
+                    } elseif ( $e->getCode() == -12 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -7, "message" => "Failed to store reference files in database"
+                        ];
+                    } // SEVERE EXCEPTIONS HERE
+                    elseif ( $e->getCode() == -6 ) {
+                        //"File not found on server after upload."
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code"    => -6,
+                                "message" => $e->getMessage()
+                        ];
+                    } elseif ( $e->getCode() == -3 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code"    => -7,
+                                "message" => "File not found. Failed to save XLIFF conversion on disk."
+                        ];
+                    } elseif ( $e->getCode() == -13 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -13, "message" => $e->getMessage()
+                        ];
+                        //we can not write to disk!! Break project creation
+                    } // S3 EXCEPTIONS HERE
+                    elseif ( $e->getCode() == -200 ) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code"    => -200,
+                                "message" => $e->getMessage()
+                        ];
+                    } else {
+                        if ( $e->getCode() == 0 ) {
+
+                            // check for 'Invalid copy source encoding' error
+                            $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
+
+                            if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
+                                $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                        "code"    => -200,
+                                        "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                                ];
+                            }
+                        }
+                    }
+                    $this->__clearFailedProject( $e );
+
+                    //EXIT
+                    return false;
+
                 }
-                $this->__clearFailedProject( $e );
 
-                //EXIT
-                return false;
+                //array append like array_merge but it do not renumber the numeric keys, so we can preserve the files id
+                $totalFilesStructure += $filesStructure;
 
-            }
-
-            //array append like array_merge but it do not renumber the numeric keys, so we can preserve the files id
-            $totalFilesStructure += $filesStructure;
-
-        } //end of conversion hash-link loop
+            } //end of conversion hash-link loop
+        }
 
         //Throws exception
         try {
@@ -837,26 +856,33 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
-        $k_file = 0;
-        foreach ( $totalFilesStructure as $fid => $file_info ) {
-            if ( isset( $this->projectStructure[ 'instructions' ][ $k_file ] ) && !empty( $this->projectStructure[ 'instructions' ][ $k_file ] ) ) {
-                $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $k_file ] );
-            }
-            $k_file++;
-        }
 
+        foreach ( $totalFilesStructure as $fid => $file_info ) {
+
+            //
+            // ==============================================
+            // NOTE 2022-03-01
+            // ==============================================
+            //
+            // Save the instruction notes in the same order of files
+            //
+            // `array_files` array contains the original file list (with correct file order).
+            // The file order in $totalFilesStructure instead (which comes from a conversion process) may do not correspond.
+            //
+            $array_files = $this->getProjectStructure()[ 'array_files' ];
+            foreach ( $array_files as $index => $filename ) {
+                if ( $file_info[ 'original_filename' ] === $filename ) {
+                    if ( isset( $this->projectStructure[ 'instructions' ][ $index ] ) && !empty( $this->projectStructure[ 'instructions' ][ $index ] ) ) {
+                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $index ] );
+                    }
+
+                }
+            }
+        }
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
         }
-
-        Projects_ProjectDao::updateAnalysisStatus(
-                $this->projectStructure[ 'id_project' ],
-                $this->projectStructure[ 'status' ],
-                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
-        );
-
-        $this->pushActivityLog();
 
         Database::obtain()->begin();
 
@@ -865,6 +891,14 @@ class ProjectManager {
         ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
 
         $featureSet->run( 'postProjectCreate', $this->projectStructure );
+
+        Projects_ProjectDao::updateAnalysisStatus(
+                $this->projectStructure[ 'id_project' ],
+                $this->projectStructure[ 'status' ],
+                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
+        );
+
+        $this->pushActivityLog();
 
         Database::obtain()->commit();
 
@@ -1250,7 +1284,7 @@ class ProjectManager {
             if ( !empty( $projectStructure[ 'private_tm_key' ] ) ) {
                 foreach ( $projectStructure[ 'private_tm_key' ] as $tmKeyObj ) {
                     $newTmKey = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
-
+                    $newTmKey->complete_format = true;
                     $newTmKey->tm    = true;
                     $newTmKey->glos  = true;
                     $newTmKey->owner = true;
@@ -1267,6 +1301,10 @@ class ProjectManager {
 
             }
 
+            // check for job_first_segment and job_last_segment existence
+            if ( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) or !isset( $this->min_max_segments_id[ 'job_last_segment' ] ) ) {
+                throw new \Exception( 'Job cannot be created. No job_first_segment or job_last_segment found!' );
+            }
 
             $this->_log( $projectStructure[ 'private_tm_key' ] );
 
@@ -1724,6 +1762,7 @@ class ProjectManager {
              * @var $owner_key TmKeyManagement_TmKeyStruct
              */
             foreach ( $owner_tm_keys as $i => $owner_key ) {
+                $owner_key->complete_format = true;
                 $owner_tm_keys[ $i ] = $owner_key->toArray();
             }
 
@@ -1789,6 +1828,7 @@ class ProjectManager {
 
         $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
+        $jobsMetadataDao    = new \Jobs\MetadataDao();
 
         // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
@@ -1799,8 +1839,8 @@ class ProjectManager {
         $xliffParser = new XliffParser();
 
         try {
-            $xliff        = $xliffParser->xliffToArray( $xliff_file_content );
-            $xliffVersion = XliffVersionDetector::detect( $xliff_file_content );
+            $xliff     = $xliffParser->xliffToArray( $xliff_file_content );
+            $xliffInfo = XliffProprietaryDetect::getInfoByStringData( $xliff_file_content );
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
@@ -1818,18 +1858,32 @@ class ProjectManager {
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
 
+            // save x-jsont* datatype
+            if(isset( $xliff_file[ 'attr' ][ 'data-type' ] )){
+                $dataType = $xliff_file[ 'attr' ][ 'data-type' ];
+
+                if (strpos($dataType, 'x-jsont' ) !== false) {
+                    $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'data-type', $dataType );
+                }
+            }
+
             if ( !array_key_exists( 'trans-units', $xliff_file ) ) {
                 continue;
             }
 
             // files-part
-            if(isset($xliff_file[ 'attr' ][ 'original' ])){
-                $filesPartsStruct = new \Files\FilesPartsStruct();
+            if ( isset( $xliff_file[ 'attr' ][ 'original' ] ) ) {
+                $filesPartsStruct          = new FilesPartsStruct();
                 $filesPartsStruct->id_file = $fid;
-                $filesPartsStruct->key = 'original';
-                $filesPartsStruct->value = $xliff_file[ 'attr' ][ 'original' ];
+                $filesPartsStruct->key     = 'original';
+                $filesPartsStruct->value   = $xliff_file[ 'attr' ][ 'original' ];
 
-                $filePartsId = (new \Files\FilesPartsDao())->insert($filesPartsStruct);
+                $filePartsId = ( new FilesPartsDao() )->insert( $filesPartsStruct );
+
+                // save `custom` meta data
+                if(isset($xliff_file[ 'attr' ][ 'custom' ]) and !empty($xliff_file[ 'attr' ][ 'custom' ])){
+                    $this->metadataDao->bulkInsert( $this->projectStructure[ 'id_project' ], $fid, $xliff_file[ 'attr' ][ 'custom' ], $filePartsId );
+                }
             }
 
             foreach ( $xliff_file[ 'trans-units' ] as $xliff_trans_unit ) {
@@ -1847,7 +1901,7 @@ class ProjectManager {
                     $show_in_cattool = 0;
                 } else {
 
-                    $this->_manageAlternativeTranslations( $xliff_trans_unit, $xliff_file[ 'attr' ] );
+                    $this->_manageAlternativeTranslations( $xliff_trans_unit, $xliff_file[ 'attr' ], $xliffInfo );
 
                     $trans_unit_reference = self::sanitizedUnitId( $xliff_trans_unit[ 'attr' ][ 'id' ], $fid );
 
@@ -1863,26 +1917,6 @@ class ProjectManager {
                             }
                         }
                     }
-
-                    //
-                    // -------------------------------------
-                    // START SEGMENTS META
-                    // -------------------------------------
-                    //
-
-                    // check if there is sizeRestriction
-                    if(isset($xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ])){
-                        $metadataStruct = new Segments_SegmentMetadataStruct();
-                        $metadataStruct->meta_key = 'sizeRestriction';
-                        $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
-                        $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
-                    }
-
-                    //
-                    // -------------------------------------
-                    // END SEGMENTS META
-                    // -------------------------------------
-                    //
 
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
@@ -1902,17 +1936,16 @@ class ProjectManager {
                                 $show_in_cattool = 0;
                             } else {
 
-                                if ( $xliffVersion === 1 ) {
-                                    $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
-                                    $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
-                                    $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
-                                    $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
-                                }
+                                $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ], $xliffInfo );
+                                $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
+                                $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
+                                $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
 
                                 if ( isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] ) ) {
 
-                                    if ( $xliffVersion === 1 ) {
-                                        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] );
+                                    if ( $this->features->filter( 'populatePreTranslations', true ) ) {
+
+                                        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
                                         // -----------------------------------------------
@@ -1961,50 +1994,67 @@ class ProjectManager {
                                 }
                             }
 
-                            // segment original data
+                            //
+                            // -------------------------------------
+                            // START SEGMENTS META
+                            // -------------------------------------
+                            //
+
+                            $metadataStruct = new Segments_SegmentMetadataStruct();
+
+                            // check if there is sizeRestriction
+                            if ( isset( $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] ) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0 ) {
+                                $metadataStruct->meta_key   = 'sizeRestriction';
+                                $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                            }
+
+                            $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
+
+                            //
+                            // -------------------------------------
+                            // END SEGMENTS META
+                            // -------------------------------------
+                            //
+
+                            //
+                            // -------------------------------------
+                            // START SEGMENTS ORIGINAL DATA
+                            // -------------------------------------
+                            //
+
                             // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
                             $segmentOriginalDataStructMap = ( !empty( $dataRefMap ) ) ? [ 'map' => $dataRefMap ] : [];
                             $segmentOriginalDataStruct    = new Segments_SegmentOriginalDataStruct( $segmentOriginalDataStructMap );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //
-                            // -------------------------------------------
-                            // NOTE 2020-12-07
-                            // -------------------------------------------
+                            // -------------------------------------
+                            // END SEGMENTS ORIGINAL DATA
+                            // -------------------------------------
                             //
-                            // When there is an 'original-data' map, save segment_hash of REPLACED string
-                            // in order to distinguish it in UI avoiding possible collisions
-                            // (same text, different 'original-data' maps).
-                            // Example:
-                            //
-                            // $mapA = '{"source1":"%@"}';
-                            // $mapB = '{"source1":"%s"}';
-                            //
-                            // $segmentA = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
-                            // $segmentB = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
-                            //
-                            $segmentHash = md5( $seg_source[ 'raw-content' ] );
-                            if ( !empty( $dataRefMap ) ) {
-                                $dataRefReplacer = new DataRefReplacer( $dataRefMap );
-                                $segmentHash     = md5( $dataRefReplacer->replace( $seg_source[ 'raw-content' ] ) );
+
+                            $sizeRestriction = null;
+                            if ( isset( $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] ) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0 ) {
+                                $sizeRestriction = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
                             }
 
+                            $segmentHash = $this->createSegmentHash( $seg_source[ 'raw-content' ], $dataRefMap, $sizeRestriction );
 
                             // segment struct
                             $segStruct = new Segments_SegmentStruct( [
-                                'id_file'                 => $fid,
-                                'id_file_part'            => (isset($filePartsId)) ? $filePartsId : null,
-                                'id_project'              => $this->projectStructure[ 'id_project' ],
-                                'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                'xliff_mrk_id'            => $seg_source[ 'mid' ],
-                                'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
-                                'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
-                                'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
-                                'segment_hash'            => $segmentHash,
-                                'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
-                                'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
-                                'raw_word_count'          => $wordCount,
-                                'show_in_cattool'         => $show_in_cattool
+                                    'id_file'                 => $fid,
+                                    'id_file_part'            => ( isset( $filePartsId ) ) ? $filePartsId : null,
+                                    'id_project'              => $this->projectStructure[ 'id_project' ],
+                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                    'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
+                                    'segment_hash'            => $segmentHash,
+                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                    'raw_word_count'          => $wordCount,
+                                    'show_in_cattool'         => $show_in_cattool
                             ] );
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
@@ -2033,14 +2083,14 @@ class ProjectManager {
                         if ( empty( $wordCount ) ) {
                             $show_in_cattool = 0;
                         } else {
-                            $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+                            $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffInfo );
                             $prec_tags                                     = empty( $extract_external[ 'prec' ] ) ? null : $extract_external[ 'prec' ];
                             $succ_tags                                     = empty( $extract_external[ 'succ' ] ) ? null : $extract_external[ 'succ' ];
                             $xliff_trans_unit[ 'source' ][ 'raw-content' ] = $extract_external[ 'seg' ];
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
-                                $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ] );
+                                $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
 
@@ -2072,12 +2122,34 @@ class ProjectManager {
 
                         $segmentHash = md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
 
+
+                        //
+                        // -------------------------------------
+                        // START SEGMENTS META
+                        // -------------------------------------
+                        //
+
+                        $metadataStruct = new Segments_SegmentMetadataStruct();
+
+                        // check if there is sizeRestriction
+                        if ( isset( $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] ) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0 ) {
+                            $metadataStruct->meta_key   = 'sizeRestriction';
+                            $metadataStruct->meta_value = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                        }
+
+                        $this->projectStructure[ 'segments-meta-data' ][ $fid ]->append( $metadataStruct );
+
+                        //
+                        // -------------------------------------
+                        // END SEGMENTS META
+                        // -------------------------------------
+                        //
+
+
                         // segment original data
                         if ( !empty( $segmentOriginalData ) ) {
 
-                            $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $segmentOriginalData );
-                            $segmentHash     = md5( $dataRefReplacer->replace( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) );
-
+                            $dataRefReplacer           = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $segmentOriginalData );
                             $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
                                     'data'             => $segmentOriginalData,
                                     'replaced_segment' => $dataRefReplacer->replace( $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) ),
@@ -2086,9 +2158,16 @@ class ProjectManager {
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
                         }
 
+                        $sizeRestriction = null;
+                        if ( isset( $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] ) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0 ) {
+                            $sizeRestriction = $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ];
+                        }
+
+                        $segmentHash = $this->createSegmentHash( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $segmentOriginalData, $sizeRestriction );
+
                         $segStruct = new Segments_SegmentStruct( [
                                 'id_file'             => $fid,
-                                'id_file_part'        => (isset($filePartsId)) ? $filePartsId : null,
+                                'id_file_part'        => ( isset( $filePartsId ) ) ? $filePartsId : null,
                                 'id_project'          => $this->projectStructure[ 'id_project' ],
                                 'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
                                 'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),
@@ -2124,6 +2203,47 @@ class ProjectManager {
             $this->show_in_cattool_segs_counter += $_fileCounter_Show_In_Cattool;
         }
 
+    }
+
+    /**
+     * -------------------------------------
+     * SEGMENT HASH
+     * -------------------------------------
+     *
+     * When there is an 'original-data' map, save segment_hash of REPLACED string
+     * in order to distinguish it in UI avoiding possible collisions
+     * (same text, different 'original-data' maps).
+     * Example:
+     *
+     * $mapA = '{"source1":"%@"}';
+     * $mapB = '{"source1":"%s"}';
+     *
+     * $segmentA = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
+     * $segmentB = 'If you find the content to be inappropriate or offensive, we recommend contacting <ph id="source1" dataRef="source1"/>.';
+     *
+     * The same thing happens when the segment has a char size restriction.
+     *
+     *
+     * @param      $rawContent
+     * @param null $dataRefMap
+     * @param null $sizeRestriction
+     *
+     * @return string
+     */
+    private function createSegmentHash( $rawContent, $dataRefMap = null, $sizeRestriction = null ) {
+
+        $segmentToBeHashed = $rawContent;
+
+        if ( !empty( $dataRefMap ) ) {
+            $dataRefReplacer   = new DataRefReplacer( $dataRefMap );
+            $segmentToBeHashed = $dataRefReplacer->replace( $rawContent );
+        }
+
+        if ( !empty( $sizeRestriction ) ) {
+            $segmentToBeHashed .= $segmentToBeHashed . '{"sizeRestriction": ' . $sizeRestriction . '}';
+        }
+
+        return md5( $segmentToBeHashed );
     }
 
     /**
@@ -2166,10 +2286,10 @@ class ProjectManager {
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // get metadata
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+            $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
             $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, @$meta );
+            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -2215,9 +2335,10 @@ class ProjectManager {
 
 
     protected function _insertInstructions( $fid, $value ) {
-        $metadataDao = new \Files\MetadataDao();
-        $metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
 
+        $value = $this->features->filter( 'decodeInstructions', $value );
+
+        $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
     }
 
     protected function _storeSegments( $fid ) {
@@ -2254,7 +2375,7 @@ class ProjectManager {
 
                 // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
                 // to allow the correct tag handling by the plugins
-                $map = $this->features->filter('sanitizeOriginalDataMap', $segmentOriginalDataStruct->map);
+                $map = $this->features->filter( 'sanitizeOriginalDataMap', $segmentOriginalDataStruct->map );
 
                 // persist original data map if present
                 Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $map );
@@ -2269,7 +2390,9 @@ class ProjectManager {
             /** @var  Segments_SegmentMetadataStruct $segmentMetadataStruct */
             $segmentMetadataStruct = @$this->projectStructure[ 'segments-meta-data' ][ $fid ][ $position ];
 
-            $this->features->filter( 'saveSegmentMetadata', $id_segment, $segmentMetadataStruct );
+            if ( isset( $segmentMetadataStruct ) and !empty( $segmentMetadataStruct ) ) {
+                $this->_saveSegmentMetadata( $id_segment, $segmentMetadataStruct );
+            }
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
                 $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
@@ -2391,13 +2514,37 @@ class ProjectManager {
     }
 
     /**
+     * Save segment metadata
+     *
+     * @param int                                 $id_segment
+     * @param Segments_SegmentMetadataStruct|null $metadataStruct
+     */
+    protected function _saveSegmentMetadata( $id_segment, Segments_SegmentMetadataStruct $metadataStruct = null ) {
+
+        if ( $metadataStruct !== null and
+                isset( $metadataStruct->meta_key ) and $metadataStruct->meta_key !== '' and
+                isset( $metadataStruct->meta_value ) and $metadataStruct->meta_value !== ''
+        ) {
+            $metadataStruct->id_segment = $id_segment;
+            Segments_SegmentMetadataDao::save( $metadataStruct );
+        }
+    }
+
+    /**
      * @param array $xliff_trans_unit
      *
      * @param       $xliff_file_attributes
      *
      * @throws Exception
      */
-    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes ) {
+    protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes, $xliffInfo = [
+            'info'                   => [],
+            'proprietary'            => false,
+            'proprietary_name'       => null,
+            'proprietary_short_name' => null,
+            'version'                => 1,
+            'converter_version'      => null,
+    ] ) {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
@@ -2442,15 +2589,15 @@ class ProjectManager {
             }
 
             if ( !empty( $xliff_trans_unit[ 'source' ] ) ) {
-                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffInfo );
             }
 
             //Override with the alt-trans source value
             if ( !empty( $altTrans[ 'source' ] ) ) {
-                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ] );
+                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ], $xliffInfo );
             }
 
-            $target_extract_external = $this->_strip_external( $altTrans[ 'target' ] );
+            $target_extract_external = $this->_strip_external( $altTrans[ 'target' ], $xliffInfo );
 
             //wrong alt-trans content: source == target
             if ( $source_extract_external[ 'seg' ] == $target_extract_external[ 'seg' ] ) {
@@ -2481,7 +2628,7 @@ class ProjectManager {
 
         $this->_cleanSegmentsMetadata();
 
-        $status = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $status = Constants_TranslationStatus::STATUS_APPROVED;
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
                 $status,
@@ -2498,12 +2645,16 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
+                $segment           = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
+                $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
+
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                         [
                                 'approved'            => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
                                 'locked'              => 0,
                                 'match_type'          => 'ICE',
-                                'eq_word_count'       => 0,
+                            // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
+                                'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
                                 'standard_word_count' => null,
                                 'status'              => $status,
                                 'suggestion_match'    => null,
@@ -2516,14 +2667,41 @@ class ProjectManager {
                 );
 
                 // Use QA to get target segment
-                $chunk   = \Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
-                $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
-                $source  = $segment->segment;
-                $target  = $translation_row [ 2 ];
-                $check   = new QA( $source, $target );
+                $chunk  = \Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
+                $source = $segment->segment;
+                $target = $translation_row [ 2 ];
+
+                //
+                // NOTE 2021-12-20
+                // ------------------------------------------------------
+                // In order to perform an integrity check
+                // we need to transform source and target to layer1
+                // This piece of code mimics setTranslationController (from line 322 to 341)
+
+                /** @var MateCatFilter filter */
+                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
+                $source = $filter->fromLayer0ToLayer1( $source );
+                $target = $filter->fromLayer0ToLayer1( $target );
+
+                $pipeline = new Pipeline( $chunk->source, $chunk->target );
+                $counter  = new PhCounter();
+                $counter->transform( $target );
+
+                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
+                    $pipeline->getNextId();
+                }
+
+                $pipeline->addLast( new FromViewNBSPToSpaces() );
+                $pipeline->addLast( new SprintfToPH() );
+
+                $src = $pipeline->transform( $source );
+                $trg = $pipeline->transform( $target );
+
+                $check = new QA( $src, $trg );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
+                $check->setIdSegment( $translation_row [ 0 ] );
                 $check->performConsistencyCheck();
 
                 /* WARNING do not change the order of the keys */
@@ -2531,8 +2709,8 @@ class ProjectManager {
                         'id_segment'             => $translation_row [ 0 ],
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
-                        'status'                  => $iceLockArray[ 'status' ],
-                        'translation'            => $check->getTargetSeg(),
+                        'status'                 => $iceLockArray[ 'status' ],
+                        'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $iceLockArray[ 'match_type' ],
                         'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
@@ -2559,7 +2737,8 @@ class ProjectManager {
     }
 
     /**
-     * @param $segment
+     * @param       $segment
+     * @param array $xliffInfo
      *
      * @return array
      * @throws \API\V2\Exceptions\AuthenticationError
@@ -2568,7 +2747,23 @@ class ProjectManager {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _strip_external( $segment ) {
+    protected function _strip_external( $segment, $xliffInfo = [
+            'info'                   => [],
+            'proprietary'            => false,
+            'proprietary_name'       => null,
+            'proprietary_short_name' => null,
+            'version'                => 1,
+            'converter_version'      => null,
+    ] ) {
+
+        // Definitely DISABLED
+        if ( true ) {
+            return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
+        }
+
+        if ( $xliffInfo[ 'version' ] == 2 ) {
+            return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
+        }
 
         if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
@@ -2838,6 +3033,9 @@ class ProjectManager {
                 }
 
                 if ( !$this->projectStructure[ 'notes' ][ $internal_id ]->offsetExists( 'entries' ) ) {
+                    $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'from', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'entries', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'entries', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json_segment_ids', [] );
@@ -2845,6 +3043,13 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'notes' ][ $internal_id ][ $noteKey ]->append( $noteContent );
+
+                // import segments metadata from the `from` attribute
+                if(isset($note[ 'from' ])){
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( $note[ 'from' ] );
+                } else {
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( 'NO_FROM' );
+                }
 
             }
 
@@ -2864,13 +3069,14 @@ class ProjectManager {
      *
      */
     private function __setSegmentIdForNotes( $row ) {
+
         $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
 
             if ( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ) {
                 array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
-            } else {
+            } else  {
                 array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
             }
 
@@ -2882,8 +3088,10 @@ class ProjectManager {
      * @throws \Exception
      */
     private function insertSegmentNotesForFile() {
+
         $this->projectStructure = $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
         ProjectManagerModel::bulkInsertSegmentNotes( $this->projectStructure[ 'notes' ] );
+        ProjectManagerModel::bulkInsertSegmentMetaDataFromAttributes( $this->projectStructure[ 'notes' ] );
     }
 
     /**
@@ -2960,7 +3168,16 @@ class ProjectManager {
                     "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
             ];
             if ( PHP_SAPI != 'cli' ) {
-                setcookie( "upload_session", "", time() - 10000, '/', \INIT::$COOKIE_DOMAIN );
+                CookieManager::setCookie( "upload_session", "",
+                        [
+                                'expires'  => time() - 10000,
+                                'path'     => '/',
+                                'domain'   => INIT::$COOKIE_DOMAIN,
+                                'secure'   => true,
+                                'httponly' => true,
+                                'samesite' => 'None',
+                        ]
+                );
             }
         }
 

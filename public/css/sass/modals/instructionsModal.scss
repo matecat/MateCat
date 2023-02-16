@@ -5,9 +5,12 @@
     padding-top: 16px;
   }
   span.fileFormat {
-    padding: 10px 5px 4px 47px;
+    padding: 4px 5px 4px 47px;
     background-size: 25px !important;
     line-height: 25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   .ui.accordion {
     max-height: 400px;
@@ -17,6 +20,8 @@
     border-radius: 0px;
     margin-bottom: 20px;
     .title {
+      display: flex;
+      align-items: center;
       color: #666;
       &:hover {
         color: #000;
@@ -31,6 +36,7 @@
         .current-icon {
           display: block;
           float: right;
+          margin-left: 10px;
         }
       }
     }
@@ -48,7 +54,8 @@
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
-    //min-height: 300px;
+    max-height: 400px;
+    overflow: auto;
     p {
       line-height: 26px;
       word-break: break-all;

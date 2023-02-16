@@ -2,7 +2,6 @@ import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
 import TeamConstants from '../constants/TeamConstants'
 import TeamsStore from '../stores/TeamsStore'
-import {changeJobsOrProjectStatus} from '../api/changeJobsOrProjectStatus'
 import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
 import {changeProjectTeam} from '../api/changeProjectTeam'
@@ -13,6 +12,9 @@ import {createTeam} from '../api/createTeam'
 import {addUserTeam} from '../api/addUserTeam'
 import {removeTeamUser} from '../api/removeTeamUser'
 import {updateTeamName} from '../api/updateTeamName'
+import CatToolActions from './CatToolActions'
+import {changeProjectStatus} from '../api/changeProjectStatus'
+import {changeJobStatus} from '../api/changeJobStatus'
 
 let ManageActions = {
   /********* Projects *********/
@@ -82,7 +84,11 @@ let ManageActions = {
   },
 
   updateStatusProject: function (project, status) {
-    changeJobsOrProjectStatus('prj', project.toJS(), status).then(() => {
+    changeProjectStatus(
+      project.get('id'),
+      project.get('password'),
+      status,
+    ).then(() => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.HIDE_PROJECT,
         project: project,
@@ -94,7 +100,7 @@ let ManageActions = {
   },
 
   changeJobStatus: function (project, job, status) {
-    changeJobsOrProjectStatus('job', job.toJS(), status).then(() => {
+    changeJobStatus(job.get('id'), job.get('password'), status).then(() => {
       AppDispatcher.dispatch({
         actionType: ManageConstants.REMOVE_JOB,
         project: project,
@@ -177,7 +183,7 @@ let ManageActions = {
       allowHtml: true,
       autoDismiss: false,
     }
-    APP.addNotification(notification)
+    CatToolActions.addNotification(notification)
   },
 
   changeProjectAssignee: function (team, project, user) {
@@ -271,7 +277,7 @@ let ManageActions = {
             allowHtml: true,
             timer: 3000,
           }
-          APP.addNotification(notification)
+          CatToolActions.addNotification(notification)
           getTeamMembers(selectedTeam.id).then(function (data) {
             selectedTeam.members = data.members
             selectedTeam.pending_invitations = data.pending_invitations
@@ -355,7 +361,7 @@ let ManageActions = {
         passwordProject: passwordProject,
         idJob: idJob,
         passwordJob: passwordJob,
-        secondPAssPassword: data.chunk_review.review_password,
+        secondPassPassword: data.chunk_review.review_password,
       })
     })
   },

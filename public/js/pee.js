@@ -1,4 +1,6 @@
+import {peeDataGraph} from './cat_source/es6/api/peeDataGraph'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import {peeDataTable} from './cat_source/es6/api/peeDataTable/peeDataTable'
 window.PEE = {
   chartOptions: {
     trendlines: {
@@ -283,8 +285,8 @@ window.PEE = {
     $('#reset-button').on('click', PEE.resetGraphFilterToUrl)
 
     $('#date-select').on('change', function () {
-      var value = $(this).dropdown('get value')[0]
-      PEE.requestDataTable(value).done(function (data) {
+      var value = $(this).dropdown('get value')
+      peeDataTable(value).then(function (data) {
         PEE.tableGenerate(data)
       })
     })
@@ -300,9 +302,8 @@ window.PEE = {
       ])
     $form.form('validate form')
     if (!$form.hasClass('error')) {
-      console.log(fields)
       PEE.addGraphFilterToUrl(fields)
-      PEE.requestDataGraph(fields).done(function (data) {
+      PEE.requestDataGraph(fields).then(function (data) {
         PEE.createDataForGraph(data)
       })
     }
@@ -313,28 +314,11 @@ window.PEE = {
     google.charts.setOnLoadCallback(PEE.drawDefaultChart)
   },
   requestDataGraph: function (fields) {
-    var data = {
+    return peeDataGraph({
       sources: fields.source_lang,
       targets: fields.target_lang,
-      month_interval: [fields.start_date, fields.end_date],
-    }
-    if (fields.fuzzy_band) {
-      data.fuzzy_band = fields.fuzzy_band
-    }
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      url: '/api/app/utils/pee/graph',
-    })
-  },
-  requestDataTable: function (data) {
-    var data = {
-      date: data,
-    }
-    return $.ajax({
-      data: data,
-      type: 'POST',
-      url: '/api/app/utils/pee/table',
+      monthInterval: [fields.start_date, fields.end_date],
+      fuzzyBand: fields.fuzzy_band,
     })
   },
   createDataForGraph: function (data) {
@@ -346,7 +330,7 @@ window.PEE = {
       }).name
     }
     var findAnnotations = function (l1, l2, date) {
-      return (annotation = PEE.annotations.find(function (elem) {
+      return PEE.annotations.find(function (elem) {
         return (
           elem.date === date &&
           (function (l1, l2, elem) {
@@ -360,7 +344,7 @@ window.PEE = {
             })
           })(l1, l2, elem)
         )
-      }))
+      })
     }
     data.lines.forEach(function (langs) {
       var column =
@@ -404,7 +388,7 @@ window.PEE = {
       }
     }
 
-    PEE.requestDataGraph(fields).done(function (data) {
+    PEE.requestDataGraph(fields).then(function (data) {
       PEE.createDataForGraph(data)
     })
   },
@@ -690,7 +674,6 @@ window.PEE = {
     if (keyParam) {
       var filters = keyParam.split(',')
       //Check if present and enable it
-      console.log(keyParam)
       if ($.tablesorter.storage) {
         $.tablesorter.storage(this, 'tablesorter-filters', filters)
       }

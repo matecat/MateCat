@@ -5,6 +5,10 @@ import SegmentActions from '../actions/SegmentActions'
 import CommentsStore from '../stores/CommentsStore'
 import {getMatecatApiDomain} from './getMatecatApiDomain'
 import TextUtils from './textUtils'
+import {getTeamUsers as getTeamUsersApi} from '../api/getTeamUsers'
+import {submitComment as submitCommentApi} from '../api/submitComment'
+import {getComments} from '../api/getComments'
+import {markAsResolvedThread} from '../api/markAsResolvedThread'
 
 const MBC = {
   enabled: function () {
@@ -24,7 +28,6 @@ MBC.init = function () {
       'commentsPanelClosed-' + config.id_job + config.password
 
     var types = {sticky: 3, resolve: 2, comment: 1}
-    var source_pages = {revise: 2, translate: 1}
     var loggedUserName = null
     var customUserName = null
     var lastCommentHash = null
@@ -41,11 +44,7 @@ MBC.init = function () {
     }
 
     var getSourcePage = function () {
-      if (config.isReview) {
-        return source_pages.revise
-      } else {
-        return source_pages.translate
-      }
+      return config.revisionNumber ? config.revisionNumber + 1 : 1
     }
 
     var refreshBadgeHeaderIcon = function () {
@@ -225,60 +224,29 @@ MBC.init = function () {
     var submitComment = function (text, sid) {
       text = parseCommentHtmlBeforeSend(text)
 
-      var data = {
-        action: 'comment',
-        _sub: 'create',
-        id_client: config.id_client,
-        id_job: config.id_job,
-        id_segment: sid,
-        revision_number: config.revisionNumber,
+      return submitCommentApi({
+        idSegment: sid,
         username: getUsername(),
-        password: config.password,
-        source_page: getSourcePage(),
+        sourcePage: getSourcePage(),
         message: text,
-      }
-
-      return APP.doRequest({
-        data: data,
       })
     }
 
     var loadCommentData = function (success) {
-      var data = {
-        action: 'comment',
-        _sub: 'getRange',
-        id_job: config.id_job,
-        first_seg: UI.getSegmentId(UI.firstSegment),
-        last_seg: UI.getSegmentId(UI.lastSegment),
-        password: config.password,
-      }
-
-      APP.doRequest({
-        data: data,
-        success: success,
-        error: function () {
-          // TODO: handle error on comments fetch
-        },
-      })
+      getComments({
+        firstSegment: UI.getSegmentId(UI.firstSegment),
+        lastSegment: UI.getSegmentId(UI.lastSegment),
+      }).then(success)
     }
 
     var resolveThread = function (sid) {
-      var data = {
-        action: 'comment',
-        _sub: 'resolve',
-        id_job: config.id_job,
-        id_client: config.id_client,
-        id_segment: sid,
-        password: config.password,
-        source_page: getSourcePage(),
+      return markAsResolvedThread({
+        idSegment: sid,
         username: getUsername(),
-      }
-
-      return APP.doRequest({
-        data: data,
-        success: function (resp) {
-          $(document).trigger('mbc:comment:new', resp.data.entries[0])
-        },
+        sourcePage: getSourcePage(),
+      }).then((resp) => {
+        $(document).trigger('mbc:comment:new', resp.data.entries[0])
+        return resp
       })
     }
 
@@ -295,33 +263,26 @@ MBC.init = function () {
     var getTeamUsers = function () {
       var teamId = config.id_team
       if (teamId) {
-        return $.ajax({
-          async: true,
-          type: 'get',
-          xhrFields: {withCredentials: true},
-          url:
-            getMatecatApiDomain() +
-            'api/app/teams/' +
-            teamId +
-            '/members/public',
-        })
-          .done(function (data) {
+        const promise = getTeamUsersApi({teamId})
+        promise
+          .then((data) => {
             var team = {
               uid: 'team',
               first_name: 'Team',
               last_name: '',
             }
-            MBC.teamUsers = data
+            MBC.teamUsers = [...data]
             MBC.teamUsers.unshift(team)
 
             CommentsActions.updateTeamUsers(MBC.teamUsers)
           })
-          .fail(function () {
+          .catch(() => {
             MBC.teamUsers = []
           })
+        return promise
       } else {
         MBC.teamUsers = []
-        return $.Deferred().resolve()
+        return Promise.resolve()
       }
     }
 
@@ -494,8 +455,6 @@ MBC.init = function () {
           openSegmentComment(lastAsked.segmentId)
         }
       })
-      //New icon inserted in the header -> resize file name
-      APP.fitText($('#pname-container'), $('#pname'), 25)
     })
 
     $(document).on('click', '.mbc-show-comment-btn', function (e) {

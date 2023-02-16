@@ -237,6 +237,40 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      */
     protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ', $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */ ) {
 
+        $findChunkReviewsStatement = $this->_findChunkReviewsStatement($chunksArray, $default_condition, $ttl);
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $findChunkReviewsStatement['sql'] );
+
+        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ChunkReviewStruct(), $findChunkReviewsStatement['parameters'] );
+
+    }
+
+    /**
+     * @param Chunks_ChunkStruct $chunkStruct
+     * @param null               $ttl
+     *
+     * @return bool|int
+     */
+    public function destroyCacheForFindChunkReviews( Chunks_ChunkStruct $chunkStruct, $ttl = null ) {
+
+        $findChunkReviewsStatement = $this->_findChunkReviewsStatement([ $chunkStruct ], null, $ttl);
+        $stmt = $this->_getStatementForCache( $findChunkReviewsStatement['sql'] );
+
+        return $this->_destroyObjectCache( $stmt, $findChunkReviewsStatement['parameters'] );
+
+    }
+
+    /**
+     * @param array  $chunksArray
+     * @param string $default_condition
+     * @param int    $ttl
+     *
+     * @return array
+     */
+    private function _findChunkReviewsStatement(Array $chunksArray, $default_condition = ' WHERE 1 = 1 ', $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution
+  */)
+    {
         $_conditions = [];
         $_parameters = [];
         foreach ( $chunksArray as $chunk ) {
@@ -247,18 +281,17 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
         $default_condition .= " AND " . implode( ' OR ', $_conditions );
 
-        $sql = /** @lang text */
+        $sql =
                 "SELECT qa_chunk_reviews.* 
                 FROM jobs 
                 INNER JOIN qa_chunk_reviews ON jobs.id = qa_chunk_reviews.id_job AND jobs.password = qa_chunk_reviews.password 
                 " . $default_condition . " 
                 ORDER BY source_page";
 
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ChunkReviewStruct(), $_parameters );
-
+        return [
+            'sql' => $sql,
+            'parameters' => $_parameters,
+        ];
     }
 
     /**

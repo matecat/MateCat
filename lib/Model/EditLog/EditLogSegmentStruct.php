@@ -1,5 +1,7 @@
 <?php
 
+use LQA\QA;
+
 /**
  * Created by PhpStorm.
  * User: roberto

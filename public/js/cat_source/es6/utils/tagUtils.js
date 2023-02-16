@@ -30,7 +30,7 @@ const TAGS_UTILS = {
     return str
       .replace(
         config.crlfPlaceholderRegex,
-        `<span class="tag small tag-selfclosed" contenteditable="false"> </span><br>`,
+        `<span class="tag small ${tagSignatures['lineFeed'].style}"> </span><br>`,
       )
       .replace(
         config.lfPlaceholderRegex,
@@ -54,6 +54,14 @@ const TAGS_UTILS = {
           tagSignatures['nbsp'].style
         }" contenteditable="false">${this.encodeToHtml(
           tagSignatures['nbsp'].placeholder,
+        )}</span>`,
+      )
+      .replace(
+        tagSignatures['wordJoiner'].regex,
+        `<span class="tag small ${
+          tagSignatures['wordJoiner'].style
+        }" contenteditable="false">${this.encodeToHtml(
+          tagSignatures['wordJoiner'].placeholder,
         )}</span>`,
       )
   },
@@ -139,7 +147,7 @@ const TAGS_UTILS = {
       .replace(/<\/span/gi, '</_plh_')
       .replace(/&lt;/gi, '<')
       .replace(/(<(ph.*?)\s*?\/&gt;)/gi, brTxPlPh1) // <ph \/&gt;
-      .replace(/(<g\sid[^<“]*?&gt;)/gi, brTx1)
+      .replace(/(<g .*?\bid[^<“]*?&gt;)/gi, brTx1)
       .replace(/(<(x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?&gt;)/gi, brTx3)
       .replace(/(<(ph.*?)\sid[^<“]*?&gt;)/gi, brTxPlPh1)
       .replace(/(<(ph.*?)\sid[^<“]*?\/>)/gi, brTxPlPh1)

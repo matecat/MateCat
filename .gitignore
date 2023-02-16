@@ -13,6 +13,7 @@ inc/*.dat
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
+inc/config.ini*
 inc/config.test.ini
 inc/config.development.ini
 inc/.globalmessage.ini
@@ -30,6 +31,9 @@ public/css/build
 # NodeJs stuff
 nodejs/*.log
 node_modules
+
+# Npm lock file
+package-lock.json
 
 # Development env config files
 .agignore
@@ -67,3 +71,4 @@ mmt_fallback_key.ini
 
 inc/google_translate/mmt_fallback_credentials.json
 .DS_Store
+certs

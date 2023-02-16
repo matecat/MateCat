@@ -41,7 +41,7 @@ class SegmentFooterTabConcordance extends React.Component {
   }
 
   findConcordance(sid, data) {
-    if (this.props.id_segment == sid) {
+    if (this.props.segment.sid == sid) {
       if (data.inTarget) {
         this.setState({
           source: '',
@@ -60,6 +60,7 @@ class SegmentFooterTabConcordance extends React.Component {
   }
 
   sourceChange(event) {
+    const previousResult = this.state.results
     this.setState({
       source: event.target.value,
       target: '',
@@ -68,6 +69,7 @@ class SegmentFooterTabConcordance extends React.Component {
   }
 
   targetChange(event) {
+    const previousResult = this.state.results
     this.setState({
       source: '',
       target: event.target.value,
@@ -87,7 +89,7 @@ class SegmentFooterTabConcordance extends React.Component {
   }
 
   renderConcordances(sid, data) {
-    if (sid !== this.props.id_segment) return
+    if (sid !== this.props.segment.sid) return
     if (data.length) {
       this.setState({
         results: data,
@@ -101,12 +103,11 @@ class SegmentFooterTabConcordance extends React.Component {
         loading: false,
       })
     }
-    setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment))
   }
 
   processResults() {
     let self = this
-    let segment_id = this.props.id_segment
+    let segment_id = this.props.segment.sid
     let array = []
 
     if (this.state.results.length) {
@@ -195,7 +196,6 @@ class SegmentFooterTabConcordance extends React.Component {
     this.setState({
       extended: !this.state.extended,
     })
-    setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment))
   }
 
   componentDidMount() {
@@ -319,7 +319,7 @@ class SegmentFooterTabConcordance extends React.Component {
           ' ' +
           haveResults
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           {html}

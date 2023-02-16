@@ -1,4 +1,5 @@
 @import 'modals/instructionsModal';
+@import 'modals/tmShareModal';
 body.side-popup {
   overflow: hidden !important;
   font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -205,6 +206,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
     }
   }
+  .user-api-text-confirm-delete {
+    label {
+      color: $black;
+    }
+  }
   .user-api-buttons {
     order: 2;
   }
@@ -230,6 +236,22 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       line-height: 30px;
     }
   }
+  &.user-api-created {
+    align-items: baseline;
+
+    .user-api-text {
+      display: flex;
+      flex-direction: row;
+      > div input {
+        height: 38px;
+        border-radius: 2px;
+      }
+      > :last-child {
+        margin-left: 3px;
+      }
+    }
+  }
+
   &.user-api-created textarea,
   &.user-api-created label {
     color: $black;
@@ -668,17 +690,17 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.4);
   p {
-    line-height: 20px;
+    line-height: 25px;
   }
   .matecat-modal-header {
     text-align: left;
-    min-height: 47px;
+    min-height: 50px;
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
     background: #002b5c;
-    padding: 10px 10px 7px 24px;
+    padding: 7px 10px 7px 24px;
     background-size: 35px;
     color: #fff;
     margin: 0 !important;
@@ -686,6 +708,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     grid-template-columns: 40px 1fr 24px;
     position: relative;
     grid-column-gap: 16px;
+    align-items: center;
     h2 {
       margin: 0 !important;
       line-height: 30px;
@@ -693,15 +716,16 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       width: auto !important;
       float: none !important;
       font-family: Calibri, Arial, Helvetica, sans-serif;
+      font-weight: normal;
     }
   }
   .modal-logo {
     background-size: inherit;
-    background: url(../../img/Logo-Onlycat-white.svg) no-repeat;
+    background: url(../../img/logo_matecat_small_white.svg) no-repeat;
     background-position-y: center;
     background-size: contain;
-    width: 40px;
-    height: 26px;
+    width: 35px;
+    height: 35px;
   }
   /* Modal Body */
   .matecat-modal-body {
@@ -737,7 +761,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     animation-name: animatetop;
     animation-duration: 0.4s;
     text-align: center;
-    max-width: 600px;
+    max-width: 640px;
     min-width: 400px;
     //-webkit-box-shadow: 0 1px 20px #000;
     //box-shadow: 0 1px 20px #6f6e6e;
@@ -888,7 +912,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   display: block;
   width: 200%;
   margin-left: -100%;
-  transition: margin 0.3s ease-in 0s;
+  transition: margin 0.2s ease-out 0s;
 }
 
 .onoffswitch-inner:before,
@@ -904,6 +928,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: white;
   font-weight: bold;
   box-sizing: border-box;
+  border-radius: 16px;
 }
 
 .onoffswitch-inner:before {
@@ -911,6 +936,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding-left: 10px;
   background-color: $linkBlue;
   color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.3s ease-in 0s;
 }
 
 .onoffswitch-inner:after {
@@ -932,7 +959,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   right: 25px;
   border: 2px solid #ccc;
   border-radius: 20px;
-  transition: all 0.3s ease-in 0s;
+  transition: all 0.2s ease-out 0s;
 }
 
 .onoffswitch-label-status-active {
@@ -997,6 +1024,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
   margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner:before {
+  opacity: 1;
 }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
@@ -1160,7 +1190,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
       &.team {
         .item {
-          padding: 5px 10px;
+          padding: 5px 5px 5px 0;
+
           &:hover {
             .mini.ui.button.right.floated {
               display: inherit;
@@ -1192,24 +1223,25 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             font-size: 14px;
             color: $grey1;
           }
-          .content.pending-msg,
-          .content.invite-sent-msg {
+          .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
             color: $grey1;
-            margin-top: 13px;
+            white-space: nowrap;
           }
 
           .mini.ui.button.right.floated {
             margin-top: 6px;
             border: 1px solid #797979;
-            display: none;
+            display: inherit;
             border-radius: 2px;
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
               sans-serif;
             font-size: 14px;
             padding: 6px 15px;
             background-color: #f6f6f6;
+            white-space: nowrap;
+
             &:hover {
               box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -1248,6 +1280,25 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             vertical-align: bottom;
             border: 1px solid #797979;
             border-radius: 2px;
+          }
+        }
+
+        .pending-invitation {
+          display: flex;
+          align-items: center;
+
+          .email {
+            padding-left: 0.5em;
+          }
+
+          .mini.ui.button.right.floated {
+            margin-top: 0;
+          }
+
+          > :last-child {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
           }
         }
       }
@@ -1405,12 +1456,67 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     .ui.members-list {
       //min-height: 180px;
       min-height: initial !important;
+
       .ui.divided.list {
-        max-height: 210px;
+        height: 210px;
         .item:first-child {
           //border-top: none !important;
         }
       }
+    }
+
+    .search-member-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin: 8px 0;
+      border-radius: 4px;
+      padding: 6px;
+      font-size: 15px;
+      color: black;
+      transition: 0.6s;
+
+      > svg {
+        margin-right: 8px;
+        color: $grey6;
+      }
+
+      > input {
+        width: 100%;
+        background: unset;
+        outline: none;
+        border: none;
+
+        &::placeholder {
+          color: $grey6;
+        }
+      }
+
+      &:hover {
+        background-color: white;
+      }
+
+      .reset_button {
+        display: flex;
+        cursor: pointer;
+        margin-right: 2px;
+
+        > svg {
+          color: $grey6;
+        }
+      }
+      .reset_button--hidden {
+        visibility: hidden;
+      }
+      .reset_button--visible {
+        visibility: visible;
+      }
+    }
+
+    .no-result {
+      font-size: 14px;
+      color: #666666;
+      padding: 7px;
     }
   }
   .change-team-modal {
@@ -1551,6 +1657,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.alt:after {
                   content: 'Alt';
                 }
+                &.option:after {
+                  content: 'Option';
+                }
                 &.\31 :after {
                   content: '1';
                 }
@@ -1632,6 +1741,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.arrows-enter:after {
                   content: 'Arrows/Enter';
                 }
+                &.space:after {
+                  content: 'Space';
+                }
               }
             }
           }
@@ -1666,13 +1778,6 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     .btn-cancel {
       margin-right: 16px;
       font-weight: 100;
-    }
-    .notes-action {
-      padding-left: 196px;
-      position: relative;
-      top: 2px;
-      font-size: 12px;
-      margin-top: 12px;
     }
   }
   .boxed {
@@ -1716,5 +1821,14 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
   .boxed {
     padding-right: 20px;
     padding-bottom: 0 !important;
+  }
+}
+
+.alert_modal {
+  .matecat-modal-body {
+    padding: 30px !important;
+    p {
+      line-height: 25px;
+    }
   }
 }

@@ -29,12 +29,12 @@ abstract class Analysis_AbstractStatus {
     protected $status_project = "";
 
     protected $_total_init_struct = array(
-        "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
-        "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_100_PUBLIC" => array( 0, "0" ),
-        "TM_75_99"      => array( 0, "0" ),
-        "TM_75_84"      => array( 0, "0" ), "TM_85_94" => array( 0, "0" ), "TM_95_99" => array( 0, "0" ),
-        "TM_50_74"      => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ),
-        "NUMBERS_ONLY"  => array( 0, "0" )
+            "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
+            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_100_PUBLIC" => array( 0, "0" ),
+            "TM_75_99"      => array( 0, "0" ),
+            "TM_75_84"      => array( 0, "0" ), "TM_85_94" => array( 0, "0" ), "TM_95_99" => array( 0, "0" ),
+            "TM_50_74"      => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ),
+            "NUMBERS_ONLY"  => array( 0, "0" )
     );
 
     protected   $featureSet;
@@ -105,6 +105,9 @@ abstract class Analysis_AbstractStatus {
         $_matecat_price_per_word          = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
         $_standard_price_per_word         = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
 
+        $target = null;
+        $outsourceAvailable = false;
+
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
         foreach ( $this->_resultSet as $segInfo ) {
 
@@ -120,7 +123,6 @@ abstract class Analysis_AbstractStatus {
                 $_total_wc_standard_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
             }
 
-
             $jid           = $segInfo[ 'jid' ];
             $jpassword     = $segInfo[ 'jpassword' ];
             $words         = $segInfo[ 'raw_word_count' ];
@@ -131,10 +133,23 @@ abstract class Analysis_AbstractStatus {
             $_total_wc_tm_analysis += $eq_words;
             $_total_wc_standard_analysis += $st_word_count;
 
+            // is outsource available?
+            if($target === null or $segInfo['target'] !== $target){
+                $outsourceAvailable = $this->featureSet->filter( 'outsourceAvailable', $segInfo['target'] );
+
+                // if the hook is not triggered by any plugin
+                if(is_string($outsourceAvailable)){
+                    $outsourceAvailable = true;
+                }
+
+                $target = $segInfo['target'];
+            }
+
             //init indexes to avoid notices
             if ( !array_key_exists( $jid, $this->result[ 'data' ][ 'jobs' ] ) ) {
                 $this->result[ 'data' ][ 'jobs' ][ $jid ]             = array();
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ] = array();
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'outsource_available' ] = $outsourceAvailable;
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ] = array();
                 $total_word_counters[ $jid ]                                = array();
             }
@@ -186,14 +201,14 @@ abstract class Analysis_AbstractStatus {
             $words_print = number_format( $w, 0, ".", "," );
 
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ] = array(
-                $w, $words_print
+                    $w, $words_print
             );
 
             $tmp_tot = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][ 0 ];
             $tmp_tot += $words;
             $words_print                                                                     = number_format( $tmp_tot, 0, ".", "," );
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array(
-                $tmp_tot, $words_print
+                    $tmp_tot, $words_print
             );
 
             //SUM WITH PREVIOUS ( Accumulator )
@@ -247,16 +262,16 @@ abstract class Analysis_AbstractStatus {
             }
 
             $_total_wc_standard_analysis
-                = $_total_wc_tm_analysis
-                = $_total_raw_wc
-                = $project_data_fallback[ 0 ][ 'standard_analysis_wc' ];
+                    = $_total_wc_tm_analysis
+                    = $_total_raw_wc
+                    = $project_data_fallback[ 0 ][ 'standard_analysis_wc' ];
 
         }
 
         // if fast quote has been done and tm analysis has not produced any result yet
         if ( $_total_wc_tm_analysis == 0
-            AND $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK
-            AND $_total_wc_fast_analysis > 0
+                AND $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK
+                AND $_total_wc_fast_analysis > 0
         ) {
             $_total_wc_tm_analysis = $_total_wc_fast_analysis;
         }
@@ -353,15 +368,15 @@ abstract class Analysis_AbstractStatus {
 
 
         $this->_globals = array(
-            'STATUS_PROJECT'    => $this->status_project,
-            'IN_QUEUE_BEFORE'   => $this->_others_in_queue,
-            'TOTAL_SEGMENTS'    => $this->total_segments,
-            'SEGMENTS_ANALYZED' => $_total_segments_analyzed,
-            'TOTAL_STANDARD_WC' => $_total_wc_standard_analysis,
-            'TOTAL_FAST_WC'     => $_total_wc_fast_analysis,
-            'TOTAL_TM_WC'       => $_total_wc_tm_analysis + 0.00000001,
-            'TOTAL_RAW_WC'      => $_total_raw_wc,
-            'TOTAL_PAYABLE'     => $_total_wc_tm_analysis + 0.00000001,
+                'STATUS_PROJECT'    => $this->status_project,
+                'IN_QUEUE_BEFORE'   => $this->_others_in_queue,
+                'TOTAL_SEGMENTS'    => $this->total_segments,
+                'SEGMENTS_ANALYZED' => $_total_segments_analyzed,
+                'TOTAL_STANDARD_WC' => $_total_wc_standard_analysis,
+                'TOTAL_FAST_WC'     => $_total_wc_fast_analysis,
+                'TOTAL_TM_WC'       => $_total_wc_tm_analysis + 0.00000001,
+                'TOTAL_RAW_WC'      => $_total_raw_wc,
+                'TOTAL_PAYABLE'     => $_total_wc_tm_analysis + 0.00000001,
         );
 
         return $this;

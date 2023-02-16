@@ -13,7 +13,7 @@ import replaceOccurrences from './replaceOccurrences'
  * @param plainText - text to analyze when editor is empty
  * @returns {*|EditorState} editorStateModified - An EditorState with all known tags treated as entities
  */
-const encodeContent = (originalEditorState, plainText = '') => {
+const encodeContent = (originalEditorState, plainText = '', sourceTagMap) => {
   // block history saving
   originalEditorState = EditorState.set(originalEditorState, {allowUndo: false})
   // get tag's types on which every block will be splitted
@@ -30,6 +30,7 @@ const encodeContent = (originalEditorState, plainText = '') => {
     originalEditorState,
     excludedTags,
     plainText,
+    sourceTagMap,
   )
   let {contentState, tagRange} = entitiesFromMap
   // Apply entities to EditorState
@@ -42,10 +43,8 @@ const encodeContent = (originalEditorState, plainText = '') => {
   // array as excludedTags to 'createNewEntitiesFromMap'. So every \n and \r will be showed as self-closed tags.
 
   // Remove LF or CR
-  const {
-    contentState: contentStateWithoutNewLines,
-    newLineMap,
-  } = removeNewLineInContentState(editorState)
+  const {contentState: contentStateWithoutNewLines, newLineMap} =
+    removeNewLineInContentState(editorState)
   editorState = EditorState.push(
     editorState,
     contentStateWithoutNewLines,

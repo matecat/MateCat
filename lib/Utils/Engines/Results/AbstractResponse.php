@@ -10,7 +10,7 @@ abstract class Engines_Results_AbstractResponse {
 
     public $responseStatus = "";
     public $responseDetails = "";
-    public $responseData = "";
+    public $responseData = [];
     public $mtLangSupported = true;
 
     /**

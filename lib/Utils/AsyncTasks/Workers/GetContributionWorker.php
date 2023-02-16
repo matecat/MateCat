@@ -78,27 +78,34 @@ class GetContributionWorker extends AbstractWorker {
 
         $this->_publishPayload( $matches, $contributionStruct );
 
+        // cross language matches
         if ( !empty( $contributionStruct->crossLangTargets ) ) {
             $crossLangMatches = [];
 
             foreach ( $contributionStruct->crossLangTargets as $lang ) {
-                list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
-                $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
-                $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+                // double check for not black lang
+                if( $lang !== '' ){
+                    list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
-                foreach ( $matches as $match ) {
-                    $crossLangMatches[] = $match;
+                    $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
+                    $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+
+                    foreach ( $matches as $match ) {
+                        $crossLangMatches[] = $match;
+                    }
                 }
             }
 
-            usort( $crossLangMatches, [ "self", "__compareScore" ] );
-            $crossLangMatches = array_reverse( $crossLangMatches );
-            $crossLangMatches = array_slice( $crossLangMatches, 0, $contributionStruct->resultNum );
+            if( !empty($crossLangMatches) ){
+                usort( $crossLangMatches, [ "self", "__compareScore" ] );
+                $crossLangMatches = array_reverse( $crossLangMatches );
+            }
 
-            $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+            if(false === $contributionStruct->concordanceSearch){
+                $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+            }
         }
-
     }
 
     /**
@@ -134,7 +141,7 @@ class GetContributionWorker extends AbstractWorker {
                 ]
         ];
 
-        $message = json_encode( $_object );
+        $message = json_encode( $_object, true );
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
@@ -155,12 +162,9 @@ class GetContributionWorker extends AbstractWorker {
 
         $keyList = [];
         if ( !empty( $tm_keys ) ) {
-
-            $keyList = [];
             foreach ( $tm_keys as $i => $tm_info ) {
                 $keyList[] = $tm_info->key;
             }
-
         }
 
         return $keyList;
@@ -186,11 +190,14 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
-        $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, json_decode($contributionStruct->dataRefMap,
-                true) );
+        $Filter = MateCatFilter::getInstance(
+                $featureSet,
+                $contributionStruct->getJobStruct()->source,
+                $targetLang,
+                json_decode($contributionStruct->dataRefMap, true)
+        );
 
         foreach ( $matches as &$match ) {
-            $match[ 'target' ] = $targetLang;
 
             if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
 
@@ -443,7 +450,12 @@ class GetContributionWorker extends AbstractWorker {
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
             $config   = array_merge( $tmEngine->getConfigStruct(), $_config );
 
-            $temp_matches = $tmEngine->get( $config );
+            $temp_matches = [];
+
+            if($this->issetSourceAndTarget($config)){
+                $temp_matches = $tmEngine->get( $config );
+            }
+
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = (isset($contributionStruct->dataRefMap) and $contributionStruct->dataRefMap !== '') ? json_decode($contributionStruct->dataRefMap, true) : [];
@@ -456,6 +468,7 @@ class GetContributionWorker extends AbstractWorker {
         if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
+
                 /**
                  * @var $mt_engine \Engines_MMT
                  */
@@ -482,6 +495,16 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         return [ $mt_result, $matches ];
+    }
+
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
+    private function issetSourceAndTarget($_config)
+    {
+        return (isset($_config[ 'source' ]) and $_config[ 'source' ] !== '' and isset($_config[ 'target' ]) and $_config[ 'target' ] !== '' );
     }
 
     /**

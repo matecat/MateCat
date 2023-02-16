@@ -8,6 +8,10 @@
         "display": "Accounting & Finance"
     },
     {
+        "key": "adwords",
+        "display": "Adwords"
+    },
+    {
         "key": "aerospace_defence",
         "display": "Aerospace / Defence"
     },
@@ -58,6 +62,10 @@
     {
         "key": "environment",
         "display": "Environment"
+    },
+    {
+        "key": "european_governmental_politics",
+        "display": "European Governmental Politics"
     },
     {
         "key": "fashion",

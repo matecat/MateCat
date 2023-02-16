@@ -7,6 +7,7 @@
  *
  */
 
+use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 
 /**
@@ -160,3 +161,4 @@ TRG;
 
 
 }
+

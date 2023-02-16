@@ -60,7 +60,7 @@ class loadTMXController extends ajaxController {
         $this->tm_key = $postInput->tm_key;
         $this->exec   = $postInput->exec;
 
-        if ( !isset( $this->tm_key ) || is_null( $this->tm_key ) || empty( $this->tm_key ) ) {
+        if ( empty( $this->tm_key ) ) {
 
             if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
                 $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Please specify a TM key." ];
@@ -113,6 +113,7 @@ class loadTMXController extends ajaxController {
                     }
 
                     $this->TMService->setName( $fileInfo->name );
+                    $this->TMService->setFile( [ $fileInfo ] );
                     $this->TMService->addTmxInMyMemory();
 
                     $this->featureSet->run( 'postPushTMX', $fileInfo, $this->user, $this->TMService->getTMKey() );

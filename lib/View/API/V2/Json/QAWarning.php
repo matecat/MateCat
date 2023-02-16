@@ -8,18 +8,28 @@
 
 namespace API\V2\Json;
 
-use QA;
+use LQA\QA;
 
 class QAWarning {
 
     protected $structure;
 
+    const GLOSSARY_CATEGORY = "GLOSSARY";
     const TAGS_CATEGORY = "TAGS";
+    const SIZE_CATEGORY = "SIZE";
     const MISMATCH_CATEGORY = "MISMATCH";
 
     protected function pushErrorSegment( $error_type, $error_category, $content ) {
 
         switch ( $error_category ) {
+            case QA::GLOSSARY_BLACKLIST_MATCH:
+                $category = self::GLOSSARY_CATEGORY;
+                break;
+
+            case QA::ERR_SIZE_RESTRICTION:
+                $category = self::SIZE_CATEGORY;
+                break;
+
             case QA::ERR_TAG_MISMATCH:
             case QA::ERR_TAG_ID:
             case QA::ERR_UNCLOSED_X_TAG:

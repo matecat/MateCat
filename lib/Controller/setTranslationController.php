@@ -3,14 +3,17 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Exceptions\ControllerReturnException;
+use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
-use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Features\TranslationVersions\TranslationVersionsHandler;
+use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
 use Matecat\SubFiltering\Filters\SprintfToPH;
+use TaskRunner\Commons\QueueElement;
 
 class setTranslationController extends ajaxController {
 
@@ -74,7 +77,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var SegmentTranslationVersionHandler|TranslationVersions\EmptySegmentTranslationVersionHandler
+     * @var TranslationVersions\Handlers\TranslationVersionsHandler|TranslationVersions\Handlers\DummyTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -130,8 +133,6 @@ class setTranslationController extends ajaxController {
          */
         !is_null( $this->__postInput[ 'propagate' ] ) ? $this->propagate = $this->__postInput[ 'propagate' ] : null /* do nothing */
         ;
-
-        $this->propagate = $this->__postInput[ 'propagate' ]; //set by the client, mandatory
 
         $this->id_segment = $this->__postInput[ 'id_segment' ];
         $this->id_before  = $this->__postInput[ 'id_before' ];
@@ -194,7 +195,7 @@ class setTranslationController extends ajaxController {
 
             $this->project = $this->chunk->getProject();
 
-            $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+            $featureSet = $this->getFeatureSet();
             $featureSet->loadForProject( $this->project );
 
             /** @var MateCatFilter filter */
@@ -322,21 +323,23 @@ class setTranslationController extends ajaxController {
         $counter = new PhCounter();
         $counter->transform( $this->__postInput[ 'translation' ] );
 
-        $pipeline = new Pipeline();
+        $pipeline = new Pipeline($this->chunk->source, $this->chunk->target);
         for ( $i = 0; $i < $counter->getCount(); $i++ ) {
             $pipeline->getNextId();
         }
 
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
-        $pipeline->addLast( new SprintfToPH( $this->chunk->source, $this->chunk->target ) );
+        $pipeline->addLast( new SprintfToPH() );
 
         $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
         $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
 
         $check = new QA( $src, $trg );
+        $check->setChunk($this->chunk);
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
+        $check->setIdSegment( $this->id_segment );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
@@ -377,7 +380,7 @@ class setTranslationController extends ajaxController {
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
-        if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+        if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
             $new_translation->time_to_edit = $this->time_to_edit;
         }
 
@@ -395,14 +398,10 @@ class setTranslationController extends ajaxController {
          * - get $_jobTotalPEE
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
-
         $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
 
-        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
-        $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
-
-        // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
-        $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+        // if saveVersionAndIncrement() return true it means that it was persisted a new version of the parent segment
+        $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -464,6 +463,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
             $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
+            $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
             try {
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
@@ -552,7 +552,7 @@ class setTranslationController extends ajaxController {
             if ( !self::isRevision() ) {
 
                 $tte = 0;
-                if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+                if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
                     $tte = $this->time_to_edit;
                 }
 
@@ -570,9 +570,9 @@ class setTranslationController extends ajaxController {
         $project   = $this->project;
 
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
-                ? true : false );
+                $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+                $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+        );
 
         $file_stats = [];
 
@@ -612,7 +612,14 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->featureSet->run( 'preSetTranslationCommitted', [
+
+        /*
+         * Hooked by TranslationVersions which manage translation versions
+         *
+         * This is also the init handler of all R1/R2 handling and Qr score calculation by
+         *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
+         */
+        $this->VersionsHandler->storeTranslationEvent( [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
                 'propagation'       => $propagationTotal,
@@ -718,7 +725,7 @@ class setTranslationController extends ajaxController {
     protected function _getOldTranslation() {
         $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->id_segment, $this->id_job );
 
-        if ( false === $old_translation ) {
+        if ( empty( $old_translation ) ) {
             $old_translation = new Translations_SegmentTranslationStruct();
         } // $old_translation if `false` sometimes
 
@@ -908,19 +915,10 @@ class setTranslationController extends ajaxController {
      * @return mixed
      */
     private function getOldCount( $segment, $old_translation ) {
+
         $word_count_type = $this->project->getWordCountType();
 
-        if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ) {
-            $old_count = $segment[ 'raw_word_count' ];
-        } else {
-            if ( is_null( $old_translation[ 'eq_word_count' ] ) || $old_translation[ 'match_type' ] == 'ICE' ) {
-                $old_count = $segment[ 'raw_word_count' ];
-            } else {
-                $old_count = $old_translation[ 'eq_word_count' ];
-            }
-        }
-
-        return $old_count;
+        return ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW  ) ? $segment[ 'raw_word_count' ] : $old_translation[ 'eq_word_count' ];
     }
 
     /**
@@ -928,7 +926,7 @@ class setTranslationController extends ajaxController {
      * @param $old_translation
      *
      * @throws Exception
-     * @throws Exceptions_RecordNotFound
+     * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
@@ -993,23 +991,14 @@ class setTranslationController extends ajaxController {
                 $this->segment
         );
 
-        /** TODO Remove , is only for debug purposes */
-        try {
-            $element         = new \TaskRunner\Commons\QueueElement();
-            $element->params = $contributionStruct;
-            $element->__toString();
-            Utils::raiseJsonExceptionError( true );
-        } catch ( Exception $e ) {
-            Log::doJsonLog( $contributionStruct );
-        }
-        /** TODO Remove */
-
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
 
-        $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
-        Set::contributionMT( $contributionStruct );
+        if( $contributionStruct->id_mt > 1 ){
+            $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
+            Set::contributionMT( $contributionStruct );
+        }
 
     }
 }

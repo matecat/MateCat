@@ -1,8 +1,6 @@
 import React from 'react'
 import TagsInput from 'react-tagsinput'
 
-import Header from '../header/Header'
-
 class LanguageSelectorSearch extends React.Component {
   constructor(props) {
     super(props)
@@ -16,6 +14,8 @@ class LanguageSelectorSearch extends React.Component {
     document.addEventListener('mousedown', () => {
       this.setState({highlightDelete: false})
     })
+
+    this.tagsInput.focus()
   }
 
   componentWillUnmount() {
@@ -64,6 +64,8 @@ class LanguageSelectorSearch extends React.Component {
         renderTag={defaultRenderTag}
         value={selectedLanguages ? selectedLanguages.map((e) => e.name) : []}
         onChange={this.handleChange}
+        autofocus={true}
+        ref={(tagsInput) => (this.tagsInput = tagsInput)}
       />
     )
   }

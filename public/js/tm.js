@@ -2,6 +2,24 @@ import Cookies from 'js-cookie'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
+import {checkTMKey} from './cat_source/es6/api/checkTMKey'
+import {createNewTmKey} from './cat_source/es6/api/createNewTmKey'
+import {updateTmKey} from './cat_source/es6/api/updateTmKey'
+import {deleteTmKey} from './cat_source/es6/api/deleteTmKey'
+import {getInfoTmKey} from './cat_source/es6/api/getInfoTmKey'
+import {shareTmKey} from './cat_source/es6/api/shareTmKey'
+import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
+import {updateJobKeys} from './cat_source/es6/api/updateJobKeys'
+import {addMTEngine as addMTEngineApi} from './cat_source/es6/api/addMTEngine'
+import {deleteMTEngine} from './cat_source/es6/api/deleteMTEngine'
+import {downloadTMX as downloadTMXApi} from './cat_source/es6/api/downloadTMX'
+import {loadTMX} from './cat_source/es6/api/loadTMX'
+import {loadGlossaryFile} from './cat_source/es6/api/loadGlossaryFile'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
+import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -10,6 +28,8 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     var elBottom = elTop + $el.height()
     return elBottom <= winBottom && elTop >= winTop
   }
+
+  var checkAnalyzabilityTimer
 
   $.extend(UI, {
     initTM: function () {
@@ -55,7 +75,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         $('.mgmt-table-options').show()
       })
 
-      $('.mgmt-mt').click(function (e) {
+      $('li.mgmt-mt').click(function (e) {
         e.preventDefault()
         $(this).addClass('active')
         $('.mgmt-tm,.mgmt-opt').removeClass('active')
@@ -95,6 +115,44 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           $('.step3').show()
           $('#add-mt-provider-confirm').removeClass('hide')
         }
+        if (provider === 'mmt') {
+          $('.mgmt-container .tooltip-preimport').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+              'If the option is enabled, all the TMs linked to your Matecat account' +
+              '<br/> will be automatically imported to your ModernMT account for adaptation purposes.' +
+              '<br/>If the option is not enabled, the only TMs imported to your ModernMT account' +
+              '<br/> will be those used on projects that use ModernMT as their MT engine.</div>',
+          )
+          $('.mgmt-container .tooltip-preimport').powerTip({
+            placement: 's',
+          })
+
+          $('.mgmt-container .tooltip-context_analyzer').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+              'If the option is enabled, ModernMT will adapt the suggestions provided for a job' +
+              '<br/> using mainly the content of the TMs that you activate for that job and your corrections during translation,' +
+              '<br/>but it will also scan all your other TMs for further adaptation based on the context of the document that you are translating.' +
+              '<br/> If the option is not enabled, ModernMT will only adapt based on the TMs that you activate for a job and on your corrections during translation.</div>',
+          )
+          $('.mgmt-container .tooltip-context_analyzer').powerTip({
+            placement: 's',
+          })
+
+          $('.mgmt-container .tooltip-pretranslate').data(
+            'powertip',
+            "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +
+              'If the option is enabled, ModernMT is used during the analysis phase.' +
+              '<br/> This makes downloading drafts from the translation interface quicker, ' +
+              '<br/>but may lead to additional charges for plans other than the "Professional" one.' +
+              '<br>If the option is not enabled, ModernMT is only used to provide adaptive ' +
+              '<br/>suggestions when opening segments.</div>',
+          )
+          $('.mgmt-container .tooltip-pretranslate').powerTip({
+            placement: 's',
+          })
+        }
         if (provider === 'letsmt') {
           // Tilde MT (letsmt) uses a standalone web component
           // we'll hide the button because it's easier to use the webcomponent's builtin buttons
@@ -105,6 +163,24 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       })
       $('.add-mt-engine').click(function () {
         if ($(this).hasClass('disabled')) {
+          var props = {
+            modalName: 'mmt-message-modal-not-logged-in',
+            text: 'If you want to add an MT engine for use in your projects, please login first.',
+            successText: 'Login',
+            successCallback: function () {
+              ModalsActions.onCloseModal()
+              $('#modal').trigger('openlogin')
+            },
+            warningText: 'Cancel',
+            warningCallback: function () {
+              ModalsActions.onCloseModal()
+            },
+          }
+          ModalsActions.showModalComponent(
+            ConfirmMessageModal,
+            props,
+            'Add MT Engine',
+          )
           return false
         }
         $(this).hide()
@@ -120,34 +196,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         if ($(this).hasClass('disabled')) return false
         var provider = $('#mt_engine_int').val()
         var providerName = $('#mt_engine_int option:selected').text()
-        if (provider === 'mmt') {
-          var props = {
-            modalName: 'mmt-message-modal',
-            text:
-              'ModernMT is an <b>Adaptive Neural Machine Translation</b> system that learns from your translation memories and corrections. </br></br> ' +
-              'To provide the best results, <b>the following data will be synchronized with your private ModernMT engine:</b>' +
-              '<ul style="list-style: disc; margin-left: 15px; margin-bottom: 20px; margin-top: 20px;">' +
-              '<li>Private translation memories uploaded to MateCat</li>' +
-              '<li>All segments translated or revised in MateCat</li></ul>' +
-              'To stop data from being synchronized, please delete the ModernMT engine from your list of available engines in MateCat.',
-            successText: 'Continue',
-            successCallback: function () {
-              UI.addMTEngine(provider, providerName)
-              APP.ModalWindow.onCloseModal()
-            },
-            warningText: 'Cancel',
-            warningCallback: function () {
-              APP.ModalWindow.onCloseModal()
-            },
-          }
-          APP.ModalWindow.showModalComponent(
-            ConfirmMessageModal,
-            props,
-            'Confirmation required',
-          )
-        } else {
-          UI.addMTEngine(provider, providerName)
-        }
+        UI.addMTEngine(provider, providerName)
       })
       $('#add-mt-provider-cancel').click(function () {
         $('.add-mt-engine').show()
@@ -198,31 +247,28 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           e.preventDefault()
           UI.addFormUpload(this, 'glossary')
         })
-        .on('change paste', '#new-tm-key', function () {
+        .on('paste', '#shared-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
             UI.checkTMKey('change')
           }, 200)
         })
+        .on('input', '#shared-tm-key', function () {
+          // set Timeout to get the text value after paste event, otherwise it is empty
+          $('#activetm tr.new .uploadtm').removeClass('disabled')
+        })
         .on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function () {
-          var keyValue = $('#new-tm-key').val()
-          var descKey = $('#new-tm-description').val()
-
-          if (config.isLoggedIn) {
-            UI.saveTMkey(keyValue, descKey).done(function (data) {
-              if (data.errors.length === 0) {
-                UI.checkTMKey('key')
-              }
-            })
-          } else {
-            UI.checkTMKey('key')
-            delete UI.newTmKey
+          UI.createNewTmKey()
+        })
+        .on('keydown', '.new #new-tm-description', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            UI.createNewTmKey()
           }
         })
         .on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function () {
           $(this).addClass('disabled')
           $(this).parents('.uploadfile').find('.error').text('').hide()
-
           UI.execAddTMOrGlossary(this, 'tmx')
         })
         .on(
@@ -271,9 +317,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           'click',
           '#activetm tr.new a.addtmxfile:not(.disabled)',
           function () {
-            console.log('upload file')
             UI.checkTMKey('tm')
-
             $(this).addClass('disabled')
           },
         )
@@ -321,10 +365,16 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
             UI.hideAllBoxOnTables()
             if (this.files[0].size > config.maxTMXFileSize) {
               const numMb = config.maxTMXFileSize / (1024 * 1024)
-              APP.alert(
-                'File is too big.<br/>The maximuxm size allowed is ' +
-                  numMb +
-                  'MB.',
+              ModalsActions.showModalComponent(
+                AlertModal,
+                {
+                  text:
+                    'File is too big.<br/>The maximuxm size allowed is ' +
+                    numMb +
+                    'MB.',
+                  buttonText: 'OK',
+                },
+                'File too big',
               )
               return false
             }
@@ -358,7 +408,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         .on('mousedown', '.mgmt-tm .downloadtmx:not(.disabled)', function (e) {
           e.preventDefault()
 
-          UI.openExportTmx(this)
+          UI.openExport(this, 'tmx')
         })
         .on('click', '.shareKey:not(.disabled)', function () {
           var tr = $(this).closest('tr')
@@ -371,25 +421,44 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           UI.openShareResource($(this))
         })
         .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
-          //Todo
           if ($(this).hasClass('disabled')) return false
-          UI.downloadGlossary($(this))
+          UI.openExport($(this), 'glossary')
         })
-        .on('mousedown', '.mgmt-tm .export-tmx-button', function (e) {
+        .on('mousedown', '.mgmt-tm .export-tmx .export-button', function (e) {
           e.preventDefault()
-          UI.startExportTmx(this)
+          UI.startExport(this, 'tmx')
         })
-        .on('keydown', '.email-export-tmx.mgmt-input', function (e) {
+        .on(
+          'mousedown',
+          '.mgmt-tm .export-glossary .export-button',
+          function (e) {
+            e.preventDefault()
+            UI.startExport(this, 'glossary')
+          },
+        )
+        .on('keydown', '.export-tmx .email-export.mgmt-input', function (e) {
           if (e.which == 13) {
             // enter
             e.preventDefault()
-            UI.startExportTmx(this)
+            UI.startExport(this, 'tmx')
           }
           UI.hideAllBoxOnTables()
         })
-        .on('mousedown', '.mgmt-tm .canceladd-export-tmx', function (e) {
+        .on(
+          'keydown',
+          '.export-glossary .email-export.mgmt-input',
+          function (e) {
+            if (e.which == 13) {
+              // enter
+              e.preventDefault()
+              UI.startExport(this, 'glossary')
+            }
+            UI.hideAllBoxOnTables()
+          },
+        )
+        .on('mousedown', '.mgmt-tm .canceladd-export', function (e) {
           e.preventDefault()
-          UI.closeExportTmx($(this).closest('tr'))
+          UI.closeExport($(this).closest('tr'))
           UI.hideAllBoxOnTables()
         })
         .on('mousedown', '.mgmt-tm .deleteTM:not(.disabled)', function (e) {
@@ -400,11 +469,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           var esc = 27
 
           var handleEscPressed = function () {
-            if ($('.modal:not([data-type=view])').length) {
-              e.stopPropagation()
-              APP.closePopup()
-              return
-            } else if ($('.popup-tm.open').length) {
+            if ($('.popup-tm.open').length) {
               e.stopPropagation()
               UI.closeTMPanel()
               UI.clearTMPanel()
@@ -418,18 +483,14 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           e.preventDefault()
           UI.clickOnShareButton($(this))
         })
-        .on(
-          'keydown',
-          '.message-share-tmx-input-email, .share-popup-container-input-email',
-          function (e) {
-            $(this).removeClass('error')
-            UI.hideAllBoxOnTables()
-            if (e.which == 13) {
-              e.preventDefault()
-              UI.clickOnShareButton($(this).parent().find('.share-button'))
-            }
-          },
-        )
+        .on('keydown', '.message-share-tmx-input-email', function (e) {
+          $(this).removeClass('error')
+          UI.hideAllBoxOnTables()
+          if (e.which == 13) {
+            e.preventDefault()
+            UI.clickOnShareButton($(this).parent().find('.share-button'))
+          }
+        })
         .on('change', '#multi-match-1, #multi-match-2', function () {
           UI.storeMultiMatchLangs()
         })
@@ -456,37 +517,17 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
 
       $(document).ready(function () {
         UI.setTMsortable()
-        // $("#inactivetm").tablesorter({
-        //     textExtraction: function(node) {
-        //         // extract data from markup and return it
-        //         if($(node).hasClass('privatekey')) {
-        //             return $(node).text();
-        //         } else {
-        //             return $(node).text();
-        //         }
-        //     },
-        //     headers: {
-        //         4: {
-        //             sorter: true
-        //         },
-        //         5: {
-        //             sorter: false
-        //         },
-        //         6: {
-        //             sorter: false
-        //         },
-        //         7: {
-        //             sorter: false
-        //         }
-        //     }
-        // });
         UI.checkCreateTmKeyFromQueryString()
         UI.checkOpenTabFromParameters()
       })
 
       $('.mgmt-table-tm .add-tm').click(function () {
-        $(this).hide()
+        // $(this).hide()
         UI.openAddNewTm()
+      })
+      $('.mgmt-table-tm .add-shared-tm').click(function () {
+        // $(this).hide()
+        UI.openAddNewTmShared()
       })
       $(
         '.mgmt-tm tr.new .canceladdtmx, .mgmt-tm tr.new .canceladdglossary',
@@ -533,6 +574,38 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
             break
         }
       }
+    },
+    createNewTmKey: function () {
+      if ($('#shared-tm-key').is(':visible')) {
+        UI.addSharedTmKey()
+        return
+      }
+      const descKey = $('#new-tm-description').val()
+      UI.saveTMkey(descKey)
+    },
+    addSharedTmKey: function () {
+      const descKey = $('#new-tm-description').val()
+      const key = $('#shared-tm-key').val()
+      UI.checkTMKey('key', key).then((success) => {
+        if (success) {
+          createNewTmKey({
+            key: key,
+            description: descKey,
+          })
+            .then(() => {
+              UI.hideAllBoxOnTables()
+            })
+            .catch((errors) => {
+              setTimeout(function () {
+                if (errors[0].code === '23000') {
+                  UI.showErrorOnActiveTMTable('The key you entered is invalid.')
+                } else {
+                  UI.showErrorOnActiveTMTable(errors[0].message)
+                }
+              }, 200)
+            })
+        }
+      })
     },
     checkCreateTmKeyFromQueryString: function () {
       var keyParam = CommonUtils.getParameterByName('private_tm_key')
@@ -610,12 +683,11 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       })
     },
 
-    checkTMKey: function (operation) {
+    checkTMKey: function (operation, keyValue) {
       //check if the key already exists, it can not be sent nor added twice
-      var keyValue = $('#new-tm-key').val()
       if (keyValue === '') {
         UI.showErrorOnKeyInput()
-        return false
+        return Promise.resolve(false)
       }
 
       var keyActive = this.checkTMKeyIsActive(keyValue)
@@ -623,7 +695,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
 
       if (keyActive) {
         UI.showErrorOnKeyInput('The key is already present in this project.')
-        return false
+        return Promise.resolve(false)
       } else if (keyInactive) {
         UI.showErrorOnKeyInput(
           'The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link activate-key">Click here to activate it</a>',
@@ -635,40 +707,34 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
             UI.activateInactiveKey(keyValue)
           })
         }, 500)
-        return false
+        return Promise.resolve(false)
       }
 
-      return APP.doRequest({
-        data: {
-          action: 'ajaxUtils',
-          exec: 'checkTMKey',
-          tm_key: keyValue,
-        },
-        context: operation,
-        error: function () {
-          console.log('checkTMKey error!!')
-        },
-        success: function (d) {
-          if (d.success === true) {
+      const promise = checkTMKey({
+        tmKey: keyValue,
+      })
+        .then((data) => {
+          if (data.success === true) {
             UI.removeErrorOnKeyInput()
-            if (this == 'key') {
-              UI.addTMKeyToList(false)
+            if (operation == 'key') {
+              UI.addTMKeyToList(false, keyValue)
               UI.clearTMUploadPanel()
             }
-          } else {
-            UI.showErrorOnKeyInput(
-              'The key is not valid. <a class="active-tm-key-link">Restore generated key</a>',
-            )
-            setTimeout(function () {
-              $('.active-tm-key-link').off('click')
-              $('.active-tm-key-link').on('click', function () {
-                UI.openAddNewTm()
-                UI.removeErrorOnKeyInput()
-              })
-            }, 500)
+            return true
           }
-        },
-      })
+        })
+        .catch(() => {
+          UI.showErrorOnKeyInput('The key is not valid.')
+          setTimeout(function () {
+            $('.active-tm-key-link').off('click')
+            $('.active-tm-key-link').on('click', function () {
+              UI.openAddNewTm()
+              UI.removeErrorOnKeyInput()
+            })
+          }, 500)
+          return false
+        })
+      return promise
     },
     checkTMKeyIsActive: function (key) {
       var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey')
@@ -753,16 +819,18 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
                 : 'update',
               key: $(tr).find('.privatekey').text(),
             }
-
-            APP.confirm({
-              name: 'confirmTMDisable',
-              cancelTxt: 'Cancel',
-              onCancel: 'cancelTMDisable',
-              callback: 'continueTMDisable',
-              okTxt: 'Continue',
-              context: JSON.stringify(data),
-              msg: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
-            })
+            ModalsActions.showModalComponent(
+              ConfirmMessageModal,
+              {
+                text: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
+                successText: 'Continue',
+                cancelText: 'Cancel',
+                successCallback: () => UI.continueTMDisable(data),
+                cancelCallback: () => UI.cancelTMDisable(data),
+                closeOnSuccess: true,
+              },
+              'Confirmation required',
+            )
             return false
           }
           UI.disableTM(el)
@@ -780,8 +848,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         }
       }
     },
-    cancelTMDisable: function (context) {
-      var options = $.parseJSON(context)
+    cancelTMDisable: function (options) {
       $(
         '.mgmt-tm tr[data-key="' +
           options.key +
@@ -790,8 +857,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           ' input',
       ).click()
     },
-    continueTMDisable: function (context) {
-      var options = $.parseJSON(context)
+    continueTMDisable: function (options) {
       const el = $(
         '.mgmt-tm tr[data-key="' +
           options.key +
@@ -840,24 +906,31 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       $('.addtmxrow').hide()
     },
     execAddTMOrGlossary: function (el, type) {
-      var action =
+      const action =
         type == 'glossary' ? '/api/v2/glossaries/import/' : '/?action=loadTMX'
-      var line = $(el).parents('tr')
+      const line = $(el).parents('tr')
       line.find('.uploadfile').addClass('uploading')
-      var form = line.find('.add-TM-Form')[0]
+      const form = line.find('.add-TM-Form')[0]
+      const filesLength = $(form).find('input[type=file]').get(0).files.length
+      if (filesLength > 10) {
+        UI.showErrorUpload(
+          $(form).parents('.uploadfile'),
+          'You can only upload a maximum of 10 files',
+        )
+        return
+      }
       var path = line.find('.uploadfile').find('input[type="file"]').val()
       var file = path.split('\\')[path.split('\\').length - 1]
       this.fileUpload(form, action, 'uploadCallback', file, type)
     },
-    addTMKeyToList: function (uploading) {
+    addTMKeyToList: function (uploading, key) {
       var descr = $('#new-tm-description').val()
-      var key = $('#new-tm-key').val()
-      descr = descr.length ? descr : 'Private TM and Glossary'
+      descr = descr.length ? descr : 'Private resource'
       var keyParams = {
         r: $('#new-tm-read').is(':checked'),
         w: $('#new-tm-write').is(':checked'),
         desc: descr,
-        TMKey: $('#new-tm-key').val(),
+        TMKey: key,
       }
 
       this.appendNewTmKeyToPanel(keyParams)
@@ -878,7 +951,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       this.initTmxTooltips()
     },
     checkKeyIsShared: function (key) {
-      UI.getUserSharedKey(key).done(function (response) {
+      UI.getUserSharedKey(key).then((response) => {
         var users = response.data
         if (users.length > 1) {
           $('tr.mine[data-key=' + key + '] .icon-owner')
@@ -966,13 +1039,11 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       }, 1000)
     },
     clearTMUploadPanel: function () {
-      $('#new-tm-key, #new-tm-description').val('')
-      $('#new-tm-key').removeAttr('disabled')
+      $('#shared-tm-key, #new-tm-description').val('')
       $('#new-tm-read, #new-tm-write').prop('checked', true)
     },
     clearAddTMRow: function () {
       $('#new-tm-description').val('')
-      $('#new-tm-key').removeAttr('disabled')
       $('#activetm .fileupload').val('')
       $('.mgmt-tm tr.new').removeClass('badkey badgrants')
       $('.mgmt-tm tr.new .message').text('')
@@ -999,7 +1070,6 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       var ifId = 'upload_iframe-' + ts
       var iframe = document.createElement('iframe')
       iframe.setAttribute('id', ifId)
-      console.log('iframe: ', iframe)
       iframe.setAttribute('name', 'upload_iframe')
       iframe.setAttribute('width', '0')
       iframe.setAttribute('height', '0')
@@ -1035,7 +1105,8 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         iframeId.addEventListener('load', eventHandler, true)
       if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
       var TR = $(form).parents('tr')
-      var Key = TR.find('.privatekey').first().text()
+      var Key = TR.find('.privatekey').first().text().trim()
+      var keyName = TR.find('.description').first().text().trim()
 
       // Set properties of form...
       form.setAttribute('target', 'upload_iframe')
@@ -1048,7 +1119,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       }
       $(form)
         .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + tmName + '" />')
+        .append('<input type="hidden" name="name" value="' + keyName + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />')
       if (APP.isCattool) {
@@ -1088,13 +1159,13 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
           setTimeout(function () {
             //delay because server can take some time to process large file
             // TRcaller.removeClass('startUploading');
-            UI.pollForUploadProgress(Key, fileName, TRcaller, type)
+            const uuid =
+              type === 'glossary' && msg.data?.uuids?.length > 0
+                ? msg.data.uuids[0]
+                : undefined
+            UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
           }, 2000)
         } else {
-          // console.log('error');
-
-          // TRcaller.removeClass('startUploading');
-
           TRcaller.find('.action a').removeClass('disabled')
           UI.showErrorUpload($(TRcaller))
           UI.UploadIframeId.remove()
@@ -1112,8 +1183,8 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       }
     },
     showErrorUpload: function ($tr, text) {
-      var msg = text ? text : 'Error uploading your file. Please try again.'
-      var msg2 = 'Error uploading your file. Please try again.'
+      var msg = text ? text : 'Error uploading your files. Please try again.'
+      var msg2 = text ? text : 'Error uploading your files. Please try again.'
       $tr.find('.addtmxfile, .addglossaryfile, .uploadprogress').hide()
       $tr.find('.upload-file-msg-error').text(msg2).show()
       $tr.find('.canceladdglossary, .canceladdtmx').show()
@@ -1148,91 +1219,83 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgress: function (Key, fileName, TRcaller, type) {
-      var glossaryUrl =
-        '/api/v2/glossaries/import/status/' + Key + '/' + fileName
-      var urlReq, data, typeReq
-      if (type === 'glossary') {
-        urlReq = glossaryUrl
-        data = {}
-        typeReq = 'GET'
-      } else {
-        data = {
-          action: 'loadTMX',
-          exec: 'uploadStatus',
-          tm_key: Key,
-          name: fileName,
-        }
-        typeReq = 'POST'
-      }
-      APP.doRequest({
-        url: urlReq,
-        data: data,
-        type: typeReq,
-        context: [Key, fileName, true, TRcaller],
-        error: function () {
-          var TDcaller = this[3]
-          UI.showErrorUpload($(TDcaller))
+    pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
+      const promise =
+        type === 'glossary'
+          ? loadGlossaryFile({id: uuid})
+          : loadTMX({key: Key, name: fileName})
+      promise
+        .then((response) => {
+          var TDcaller = TRcaller
+          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
+          UI.showStartUpload($(TDcaller))
+
+          if (response.data.total == null && response.data.totals === null) {
+            setTimeout(function () {
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
+            }, 1000)
+          } else {
+            if (
+              (type === 'tmx' && response.data.completed) ||
+              (type === 'glossary' &&
+                response.data.completed === response.data.totals)
+            ) {
+              var tr = $(TDcaller).parents('tr')
+              UI.showSuccessUpload(tr)
+
+              if (!tr.find('td.description .edit-desc').text()) {
+                tr.find('td.description .edit-desc').text(fileName)
+              }
+
+              setTimeout(function () {
+                $(TDcaller).slideToggle(function () {
+                  this.remove()
+                })
+              }, 3000)
+
+              UI.UploadIframeId.remove()
+
+              return false
+            }
+            const done =
+              type === 'tmx' ? response.data.done : response.data.completed
+            const total =
+              type === 'tmx' ? response.data.total : response.data.totals
+            var progress = (parseInt(done) / parseInt(total)) * 100
+            $(TDcaller)
+              .find('.progress .inner')
+              .css('width', progress + '%')
+            setTimeout(function () {
+              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
+            }, 1000)
+          }
+        })
+        .catch(({errors}) => {
+          var TDcaller = TRcaller
+          UI.showErrorUpload($(TDcaller), errors[0].message)
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.UploadIframeId.remove()
-        },
-        success: function (d) {
-          var TDcaller = this[3]
-          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
-          if (d.errors.length) {
-            UI.showErrorUpload($(TDcaller), d.errors[0].message)
-
-            UI.UploadIframeId.remove()
-          } else {
-            UI.showStartUpload($(TDcaller))
-
-            if (d.data.total == null) {
-              setTimeout(function () {
-                UI.pollForUploadProgress(Key, fileName, TDcaller, type)
-              }, 1000)
-            } else {
-              if (d.data.completed) {
-                var tr = $(TDcaller).parents('tr')
-                UI.showSuccessUpload(tr)
-
-                if (!tr.find('td.description .edit-desc').text()) {
-                  tr.find('td.description .edit-desc').text(fileName)
-                }
-
-                setTimeout(function () {
-                  $(TDcaller).slideToggle(function () {
-                    this.remove()
-                  })
-                }, 3000)
-
-                UI.UploadIframeId.remove()
-
-                return false
-              }
-              var progress =
-                (parseInt(d.data.done) / parseInt(d.data.total)) * 100
-              $(TDcaller)
-                .find('.progress .inner')
-                .css('width', progress + '%')
-              setTimeout(function () {
-                UI.pollForUploadProgress(Key, fileName, TDcaller, type)
-              }, 1000)
-            }
-          }
-        },
-      })
+        })
     },
 
     allTMUploadsCompleted: function () {
       if ($('#activetm .uploadfile.uploading').length) {
-        APP.alert({
-          msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'There is one or more TM uploads in progress. Try again when all uploads are completed!',
+          },
+          'Upload in progress',
+        )
         return false
       } else if ($('tr td a.downloading').length) {
-        APP.alert({
-          msg: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.',
+          },
+          'Upload in progress',
+        )
         return false
       } else {
         return true
@@ -1283,7 +1346,6 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     },
 
     saveTMdata: function (closeAfter) {
-      $('.popup-tm').addClass('saving')
       if (closeAfter) {
         UI.closeTMPanel()
         UI.clearTMPanel()
@@ -1293,99 +1355,78 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       var getPublicMatches = $('#activetm')
         .find('tr.mymemory .lookup input')
         .is(':checked')
-      APP.doRequest({
-        data: {
-          action: 'updateJobKeys',
-          job_id: config.job_id,
-          job_pass: config.password,
-          get_public_matches: getPublicMatches,
-          data: data,
-          current_password: config.currentPassword,
-        },
-        error: function () {
+
+      updateJobKeys({
+        getPublicMatches,
+        dataTm: data,
+      })
+        .then(() => {
+          UI.hideAllBoxOnTables()
+          // TODO: update keys for glossary
+          CatToolActions.onTMKeysChangeStatus()
+        })
+        .catch(() => {
           UI.showErrorOnActiveTMTable(
             'There was an error saving your data. Please retry!',
           )
-          $('.popup-tm').removeClass('saving')
-        },
-        success: function (d) {
-          $('.popup-tm').removeClass('saving')
-          if (d.errors.length) {
-            UI.showErrorOnActiveTMTable(
-              'There was an error saving your data. Please retry!',
-            )
-            // APP.showMessage({msg: d.errors[0].message});
-          } else {
-            UI.hideAllBoxOnTables()
-          }
-        },
-      })
+        })
     },
     saveTMdescription: function (field) {
       if (!config.isLoggedIn) return
       var tr = field.parents('tr').first()
       var old_descr = tr.find('.edit-desc').data('descr')
       var new_descr = field.text()
+
+      if (new_descr === '') {
+        old_descr.length > 0
+          ? (new_descr = old_descr)
+          : (new_descr = 'Private resource')
+        field.text(new_descr)
+      }
       if (old_descr === new_descr) {
         return
       }
-      APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'update',
-          key: tr.find('.privatekey').text(),
-          description: new_descr,
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your description. Please retry!',
-          )
-          // APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
-          $('.popup-tm').removeClass('saving')
-        },
-        success: function (d) {
-          tr.find('.edit-desc').data('descr', new_descr)
-          $('.popup-tm').removeClass('saving')
-          if (d.errors.length) {
-            UI.showErrorOnActiveTMTable(d.errors[0].message)
-            // APP.showMessage({msg: d.errors[0].message});
-          } else {
-            UI.hideAllBoxOnTables()
-          }
-        },
+      updateTmKey({
+        key: tr.find('.privatekey').text(),
+        description: new_descr,
       })
+        .then(() => {
+          tr.find('.edit-desc').data('descr', new_descr)
+          UI.hideAllBoxOnTables()
+        })
+        .catch((errors) => {
+          UI.showErrorOnActiveTMTable(errors[0].message)
+        })
     },
-    saveTMkey: function (key, desc) {
-      delete UI.newTmKey
+    saveTMkey: function (desc) {
       if (desc.length == 0) {
-        desc = 'Private TM and Glossary'
+        desc = 'Private resource'
       }
-      return APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'newKey',
+
+      //call API
+      return tmCreateRandUser().then((response) => {
+        const {key} = response.data
+        if (!config.isLoggedIn) {
+          UI.checkTMKey('key', key)
+          return
+        }
+        createNewTmKey({
           key: key,
           description: desc,
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your data. Please retry!',
-          )
-          $('.popup-tm').removeClass('saving')
-        },
-        success: function (d) {
-          $('.popup-tm').removeClass('saving')
-          UI.hideAllBoxOnTables()
-          if (d.errors.length) {
+        })
+          .then(() => {
+            UI.checkTMKey('key', key)
+            UI.hideAllBoxOnTables()
+          })
+          .catch((errors) => {
             setTimeout(function () {
-              if (d.errors[0].code === '23000') {
+              if (errors[0].code === '23000') {
                 UI.showErrorOnActiveTMTable('The key you entered is invalid.')
               } else {
-                UI.showErrorOnActiveTMTable(d.errors[0].message)
+                UI.showErrorOnActiveTMTable(errors[0].message)
               }
             }, 200)
-          }
-        },
+          })
       })
     },
 
@@ -1393,12 +1434,12 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       $('.popup-tm').removeClass('open').animate({right: '-1100px'}, 400)
       $('.outer-tm').hide()
       $('body').removeClass('side-popup')
-      if (!APP.isCattool && !checkAnalyzability('closing tmx panel')) {
-        disableAnalyze()
+      if (!APP.isCattool && !UI.checkAnalyzability('closing tmx panel')) {
+        UI.disableAnalyze()
         if (!checkAnalyzabilityTimer)
-          var checkAnalyzabilityTimer = window.setInterval(function () {
-            if (checkAnalyzability('set interval')) {
-              enableAnalyze()
+          checkAnalyzabilityTimer = window.setInterval(function () {
+            if (UI.checkAnalyzability('set interval')) {
+              UI.enableAnalyze()
               window.clearInterval(checkAnalyzabilityTimer)
             }
           }, 500)
@@ -1415,118 +1456,6 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       )
         .parents('tr')
         .addClass('found')
-    },
-    downloadTM: function (tm, email) {
-      var tm_key = $('.privatekey', tm).text().trim()
-      var tm_name = $('.description', tm).text().trim()
-
-      var id_job
-      var password
-
-      if (typeof config.id_job !== 'undefined') {
-        id_job = config.id_job
-        password = config.password
-      }
-
-      return APP.doRequest({
-        data: {
-          action: 'downloadTMX',
-          tm_key: tm_key,
-          tm_name: tm_name,
-          id_job: id_job,
-          password: password,
-          email: email,
-        },
-      })
-    },
-    downloadGlossary: function (elem) {
-      var tr = elem.closest('tr')
-      UI.hideAllBoxOnTables()
-      this.openExportGlossary(elem, tr)
-
-      //add a random string to avoid collision for concurrent javascript requests
-      //in the same milli second, and also, because a string is needed for token and not number....
-      var downloadToken =
-        new Date().getTime() + '_' + parseInt(Math.random(0, 1) * 10000000)
-
-      //create a random Frame ID and form ID to get it uniquely
-      var iFrameID = 'iframeDownload_' + downloadToken
-      var formID = 'form_' + downloadToken
-
-      //create an iFrame element
-      var iFrameDownload = $(document.createElement('iframe')).hide().prop({
-        id: iFrameID,
-        src: '',
-      })
-
-      $('body').append(iFrameDownload)
-
-      iFrameDownload.ready(function () {
-        //create a GLOBAL setInterval so in anonymous function it can be disabled
-        var downloadTimer = window.setInterval(function () {
-          //check for cookie equals to it's value.
-          //This is unique by definition and we can do multiple downloads
-          var token = Cookies.get(downloadToken)
-
-          //if the cookie is found, download is completed
-          //remove iframe an re-enable download button
-          if (token) {
-            window.clearInterval(downloadTimer)
-            elem.removeClass('disabled')
-            tr.find('.uploadloader').hide()
-            Cookies.set(downloadToken, null, {
-              path: '/',
-              expires: -1,
-              secure: true,
-            })
-            const errorMsg = $('#' + iFrameID)
-              .contents()
-              .find('body')
-              .text()
-            if (errorMsg != '') {
-              tr.find('.message-glossary-export-error').show()
-              if (tr.closest('table').attr('id') == 'inactivetm') {
-                UI.showErrorOnInactiveTMTable(
-                  'Export failed. No glossary found in the resource.',
-                )
-              } else {
-                UI.showErrorOnActiveTMTable(
-                  'Export failed. No glossary found in the resource.',
-                )
-              }
-              tr.find('.download-glossary-container').addClass('tm-error')
-            } else {
-              tr.find('.message-glossary-export-completed').show()
-            }
-            tr.find('.action a').removeClass('disabled')
-            $('#' + iFrameID).remove()
-
-            setTimeout(function () {
-              tr.find('td.download-glossary-container').slideToggle(
-                function () {
-                  $(this).remove()
-                },
-              )
-              UI.hideAllBoxOnTables()
-            }, 5000)
-          }
-        }, 2000)
-      })
-      var tm_key = $('.privatekey', tr).text()
-      //create the html form and append a token for download
-      var iFrameForm = $(document.createElement('form')).attr({
-        id: formID,
-        action: '/api/v2/glossaries/export/' + tm_key + '/' + downloadToken,
-        method: 'GET',
-      })
-
-      //append from to newly created iFrame and submit form post
-      iFrameDownload.contents().find('body').append(iFrameForm)
-      console.log(iFrameDownload.contents().find('#' + formID))
-      iFrameDownload
-        .contents()
-        .find('#' + formID)
-        .submit()
     },
     showMTDeletingMessage: function (button) {
       var tr = button.closest('tr')
@@ -1591,48 +1520,40 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       $(tr).fadeOut('normal', function () {
         $(this).remove()
       })
-      APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'delete',
-          key: tr.find('.privatekey').text(),
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your data. Please retry!',
-          )
-          // console.log('Error deleting TM!!');
-        },
-        success: function () {
+
+      deleteTmKey({
+        key: tr.find('.privatekey').text(),
+      })
+        .then(() => {
           UI.hideAllBoxOnTables()
           setTimeout(function () {
             $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
           }, 500)
-        },
-      })
+          // TODO: update keys for glossary
+          if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
+        })
+        .catch(() => {
+          UI.showErrorOnActiveTMTable(
+            'There was an error saving your data. Please retry!',
+          )
+        })
     },
     deleteMT: function (id) {
-      APP.doRequest({
-        data: {
-          action: 'engine',
-          exec: 'delete',
-          id: id,
-        },
-        context: id,
-        error: function () {
+      deleteMTEngine({
+        id,
+      })
+        .then(({data}) => {
+          UI.hideAllBoxOnTables()
+          $('.mgmt-table-mt tr[data-id=' + data.id + ']').remove()
+          $('#mt_engine option[value=' + data.id + ']').remove()
+          if (!$('#mt_engine option[selected=selected]').length)
+            $('#mt_engine option[value=0]').attr('selected', 'selected')
+        })
+        .catch(() => {
           $('.mgmt-table-mt .tm-error-message')
             .text('There was an error saving your data. Please retry!')
             .show()
-        },
-        success: function () {
-          // console.log('success');
-          UI.hideAllBoxOnTables()
-          $('.mgmt-table-mt tr[data-id=' + this + ']').remove()
-          $('#mt_engine option[value=' + this + ']').remove()
-          if (!$('#mt_engine option[selected=selected]').length)
-            $('#mt_engine option[value=0]').attr('selected', 'selected')
-        },
-      })
+        })
     },
 
     addMTEngine: function (provider, providerName) {
@@ -1647,75 +1568,72 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       })
 
       var name = $('#new-engine-name').val()
-      var data = {
-        action: 'engine',
-        exec: 'add',
-        name: name,
-        provider: provider,
-        data: JSON.stringify(providerData),
-      }
-      var context = data
-      context.providerName = providerName
 
-      APP.doRequest({
-        data: data,
-        context: context,
-        error: function () {
-          console.log('error')
-        },
-        success: function (d) {
-          if (d.errors.length) {
-            console.log('error')
-            if (d.errors[0].code !== undefined) {
-              $('#mt-provider-details .mt-error-key')
-                .text(d.errors[0].message)
-                .show()
-            } else {
-              $('#mt-provider-details .mt-error-key')
-                .text('API key not valid')
-                .show()
-            }
-          } else {
-            if (d.data.config && Object.keys(d.data.config).length) {
-              UI.renderMTConfig(provider, d.name, d.data.config)
-            } else {
-              console.log('success')
-              UI.renderNewMT(this, d.data)
-              if (!APP.isCattool) {
-                UI.activateMT(
-                  $(
-                    'table.mgmt-mt tr[data-id=' +
-                      d.data.id +
-                      '] .enable-mt input',
-                  ),
-                )
-                $('#mt_engine').append(
-                  '<option value="' +
-                    d.data.id +
-                    '">' +
-                    d.data.name +
-                    '</option>',
-                )
-                $('#mt_engine option:selected').removeAttr('selected')
-                $('#mt_engine option[value="' + d.data.id + '"]').attr(
-                  'selected',
-                  'selected',
-                )
-              }
-              $('#mt_engine_int').val('none').trigger('change')
-            }
-          }
-        },
+      const props = {
+        name,
+        provider,
+        data: JSON.stringify(providerData),
+        providerName,
+      }
+
+      addMTEngineApi({
+        name: props.name,
+        provider: props.provider,
+        dataMt: props.data,
       })
+        .then((response) => {
+          if (
+            response.data.config &&
+            Object.keys(response.data.config).length
+          ) {
+            UI.renderMTConfig(provider, response.name, response.data.config)
+          } else {
+            UI.renderNewMT(props, response.data)
+            if (!APP.isCattool) {
+              UI.activateMT(
+                $(
+                  'table.mgmt-mt tr[data-id=' +
+                    response.data.id +
+                    '] .enable-mt input',
+                ),
+              )
+              $('#mt_engine').append(
+                '<option value="' +
+                  response.data.id +
+                  '">' +
+                  response.data.name +
+                  '</option>',
+              )
+              $('#mt_engine option:selected').removeAttr('selected')
+              $('#mt_engine option[value="' + response.data.id + '"]').attr(
+                'selected',
+                'selected',
+              )
+            }
+            $('#mt_engine_int').val('none').trigger('change')
+            UI.decorateMMTRow && UI.decorateMMTRow()
+          }
+        })
+        .catch((errors) => {
+          if (errors[0].code !== undefined) {
+            $('#mt-provider-details .mt-error-key')
+              .text(errors[0].message)
+              .show()
+          } else {
+            $('#mt-provider-details .mt-error-key')
+              .text('API key not valid')
+              .show()
+          }
+        })
     },
     renderNewMT: function (data, serverResponse) {
       var newTR =
         '<tr data-id="' +
         serverResponse.id +
         '">' +
-        '    <td class="mt-provider"> ' +
+        '    <td class="mt-provider">' +
         serverResponse.name +
-        ' </td>' +
+        '</td>' +
         '    <td class="engine-name">' +
         data.providerName +
         '</td>' +
@@ -1729,11 +1647,11 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
       if (APP.isCattool) {
         $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR)
       } else {
-        $('table.mgmt-mt tbody tr.activetm')
-          .removeClass('activetm')
+        $('table.mgmt-mt tbody tr.activemt')
+          .removeClass('activemt')
           .find('.enable-mt input')
-          .removeAttr('checked')
-        $('table.mgmt-mt tbody').prepend(newTR)
+          .click()
+        $('table.mgmt-mt.active-mt tbody').prepend(newTR)
       }
     },
 
@@ -1757,13 +1675,16 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     activateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" checked class="temp" />')
-      var tbody = tr.parents('tbody')
-      $(tbody).prepend(tr)
-      tbody
-        .find('.activemt input[type=checkbox]')
-        .replaceWith('<input type="checkbox" />')
-      tbody.find('.activemt').removeClass('activemt')
-      tr.addClass('activemt').removeClass('temp')
+
+      const activeMtBody = $('.mgmt-mt.active-mt tbody')
+      activeMtBody.append(tr)
+      // var tbody = tr.parents('tbody')
+      tr.removeClass('inactivemt')
+      activeMtBody.find('.activemt input[type=checkbox]').each((i, elem) => {
+        UI.deactivateMT(elem)
+      })
+      // $(tbody).prepend(tr)
+      tr.addClass('activemt').removeClass('inactivemt').removeClass('temp')
       $('#mt_engine option').removeAttr('selected')
       $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr(
         'selected',
@@ -1774,9 +1695,12 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     deactivateMT: function (el) {
       var tr = $(el).parents('tr')
       $(el).replaceWith('<input type="checkbox" />')
-      tr.removeClass('activemt')
+      tr.removeClass('activemt').addClass('inactivemt')
       $('#mt_engine option').removeAttr('selected')
       $('#mt_engine option[value=0]').attr('selected', 'selected')
+      const inactiveMtBody = $('.mgmt-mt.inactive-mt tbody')
+      inactiveMtBody.prepend(tr)
+      UI.pulseMTadded($('.inactivemt').first())
     },
     openTMActionDropdown: function (switcher) {
       $(switcher).parents('td').find('.dropdown').toggle()
@@ -1875,78 +1799,69 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     },
 
     openAddNewTm: function () {
+      UI.removeErrorOnKeyInput()
+      $('#shared-tm-key').addClass('hide')
       $('.mgmt-table-tm tr.new').removeClass('hide').show()
-      // $('#new-tm-key').attr('disabled','disabled');
-      if (UI.newTmKey) {
-        UI.copyNewTMKey(UI.newTmKey)
-        return false
-      }
-      //call API
-      APP.doRequest({
-        data: {
-          action: 'createRandUser',
-        },
-        success: function (d) {
-          const data = d.data
-          //put value into input field
-          UI.newTmKey = data.key
-          UI.copyNewTMKey(UI.newTmKey)
-          return false
-        },
-      })
+      $('#new-tm-description').focus()
     },
-    copyNewTMKey: function (key) {
-      $('#new-tm-key').val(key)
-      $('#activetm tr.new').removeClass('badkey')
-      UI.checkTMAddAvailability()
+    openAddNewTmShared: function () {
+      UI.removeErrorOnKeyInput()
+      $('#shared-tm-key').removeClass('hide')
+      $('.mgmt-table-tm tr.new').removeClass('hide').show()
+      $('#new-tm-description').focus()
     },
-    openExportTmx: function (elem) {
+
+    openExport: function (elem, type) {
       $(elem)
         .parents('.action')
         .find('a')
         .each(function () {
           $(this).addClass('disabled')
         })
-
-      var exportDiv =
-        '<td class="download-tmx-container" style="display: none">' +
-        '<div class="message-export-tmx">We will send a link to download the exported TM to this email:</div>' +
-        '<div class="message-export-tmx-success"></div>' +
-        '<input type="email" required class="email-export-tmx mgmt-input" value="' +
+      const text =
+        type === 'glossary'
+          ? 'We will send a link to download the exported Glossary to this email:'
+          : 'We will send a link to download the exported TM to this email:'
+      const className = type === 'glossary' ? 'export-glossary' : 'export-tmx'
+      const exportDiv =
+        '<td class="download-container ' +
+        className +
+        '" style="display: none">' +
+        '<div class="message-export">' +
+        text +
+        '</div>' +
+        '<div class="message-export-success"></div>' +
+        '<input type="email" required class="email-export mgmt-input" value="' +
         config.userMail +
         '"/>' +
         '<span class="uploadloader"></span>' +
-        '<span class="email-export-tmx-email-sent">Request submitted</span>' +
-        '<a class="pull-right btn-grey canceladd-export-tmx">' +
+        '<span class="email-export-email-sent">Request submitted</span>' +
+        '<a class="pull-right btn-grey canceladd-export">' +
         '<span class="text"></span>' +
         '</a>' +
-        '<a class="pull-right btn-ok export-tmx-button">' +
-        '   <span class="text export-tmx-button-label">Confirm</span>' +
+        '<a class="pull-right btn-ok export-button export-tmx-button">' +
+        '   <span class="text export-button-label">Confirm</span>' +
         '</a>' +
-        '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
+        '<span class="email-export-email-error">We got an error,</br> please contact support</span>' +
         '</td>'
 
       $(elem).parents('tr').append(exportDiv)
-      $(elem).parents('tr').find('.download-tmx-container').slideToggle()
+      $(elem).parents('tr').find('.download-container').slideToggle()
     },
     getUserSharedKey: function (keyValue) {
-      return APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'info',
-          key: keyValue,
-        },
-        error: function () {
-          console.log('getUserSharedKey error')
-        },
-        success: function (d) {
-          if (d.success !== true) {
-            UI.showErrorOnActiveTMTable(
-              'Error retrieving the information, try again',
-            )
-          }
-        },
+      const promise = getInfoTmKey({
+        key: keyValue,
       })
+
+      promise.then((data) => {
+        if (data.success !== true) {
+          UI.showErrorOnActiveTMTable(
+            'Error retrieving the information, try again',
+          )
+        }
+      })
+
+      return promise
     },
     openShareResource: function (elem) {
       var tr = $(elem).parents('tr')
@@ -1964,7 +1879,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
 
       var key = tr.find('.privatekey').text()
       if (key.indexOf('*') > -1) return
-      this.getUserSharedKey(key).done(function (response) {
+      this.getUserSharedKey(key).then((response) => {
         if (response.success !== true) return
 
         var users = response.data
@@ -1992,7 +1907,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
             '<td class="share-tmx-container" style="display: none">' +
             '<div class="message-share-tmx">Share ownership of the resource by sharing the key. This action cannot be undone.</div>' +
             '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>' +
-            '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
+            '<a class="pull-right btn-grey cancelsharetmx"><span class="text"></span>   </a>' +
             '<div class="pull-right btn-ok share-button">Share</div>' +
             '</td>'
         } else if (users.length > 0) {
@@ -2031,144 +1946,70 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
 
         var description = tr.find('.edit-desc').data('descr')
 
-        if (description.length) {
-          description =
-            "<span class='share-popup-description'>" + description + '</span>'
-        }
-
-        //Create the users list with the logged user first
-        var htmlUsersList =
-          '<div class="share-popup-list-item">' +
-          '<span class="share-popup-item-name">' +
-          user.first_name +
-          ' ' +
-          user.last_name +
-          ' (you)</span>' +
-          '<span class="share-popup-item-email">' +
-          user.email +
-          '</span>' +
-          '</div>'
-        users.forEach(function (item) {
-          htmlUsersList =
-            htmlUsersList +
-            '<div class="share-popup-list-item">' +
-            '<span class="share-popup-item-name">' +
-            item.first_name +
-            ' ' +
-            item.last_name +
-            '</span>' +
-            '<span class="share-popup-item-email">' +
-            item.email +
-            '</span>' +
-            '</div>'
-        })
-
-        var message =
-          "<div class='share-popup-container'>" +
-          "<div class='share-popup-top'>" +
-          "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />" +
-          description +
-          " - <span class='share-popup-key'>" +
-          key +
-          '</span>' +
-          '</h3>' +
-          '</div>' +
-          "<div class='share-popup-container-bottom'>" +
-          '<p>This action cannot be undone.</p>' +
-          "<div class='share-popup-copy-result'></div>" +
-          "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>" +
-          "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>" +
-          "<div class='share-popup-input-result'></div>" +
-          '</div>' +
-          '</div>' +
-          "<div class='share-popup-container-list'>" +
-          "<h3 class='popup-tm'>Who owns the resource</h3>" +
-          "<div class='share-popup-list'>" +
-          htmlUsersList +
-          '</div>' +
-          '</div>'
         tr.find('.message-share-tmx-openemailpopup').on('click', function () {
-          APP.confirm({
-            type: 'share_key_popup',
-            name: 'share-window',
-            cancelTxt: 'Cancel',
-            msg: message,
-            title: 'Share resource',
-          })
-
-          $('.share-popup-copy-link-button').data(
-            'powertip',
-            "<div style='line-height: 20px;font-size: 15px;'>Click to copy to clipboard</div>",
+          ModalsActions.showModalComponent(
+            ShareTmModal,
+            {
+              description,
+              tmKey: key,
+              user,
+              users,
+              callback: () => UI.shareTmCallbackFromPopup(key),
+            },
+            'Share resource',
           )
-          $('.share-popup-copy-link-button').powerTip({
-            placement: 'n',
-          })
         })
       })
     },
-    openExportGlossary: function (elem, tr) {
-      tr.find('.action a').addClass('disabled')
-      var exportDiv =
-        '<td class="download-glossary-container" style="display: none">' +
-        '<div class="message-export-glossary">We are exporting the glossary. Please wait...</div>' +
-        '<span class="message-glossary-export-completed">Export Completed</span>' +
-        '<span class="message-glossary-export-error">Export failed. No glossary found in the resource.</span>' +
-        '<span class="uploadloader"></span>' +
-        '</td>'
-
-      tr.append(exportDiv)
-      tr.find('.uploadloader').show()
-      tr.find('.download-glossary-container').slideToggle()
-    },
-    startExportTmx: function (elem) {
+    startExport: function (elem, type) {
       var line = $(elem).closest('tr')
-      var email = line.find('.email-export-tmx').val()
-      var successText =
-        'You should receive the link at ' +
-        email +
-        ' in <strong>%XX% minutes.</strong>'
+      var email = line.find('.email-export').val()
+      var successText = 'You should receive the link at ' + email
 
       line.find('.uploadloader').show()
-      line
-        .find('.export-tmx-button, .canceladd-export-tmx')
-        .addClass('disabled')
-      UI.downloadTM(line, email).done(function (response) {
-        if (response.errors.length == 0 && !response.data.error) {
+      line.find('.export-button, .canceladd-export').addClass('disabled')
+      const tm_key = $('.privatekey', line).text().trim()
+      const tm_name = $('.description', line).text().trim()
+      const params = {
+        key: tm_key,
+        name: tm_name,
+        email,
+      }
+      const promise =
+        type === 'glossary' ? downloadGlossary(params) : downloadTMXApi(params)
+      promise
+        .then((response) => {
           var time = Math.round(response.data.estimatedTime / 60)
           time = time > 0 ? time : 1
           successText = successText.replace('%XX%', time)
           setTimeout(function () {
-            line.find('.message-export-tmx-success').html(successText)
+            line.find('.message-export-success').html(successText)
             line.find('.uploadloader').hide()
+            line.find('.export-button, .canceladd-export, .email-export').hide()
+            line.find('.message-export').hide()
             line
-              .find(
-                '.export-tmx-button, .canceladd-export-tmx, .email-export-tmx',
-              )
-              .hide()
-            line.find('.message-export-tmx').hide()
-            line
-              .find('.message-export-tmx-success, .email-export-tmx-email-sent')
+              .find('.message-export-success, .email-export-email-sent')
               .show()
             setTimeout(function () {
-              UI.closeExportTmx(line)
+              UI.closeExport(line)
             }, 5000)
           }, 3000)
-        } else {
+        })
+        .catch(() => {
           setTimeout(function () {
             line.find('.uploadloader').hide()
-            line.find('.export-tmx-button').hide()
+            line.find('.export-button').hide()
             line.find('.action a').removeClass('disabled')
-            line.find('.canceladd-export-tmx').removeClass('disabled')
-            line.find('.email-export-tmx-email-error').show()
+            line.find('.canceladd-export').removeClass('disabled')
+            line.find('.email-export-email-error').show()
             UI.showErrorMessage(line, 'We got an error, please contact support')
-            line.find('.download-tmx-container').addClass('tm-error')
+            line.find('.download-container').addClass('tm-error')
           }, 2000)
-        }
-      })
+        })
     },
-    closeExportTmx: function (elem) {
+    closeExport: function (elem) {
       $(elem)
-        .find('td.download-tmx-container')
+        .find('td.download-container')
         .slideToggle(function () {
           $(this).remove()
         })
@@ -2177,7 +2018,8 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     addFormUpload: function (elem, type) {
       var label, format
       if (type == 'tmx') {
-        label = '<p class="pull-left">Select TMX file to import</p>'
+        label =
+          '<p class="pull-left">Select up to 10 TMX files to be imported</p>'
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2186,10 +2028,10 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select glossary in XLSX format ' +
+          '<p class="pull-left">Select up to 10 glossaries in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
-        format = '.xlsx,.xls'
+        format = '.xlsx,.xls, .ods'
       }
       $(elem).closest('tr').find('.action a').addClass('disabled')
       var nr =
@@ -2197,9 +2039,9 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
         label +
         '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-        '    <input type="file" name="uploaded_file" accept="' +
+        '    <input type="file" name="uploaded_file[]" accept="' +
         format +
-        '"/>' +
+        '" multiple/>' +
         '</form>' +
         '   <a class="pull-right btn-grey canceladd' +
         type +
@@ -2313,10 +2155,10 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     initTmxTooltips: function () {
       //Description input
       if (config.isLoggedIn) {
-        $('tr:not(.ownergroup) .edit-desc').data(
+        /*$('tr:not(.ownergroup) .edit-desc').data(
           'powertip',
           "<div style='line-height: 18px;font-size: 15px;'>Rename</div>",
-        )
+        )*/
         $('.edit-desc').powerTip({
           placement: 's',
         })
@@ -2395,117 +2237,86 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
     },
     clickOnShareButton(button) {
       var tr = button.closest('tr')
-      var key = tr.length
-        ? tr.data('key')
-        : button
-            .closest('.share-popup-container')
-            .find('.share-popup-key')
-            .text()
+      var key = tr.data('key')
       var msg =
         'The resource <span style="font-weight: bold">' +
         key +
         '</span> has been shared.'
 
-      var validateEmail = function (emails) {
-        var re =
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        var result = true
-        emails.split(',').forEach(function (email) {
-          if (!re.test(email.trim())) result = email
-        })
-        return result
-      }
+      var emails = button
+        .closest('.share-tmx-container')
+        .find('.message-share-tmx-input-email')
+        .val()
+      var validateReturn = CommonUtils.validateEmailList(emails)
 
-      var emails = button.hasClass('share-button-popup')
-        ? button
-            .closest('.share-popup-container-bottom')
-            .find('.share-popup-container-input-email')
-            .val()
-        : button
-            .closest('.share-tmx-container')
-            .find('.message-share-tmx-input-email')
-            .val()
-
-      var validateReturn = validateEmail(emails)
-
-      if (validateReturn !== true) {
+      if (validateReturn.result !== true) {
         var errorMsg =
           'The email <span style="font-weight: bold">' +
-          validateReturn +
+          validateReturn.emails +
           '</span> is not valid.'
-        if (button.hasClass('share-button-popup')) {
-          $('.share-popup-input-result').html(errorMsg)
-          $('.share-popup-container-input-email').addClass('error')
+
+        if (tr.closest('table').attr('id') == 'inactivetm') {
+          UI.showErrorOnInactiveTMTable(errorMsg)
         } else {
+          UI.showErrorOnActiveTMTable(errorMsg)
+        }
+        tr.find('.message-share-tmx-input-email').addClass('error')
+
+        return
+      }
+
+      UI.shareKeyByEmail(emails, key)
+        .then(() => {
+          UI.hideAllBoxOnTables()
+          button.closest('.share-tmx-container').find('.cancelsharetmx').click()
+          if (tr.closest('table').attr('id') == 'inactivetm') {
+            UI.showSuccessOnInactiveTMTable(msg)
+          } else {
+            UI.showSuccessOnActiveTMTable(msg)
+          }
+          setTimeout(function () {
+            UI.hideAllBoxOnTables()
+          }, 4000)
+        })
+        .catch((errors) => {
+          var errorMsg = errors[0].message
           if (tr.closest('table').attr('id') == 'inactivetm') {
             UI.showErrorOnInactiveTMTable(errorMsg)
           } else {
             UI.showErrorOnActiveTMTable(errorMsg)
           }
           tr.find('.message-share-tmx-input-email').addClass('error')
-        }
-        return
-      }
-
-      UI.shareKeyByEmail(emails, key).done(function (response) {
-        UI.hideAllBoxOnTables()
-        if (response.errors.length === 0) {
-          if (button.hasClass('share-button-popup')) {
-            APP.closePopup()
-            UI.showSuccessOnActiveTMTable(msg)
-            $('tr .action a').removeClass('disabled')
-            $('.share-tmx-container').slideToggle(function () {
-              $(this).remove()
-            })
-          } else {
-            button
-              .closest('.share-tmx-container')
-              .find('.cancelsharetmx')
-              .click()
-            if (tr.closest('table').attr('id') == 'inactivetm') {
-              UI.showSuccessOnInactiveTMTable(msg)
-            } else {
-              UI.showSuccessOnActiveTMTable(msg)
-            }
-          }
-
-          setTimeout(function () {
-            UI.hideAllBoxOnTables()
-          }, 4000)
-        } else {
-          var errorMsg = response.errors[0].message
-          if (button.hasClass('share-button-popup')) {
-            $('.share-popup-input-result').text(errorMsg)
-            $('.share-popup-container-input-email').addClass('error')
-          } else {
-            if (tr.closest('table').attr('id') == 'inactivetm') {
-              UI.showErrorOnInactiveTMTable(errorMsg)
-            } else {
-              UI.showErrorOnActiveTMTable(errorMsg)
-            }
-            tr.find('.message-share-tmx-input-email').addClass('error')
-          }
-        }
+        })
+    },
+    shareTmCallbackFromPopup: function (key) {
+      var msg =
+        'The resource <span style="font-weight: bold">' +
+        key +
+        '</span> has been shared.'
+      UI.showSuccessOnActiveTMTable(msg)
+      $('tr .action a').removeClass('disabled')
+      $('.share-tmx-container').slideToggle(function () {
+        $(this).remove()
       })
+      UI.hideAllBoxOnTables()
     },
     /**
      * Share a key to one or more email, separated by comma
      * @param container
      */
     shareKeyByEmail: function (emails, key) {
-      return APP.doRequest({
-        data: {
-          action: 'userKeys',
-          exec: 'share',
-          key: key,
-          emails: emails,
-        },
-        error: function () {
-          UI.showErrorOnActiveTMTable(
-            'There was a problem sharing the key, try again or contact the support.',
-          )
-        },
+      const promise = shareTmKey({
+        key: key,
+        emails: emails,
       })
+
+      promise.catch(() => {
+        UI.showErrorOnActiveTMTable(
+          'There was a problem sharing the key, try again or contact the support.',
+        )
+      })
+
+      return promise
     },
 
     storeMultiMatchLangs: function () {

@@ -33839,14 +33839,8 @@ select.ui.dropdown {
   left: 0%;
   right: auto;
   margin: 1em 0em 0em;
-}
-
-.ui.top.left.pointing.dropdown > .menu {
-  top: 100%;
-  bottom: auto;
-  left: 0%;
-  right: auto;
-  margin: 1em 0em 0em;
+  overflow-y: auto;
+  max-height: 80vh;
 }
 
 .ui.top.left.pointing.dropdown > .menu:after {

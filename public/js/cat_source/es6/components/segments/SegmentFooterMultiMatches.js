@@ -30,15 +30,15 @@ class SegmentFooterMultiMatches extends React.Component {
   processContributions(matches) {
     var self = this
     var matchesProcessed = []
-    // SegmentActions.createFooter(this.props.id_segment);
-    $.each(matches, function () {
+    // SegmentActions.createFooter(this.props.segment.sid);
+    $.each(matches, function (match) {
       if (
         _.isUndefined(this.segment) ||
         this.segment === '' ||
         this.translation === ''
       )
         return true
-      var item = {}
+      var item = {...this}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
       item.cb = this.created_by
@@ -232,14 +232,14 @@ class SegmentFooterMultiMatches extends React.Component {
           >
             <li className="sugg-source">
               <span
-                id={self.props.id_segment + '-tm-' + match.id + '-source'}
+                id={self.props.segment.sid + '-tm-' + match.id + '-source'}
                 className="suggestion_source"
                 dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}
               ></span>
             </li>
             <li className="b sugg-target">
               <span
-                id={self.props.id_segment + '-tm-' + match.id + '-translation'}
+                id={self.props.segment.sid + '-tm-' + match.id + '-translation'}
                 className="translation"
                 dangerouslySetInnerHTML={self.allowHTML(
                   match.translationDecodedHtml,
@@ -256,7 +256,7 @@ class SegmentFooterMultiMatches extends React.Component {
       this.props.segment.cl_contributions.matches &&
       this.props.segment.cl_contributions.matches.length === 0
     ) {
-      if (config.mt_enabled && !config.id_translator) {
+      if (config.mt_enabled) {
         matches.push(
           <ul key={0} className="graysmall message">
             <li>
@@ -287,7 +287,7 @@ class SegmentFooterMultiMatches extends React.Component {
           ' ' +
           this.props.tab_class
         }
-        id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+        id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
         <div className="overflow">
           {!_.isUndefined(matches) && matches.length > 0 ? (

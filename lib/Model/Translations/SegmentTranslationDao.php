@@ -21,7 +21,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     /**
      * @param     $id_segment
      * @param     $id_job
-     *
      * @param int $ttl
      *
      * @return Translations_SegmentTranslationStruct
@@ -38,10 +37,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), [
+        /**
+         * @var $result Translations_SegmentTranslationStruct[]
+         */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment
-        ] )[ 0 ];
+        ] );
+
+        return !empty( $result ) ? $result[ 0 ] : null;
     }
 
     /**
@@ -61,32 +65,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $values = array_merge( [ $date ], $segmentIdList );
             $stmt->execute( $values );
         }
-    }
-
-    /**
-     * @param $chunk
-     *
-     * @return Translations_SegmentTranslationStruct
-     */
-    public function lastTranslationByJobOrChunk( $chunk ) {
-
-        $conn  = Database::obtain()->getConnection();
-        $query = "SELECT * 
-                  FROM segment_translations
-                    WHERE id_job = :id_job 
-                    AND segment_translations.id_segment BETWEEN :job_first_segment AND :job_last_segment 
-                  ORDER BY translation_date DESC
-                  LIMIT 1 ";
-        $stmt  = $conn->prepare( $query );
-        $array = [
-                'id_job'            => $chunk->id,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment'  => $chunk->job_last_segment
-        ];
-        $stmt->execute( $array );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct' );
-
-        return $stmt->fetch();
     }
 
     protected function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
@@ -317,19 +295,18 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
             /**
-             * if source_page is null, we keep the default behaviour and only allow TRANSLATED segments.
+             * if source_page is null, we keep the default behaviour and only allow TRANSLATED and APPROVED segments.
              */
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-            // If source page is more than 2 (2ndPass) allow also APPROVED segments
-            if ( $source_page === 3 ) {
-                $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
-            }
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
         } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
             /**
              * When status is TRANSLATED we can change APPROVED DRAFT and NEW statuses
              */
             $where_values[] = Constants_TranslationStatus::STATUS_DRAFT;
             $where_values[] = Constants_TranslationStatus::STATUS_NEW;
+            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
         } else {
             throw new Exception( 'not allowed to change status to ' . $status );
         }
@@ -682,7 +659,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
-            $sum_sql = " SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
+            $sum_sql = " SUM( eq_word_count )";
         }
 
         /**
@@ -804,6 +781,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             'status',
                             'translation_date',
                             'autopropagated_from',
+                            'serialized_errors_list',
                             'warning',
                         ];
 
@@ -949,8 +927,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $versionToMove
+     * @param $events
      *
      * @return int
      */

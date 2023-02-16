@@ -1,9 +1,8 @@
 import Cookies from 'js-cookie'
 import _ from 'lodash'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import React from 'react'
 
-import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import Header from './cat_source/es6/components/header/Header'
@@ -12,6 +11,10 @@ import TeamsStore from './cat_source/es6/stores/TeamsStore'
 import TeamConstants from './cat_source/es6/constants/TeamConstants'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
+import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
+import {createProject} from './cat_source/es6/api/createProject'
+import AlertModal from './cat_source/es6/components/modals/AlertModal'
+import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -28,44 +31,34 @@ APP.createTMKey = function () {
   APP.pendingCreateTMkey = true
 
   //call API
-  return APP.doRequest({
-    data: {
-      action: 'createRandUser',
-    },
-    success: function (d) {
-      /*$( '#private-tm-key' ).val( d.data.key );
-            $( '#private-tm-user' ).val( d.data.id );
-            $( '#private-tm-pass' ).val( d.data.pass );
-            $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
-      APP.pendingCreateTMkey = false
-      $('tr.template-download.fade.ready ').each(function (
-        key,
-        fileUploadedRow,
+  const promise = tmCreateRandUser()
+  promise.then(({data}) => {
+    APP.pendingCreateTMkey = false
+    $('tr.template-download.fade.ready ').each(function (key, fileUploadedRow) {
+      if (
+        $('.mgmt-panel #activetm tbody tr.mine').length &&
+        $('.mgmt-panel #activetm tbody tr.mine .update input').is(':checked')
+      )
+        return false
+      var _fileName = $(fileUploadedRow).find('.name').text()
+      if (
+        _fileName.split('.').pop().toLowerCase() == 'tmx' ||
+        _fileName.split('.').pop().toLowerCase() == 'g'
       ) {
-        if (
-          $('.mgmt-panel #activetm tbody tr.mine').length &&
-          $('.mgmt-panel #activetm tbody tr.mine .update input').is(':checked')
-        )
-          return false
-        var _fileName = $(fileUploadedRow).find('.name').text()
-        if (
-          _fileName.split('.').pop().toLowerCase() == 'tmx' ||
-          _fileName.split('.').pop().toLowerCase() == 'g'
-        ) {
-          UI.appendNewTmKeyToPanel({
-            r: 1,
-            w: 1,
-            desc: _fileName,
-            TMKey: d.data.key,
-          })
-          UI.setDropDown()
-          return true
-        }
-      })
+        UI.appendNewTmKeyToPanel({
+          r: 1,
+          w: 1,
+          desc: _fileName,
+          TMKey: data.key,
+        })
+        UI.setDropDown()
+        return true
+      }
+    })
 
-      return false
-    },
+    return false
   })
+  return promise
 }
 
 /**
@@ -331,11 +324,14 @@ APP.checkForSpeechToText = function () {
       .find('.onoffswitch')
       .off('click')
       .on('click', function () {
-        APP.alert({
-          title: 'Option not available',
-          okTxt: 'Continue',
-          msg: 'This options is only available on Chrome browser.',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'This options is only available on your browser.',
+            buttonText: 'Continue',
+          },
+          'Option not available',
+        )
       })
     speech2textCheck.addClass('option-unavailable')
   }
@@ -382,6 +378,37 @@ APP.checkForDqf = function () {
 
 UI.UPLOAD_PAGE = {}
 
+// workaround hide dropdown tab navigation
+const getInputElement = function () {
+  return this.getElementsByClassName('menu-dropdown')[0].getElementsByTagName(
+    'input',
+  )[0]
+}
+const onTabKeyDown = (e) => {
+  if (e.key.toLowerCase() === 'tab') {
+    const elements = [
+      document.getElementById('project-team'),
+      document.getElementById('source-lang'),
+      document.getElementById('target-lang'),
+      document.getElementById('project-subject'),
+      document.getElementById('tmx-select'),
+    ]
+
+    elements.forEach((element) => {
+      if (!element) return
+      const input = getInputElement.call(element)
+      if (
+        element.classList.contains('visible') &&
+        element.classList.contains('active') &&
+        document.activeElement &&
+        input === document.activeElement
+      ) {
+        $(element).dropdown('hide')
+      }
+    })
+  }
+}
+
 $.extend(UI.UPLOAD_PAGE, {
   init: function () {
     this.checkLanguagesCookie()
@@ -407,16 +434,15 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   render: function () {
-    var headerMountPoint = $('header')[0]
+    const headerMountPoint = createRoot($('header')[0])
     if (config.isLoggedIn) {
-      ReactDOM.render(
+      headerMountPoint.render(
         React.createElement(Header, {
           showFilterProjects: false,
           showModals: false,
           showLinks: true,
           user: APP.USER.STORE,
         }),
-        headerMountPoint,
       )
       TeamsStore.addListener(TeamConstants.UPDATE_USER, () => {
         this.initDropdowns()
@@ -426,14 +452,13 @@ $.extend(UI.UPLOAD_PAGE, {
         CatToolActions.showHeaderTooltip()
       }, 2000)
     } else {
-      ReactDOM.render(
+      headerMountPoint.render(
         React.createElement(Header, {
           showSubHeader: false,
           showModals: false,
           loggedUser: false,
           showLinks: true,
         }),
-        headerMountPoint,
       )
       this.initDropdowns()
     }
@@ -489,11 +514,15 @@ $.extend(UI.UPLOAD_PAGE, {
 
     $('.tmx-select .tm-info-title .icon').popup({
       html:
-        "<div style='text-align: left'>By updating MyMemory, you are contributing to making MateCat better " +
-        'and helping fellow MateCat users improve their translations.</br></br>' +
+        "<div style='text-align: left'>By updating MyMemory, you are contributing to making Matecat better " +
+        'and helping fellow Matecat users improve their translations.</br></br>' +
         'For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel.</div>',
       position: 'bottom center',
     })
+
+    // add keydown listener workaround hide dropdown tab navigation
+    window.removeEventListener('keydown', onTabKeyDown)
+    window.addEventListener('keydown', onTabKeyDown)
   },
 
   checkLanguagesCookie: function () {
@@ -627,6 +656,14 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 
   addEvents: function () {
+    $('.supported-file-formats').click(function (e) {
+      e.preventDefault()
+      $('.supported-formats').show()
+    })
+    $('.supported-formats .x-popup').click(function (e) {
+      e.preventDefault()
+      $('.supported-formats').hide()
+    })
     $('.more-options-cont').on('click', function (e) {
       e.preventDefault()
       APP.openOptionsPanel('tm')
@@ -652,44 +689,88 @@ $.extend(UI.UPLOAD_PAGE, {
       },
     })
 
-    $('input.uploadbtn').click(function () {
-      if (!UI.allTMUploadsCompleted()) {
+    $('#swaplang').click(function (e) {
+      e.preventDefault()
+      var src = $('#source-lang').dropdown('get value')
+      var trg = $('#target-lang').dropdown('get value')
+      if (trg.split(',').length > 1) {
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'Cannot swap languages when multiple target languages are selected!',
+          },
+          'Warning',
+        )
         return false
       }
+      $('#source-lang').dropdown('set selected', trg)
+      $('#target-lang').dropdown('set selected', src)
 
-      $('body').addClass('creating')
+      APP.changeTargetLang(src)
 
-      APP.doRequest({
-        data: APP.getCreateProjectParams(),
-        url: config.basepath + '?action=createProject', //Sometime is necessary to forcibly disable random url call!! :D
-        beforeSend: function () {
-          $('.error-message').hide()
-          $('.uploadbtn')
-            .attr('value', 'Analyzing...')
-            .attr('disabled', 'disabled')
-            .addClass('disabled')
-        },
-        success: function (d) {
-          if (typeof d.errors != 'undefined' && d.errors.length) {
-            var message = this.message
-            if (d.errors.length > 0) {
-              var error = d.errors[0]
-              if (error.code === -230) {
-                //Not a valid S3 object name
-                message =
+      if ($('.template-download').length) {
+        if (UI.conversionsAreToRestart()) {
+          ModalsActions.showModalComponent(
+            AlertModal,
+            {
+              text: 'Source language changed. The files must be reimported.',
+              successCallback: () => UI.confirmRestartConversions(),
+            },
+            'Confirmation required',
+          )
+        }
+      } else if ($('.template-gdrive').length) {
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'Source language changed. The files must be reimported.',
+            successCallback: () => UI.confirmGDriveRestartConversions(),
+          },
+          'Confirmation required',
+        )
+      }
+    })
+
+    $('input.uploadbtn').click(function () {
+      if (!$('.uploadbtn').hasClass('disabled')) {
+        if (!UI.allTMUploadsCompleted()) {
+          return false
+        }
+
+        $('body').addClass('creating')
+
+        $('.error-message').hide()
+        $('.uploadbtn')
+          .attr('value', 'Analyzing...')
+          .attr('disabled', 'disabled')
+          .addClass('disabled')
+
+        createProject(APP.getCreateProjectParams())
+          .then(({data}) => {
+            APP.handleCreationStatus(data.id_project, data.password)
+          })
+          .catch((errors) => {
+            let errorMsg
+            switch (errors[0].code) {
+              case -230: {
+                errorMsg =
                   'Sorry, file name too long. Try shortening it and try again.'
+                break
               }
+              case -235: {
+                errorMsg =
+                  'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
+                break
+              }
+              default:
+                errorMsg = errors[0].message
             }
-            //normal error management
-            $('.error-message').find('p').text(message)
+            $('.error-message').find('p').text(errorMsg)
             $('.error-message').show()
             $('.uploadbtn').attr('value', 'Analyze')
             $('body').removeClass('creating')
-          } else {
-            APP.handleCreationStatus(d.data.id_project, d.data.password)
-          }
-        },
-      })
+          })
+      }
     })
 
     $('.upload-table').on('click', 'a.skip_link', function () {
@@ -715,14 +796,14 @@ $.extend(UI.UPLOAD_PAGE, {
 
       var tlAr = $('#target-lang').dropdown('get value').split(',')
       var sourceLang = $('#source-lang').dropdown('get value')
-
-      ReactDOM.render(
+      const mountPoint = createRoot($('#languageSelector')[0])
+      mountPoint.render(
         React.createElement(LanguageSelector, {
           selectedLanguagesFromDropdown: tlAr,
           languagesList: config.languages_array,
           fromLanguage: sourceLang,
           onClose: function () {
-            ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+            mountPoint.unmount()
           },
           onConfirm: function (data) {
             if (data) {
@@ -748,10 +829,9 @@ $.extend(UI.UPLOAD_PAGE, {
                 `<span class="extra">(${vals.length} languages)</span>`,
               )
             }
-            ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+            mountPoint.unmount()
           },
         }),
-        $('#languageSelector')[0],
       )
     })
 
@@ -780,21 +860,27 @@ $.extend(UI.UPLOAD_PAGE, {
     if ($('.template-download').length) {
       //.template-download is present when jquery file upload is used and a file is found
       if (UI.conversionsAreToRestart()) {
-        APP.confirm({
-          msg: 'Source language has been changed.<br/>The files will be reimported.',
-          callback: 'confirmRestartConversions',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'Source language changed. The files must be reimported.',
+            successCallback: () => UI.confirmRestartConversions(),
+          },
+          'Confirmation required',
+        )
       }
       if (UI.checkTMXLangFailure()) {
         UI.delTMXLangFailure()
       }
     } else if ($('.template-gdrive').length) {
-      APP.confirm({
-        msg: 'Source language has been changed.<br/>The files will be reimported.',
-        callback: 'confirmGDriveRestartConversions',
-      })
-    } else {
-      return
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'Source language changed. The files must be reimported.',
+          successCallback: () => UI.confirmGDriveRestartConversions(),
+        },
+        'Confirmation required',
+      )
     }
   },
   targetLanguageChangedCallback: function () {
@@ -814,7 +900,7 @@ APP.handleCreationStatus = function (id_project, password) {
         APP.postProjectCreation(data)
       }
     })
-    .catch((errors) => {
+    .catch(({errors}) => {
       APP.postProjectCreation({errors})
     })
 }
@@ -890,9 +976,14 @@ APP.postProjectCreation = function (d) {
       if (d.status == 'EMPTY') {
         console.log('EMPTY')
         $('body').removeClass('creating')
-        APP.alert({
-          msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
-        })
+        ModalsActions.showModalComponent(
+          AlertModal,
+          {
+            text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
+            buttonText: 'Continue',
+          },
+          'No text to translate',
+        )
         $('.uploadbtn')
           .attr('value', 'Analyze')
           .removeAttr('disabled')
@@ -977,4 +1068,8 @@ APP.postProjectCreation = function (d) {
 
 $(document).ready(function () {
   UI.UPLOAD_PAGE.init()
+  //TODO: REMOVE
+  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
+  const root = createRoot(mountPoint)
+  root.render(<NotificationBox />)
 })

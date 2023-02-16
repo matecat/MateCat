@@ -9,11 +9,16 @@
 namespace Features;
 
 use AMQHandler;
-use Features\QaCheckBlacklist\BlacklistFromZip;
+use Chunks_ChunkStruct;
+use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects\ProjectModel;
+use Projects_ProjectDao;
+use RedisHandler;
+use Segments_SegmentStruct;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
 use Translations\WarningStruct;
+use Utils;
 use WorkerClient;
 
 class QaCheckBlacklist extends BaseFeature {
@@ -53,7 +58,7 @@ class QaCheckBlacklist extends BaseFeature {
     }
 
     public function postProjectCreate( $projectStructure ) {
-        $project_struct = \Projects_ProjectDao::findById( $projectStructure[ 'result' ][ 'id_project' ] );
+        $project_struct = Projects_ProjectDao::findById( $projectStructure[ 'result' ][ 'id_project' ] );
         $project_model = new ProjectModel($project_struct );
         $project_model->saveBlacklistPresence();
     }
@@ -61,29 +66,34 @@ class QaCheckBlacklist extends BaseFeature {
     public function setTranslationCommitted( $params ) {
         $translation = $params[ 'translation' ];
 
-        /** @var  $segment \Segments_SegmentStruct */
+        /** @var  $segment Segments_SegmentStruct */
         $segment = $params[ 'segment' ];
 
-        /** @var $chunk \Chunks_ChunkStruct */
+        /** @var $chunk Chunks_ChunkStruct */
         $chunk = $params[ 'chunk' ];
 
-        $queue_element = array(
-                'id_segment'          => $translation['id_segment'],
-                'id_job'              => $translation['id_job'],
-                'id_project'          => $chunk->id_project,
-                'segment'             => $segment['segment'],
-                'translation'         => $translation['translation'],
-                'recheck_translation' => true,
-                'propagated_ids'      => $params['propagated_ids']
-        ) ;
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
+
+        $queue_element = [
+            'id_segment'          => $translation['id_segment'],
+            'id_job'              => $translation['id_job'],
+            'job_password'        => $chunk->password,
+            'id_project'          => $chunk->id_project,
+            'segment'             => $segment['segment'],
+            'translation'         => $translation['translation'],
+            'recheck_translation' => true,
+            'from_upload'         => $blacklistUtils->checkIfExists($chunk->id, $chunk->password),
+            'propagated_ids'      => $params['propagated_ids']
+        ] ;
 
         self::enqueueTranslationCheck( $queue_element ) ;
-
     }
+
+
 
     public function filterGlobalWarnings( $result, $params ) {
         /**
-         * @var $chunk \Chunks_ChunkStruct
+         * @var $chunk Chunks_ChunkStruct
          */
         $chunk = $params[ 'chunk' ];
 
@@ -108,27 +118,23 @@ class QaCheckBlacklist extends BaseFeature {
     }
 
     public function filterSegmentWarnings( $data, $params ) {
-        $params = \Utils::ensure_keys( $params, array(
+        $params = Utils::ensure_keys( $params, array(
                 'src_content', 'trg_content', 'chunk', 'project'
         ));
 
         $target = $params['trg_content'] ;
 
         /**
-         * @var $project \Projects_ProjectStruct
+         * @var $chunk Chunks_ChunkStruct
          */
-        $project = $params['project'];
+        $chunk = $params['chunk'] ;
 
-        /**
-         * @var $chunk \Chunks_ChunkStruct
-         */
-        $chunk =$params['chunk'] ;
+        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
+        $blacklist = $blacklistUtils->getAbstractBlacklist($chunk);
 
-        $blacklist = new BlacklistFromZip( $project->getFirstOriginalZipPath(),  $chunk->id ) ;
-
-        $data['blacklist'] = array(
+        $data['blacklist'] = [
                 'matches' => $blacklist->getMatches( $target )
-        );
+        ];
 
         return $data;
     }

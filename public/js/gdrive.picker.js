@@ -1,4 +1,5 @@
 import {sprintf} from 'sprintf-js'
+import {getUserConnectedService} from './cat_source/es6/api/getUserConnectedService'
 
 var GDrive = function () {
   'use strict'
@@ -31,7 +32,12 @@ var GDrive = function () {
       .enableFeature(google.picker.Feature.MINE_ONLY)
       .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
       .build()
-    picker.setVisible(true)
+    try {
+      picker.setVisible(true)
+    } catch (e) {
+      APP.USER.STORE.connected_services = null
+      throw new Error('Picker Error')
+    }
   }
 
   function pickerCallback(data) {
@@ -60,17 +66,13 @@ var GDrive = function () {
 var gdrive = new GDrive()
 
 ;(function ($, gdrive, undefined) {
-  var default_service
-
   /**
    * Reads the store and returns the first selectable or first default or null
    *
    * @returns {*}
    */
   function tryToRefreshToken(service) {
-    return $.getJSON(
-      sprintf('/api/app/connected_services/%s/verify', service.id),
-    )
+    return getUserConnectedService(service.id)
   }
 
   function gdriveInitComplete() {
@@ -101,11 +103,12 @@ var gdrive = new GDrive()
     }
 
     tryToRefreshToken(default_service)
-      .done(function (data) {
+      .then(function (data) {
         APP.USER.upsertConnectedService(data.connected_service)
         gdrive.createPicker(data.connected_service)
       })
-      .fail(function () {
+      .catch(function () {
+        APP.USER.STORE.connected_services = null
         showPreferencesWithMessage()
       })
   }

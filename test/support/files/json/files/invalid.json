@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "name":"John Doe",
+  "orders":[
+    {
+      "id":1
+    },
+    {
+      "price":1.0
+    }
+  ]
+}

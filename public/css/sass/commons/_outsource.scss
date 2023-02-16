@@ -62,14 +62,10 @@
     -webkit-transition: all 0.3s ease;
   }
 
-  &.showOpenBox.transitionOutsource-enter.transitionOutsource-enter-active {
-    height: 612px;
-    -webkit-transition: all 0.3s ease;
-  }
-
   &.transitionOutsource-exit.transitionOutsource-exit-active {
     height: 0 !important;
     margin: 0 !important;
+    overflow: hidden;
     -webkit-transition: all 0.3s ease;
   }
 
