@@ -901,7 +901,7 @@ var getIconClass = function ( ext ) {
     }
 }
 
-window.onbeforeunload = async function ( e ) {
+window.onbeforeunload = function ( e ) {
 
     var leave_message = null;
     if ( $( '.popup-tm .notify' ).length ) {
@@ -926,13 +926,12 @@ window.onbeforeunload = async function ( e ) {
     //return works for Chrome and Safari
     //function in new-project.js this function does an ajax call to clean uploaded files when an user
     // refresh a page without click the analyze method
-
-    await clearNotCompletedUploads();
+    clearNotCompletedUploads();
 
     if ( leave_message != null ) {
         return leave_message;
     }
-    return null
+
 };
 
 $( document ).ready( function () {
