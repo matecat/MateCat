@@ -31,6 +31,7 @@ import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/
 import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
+import CatToolStore from '../../stores/CatToolStore'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -375,7 +376,9 @@ class Editarea extends React.Component {
         )
 
       if (
-        Array.isArray(qaBlacklistGlossary) && //qaBlacklistGlossary undefined only before the glossary response
+        //Condition to understand if the job has tm keys or if the check glossary request has been made (blacklist must take precedence over lexiqa)
+        (CatToolStore.getHaveKeysGlossary() === false ||
+          Array.isArray(qaBlacklistGlossary)) &&
         currentLexiqaTarget &&
         (!prevLexiqaTarget ||
           lexiqaChanged ||

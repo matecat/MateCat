@@ -45,7 +45,7 @@ USE `matecat`;
 
 DROP TABLE IF EXISTS `activity_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4mb4 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `activity_log` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `id_project` int(10) unsigned DEFAULT NULL,
@@ -1340,6 +1340,7 @@ CREATE TABLE `sequences`
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+
 -- Temporary view structure for view `show_clients`
 --
 
@@ -1556,8 +1557,12 @@ VALUES (11, 'MyMemory (<a href="https://guides.matecat.com/my" target="_blank">D
 "detect_language_url":"langdetect.php","glossary_check_relative_url":"v2/glossary/check","glossary_delete_relative_url":"v2/glossary/delete","glossary_domains_relative_url":"v2/glossary/domains","glossary_entry_status_relative_url":"v2/entry/status","glossary_export_relative_url":"v2/glossary/export","glossary_get_relative_url":"v2/glossary/get","glossary_import_relative_url":"v2/glossary/import","glossary_import_status_relative_url":"v2/import/status","glossary_keys_relative_url":"v2/glossary/keys","glossary_set_relative_url":"v2/glossary/set","glossary_update_relative_url":"v2/glossary/update","tmx_export_check_url":"tmx/export/check","tmx_export_create_url":"tmx/export/create","tmx_export_download_url":"tmx/export/download","tmx_export_email_url":"tmx/export/create","tmx_export_list_url":"tmx/export/list","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"tmx/status","tags_projection":"tags-projection"}',
         'MyMemory', '', '1', 0, 1, null);
 
-UPDATE engines SET id = 0 WHERE id = 10 ;
-UPDATE engines SET id = 1 WHERE id = 11 ;
+UPDATE engines
+SET id = 0
+WHERE id = 10;
+UPDATE engines
+SET id = 1
+WHERE id = 11;
 
 -- populate sequences
 INSERT INTO sequences (id_segment, id_project, id_dqf_project)

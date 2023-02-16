@@ -31,7 +31,7 @@ let ModalsActions = {
       team: team,
       hideChangeName: hideChangeName,
     }
-    this.showModalComponent(ModifyTeamModal, props, 'Modify Team')
+    this.showModalComponent(ModifyTeamModal, props, 'Manage Team')
   },
 
   openSplitJobModal: function (job, project, callback) {

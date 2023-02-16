@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "127e35efbd8994b1d57c2c14a090ebba",
+    "content-hash": "ff0f05b907a32b6c973d02bf901287a7",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.255.11",
+            "version": "3.257.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "e851af4d7d2d95b131db344430384ae7cc04758e"
+                "reference": "3c26d5d82120bcb8845f70f8f63c37cbc9d65b51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/e851af4d7d2d95b131db344430384ae7cc04758e",
-                "reference": "e851af4d7d2d95b131db344430384ae7cc04758e",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3c26d5d82120bcb8845f70f8f63c37cbc9d65b51",
+                "reference": "3c26d5d82120bcb8845f70f8f63c37cbc9d65b51",
                 "shasum": ""
             },
             "require": {
@@ -146,9 +146,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.255.11"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.257.11"
             },
-            "time": "2023-01-06T19:22:07+00:00"
+            "time": "2023-01-30T19:45:18+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -431,16 +431,16 @@
         },
         {
             "name": "google/auth",
-            "version": "v1.19.0",
+            "version": "v1.19.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "31e5d24d5fa0eaf6adc7e596292dc4732f4b60c5"
+                "reference": "6017af0f86f6c6dc1336a42ba790760172f41460"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/31e5d24d5fa0eaf6adc7e596292dc4732f4b60c5",
-                "reference": "31e5d24d5fa0eaf6adc7e596292dc4732f4b60c5",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/6017af0f86f6c6dc1336a42ba790760172f41460",
+                "reference": "6017af0f86f6c6dc1336a42ba790760172f41460",
                 "shasum": ""
             },
             "require": {
@@ -483,9 +483,9 @@
             "support": {
                 "docs": "https://googleapis.github.io/google-auth-library-php/main/",
                 "issues": "https://github.com/googleapis/google-auth-library-php/issues",
-                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.19.0"
+                "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.19.1"
             },
-            "time": "2022-03-24T21:22:45+00:00"
+            "time": "2023-01-26T22:02:48+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -1027,16 +1027,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.103",
+            "version": "v1.0.104",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "7096f480f67f89223695544a6b07c93f7b6e5e38"
+                "reference": "95179ae5a5ea042670913c017673f4010878d175"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/7096f480f67f89223695544a6b07c93f7b6e5e38",
-                "reference": "7096f480f67f89223695544a6b07c93f7b6e5e38",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/95179ae5a5ea042670913c017673f4010878d175",
+                "reference": "95179ae5a5ea042670913c017673f4010878d175",
                 "shasum": ""
             },
             "require": {
@@ -1086,9 +1086,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.103"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.104"
             },
-            "time": "2023-01-05T16:41:41+00:00"
+            "time": "2023-01-31T16:03:48+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -4008,7 +4008,9 @@
         "ext-pdo_mysql": "*",
         "ext-posix": "*",
         "ext-zip": "*",
-        "ext-fileinfo": "*"
+        "ext-fileinfo": "*",
+        "ext-mbstring": "*",
+        "ext-zlib": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.2.0"

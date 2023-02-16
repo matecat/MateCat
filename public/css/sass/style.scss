@@ -2107,23 +2107,15 @@ section.opened {
 .editarea,
 .search-editarea,
 .textarea-container .area {
-  /*display: inline-block;*/
-  /*float:right;*/
   width: 100%;
-  //height: 96%;
   min-height: 54px;
   resize: none;
-  //overflow: hidden;
   margin: 2px 0 0px -11px;
   padding: 5px;
   color: #4d4d4f;
   border: 1px solid transparent;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  word-wrap: break-word;
-  word-break: normal;
-  hyphens: auto;
-  -moz-hyphens: auto;
   transition: all 50ms ease-in;
   -webkit-transition: all 50ms ease-in;
 }
@@ -2140,10 +2132,6 @@ section.ice-locked:not(.segment-selected) .text {
 body section:not(.editor).ice-locked {
   background: #dde0e4 !important;
 }
-
-/*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
-/*background-color: rgba(99, 157, 94, 0.1) !important;*/
-/*}*/
 
 .ice-locked-icon > button {
   padding: 4px;
