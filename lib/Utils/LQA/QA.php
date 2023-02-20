@@ -2529,9 +2529,9 @@ class QA {
                 return true;
             }
 
-            $sizeRestriction = new SizeRestriction( $text, $limit->meta_value, $this->featureSet );
+            $sizeRestriction = new SizeRestriction( $text, $this->featureSet );
 
-            return $sizeRestriction->checkLimit();
+            return $sizeRestriction->checkLimit($limit->meta_value);
         }
 
         return true;
