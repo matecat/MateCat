@@ -188,7 +188,12 @@ class FastAnalysis extends AbstractDaemon {
                         self::_updateProject( $pid, ProjectStatus::STATUS_NOT_TO_ANALYZE );
                         //next project
                         continue;
-                    } elseif ( $e->getCode() == self::ERR_500 || $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
+                    } elseif ( $e->getCode() == self::ERR_500 ) {
+                        self::_updateProject( $pid, ProjectStatus::STATUS_NOT_TO_ANALYZE );
+                        //next project
+                        continue;
+                    } elseif ( $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
+                        // NOTE: This exception code is NO MORE used ( keep the code to remember how to reset the status )
                         self::_TimeStampMsg( $e->getMessage() );
                         self::_updateProject( $pid, ProjectStatus::STATUS_NEW );
                         self::$queueHandler->getRedisClient()->del( [ '_fPid:' . $pid ] );
@@ -330,10 +335,8 @@ class FastAnalysis extends AbstractDaemon {
             throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 504 ) { //Gateway time out
             throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
-        } elseif ( $result->responseStatus == 500 ) { // temporary error - retry
+        } elseif ( $result->responseStatus == 500 || $result->responseStatus == 502 ) { // server error, could depend on request
             throw new Exception( "MyMemory Internal Server Error. Pid: " . $pid, self::ERR_500 );
-        } elseif ( !empty( $fastSegmentsRequest ) && empty( $result->responseData ) ) { // temporary error - retry
-            throw new Exception( "MyMemory Fast Analysis Failed. Pid: " . $pid, self::ERR_EMPTY_RESPONSE );
         }
 
         return $result;
