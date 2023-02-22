@@ -19,8 +19,13 @@ class CJKLangUtils
         preg_match_all(self::JAPANESE_REGEX, $string, $japaneseMatches);
         preg_match_all(self::KOREAN_REGEX, $string, $korenMatches);
 
-        $count = $count + count($japaneseMatches[0]);
-        $count = $count + count($korenMatches[0]);
+        foreach($japaneseMatches[0] as $japaneseMatch){
+            $count = $count + (strlen($japaneseMatch)-1);
+        }
+
+        foreach($korenMatches[0] as $korenMatch){
+            $count = $count + (strlen($korenMatch)-1);
+        }
 
         return $count;
     }
