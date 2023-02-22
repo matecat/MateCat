@@ -13,6 +13,7 @@ use API\V2\KleinController;
 use CatUtils;
 use Langs_Languages;
 use LQA\SizeRestriction;
+use Matecat\SubFiltering\MateCatFilter;
 
 
 class CountWordController extends KleinController {
@@ -41,10 +42,11 @@ class CountWordController extends KleinController {
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
         $words_count = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
-        $size_restriction = new SizeRestriction($this->request->text, $this->featureSet);
+        $filter = MateCatFilter::getInstance($this->featureSet);
+        $size_restriction = new SizeRestriction($filter->fromLayer0ToLayer2($this->request->text), $this->featureSet);
 
         $character_count = [
-            'length' => $size_restriction->getCleanedStringLength(),
+            'length' =>  $size_restriction->getCleanedStringLength(),
         ];
 
         if(isset($this->request->limit) and is_numeric($this->request->limit)){
