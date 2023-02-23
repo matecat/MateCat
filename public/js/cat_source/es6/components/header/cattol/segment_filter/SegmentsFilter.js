@@ -553,7 +553,7 @@ class SegmentsFilter extends React.Component {
                         ref={(button) => (this.unlockIce = button)}
                         onClick={(event) => this.unlockAllSegments(event)}
                       >
-                        Unlock All filtered segments
+                        Unlock all filtered segments
                       </button>
                     </div>
                   ) : null}
