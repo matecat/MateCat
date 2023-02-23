@@ -74,8 +74,15 @@ class LanguageSelectorSearch extends React.Component {
     const {removeLanguageWithIconTag} = this
     const {highlightDelete} = this.state
     const {selectedLanguages} = this.props
-    let {tag, key, disabled, classNameRemove, getTagDisplayValue, ...other} =
-      props
+    let {
+      tag,
+      key,
+      disabled,
+      classNameRemove,
+      getTagDisplayValue,
+      onRemove,
+      ...other
+    } = props
     const highlight =
       highlightDelete && key + 1 === selectedLanguages.length
         ? 'highlightDelete'

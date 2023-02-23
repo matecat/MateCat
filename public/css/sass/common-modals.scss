@@ -730,6 +730,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   /* Modal Body */
   .matecat-modal-body {
     min-height: 50px;
+    height: 100%;
     /*color: #000;*/
     background-color: $grey5;
     border-radius: 0 0 4px 4px;
@@ -1190,7 +1191,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       }
       &.team {
         .item {
-          padding: 5px 10px;
+          padding: 5px 5px 5px 0;
+
           &:hover {
             .mini.ui.button.right.floated {
               display: inherit;
@@ -1222,24 +1224,25 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             font-size: 14px;
             color: $grey1;
           }
-          .content.pending-msg,
-          .content.invite-sent-msg {
+          .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
             color: $grey1;
-            margin-top: 13px;
+            white-space: nowrap;
           }
 
           .mini.ui.button.right.floated {
             margin-top: 6px;
             border: 1px solid #797979;
-            display: none;
+            display: inherit;
             border-radius: 2px;
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
               sans-serif;
             font-size: 14px;
             padding: 6px 15px;
             background-color: #f6f6f6;
+            white-space: nowrap;
+
             &:hover {
               box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -1278,6 +1281,25 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             vertical-align: bottom;
             border: 1px solid #797979;
             border-radius: 2px;
+          }
+        }
+
+        .pending-invitation {
+          display: flex;
+          align-items: center;
+
+          .email {
+            padding-left: 0.5em;
+          }
+
+          .mini.ui.button.right.floated {
+            margin-top: 0;
+          }
+
+          > :last-child {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
           }
         }
       }
@@ -1435,12 +1457,67 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     .ui.members-list {
       //min-height: 180px;
       min-height: initial !important;
+
       .ui.divided.list {
-        max-height: 210px;
+        height: 210px;
         .item:first-child {
           //border-top: none !important;
         }
       }
+    }
+
+    .search-member-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin: 8px 0;
+      border-radius: 4px;
+      padding: 6px;
+      font-size: 15px;
+      color: black;
+      transition: 0.6s;
+
+      > svg {
+        margin-right: 8px;
+        color: $grey6;
+      }
+
+      > input {
+        width: 100%;
+        background: unset;
+        outline: none;
+        border: none;
+
+        &::placeholder {
+          color: $grey6;
+        }
+      }
+
+      &:hover {
+        background-color: white;
+      }
+
+      .reset_button {
+        display: flex;
+        cursor: pointer;
+        margin-right: 2px;
+
+        > svg {
+          color: $grey6;
+        }
+      }
+      .reset_button--hidden {
+        visibility: hidden;
+      }
+      .reset_button--visible {
+        visibility: visible;
+      }
+    }
+
+    .no-result {
+      font-size: 14px;
+      color: #666666;
+      padding: 7px;
     }
   }
   .change-team-modal {

@@ -5,6 +5,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 import TooltipInfo from '../segments/TooltipInfo/TooltipInfo.component'
 import SegmentActions from '../../actions/SegmentActions'
+import {CookieConsent} from '../common/CookieConsent'
 
 const transformStats = (stats) => {
   let reviewWordsSecondPass
@@ -286,6 +287,7 @@ export const CattolFooter = ({
           </div>
         )}
       </div>
+      <CookieConsent />
     </footer>
   )
 }

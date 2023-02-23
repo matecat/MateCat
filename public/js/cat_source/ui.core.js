@@ -1,25 +1,20 @@
 import _ from 'lodash'
-import React, {useEffect} from 'react'
+import React from 'react'
 import Cookies from 'js-cookie'
-import {createRoot} from 'react-dom/client'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
-import {getLocalWarnings} from './es6/api/getLocalWarnings'
 import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
-import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
 import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
@@ -616,8 +611,8 @@ window.UI = {
 
     setTranslation(requestArgs)
       .then((data) => {
-        var idSegment = options.id_segment
-        var index = UI.executingSetTranslation.indexOf(idSegment)
+        const idSegment = options.id_segment
+        const index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)
         }
@@ -636,19 +631,20 @@ window.UI = {
         }
       })
       .catch(({errors}) => {
+        const idSegment = options.id_segment
+        const index = UI.executingSetTranslation.indexOf(idSegment)
+        if (index > -1) {
+          UI.executingSetTranslation.splice(index, 1)
+        }
         if (errors && errors.length) {
           this.processErrors(errors, 'setTranslation')
         } else {
-          var idSegment = options.id_segment
-          var index = UI.executingSetTranslation.indexOf(idSegment)
-          if (index > -1) {
-            UI.executingSetTranslation.splice(index, 1)
-          }
           UI.addToSetTranslationTail(options)
           OfflineUtils.changeStatusOffline(idSegment)
           OfflineUtils.failedConnection(reqArguments, 'setTranslation')
           OfflineUtils.decrementOfflineCacheRemaining()
         }
+        SegmentActions.setSegmentSaving(id_segment, false)
       })
   },
 
@@ -725,7 +721,9 @@ window.UI = {
         ModalsActions.showModalComponent(
           AlertModal,
           {
-            text: this.message,
+            text:
+              'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
+              'Please edit the segment first if you want to change its status to "Translated".',
           },
           'Error',
         )

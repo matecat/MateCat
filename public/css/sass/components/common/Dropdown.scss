@@ -144,6 +144,12 @@
   }
 }
 
+.container__dropdown__list {
+  transition: height 0.2s ease;
+  height: 0;
+  overflow: hidden;
+}
+
 // Options list
 .dropdown__list {
   margin: 0;

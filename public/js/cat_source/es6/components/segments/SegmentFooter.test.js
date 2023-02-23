@@ -332,6 +332,12 @@ const executeMswServer = () => {
           }),
         )
       }),
+      rest.post('/api/app/glossary/_keys', (req, res, ctx) => {
+        return res(ctx.status(200), ctx.json({}))
+      }),
+      rest.post('/api/app/glossary/_domains', (req, res, ctx) => {
+        return res(ctx.status(200), ctx.json({}))
+      }),
     ],
   )
 }
@@ -428,10 +434,10 @@ test('Click tab', async () => {
     </SegmentContext.Provider>,
   )
 
-  userEvent.click(screen.getByTestId('concordances'))
-  await waitFor(() => {
-    expect(screen.getByTestId('concordances')).toHaveClass('active')
-  })
+  await act(
+    async () => await userEvent.click(screen.getByTestId('concordances')),
+  )
+  expect(screen.getByTestId('concordances')).toHaveClass('active')
 })
 
 test('Move to next tab with keyboard shortcut', async () => {

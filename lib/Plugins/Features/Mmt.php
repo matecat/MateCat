@@ -100,8 +100,6 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
-        $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-
         try {
 
             $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();

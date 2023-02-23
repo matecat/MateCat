@@ -3,6 +3,7 @@
 namespace API\App;
 
 use API\V2\KleinController;
+use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
 use Validator\JSONValidatorObject;
@@ -226,6 +227,13 @@ class GlossaryController extends KleinController {
         if(isset($json['target_language']) and isset($json['source_language'])){
             $this->validateLanguage($json['target_language']);
             $this->validateLanguage($json['source_language']);
+
+            // handle source and target
+            if(isset($json['source']) and isset($json['target'])){
+                $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $json['source_language'], $json['target_lang'], [] );
+                $json['source'] = $filter->fromLayer1ToLayer2( $json['source'] );
+                $json['target'] = $filter->fromLayer1ToLayer2( $json['target'] );
+            }
         }
 
         if(isset($json['term']['target_language']) and isset($json['term']['source_language'])){

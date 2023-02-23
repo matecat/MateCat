@@ -39,25 +39,10 @@
 
 
 <body class="analyze">
-
-<header>
-</header>
-
-<div class="project-list" id="analyze-container"></div>
-
-<!-- END DIV POPUP-SPLIT -->
-
-<div class="notifications-wrapper"></div>
-<!-- START FOOTER -->
-<!--<footer>
-
-</footer>-->
-<!-- END FOOTER -->
-
-
-
-<!-- FINE POPUP LOGIN -->
-<div metal:use-macro="cookiebanner.html/cookieBanner"/>
+<div class="analyze-page">
+    <header>
+    </header>
+</div>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 

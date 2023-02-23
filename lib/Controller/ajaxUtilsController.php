@@ -31,7 +31,7 @@ class ajaxUtilsController extends ajaxController {
         switch ( $this->__postInput[ 'exec' ] ) {
 
             case 'ping':
-                $db = Database::obtain();
+                $db   = Database::obtain();
                 $stmt = $db->getConnection()->prepare( "SELECT 1" );
                 $stmt->execute();
                 $this->result[ 'data' ] = [ "OK", time() ];
@@ -63,20 +63,9 @@ class ajaxUtilsController extends ajaxController {
             case 'clearNotCompletedUploads':
                 try {
                     ConnectedServices\GDrive\Session::cleanupSessionFiles();
-                    if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
-                        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
-                    }
                 } catch ( Exception $e ) {
                     Log::doJsonLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() );
                 }
-                CookieManager::setCookie( "upload_session", null,
-                        [
-                                'expires' => -1,
-                                'path'    => '/',
-                                'domain'  => INIT::$COOKIE_DOMAIN
-                        ]
-                );
-                unset( $_COOKIE[ 'upload_session' ] );
                 break;
 
         }
