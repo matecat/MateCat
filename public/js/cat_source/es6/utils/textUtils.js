@@ -528,11 +528,9 @@ const TEXT_UTILS = {
       }
     }, [])
   },
-
-  charactersCounterValue: {
-    cjk: 2,
-    emoji: 2,
-  },
+  getCharsSize: (value) => value.length * 1,
+  getCJKCharsSize: (value) => new Blob([value]).size,
+  getEmojiCharsSize: (value) => new Blob([value]).size,
   getCJKMatches: (value) => {
     const regex =
       /[\u3041-\u3096\u30A0-\u30FF\u3400-\u4DB5\u4E00-\u9FCB\uF900-\uFA6A\u2E80-\u2FD5\uFF5F-\uFF9F\u3000-\u303F\u31F0-\u31FF\u3220-\u3243\u3280-\u337F\uFF01-\uFF5E\u3130-\u318F\uAC00-\uD7AF]/g
@@ -540,10 +538,12 @@ const TEXT_UTILS = {
     const result = []
 
     while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
       result.push({
-        match: match[0],
+        match: char,
         index: match.index,
-        counterValue: TEXT_UTILS.charactersCounterValue.cjk,
+        length: char.length,
+        size: TEXT_UTILS.getCJKCharsSize(char),
       })
     }
 
@@ -555,10 +555,12 @@ const TEXT_UTILS = {
     const result = []
 
     while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
       result.push({
-        match: match[0],
+        match: char,
         index: match.index,
-        counterValue: TEXT_UTILS.charactersCounterValue.emoji,
+        length: char.length,
+        size: TEXT_UTILS.getEmojiCharsSize(char),
       })
     }
 

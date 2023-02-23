@@ -3775,7 +3775,10 @@ class EmojiUtils
         $count = 0;
 
         preg_match_all(self::regex(), $string, $emojiMatches);
-        $count = $count + count($emojiMatches[0]);
+
+        foreach($emojiMatches[0] as $emojiMatch){
+            $count = $count + (strlen($emojiMatch)-1);
+        }
 
         return $count;
     }
