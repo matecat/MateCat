@@ -533,27 +533,28 @@ class Utils {
      */
     public static function deleteDir( $dirPath ) {
 
-        $iterator = new DirectoryIterator( $dirPath );
+        if(is_dir($dirPath)){
+            $iterator = new DirectoryIterator( $dirPath );
 
-        foreach ( $iterator as $fileInfo ) {
-            if ( $fileInfo->isDot() ) {
-                continue;
-            }
-            if ( $fileInfo->isDir() ) {
-                self::deleteDir( $fileInfo->getPathname() );
-            } else {
-                $fileName = $fileInfo->getFilename();
-                if ( $fileName[0] == '.' ) {
+            foreach ( $iterator as $fileInfo ) {
+                if ( $fileInfo->isDot() ) {
                     continue;
                 }
-                $outcome = unlink( $fileInfo->getPathname() );
-                if ( !$outcome ) {
-                    Log::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
+                if ( $fileInfo->isDir() ) {
+                    self::deleteDir( $fileInfo->getPathname() );
+                } else {
+                    $fileName = $fileInfo->getFilename();
+                    if ( $fileName[0] == '.' ) {
+                        continue;
+                    }
+                    $outcome = unlink( $fileInfo->getPathname() );
+                    if ( !$outcome ) {
+                        Log::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
+                    }
                 }
             }
+            rmdir( $iterator->getPath() );
         }
-        rmdir( $iterator->getPath() );
-
     }
 
     /**

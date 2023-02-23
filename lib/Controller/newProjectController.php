@@ -172,22 +172,23 @@ class newProjectController extends viewController {
     }
 
     private function setOrGetGuid() {
+
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $this->guid = Utils::createToken();
-            CookieManager::setCookie( "upload_session", $this->guid,
-                    [
-                            'expires'  => time() + 86400,
-                            'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
-                            'secure'   => true,
-                            'httponly' => true,
-                            'samesite' => 'None',
-                    ]
-            );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
+        if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+            Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
         }
+
+        $this->guid = Utils::createToken();
+        CookieManager::setCookie( "upload_session", $this->guid,
+                [
+                        'expires'  => time() + 86400,
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
 
     }
 
