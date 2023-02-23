@@ -319,7 +319,22 @@ class AnalyzeHeader extends React.Component {
   }
 
   downloadAnalysisReport() {
-    UI.downloadAnalysisReport()
+    var pid = config.id_project
+    var ppassword = config.password
+
+    var form =
+        '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
+        '				<input type=hidden name="action" value="downloadAnalysisReport">' +
+        '				<input type=hidden name="id_project" value="' +
+        pid +
+        '">' +
+        '				<input type=hidden name="password" value="' +
+        ppassword +
+        '">' +
+        '				<input type=hidden name="download_type" value="XTRF">' +
+        '			</form>'
+    $('body').append(form)
+    $('#downloadAnalysisReportForm').submit()
   }
 
   /**

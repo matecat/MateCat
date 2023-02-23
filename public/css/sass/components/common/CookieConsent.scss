@@ -1,0 +1,26 @@
+.cookiebanner {
+  position: relative;
+  left: 0px;
+  right: 0px;
+  height: auto;
+  min-height: 21px;
+  z-index: 2147483647;
+  background: rgb(0, 0, 0);
+  color: rgb(221, 221, 221);
+  line-height: 21px;
+  padding: 5px 16px;
+  font-family: arial, sans-serif;
+  font-size: 14px;
+  text-align: center;
+  bottom: 0px;
+  opacity: 1;
+  .cookiebanner-close {
+    float: right;
+    padding-left: 5px;
+    cursor: pointer;
+  }
+  a {
+    text-decoration: none;
+    color: rgb(170, 170, 170);
+  }
+}
