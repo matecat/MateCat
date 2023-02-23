@@ -616,8 +616,8 @@ window.UI = {
 
     setTranslation(requestArgs)
       .then((data) => {
-        var idSegment = options.id_segment
-        var index = UI.executingSetTranslation.indexOf(idSegment)
+        const idSegment = options.id_segment
+        const index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)
         }
@@ -636,19 +636,20 @@ window.UI = {
         }
       })
       .catch(({errors}) => {
+        const idSegment = options.id_segment
+        const index = UI.executingSetTranslation.indexOf(idSegment)
+        if (index > -1) {
+          UI.executingSetTranslation.splice(index, 1)
+        }
         if (errors && errors.length) {
           this.processErrors(errors, 'setTranslation')
         } else {
-          var idSegment = options.id_segment
-          var index = UI.executingSetTranslation.indexOf(idSegment)
-          if (index > -1) {
-            UI.executingSetTranslation.splice(index, 1)
-          }
           UI.addToSetTranslationTail(options)
           OfflineUtils.changeStatusOffline(idSegment)
           OfflineUtils.failedConnection(reqArguments, 'setTranslation')
           OfflineUtils.decrementOfflineCacheRemaining()
         }
+        SegmentActions.setSegmentSaving(id_segment, false)
       })
   },
 
@@ -725,7 +726,9 @@ window.UI = {
         ModalsActions.showModalComponent(
           AlertModal,
           {
-            text: this.message,
+            text:
+              'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
+              'Please edit the segment first if you want to change its status to "Translated".',
           },
           'Error',
         )
