@@ -104,8 +104,6 @@ class Chunk extends \API\V2\Json\Chunk {
             $blacklistWordsCount = $abstractBlacklist->getWordsCount();
         }
 
-        $standardAnalysisWc = \Chunks_ChunkDao::getStandardWordCount($chunk->id, $chunk->password);
-
         $result = [
                 'id'                      => (int)$chunk->id,
                 'password'                => $chunk->password,
@@ -130,8 +128,8 @@ class Chunk extends \API\V2\Json\Chunk {
                 'outsource'               => $outsource,
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$chunk->total_raw_wc,
-                'standard_wc'             => $standardAnalysisWc,
-                'blacklist_word_count'     => $blacklistWordsCount,
+                'standard_wc'             => (float)$chunk->standard_analysis_wc,
+                'blacklist_word_count'    => $blacklistWordsCount,
         ];
 
         if ( $featureSet->hasRevisionFeature() ) {
