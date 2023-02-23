@@ -433,7 +433,7 @@ class SegmentsFilter extends React.Component {
                     className="ui top left pointing dropdown basic tiny button"
                     ref={(dropdown) => (this.filtersDropdown = dropdown)}
                   >
-                    <div className="text">Filters</div>
+                    <div className="text">Others</div>
                     <div className="ui cancel label">
                       <i
                         className="icon-cancel3"
@@ -531,7 +531,7 @@ class SegmentsFilter extends React.Component {
                 <div className="clear-filter-element">
                   <div className="clear-filter">
                     <button href="#" onClick={this.clearClick.bind(this)}>
-                      Clear all
+                      Clear all filters
                     </button>
                   </div>
                   {this.state.filteredCount > 0 ? (
@@ -541,7 +541,7 @@ class SegmentsFilter extends React.Component {
                         ref={(button) => (this.selectAllButton = button)}
                         onClick={(event) => this.selectAllSegments(event)}
                       >
-                        Select All
+                        Select all filtered segments
                       </button>
                     </div>
                   ) : null}
@@ -553,7 +553,7 @@ class SegmentsFilter extends React.Component {
                         ref={(button) => (this.unlockIce = button)}
                         onClick={(event) => this.unlockAllSegments(event)}
                       >
-                        Unlock All
+                        Unlock all filtered segments
                       </button>
                     </div>
                   ) : null}
