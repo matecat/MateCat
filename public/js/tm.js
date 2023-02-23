@@ -20,6 +20,7 @@ import ShareTmModal from './cat_source/es6/components/modals/ShareTmModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
+import TEXT_UTILS from './cat_source/es6/utils/textUtils'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -1467,16 +1468,23 @@ import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
       }
     },
     filterInactiveTM: function (txt) {
-      $('#inactivetm tbody tr').removeClass('found')
-      $(
-        '#inactivetm tbody td.privatekey:contains("' +
-          txt +
-          '"), #inactivetm tbody td.description:contains("' +
-          txt +
-          '")',
+      const inactiveItems = Array.from(
+        document.getElementById('inactivetm')?.getElementsByClassName('list')[0]
+          ?.children,
       )
-        .parents('tr')
-        .addClass('found')
+      inactiveItems.forEach((item) => {
+        const description = item
+          .getElementsByClassName('description')[0]
+          .getElementsByClassName('edit-desc')[0]
+          .getAttribute('data-descr')
+
+        const regex = new RegExp(TEXT_UTILS.escapeRegExp(txt), 'gi')
+        if (regex.test(description)) {
+          item.classList.add('found')
+        } else {
+          item.classList.remove('found')
+        }
+      })
     },
     showMTDeletingMessage: function (button) {
       var tr = button.closest('tr')

@@ -72,4 +72,15 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     public static function getByIdProjectAndIdJob( $id_project, $id_job, $ttl = 0 ) {
         return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl, new Chunks_ChunkStruct() );
     }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param int $ttl
+     * @return float|null
+     */
+    public static function getStandardWordCount($id_job, $password, $ttl = 86400)
+    {
+        return Jobs_JobDao::getStandardWordCount($id_job, $password, $ttl);
+    }
 }
