@@ -19,8 +19,10 @@ test('works properly', async () => {
     userEvent.type(elInput, 'something')
   })
 
-  setTimeout(() => expect(elInput).toHaveValue('something'), 200)
-  expect(screen.queryByTestId('reset-button')).not.toBeInTheDocument()
+  await waitFor(() => {
+    expect(elInput).toHaveValue('something')
+    expect(screen.queryByTestId('reset-button')).not.toBeInTheDocument()
+  })
 
   await waitFor(() => {
     expect(onFieldChanged).toHaveBeenCalledTimes(1)

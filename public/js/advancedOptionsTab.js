@@ -4,6 +4,7 @@ import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 import Speech2Text from './cat_source/es6/utils/speech2text'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
+import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -42,9 +43,7 @@ import SegmentActions from './cat_source/es6/actions/SegmentActions'
         var LXQContainer = $('.options-box.qa-box')
         var acceptedLanguagesLXQ = config.lexiqa_languages.slice()
         if (acceptedLanguagesLXQ.indexOf(config.source_rfc) === -1) {
-          notAcceptedLanguages.push(
-            $('#source-lang').dropdown('get text').text(),
-          )
+          notAcceptedLanguages.push(CreateProjectStore.getSourceLangName())
         }
         if (acceptedLanguagesLXQ.indexOf(config.target_rfc) === -1) {
           try {

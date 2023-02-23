@@ -172,22 +172,23 @@ class newProjectController extends viewController {
     }
 
     private function setOrGetGuid() {
+
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $this->guid = Utils::createToken();
-            CookieManager::setCookie( "upload_session", $this->guid,
-                    [
-                            'expires'  => time() + 86400,
-                            'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
-                            'secure'   => true,
-                            'httponly' => true,
-                            'samesite' => 'None',
-                    ]
-            );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
+        if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+            Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
         }
+
+        $this->guid = Utils::createToken();
+        CookieManager::setCookie( "upload_session", $this->guid,
+                [
+                        'expires'  => time() + 86400,
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
 
     }
 
@@ -255,7 +256,7 @@ class newProjectController extends viewController {
                         'class' => $info[ 2 ]
                 ];
             }
-            $val = array_chunk( $val, 12 );
+            $val = array_chunk( $val, 1 );
 
             $ret[ $key ] = $val;
         }
@@ -279,7 +280,7 @@ class newProjectController extends viewController {
         $this->template->page             = 'home';
         $this->template->source_languages = $source_languages;
         $this->template->target_languages = $target_languages;
-        $this->template->subjects         = $this->subjectArray;
+        $this->template->subjects         = json_encode($this->subjectArray);
 
         $this->template->mt_engines         = $this->mt_engines;
         $this->template->conversion_enabled = !empty( INIT::$FILTERS_ADDRESS );

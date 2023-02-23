@@ -4,17 +4,15 @@ import {createRoot} from 'react-dom/client'
 import React from 'react'
 
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
-import CatToolActions from './cat_source/es6/actions/CatToolActions'
-import Header from './cat_source/es6/components/header/Header'
-import LanguageSelector from './cat_source/es6/components/languageSelector/LanguageSelector'
-import TeamsStore from './cat_source/es6/stores/TeamsStore'
-import TeamConstants from './cat_source/es6/constants/TeamConstants'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 import {createProject} from './cat_source/es6/api/createProject'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
+import NewProject from './cat_source/es6/pages/NewProject'
+import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
+import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
 APP.openOptionsPanel = function (tab, elem) {
   var elToClick = $(elem).attr('data-el-to-click') || null
@@ -81,55 +79,16 @@ APP.changeSourceLang = function (lang) {
   }
 }
 
-APP.displayCurrentTargetLang = function () {
-  var currentLangs = localStorage.getItem('currentTargetLang')
-  if (currentLangs.indexOf(',') === -1) {
-    $('#target-lang').dropdown(
-      'set selected',
-      localStorage.getItem('currentTargetLang'),
-    )
-  } else {
-    currentLangs = currentLangs
-      .split(',')
-      .map((e) => config.languages_array.filter((i) => i.code === e)[0])
-    var direction = 'ltr' // todo: this not work. Check rtl from array
-    var op =
-      '<div id="extraTarget" class="item active selected" data-selected="selected" data-direction="' +
-      direction +
-      '" data-value="' +
-      currentLangs.map((e) => e.code) +
-      '">' +
-      currentLangs.map((e) => e.name) +
-      '</div>'
-    $('#extraTarget').remove()
-    $('#target-lang div.item').first().before(op)
-    setTimeout(function () {
-      $('#target-lang').dropdown(
-        'set selected',
-        currentLangs.map((e) => e.code),
-      )
-    })
-  }
-}
-
-APP.displayCurrentSourceLang = function () {
-  $('#source-lang').dropdown(
-    'set selected',
-    localStorage.getItem('currentSourceLang'),
-  )
-}
-
 /**
  * Disable/Enable languages for LexiQA
  *
  */
-APP.checkForLexiQALangs = function () {
+APP.checkForLexiQALangs = function (source) {
   var acceptedLanguages = config.lexiqa_languages.slice()
   var LXQCheck = $('.options-box.qa-box')
   var notAcceptedLanguages = []
   var targetLanguages = localStorage.getItem('currentTargetLang').split(',')
-  var sourceAccepted =
-    acceptedLanguages.indexOf($('#source-lang').dropdown('get value')) > -1
+  var sourceAccepted = acceptedLanguages.indexOf(source.code) > -1
   var targetAccepted =
     targetLanguages.filter(function (n) {
       if (acceptedLanguages.indexOf(n) === -1) {
@@ -142,7 +101,7 @@ APP.checkForLexiQALangs = function () {
     }).length > 0
 
   if (!sourceAccepted) {
-    notAcceptedLanguages.push($('#source-lang').dropdown('get text'))
+    notAcceptedLanguages.push(source.name)
   }
 
   LXQCheck.find('.onoffswitch').off('click')
@@ -174,13 +133,13 @@ APP.checkForLexiQALangs = function () {
  * Disable/Enable languages for LexiQA
  *
  */
-APP.checkForTagProjectionLangs = function () {
+APP.checkForTagProjectionLangs = function (source) {
   if ($('.options-box #tagp_check').length == 0) return
 
   var acceptedLanguages = config.tag_projection_languages
   var tpCheck = $('.options-box.tagp')
-  var sourceLanguageCode = $('#source-lang').dropdown('get value')
-  var sourceLanguageText = $('#source-lang').dropdown('get text')
+  var sourceLanguageCode = source.code
+  var sourceLanguageText = source.name
   var languageCombinations = []
   var notSupportedCouples = []
 
@@ -191,9 +150,7 @@ APP.checkForTagProjectionLangs = function () {
       var elem = {}
       elem.targetCode = value
       elem.sourceCode = sourceLanguageCode
-      elem.targetName = $(
-        $('#target-lang div[data-value="' + value + '"]')[0],
-      ).text()
+      elem.targetName = CommonUtils.getLanguageNameFromLocale(value)
       elem.sourceName = sourceLanguageText
       languageCombinations.push(elem)
     })
@@ -256,18 +213,21 @@ APP.getDQFParameters = function () {
   return dqf
 }
 
-APP.getCreateProjectParams = function () {
+APP.getCreateProjectParams = function ({
+  projectName,
+  sourceLang,
+  targetLang,
+  jobSubject,
+  selectedTeam,
+}) {
   var dqf = APP.getDQFParameters()
   return {
     action: 'createProject',
     file_name: APP.getFilenameFromUploadedFiles(),
-    project_name: $('#project-name').val(),
-    source_lang: $('#source-lang').dropdown('get value'),
-    target_lang: $('#target-lang').dropdown('get value'),
-    job_subject: $('#project-subject').dropdown('get value'),
-    disable_tms_engine: $('#disable_tms_engine').prop('checked')
-      ? $('#disable_tms_engine').val()
-      : false,
+    project_name: projectName,
+    source_lang: sourceLang,
+    target_lang: targetLang,
+    job_subject: jobSubject,
     mt_engine: $('.mgmt-mt .activemt').data('id'),
     private_keys_list: UI.extractTMdataFromTable(),
     lang_detect_files: UI.skipLangDetectArr,
@@ -282,7 +242,7 @@ APP.getCreateProjectParams = function () {
       $('#tagp_check').prop('checked') && !$('#tagp_check').prop('disabled')
     ),
     segmentation_rule: $('#segm_rule').val(),
-    id_team: UI.UPLOAD_PAGE.getSelectedTeam(),
+    id_team: selectedTeam,
     dqf: dqf.dqfEnabled,
     dqf_content_type: dqf.dqf_content_type,
     dqf_industry: dqf.dqf_industry,
@@ -378,401 +338,37 @@ APP.checkForDqf = function () {
 
 UI.UPLOAD_PAGE = {}
 
-// workaround hide dropdown tab navigation
-const getInputElement = function () {
-  return this.getElementsByClassName('menu-dropdown')[0].getElementsByTagName(
-    'input',
-  )[0]
-}
-const onTabKeyDown = (e) => {
-  if (e.key.toLowerCase() === 'tab') {
-    const elements = [
-      document.getElementById('project-team'),
-      document.getElementById('source-lang'),
-      document.getElementById('target-lang'),
-      document.getElementById('project-subject'),
-      document.getElementById('tmx-select'),
-    ]
-
-    elements.forEach((element) => {
-      if (!element) return
-      const input = getInputElement.call(element)
-      if (
-        element.classList.contains('visible') &&
-        element.classList.contains('active') &&
-        document.activeElement &&
-        input === document.activeElement
-      ) {
-        $(element).dropdown('hide')
-      }
-    })
-  }
-}
-
 $.extend(UI.UPLOAD_PAGE, {
   init: function () {
-    this.checkLanguagesCookie()
-    this.checkGDriveEvents()
-    /**
-     * LexiQA language Enable/Disable
-     */
-    APP.checkForLexiQALangs()
-    /**
-     * Guess Tags language Enable/Disable
-     */
-    APP.checkForTagProjectionLangs()
-    /**
-     * SpeechToText language Enable/Disable
-     */
-    APP.checkForSpeechToText()
-    APP.checkForDqf()
-    this.render()
     this.addEvents()
-    $('#activetm').on('update', this.checkTmKeys)
-    $('#activetm').on('removeTm', this.disableTmKeysFromSelect)
-    $('#activetm').on('deleteTm', this.deleteTMFromSelect)
   },
 
-  render: function () {
-    const headerMountPoint = createRoot($('header')[0])
-    if (config.isLoggedIn) {
-      headerMountPoint.render(
-        React.createElement(Header, {
-          showFilterProjects: false,
-          showModals: false,
-          showLinks: true,
-          user: APP.USER.STORE,
-        }),
-      )
-      TeamsStore.addListener(TeamConstants.UPDATE_USER, () => {
-        this.initDropdowns()
-      })
-
-      setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 2000)
-    } else {
-      headerMountPoint.render(
-        React.createElement(Header, {
-          showSubHeader: false,
-          showModals: false,
-          loggedUser: false,
-          showLinks: true,
-        }),
-      )
-      this.initDropdowns()
-    }
-  },
-
-  initDropdowns: function () {
-    var self = this
-    $('#tmx-select').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      useLabels: false,
-      message: {
-        count: '{count} Private TMs',
-        noResults: 'No TMs found.',
-      },
-      onAdd: function (value) {
-        self.selectTm(value)
-      },
-      onRemove: function (removedValue) {
-        self.disableTm(removedValue)
-        setTimeout(self.checkMailDropDownValueSelected, 100)
-      },
-    })
-
-    $('#add-tmx-option').on('click', function () {
-      UI.openLanguageResourcesPanel('tm')
-    })
-
-    $('#project-subject').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-    })
-
-    $('#project-team').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      onChange: function (value) {
-        APP.setTeamInStorage(value)
-      },
-    })
-
-    var selectedTeam = APP.getLastTeamSelected(APP.USER.STORE.teams)
-    if (selectedTeam) {
-      $('#project-team').dropdown('set selected', selectedTeam.id)
-    } else {
-      $('#project-team').dropdown(
-        'set selected',
-        $('#project-team .menu .item:first-child').data('value'),
-      )
-    }
-
-    $('#project-subject').dropdown('set selected', 'general')
-
-    $('.tmx-select .tm-info-title .icon').popup({
-      html:
-        "<div style='text-align: left'>By updating MyMemory, you are contributing to making Matecat better " +
-        'and helping fellow Matecat users improve their translations.</br></br>' +
-        'For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel.</div>',
-      position: 'bottom center',
-    })
-
-    // add keydown listener workaround hide dropdown tab navigation
-    window.removeEventListener('keydown', onTabKeyDown)
-    window.addEventListener('keydown', onTabKeyDown)
-  },
-
-  checkLanguagesCookie: function () {
-    if (!localStorage.getItem('currentTargetLang')) {
-      APP.changeTargetLang(config.currentSourceLang)
-    }
-
-    if (!localStorage.getItem('currentSourceLang')) {
-      APP.changeSourceLang(config.currentTargetLang)
-    }
-
-    APP.displayCurrentTargetLang()
-    APP.displayCurrentSourceLang()
-  },
-
-  checkGDriveEvents: function () {
-    var cookie = Cookies.get('gdrive_files_to_be_listed')
-    if (cookie) {
-      APP.tryListGDriveFiles()
-    }
-  },
-
-  selectTm: function (value) {
-    var tmElem = $(
-      '.mgmt-table-tm #inactivetm tr.mine[data-key=' +
-        value +
-        '] .activate input',
-    )
-    if (tmElem.length > 0) {
-      $(tmElem).trigger('click')
-    }
-    setTimeout(function () {
-      UI.UPLOAD_PAGE.setTMName()
-    })
-  },
-
-  disableTm: function (value) {
-    var tmElem = $(
-      '.mgmt-table-tm #activetm tr.mine[data-key=' +
-        value +
-        '] .activate input',
-    )
-    if (tmElem.length > 0) {
-      $(tmElem).trigger('click')
-    }
-    setTimeout(function () {
-      UI.UPLOAD_PAGE.setTMName()
-    })
-  },
-
-  checkMailDropDownValueSelected: function () {
-    var values = $('#tmx-select').dropdown('get value')
-    if (values.length === 0) {
-      $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM')
-    }
-  },
-
-  setTMName: function () {
-    if (
-      $('#tmx-select').dropdown('get value').indexOf(',') === -1 &&
-      $('#tmx-select').dropdown('get value').length > 0
-    ) {
-      var html = $('#tmx-select').find('div.item.active').html()
-      $('#tmx-select').dropdown('set text', html)
-    }
-  },
-
-  checkTmKeys: function (event, desc, key) {
-    var activeTm = $('#activetm .mine')
-    if (activeTm.length === 0) {
-      $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM')
-      $('#tmx-select').dropdown('remove selected', key)
-    } else {
-      var existingKey = $('#tmx-select').find(
-        'div.item[data-value=' + key + ']',
-      )
-      if (existingKey.length > 0) {
-        if (existingKey.hasClass('active')) {
-          return
-        } else {
-          $('#tmx-select').dropdown('set selected', key)
-        }
-      } else {
-        var html =
-          '<div class="item"  data-value="' +
-          key +
-          '">' +
-          '<span class="item-key-name">' +
-          desc +
-          '</span>' +
-          '<span class="item-key-id">' +
-          key +
-          '</span>' +
-          '<i class="icon-checkmark2 icon"></i>' +
-          '</div>'
-        $('#tmx-select div.item').first().before(html)
-        setTimeout(function () {
-          $('#tmx-select').dropdown('set selected', key)
-        })
-      }
-    }
-  },
-
-  disableTmKeysFromSelect: function (event, key) {
-    var existingKey = $('#tmx-select').find('div.item[data-value=' + key + ']')
-    if (existingKey.length > 0) {
-      if (existingKey.hasClass('active')) {
-        $('#tmx-select').dropdown('remove selected', key)
-      }
-    }
-  },
-
-  deleteTMFromSelect: function (event, key) {
-    if ($('#tmx-select').find('div.item[data-value=' + key + ']').length > 0) {
-      $('#tmx-select')
-        .find('div.item[data-value=' + key + ']')
-        .remove()
-      if ($('#tmx-select').dropdown('get value') == key) {
-        $('#tmx-select').dropdown('set text', 'MyMemory Collaborative TM')
-      }
-    }
-  },
-
-  getSelectedTeam: function () {
-    var selectedTeamId
-    if (config.isLoggedIn) {
-      //selectedTeamId = $('.team-dd').val();
-      selectedTeamId = $('#project-team').dropdown('get value')
-    }
-    return selectedTeamId
-  },
-
-  addEvents: function () {
-    $('.supported-file-formats').click(function (e) {
-      e.preventDefault()
-      $('.supported-formats').show()
-    })
-    $('.supported-formats .x-popup').click(function (e) {
-      e.preventDefault()
-      $('.supported-formats').hide()
-    })
-    $('.more-options-cont').on('click', function (e) {
-      e.preventDefault()
-      APP.openOptionsPanel('tm')
-    })
-
-    $('#target-lang').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      onChange: function () {
-        UI.UPLOAD_PAGE.targetLanguageChangedCallback()
-        APP.checkForLexiQALangs()
-        APP.checkForTagProjectionLangs()
-      },
-    })
-
-    $('#source-lang').dropdown({
-      selectOnKeydown: false,
-      fullTextSearch: 'exact',
-      onChange: function () {
-        UI.UPLOAD_PAGE.sourceLangChangedCallback()
-        APP.checkForLexiQALangs()
-        APP.checkForTagProjectionLangs()
-      },
-    })
-
-    $('#swaplang').click(function (e) {
-      e.preventDefault()
-      var src = $('#source-lang').dropdown('get value')
-      var trg = $('#target-lang').dropdown('get value')
-      if (trg.split(',').length > 1) {
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'Cannot swap languages when multiple target languages are selected!',
-          },
-          'Warning',
-        )
-        return false
-      }
-      $('#source-lang').dropdown('set selected', trg)
-      $('#target-lang').dropdown('set selected', src)
-
-      APP.changeTargetLang(src)
-
-      if ($('.template-download').length) {
-        if (UI.conversionsAreToRestart()) {
-          ModalsActions.showModalComponent(
-            AlertModal,
-            {
-              text: 'Source language changed. The files must be reimported.',
-              successCallback: () => UI.confirmRestartConversions(),
-            },
-            'Confirmation required',
-          )
-        }
-      } else if ($('.template-gdrive').length) {
+  restartConversions: function () {
+    if ($('.template-download').length) {
+      if (UI.conversionsAreToRestart()) {
         ModalsActions.showModalComponent(
           AlertModal,
           {
             text: 'Source language changed. The files must be reimported.',
-            successCallback: () => UI.confirmGDriveRestartConversions(),
+            successCallback: () => UI.confirmRestartConversions(),
           },
           'Confirmation required',
         )
       }
-    })
+    } else if ($('.template-gdrive').length) {
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'Source language changed. The files must be reimported.',
+          successCallback: () => UI.confirmGDriveRestartConversions(),
+        },
+        'Confirmation required',
+      )
+    }
+  },
 
-    $('input.uploadbtn').click(function () {
-      if (!$('.uploadbtn').hasClass('disabled')) {
-        if (!UI.allTMUploadsCompleted()) {
-          return false
-        }
-
-        $('body').addClass('creating')
-
-        $('.error-message').hide()
-        $('.uploadbtn')
-          .attr('value', 'Analyzing...')
-          .attr('disabled', 'disabled')
-          .addClass('disabled')
-
-        createProject(APP.getCreateProjectParams())
-          .then(({data}) => {
-            APP.handleCreationStatus(data.id_project, data.password)
-          })
-          .catch((errors) => {
-            let errorMsg
-            switch (errors[0].code) {
-              case -230: {
-                errorMsg =
-                  'Sorry, file name too long. Try shortening it and try again.'
-                break
-              }
-              case -235: {
-                errorMsg =
-                  'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
-                break
-              }
-              default:
-                errorMsg = errors[0].message
-            }
-            $('.error-message').find('p').text(errorMsg)
-            $('.error-message').show()
-            $('.uploadbtn').attr('value', 'Analyze')
-            $('body').removeClass('creating')
-          })
-      }
-    })
-
+  addEvents: function () {
+    //Error upload (??)
     $('.upload-table').on('click', 'a.skip_link', function () {
       var fname = decodeURIComponent($(this).attr('id').replace('skip_', ''))
 
@@ -790,107 +386,40 @@ $.extend(UI.UPLOAD_PAGE, {
         $('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus()
       }
     })
-
-    $('#add-multiple-lang').click(function (e) {
-      e.preventDefault()
-
-      var tlAr = $('#target-lang').dropdown('get value').split(',')
-      var sourceLang = $('#source-lang').dropdown('get value')
-      const mountPoint = createRoot($('#languageSelector')[0])
-      mountPoint.render(
-        React.createElement(LanguageSelector, {
-          selectedLanguagesFromDropdown: tlAr,
-          languagesList: config.languages_array,
-          fromLanguage: sourceLang,
-          onClose: function () {
-            mountPoint.unmount()
-          },
-          onConfirm: function (data) {
-            if (data) {
-              const str = data.map((e) => e.name).join(',')
-              const vals = data.map((e) => e.code).join(',')
-              var direction = 'ltr' // todo: this not work. Check rtl from array
-              var op =
-                '<div id="extraTarget" class="item" data-selected="selected" data-direction="' +
-                direction +
-                '" data-value="' +
-                vals +
-                '">' +
-                str +
-                '</div>'
-              $('#extraTarget').remove()
-              $('#target-lang div.item').first().before(op)
-              setTimeout(function () {
-                $('#target-lang').dropdown('set selected', vals)
-              })
-
-              $('.translate-box.target h2 .extra').remove()
-              $('.translate-box.target h2').append(
-                `<span class="extra">(${vals.length} languages)</span>`,
-              )
-            }
-            mountPoint.unmount()
-          },
-        }),
-      )
-    })
-
-    $('#disable_tms_engine').change(function () {
-      if (this.checked) {
-        $("input[id^='private-tm-']").prop('disabled', true)
-
-        // $("#create_private_tm_btn").addClass("disabled", true);
-      } else {
-        if (!$('#create_private_tm_btn[data-key]').length) {
-          $("input[id^='private-tm-']").prop('disabled', false)
-          $('#create_private_tm_btn').removeClass('disabled')
-        }
-      }
-    })
-
-    $('input, select').change(function () {
-      $('.error-message').hide()
-    })
-    $('input').keyup(function () {
-      $('.error-message').hide()
-    })
   },
-  sourceLangChangedCallback: function () {
-    APP.changeSourceLang($('#source-lang').dropdown('get value'))
-    if ($('.template-download').length) {
-      //.template-download is present when jquery file upload is used and a file is found
-      if (UI.conversionsAreToRestart()) {
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'Source language changed. The files must be reimported.',
-            successCallback: () => UI.confirmRestartConversions(),
-          },
-          'Confirmation required',
-        )
-      }
-      if (UI.checkTMXLangFailure()) {
-        UI.delTMXLangFailure()
-      }
-    } else if ($('.template-gdrive').length) {
+})
+
+APP.sourceLangChangedCallback = function () {
+  if ($('.template-download').length) {
+    //.template-download is present when jquery file upload is used and a file is found
+    if (UI.conversionsAreToRestart()) {
       ModalsActions.showModalComponent(
         AlertModal,
         {
           text: 'Source language changed. The files must be reimported.',
-          successCallback: () => UI.confirmGDriveRestartConversions(),
+          successCallback: () => UI.confirmRestartConversions(),
         },
         'Confirmation required',
       )
     }
-  },
-  targetLanguageChangedCallback: function () {
-    $('.translate-box.target h2 .extra').remove()
-    if (UI.checkTMXLangFailure()) {
-      UI.delTMXLangFailure()
-    }
-    APP.changeTargetLang($('#target-lang').dropdown('get value'))
-  },
-})
+  } else if ($('.template-gdrive').length) {
+    ModalsActions.showModalComponent(
+      AlertModal,
+      {
+        text: 'Source language changed. The files must be reimported.',
+        successCallback: () => UI.confirmGDriveRestartConversions(),
+      },
+      'Confirmation required',
+    )
+  }
+}
+
+APP.checkGDriveEvents = function () {
+  var cookie = Cookies.get('gdrive_files_to_be_listed')
+  if (cookie) {
+    APP.tryListGDriveFiles()
+  }
+}
 APP.handleCreationStatus = function (id_project, password) {
   projectCreationStatus(id_project, password)
     .then(({data, status}) => {
@@ -918,7 +447,7 @@ APP.postProjectCreation = function (d) {
   }
 
   if (typeof d.errors != 'undefined' && d.errors.length) {
-    $('.error-message').find('p').text('')
+    CreateProjectActions.hideErrors()
 
     $.each(d.errors, function () {
       switch (this.code) {
@@ -959,8 +488,7 @@ APP.postProjectCreation = function (d) {
       }
 
       //normal error management
-      $('.error-message').find('p').text(this.message)
-      $('.error-message').show()
+      CreateProjectActions.showError(this.message())
     })
 
     $('.uploadbtn').attr('value', 'Analyze')
@@ -995,10 +523,9 @@ APP.postProjectCreation = function (d) {
       if (Object.keys(d.target_language).length > 1) {
         //if multiple language selected show a job list
         d.files = []
-        d.trgLangHumanReadable = $('#target-lang')
-          .dropdown('get text')
-          .split(',')
-        d.srcLangHumanReadable = $('#source-lang').dropdown('get text')
+        d.trgLangHumanReadable =
+          CreateProjectStore.getTargetLangsNames.split(',')
+        d.srcLangHumanReadable = CreateProjectStore.getSourceLangName()
 
         $.each(d.target_language, function (idx, val) {
           d.files.push({
@@ -1069,6 +596,33 @@ APP.postProjectCreation = function (d) {
 $(document).ready(function () {
   UI.UPLOAD_PAGE.init()
   //TODO: REMOVE
+  let currentTargetLangs = localStorage.getItem('currentTargetLang')
+  let currentSourceLangs = localStorage.getItem('currentSourceLang')
+  if (!currentSourceLangs) {
+    currentSourceLangs = config.currentSourceLang
+  }
+  if (!currentTargetLangs) {
+    currentTargetLangs = config.currentTargetLang
+  }
+  const newProjectPage = document.getElementsByClassName('new_project__page')[0]
+  const rootNewProjectPage = createRoot(newProjectPage)
+  rootNewProjectPage.render(
+    <NewProject
+      isLoggedIn={config.isLoggedIn}
+      languages={config.languages_array.map((lang) => {
+        return {...lang, id: lang.code}
+      })}
+      sourceLanguageSelected={currentSourceLangs}
+      targetLanguagesSelected={currentTargetLangs}
+      subjectsArray={config.subject_array.map((item) => {
+        return {...item, id: item.key, name: item.display}
+      })}
+      conversionEnabled={config.conversionEnabled}
+      formatsNumber={config.formats_number}
+      googleDriveEnabled={config.googleDriveEnabled}
+    />,
+  )
+
   const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
   const root = createRoot(mountPoint)
   root.render(<NotificationBox />)

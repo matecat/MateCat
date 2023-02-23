@@ -8,6 +8,7 @@ import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
 import Header from '../header/Header'
 import {getUserData} from '../../api/getUserData'
+import {CookieConsent} from '../common/CookieConsent'
 
 class QualityReport extends React.Component {
   constructor(props) {
@@ -282,3 +283,8 @@ if (config.isLoggedIn) {
   )
   mountPoint.render(React.createElement(QualityReport))
 }
+
+const cookieBannerMountPoint = createRoot(
+  document.getElementsByTagName('footer')[0],
+)
+cookieBannerMountPoint.render(React.createElement(CookieConsent))
