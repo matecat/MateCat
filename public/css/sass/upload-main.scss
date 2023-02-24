@@ -97,8 +97,8 @@
   #project-subject,
   #source-lang,
   #target-lang,
-  #tmx-select{
-     width:164px;
+  #tmx-select {
+    width: 164px;
   }
   #target-lang {
     .multiple-none-text {
@@ -279,10 +279,6 @@
       .ui.multiple.search.dropdown > .text {
         width: 150px;
       }
-    }
-    .select-with-label__wrapper {
-      max-height: none !important;
-      overflow: hidden !important;
     }
     div#add-tmx-option:hover,
     div#add-multiple-lang:hover {
