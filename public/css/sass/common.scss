@@ -3256,6 +3256,15 @@ section.currSearchSegment mark.searchMarker {
   color: #39699a;
 }
 
+.fileformat span {
+  padding: 10px 0px 10px 40px;
+  margin: 5px 0 0 0;
+  width: 60px;
+  height: 35px;
+  float: left;
+  background-size: 25px !important;
+}
+
 .extdoc {
   background: url(../../img/matecat_file_icons.png) 6px 0 no-repeat !important;
 }
