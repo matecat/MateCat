@@ -13,11 +13,17 @@ class LanguageSelector extends React.Component {
       querySearch: '',
       filteredLanguages: [],
     }
+
+    this.listRef = React.createRef()
   }
 
   componentDidMount() {
     const {selectedLanguagesFromDropdown, languagesList, fromLanguage} =
       this.props
+    this.container.addEventListener(
+      'keydown',
+      this.listRef.current.navigateLanguagesList,
+    )
     document.addEventListener('keydown', this.keyHandler)
 
     this.setState({
@@ -32,6 +38,10 @@ class LanguageSelector extends React.Component {
   }
 
   componentWillUnmount() {
+    this.container.removeEventListener(
+      'keydown',
+      this.listRef.current.navigateLanguagesList,
+    )
     document.removeEventListener('keydown', this.keyHandler)
   }
 
@@ -62,10 +72,14 @@ class LanguageSelector extends React.Component {
     const {languagesList, onClose} = this.props
     const {selectedLanguages, querySearch, fromLanguage, filteredLanguages} =
       this.state
+
     return (
       <div
         id="matecat-modal-languages"
         className="matecat-modal"
+        ref={(el) => {
+          this.container = el
+        }}
         onClick={onClose}
       >
         <div className="matecat-modal-content" onClick={preventDismiss}>
@@ -113,6 +127,7 @@ class LanguageSelector extends React.Component {
             </div>
 
             <LanguageSelectorList
+              ref={this.listRef}
               languagesList={languagesList}
               selectedLanguages={selectedLanguages}
               querySearch={querySearch}
@@ -248,7 +263,8 @@ class LanguageSelector extends React.Component {
     if (keyCode === 27) {
       onClose()
     }
-    if (event.ctrlKey && event.key === 'Enter') {
+
+    if (event.key === 'Enter' && !this.state.querySearch) {
       this.onConfirm()
     }
 
