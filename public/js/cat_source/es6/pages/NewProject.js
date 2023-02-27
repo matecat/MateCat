@@ -179,7 +179,10 @@ const NewProject = ({
       setErrors()
       setWarnings()
     }
-    const showError = (message) => setErrors(message)
+    const showError = (message) => {
+      setErrors(message)
+      setProjectSent(false)
+    }
 
     const showWarning = (message) => {
       setWarnings(message)
