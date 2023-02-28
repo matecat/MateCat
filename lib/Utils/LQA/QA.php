@@ -1622,21 +1622,36 @@ class QA {
      */
     protected function _checkTagPositions() {
 
+        // a custom check was already performed?
+        $customCheckTagPositions = $this->getFeatureSet()->filter( 'checkTagPositions', self::ERR_NONE, $this );
+
+        // if a custom check was already performed run this:
+        if($customCheckTagPositions !== true){
+            $this->performTagPositionCheck($this->source_seg, $this->target_seg);
+        }
+    }
+
+    /**
+     * @param $source
+     * @param $target
+     */
+    public function performTagPositionCheck($source, $target)
+    {
         // extract tag from source
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
+        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $source, $matches );
         $complete_malformedSrcStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
         $open_malformedXmlSrcStruct    = $matches[ 2 ];
         $closing_malformedXmlSrcStruct = $matches[ 3 ];
 
         // extract tag from target
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $target, $matches );
         $complete_malformedTrgStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
         $open_malformedXmlTrgStruct    = $matches[ 2 ];
         $closing_malformedXmlTrgStruct = $matches[ 3 ];
 
         // extract self closing tags from source and target
-        preg_match_all( '#(<[^>]+/>)#', $this->source_seg, $selfClosingTags_src );
-        preg_match_all( '#(<[^>]+/>)#', $this->target_seg, $selfClosingTags_trg );
+        preg_match_all( '#(<[^>]+/>)#', $source, $selfClosingTags_src );
+        preg_match_all( '#(<[^>]+/>)#', $target, $selfClosingTags_trg );
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
 
