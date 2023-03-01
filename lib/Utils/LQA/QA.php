@@ -1634,8 +1634,10 @@ class QA {
     /**
      * @param $source
      * @param $target
+     * @param bool $performIdCheck
+     * @param bool $performTagPositionsCheck
      */
-    public function performTagPositionCheck($source, $target)
+    public function performTagPositionCheck($source, $target, $performIdCheck = true, $performTagPositionsCheck = true)
     {
         // extract tag from source
         preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $source, $matches );
@@ -1689,12 +1691,14 @@ class QA {
         $this->checkContentAndAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // check for id mismatch
-        $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        if($performIdCheck){
+            $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        }
 
         // check for warnings only if there are no errors
-        if( !$this->thereAreErrors() ){
+        if( !$this->thereAreErrors() and $performTagPositionsCheck ){
             $this->checkTagPositionsAndAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
             $this->checkTagPositionsAndAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
             $this->checkTagPositionsAndAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
