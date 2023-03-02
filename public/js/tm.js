@@ -639,7 +639,7 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         }
         var keyInactive = UI.checkTMKeyIsInactive(keyParam)
         if (keyInactive) {
-          this.activateInactiveKey(keyParam)
+          UI.selectTm(keyParam)
           return false
         }
         //Create the TM Key
