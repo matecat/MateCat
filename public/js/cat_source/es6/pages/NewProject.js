@@ -226,7 +226,7 @@ const NewProject = ({
     const activateKey = (event, desc, key) => {
       let tmSelected = tmKeys.find((item) => item.id === key)
       if (!tmSelected) {
-        tmSelected = {id: key, name: desc}
+        tmSelected = {id: key, name: desc, key}
         setTmKeys(tmKeys.concat(tmSelected))
       }
       if (!tmKeySelected.find((item) => item.id === key)) {
