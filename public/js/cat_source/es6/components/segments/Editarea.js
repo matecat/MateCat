@@ -1477,9 +1477,18 @@ class Editarea extends React.Component {
     if (editorState.getSelection().isCollapsed()) {
       return
     }
-    let selectedText = DraftMatecatUtils.getSelectedText(editorState)
-    selectedText = DraftMatecatUtils.formatText(selectedText, format)
-    const newEditorState = insertText(editorState, selectedText)
+
+    const selectionsText = DraftMatecatUtils.getSelectedTextWithoutEntities(
+      editorState,
+    ).map((selected) => ({
+      ...selected,
+      value: DraftMatecatUtils.formatText(selected.value, format),
+    }))
+    const newEditorState = DraftMatecatUtils.replaceMultipleText(
+      editorState,
+      selectionsText,
+    )
+
     this.setState(
       {
         editorState: newEditorState,
