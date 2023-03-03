@@ -16,10 +16,15 @@ const Footer = () => {
         </div>
         <div className="side-info">
           <div className="item">
-            <a href="/api/docs" target="_blank">
-              API
+            <a
+              href="https://site.matecat.com/terms/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Terms of service
             </a>
           </div>
+
           <div className="item">
             <a
               href="https://site.matecat.com/open-source/"
@@ -30,14 +35,25 @@ const Footer = () => {
             </a>
           </div>
           <div className="item">
-            <a
-              href="https://site.matecat.com/terms/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Terms
+            <a href="/api/docs" target="_blank">
+              API
             </a>
           </div>
+          <div className="item">
+            <a
+              href="mailto:support@matecat.com"
+              className="email-link"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Contact us
+            </a>
+          </div>
+        </div>
+        <div className="footer-logo">
+          <a href="https://www.translated.net" target="_blank">
+            <img src="public/img/matecat-logo-translated.svg" width="130" />
+          </a>
         </div>
       </div>
       <CookieConsent />
