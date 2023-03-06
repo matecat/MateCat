@@ -263,8 +263,7 @@ class SegmentFooterTabMatches extends React.Component {
       tpmMatches.forEach((match, index) => {
         const {memoryKey} = match
         const isOwnedKey = memoryKey ? this.isOwnerKey(memoryKey) : false
-        const isPublicTm =
-          match.cb === 'Public TM' || match.cb === 'Public_Corpora'
+        const isPublicTm = match.cb !== 'MT' && !memoryKey
         const trashIcon =
           match.disabled || (!isOwnedKey && !isPublicTm) ? (
             ''
