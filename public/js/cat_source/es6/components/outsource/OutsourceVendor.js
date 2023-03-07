@@ -854,6 +854,7 @@ class OutsourceVendor extends React.Component {
                   {!this.state.outsourceConfirmed ? (
                     <button
                       className="open-order ui green button"
+                      id="accept-outsource-quote"
                       onClick={this.sendOutsource.bind(this)}
                     >
                       Order now
@@ -861,6 +862,7 @@ class OutsourceVendor extends React.Component {
                   ) : !this.state.jobOutsourced ? (
                     <button
                       className="open-order ui green button"
+                      id="accept-outsource-quote"
                       onClick={this.sendOutsource.bind(this)}
                     >
                       Confirm
@@ -868,6 +870,7 @@ class OutsourceVendor extends React.Component {
                   ) : (
                     <button
                       className="open-outsourced ui button "
+                      id="accept-outsource-quote"
                       onClick={this.openOutsourcePage.bind(this)}
                     >
                       View status
