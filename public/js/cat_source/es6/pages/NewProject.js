@@ -92,13 +92,15 @@ const NewProject = ({
   }
 
   const getTmKeys = () => {
-    getTmKeysUser().then(({tm_keys}) =>
-      setTmKeys(
-        tm_keys.map((key) => {
-          return {...key, id: key.key}
-        }),
-      ),
-    )
+    if (config.isLoggedIn) {
+      getTmKeysUser().then(({tm_keys}) =>
+        setTmKeys(
+          tm_keys.map((key) => {
+            return {...key, id: key.key}
+          }),
+        ),
+      )
+    }
   }
 
   const createProject = () => {
