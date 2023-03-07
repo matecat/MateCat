@@ -689,6 +689,7 @@ class JobContainer extends React.Component {
     let label = (
       <a
         className="open-outsource buy-translation ui button"
+        id="open-quote-request"
         onClick={this.openOutsourceModal.bind(this, false, true)}
         data-testid="buy-translation-button"
       >
@@ -706,6 +707,7 @@ class JobContainer extends React.Component {
         label = (
           <a
             className="open-outsourced ui button "
+            id="open-quote-request"
             onClick={this.openOutsourceModal.bind(this, false, true)}
           >
             View status
@@ -741,6 +743,7 @@ class JobContainer extends React.Component {
 
       outsourceJobLabel = (
         <div
+          id="open-quote-request"
           className="job-to-translator"
           data-variation="tiny"
           ref={(tooltip) => (this.emailTooltip = tooltip)}
@@ -752,7 +755,10 @@ class JobContainer extends React.Component {
     } else {
       outsourceJobLabel = (
         <div className="job-to-translator not-assigned" data-variation="tiny">
-          <a onClick={this.openOutsourceModal.bind(this, true, false)}>
+          <a
+            id="open-quote-request"
+            onClick={this.openOutsourceModal.bind(this, true, false)}
+          >
             Assign job to translator
           </a>
         </div>

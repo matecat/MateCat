@@ -435,8 +435,6 @@ window.UI = {
 
             } else if ( fileSpecs.error ) {
                 disableAnalyze();
-                CreateProjectActions.showError('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).' )
-
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
                 $( '#add-files' ).addClass( 'disabled' );
                 $( '#add-files input' ).attr( 'disabled', 'disabled' );
