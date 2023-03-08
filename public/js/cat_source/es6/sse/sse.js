@@ -53,9 +53,21 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_get', function (ev, message) {
+      if (!Array.isArray(message.data.terms)) {
+        const trackingMessage = `Glossary GET terms is not Array: ${
+          message.data.terms
+        } / message: ${JSON.stringify(message)}`
+        CommonUtils.dispatchTrackingError(trackingMessage)
+      }
+
+      const terms = Array.isArray(message.data.terms) ? message.data.terms : []
+      const blacklistedTerms = Array.isArray(message.data.blacklisted_terms)
+        ? message.data.blacklisted_terms
+        : []
+
       SegmentActions.setGlossaryForSegment(message.data.id_segment, [
-        ...message.data.terms,
-        ...message.data.blacklisted_terms.map((term) => ({
+        ...terms,
+        ...blacklistedTerms.map((term) => ({
           ...term,
           isBlacklist: true,
         })),
