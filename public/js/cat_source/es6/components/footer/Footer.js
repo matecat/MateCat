@@ -17,7 +17,7 @@ const Footer = () => {
         <div className="side-info">
           <div className="item">
             <a
-              href="https://site.matecat.com/terms/"
+              href="https://site.matecat.com/terms"
               target="_blank"
               rel="noreferrer"
             >
@@ -27,7 +27,7 @@ const Footer = () => {
 
           <div className="item">
             <a
-              href="https://site.matecat.com/open-source/"
+              href="https://site.matecat.com/open-source"
               target="_blank"
               rel="noreferrer"
             >
