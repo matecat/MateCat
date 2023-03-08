@@ -1,6 +1,7 @@
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import CommonUtils from '../utils/commonUtils'
 
 let SSE = {
   init: function () {
@@ -209,7 +210,13 @@ let SSE = {
 let NOTIFICATIONS = {
   start: function () {
     SSE.init()
+    this.connectionStatus = {
+      connectionOpened: false,
+      connectionError: false,
+      messageReceived: false,
+    }
     this.source = SSE.getSource('notifications')
+
     this.addEvents()
   },
   restart: function () {
@@ -220,7 +227,8 @@ let NOTIFICATIONS = {
     var self = this
     this.source.addEventListener(
       'message',
-      function (e) {
+      (e) => {
+        this.connectionStatus.messageReceived = true
         var message = new SSE.Message(JSON.parse(e.data))
         if (message.isValid()) {
           $(document).trigger(message.eventIdentifier, message)
@@ -231,8 +239,16 @@ let NOTIFICATIONS = {
 
     this.source.addEventListener(
       'error',
-      function () {
+      () => {
         console.error('SSE: server disconnect')
+        let {connectionError} = this.connectionStatus
+        if (!connectionError) {
+          const {connectionOpened, connectionError, messageReceived} =
+            this.connectionStatus
+          const message = `SSE channel disconnect. Connection opened = ${connectionOpened} / Connection error = ${connectionError} / Some message received = ${messageReceived} `
+          CommonUtils.dispatchTrackingError(message)
+        }
+        this.connectionStatus.connectionError = true
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -241,6 +257,13 @@ let NOTIFICATIONS = {
             self.restart()
           }, 5000)
         }
+      },
+      false,
+    )
+    this.source.addEventListener(
+      'open',
+      () => {
+        this.connectionStatus.connectionOpened = true
       },
       false,
     )
