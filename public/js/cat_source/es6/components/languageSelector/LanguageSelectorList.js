@@ -11,14 +11,6 @@ class LanguageSelectorList extends React.Component {
   currentSelectedElementRef = null
   wrapperScrollRef = null
 
-  componentDidMount() {
-    document.addEventListener('keydown', this.navigateLanguagesList)
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.navigateLanguagesList)
-  }
-
   componentDidUpdate(prevProps) {
     const {scrollIfTagNavigationIsOverflow} = this
     scrollIfTagNavigationIsOverflow()
@@ -186,6 +178,7 @@ class LanguageSelectorList extends React.Component {
         //enter with 1 language filtered
         onToggleLanguage(filteredLanguages[position])
         onResetResults()
+        event.stopPropagation()
       }
     }
   }

@@ -43,7 +43,8 @@ import activateGlossary from './activateGlossary'
 import activateQaCheckGlossary from './activateQaCheckGlossary'
 import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
-// import tagFromString from "./tagFromString";
+import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
+import replaceMultipleText from './replaceMultipleText'
 
 const DraftMatecatUtils = {
   // Text utils
@@ -97,6 +98,8 @@ const DraftMatecatUtils = {
   activateQaCheckBlacklist,
   prepareTextForLexiqa,
   getCharactersCounter,
+  getSelectedTextWithoutEntities,
+  replaceMultipleText,
 }
 
 export default DraftMatecatUtils

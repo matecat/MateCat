@@ -9,6 +9,8 @@ import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import CommonUtils from '../../utils/commonUtils'
+import CatToolStore from '../../stores/CatToolStore'
+import CatToolConstants from '../../constants/CatToolConstants'
 
 class SegmentFooterTabMatches extends React.Component {
   constructor(props) {
@@ -16,11 +18,15 @@ class SegmentFooterTabMatches extends React.Component {
     this.suggestionShortcutLabel = 'CTRL+'
     this.processContributions = this.processContributions.bind(this)
     this.chooseSuggestion = this.chooseSuggestion.bind(this)
+    this.setJobTmKeys = this.setJobTmKeys.bind(this)
     SegmentActions.getContributions(
       this.props.segment.sid,
       this.props.fid,
       this.props.segment.segment,
     )
+    this.state = {
+      tmKeys: CatToolStore.getJobTmKeys(),
+    }
   }
 
   processContributions(matches) {
@@ -77,7 +83,7 @@ class SegmentFooterTabMatches extends React.Component {
         ),
       )
       item.sourceDiff = item.suggestionDecodedHtml
-
+      item.memoryKey = this.memory_key
       if (
         this.match !== 'MT' &&
         parseInt(this.match) > 70 &&
@@ -119,6 +125,20 @@ class SegmentFooterTabMatches extends React.Component {
     if (this.props.segment.sid === sid) {
       this.suggestionDblClick(this.props.segment.contributions, index)
     }
+  }
+  setJobTmKeys(keys) {
+    this.setState({tmKeys: keys})
+  }
+
+  isOwnerKey(key) {
+    const {tmKeys} = this.state
+    if (tmKeys && tmKeys.length > 0) {
+      const ownedKey = tmKeys.find(
+        (currentKey) => currentKey.key === key && currentKey.w === 1,
+      )
+      return !!ownedKey
+    }
+    return false
   }
 
   suggestionDblClick(match, index) {
@@ -185,6 +205,7 @@ class SegmentFooterTabMatches extends React.Component {
       SegmentConstants.CHOOSE_CONTRIBUTION,
       this.chooseSuggestion,
     )
+    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, this.setJobTmKeys)
   }
 
   componentWillUnmount() {
@@ -192,6 +213,10 @@ class SegmentFooterTabMatches extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.CHOOSE_CONTRIBUTION,
       this.chooseSuggestion,
+    )
+    CatToolStore.removeListener(
+      CatToolConstants.UPDATE_TM_KEYS,
+      this.setJobTmKeys,
     )
   }
 
@@ -204,7 +229,7 @@ class SegmentFooterTabMatches extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate(nextProps, nextState) {
     return (
       ((!_.isUndefined(nextProps.segment.contributions) ||
         !_.isUndefined(this.props.segment.contributions)) &&
@@ -215,7 +240,8 @@ class SegmentFooterTabMatches extends React.Component {
           ))) ||
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||
-      this.props.segment.unlocked !== nextProps.segment.unlocked
+      this.props.segment.unlocked !== nextProps.segment.unlocked ||
+      this.state.tmKeys !== nextState.tmKeys
     )
   }
 
@@ -234,17 +260,21 @@ class SegmentFooterTabMatches extends React.Component {
       let tpmMatches = this.processContributions(
         this.props.segment.contributions.matches,
       )
-      tpmMatches.forEach(function (match, index) {
-        var trashIcon = match.disabled ? (
-          ''
-        ) : (
-          <span
-            id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
-            className="trash"
-            title="delete this row"
-            onClick={self.deleteSuggestion.bind(self, match, index)}
-          />
-        )
+      tpmMatches.forEach((match, index) => {
+        const {memoryKey} = match
+        const isOwnedKey = memoryKey ? this.isOwnerKey(memoryKey) : false
+        const isPublicTm = match.cb !== 'MT' && !memoryKey
+        const trashIcon =
+          match.disabled || (!isOwnedKey && !isPublicTm) ? (
+            ''
+          ) : (
+            <span
+              id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
+              className="trash"
+              title="delete this row"
+              onClick={self.deleteSuggestion.bind(self, match, index)}
+            />
+          )
         var item = (
           <ul
             key={match.id}

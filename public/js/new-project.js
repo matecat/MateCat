@@ -7,7 +7,6 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
-import {createProject} from './cat_source/es6/api/createProject'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import NewProject from './cat_source/es6/pages/NewProject'
@@ -380,11 +379,6 @@ $.extend(UI.UPLOAD_PAGE, {
         $(this).remove()
       })
       $(parentTd_label).parent().removeClass('error')
-
-      //analyze button should be reactivated?
-      if ($('.upload-table td.error').length == 0) {
-        $('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus()
-      }
     })
   },
 })
@@ -483,16 +477,11 @@ APP.postProjectCreation = function (d) {
             }
           })
           break
-
-        default:
       }
 
       //normal error management
-      CreateProjectActions.showError(this.message())
+      CreateProjectActions.showError(this.message)
     })
-
-    $('.uploadbtn').attr('value', 'Analyze')
-    $('body').removeClass('creating')
   } else {
     //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
     //--> we don't want to delete the files on the upload directory
@@ -512,10 +501,6 @@ APP.postProjectCreation = function (d) {
           },
           'No text to translate',
         )
-        $('.uploadbtn')
-          .attr('value', 'Analyze')
-          .removeAttr('disabled')
-          .removeClass('disabled')
       } else {
         location.href = d.analyze_url
       }

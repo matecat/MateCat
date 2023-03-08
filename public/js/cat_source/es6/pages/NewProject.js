@@ -20,6 +20,7 @@ import {CreateProjectContext} from '../components/createProject/CreateProjectCon
 import {TargetLanguagesSelect} from '../components/createProject/TargetLanguagesSelect'
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
+import CommonUtils from '../utils/commonUtils'
 
 const SELECT_HEIGHT = 324
 
@@ -91,13 +92,15 @@ const NewProject = ({
   }
 
   const getTmKeys = () => {
-    getTmKeysUser().then(({tm_keys}) =>
-      setTmKeys(
-        tm_keys.map((key) => {
-          return {...key, id: key.key}
-        }),
-      ),
-    )
+    if (config.isLoggedIn) {
+      getTmKeysUser().then(({tm_keys}) =>
+        setTmKeys(
+          tm_keys.map((key) => {
+            return {...key, id: key.key}
+          }),
+        ),
+      )
+    }
   }
 
   const createProject = () => {
@@ -178,10 +181,12 @@ const NewProject = ({
       setErrors()
       setWarnings()
     }
-    const showError = (message) => setErrors(message)
+    const showError = (message) => {
+      setErrors(message)
+      setProjectSent(false)
+    }
 
     const showWarning = (message) => {
-      console.log('setWarnings-------------->', message)
       setWarnings(message)
     }
 
@@ -196,6 +201,13 @@ const NewProject = ({
       NewProjectConstants.SHOW_WARNING,
       showWarning,
     )
+
+    // check query string project name
+    const projectNameFromQuerystring =
+      CommonUtils.getParameterByName('project_name')
+    if (projectNameFromQuerystring)
+      projectNameRef.current.value = projectNameFromQuerystring
+
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -216,7 +228,7 @@ const NewProject = ({
     const activateKey = (event, desc, key) => {
       let tmSelected = tmKeys.find((item) => item.id === key)
       if (!tmSelected) {
-        tmSelected = {id: key, name: desc}
+        tmSelected = {id: key, name: desc, key}
         setTmKeys(tmKeys.concat(tmSelected))
       }
       if (!tmKeySelected.find((item) => item.id === key)) {

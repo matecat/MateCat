@@ -195,7 +195,7 @@ class QAModelTemplateController extends KleinController {
             $validator->validate($validatorObject);
 
             $errors = $validator->getErrors();
-            $code = ($validator->isValid()) ? 500 : 200;
+            $code = ($validator->isValid()) ? 200 : 500;
 
             $this->response->code($code);
             return $this->response->json([

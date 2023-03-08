@@ -541,6 +541,9 @@ class Editarea extends React.Component {
       onMouseUpEvent,
       onBlurEvent,
       onFocus,
+      onDragEvent,
+      onDragEnd,
+      onKeyUpEvent,
     } = this
 
     let lang = ''
@@ -572,10 +575,11 @@ class Editarea extends React.Component {
         onCut={copyFragment}
         onMouseUp={onMouseUpEvent}
         onBlur={onBlurEvent}
-        onDragStart={this.onDragEvent}
-        onDragEnd={this.onDragEnd}
-        onDrop={this.onDragEnd}
+        onDragStart={onDragEvent}
+        onDragEnd={onDragEnd}
+        onDrop={onDragEnd}
         onFocus={onFocus}
+        onKeyUp={onKeyUpEvent}
       >
         <Editor
           lang={lang}
@@ -838,6 +842,20 @@ class Editarea extends React.Component {
     toggleFormatMenu(
       !this.editor._latestEditorState.getSelection().isCollapsed(),
     )
+  }
+
+  onKeyUpEvent = (event) => {
+    if (
+      event.key === 'ArrowLeft' ||
+      event.key === 'ArrowRight' ||
+      event.key === 'ArrowUp' ||
+      event.key === 'ArrowDown'
+    ) {
+      const {toggleFormatMenu} = this.props
+      toggleFormatMenu(
+        !this.editor._latestEditorState.getSelection().isCollapsed(),
+      )
+    }
   }
 
   onBlurEvent = () => {
@@ -1459,9 +1477,18 @@ class Editarea extends React.Component {
     if (editorState.getSelection().isCollapsed()) {
       return
     }
-    let selectedText = DraftMatecatUtils.getSelectedText(editorState)
-    selectedText = DraftMatecatUtils.formatText(selectedText, format)
-    const newEditorState = insertText(editorState, selectedText)
+
+    const selectionsText = DraftMatecatUtils.getSelectedTextWithoutEntities(
+      editorState,
+    ).map((selected) => ({
+      ...selected,
+      value: DraftMatecatUtils.formatText(selected.value, format),
+    }))
+    const newEditorState = DraftMatecatUtils.replaceMultipleText(
+      editorState,
+      selectionsText,
+    )
+
     this.setState(
       {
         editorState: newEditorState,

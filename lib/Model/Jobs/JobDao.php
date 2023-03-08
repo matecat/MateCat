@@ -834,4 +834,33 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         return (int)$records[0]->total;
     }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param int $ttl
+     * @return float|null
+     */
+    public static function getStandardWordCount( $id_job, $password, $ttl = 86400 ) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( "
+            SELECT sum(standard_word_count) as standard_word_count 
+            FROM segment_translations st
+            join jobs j on j.id = st.id_job
+             where j.id = :id_job and j.password = :password
+        " );
+
+        $object = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $id_job,
+            'password' => $password,
+        ] )[0];
+
+        if($object === null){
+            return null;
+        }
+
+        return (float)$object->standard_word_count;
+    }
 }

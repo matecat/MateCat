@@ -1622,21 +1622,38 @@ class QA {
      */
     protected function _checkTagPositions() {
 
+        // a custom check was already performed?
+        $customCheckTagPositions = $this->getFeatureSet()->filter( 'checkTagPositions', self::ERR_NONE, $this );
+
+        // if a custom check was already performed run this:
+        if($customCheckTagPositions !== true){
+            $this->performTagPositionCheck($this->source_seg, $this->target_seg);
+        }
+    }
+
+    /**
+     * @param $source
+     * @param $target
+     * @param bool $performIdCheck
+     * @param bool $performTagPositionsCheck
+     */
+    public function performTagPositionCheck($source, $target, $performIdCheck = true, $performTagPositionsCheck = true)
+    {
         // extract tag from source
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
+        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $source, $matches );
         $complete_malformedSrcStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
         $open_malformedXmlSrcStruct    = $matches[ 2 ];
         $closing_malformedXmlSrcStruct = $matches[ 3 ];
 
         // extract tag from target
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $target, $matches );
         $complete_malformedTrgStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
         $open_malformedXmlTrgStruct    = $matches[ 2 ];
         $closing_malformedXmlTrgStruct = $matches[ 3 ];
 
         // extract self closing tags from source and target
-        preg_match_all( '#(<[^>]+/>)#', $this->source_seg, $selfClosingTags_src );
-        preg_match_all( '#(<[^>]+/>)#', $this->target_seg, $selfClosingTags_trg );
+        preg_match_all( '#(<[^>]+/>)#', $source, $selfClosingTags_src );
+        preg_match_all( '#(<[^>]+/>)#', $target, $selfClosingTags_trg );
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
 
@@ -1674,12 +1691,14 @@ class QA {
         $this->checkContentAndAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // check for id mismatch
-        $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        if($performIdCheck){
+            $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        }
 
         // check for warnings only if there are no errors
-        if( !$this->thereAreErrors() ){
+        if( !$this->thereAreErrors() and $performTagPositionsCheck ){
             $this->checkTagPositionsAndAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
             $this->checkTagPositionsAndAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
             $this->checkTagPositionsAndAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
@@ -2520,7 +2539,7 @@ class QA {
      */
     private function _filterCheckSizeRestriction( $segmentId, $text ) {
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION );
+        $limit = @Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ];
 
         if ( $limit ) {
 

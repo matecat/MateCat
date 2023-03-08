@@ -1275,7 +1275,7 @@ class ProjectManager {
 
             //get payable rates
             $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
-            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $projectStructure[ 'source_language' ], $target ) );
+            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $shortSourceLang, $shortTargetLang  ) );
 
             $password = $this->generatePassword();
 
