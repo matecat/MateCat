@@ -21,6 +21,8 @@ class TmKeyManagement_TmKeyManagement {
      */
     public static function getTmKeyStructure( $tmKey_arr = null ) {
         $tmKeyStruct = new TmKeyManagement_TmKeyStruct( $tmKey_arr );
+        $tmKeyStruct->complete_format = true;
+
         return $tmKeyStruct;
     }
 
