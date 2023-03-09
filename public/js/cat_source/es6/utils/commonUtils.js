@@ -550,6 +550,10 @@ const CommonUtils = {
     )
   },
   isAllowedLinkRedirect: () => false,
+  dispatchTrackingError: (message) => {
+    const event = new CustomEvent('track-error', {detail: message})
+    document.dispatchEvent(event)
+  },
 }
 
 const ParsedHash = function (hash) {
