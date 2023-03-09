@@ -487,7 +487,7 @@ class OutsourceVendor extends React.Component {
                 <div className="translator-details-box">
                   <div className="translator-no-found">
                     <p>
-                      Translated.net uses the <b>most qualified translator</b>{' '}
+                      Translated uses the <b>most qualified translator</b>{' '}
                       <br /> and{' '}
                       <b>
                         keeps using the same translator for your next projects.{' '}
