@@ -9,10 +9,8 @@ export const initFileUpload = async () => {
     return Promise.reject(res)
   }
   const response = await res.json()
-
-  if (response.errors) {
-    return Promise.reject(errors)
+  if (response?.errors) {
+    return Promise.reject(response.errors)
   }
-  const {...restData} = response
-  return restData
+  return response
 }

@@ -49,7 +49,6 @@ function SegmentsContainer({
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)
   const [onUpdateRow, setOnUpdateRow] = useState(undefined)
-  const [widthArea, setWidthArea] = useState(0)
   const [heightArea, setHeightArea] = useState(0)
   const [startIndex, setStartIndex] = useState(0)
   const [stopIndex, setStopIndex] = useState(0)
@@ -141,9 +140,9 @@ function SegmentsContainer({
           ? previousSegment.get('id_file')
           : 0
         const isFirstSegment =
-          files &&
-          SegmentUtils.getSegmentFileId(segment.toJS()) ===
-            files[0].first_segment
+          files?.length &&
+          parseInt(SegmentUtils.getSegmentFileId(segment.toJS())) ===
+            parseInt(files[0].first_segment)
         const fileDivHeight = isFirstSegment ? 60 : 75
         const collectionDivHeight = isFirstSegment ? 35 : 50
         if (previousFileId !== SegmentUtils.getSegmentFileId(segment.toJS())) {
@@ -240,7 +239,9 @@ function SegmentsContainer({
         collectionsTypeArray.indexOf(collectionType) === -1
       ) {
         let classes = isSideOpen ? 'slide-right' : ''
-        const isFirstSegment = files && segment.sid === files[0].first_segment
+        const isFirstSegment =
+          files?.length &&
+          parseInt(segment.sid) === parseInt(files[0].first_segment)
         classes = isFirstSegment ? classes + ' first-segment' : classes
         collectionTypeSeparator = (
           <div
@@ -673,7 +674,6 @@ function SegmentsContainer({
           align: scrollToParams.position,
         }}
         overscan={OVERSCAN}
-        width={widthArea}
         height={heightArea}
         onRender={(index) => {
           const props = getSegmentPropsBySid(essentialRows[index].id)
