@@ -19,8 +19,11 @@ $.extend(window.UI, {
     })
 
     // page content mount point
-    const mountPoint = createRoot($('.page-content')[0])
-    mountPoint.render(<CatTool />)
+    const targetPageContent = document.getElementsByClassName('page-content')[0]
+    if (targetPageContent) {
+      const mountPoint = createRoot(targetPageContent)
+      mountPoint.render(<CatTool />)
+    }
   },
   init: function () {
     this.isMac = navigator.platform == 'MacIntel' ? true : false
