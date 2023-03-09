@@ -893,6 +893,7 @@ window.UI = {
 
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
+    console.log(section)
     const projectCompletionCheck =
       config.project_completion_feature_enabled &&
       !config.isReview &&

@@ -1243,16 +1243,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       .toJS()
   },
   getSegmentChoosenContribution(sid) {
-    let seg = this.getSegmentById(sid)
-    let currContrIndex = seg.get('choosenSuggestionIndex')
-    if (currContrIndex) {
-      return seg
-        .get('contributions')
-        .get('matches')
-        .get(currContrIndex - 1)
-        .toJS()
-    }
-    return
+    const seg = this.getSegmentById(sid)
+    const currentIndex = seg.get('choosenSuggestionIndex')
+    const currentMatch = seg
+      .get('contributions')
+      .get('matches')
+      .get(currentIndex - 1)
+
+    return currentMatch?.toJS()
   },
   getGlobalWarnings() {
     return this._globalWarnings
