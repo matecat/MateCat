@@ -226,10 +226,11 @@ const NewProject = ({
   }, [])
   useEffect(() => {
     const activateKey = (event, desc, key) => {
-      let tmSelected = tmKeys.find((item) => item.id === key)
+      const prevTmKeys = tmKeys ?? []
+      let tmSelected = prevTmKeys.find((item) => item.id === key)
       if (!tmSelected) {
         tmSelected = {id: key, name: desc, key}
-        setTmKeys(tmKeys.concat(tmSelected))
+        setTmKeys(prevTmKeys.concat(tmSelected))
       }
       if (!tmKeySelected.find((item) => item.id === key)) {
         setTmKeySelected(tmKeySelected.concat([tmSelected]))
@@ -241,6 +242,7 @@ const NewProject = ({
     const removeKey = () => {
       getTmKeys()
     }
+
     $('#activetm').on('update', activateKey)
     $('#activetm').on('removeTm', deactivateKey)
     $('#activetm').on('deleteTm', removeKey)

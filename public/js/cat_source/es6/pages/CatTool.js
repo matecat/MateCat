@@ -235,7 +235,7 @@ function CatTool() {
                 reviewType={Review.type}
                 enableTagProjection={UI.enableTagProjection}
                 tagModesEnabled={UI.tagModesEnabled}
-                startSegmentId={UI.startSegmentId}
+                startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
               />
             </div>
