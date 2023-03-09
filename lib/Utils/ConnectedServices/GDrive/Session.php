@@ -430,6 +430,18 @@ class Session {
                 $this->deleteDirectory( $pathCache );
             }
 
+            $tempUploadedFileDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_session'];
+
+            /** @var DirectoryIterator $item */
+            foreach ($iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $tempUploadedFileDir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::SELF_FIRST ) as $item) {
+                $target = explode('__', $pathCache);
+                $hashFile = $file['fileHash']."|".end($target);
+
+                if($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile){
+                    unlink($item);
+                }
+            }
+
             unset( $this->session[ self::FILE_LIST ] [ $fileId ] );
 
             Log::doJsonLog( 'File ' . $fileId . ' removed.' );
