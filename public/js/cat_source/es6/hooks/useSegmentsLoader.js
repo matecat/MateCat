@@ -72,7 +72,7 @@ function useSegmentsLoader({
           )
             current.thereAreNoItemsAfter = true
         }
-        setResult({data, segmentIdValue, where: data.where})
+        setResult({data, segmentId: segmentIdValue, where: data.where})
       })
       .catch((errors) => {
         if (wasCleaned) return
