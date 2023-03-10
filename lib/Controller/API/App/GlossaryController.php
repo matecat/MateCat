@@ -97,10 +97,23 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        // mostrare solo le chiavi di cui sono owner!
+        $tmKeys = [];
+
+        foreach ($json['tmKeys'] as $tmKey){
+            if($tmKey['owner'] == true){
+                $tmKeys[] = $tmKey;
+            }
+        }
+
+        $json['tmKeys'] = $tmKeys;
+
         $params = [
                 'action' => 'get',
                 'payload' => $json,
         ];
+
+
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
