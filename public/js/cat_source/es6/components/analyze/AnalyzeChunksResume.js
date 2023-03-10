@@ -32,7 +32,9 @@ class AnalyzeChunksResume extends React.Component {
     let job = project.get('jobs').find((item) => {
       return item.get('id') == id
     })
-    ModalsActions.openSplitJobModal(job, project, ()=>window.location.reload())
+    ModalsActions.openSplitJobModal(job, project, () =>
+      window.location.reload(),
+    )
   }
 
   openMergeModal = (id) => (e) => {
@@ -42,7 +44,9 @@ class AnalyzeChunksResume extends React.Component {
     let job = this.props.project.get('jobs').find((item) => {
       return item.get('id') == id
     })
-    ModalsActions.openMergeModal(project.toJS(), job.toJS(), ()=>window.location.reload())
+    ModalsActions.openMergeModal(project.toJS(), job.toJS(), () =>
+      window.location.reload(),
+    )
   }
 
   thereIsChunkOutsourced = () => {
@@ -132,6 +136,7 @@ class AnalyzeChunksResume extends React.Component {
       <div
         className={'outsource-translation'}
         onClick={openOutsourceModal(index, chunk)}
+        id="open-quote-request"
       >
         <a>Buy Translation</a>
         <span>
@@ -555,7 +560,7 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   render() {
-    let showHideText = this.props.showAnalysis ?  'Show Details' :'Hide Details'
+    let showHideText = this.props.showAnalysis ? 'Show Details' : 'Hide Details'
     let iconClass = this.props.showAnalysis ? '' : 'open'
     let html = this.getResumeJobs()
     return (
