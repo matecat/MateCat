@@ -14,7 +14,6 @@ import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
-import CommonUtils from '../utils/commonUtils'
 
 function CatTool() {
   const [options, setOptions] = useState({})
@@ -136,9 +135,6 @@ function CatTool() {
         const firstFile = data.files[Object.keys(data.files)[0]]
         if (firstFile) {
           startSegmentIdRef.current = firstFile.segments[0].sid
-        } else {
-          const trackingMessage = `getSegments data: ${JSON.stringify(data)}`
-          CommonUtils.dispatchTrackingError(trackingMessage)
         }
       }
       // TODO: da verificare se serve: this.body.addClass('loaded')
