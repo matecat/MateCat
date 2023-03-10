@@ -327,9 +327,11 @@ class Session {
      * @return bool
      */
     public function hasFiles() {
-        return
-                isset( $this->session[ self::FILE_LIST ] )
-                && !empty( $this->session[ self::FILE_LIST ] );
+        return (isset( $this->session[ self::FILE_LIST ] ) and count($this->session[ self::FILE_LIST ]) > 0);
+
+//        return
+//                isset( $this->session[ self::FILE_LIST ] )
+//                && !empty( $this->session[ self::FILE_LIST ] );
     }
 
     /**
