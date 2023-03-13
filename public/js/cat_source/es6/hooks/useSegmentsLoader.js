@@ -73,7 +73,6 @@ function useSegmentsLoader({
           )
             current.thereAreNoItemsAfter = true
         }
-
         setResult({data, segmentId: segmentIdValue, where: data.where})
 
         // check files prop is empty and "where='center'" / send exception to Sentry
