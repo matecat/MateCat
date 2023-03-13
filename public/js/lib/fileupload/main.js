@@ -16,7 +16,6 @@ import {initFileUpload} from "../../cat_source/es6/api/initFileUpload";
 import {convertFileRequest} from "../../cat_source/es6/api/convertFileRequest";
 import CreateProjectStore from "../../cat_source/es6/stores/CreateProjectStore";
 import CreateProjectActions from "../../cat_source/es6/actions/CreateProjectActions";
-import { clearNotCompletedUploads } from '../../cat_source/es6/api/clearNotCompletedUploads';
 
 window.UI = null;
 
