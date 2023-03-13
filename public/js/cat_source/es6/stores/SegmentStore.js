@@ -700,19 +700,21 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       ? segment.get('glossary').toJS()
       : []
 
-    const updatedGlossary = [
-      ...addedTerms,
-      ...glossary
-        .filter(
-          ({term_id}) => !addedTerms.find((term) => term.term_id === term_id),
-        )
-        .map((term) => ({
-          ...term,
-          ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
-            missingTerm: false,
-          }),
-        })),
-    ]
+    const updatedGlossary = glossary.length
+      ? glossary
+          .map((term) => ({
+            ...term,
+            ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
+              missingTerm: false,
+            }),
+          }))
+          .map((term) => {
+            const matchedTerm = addedTerms.find(
+              ({term_id}) => term_id === term.term_id,
+            )
+            return matchedTerm ? matchedTerm : term
+          })
+      : addedTerms
 
     this._segments = this._segments.setIn(
       [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
