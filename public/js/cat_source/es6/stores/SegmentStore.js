@@ -1247,8 +1247,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     const currentIndex = seg.get('choosenSuggestionIndex')
     const currentMatch = seg
       .get('contributions')
-      .get('matches')
-      .get(currentIndex - 1)
+      ?.get('matches')
+      ?.get(currentIndex - 1)
 
     return currentMatch?.toJS()
   },

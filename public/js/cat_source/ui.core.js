@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import React from 'react'
 import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
@@ -12,7 +11,6 @@ import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
-import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
