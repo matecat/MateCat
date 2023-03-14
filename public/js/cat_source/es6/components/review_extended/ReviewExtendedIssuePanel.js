@@ -57,7 +57,6 @@ class ReviewExtendedIssuePanel extends React.Component {
 
     const deferredSubmit = () => {
       SegmentActions.setStatus(segment.sid, segment.fid, segment.status)
-      UI.currentSegment.data('modified', false)
       SegmentActions.submitIssue(this.context.segment.sid, issue)
         .then((data) => {
           this.setState({
