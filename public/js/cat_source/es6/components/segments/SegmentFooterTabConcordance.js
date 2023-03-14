@@ -8,10 +8,12 @@ import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
-import SegmentActions from '../../actions/SegmentActions'
 import {getConcordance} from '../../api/getConcordance'
+import {SegmentContext} from './SegmentContext'
 
 class SegmentFooterTabConcordance extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     let extended = false
@@ -172,6 +174,7 @@ class SegmentFooterTabConcordance extends React.Component {
     }
     return array
   }
+
   searchSubmit(event) {
     event ? event.preventDefault() : ''
     if (this.state.source.length > 0) {
@@ -236,6 +239,7 @@ class SegmentFooterTabConcordance extends React.Component {
   }
 
   render() {
+    const {clientConnected} = this.context
     let html = '',
       results = '',
       loadingClass = '',
@@ -306,7 +310,18 @@ class SegmentFooterTabConcordance extends React.Component {
       )
     }
 
-    return (
+    return !clientConnected ? (
+      <div
+        className={
+          'tab sub-editor ' +
+          this.props.active_class +
+          ' ' +
+          this.props.tab_class
+        }
+      >
+        <div className="engine-errors">SSE Channel Error</div>
+      </div>
+    ) : (
       <div
         key={'container_' + this.props.code}
         className={

@@ -82,7 +82,7 @@ function SegmentFooter() {
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
 
-  const {segment} = useContext(SegmentContext)
+  const {segment, clientConnected} = useContext(SegmentContext)
 
   const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
@@ -315,6 +315,7 @@ function SegmentFooter() {
   }, [message])
 
   const isInitTabLoading = ({code}) => {
+    if (!clientConnected) return true
     switch (code) {
       case 'tm':
         return (
@@ -448,10 +449,15 @@ function SegmentFooter() {
               {!isLoading && countResult ? ' (' + countResult + ')' : ''}
             </span>
           </a>
-        ) : (
+        ) : clientConnected ? (
           <a tabIndex="-1">
             {tab.label}
             <span className="loader loader_on" />
+          </a>
+        ) : (
+          <a tabIndex="-1">
+            {tab.label}
+            <i className="icon-warning2 icon" />
           </a>
         )}
       </li>

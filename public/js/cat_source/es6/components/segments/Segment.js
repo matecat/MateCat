@@ -14,8 +14,6 @@ import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
-import CatToolStore from '../../stores/CatToolStore'
-import CatToolConstants from '../../constants/CatToolConstants'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
@@ -107,7 +105,7 @@ class Segment extends React.Component {
 
       /************/
       UI.editStart = new Date()
-      if (config.id_client) {
+      if (this.props.clientConnected) {
         SegmentActions.getGlossaryForSegment({
           sid: this.props.segment.sid,
           fid: this.props.fid,
@@ -506,16 +504,6 @@ class Segment extends React.Component {
     }
   }
 
-  clientConnected = () => {
-    if (this.props.segment.opened) {
-      SegmentActions.getGlossaryForSegment({
-        sid: this.props.segment.sid,
-        fid: this.props.fid,
-        text: this.props.segment.segment,
-      })
-    }
-  }
-
   forceUpdateSegment(sid) {
     if (this.props.segment.sid === sid) {
       this.forceUpdate()
@@ -549,10 +537,6 @@ class Segment extends React.Component {
     SegmentStore.addListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
-    )
-    CatToolStore.addListener(
-      CatToolConstants.CLIENT_CONNECT,
-      this.clientConnected,
     )
 
     //Review
@@ -597,10 +581,7 @@ class Segment extends React.Component {
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
     )
-    CatToolStore.removeListener(
-      CatToolConstants.CLIENT_CONNECT,
-      this.clientConnected,
-    )
+
     //Review
     SegmentStore.removeListener(
       SegmentConstants.OPEN_ISSUES_PANEL,
@@ -618,7 +599,8 @@ class Segment extends React.Component {
       nextState.readonly !== this.state.readonly ||
       nextState.selectedTextObj !== this.state.selectedTextObj ||
       nextProps.sideOpen !== this.props.sideOpen ||
-      nextState.showActions !== this.state.showActions
+      nextState.showActions !== this.state.showActions ||
+      nextProps.clientConnected !== this.props.clientConnected
     )
   }
 
@@ -647,6 +629,13 @@ class Segment extends React.Component {
       clearTimeout(this.timeoutScroll)
       setTimeout(() => {
         SegmentActions.saveSegmentBeforeClose(this.props.segment)
+      })
+    }
+    if (!prevProps.clientConnected && this.props.clientConnected) {
+      SegmentActions.getGlossaryForSegment({
+        sid: this.props.segment.sid,
+        fid: this.props.fid,
+        text: this.props.segment.segment,
       })
     }
     return null
@@ -712,6 +701,8 @@ class Segment extends React.Component {
         removeSelection: this.removeSelection.bind(this),
         openSegment: this.openSegment,
         isReviewImproved: this.props.isReviewImproved,
+        clientConnected: this.props.clientConnected,
+        clientId: this.props.clientId,
       }
     }
 

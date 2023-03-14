@@ -61,6 +61,8 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
+  const [clientConnected, setClientConnected] = useState(false)
+  const [clientId, setClientId] = useState()
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -314,6 +316,11 @@ function SegmentsContainer({
       container === 'search' && setIsSearchBarOpen((prevState) => !prevState)
     const closeSubHeader = () => setIsSearchBarOpen(false)
 
+    const sseConnection = (clientId) => {
+      setClientConnected(!!clientId)
+      setClientId(clientId)
+    }
+
     const mousedownHandler = () =>
       (persistenceVariables.current.isUserDraggingCursor = true)
     const mouseupHandler = () =>
@@ -338,6 +345,7 @@ function SegmentsContainer({
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
     CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, toggleSearchBar)
     CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, closeSubHeader)
+    CatToolStore.addListener(CatToolConstants.CLIENT_CONNECT, sseConnection)
 
     document.addEventListener('mousedown', mousedownHandler)
     document.addEventListener('mouseup', mouseupHandler)
@@ -372,6 +380,10 @@ function SegmentsContainer({
       CatToolStore.removeListener(
         CatToolConstants.CLOSE_SUBHEADER,
         closeSubHeader,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.CLIENT_CONNECT,
+        sseConnection,
       )
 
       document.removeEventListener('mousedown', mousedownHandler)
@@ -685,6 +697,8 @@ function SegmentsContainer({
                   onChangeRowHeight,
                   ...essentialRows[index],
                   ...props,
+                  clientConnected,
+                  clientId,
                   ...(index === essentialRows.length - 1 && {
                     isLastRow: true,
                   }),
