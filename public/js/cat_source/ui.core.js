@@ -873,7 +873,6 @@ window.UI = {
     $('.temp-highlight-tags').remove()
 
     SegmentActions.removeClassToSegment(sid, 'modified')
-    UI.currentSegment.data('modified', false)
 
     UI.setTimeToEdit(segment.sid)
 
