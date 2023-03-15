@@ -33,7 +33,7 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
      *
      * NOTE: 604800 sec = 1 week
      *
-     * @return DataAccess_IDaoStruct|null
+     * @return array
      */
     public static function get($id_segment, $key, $ttl = 604800){
 
@@ -46,7 +46,7 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
             [ $id_segment, $key ]
         );
 
-        return (isset($data[0])) ? $data[0] : null;
+        return (!empty($data)) ? $data : [];
     }
 
     /**
