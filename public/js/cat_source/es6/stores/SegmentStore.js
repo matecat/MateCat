@@ -700,19 +700,21 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       ? segment.get('glossary').toJS()
       : []
 
-    const updatedGlossary = [
-      ...addedTerms,
-      ...glossary
-        .filter(
-          ({term_id}) => !addedTerms.find((term) => term.term_id === term_id),
-        )
-        .map((term) => ({
-          ...term,
-          ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
-            missingTerm: false,
-          }),
-        })),
-    ]
+    const updatedGlossary = glossary.length
+      ? glossary
+          .map((term) => ({
+            ...term,
+            ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
+              missingTerm: false,
+            }),
+          }))
+          .map((term) => {
+            const matchedTerm = addedTerms.find(
+              ({term_id}) => term_id === term.term_id,
+            )
+            return matchedTerm ? matchedTerm : term
+          })
+      : addedTerms
 
     this._segments = this._segments.setIn(
       [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
@@ -1247,8 +1249,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     const currentIndex = seg.get('choosenSuggestionIndex')
     const currentMatch = seg
       .get('contributions')
-      .get('matches')
-      .get(currentIndex - 1)
+      ?.get('matches')
+      ?.get(currentIndex - 1)
 
     return currentMatch?.toJS()
   },
@@ -1905,7 +1907,11 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
       )
       const current = SegmentStore.getCurrentSegment()
-      SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid)
+      if (current)
+        SegmentStore.emitChange(
+          SegmentConstants.SET_SEGMENT_TAGGED,
+          current.sid,
+        )
       break
     }
     case EditAreaConstants.EDIT_AREA_CHANGED:

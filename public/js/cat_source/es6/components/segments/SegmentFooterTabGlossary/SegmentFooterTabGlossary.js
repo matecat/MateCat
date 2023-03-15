@@ -350,23 +350,7 @@ export const SegmentFooterTabGlossary = ({
 
   useEffect(() => {
     if (!segment?.glossary_search_results) return
-    const orderedByUpdateDate = [...segment.glossary_search_results]
-      .sort((a, b) => {
-        if (a.term_id < b.term_id) {
-          return 1
-        } else {
-          return -1
-        }
-      })
-      .sort((a, b) => {
-        if (a.source.term > b.source.term) {
-          return 1
-        } else {
-          return -1
-        }
-      })
-    // console.log('----> segment glossary', orderedByUpdateDate)
-    setTerms(orderedByUpdateDate)
+    setTerms(segment.glossary_search_results)
     setIsLoading(false)
   }, [segment?.glossary_search_results])
 
