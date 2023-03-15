@@ -2539,7 +2539,7 @@ class QA {
      */
     private function _filterCheckSizeRestriction( $segmentId, $text ) {
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION );
+        $limit = @Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ];
 
         if ( $limit ) {
 
