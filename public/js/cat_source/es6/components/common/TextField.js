@@ -19,6 +19,9 @@ export default class TextField extends React.Component {
     if (this.props.text) {
       var event = new Event('input', {bubbles: true})
       this.input.dispatchEvent(event)
+
+      if (this.props.onFieldChanged)
+        this.props.onFieldChanged({target: {value: this.props.text}})
     }
   }
 

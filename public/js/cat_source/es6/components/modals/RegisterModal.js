@@ -121,6 +121,48 @@ class RegisterModal extends React.Component {
     }
   }
 
+  onKeyDown = (event) => {
+    const focusedElement = document.activeElement
+    const nextNodeName =
+      focusedElement.parentNode.nextSibling?.firstChild?.nodeName?.toLowerCase?.()
+
+    if (event.key === 'Tab') {
+      if (nextNodeName === 'input') {
+        focusedElement.parentNode.nextSibling.firstChild.focus()
+      } else {
+        const focusedElementNodeName = focusedElement.nodeName.toLowerCase()
+
+        if (focusedElementNodeName === 'a') {
+          // reset focus to first input
+          const firstInput = Array.from(this.formContainer.children).find(
+            (element) => element.firstChild.nodeName.toLowerCase() === 'input',
+          )
+          firstInput.firstChild.focus()
+        } else if (
+          focusedElementNodeName === 'input' &&
+          focusedElement.getAttribute('type') === 'password'
+        ) {
+          const termsAndCondition = this.formContainer.querySelector(
+            'input[name="terms"]',
+          )
+          termsAndCondition.focus()
+        } else {
+          const submitButton =
+            this.formContainer.getElementsByClassName('register-submit')[0]
+          submitButton.focus()
+        }
+      }
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('keyup', this.onKeyDown)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.onKeyDown)
+  }
+
   render() {
     var generalErrorHtml = ''
     if (this.state.generalError.length) {
@@ -135,6 +177,7 @@ class RegisterModal extends React.Component {
     }
     var loaderClass = this.state.requestRunning ? 'show' : ''
     var emailAddress = this.props.userMail ? this.props.userMail : ''
+
     return (
       <div className="register-modal">
         <a
@@ -156,7 +199,10 @@ class RegisterModal extends React.Component {
           <span>OR</span>
           <div className="divider-line"></div>
         </div>
-        <div className="register-form-container">
+        <div
+          className="register-form-container"
+          ref={(ref) => (this.formContainer = ref)}
+        >
           <h2>Register with your email</h2>
           <TextField
             showError={this.state.showErrors}
