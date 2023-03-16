@@ -224,7 +224,7 @@ export const Select = ({
     <div
       className={`select-with-label__wrapper ${className ? className : ''}`}
       ref={wrapperRef}
-      id={id? id: null}
+      id={id ? id : null}
     >
       <input type="hidden" name={`${name}-hidden`} value={inputValue} />{' '}
       {label && (

@@ -50,7 +50,11 @@ export const Dropdown = forwardRef(
       setListMaxHeight: (value) => {
         if (listRef?.current) {
           listRef.current.style.maxHeight = `${value}px`
-          listRef.current.parentElement.style.height = `${listRef.current.offsetHeight}px`
+          listRef.current.parentElement.style.height = `${
+            listRef.current.offsetHeight
+              ? listRef.current.offsetHeight + 'px'
+              : 'auto'
+          }`
           listRef.current.parentElement.ontransitionend = () =>
             (listRef.current.parentElement.style.height = 'auto')
         }
