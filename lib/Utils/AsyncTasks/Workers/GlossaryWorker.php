@@ -73,7 +73,7 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryCheck($payload['source'], $payload['target'], $payload['source_language'], $payload['target_language'], $payload['keys']);
         $matches = $response->matches;
 
-        if($matches['id_segment'] === null){
+        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
         }
@@ -195,7 +195,7 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
 
-        if($matches['id_segment'] === null){
+        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
         }
@@ -263,7 +263,7 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
 
-        if($matches['id_segment'] === null){
+        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
         }
