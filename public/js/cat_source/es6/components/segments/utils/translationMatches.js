@@ -1,7 +1,5 @@
 import _ from 'lodash'
 
-import TagUtils from '../../../utils/tagUtils'
-import TextUtils from '../../../utils/textUtils'
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'

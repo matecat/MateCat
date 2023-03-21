@@ -75,9 +75,6 @@ const createNewEntitiesFromMap = (
     brackets.push({offset: result.index})
   }
 
-  // Escape exceeding brackets
-  plainText = plainText.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
-
   if (brackets.length > 0) {
     offsetWithEntities.map((tag) => {
       const start = tag.start

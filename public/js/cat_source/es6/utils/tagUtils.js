@@ -12,8 +12,61 @@ const TAGS_UTILS = {
   // TODO: move it in another module
   // We need to send to BE the reverse (more or less) of what we receive in the getSegments (WHY??)
   // EX: From BE
-  prepareTextToSend: function (text) {
-    return TextUtils.view2rawxliff(text)
+  prepareTextToSend: function (tx) {
+    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+    tx = tx
+      .replace(/</g, '##LESSTHANLT##')
+      .replace(/>/g, '##GREATERTHANGT##')
+      .replace(/&lt;/gi, '<')
+      .replace(/<((ph.*?)\s*?\/)&gt;/gi, brTx1) // <ph \/&gt;
+      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/gi, brTx1)
+      .replace(/<\/(g|x|bx|ex)&gt/gi, brTx1)
+      .replace(/</gi, '&lt;')
+    tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
+    tx = tx
+      .replace(/##LESSTHANLT##/g, '&lt;')
+      .replace(/##GREATERTHANGT##/g, '&gt;')
+      .replace(/##LESSTHAN##/g, '<')
+      .replace(/##GREATERTHAN##/g, '>')
+    return tx
+    // return TextUtils.view2rawxliff(text)
+  },
+
+  transformTextFromBe: (tx) => {
+    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+    tx = tx
+      .replace(/&lt;/gi, '<')
+      .replace(/<((ph.*?)\s*?\/)&gt;/gi, brTx1) // <ph \/&gt;
+      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/gi, brTx1)
+      .replace(/<(\/(g|x|bx|ex))&gt/gi, brTx1)
+      .replace(/</gi, '&lt;')
+    tx = tx.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/g, '&')
+    tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
+    return tx
+  },
+
+  transformTextForEditor: (tx) => {
+    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+    tx = tx
+      .replace(/</g, '##LESSTHAN##')
+      .replace(/>/g, '##GREATERTHAN##')
+      .replace(/&lt;/gi, '<')
+      .replace(/<((ph.*?)\s*?\/)&gt;/gi, brTx1) // <ph \/&gt;
+      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/gi, brTx1)
+      .replace(/<\/(g|x|bx|ex)&gt/gi, brTx1)
+      .replace(/</gi, '&lt;')
+    tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
+    tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
+    return tx
   },
 
   transformPlaceholdersAndTagsNew: function (text) {
@@ -142,7 +195,7 @@ const TAGS_UTILS = {
     let brTxPlPh12 =
       '<span contenteditable="false" class="tag small tag-selfclosed tag-ph">$1</span>'
     tx = tx
-      .replace(/&amp;/gi, '&')
+      // .replace(/&amp;/gi, '&')
       .replace(/<span/gi, '<_plh_')
       .replace(/<\/span/gi, '</_plh_')
       .replace(/&lt;/gi, '<')

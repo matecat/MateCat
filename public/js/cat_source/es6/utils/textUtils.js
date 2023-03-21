@@ -240,9 +240,9 @@ const TEXT_UTILS = {
 
     // caso controverso <g id="4" x="&lt; dfsd &gt;">
     //segment=htmlDecode(segment);
-    segment = this.placehold_xliff_tags(segment)
+    // segment = this.placehold_xliff_tags(segment)
     segment = this.htmlEncode(segment)
-    segment = this.restore_xliff_tags(segment)
+    // segment = this.restore_xliff_tags(segment)
 
     return segment
   },
