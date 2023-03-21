@@ -82,6 +82,8 @@ class SegmentFooterTabMatches extends React.Component {
           config.isTargetRTL,
         ),
       )
+      item.translation = TagUtils.transformTextFromBe(this.translation)
+
       item.sourceDiff = item.suggestionDecodedHtml
       item.memoryKey = this.memory_key
       if (

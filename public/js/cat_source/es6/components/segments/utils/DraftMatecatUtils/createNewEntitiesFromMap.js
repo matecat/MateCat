@@ -75,7 +75,8 @@ const createNewEntitiesFromMap = (
     brackets.push({offset: result.index})
   }
 
-  if (brackets.length > 0) {
+  //Removed after change, we do not decode &lt; and &gt;
+  /*if (brackets.length > 0) {
     offsetWithEntities.map((tag) => {
       const start = tag.start
       brackets.forEach((bracket) => {
@@ -85,7 +86,7 @@ const createNewEntitiesFromMap = (
       })
       return tag
     })
-  }
+  }*/
   // New contentState without entities
   let plainContentState = ContentState.createFromText(plainText)
   const blocks = plainContentState.getBlockMap()

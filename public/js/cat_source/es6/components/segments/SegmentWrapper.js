@@ -5,6 +5,7 @@ import SegmentSource from './SegmentSource'
 import SegmentTarget from './SegmentTarget'
 import SimpleEditor from './SimpleEditor'
 import TagUtils from '../../utils/tagUtils'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentWrapper extends React.Component {
   static contextType = SegmentContext
@@ -25,7 +26,9 @@ class SegmentWrapper extends React.Component {
       )
     }
     let textToDisplay = isTarget ? segment.translation : segment.segment
-    textToDisplay = TagUtils.transformTextForEditor(textToDisplay)
+    textToDisplay = TagUtils.transformTextForEditor(
+      DraftMatecatUtils.unescapeHTML(textToDisplay),
+    )
     return <SimpleEditor text={textToDisplay} isTarget={isTarget} />
   }
 }

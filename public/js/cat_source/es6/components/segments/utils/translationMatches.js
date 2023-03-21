@@ -9,6 +9,7 @@ import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
+import TagUtils from '../../../utils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -17,7 +18,10 @@ let TranslationMatches = {
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
+      SegmentActions.replaceEditAreaTextContent(
+        segment.sid,
+        TagUtils.transformTextFromBe(translation),
+      )
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,
