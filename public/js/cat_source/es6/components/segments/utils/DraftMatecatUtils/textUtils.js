@@ -28,6 +28,28 @@ export const getIdAttributeRegEx = () => {
  */
 export const unescapeHTML = (escapedHTML) => {
   try {
+    return (
+      escapedHTML
+        // .replace(/&lt;/g, '<')
+        // .replace(/&gt;/g, '>')
+        // .replace(/&amp;amp;/g, '&')
+        // .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+    )
+  } catch (e) {
+    return ''
+  }
+}
+
+/**
+ *
+ * @param escapedHTML
+ * @returns {string}
+ */
+export const unescapeHTMLinTags = (escapedHTML) => {
+  try {
     return escapedHTML
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -46,7 +68,7 @@ export const unescapeHTMLRecursive = (escapedHTML) => {
 
   try {
     while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTML(escapedHTML)
+      escapedHTML = unescapeHTMLinTags(escapedHTML)
     }
   } catch (e) {
     console.error('Error unescapeHTMLRecursive')
@@ -62,12 +84,14 @@ export const unescapeHTMLRecursive = (escapedHTML) => {
  */
 export const unescapeHTMLLeaveTags = (escapedHTML) => {
   if (escapedHTML) {
-    return escapedHTML
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&#39;/g, '’')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
+    return (
+      escapedHTML
+        // .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&#39;/g, '’')
+        .replace(/&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+    )
   }
   return escapedHTML
 }

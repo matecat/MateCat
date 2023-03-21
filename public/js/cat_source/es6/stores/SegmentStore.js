@@ -158,7 +158,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
-            segment: splittedSourceAr[i],
+            segment: TagUtils.transformTextFromBe(splittedSourceAr[i]),
             decodedSource: DraftMatecatUtils.unescapeHTML(
               DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
             ),
@@ -169,10 +169,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             split_points_source: [],
             status: status,
             time_to_edit: '0',
-            originalDecodedTranslation: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(translation),
-            ),
-            translation: translation ? translation : '',
+            originalDecodedTranslation: translation
+              ? TagUtils.transformTextFromBe(translation)
+              : '',
+            translation: translation
+              ? TagUtils.transformTextFromBe(translation)
+              : '',
             decodedTranslation: DraftMatecatUtils.unescapeHTML(
               DraftMatecatUtils.decodeTagsToPlainText(translation),
             ),
@@ -218,16 +220,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
-        segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
-        )
-        segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
-        )
-        segment.decodedSource = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
-        )
-        segment.updatedSource = segment.segment
+        segment.segment = TagUtils.transformTextFromBe(segment.segment)
+        segment.translation = TagUtils.transformTextFromBe(segment.translation)
+        ;(segment.originalDecodedTranslation = segment.translation),
+          (segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
+            DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
+          )),
+          (segment.decodedSource = DraftMatecatUtils.unescapeHTML(
+            DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+          )),
+          (segment.updatedSource = segment.segment)
         segment.openComments = false
         segment.openSplit = false
         newSegments.push(segment)
@@ -365,12 +367,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.unescapeHTML(
-      DraftMatecatUtils.decodeTagsToPlainText(translation),
-    )
+    const newTrans = DraftMatecatUtils.decodeTagsToPlainText(translation)
+
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
-      newTrans,
+      translation,
     )
     this._segments = this._segments.setIn(
       [index, 'decodedTranslation'],
@@ -390,7 +391,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (!segment) return
 
     //Check segment is modified
-    if (segment.get('originalDecodedTranslation') !== decodedTranslation) {
+    if (segment.get('originalDecodedTranslation') !== translation) {
       this._segments = this._segments.setIn([index, 'modified'], true)
     } else {
       this._segments = this._segments.setIn([index, 'modified'], false)
@@ -433,7 +434,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       let segment = this._segments.get(index)
       this._segments = this._segments.setIn(
         [index, 'originalDecodedTranslation'],
-        segment.get('decodedTranslation'),
+        segment.get('translation'),
       )
     }
   },

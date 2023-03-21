@@ -76,6 +76,7 @@ class SegmentFooterMultiMatches extends React.Component {
           TagUtils.decodePlaceholdersToTextSimple(this.translation),
         ),
       )
+      item.translation = TagUtils.transformTextFromBe(this.translation)
       item.sourceDiff = item.suggestionDecodedHtml
 
       if (
