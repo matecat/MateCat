@@ -7,6 +7,7 @@ import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterMultiMatches extends React.Component {
   static contextType = SegmentContext
@@ -302,7 +303,7 @@ class SegmentFooterMultiMatches extends React.Component {
             )}
           </div>
         ) : (
-          <div className="engine-errors">SSE Channel Error</div>
+          <SegmentFooterTabError />
         )}
       </div>
     )

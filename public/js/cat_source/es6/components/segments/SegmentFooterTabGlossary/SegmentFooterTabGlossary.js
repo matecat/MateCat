@@ -18,6 +18,7 @@ import GlossaryList from './GlossaryList'
 import TermForm from './TermForm'
 import {SegmentContext} from '../SegmentContext'
 import SegmentUtils from '../../../utils/segmentUtils'
+import {SegmentFooterTabError} from '../SegmentFooterTabError'
 
 export const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -517,7 +518,7 @@ export const SegmentFooterTabGlossary = ({
         tabIndex="0"
       >
         {!clientConnected ? (
-          <span className="loading_label">SSE Channel not connected</span>
+          <SegmentFooterTabError />
         ) : haveKeysGlossary ? (
           <>
             <SearchTerms />

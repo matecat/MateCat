@@ -10,6 +10,7 @@ import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 import {getConcordance} from '../../api/getConcordance'
 import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterTabConcordance extends React.Component {
   static contextType = SegmentContext
@@ -310,18 +311,7 @@ class SegmentFooterTabConcordance extends React.Component {
       )
     }
 
-    return !clientConnected ? (
-      <div
-        className={
-          'tab sub-editor ' +
-          this.props.active_class +
-          ' ' +
-          this.props.tab_class
-        }
-      >
-        <div className="engine-errors">SSE Channel Error</div>
-      </div>
-    ) : (
+    return (
       <div
         key={'container_' + this.props.code}
         className={
@@ -336,12 +326,19 @@ class SegmentFooterTabConcordance extends React.Component {
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
-        <div className="overflow">
-          {html}
-          <div className="results">{results}</div>
-        </div>
-        <br className="clear" />
-        {this.state.results.length > 3 ? extended : null}
+        {' '}
+        {!clientConnected ? (
+          <SegmentFooterTabError />
+        ) : (
+          <>
+            <div className="overflow">
+              {html}
+              <div className="results">{results}</div>
+            </div>
+            <br className="clear" />
+            {this.state.results.length > 3 ? extended : null}
+          </>
+        )}
       </div>
     )
   }

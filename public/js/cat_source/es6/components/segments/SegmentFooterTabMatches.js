@@ -12,6 +12,7 @@ import CommonUtils from '../../utils/commonUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -402,10 +403,10 @@ class SegmentFooterTabMatches extends React.Component {
                 <span className="loader loader_on" />
               )}
             </div>
-            <div className="engine-errors">{errors}</div>
+            {errors.length > 0 && <div className="engine-errors">{errors}</div>}
           </>
         ) : (
-          <div className="engine-errors">SSE channel error</div>
+          <SegmentFooterTabError />
         )}
       </div>
     )
