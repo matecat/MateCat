@@ -315,21 +315,26 @@ function SegmentFooter() {
   }, [message])
 
   const isInitTabLoading = ({code}) => {
-    if (!clientConnected) return true
     switch (code) {
       case 'tm':
+        if (!clientConnected) return true
         return (
           isUndefined(segment.contributions) ||
           (isUndefined(segment.contributions.matches) &&
             segment.contributions.errors.length === 0)
         )
       case 'cl':
+        if (!clientConnected) return true
         return (
           isUndefined(segment.cl_contributions) ||
           (isUndefined(segment.cl_contributions.matches) &&
             segment.cl_contributions.errors.length === 0)
         )
       case 'gl':
+        //if (!clientConnected) return true
+        return tabItems.find(({code}) => code === 'gl')?.isLoading
+      case 'cc':
+        if (!clientConnected) return true
         return tabItems.find(({code}) => code === 'gl')?.isLoading
       default:
         return false
