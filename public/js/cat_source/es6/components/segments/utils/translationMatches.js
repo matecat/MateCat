@@ -1,7 +1,4 @@
 import _ from 'lodash'
-
-import TagUtils from '../../../utils/tagUtils'
-import TextUtils from '../../../utils/textUtils'
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
@@ -15,7 +12,8 @@ import {deleteContribution} from '../../../api/deleteContribution'
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
     if (!config.translation_matches_enabled) return
-    let matchToUse = segment.contributions.matches[index - 1]
+    let matchToUse = segment.contributions.matches[index - 1] ?? {}
+
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {

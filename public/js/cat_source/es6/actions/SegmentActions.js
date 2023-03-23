@@ -295,6 +295,9 @@ const SegmentActions = {
     var currentSegment = segmentObj
       ? segmentObj
       : SegmentStore.getCurrentSegment()
+
+    if (!currentSegment) return
+
     var tagProjectionEnabled =
       TagUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged

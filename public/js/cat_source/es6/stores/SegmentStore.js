@@ -1247,8 +1247,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     const currentIndex = seg.get('choosenSuggestionIndex')
     const currentMatch = seg
       .get('contributions')
-      .get('matches')
-      .get(currentIndex - 1)
+      ?.get('matches')
+      ?.get(currentIndex - 1)
 
     return currentMatch?.toJS()
   },
@@ -1905,7 +1905,11 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
       )
       const current = SegmentStore.getCurrentSegment()
-      SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid)
+      if (current)
+        SegmentStore.emitChange(
+          SegmentConstants.SET_SEGMENT_TAGGED,
+          current.sid,
+        )
       break
     }
     case EditAreaConstants.EDIT_AREA_CHANGED:
