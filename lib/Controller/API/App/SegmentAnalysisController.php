@@ -148,7 +148,7 @@ class SegmentAnalysisController extends KleinController {
     private function formatSegment(\DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap)
     {
         // id_request
-        $idRequest = \Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request');
+        $idRequest = @\Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request')[ 0 ];
 
         // issues
         $issues_records = EntryDao::findAllBySegmentId( $segmentForAnalysis->id );

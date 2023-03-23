@@ -97,6 +97,23 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        $tmKeys = [];
+
+        foreach ($json['tmKeys'] as $tmKey){
+
+            // allowing only terms belonging to the owner of the job
+            if($tmKey['owner'] == true){
+                $tmKeys[] = $tmKey;
+            }
+
+            // additional terms are also visible for the other users (NOT the owner of the job) who added them
+            if($this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
+                $tmKeys[] = $tmKey;
+            }
+        }
+
+        $json['tmKeys'] = $tmKeys;
+
         $params = [
                 'action' => 'get',
                 'payload' => $json,
