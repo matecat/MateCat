@@ -118,9 +118,12 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   getDirectOpenButton = (chunk, index) => {
+    const {status} = this.props
     return (
       <div
-        className="open-translate ui primary button open"
+        className={`open-translate ui primary button open ${
+          status === 'NEW' ? 'disabled' : ''
+        }`}
         onClick={(e) => {
           this.goToTranslate(chunk, index, e)
         }}

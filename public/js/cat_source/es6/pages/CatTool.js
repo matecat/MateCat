@@ -144,7 +144,11 @@ function CatTool() {
       // TODO: da verificare se serve: this.body.addClass('loaded')
       $('body').addClass('loaded')
 
-      if (typeof data.files !== 'undefined') {
+      const haveDataFilesEntries = Boolean(
+        typeof data.files !== 'undefined' && Object.keys(data?.files)?.length,
+      )
+
+      if (haveDataFilesEntries) {
         if (options?.openCurrentSegmentAfter && !segmentId)
           SegmentActions.openSegment(
             UI.firstLoad ? UI.currentSegmentId : startSegmentIdRef?.current,
@@ -155,7 +159,7 @@ function CatTool() {
       $(document).trigger('getSegments_success')
 
       // Open segment
-      if (startSegmentIdRef?.current)
+      if (startSegmentIdRef?.current && haveDataFilesEntries)
         SegmentActions.openSegment(startSegmentIdRef?.current)
 
       setWasInitSegments(true)
