@@ -7,7 +7,6 @@ import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
 
 const AnalyzeMain = ({volumeAnalysis, project}) => {
-
   const [showAnalysis, setShowAnalysis] = useState(false)
   const [intervalId, setIntervalId] = useState()
   const [scrollTop, setScrollTop] = useState()
@@ -34,7 +33,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
   )
 
   const openAnalysisReport = (idJob, forceOpen) => {
-    setShowAnalysis((showAnalysis) => forceOpen ? forceOpen : !showAnalysis)
+    setShowAnalysis((showAnalysis) => (forceOpen ? forceOpen : !showAnalysis))
     setJobToScroll(idJob)
   }
 
@@ -60,17 +59,6 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     }
   })
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return (
-  //     !this.state.volumeAnalysis ||
-  //     (nextState.project && !nextState.project.equals(this.state.project)) ||
-  //     !nextState.volumeAnalysis.equals(this.state.volumeAnalysis) ||
-  //     nextState.showAnalysis !== this.state.showAnalysis ||
-  //     nextState.intervalId !== this.state.intervalId ||
-  //     nextState.scrollTop !== this.state.scrollTop
-  //   )
-  // }
-
   return (
     <div className="ui container">
       {volumeAnalysis && project ? (
@@ -89,7 +77,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
               project={project}
               status={volumeAnalysis.get('summary').get('STATUS')}
               showAnalysis={showAnalysis}
-              openAnalysisReport={ openAnalysisReport }
+              openAnalysisReport={openAnalysisReport}
             />
 
             {showAnalysis ? (
@@ -107,7 +95,6 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
                       status={volumeAnalysis.get('summary').get('STATUS')}
                       jobToScroll={jobToScroll}
                       showAnalysis={showAnalysis}
-
                     />
                   </CSSTransition>
                 </TransitionGroup>

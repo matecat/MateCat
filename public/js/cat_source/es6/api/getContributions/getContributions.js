@@ -27,7 +27,7 @@ export const getContributions = async ({
   const idBefore = UI.getIdBefore(idSegment)
   const contextAfter = UI.getContextAfter(idSegment)
   const idAfter = UI.getIdAfter(idSegment)
-  const txt = TextUtils.view2rawxliff(TagUtils.prepareTextToSend(target))
+  const txt = TagUtils.prepareTextToSend(target)
 
   const dataParams = {
     action: 'getContribution',

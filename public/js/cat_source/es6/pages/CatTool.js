@@ -14,6 +14,7 @@ import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
+import CommonUtils from '../utils/commonUtils'
 
 function CatTool() {
   const [options, setOptions] = useState({})
@@ -133,12 +134,21 @@ function CatTool() {
           )
       ) {
         const firstFile = data.files[Object.keys(data.files)[0]]
-        startSegmentIdRef.current = firstFile.segments[0].sid
+        if (firstFile) {
+          startSegmentIdRef.current = firstFile.segments[0].sid
+        } else {
+          const trackingMessage = `getSegments data: ${JSON.stringify(data)}`
+          CommonUtils.dispatchTrackingError(trackingMessage)
+        }
       }
       // TODO: da verificare se serve: this.body.addClass('loaded')
       $('body').addClass('loaded')
 
-      if (typeof data.files !== 'undefined') {
+      const haveDataFilesEntries = Boolean(
+        typeof data.files !== 'undefined' && Object.keys(data?.files)?.length,
+      )
+
+      if (haveDataFilesEntries) {
         if (options?.openCurrentSegmentAfter && !segmentId)
           SegmentActions.openSegment(
             UI.firstLoad ? UI.currentSegmentId : startSegmentIdRef?.current,
@@ -149,7 +159,7 @@ function CatTool() {
       $(document).trigger('getSegments_success')
 
       // Open segment
-      if (startSegmentIdRef?.current)
+      if (startSegmentIdRef?.current && haveDataFilesEntries)
         SegmentActions.openSegment(startSegmentIdRef?.current)
 
       setWasInitSegments(true)
@@ -229,7 +239,7 @@ function CatTool() {
                 reviewType={Review.type}
                 enableTagProjection={UI.enableTagProjection}
                 tagModesEnabled={UI.tagModesEnabled}
-                startSegmentId={UI.startSegmentId}
+                startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
               />
             </div>

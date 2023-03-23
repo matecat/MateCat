@@ -5,6 +5,7 @@ import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterTabConflicts extends React.Component {
   chooseAlternative(text) {
@@ -23,26 +24,40 @@ class SegmentFooterTabConflicts extends React.Component {
     const self = this
     const source = TagUtils.matchTag(
       TagUtils.decodeHtmlInTag(
-        TagUtils.decodePlaceholdersToTextSimple(segment.segment),
+        TagUtils.decodePlaceholdersToTextSimple(
+          TagUtils.transformTextForEditor(segment.segment),
+        ),
       ),
     )
     $.each(alternatives.editable, function (index) {
       // Execute diff
-      let diff_obj = TagUtils.executeDiff(segment.translation, this.translation)
-      let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
-      translation = translation.replace(/&amp;/g, '&')
-      translation = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(translation),
+      const segmentTranslation = DraftMatecatUtils.unescapeHTML(
+        DraftMatecatUtils.decodeTagsToPlainText(
+          TagUtils.transformTextFromBe(segment.translation),
         ),
       )
+      const conflictTranslation = DraftMatecatUtils.unescapeHTML(
+        DraftMatecatUtils.decodeTagsToPlainText(
+          TagUtils.transformTextFromBe(this.translation),
+        ),
+      )
+      let diff_obj = TagUtils.executeDiff(
+        segmentTranslation,
+        conflictTranslation,
+      )
+      let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
+
       // No diff executed on source
       html.push(
         <ul
           className="graysmall"
           data-item={index + 1}
           key={'editable' + index}
-          onDoubleClick={() => self.chooseAlternative(this.translation)}
+          onDoubleClick={() =>
+            self.chooseAlternative(
+              TagUtils.transformTextFromBe(this.translation),
+            )
+          }
         >
           <li className="sugg-source">
             <span

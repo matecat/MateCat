@@ -1,6 +1,7 @@
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import CommonUtils from '../utils/commonUtils'
 
 let SSE = {
   init: function () {
@@ -52,9 +53,21 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_get', function (ev, message) {
+      if (!Array.isArray(message.data.terms)) {
+        const trackingMessage = `Glossary GET terms is not Array: ${
+          message.data.terms
+        } / message: ${JSON.stringify(message)}`
+        CommonUtils.dispatchTrackingError(trackingMessage)
+      }
+
+      const terms = Array.isArray(message.data.terms) ? message.data.terms : []
+      const blacklistedTerms = Array.isArray(message.data.blacklisted_terms)
+        ? message.data.blacklisted_terms
+        : []
+
       SegmentActions.setGlossaryForSegment(message.data.id_segment, [
-        ...message.data.terms,
-        ...message.data.blacklisted_terms.map((term) => ({
+        ...terms,
+        ...blacklistedTerms.map((term) => ({
           ...term,
           isBlacklist: true,
         })),
@@ -210,6 +223,7 @@ let NOTIFICATIONS = {
   start: function () {
     SSE.init()
     this.source = SSE.getSource('notifications')
+
     this.addEvents()
   },
   restart: function () {
@@ -220,7 +234,7 @@ let NOTIFICATIONS = {
     var self = this
     this.source.addEventListener(
       'message',
-      function (e) {
+      (e) => {
         var message = new SSE.Message(JSON.parse(e.data))
         if (message.isValid()) {
           $(document).trigger(message.eventIdentifier, message)
@@ -231,8 +245,10 @@ let NOTIFICATIONS = {
 
     this.source.addEventListener(
       'error',
-      function () {
+      () => {
         console.error('SSE: server disconnect')
+        config.id_client = undefined
+        CatToolActions.clientConntected()
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -244,6 +260,7 @@ let NOTIFICATIONS = {
       },
       false,
     )
+    this.source.addEventListener('open', () => {}, false)
   },
 }
 

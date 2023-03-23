@@ -171,7 +171,8 @@ const SegmentActions = {
     }
   },
   scrollToCurrentSegment() {
-    this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
+    if (SegmentStore.getCurrentSegment())
+      this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
   scrollToSegment: function (sid, callback) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
@@ -294,6 +295,9 @@ const SegmentActions = {
     var currentSegment = segmentObj
       ? segmentObj
       : SegmentStore.getCurrentSegment()
+
+    if (!currentSegment) return
+
     var tagProjectionEnabled =
       TagUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged

@@ -1,7 +1,5 @@
 import _ from 'lodash'
 
-import TagUtils from '../../../utils/tagUtils'
-import TextUtils from '../../../utils/textUtils'
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
@@ -11,15 +9,20 @@ import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
+import TagUtils from '../../../utils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
     if (!config.translation_matches_enabled) return
-    let matchToUse = segment.contributions.matches[index - 1]
+    let matchToUse = segment.contributions.matches[index - 1] ?? {}
+
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
+      SegmentActions.replaceEditAreaTextContent(
+        segment.sid,
+        TagUtils.transformTextFromBe(translation),
+      )
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,

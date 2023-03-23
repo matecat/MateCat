@@ -240,9 +240,9 @@ const TEXT_UTILS = {
 
     // caso controverso <g id="4" x="&lt; dfsd &gt;">
     //segment=htmlDecode(segment);
-    segment = this.placehold_xliff_tags(segment)
+    // segment = this.placehold_xliff_tags(segment)
     segment = this.htmlEncode(segment)
-    segment = this.restore_xliff_tags(segment)
+    // segment = this.restore_xliff_tags(segment)
 
     return segment
   },
@@ -364,8 +364,26 @@ const TEXT_UTILS = {
   },
 
   justSelecting: function () {
-    if (window.getSelection().isCollapsed) return false
-    return selContainer.hasClass('area') || selContainer.hasClass('source')
+    const selection = window.getSelection()
+    if (selection.isCollapsed) return false
+
+    let shouldBreakCycle = false
+    let container = selection.getRangeAt(0).startContainer
+
+    while (!shouldBreakCycle) {
+      container = container.parentNode
+      const nodeName = container.nodeName.toLowerCase()
+
+      if (
+        nodeName === 'body' ||
+        container.classList.contains('segment-body-content')
+      ) {
+        shouldBreakCycle = true
+        if (nodeName === 'body') container = undefined
+      }
+    }
+
+    return !!container
   },
 
   //Change with TagUtils.decodePlaceholdersToPlainText

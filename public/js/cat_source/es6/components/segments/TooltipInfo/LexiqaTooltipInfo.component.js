@@ -5,7 +5,9 @@ import LXQ from '../../../utils/lxq.main'
 
 class LexiqaTooltipInfo extends Component {
   ignoreError(message) {
-    LXQ.ignoreError(message.error)
+    if (message.error) {
+      LXQ.ignoreError(message.error)
+    }
   }
 
   buildTooltipError = () => {
