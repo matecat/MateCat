@@ -680,10 +680,6 @@ window.UI = {
     return totalTranslation
   },
 
-  targetContainerSelector: function () {
-    return '.targetarea'
-  },
-
   processErrors: function (err, operation) {
     $.each(err, function () {
       var codeInt = parseInt(this.code)
