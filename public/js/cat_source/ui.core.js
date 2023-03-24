@@ -680,10 +680,6 @@ window.UI = {
     return totalTranslation
   },
 
-  targetContainerSelector: function () {
-    return '.targetarea'
-  },
-
   processErrors: function (err, operation) {
     $.each(err, function () {
       var codeInt = parseInt(this.code)
@@ -738,10 +734,7 @@ window.UI = {
       SegmentActions.setStatus(id_segment, null, status)
       this.setDownloadStatus(response.stats)
       CatToolActions.setProgress(response.stats)
-      SegmentActions.removeClassToSegment(
-        options.id_segment,
-        'setTranslationPending',
-      )
+      SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
 
       this.checkWarnings(false)
       $(segment).attr('data-version', response.version)

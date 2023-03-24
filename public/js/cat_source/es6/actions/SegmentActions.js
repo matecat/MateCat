@@ -721,7 +721,10 @@ const SegmentActions = {
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
-      if (typeof segment.glossary === 'undefined' || sid === request.sid) {
+      if (
+        segment &&
+        (typeof segment.glossary === 'undefined' || sid === request.sid)
+      ) {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
