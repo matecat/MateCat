@@ -349,7 +349,7 @@ window.APP = {
             props,
             'Download fail',
           )
-          Cookies.delete(downloadToken)
+          Cookies.remove(downloadToken)
         }
       })
   },
