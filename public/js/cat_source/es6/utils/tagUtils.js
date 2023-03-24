@@ -311,11 +311,19 @@ const TAGS_UTILS = {
       })
 
       tx = tx.replace(openRegex, function () {
-        return openings.pop().id
+        return (
+          String.fromCharCode(parseInt('200B', 16)) +
+          openings.pop().id +
+          String.fromCharCode(parseInt('200B', 16))
+        )
       })
 
       tx = tx.replace(closeRegex, function () {
-        return closings.shift().id
+        return (
+          String.fromCharCode(parseInt('200B', 16)) +
+          closings.shift().id +
+          String.fromCharCode(parseInt('200B', 16))
+        )
       })
       returnValue = tx
     } catch (e) {

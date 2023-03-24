@@ -1963,6 +1963,14 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
+    case SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG:
+      SegmentStore.emitChange(
+        SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+        {
+          ...action,
+        },
+      )
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }
