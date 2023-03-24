@@ -639,12 +639,15 @@ const SegmentActions = {
       alternatives: alternatives,
     })
   },
-  chooseContribution: function (sid, index) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
-      sid: sid,
-      index: index,
-    })
+  chooseContributionOnCurrentSegment: function (index) {
+    const segment = SegmentStore.getCurrentSegment()
+    if (segment.contributions) {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
+        sid: segment.sid,
+        index: index,
+      })
+    }
   },
   deleteContribution: function (source, target, matchId, sid) {
     TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
