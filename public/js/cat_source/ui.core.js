@@ -77,7 +77,7 @@ window.UI = {
     // ask if the user wants propagation or this is valid only
     // for this segment
 
-    if (this.autopropagateConfirmNeeded(opts.propagation)) {
+    if (this.autopropagateConfirmNeeded(segment, opts.propagation)) {
       var text = !_.isUndefined(segment.alternatives)
         ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
           'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
@@ -115,8 +115,7 @@ window.UI = {
     }
   },
 
-  autopropagateConfirmNeeded: function (propagation) {
-    var segment = SegmentStore.getCurrentSegment()
+  autopropagateConfirmNeeded: function (segment, propagation) {
     var segmentModified = segment.modified
     var segmentStatus = segment.status.toLowerCase()
     var statusNotConfirmationNeeded = ['new', 'draft']
