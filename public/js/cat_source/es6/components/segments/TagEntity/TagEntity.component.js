@@ -58,6 +58,10 @@ class TagEntity extends Component {
       currentOccurrence &&
       currentOccurrence.matchPosition >= this.props.start &&
       currentOccurrence.matchPosition < this.props.end
+
+    if (active && isCurrent)
+      SegmentActions.setIsCurrentSearchOccurrenceTag(true)
+
     if (active) {
       let regex = SearchUtils.getSearchRegExp(
         textToReplace,

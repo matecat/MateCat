@@ -82,7 +82,11 @@ export const decodeTagsToPlainText = (text) => {
     decoded = decoded.replace(
       /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
       (match, text) => {
-        return text
+        return (
+          String.fromCharCode(parseInt('200B', 16)) +
+          text +
+          String.fromCharCode(parseInt('200B', 16))
+        )
       },
     )
     // Match PH
@@ -90,7 +94,11 @@ export const decodeTagsToPlainText = (text) => {
       /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
       (match, text) => {
         try {
-          return Base64.decode(text)
+          return (
+            String.fromCharCode(parseInt('200B', 16)) +
+            Base64.decode(text) +
+            String.fromCharCode(parseInt('200B', 16))
+          )
         } catch (e) {
           console.error('Fail decoding tags in text', match, text)
         }
