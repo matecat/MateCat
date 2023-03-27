@@ -10,6 +10,8 @@ class SimpleEditor extends React.Component {
 
   constructor(props) {
     super(props)
+
+    this.customCssForLanguage = `target-${config.target_code}`
   }
 
   render() {
@@ -34,7 +36,11 @@ class SimpleEditor extends React.Component {
 
     return (
       <div
-        className={`${isTarget ? 'target' : 'source'} item`}
+        className={`${
+          isTarget
+            ? `target target-${config.target_code}`
+            : `source source-${config.source_code}`
+        } item`}
         id={`segment-${sid}-${isTarget ? 'target' : 'source'}`}
       >
         <div
