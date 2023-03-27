@@ -5018,3 +5018,16 @@ header {
     }
   }
 }
+
+/* Custom font for Urdu (ur-PK) language */
+@font-face {
+  font-family: 'Jameel Nori';
+  src: url('../fonts/Jameel_Noori_Nastaleeq_Kasheeda.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.source-ur-PK,
+.target-ur-PK {
+  font-family: 'Jameel Nori';
+}
