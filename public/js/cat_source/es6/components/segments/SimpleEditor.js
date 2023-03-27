@@ -10,8 +10,6 @@ class SimpleEditor extends React.Component {
 
   constructor(props) {
     super(props)
-
-    this.customCssForLanguage = `target-${config.target_code}`
   }
 
   render() {
