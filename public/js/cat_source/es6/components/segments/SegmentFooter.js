@@ -63,7 +63,7 @@ const TAB_ITEMS = {
     code: 'ai',
     tabClass: 'ai-assistant',
     isLoading: false,
-    shouldEnableCloseButton: true,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -476,7 +476,7 @@ function SegmentFooter() {
             <span className="loader loader_on" />
           )}
 
-          {tab.shouldEnableCloseButton && (
+          {tab.isEnableCloseButton && (
             <span className="icon-close" onClick={onClickRemoveTab}>
               <IconCloseCircle />
             </span>
