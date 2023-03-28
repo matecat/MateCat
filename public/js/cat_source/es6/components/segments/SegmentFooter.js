@@ -18,6 +18,8 @@ import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
+import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
+import IconCloseCircle from '../icons/IconCloseCircle'
 
 const TAB_ITEMS = {
   matches: {
@@ -55,6 +57,13 @@ const TAB_ITEMS = {
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
+  },
+  AiAssistant: {
+    label: 'AI Assistant',
+    code: 'ai',
+    tabClass: 'ai-assistant',
+    isLoading: false,
+    shouldEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -155,7 +164,7 @@ function SegmentFooter() {
     }
     const registerTab = (tabs, configs) => setConfigurations(configs)
     const modifyTabVisibility = (name, visible) =>
-      setTabStateChanges({name, visible})
+      setTabStateChanges({name, visible, enabled: visible})
     const openTab = (sidProp, name) =>
       segment.sid === sidProp && setActiveTab({name, forceOpen: true})
     const addTabIndex = (sidProp, name, index) =>
@@ -415,6 +424,16 @@ function SegmentFooter() {
             segment={segment}
           />
         )
+      case 'ai':
+        return (
+          <SegmentFooterTabAiAssistant
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
       default:
         return ''
     }
@@ -427,6 +446,12 @@ function SegmentFooter() {
       ? true
       : false
     const countResult = !isLoading && getTabIndex(tab)
+    const onClickRemoveTab = (event) => {
+      SegmentActions.modifyTabVisibility('AiAssistant', false)
+      if (tab.open) SegmentActions.activateTab(segment.sid, 'matches')
+      event.stopPropagation()
+    }
+
     return (
       <li
         key={tab.code}
@@ -441,19 +466,22 @@ function SegmentFooter() {
         onClick={() => setUserChangedTab({[Symbol()]: tab.name})}
         data-testid={tab.name}
       >
-        {!isLoading ? (
-          <a tabIndex="-1">
-            {tab.label}
+        <a tabIndex="-1">
+          {tab.label}
+          {!isLoading ? (
             <span className="number">
-              {!isLoading && countResult ? ' (' + countResult + ')' : ''}
+              {countResult ? ' (' + countResult + ')' : ''}
             </span>
-          </a>
-        ) : (
-          <a tabIndex="-1">
-            {tab.label}
+          ) : (
             <span className="loader loader_on" />
-          </a>
-        )}
+          )}
+
+          {tab.shouldEnableCloseButton && (
+            <span className="icon-close" onClick={onClickRemoveTab}>
+              <IconCloseCircle />
+            </span>
+          )}
+        </a>
       </li>
     )
   }

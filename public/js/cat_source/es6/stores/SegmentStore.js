@@ -99,6 +99,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   clipboardPlainText: '',
   sideOpen: false,
   isSearchingGlossaryInTarget: false,
+  helpAiAssistantParams: undefined,
   /**
    * Update all
    */
@@ -1957,6 +1958,12 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.HIGHLIGHT_GLOSSARY_TERM:
       SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
+        ...action,
+      })
+      break
+    case SegmentConstants.HELP_AI_ASSISTANT:
+      SegmentStore.helpAiAssistantParams = {value: action.value}
+      SegmentStore.emitChange(SegmentConstants.HELP_AI_ASSISTANT, {
         ...action,
       })
       break

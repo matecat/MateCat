@@ -1361,6 +1361,15 @@ const SegmentActions = {
       isTarget,
     })
   },
+  helpAiAssistant: ({sid, value}) => {
+    SegmentActions.modifyTabVisibility('AiAssistant', true)
+    SegmentActions.activateTab(sid, 'AiAssistant')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HELP_AI_ASSISTANT,
+      sid,
+      value,
+    })
+  },
 }
 
 export default SegmentActions

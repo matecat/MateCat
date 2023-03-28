@@ -1,0 +1,9 @@
+.ai-assistant-container {
+  display: flex;
+  padding: 24px 32px;
+
+  > div {
+    width: 50%;
+    text-align: left;
+  }
+}

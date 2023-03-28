@@ -109,4 +109,5 @@ module.exports = keyMirror({
   FREEZING_SEGMENTS: null,
   GET_SEGMENT_QA: null,
   HIGHLIGHT_GLOSSARY_TERM: null,
+  HELP_AI_ASSISTANT: null,
 })
