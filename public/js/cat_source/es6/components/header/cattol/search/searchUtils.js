@@ -454,7 +454,7 @@ let SearchUtils = {
     // text = text.replace(/(\$&)/g, function ( match, text ) {
     //     return tagsArray.shift();
     // });
-    text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
+    //text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
     text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<')
     return text
   },
