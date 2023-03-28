@@ -120,7 +120,7 @@ export const decodeTagsToPlainText = (text) => {
         try {
           return (
             String.fromCharCode(parseInt('200B', 16)) +
-            Base64.decode(text) +
+            Base64.decode(text).replace(/&lt;/gi, '<').replace(/&gt;/gi, '>') +
             String.fromCharCode(parseInt('200B', 16))
           )
         } catch (e) {

@@ -32,7 +32,6 @@ const TAGS_UTILS = {
       .replace(/##LESSTHAN##/g, '<')
       .replace(/##GREATERTHAN##/g, '>')
     return tx
-    // return TextUtils.view2rawxliff(text)
   },
 
   transformTextFromBe: (tx) => {

@@ -170,7 +170,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             status: status,
             time_to_edit: '0',
             originalDecodedTranslation: translation
-              ? TagUtils.transformTextFromBe(translation)
+              ? DraftMatecatUtils.unescapeHTML(
+                  TagUtils.transformTextFromBe(translation),
+                )
               : '',
             translation: translation
               ? TagUtils.transformTextFromBe(translation)
@@ -222,14 +224,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.searchParams = this.searchParams
         segment.segment = TagUtils.transformTextFromBe(segment.segment)
         segment.translation = TagUtils.transformTextFromBe(segment.translation)
-        ;(segment.originalDecodedTranslation = segment.translation),
-          (segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
-            DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
-          )),
-          (segment.decodedSource = DraftMatecatUtils.unescapeHTML(
-            DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
-          )),
-          (segment.updatedSource = segment.segment)
+        segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
+          segment.translation,
+        )
+        segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
+          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
+        )
+        segment.decodedSource = DraftMatecatUtils.unescapeHTML(
+          DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+        )
+        segment.updatedSource = segment.segment
         segment.openComments = false
         segment.openSplit = false
         newSegments.push(segment)
