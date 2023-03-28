@@ -123,12 +123,12 @@ class SegmentFooterTabConcordance extends React.Component {
 
         let cb = item.created_by
 
-        let leftTxt = item.segment
+        let leftTxt = item.raw_segment
         leftTxt = TagUtils.decodePlaceholdersToTextSimple(leftTxt)
         leftTxt = leftTxt.replace(/#\{/gi, '<mark>')
         leftTxt = leftTxt.replace(/\}#/gi, '</mark>')
 
-        let rightTxt = item.translation
+        let rightTxt = item.raw_translation
         rightTxt = TagUtils.decodePlaceholdersToTextSimple(rightTxt)
         rightTxt = rightTxt.replace(/#\{/gi, '<mark>')
         rightTxt = rightTxt.replace(/\}#/gi, '</mark>')

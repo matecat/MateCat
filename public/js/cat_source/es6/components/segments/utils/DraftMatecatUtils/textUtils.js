@@ -115,6 +115,8 @@ export const decodeTagsToPlainText = (text) => {
       (match, text) => {
         try {
           return Base64.decode(text)
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>')
         } catch (e) {
           console.error('Fail decoding tags in text', match, text)
         }

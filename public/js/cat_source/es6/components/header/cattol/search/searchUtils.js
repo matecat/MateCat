@@ -84,14 +84,6 @@ let SearchUtils = {
       !_.isUndefined(p.source) && !_.isUndefined(p.target)
         ? 'source&target'
         : 'normal'
-    this.whereToFind = ''
-    if (this.searchMode === 'normal') {
-      if (!_.isUndefined(p.target)) {
-        this.whereToFind = '.targetarea'
-      } else if (!_.isUndefined(p.source)) {
-        this.whereToFind = '.source'
-      }
-    }
 
     this.searchParams.searchMode = this.searchMode
 
@@ -478,14 +470,14 @@ let SearchUtils = {
     let ignoreCase = params['match-case'] ? '' : 'i'
     if (this.searchMode === 'source&target') {
       let txt = isSource ? params.source : params.target
-      txt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt))
+      txt = TextUtils.escapeRegExp(txt)
       reg = new RegExp('(' + txt + ')', 'g' + ignoreCase)
     } else if (
       (!_.isUndefined(params.source) && isSource) ||
       (!_.isUndefined(params.target) && !isSource)
     ) {
       let txt = params.source ? params.source : params.target
-      let regTxt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt))
+      let regTxt = TextUtils.escapeRegExp(txt)
       // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
       reg = new RegExp('(' + regTxt + ')', 'g' + ignoreCase)
