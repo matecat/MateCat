@@ -1,7 +1,10 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
+import IconLike from '../icons/IconLike'
+import IconDislike from '../icons/IconDislike'
+import {aiAssistantSuggestion} from '../../api/aiAssistantSuggestion/aiAssistantSuggestion'
 
 export const SegmentFooterTabAiAssistant = ({
   code,
@@ -9,16 +12,23 @@ export const SegmentFooterTabAiAssistant = ({
   tab_class,
   segment,
 }) => {
+  const [suggestion, setSuggestion] = useState()
+
   useEffect(() => {
-    const aiAssistantHandler = ({value}) =>
-      console.log('Ai assistant value:', value)
+    const aiAssistantHandler = ({value}) => {
+      setSuggestion(undefined)
+
+      aiAssistantSuggestion({phrase: value}).then((suggestion) =>
+        setSuggestion(suggestion.phrase),
+      )
+    }
 
     SegmentStore.addListener(
       SegmentConstants.HELP_AI_ASSISTANT,
       aiAssistantHandler,
     )
 
-    console.log('Ai assistant value:', SegmentStore.helpAiAssistantParams.value)
+    aiAssistantHandler(SegmentStore.helpAiAssistantParams)
 
     return () =>
       SegmentStore.removeListener(
@@ -33,10 +43,26 @@ export const SegmentFooterTabAiAssistant = ({
       className={`tab sub-editor ${active_class} ${tab_class}`}
       id={`segment-${segment.sid}-${tab_class}`}
     >
-      <div className="ai-assistant-container">
-        <div>content scrollable</div>
-        <div>Feedback buttons</div>
-      </div>
+      {suggestion ? (
+        <div className="ai-assistant-container">
+          <div>{suggestion}</div>
+          <div>
+            <span>Was this suggestion useful?</span>
+            <div className="feedback-icons">
+              <span className="like">
+                <IconLike />
+              </span>
+              <span className="dislike">
+                <IconDislike />
+              </span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="loading-container">
+          <span>Loading</span>
+        </div>
+      )}
     </div>
   )
 }
