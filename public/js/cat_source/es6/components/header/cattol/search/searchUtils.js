@@ -477,6 +477,10 @@ let SearchUtils = {
       (!_.isUndefined(params.target) && !isSource)
     ) {
       let txt = params.source ? params.source : params.target
+      txt = txt
+        .replace(/&/g, '&amp;')
+        .replace(/</gi, '&lt;')
+        .replace(/>/gi, '&gt;')
       let regTxt = TextUtils.escapeRegExp(txt)
       // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
@@ -492,7 +496,7 @@ let SearchUtils = {
       }
     }
 
-    let {text, tagsIntervals, tagsArray} = this.prepareTextToReplace(textToMark)
+    let {text, tagsIntervals} = this.prepareTextToReplace(textToMark)
 
     let matchIndex = 0
     text = text.replace(reg, (match, text, index) => {
@@ -520,8 +524,7 @@ let SearchUtils = {
         return match
       }
     })
-    text = TextUtils.htmlDecode(text)
-    text = this.restoreTextAfterReplace(text, tagsArray)
+    text = this.restoreTextAfterReplace(text)
     return text
   },
   resetSearch: function () {
