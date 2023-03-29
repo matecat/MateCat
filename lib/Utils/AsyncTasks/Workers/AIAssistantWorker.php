@@ -53,6 +53,7 @@ class AIAssistantWorker extends AbstractWorker
             '_type' => 'ai_assistant_explain_meaning',
             'data'  => [
                 'payload'   => [
+                    'id_segment' => $payload['id_segment'],
                     'message' => $message
                 ],
                 'id_client' => $payload[ 'id_client' ],

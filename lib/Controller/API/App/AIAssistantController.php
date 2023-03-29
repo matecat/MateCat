@@ -41,6 +41,15 @@ class AIAssistantController extends KleinController {
             die();
         }
 
+        // id_segment
+        if(!isset($json['id_segment'])){
+            $this->response->code(500);
+            $this->response->json([
+                'error' => 'Missing `id_segment` parameter'
+            ]);
+            die();
+        }
+
         // word
         if(!isset($json['word'])){
             $this->response->code(500);
@@ -70,6 +79,7 @@ class AIAssistantController extends KleinController {
 
         $json = [
             'id_client' => $json['id_client'],
+            'id_segment' => $json['id_segment'],
             'target' => $json['target'],
             'localized_target' => $localizedLanguage,
             'word' => $json['word'],
