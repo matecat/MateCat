@@ -52,7 +52,9 @@ class AIAssistantWorker extends AbstractWorker
         $this->publishMessage([
             '_type' => 'ai_assistant_explain_meaning',
             'data'  => [
-                'payload'   => $message,
+                'payload'   => [
+                    'message' => $message
+                ],
                 'id_client' => $payload[ 'id_client' ],
             ]
         ]);
