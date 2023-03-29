@@ -100,3 +100,6 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_set', 'POST', '\API\App\GlossaryController', 'set' );
     route( '/_update', 'POST', '\API\App\GlossaryController', 'update' );
 } );
+
+// AI Assistant
+route( '/api/app/ai-assistant', 'POST',  'API\App\AIAssistantController', 'index' );
