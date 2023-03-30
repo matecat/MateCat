@@ -4,7 +4,8 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import IconLike from '../icons/IconLike'
 import IconDislike from '../icons/IconDislike'
-import {aiAssistantSuggestion} from '../../api/aiAssistantSuggestion/aiAssistantSuggestion'
+import {aiSuggestion} from '../../api/aiSuggestion/aiSuggestion'
+import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 
 export const SegmentFooterTabAiAssistant = ({
@@ -30,27 +31,54 @@ export const SegmentFooterTabAiAssistant = ({
   }
 
   useEffect(() => {
-    const aiAssistantHandler = ({value}) => {
-      setSuggestion(undefined)
-      requestedWord.current = value
-      aiAssistantSuggestion({phrase: value}).then((suggestion) =>
-        setSuggestion(suggestion.phrase),
-      )
+    const aiAssistantHandler = ({sid, value}) => {
+      if (sid === segment.sid) {
+        console.log('request ai assistant', sid, value)
+        setSuggestion(undefined)
+        requestedWord.current = value
+
+        const sourceContent = TagUtils.prepareTextToSend(segment.updatedSource)
+        aiSuggestion({
+          idSegment: segment.sid,
+          words: value,
+          phrase: sourceContent,
+        })
+      }
+    }
+    const aiSuggestionHandler = ({sid, suggestion}) => {
+      if (sid === segment.sid) {
+        console.log('ai suggestion', sid, suggestion)
+        setSuggestion(suggestion)
+      }
     }
 
     SegmentStore.addListener(
       SegmentConstants.HELP_AI_ASSISTANT,
       aiAssistantHandler,
     )
+    SegmentStore.addListener(
+      SegmentConstants.AI_SUGGESTION,
+      aiSuggestionHandler,
+    )
 
-    aiAssistantHandler(SegmentStore.helpAiAssistantParams)
+    const lastSuggestionResult = SegmentStore.getAiSuggestion(segment.sid)
+    if (
+      !lastSuggestionResult &&
+      SegmentStore.helpAiAssistantWords?.sid === segment.sid
+    )
+      aiAssistantHandler(SegmentStore.helpAiAssistantWords)
 
-    return () =>
+    return () => {
       SegmentStore.removeListener(
         SegmentConstants.HELP_AI_ASSISTANT,
         aiAssistantHandler,
       )
-  }, [])
+      SegmentStore.removeListener(
+        SegmentConstants.AI_SUGGESTION,
+        aiSuggestionHandler,
+      )
+    }
+  }, [segment.sid, segment.updatedSource])
 
   return (
     <div
@@ -75,7 +103,7 @@ export const SegmentFooterTabAiAssistant = ({
         </div>
       ) : (
         <div className="loading-container">
-          <span>Loading</span>
+          <span className="loader loader_on" />
         </div>
       )}
     </div>

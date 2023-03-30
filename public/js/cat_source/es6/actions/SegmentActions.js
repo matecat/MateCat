@@ -1370,6 +1370,13 @@ const SegmentActions = {
       value,
     })
   },
+  aiSuggestion: ({sid, suggestion}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_SUGGESTION,
+      sid,
+      suggestion,
+    })
+  },
 }
 
 export default SegmentActions

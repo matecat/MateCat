@@ -21,44 +21,54 @@ import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 
+export const TAB = {
+  MATCHES: 'matches',
+  CONCORDANCES: 'concordances',
+  GLOSSARY: 'glossary',
+  ALTERNATIVES: 'alternatives',
+  MESSAGES: 'messages',
+  MULTIMATCHES: 'multiMatches',
+  AI_ASSISTANT: 'AiAssistant',
+}
+
 const TAB_ITEMS = {
-  matches: {
+  [TAB.MATCHES]: {
     label: 'Translation Matches',
     code: 'tm',
     tabClass: 'matches',
     isLoading: false,
   },
-  concordances: {
+  [TAB.CONCORDANCES]: {
     label: 'TM Search',
     code: 'cc',
     tabClass: 'concordances',
     isLoading: false,
   },
-  glossary: {
+  [TAB.GLOSSARY]: {
     label: 'Glossary',
     code: 'gl',
     tabClass: 'glossary',
     isLoading: false,
   },
-  alternatives: {
+  [TAB.ALTERNATIVES]: {
     label: 'Translation conflicts',
     code: 'al',
     tabClass: 'alternatives',
     isLoading: false,
   },
-  messages: {
+  [TAB.MESSAGES]: {
     label: 'Messages',
     code: 'notes',
     tabClass: 'segment-notes',
     isLoading: false,
   },
-  multiMatches: {
+  [TAB.MULTIMATCHES]: {
     label: 'Crosslanguage Matches',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
   },
-  AiAssistant: {
+  [TAB.AI_ASSISTANT]: {
     label: 'AI Assistant',
     code: 'ai',
     tabClass: 'ai-assistant',
@@ -209,8 +219,8 @@ function SegmentFooter() {
         ...item,
         ...(configurations[item.name] && {...configurations[item.name]}),
         open: hasNotes
-          ? item.name === 'messages'
-          : !hasNotes && item.name === 'messages'
+          ? item.name === TAB.MESSAGES
+          : !hasNotes && item.name === TAB.MESSAGES
           ? false
           : configurations[item.name]?.open,
       })),
@@ -230,16 +240,16 @@ function SegmentFooter() {
       prevState.map((item) => ({
         ...item,
         open:
-          item.name !== 'alternatives' && hasAlternatives ? false : item.open,
-        ...(item.name === 'alternatives' && {
+          item.name !== TAB.ALTERNATIVES && hasAlternatives ? false : item.open,
+        ...(item.name === TAB.ALTERNATIVES && {
           visible: hasAlternatives,
           open: hasAlternatives,
         }),
-        ...(item.name === 'messages' && {
+        ...(item.name === TAB.MESSAGES && {
           enabled: hasNotes,
           visible: hasNotes,
         }),
-        ...(item.name === 'multiMatches' && {
+        ...(item.name === TAB.MULTIMATCHES && {
           enabled: hasMultiMatches,
           visible: hasMultiMatches,
         }),
@@ -253,7 +263,7 @@ function SegmentFooter() {
       const openedTab = prevState.find(({open}) => open)
       return !openedTab || (openedTab && openedTab.open && !openedTab.visible)
         ? prevState.map((item) =>
-            item.name === 'matches'
+            item.name === TAB.MATCHES
               ? {...item, open: true}
               : {...item, open: false},
           )
@@ -287,7 +297,8 @@ function SegmentFooter() {
       userChangedTab &&
       userChangedTab[Object.getOwnPropertySymbols(userChangedTab)[0]]
     if (!name) return
-    setTimeout(() => SegmentActions.setTabOpen(segment.sid, name))
+    if (!TAB_ITEMS[name].isEnableCloseButton)
+      setTimeout(() => SegmentActions.setTabOpen(segment.sid, name))
     setActiveTab({name: name})
   }, [userChangedTab, segment?.sid])
 
@@ -447,8 +458,8 @@ function SegmentFooter() {
       : false
     const countResult = !isLoading && getTabIndex(tab)
     const onClickRemoveTab = (event) => {
-      SegmentActions.modifyTabVisibility('AiAssistant', false)
-      if (tab.open) SegmentActions.activateTab(segment.sid, 'matches')
+      SegmentActions.modifyTabVisibility(TAB.AI_ASSISTANT, false)
+      if (tab.open) SegmentActions.activateTab(segment.sid, TAB.MATCHES)
       event.stopPropagation()
     }
 
