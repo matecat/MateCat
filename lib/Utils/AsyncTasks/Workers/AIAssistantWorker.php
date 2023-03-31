@@ -46,17 +46,17 @@ class AIAssistantWorker extends AbstractWorker
             $client = $this->getAIAssistantClient();
             $message = $client->findContextForAWord($payload['word'], $payload['phrase'], $payload['localized_target']);
         } catch (\Exception $exception){
-            $message = 'There was an error: ' . $exception->getMessage();
+            $message = 'AI ASSISTANT: there was an error, ' . $exception->getMessage();
         }
 
         $this->publishMessage([
             '_type' => 'ai_assistant_explain_meaning',
             'data'  => [
+                'id_client' => $payload['id_client'],
                 'payload'   => [
                     'id_segment' => $payload['id_segment'],
-                    'message' => $message
+                    'message' => trim($message)
                 ],
-                'id_client' => $payload[ 'id_client' ],
             ]
         ]);
     }

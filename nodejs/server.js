@@ -140,7 +140,7 @@ const checkCandidate = ( type, response, message ) => {
     let candidate;
     switch ( type ) {
         case AI_ASSISTANT_EXPLAIN_MEANING:
-            candidate = response._clientId !== message.data.id_client;
+            candidate = response._clientId === message.data.id_client;
             break;
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&

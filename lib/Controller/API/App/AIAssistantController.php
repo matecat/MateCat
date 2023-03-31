@@ -82,8 +82,8 @@ class AIAssistantController extends KleinController {
             'id_segment' => $json['id_segment'],
             'target' => $json['target'],
             'localized_target' => $localizedLanguage,
-            'word' => $json['word'],
-            'phrase' => $json['phrase'],
+            'word' => trim($json['word']),
+            'phrase' => trim($json['phrase']),
         ];
 
         $params = [
