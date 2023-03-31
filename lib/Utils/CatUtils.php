@@ -399,13 +399,44 @@ class CatUtils {
         if ( preg_match_all( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._]+?(?:\s[:_a-z]+=.+?)?\s*[\/]{0,1}>#i', $string, $matches, PREG_SET_ORDER ) ) {
 
             foreach ( $matches as $tag ) {
-                if ( is_numeric( substr( $tag[ 0 ], -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#i', $tag[ 0 ] ) ) { //H tag are an exception
+
+                $element = $tag[ 0 ];
+
+                var_dump($element);
+
+                if ( is_numeric( substr( $element, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#i', $element ) ) { //H tag are an exception
                     //tag can not end with a number
                     continue;
                 }
-                $string = str_replace( $tag[ 0 ], " ", $string );
-            }
 
+                // check for placeholders
+                preg_match_all('/equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/', $element, $equivTextMatch);
+
+                if(!empty($equivTextMatch[1])){
+                    foreach ($equivTextMatch[1] as $equivText){
+                        $decodedEquivText = base64_decode($equivText);
+
+                        // %%[a-zA-Z0-9]+%%
+                        // {{[a-zA-Z0-9]+}}
+                        // %{[a-zA-Z0-9]+}
+                        // @@[a-zA-Z0-9]+@@
+                        // {%[a-zA-Z0-9]+%}
+                        // <[a-zA-Z0-9]+>
+                        // {[a-zA-Z0-9]+}
+                        $placeholderRegex = '/%%[a-zA-Z0-9]+%%|{{[a-zA-Z0-9]+}}|%{[a-zA-Z0-9]+}|@@[a-zA-Z0-9]+@@|{%[a-zA-Z0-9]+%}|&lt;[a-zA-Z0-9]+&gt;|{[a-zA-Z0-9]+}/iu';
+
+                        preg_match_all($placeholderRegex, $decodedEquivText, $placeholderMatch);
+
+                        if(($decodedEquivText !== '&lt;style&gt;' and $decodedEquivText !== '&lt;/style&gt;') and count($placeholderMatch[0]) > 0){
+                            $string = str_replace( $tag, $decodedEquivText, $string );
+                        } else {
+                            $string = str_replace( $element, " ", $string );
+                        }
+                    }
+                } else {
+                    $string = str_replace( $element, " ", $string );
+                }
+            }
         }
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
