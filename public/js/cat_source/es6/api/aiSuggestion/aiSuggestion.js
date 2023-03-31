@@ -24,16 +24,11 @@ export const aiSuggestion = async ({
     phrase,
     id_client: idClient,
   }
-  const formData = new FormData()
-
-  Object.keys(dataParams).forEach((key) => {
-    if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
-  })
 
   const response = await fetch(`${getMatecatApiDomain()}api/app/ai-assistant`, {
     method: 'POST',
     credentials: 'include',
-    body: formData,
+    body: JSON.stringify(dataParams),
   })
 
   if (!response.ok) return Promise.reject(response)
