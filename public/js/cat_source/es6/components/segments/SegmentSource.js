@@ -512,19 +512,21 @@ class SegmentSource extends React.Component {
 
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
-        <li
-          title="AI assistant"
-          onMouseDown={() => {
-            SegmentActions.helpAiAssistant({
-              sid: segment.sid,
-              value: DraftMatecatUtils.getSelectedTextWithoutEntities(
-                editorState,
-              ).reduce((acc, {value}) => `${acc}${value}`, ''),
-            })
-          }}
-        >
-          <Assistant />
-        </li>
+        {Boolean(config.isOpenAiEnabled) && (
+          <li
+            title="AI assistant"
+            onMouseDown={() => {
+              SegmentActions.helpAiAssistant({
+                sid: segment.sid,
+                value: DraftMatecatUtils.getSelectedTextWithoutEntities(
+                  editorState,
+                ).reduce((acc, {value}) => `${acc}${value}`, ''),
+              })
+            }}
+          >
+            <Assistant />
+          </li>
+        )}
       </ul>
     )
 
