@@ -180,7 +180,7 @@ class GlossaryWorker extends AbstractWorker {
     private function get( $payload )
     {
 
-        if( empty ( $payload['source_language'] ) || empty ( $payload['target_language'] ) ){
+        if( empty($payload['source']) || empty ( $payload['source_language'] ) || empty ( $payload['target_language'] ) ){
             throw new EndQueueException( "Invalid Payload" );
         }
 
