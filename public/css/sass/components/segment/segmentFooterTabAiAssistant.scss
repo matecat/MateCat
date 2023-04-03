@@ -36,7 +36,8 @@
       color: $approvedGreen;
       margin-right: 8px;
 
-      &:hover {
+      &:hover,
+      &.active {
         border-color: $approvedGreen;
         background-color: rgba($approvedGreen, 0.1);
       }
@@ -45,7 +46,8 @@
     .dislike {
       color: $redDefault;
 
-      &:hover {
+      &:hover,
+      &.active {
         border-color: $redDefault;
         background-color: rgba($redDefault, 0.1);
       }
