@@ -23,13 +23,15 @@ class Client
     public function findContextForAWord($word, $phrase, $target)
     {
         $phrase = strip_tags($phrase);
+        $content = "Explain, in ".$target.", the meaning of '".$word."' when used in this context : '".$phrase."'";
+        $model =  (\INIT::$OPEN_AI_MODEL and \INIT::$OPEN_AI_MODEL !== '') ? \INIT::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
 
         $chat = $this->openAi->chat([
-            'model' => 'gpt-3.5-turbo',
+            'model' => $model,
             'messages' => [
                 [
                     "role" => "user",
-                    "content" => "Explain, in ".$target.", the meaning of '".$word."' when used in this context : '".$phrase."'"
+                    "content" => $content
                 ],
             ],
             'temperature' => 1.0,
@@ -39,6 +41,8 @@ class Client
         ]);
 
         $d = json_decode($chat);
+
+        \Log::doJsonLog('Response to `'.$content.'` from Open AI API: ' . $d);
 
         return $d->choices[0]->message->content;
     }

@@ -119,6 +119,7 @@ class INIT {
      * OPENAI configuration
      */
     public static $OPENAI_API_KEY;
+    public static $OPEN_AI_MODEL;
 
     /**
      * DQF configuration
