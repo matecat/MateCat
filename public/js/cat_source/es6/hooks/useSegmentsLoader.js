@@ -74,14 +74,6 @@ function useSegmentsLoader({
             current.thereAreNoItemsAfter = true
         }
         setResult({data, segmentId: segmentIdValue, where: data.where})
-
-        // check files prop is empty and "where='center'" / send exception to Sentry
-        if (where === 'center' && !data.files[Object.keys(data.files)[0]]) {
-          const trackingMessage = `API getSegments files is empty: ${JSON.stringify(
-            data,
-          )} POST params: idJob:${idJob}, password:${password}, segmentId:${segmentIdValue}, where:${where}`
-          CommonUtils.dispatchTrackingError(trackingMessage)
-        }
       })
       .catch((errors) => {
         if (wasCleaned) return
