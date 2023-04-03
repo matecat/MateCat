@@ -97,6 +97,8 @@ browserChannel.on( 'connect', ( context, req, res ) => {
             clientId: res._clientId
         }
     }, [res] );
+    logger.debug( ['New client connection ' + res._clientId ] );
+
 } );
 
 /**
