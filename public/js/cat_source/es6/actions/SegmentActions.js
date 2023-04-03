@@ -1361,6 +1361,12 @@ const SegmentActions = {
       isTarget,
     })
   },
+  setIsCurrentSearchOccurrenceTag: (value) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      value,
+    })
+  },
 }
 
 export default SegmentActions
