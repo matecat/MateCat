@@ -534,9 +534,13 @@ const TEXT_UTILS = {
     }, [])
   },
   getCharsSize: (value) => value.length * 1,
-  getCJKCharsSize: (value) => new Blob([value]).size,
-  getEmojiCharsSize: (value) => new Blob([value]).size,
-  getCJKMatches: (value) => {
+  getUtf8CharsSize: (value) => new Blob([value]).size,
+  getUft16CharsSize: (value) => value * 2,
+
+  // getCJKCharsSize: (value) => new Blob([value]).size,
+  // getEmojiCharsSize: (value) => new Blob([value]).size,
+
+  getCJKMatches: (value, sizeCallback) => {
     const regex =
       /[\u3041-\u3096\u30A0-\u30FF\u3400-\u4DB5\u4E00-\u9FCB\uF900-\uFA6A\u2E80-\u2FD5\uFF5F-\uFF9F\u3000-\u303F\u31F0-\u31FF\u3220-\u3243\u3280-\u337F\uFF01-\uFF5E\u3130-\u318F\uAC00-\uD7AF]/g
     let match
@@ -548,13 +552,30 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: TEXT_UTILS.getCJKCharsSize(char),
+        size: sizeCallback(char),
       })
     }
 
     return result
   },
-  getEmojiMatches: (value) => {
+  getArmenianMatches: (value, sizeCallback) => {
+    const regex = /[\u0561-\u0587\u0531-\u0556]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: sizeCallback(char),
+      })
+    }
+
+    return result
+  },
+  getEmojiMatches: (value, sizeCallback) => {
     const regex = /\p{Extended_Pictographic}/gu
     let match
     const result = []
@@ -565,13 +586,16 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: TEXT_UTILS.getEmojiCharsSize(char),
+        size: sizeCallback(char),
       })
     }
 
     return result
   },
-
+  charsSizeMapping: [
+    (value) => TEXT_UTILS.getCJKMatches(value, TEXT_UTILS.getUtf8CharsSize),
+    (value) => TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUtf8CharsSize),
+  ],
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
 }
 
