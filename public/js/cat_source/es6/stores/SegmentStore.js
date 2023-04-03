@@ -158,7 +158,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
-            segment: splittedSourceAr[i],
+            segment: TagUtils.transformTextFromBe(splittedSourceAr[i]),
             decodedSource: DraftMatecatUtils.unescapeHTML(
               DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
             ),
@@ -169,10 +169,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             split_points_source: [],
             status: status,
             time_to_edit: '0',
-            originalDecodedTranslation: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(translation),
-            ),
-            translation: translation ? translation : '',
+            originalDecodedTranslation: translation
+              ? DraftMatecatUtils.unescapeHTML(
+                  TagUtils.transformTextFromBe(translation),
+                )
+              : '',
+            translation: translation
+              ? TagUtils.transformTextFromBe(translation)
+              : '',
             decodedTranslation: DraftMatecatUtils.unescapeHTML(
               DraftMatecatUtils.decodeTagsToPlainText(translation),
             ),
@@ -218,8 +222,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
+        segment.segment = TagUtils.transformTextFromBe(segment.segment)
+        segment.translation = TagUtils.transformTextFromBe(segment.translation)
         segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
+          segment.translation,
         )
         segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
           DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
@@ -365,12 +371,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.unescapeHTML(
-      DraftMatecatUtils.decodeTagsToPlainText(translation),
-    )
+    const newTrans = DraftMatecatUtils.decodeTagsToPlainText(translation)
+
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
-      newTrans,
+      translation,
     )
     this._segments = this._segments.setIn(
       [index, 'decodedTranslation'],
@@ -390,7 +395,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (!segment) return
 
     //Check segment is modified
-    if (segment.get('originalDecodedTranslation') !== decodedTranslation) {
+    if (segment.get('originalDecodedTranslation') !== translation) {
       this._segments = this._segments.setIn([index, 'modified'], true)
     } else {
       this._segments = this._segments.setIn([index, 'modified'], false)
@@ -433,7 +438,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       let segment = this._segments.get(index)
       this._segments = this._segments.setIn(
         [index, 'originalDecodedTranslation'],
-        segment.get('decodedTranslation'),
+        segment.get('translation'),
       )
     }
   },
@@ -700,19 +705,21 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       ? segment.get('glossary').toJS()
       : []
 
-    const updatedGlossary = [
-      ...addedTerms,
-      ...glossary
-        .filter(
-          ({term_id}) => !addedTerms.find((term) => term.term_id === term_id),
-        )
-        .map((term) => ({
-          ...term,
-          ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
-            missingTerm: false,
-          }),
-        })),
-    ]
+    const updatedGlossary = glossary.length
+      ? glossary
+          .map((term) => ({
+            ...term,
+            ...((shouldCheckMissingTerms || term.missingTerm === undefined) && {
+              missingTerm: false,
+            }),
+          }))
+          .map((term) => {
+            const matchedTerm = addedTerms.find(
+              ({term_id}) => term_id === term.term_id,
+            )
+            return matchedTerm ? matchedTerm : term
+          })
+      : addedTerms
 
     this._segments = this._segments.setIn(
       [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
@@ -1243,16 +1250,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       .toJS()
   },
   getSegmentChoosenContribution(sid) {
-    let seg = this.getSegmentById(sid)
-    let currContrIndex = seg.get('choosenSuggestionIndex')
-    if (currContrIndex) {
-      return seg
-        .get('contributions')
-        .get('matches')
-        .get(currContrIndex - 1)
-        .toJS()
-    }
-    return
+    const seg = this.getSegmentById(sid)
+    const currentIndex = seg.get('choosenSuggestionIndex')
+    const currentMatch = seg
+      .get('contributions')
+      ?.get('matches')
+      ?.get(currentIndex - 1)
+
+    return currentMatch?.toJS()
   },
   getGlobalWarnings() {
     return this._globalWarnings
@@ -1907,7 +1912,11 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
       )
       const current = SegmentStore.getCurrentSegment()
-      SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid)
+      if (current)
+        SegmentStore.emitChange(
+          SegmentConstants.SET_SEGMENT_TAGGED,
+          current.sid,
+        )
       break
     }
     case EditAreaConstants.EDIT_AREA_CHANGED:
@@ -1957,6 +1966,14 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
         ...action,
       })
+      break
+    case SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG:
+      SegmentStore.emitChange(
+        SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+        {
+          ...action,
+        },
+      )
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

@@ -171,7 +171,8 @@ const SegmentActions = {
     }
   },
   scrollToCurrentSegment() {
-    this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
+    if (SegmentStore.getCurrentSegment())
+      this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
   scrollToSegment: function (sid, callback) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
@@ -294,6 +295,9 @@ const SegmentActions = {
     var currentSegment = segmentObj
       ? segmentObj
       : SegmentStore.getCurrentSegment()
+
+    if (!currentSegment) return
+
     var tagProjectionEnabled =
       TagUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged
@@ -635,12 +639,15 @@ const SegmentActions = {
       alternatives: alternatives,
     })
   },
-  chooseContribution: function (sid, index) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
-      sid: sid,
-      index: index,
-    })
+  chooseContributionOnCurrentSegment: function (index) {
+    const segment = SegmentStore.getCurrentSegment()
+    if (segment.contributions) {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
+        sid: segment.sid,
+        index: index,
+      })
+    }
   },
   deleteContribution: function (source, target, matchId, sid) {
     TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
@@ -717,7 +724,10 @@ const SegmentActions = {
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
-      if (typeof segment.glossary === 'undefined' || sid === request.sid) {
+      if (
+        segment &&
+        (typeof segment.glossary === 'undefined' || sid === request.sid)
+      ) {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
@@ -1355,6 +1365,12 @@ const SegmentActions = {
       termId,
       type,
       isTarget,
+    })
+  },
+  setIsCurrentSearchOccurrenceTag: (value) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      value,
     })
   },
 }

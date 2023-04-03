@@ -31,6 +31,7 @@ class Search extends React.Component {
         searchTarget: '',
         searchSource: '',
         previousIsTagProjectionEnabled: false,
+        isSelectedTag: false,
       },
       focus: true,
       funcFindButton: true, // true=find / false=next
@@ -91,6 +92,7 @@ class Search extends React.Component {
       searchResultsDictionary: data.searchResultsDictionary,
       featuredSearchResult: data.featuredSearchResult,
       searchReturn: true,
+      isSelectedTag: false,
     })
     setTimeout(() => {
       !_.isUndefined(this.state.occurrencesList[data.featuredSearchResult]) &&
@@ -109,6 +111,7 @@ class Search extends React.Component {
           occurrencesList: searchObject.occurrencesList,
           searchResultsDictionary: searchObject.searchResultsDictionary,
           featuredSearchResult: searchObject.featuredSearchResult,
+          isSelectedTag: false,
         })
         setTimeout(() =>
           SegmentActions.addSearchResultToSegments(
@@ -300,12 +303,14 @@ class Search extends React.Component {
       const segment = SegmentStore.getSegmentByIdToJS(
         this.state.occurrencesList[this.state.featuredSearchResult],
       )
-      this.updateAfterReplace(segment.original_sid)
-      // let next = this.state.occurrencesList[this.state.featuredSearchResult];
-      UI.setTranslation({
-        id_segment: segment.original_sid,
-        status: segment.status,
-      })
+      if (segment) {
+        this.updateAfterReplace(segment.original_sid)
+        // let next = this.state.occurrencesList[this.state.featuredSearchResult];
+        UI.setTranslation({
+          id_segment: segment.original_sid,
+          status: segment.status,
+        })
+      }
     })
   }
 
@@ -554,6 +559,14 @@ class Search extends React.Component {
       }
     }
   }
+  setStateReplaceButton = ({value}) => {
+    setTimeout(() => {
+      this.setState({
+        isSelectedTag: value,
+      })
+    })
+  }
+
   componentDidMount() {
     document.addEventListener('keydown', this.handelKeydownFunction, true)
     CatToolStore.addListener(
@@ -565,6 +578,10 @@ class Search extends React.Component {
       this.handleCancelClick,
     )
     SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch)
+    SegmentStore.addListener(
+      SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      this.setStateReplaceButton,
+    )
   }
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handelKeydownFunction)
@@ -579,6 +596,10 @@ class Search extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.UPDATE_SEARCH,
       this.updateSearch,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      this.setStateReplaceButton,
     )
   }
 
@@ -632,7 +653,8 @@ class Search extends React.Component {
     let replaceButtonsClass =
       this.state.search.enableReplace &&
       this.state.search.searchTarget &&
-      !this.state.funcFindButton
+      !this.state.funcFindButton &&
+      !this.state.isSelectedTag
         ? ''
         : 'disabled'
     let replaceAllButtonsClass =

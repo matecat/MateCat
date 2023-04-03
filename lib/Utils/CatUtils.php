@@ -500,7 +500,7 @@ class CatUtils {
 
 
         //check for a string made of spaces only, after the string was cleaned
-        $string_with_no_spaces = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $string );
+        $string_with_no_spaces = preg_replace( '#[\p{Z}\p{C}]+#u', "", $string );
         if ( $string_with_no_spaces == "" ) {
             return 0;
         }

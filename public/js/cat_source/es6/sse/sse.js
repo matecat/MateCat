@@ -53,9 +53,21 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_get', function (ev, message) {
+      if (!Array.isArray(message.data.terms)) {
+        const trackingMessage = `Glossary GET terms is not Array: ${
+          message.data.terms
+        } / message: ${JSON.stringify(message)}`
+        CommonUtils.dispatchTrackingError(trackingMessage)
+      }
+
+      const terms = Array.isArray(message.data.terms) ? message.data.terms : []
+      const blacklistedTerms = Array.isArray(message.data.blacklisted_terms)
+        ? message.data.blacklisted_terms
+        : []
+
       SegmentActions.setGlossaryForSegment(message.data.id_segment, [
-        ...message.data.terms,
-        ...message.data.blacklisted_terms.map((term) => ({
+        ...terms,
+        ...blacklistedTerms.map((term) => ({
           ...term,
           isBlacklist: true,
         })),
@@ -210,11 +222,6 @@ let SSE = {
 let NOTIFICATIONS = {
   start: function () {
     SSE.init()
-    this.connectionStatus = {
-      connectionOpened: false,
-      connectionError: false,
-      messageReceived: false,
-    }
     this.source = SSE.getSource('notifications')
 
     this.addEvents()
@@ -228,7 +235,6 @@ let NOTIFICATIONS = {
     this.source.addEventListener(
       'message',
       (e) => {
-        this.connectionStatus.messageReceived = true
         var message = new SSE.Message(JSON.parse(e.data))
         if (message.isValid()) {
           $(document).trigger(message.eventIdentifier, message)
@@ -241,14 +247,8 @@ let NOTIFICATIONS = {
       'error',
       () => {
         console.error('SSE: server disconnect')
-        let {connectionError} = this.connectionStatus
-        if (!connectionError) {
-          const {connectionOpened, connectionError, messageReceived} =
-            this.connectionStatus
-          const message = `SSE channel disconnect. Connection opened = ${connectionOpened} / Connection error = ${connectionError} / Some message received = ${messageReceived} `
-          CommonUtils.dispatchTrackingError(message)
-        }
-        this.connectionStatus.connectionError = true
+        config.id_client = undefined
+        CatToolActions.clientConntected()
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -260,13 +260,7 @@ let NOTIFICATIONS = {
       },
       false,
     )
-    this.source.addEventListener(
-      'open',
-      () => {
-        this.connectionStatus.connectionOpened = true
-      },
-      false,
-    )
+    this.source.addEventListener('open', () => {}, false)
   },
 }
 

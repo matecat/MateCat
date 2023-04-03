@@ -156,7 +156,7 @@ const CommonUtils = {
     let updateAppByPopState = () => {
       var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
       var currentSegment = SegmentStore.getCurrentSegment()
-      if (segment && currentSegment.sid === segment.sid) return
+      if (segment && currentSegment?.sid === segment.sid) return
       if (segment && !segment.opened) {
         SegmentActions.openSegment(this.parsedHash.segmentId, true)
       }

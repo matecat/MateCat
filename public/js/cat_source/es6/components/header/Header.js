@@ -160,11 +160,6 @@ class Header extends React.Component {
                     <li>
                       <a href="https://guides.matecat.com/">User Guide</a>
                     </li>
-                    <li>
-                      <a href="https://site.matecat.com/contact-us/">
-                        Contact us
-                      </a>
-                    </li>
                     {/*<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>*/}
                     {this.getMoreLinks()}
                   </ul>

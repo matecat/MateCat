@@ -49,7 +49,6 @@ function SegmentsContainer({
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)
   const [onUpdateRow, setOnUpdateRow] = useState(undefined)
-  const [widthArea, setWidthArea] = useState(0)
   const [heightArea, setHeightArea] = useState(0)
   const [startIndex, setStartIndex] = useState(0)
   const [stopIndex, setStopIndex] = useState(0)
@@ -61,6 +60,8 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
+  const [clientConnected, setClientConnected] = useState(false)
+  const [clientId, setClientId] = useState()
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -141,9 +142,9 @@ function SegmentsContainer({
           ? previousSegment.get('id_file')
           : 0
         const isFirstSegment =
-          files &&
-          SegmentUtils.getSegmentFileId(segment.toJS()) ===
-            files[0].first_segment
+          files?.length &&
+          parseInt(SegmentUtils.getSegmentFileId(segment.toJS())) ===
+            parseInt(files[0].first_segment)
         const fileDivHeight = isFirstSegment ? 60 : 75
         const collectionDivHeight = isFirstSegment ? 35 : 50
         if (previousFileId !== SegmentUtils.getSegmentFileId(segment.toJS())) {
@@ -240,7 +241,9 @@ function SegmentsContainer({
         collectionsTypeArray.indexOf(collectionType) === -1
       ) {
         let classes = isSideOpen ? 'slide-right' : ''
-        const isFirstSegment = files && segment.sid === files[0].first_segment
+        const isFirstSegment =
+          files?.length &&
+          parseInt(segment.sid) === parseInt(files[0].first_segment)
         classes = isFirstSegment ? classes + ' first-segment' : classes
         collectionTypeSeparator = (
           <div
@@ -314,6 +317,11 @@ function SegmentsContainer({
       container === 'search' && setIsSearchBarOpen((prevState) => !prevState)
     const closeSubHeader = () => setIsSearchBarOpen(false)
 
+    const sseConnection = (clientId) => {
+      setClientConnected(!!clientId)
+      setClientId(clientId)
+    }
+
     const mousedownHandler = () =>
       (persistenceVariables.current.isUserDraggingCursor = true)
     const mouseupHandler = () =>
@@ -338,6 +346,7 @@ function SegmentsContainer({
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
     CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, toggleSearchBar)
     CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, closeSubHeader)
+    CatToolStore.addListener(CatToolConstants.CLIENT_CONNECT, sseConnection)
 
     document.addEventListener('mousedown', mousedownHandler)
     document.addEventListener('mouseup', mouseupHandler)
@@ -372,6 +381,10 @@ function SegmentsContainer({
       CatToolStore.removeListener(
         CatToolConstants.CLOSE_SUBHEADER,
         closeSubHeader,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.CLIENT_CONNECT,
+        sseConnection,
       )
 
       document.removeEventListener('mousedown', mousedownHandler)
@@ -673,7 +686,6 @@ function SegmentsContainer({
           align: scrollToParams.position,
         }}
         overscan={OVERSCAN}
-        width={widthArea}
         height={heightArea}
         onRender={(index) => {
           const props = getSegmentPropsBySid(essentialRows[index].id)
@@ -685,6 +697,8 @@ function SegmentsContainer({
                   onChangeRowHeight,
                   ...essentialRows[index],
                   ...props,
+                  clientConnected,
+                  clientId,
                   ...(index === essentialRows.length - 1 && {
                     isLastRow: true,
                   }),

@@ -16,14 +16,12 @@ export const markAsResolvedThread = async ({
   idSegment,
   username,
   sourcePage,
-  idClient = config.id_client,
   idJob = config.id_job,
   password = config.password,
 }) => {
   const dataParams = {
     action: 'comment',
     _sub: 'resolve',
-    id_client: idClient,
     id_job: idJob,
     id_segment: idSegment,
     username,

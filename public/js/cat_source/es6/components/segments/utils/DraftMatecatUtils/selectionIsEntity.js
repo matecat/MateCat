@@ -7,7 +7,7 @@ const selectionIsEntity = (editorState) => {
   if (focusKey !== anchorKey) return {entityKey: null, onEdge: null}
   const anchorOffset = currentSelection.getAnchorOffset()
   const anchorBlock = contentState.getBlockForKey(anchorKey)
-  let anchorEntityKey = anchorBlock.getEntityAt(anchorOffset)
+  let anchorEntityKey = anchorBlock && anchorBlock.getEntityAt(anchorOffset)
   // if selection is collapsed if selection on edge
   let onEdge = false
   if (anchorEntityKey && currentSelection.isCollapsed()) {

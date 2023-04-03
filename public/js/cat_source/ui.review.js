@@ -8,14 +8,7 @@ window.Review = {
 }
 $.extend(window.UI, {
   evalOpenableSegment: function (segment) {
-    if (!(segment.status === 'NEW' || segment.status === 'DRAFT')) return true
-
-    if (UI.projectStats && UI.projectStats.TRANSLATED_PERC === 0) {
-      alertNoTranslatedSegments()
-    } else {
-      alertNotTranslatedYet(segment.sid)
-    }
-    return false
+    return !(segment.status === 'NEW' || segment.status === 'DRAFT')
   },
 })
 

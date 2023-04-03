@@ -1,4 +1,10 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
@@ -10,7 +16,9 @@ import {TabGlossaryContext} from './TabGlossaryContext'
 import {SearchTerms} from './SearchTerms'
 import GlossaryList from './GlossaryList'
 import TermForm from './TermForm'
+import {SegmentContext} from '../SegmentContext'
 import SegmentUtils from '../../../utils/segmentUtils'
+import {SegmentFooterTabError} from '../SegmentFooterTabError'
 
 export const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -59,6 +67,7 @@ export const SegmentFooterTabGlossary = ({
   const [haveKeysGlossary, setHaveKeysGlossary] = useState(undefined)
   const [termsStatusDeleting, setTermsStatusDeleting] = useState([])
 
+  const {clientConnected, clientId} = useContext(SegmentContext)
   const ref = useRef()
   const previousSearchTermRef = useRef('')
 
@@ -148,7 +157,7 @@ export const SegmentFooterTabGlossary = ({
 
       return {
         id_segment: segment.sid,
-        id_client: config.id_client,
+        id_client: clientId,
         id_job: config.id_job,
         password: config.password,
         term: {
@@ -227,8 +236,6 @@ export const SegmentFooterTabGlossary = ({
       CatToolConstants.DELETE_FROM_GLOSSARY,
       onDeleteTerm,
     )
-
-    CatToolActions.retrieveJobKeys()
 
     return () => {
       SegmentStore.removeListener(
@@ -350,23 +357,7 @@ export const SegmentFooterTabGlossary = ({
 
   useEffect(() => {
     if (!segment?.glossary_search_results) return
-    const orderedByUpdateDate = [...segment.glossary_search_results]
-      .sort((a, b) => {
-        if (a.term_id < b.term_id) {
-          return 1
-        } else {
-          return -1
-        }
-      })
-      .sort((a, b) => {
-        if (a.source.term > b.source.term) {
-          return 1
-        } else {
-          return -1
-        }
-      })
-    // console.log('----> segment glossary', orderedByUpdateDate)
-    setTerms(orderedByUpdateDate)
+    setTerms(segment.glossary_search_results)
     setIsLoading(false)
   }, [segment?.glossary_search_results])
 
@@ -463,6 +454,12 @@ export const SegmentFooterTabGlossary = ({
     setIsActive(!!active_class)
   }, [active_class])
 
+  useEffect(() => {
+    if (clientConnected) {
+      CatToolActions.retrieveJobKeys()
+    }
+  }, [clientConnected])
+
   return (
     <TabGlossaryContext.Provider
       value={{
@@ -504,7 +501,9 @@ export const SegmentFooterTabGlossary = ({
         className={`tab sub-editor glossary ${active_class}`}
         tabIndex="0"
       >
-        {haveKeysGlossary ? (
+        {!clientConnected ? (
+          <SegmentFooterTabError />
+        ) : haveKeysGlossary ? (
           <>
             <SearchTerms />
             {showForm && <TermForm />}
