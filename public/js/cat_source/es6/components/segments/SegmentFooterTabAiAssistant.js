@@ -15,6 +15,8 @@ export const SegmentFooterTabAiAssistant = ({
   segment,
 }) => {
   const [suggestion, setSuggestion] = useState()
+  const [feedbackLeave, setFeedbackLeave] = useState()
+
   let requestedWord = useRef()
 
   const sendFeedback = (feedback) => {
@@ -28,12 +30,12 @@ export const SegmentFooterTabAiAssistant = ({
       feedback: feedback ? 'Yes' : 'No',
     }
     CommonUtils.dispatchTrackingEvents('AiAssistantFeedback', message)
+    setFeedbackLeave(feedback ? 'Yes' : 'No')
   }
 
   useEffect(() => {
     const aiAssistantHandler = ({sid, value}) => {
       if (sid === segment.sid) {
-        console.log('request ai assistant', sid, value)
         setSuggestion(undefined)
         requestedWord.current = value
 
@@ -46,10 +48,7 @@ export const SegmentFooterTabAiAssistant = ({
       }
     }
     const aiSuggestionHandler = ({sid, suggestion}) => {
-      if (sid === segment.sid) {
-        console.log('ai suggestion', sid, suggestion)
-        setSuggestion(suggestion)
-      }
+      if (sid === segment.sid) setSuggestion(suggestion)
     }
 
     SegmentStore.addListener(
@@ -86,16 +85,22 @@ export const SegmentFooterTabAiAssistant = ({
       className={`tab sub-editor ${active_class} ${tab_class}`}
       id={`segment-${segment.sid}-${tab_class}`}
     >
-      {suggestion ? (
+      {typeof suggestion !== 'undefined' ? (
         <div className="ai-assistant-container">
           <div>{suggestion}</div>
           <div>
             <span>Was this suggestion useful?</span>
             <div className="feedback-icons">
-              <span className="like" onClick={() => sendFeedback(false)}>
+              <span
+                className={`like${feedbackLeave === 'Yes' ? ' active' : ''}`}
+                onClick={() => sendFeedback(true)}
+              >
                 <IconLike />
               </span>
-              <span className="dislike" onClick={() => sendFeedback(false)}>
+              <span
+                className={`dislike${feedbackLeave === 'No' ? ' active' : ''}`}
+                onClick={() => sendFeedback(false)}
+              >
                 <IconDislike />
               </span>
             </div>
