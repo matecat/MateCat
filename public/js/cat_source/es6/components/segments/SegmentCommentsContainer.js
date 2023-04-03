@@ -262,7 +262,7 @@ class SegmentCommentsContainer extends React.Component {
           ) : null}
           <div
             ref={(input) => (this.commentInput = input)}
-            onKeyPress={(e) => e.key === 'Enter' && this.sendComment()}
+            onKeyDown={(e) => this.onKeyDown(e)}
             className="mbc-comment-input mbc-comment-textarea"
             contentEditable={true}
             data-placeholder="Write a comment..."
@@ -331,6 +331,13 @@ class SegmentCommentsContainer extends React.Component {
 
   setFocusOnInput() {
     this.commentInput.focus()
+  }
+
+  onKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      this.sendComment()
+    }
   }
 
   componentDidUpdate() {
