@@ -246,7 +246,7 @@ let CatToolActions = {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
     const haveKeysGlossary = CatToolStore.getHaveKeysGlossary()
-    if (!jobKeys || forceUpdate) {
+    if ((!jobKeys || forceUpdate) && config.id_client) {
       getTmKeysJob().then(({tm_keys: tmKeys}) => {
         // filter not private keys
         const filteredKeys = tmKeys.filter(({is_private}) => !is_private)

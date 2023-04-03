@@ -1423,7 +1423,7 @@ body.noGlossary .tab-switcher-gl {
   background: #f5f5f5;
   color: $grey1;
   -moz-box-shadow: none;
-  position: relative;
+  //position: relative;
   -webkit-box-shadow: none;
 }
 
@@ -2750,9 +2750,13 @@ body.rtl-target .editor .editarea span {
 }
 
 .engine-errors {
-  position: absolute;
-  top: 13px;
+  position: relative;
   width: 100%;
+  min-height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
 }
 
 .engine-error-item.graysmall:hover {

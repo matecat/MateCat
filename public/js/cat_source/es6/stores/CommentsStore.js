@@ -112,11 +112,11 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       var count = 0
 
       for (var segmentID in CommentsStore.db.segments) {
-        var el =
+        const el =
           CommentsStore.db.segments[segmentID][
             CommentsStore.db.segments[segmentID].length - 1
           ]
-        parseInt(el.message_type) === 1 ? count++ : null
+        if (el.message_type && parseInt(el.message_type) === 1) count++
       }
       return count
     },

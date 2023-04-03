@@ -14,7 +14,8 @@ import TagUtils from '../../../utils/tagUtils'
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
     if (!config.translation_matches_enabled) return
-    let matchToUse = segment.contributions.matches[index - 1]
+    let matchToUse = segment.contributions.matches[index - 1] ?? {}
+
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {

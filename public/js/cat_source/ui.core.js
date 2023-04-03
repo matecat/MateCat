@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import React from 'react'
 import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
@@ -12,7 +11,6 @@ import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
-import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
@@ -79,7 +77,7 @@ window.UI = {
     // ask if the user wants propagation or this is valid only
     // for this segment
 
-    if (this.autopropagateConfirmNeeded(opts.propagation)) {
+    if (this.autopropagateConfirmNeeded(segment, opts.propagation)) {
       var text = !_.isUndefined(segment.alternatives)
         ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
           'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
@@ -117,8 +115,7 @@ window.UI = {
     }
   },
 
-  autopropagateConfirmNeeded: function (propagation) {
-    var segment = SegmentStore.getCurrentSegment()
+  autopropagateConfirmNeeded: function (segment, propagation) {
     var segmentModified = segment.modified
     var segmentStatus = segment.status.toLowerCase()
     var statusNotConfirmationNeeded = ['new', 'draft']
@@ -682,10 +679,6 @@ window.UI = {
     return totalTranslation
   },
 
-  targetContainerSelector: function () {
-    return '.targetarea'
-  },
-
   processErrors: function (err, operation) {
     $.each(err, function () {
       var codeInt = parseInt(this.code)
@@ -740,10 +733,7 @@ window.UI = {
       SegmentActions.setStatus(id_segment, null, status)
       this.setDownloadStatus(response.stats)
       CatToolActions.setProgress(response.stats)
-      SegmentActions.removeClassToSegment(
-        options.id_segment,
-        'setTranslationPending',
-      )
+      SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
 
       this.checkWarnings(false)
       $(segment).attr('data-version', response.version)
@@ -875,7 +865,6 @@ window.UI = {
     $('.temp-highlight-tags').remove()
 
     SegmentActions.removeClassToSegment(sid, 'modified')
-    UI.currentSegment.data('modified', false)
 
     UI.setTimeToEdit(segment.sid)
 

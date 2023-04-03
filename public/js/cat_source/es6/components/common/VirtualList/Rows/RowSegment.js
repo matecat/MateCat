@@ -72,8 +72,11 @@ function RowSegment({
         ? files.find((file) => file.id == idFileSegment)
         : false
       let classes = sideOpen ? 'slide-right' : ''
-      const isFirstSegment = files && segment.sid === files[0].first_segment
+      const isFirstSegment =
+        files?.length &&
+        parseInt(segment.sid) === parseInt(files[0].first_segment)
       classes = isFirstSegment ? classes + ' first-segment' : classes
+
       return (
         <div className={'projectbar ' + classes}>
           {file ? (
