@@ -6,6 +6,7 @@ use API\V2\KleinController;
 use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
+use Utils;
 use Validator\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
@@ -374,31 +375,13 @@ class GlossaryController extends KleinController {
      */
     private function validateLanguage($language){
 
-        if(!in_array($language, $this->allowedLanguages())){
+        if(!in_array($language, Utils::allowedLanguages())){
             $this->response->code(500);
             $this->response->json([
                     'error' => $language . ' is not an allowed language'
             ]);
             die();
         }
-    }
-
-    /**
-     * @return array
-     */
-    private function allowedLanguages()
-    {
-        $allowedLanguages = [];
-
-        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = $lang['rfc3066code'];
-        }
-
-        return $allowedLanguages;
     }
 
     /**

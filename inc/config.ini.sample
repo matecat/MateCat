@@ -57,6 +57,8 @@ AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
 AWS_CACHING = true
 AWS_SSL_VERIFY = true
 
+OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxx"
+
 DQF_ENABLED = yes
 DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'
 DQF_API_KEY = api-key

@@ -99,6 +99,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   clipboardPlainText: '',
   sideOpen: false,
   isSearchingGlossaryInTarget: false,
+  helpAiAssistantWords: undefined,
+  _aiSuggestions: [],
   /**
    * Update all
    */
@@ -1286,6 +1288,21 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
+  getAiSuggestion: (sid) =>
+    SegmentStore._aiSuggestions.find((item) => item.sid === sid),
+  setAiSuggestion: ({sid, suggestion}) => {
+    const MAX_ITEMS = 10
+
+    const filteredWithoutCurrent = SegmentStore._aiSuggestions.filter(
+      (item) => item.sid !== sid,
+    )
+    const difference = filteredWithoutCurrent.length - MAX_ITEMS
+    const update =
+      difference > 0
+        ? filteredWithoutCurrent.slice(difference)
+        : filteredWithoutCurrent
+    SegmentStore._aiSuggestions = [...update, {sid, suggestion}]
+  },
 })
 
 // Register callback to handle all updates
@@ -1974,6 +1991,20 @@ AppDispatcher.register(function (action) {
           ...action,
         },
       )
+    case SegmentConstants.HELP_AI_ASSISTANT:
+      SegmentStore.helpAiAssistantWords = {...action}
+      SegmentStore.emitChange(SegmentConstants.HELP_AI_ASSISTANT, {
+        ...action,
+      })
+      break
+    case SegmentConstants.AI_SUGGESTION:
+      SegmentStore.setAiSuggestion({
+        sid: action.sid,
+        suggestion: action.suggestion,
+      })
+      SegmentStore.emitChange(SegmentConstants.AI_SUGGESTION, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

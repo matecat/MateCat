@@ -262,10 +262,10 @@ abstract class viewController extends controller {
             $this->template->supportedBrowser    = $this->supportedBrowser;
             $this->template->platform            = $this->platform;
             $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
-
-            $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
-            $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-            $this->template->dqf_enabled    = false;
+            $this->template->maxFileSize         = INIT::$MAX_UPLOAD_FILE_SIZE;
+            $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+            $this->template->dqf_enabled         = false;
+            $this->template->isOpenAiEnabled     = !empty(INIT::$OPENAI_API_KEY);
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );

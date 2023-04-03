@@ -190,6 +190,12 @@ let SSE = {
         }
       })
     }
+    $(document).on('sse:ai_assistant_explain_meaning', function (ev, message) {
+      SegmentActions.aiSuggestion({
+        sid: message.data.id_segment,
+        suggestion: message.data.message,
+      })
+    })
   },
 
   Message: function (data) {
@@ -210,6 +216,7 @@ let SSE = {
       'glossary_search',
       'glossary_check',
       'glossary_keys',
+      'ai_assistant_explain_meaning',
     ]
     this.eventIdentifier = 'sse:' + this._type
 

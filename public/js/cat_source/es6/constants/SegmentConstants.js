@@ -110,4 +110,6 @@ module.exports = keyMirror({
   GET_SEGMENT_QA: null,
   HIGHLIGHT_GLOSSARY_TERM: null,
   SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG: null,
+  HELP_AI_ASSISTANT: null,
+  AI_SUGGESTION: null,
 })

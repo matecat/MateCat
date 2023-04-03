@@ -1447,6 +1447,18 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu li a {
   outline: none;
+  display: flex;
+  align-items: center;
+
+  .number {
+    margin-left: 4px;
+  }
+
+  .icon-close {
+    display: block;
+    height: 15px;
+    color: $grey1;
+  }
 }
 
 .submenu li.active a {
@@ -5023,6 +5035,7 @@ header {
   }
 }
 
+
 /* Custom font for Urdu (ur-PK) language */
 @font-face {
   font-family: 'Jameel Nori';
@@ -5034,4 +5047,20 @@ header {
 .source-ur-PK,
 .target-ur-PK {
   font-family: 'Jameel Nori';
+}
+
+.optionsToolbar {
+  margin-top: 16px;
+
+  > li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #c6c6c6;
+  }
+
 }

@@ -1367,10 +1367,27 @@ const SegmentActions = {
       isTarget,
     })
   },
+
   setIsCurrentSearchOccurrenceTag: (value) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
       value,
+    })
+  },
+  helpAiAssistant: ({sid, value}) => {
+    SegmentActions.modifyTabVisibility('AiAssistant', true)
+    SegmentActions.activateTab(sid, 'AiAssistant')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HELP_AI_ASSISTANT,
+      sid,
+      value,
+    })
+  },
+  aiSuggestion: ({sid, suggestion}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_SUGGESTION,
+      sid,
+      suggestion,
     })
   },
 }
