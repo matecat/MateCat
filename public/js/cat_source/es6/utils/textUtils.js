@@ -233,19 +233,6 @@ const TEXT_UTILS = {
     segment = segment.replace(/&gt;/gi, GTPLACEHOLDER)
     return segment
   },
-  view2rawxliff(segment) {
-    // return segment+"____";
-    // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-    // output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
-
-    // caso controverso <g id="4" x="&lt; dfsd &gt;">
-    //segment=htmlDecode(segment);
-    segment = this.placehold_xliff_tags(segment)
-    segment = this.htmlEncode(segment)
-    segment = this.restore_xliff_tags(segment)
-
-    return segment
-  },
 
   restore_xliff_tags(segment) {
     let LTPLACEHOLDER = '##LESSTHAN##'

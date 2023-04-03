@@ -393,8 +393,15 @@ test('Remove tab', () => {
 
 test('Translation Matches count result', () => {
   UI.registerFooterTabs()
+  config.id_client = 'xxx'
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider
+      value={{
+        segment: props.segment,
+        clientConnected: true,
+        clientId: config.id_client,
+      }}
+    >
       <SegmentFooter />
     </SegmentContext.Provider>,
   )

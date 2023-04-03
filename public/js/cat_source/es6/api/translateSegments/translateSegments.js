@@ -15,13 +15,11 @@ export const translateSegments = async (
   segments,
   idJob = config.id_job,
   password = config.password,
-  idClient = config.id_client,
   revisionNumber = config.revisionNumber,
 ) => {
   const dataParams = flattenObject({
     segments_id: segments,
     status: 'translated',
-    client_id: idClient,
     revision_number: revisionNumber,
   })
   const formData = new FormData()

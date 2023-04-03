@@ -11,8 +11,12 @@ import SegmentActions from '../../actions/SegmentActions'
 import CommonUtils from '../../utils/commonUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
+import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterTabMatches extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     this.suggestionShortcutLabel = 'CTRL+'
@@ -82,6 +86,8 @@ class SegmentFooterTabMatches extends React.Component {
           config.isTargetRTL,
         ),
       )
+      item.translation = TagUtils.transformTextFromBe(this.translation)
+
       item.sourceDiff = item.suggestionDecodedHtml
       item.memoryKey = this.memory_key
       if (
@@ -156,8 +162,8 @@ class SegmentFooterTabMatches extends React.Component {
   deleteSuggestion(match) {
     var source = TextUtils.htmlDecode(match.segment)
     var target = TextUtils.htmlDecode(match.translation)
-    target = TextUtils.view2rawxliff(target)
-    source = TextUtils.view2rawxliff(source)
+    target = TagUtils.prepareTextToSend(target)
+    source = TagUtils.prepareTextToSend(source)
     SegmentActions.deleteContribution(
       source,
       target,
@@ -250,6 +256,8 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   render() {
+    const {clientConnected} = this.context
+
     let matchesHtml = []
     let self = this
     if (
@@ -388,14 +396,20 @@ class SegmentFooterTabMatches extends React.Component {
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
-        <div className="overflow">
-          {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-            matchesHtml
-          ) : (
-            <span className="loader loader_on" />
-          )}
-        </div>
-        <div className="engine-errors">{errors}</div>
+        {clientConnected ? (
+          <>
+            <div className="overflow">
+              {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+                matchesHtml
+              ) : (
+                <span className="loader loader_on" />
+              )}
+            </div>
+            {errors.length > 0 && <div className="engine-errors">{errors}</div>}
+          </>
+        ) : (
+          <SegmentFooterTabError />
+        )}
       </div>
     )
   }
