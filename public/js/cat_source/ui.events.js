@@ -193,10 +193,7 @@ $.extend(window.UI, {
         ],
         function (e) {
           e.preventDefault()
-          SegmentActions.chooseContribution(
-            UI.getSegmentId(UI.currentSegment),
-            1,
-          )
+          SegmentActions.chooseContributionOnCurrentSegment(1)
         },
       )
       .on(
@@ -207,10 +204,7 @@ $.extend(window.UI, {
         ],
         function (e) {
           e.preventDefault()
-          SegmentActions.chooseContribution(
-            UI.getSegmentId(UI.currentSegment),
-            2,
-          )
+          SegmentActions.chooseContributionOnCurrentSegment(2)
         },
       )
       .on(
@@ -221,10 +215,7 @@ $.extend(window.UI, {
         ],
         function (e) {
           e.preventDefault()
-          SegmentActions.chooseContribution(
-            UI.getSegmentId(UI.currentSegment),
-            3,
-          )
+          SegmentActions.chooseContributionOnCurrentSegment(3)
         },
       )
       .on(

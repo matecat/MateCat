@@ -120,9 +120,11 @@ export const decodeTagsToPlainText = (text) => {
         try {
           return (
             String.fromCharCode(parseInt('200B', 16)) +
-            Base64.decode(text).replace(/&lt;/gi, '<').replace(/&gt;/gi, '>') +
+            Base64.decode(text) +
             String.fromCharCode(parseInt('200B', 16))
           )
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>')
         } catch (e) {
           console.error('Fail decoding tags in text', match, text)
         }

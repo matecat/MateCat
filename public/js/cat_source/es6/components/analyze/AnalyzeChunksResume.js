@@ -139,6 +139,7 @@ class AnalyzeChunksResume extends React.Component {
       <div
         className={'outsource-translation'}
         onClick={openOutsourceModal(index, chunk)}
+        id="open-quote-request"
       >
         <a>Buy Translation</a>
         <span>

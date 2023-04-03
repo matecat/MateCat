@@ -303,12 +303,14 @@ class Search extends React.Component {
       const segment = SegmentStore.getSegmentByIdToJS(
         this.state.occurrencesList[this.state.featuredSearchResult],
       )
-      this.updateAfterReplace(segment.original_sid)
-      // let next = this.state.occurrencesList[this.state.featuredSearchResult];
-      UI.setTranslation({
-        id_segment: segment.original_sid,
-        status: segment.status,
-      })
+      if (segment) {
+        this.updateAfterReplace(segment.original_sid)
+        // let next = this.state.occurrencesList[this.state.featuredSearchResult];
+        UI.setTranslation({
+          id_segment: segment.original_sid,
+          status: segment.status,
+        })
+      }
     })
   }
 
