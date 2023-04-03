@@ -514,7 +514,7 @@ class SegmentSource extends React.Component {
       <ul className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) && (
           <li
-            title="AI assistant"
+            title="See the meaning of the highlighted text in this context"
             onMouseDown={() => {
               SegmentActions.helpAiAssistant({
                 sid: segment.sid,
