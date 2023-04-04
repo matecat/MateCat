@@ -6,11 +6,21 @@ use Orhanerday\OpenAi\OpenAi;
 
 class Client
 {
+    const CURL_TIMEOUT = 30;
+
+    /**
+     * @var OpenAi
+     */
     private $openAi;
 
+    /**
+     * Client constructor.
+     * @param $apiKey
+     */
     public function __construct($apiKey)
     {
         $this->openAi = new OpenAi($apiKey);
+        $this->openAi->setTimeout(self::CURL_TIMEOUT);
     }
 
     /**
@@ -40,9 +50,15 @@ class Client
             'presence_penalty' => 0,
         ]);
 
+        $curlInfo = $this->openAi->getCURLInfo();
+
+        if($curlInfo['http_code'] !== 200){
+            throw new \Exception('Open AI API unexpected error');
+        }
+
         $d = json_decode($chat);
 
-        \Log::doJsonLog('Response to `'.$content.'` from Open AI API: ' . $d);
+        \Log::doJsonLog('Response to `'.$content.'` from Open AI API: ' . $chat);
 
         return $d->choices[0]->message->content;
     }
