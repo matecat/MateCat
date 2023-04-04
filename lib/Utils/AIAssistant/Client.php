@@ -6,8 +6,6 @@ use Orhanerday\OpenAi\OpenAi;
 
 class Client
 {
-    const CURL_TIMEOUT = 30;
-
     /**
      * @var OpenAi
      */
@@ -19,8 +17,10 @@ class Client
      */
     public function __construct($apiKey)
     {
+        $timeOut = (\INIT::$OPEN_AI_TIMEOUT) ? \INIT::$OPEN_AI_TIMEOUT : 30;
+
         $this->openAi = new OpenAi($apiKey);
-        $this->openAi->setTimeout(self::CURL_TIMEOUT);
+        $this->openAi->setTimeout($timeOut);
     }
 
     /**

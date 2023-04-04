@@ -120,6 +120,7 @@ class INIT {
      */
     public static $OPENAI_API_KEY;
     public static $OPEN_AI_MODEL;
+    public static $OPEN_AI_TIMEOUT;
 
     /**
      * DQF configuration
