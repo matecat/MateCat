@@ -1,4 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import TagUtils from '../../utils/tagUtils'
 
 /**
  * Get concordance
@@ -25,7 +26,7 @@ export const getConcordance = async (
     is_concordance: 1,
     from_target: type,
     id_segment: UI.currentSegmentId,
-    text: TextUtils.view2rawxliff(query),
+    text: TagUtils.prepareTextToSend(query),
     id_job: idJob,
     num_results: UI.numMatchesResults,
     password: password,

@@ -364,7 +364,7 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
           'tr td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]',
           function () {
             UI.hideAllBoxOnTables()
-            if (this.files[0].size > config.maxTMXFileSize) {
+            if (this.files && this.files[0].size > config.maxTMXFileSize) {
               const numMb = config.maxTMXFileSize / (1024 * 1024)
               ModalsActions.showModalComponent(
                 AlertModal,

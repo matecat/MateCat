@@ -20,6 +20,7 @@ export const CookieConsent = () => {
     //   .classList.remove('show-cookies-bar')
     Cookies.set(COOKIE_NAME, 1, {
       expires: COOKIE_TTL_DAYS,
+      secure: true,
     })
   }
 

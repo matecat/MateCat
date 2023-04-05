@@ -111,4 +111,5 @@ module.exports = keyMirror({
   HIGHLIGHT_GLOSSARY_TERM: null,
   HELP_AI_ASSISTANT: null,
   AI_SUGGESTION: null,
+  SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG: null,
 })

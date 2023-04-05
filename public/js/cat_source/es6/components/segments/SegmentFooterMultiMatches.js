@@ -6,8 +6,12 @@ import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
 import SegmentActions from '../../actions/SegmentActions'
+import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterMultiMatches extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     // this.state = {
@@ -76,6 +80,7 @@ class SegmentFooterMultiMatches extends React.Component {
           TagUtils.decodePlaceholdersToTextSimple(this.translation),
         ),
       )
+      item.translation = TagUtils.transformTextFromBe(this.translation)
       item.sourceDiff = item.suggestionDecodedHtml
 
       if (
@@ -210,6 +215,7 @@ class SegmentFooterMultiMatches extends React.Component {
   }
 
   render() {
+    const {clientConnected} = this.context
     var matches = []
     if (
       this.props.segment.cl_contributions &&
@@ -289,14 +295,17 @@ class SegmentFooterMultiMatches extends React.Component {
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
-        <div className="overflow">
-          {!_.isUndefined(matches) && matches.length > 0 ? (
-            matches
-          ) : (
-            <span className="loader loader_on" />
-          )}
-        </div>
-        <div className="engine-errors"></div>
+        {clientConnected ? (
+          <div className="overflow">
+            {!_.isUndefined(matches) && matches.length > 0 ? (
+              matches
+            ) : (
+              <span className="loader loader_on" />
+            )}
+          </div>
+        ) : (
+          <SegmentFooterTabError />
+        )}
       </div>
     )
   }
