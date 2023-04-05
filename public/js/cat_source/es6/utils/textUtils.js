@@ -536,7 +536,7 @@ const TEXT_UTILS = {
   getDefaultCharsSize: (value) => value.length * 1,
   getUtf8CharsSize: (value) => new Blob([value]).size,
   getUft16CharsSize: (value) => value.length * 2,
-  getCJKMatches: (value, sizeCallback) => {
+  getCJKMatches: (value, getSize) => {
     const regex =
       /[\u4E00-\u9FCC\u3400-\u4DB5\u{20000}-\u{2A6D6}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{2B740}-\u{2B81F}\u{2A700}-\u{2B73F}\u30A0-\u30FF\uF900-\uFaff\u{1B000}-\u{1B0FF}\u{1B100}-\u{1B12F}\u{1B130}-\u{1B16F}\uAC00-\uD7AF\uD7B0-\uD7FF]/gu
     let match
@@ -548,13 +548,13 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: sizeCallback(char),
+        size: getSize(char),
       })
     }
 
     return result
   },
-  getArmenianMatches: (value, sizeCallback) => {
+  getArmenianMatches: (value, getSize) => {
     const regex = /[\u0530-\u058F]/g
     let match
     const result = []
@@ -565,13 +565,13 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: sizeCallback(char),
+        size: getSize(char),
       })
     }
 
     return result
   },
-  getEmojiMatches: (value, sizeCallback) => {
+  getEmojiMatches: (value, getSize) => {
     const regex = /\p{Extended_Pictographic}/gu
     let match
     const result = []
@@ -582,13 +582,13 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: sizeCallback(char),
+        size: getSize(char),
       })
     }
 
     return result
   },
-  getLatinCharsMatches: (value, sizeCallback) => {
+  getLatinCharsMatches: (value, getSize) => {
     let match
     const result = []
 
@@ -599,7 +599,7 @@ const TEXT_UTILS = {
           match: char,
           index: i,
           length: char.length,
-          size: sizeCallback(char),
+          size: getSize(char),
         })
       }
     }
