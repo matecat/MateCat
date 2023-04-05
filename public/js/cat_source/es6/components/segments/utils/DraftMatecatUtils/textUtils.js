@@ -165,13 +165,13 @@ export const getCharactersCounter = (value) => {
   const {getDefaultCharsSize, charsSizeMapping, removeHiddenCharacters} =
     TEXT_UTILS
   const cleanedContent = removeHiddenCharacters(value)
-  const defaultCounter =
-    charsSizeMapping.find((map) => typeof map === 'object')?.default ??
-    getDefaultCharsSize
+  const defaultCounter = charsSizeMapping.default ?? getDefaultCharsSize
 
-  const matches = charsSizeMapping
-    .filter((map) => typeof map === 'function')
-    .map((map) => map(cleanedContent))
+  const matches = Array.isArray(charsSizeMapping.custom)
+    ? charsSizeMapping.custom
+        .filter((map) => typeof map === 'function')
+        .map((map) => map(cleanedContent))
+    : []
 
   const counter = cleanedContent.split('').reduce((acc, cur, index) => {
     const result = matches.flatMap((collection) => {
