@@ -194,6 +194,7 @@ let SSE = {
       SegmentActions.aiSuggestion({
         sid: message.data.id_segment,
         suggestion: message.data.message,
+        hasError: Boolean(message.data?.has_error),
       })
     })
   },
