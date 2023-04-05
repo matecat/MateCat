@@ -16,6 +16,8 @@ class CatUtilsTest extends PHPUnit_Framework_TestCase
                 'La casa @@placeholder@@ è bianca' => 5,
                 'La casa <placeholder> è bianca' => 5,
                 'La casa {placeholder} è bianca' => 5,
+                'La casa {{placeholder}} è bianca' => 5,
+                'La casa {{ placeholder }} è bianca' => 5,
                 'La casa %s è bianca' => 5,
                 'La casa %u è bianca' => 5,
                 'La casa %1$s è bianca' => 5,
