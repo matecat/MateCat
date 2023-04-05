@@ -1987,6 +1987,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.setAiSuggestion({
         sid: action.sid,
         suggestion: action.suggestion,
+        hasError: action.hasError,
       })
       SegmentStore.emitChange(SegmentConstants.AI_SUGGESTION, {
         ...action,
