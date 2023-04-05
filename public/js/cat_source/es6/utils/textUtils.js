@@ -555,7 +555,7 @@ const TEXT_UTILS = {
     return result
   },
   getArmenianMatches: (value, sizeCallback) => {
-    const regex = /[\u0561-\u0587\u0531-\u0556]/g
+    const regex = /[\u0530-\u058F]/g
     let match
     const result = []
 
