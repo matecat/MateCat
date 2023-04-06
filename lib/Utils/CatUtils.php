@@ -368,15 +368,16 @@ class CatUtils {
     /**
      * Remove Tags and treat numbers as one word
      *
-     * @param                 $string
-     * @param string          $source_lang
-     *
-     * @param MateCatFilter|null     $Filter
+     * @param                    $string
+     * @param string             $source_lang
+     * @param MateCatFilter|null $Filter
      *
      * @return mixed|string
      * @throws \Exception
      */
-    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null ) {
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null) {
+
+        $string = self::replacePlaceholders($string);
 
         if ( $Filter === null ) {
             $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang, null, []);
@@ -394,18 +395,6 @@ class CatUtils {
             $tmp_lang    = explode( '-', $source_lang );
             $source_lang = $tmp_lang[ 0 ];
             unset( $tmp_lang );
-        }
-
-        if ( preg_match_all( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._]+?(?:\s[:_a-z]+=.+?)?\s*[\/]{0,1}>#i', $string, $matches, PREG_SET_ORDER ) ) {
-
-            foreach ( $matches as $tag ) {
-                if ( is_numeric( substr( $tag[ 0 ], -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#i', $tag[ 0 ] ) ) { //H tag are an exception
-                    //tag can not end with a number
-                    continue;
-                }
-                $string = str_replace( $tag[ 0 ], " ", $string );
-            }
-
         }
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
@@ -452,12 +441,37 @@ class CatUtils {
     }
 
     /**
+     * This function replaces the placeholder with a word. Example:
+     *
+     * La casa %%placeholder%% è bianca ----> La casa placeholder è bianca
+     *
+     * Thanks to this string manipulation, the `clean_raw_string_4_word_count` function is able to count every placeholder as 1 word
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    private static function replacePlaceholders($string)
+    {
+        $placeholderRegex = '/{{(.*)+}}|%%[a-zA-Z0-9]+%%|{{[a-zA-Z0-9]+}}|%{[a-zA-Z0-9]+}|@@[a-zA-Z0-9]+@@|{%[a-zA-Z0-9]+%}|&lt;[a-zA-Z0-9]+&gt;|{[a-zA-Z0-9]+}|<[a-zA-Z0-9]+>|%@|%N$@|%s|%@|%N$@|%s|%u|%1$s|%2$d|%d|%@|%1$i|%1\$.2f|%.0f|%c|%2$@|%x|%1%@|%1\$#@file@|%#@file@|$%1\$.2f|%.0f%|%ld|%hi|%lu|%1|%2/iu';
+
+        preg_match_all($placeholderRegex, $string, $placeholderMatch);
+
+        if(count($placeholderMatch[0]) > 0){
+            foreach ($placeholderMatch[0] as $placeholderSingleMatch){
+                $string = str_replace( $placeholderSingleMatch, "placeholder", $string );
+            }
+        }
+
+        return $string;
+    }
+
+    /**
      * Count words in a string
      *
-     * @param                 $string
-     * @param string          $source_lang
-     *
-     * @param MateCatFilter|null     $filter
+     * @param                    $string
+     * @param string             $source_lang
+     * @param MateCatFilter|null $filter
      *
      * @return float|int
      * @throws Exception
