@@ -30,7 +30,7 @@ export const setTranslation = async ({
   propagate = false,
   splitStatuses = null,
 }) => {
-  const {sid, segment: segmentDetails, charactersCounter} = segment
+  const {sid, segment: segmentDetails, charactersCounter = 0} = segment
 
   const contextBefore = UI.getContextBefore(sid)
   const idBefore = UI.getIdBefore(sid)
@@ -58,7 +58,7 @@ export const setTranslation = async ({
     revision_number: revisionNumber,
     current_password: currentPassword,
     splitStatuses,
-    characters_counter: charactersCounter ?? 0,
+    characters_counter: charactersCounter,
   }
   const formData = new FormData()
 
