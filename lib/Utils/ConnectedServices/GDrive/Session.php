@@ -327,9 +327,11 @@ class Session {
      * @return bool
      */
     public function hasFiles() {
-        return
-                isset( $this->session[ self::FILE_LIST ] )
-                && !empty( $this->session[ self::FILE_LIST ] );
+        return (isset( $this->session[ self::FILE_LIST ] ) and count($this->session[ self::FILE_LIST ]) > 0);
+
+//        return
+//                isset( $this->session[ self::FILE_LIST ] )
+//                && !empty( $this->session[ self::FILE_LIST ] );
     }
 
     /**
@@ -428,6 +430,18 @@ class Session {
                 );
             } else {
                 $this->deleteDirectory( $pathCache );
+            }
+
+            $tempUploadedFileDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_session'];
+
+            /** @var DirectoryIterator $item */
+            foreach ($iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $tempUploadedFileDir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::SELF_FIRST ) as $item) {
+                $target = explode('__', $pathCache);
+                $hashFile = $file['fileHash']."|".end($target);
+
+                if($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile){
+                    unlink($item);
+                }
             }
 
             unset( $this->session[ self::FILE_LIST ] [ $fileId ] );
