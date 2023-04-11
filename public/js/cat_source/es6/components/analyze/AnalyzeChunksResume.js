@@ -563,8 +563,8 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   render() {
-    let showHideText = this.props.showAnalysis ? 'Show Details' : 'Hide Details'
-    let iconClass = this.props.showAnalysis ? '' : 'open'
+    let showHideText = this.props.showAnalysis ? 'Hide Details' : 'Show Details'
+    let iconClass = this.props.showAnalysis ? 'open' : ''
     let html = this.getResumeJobs()
     return (
       <div className="project-top ui grid">

@@ -66,7 +66,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
 
       if (typeof CommentsStore.db.segments[s] === 'undefined') {
         CommentsStore.db.segments[s] = [data]
-      } else {
+      } else if (!CommentsStore.db.segments[s].find((e) => e.id === data.id)) {
         CommentsStore.db.segments[s].push(data)
       }
       if (Number(data.message_type) === this.types.resolve) {
