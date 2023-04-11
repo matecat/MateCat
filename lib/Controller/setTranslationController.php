@@ -117,7 +117,8 @@ class setTranslationController extends ajaxController {
                 'id_before'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'                => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'revision_number'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'guess_tag_used'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ]
+                'guess_tag_used'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'characters_counter'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -340,6 +341,11 @@ class setTranslationController extends ajaxController {
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
         $check->setIdSegment( $this->id_segment );
+
+        if(isset($this->__postInput[ 'characters_counter' ] )){
+            $check->setCharactersCount($this->__postInput[ 'characters_counter' ]);
+        }
+
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {

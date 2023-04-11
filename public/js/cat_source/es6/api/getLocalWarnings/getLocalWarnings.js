@@ -7,6 +7,7 @@ export const getLocalWarnings = async ({
   src_content,
   trg_content,
   segment_status,
+  characters_counter,
 }) => {
   const paramsData = {
     action: 'getWarning',
@@ -16,6 +17,7 @@ export const getLocalWarnings = async ({
     src_content,
     trg_content,
     segment_status,
+    characters_counter,
   }
   const formData = new FormData()
 
