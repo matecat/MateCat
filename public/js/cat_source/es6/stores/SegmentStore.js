@@ -1286,6 +1286,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
+  setSegmentCharactersCounter: function (sid, counter) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn([index, 'charactersCounter'], counter)
+  },
 })
 
 // Register callback to handle all updates
@@ -1943,6 +1948,7 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHARACTER_COUNTER:
+      SegmentStore.setSegmentCharactersCounter(action.sid, action.counter)
       SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
         sid: action.sid,
         counter: action.counter,
