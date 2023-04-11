@@ -12,6 +12,6 @@ export const initFileUpload = async () => {
   if (response?.errors) {
     return Promise.reject(response.errors)
   }
-  const {...restData} = response
-  return restData
+
+  return response
 }
