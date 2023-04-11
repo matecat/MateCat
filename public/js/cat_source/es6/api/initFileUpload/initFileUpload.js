@@ -12,5 +12,6 @@ export const initFileUpload = async () => {
   if (response?.errors) {
     return Promise.reject(response.errors)
   }
+
   return response
 }
