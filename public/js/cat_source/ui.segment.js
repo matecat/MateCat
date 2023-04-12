@@ -21,7 +21,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           // Set as Tagged and restore source with taggedText
           SegmentActions.setSegmentAsTagged(sid)
           // Unescape HTML
-          let unescapedTranslation = DraftMatecatUtils.unescapeHTMLLeaveTags(
+          let unescapedTranslation = TagUtils.transformTextFromBe(
             response.data.translation,
           )
           // Update target area
@@ -57,7 +57,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
     getSegmentTagsProjection: function (sid) {
       var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
       var source = segmentObj.segment
-      source = TextUtils.htmlDecode(source).replace(/&quot;/g, '"')
+      source = TagUtils.prepareTextToSend(source)
       // source = TextUtils.htmlDecode(source);
       //Retrieve the chosen suggestion if exist
       var suggestion
@@ -71,7 +71,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
         suggestion = currentContribution.translation
       }
 
-      var target = segmentObj.translation
+      var target = TagUtils.prepareTextToSend(segmentObj.translation)
       return getTagProjection({
         action: 'getTagProjection',
         password: config.password,

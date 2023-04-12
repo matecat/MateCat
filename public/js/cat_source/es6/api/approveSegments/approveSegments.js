@@ -15,7 +15,6 @@ export const approveSegments = async (
   segments,
   idJob = config.id_job,
   password = config.password,
-  idClient = config.id_client,
   revisionNumber = config.revisionNumber,
 ) => {
   const dataParams = flattenObject({

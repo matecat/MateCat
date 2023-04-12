@@ -28,6 +28,28 @@ export const getIdAttributeRegEx = () => {
  */
 export const unescapeHTML = (escapedHTML) => {
   try {
+    return (
+      escapedHTML
+        // .replace(/&lt;/g, '<')
+        // .replace(/&gt;/g, '>')
+        // .replace(/&amp;amp;/g, '&')
+        // .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+    )
+  } catch (e) {
+    return ''
+  }
+}
+
+/**
+ *
+ * @param escapedHTML
+ * @returns {string}
+ */
+export const unescapeHTMLinTags = (escapedHTML) => {
+  try {
     return escapedHTML
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -46,7 +68,7 @@ export const unescapeHTMLRecursive = (escapedHTML) => {
 
   try {
     while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTML(escapedHTML)
+      escapedHTML = unescapeHTMLinTags(escapedHTML)
     }
   } catch (e) {
     console.error('Error unescapeHTMLRecursive')
@@ -62,12 +84,14 @@ export const unescapeHTMLRecursive = (escapedHTML) => {
  */
 export const unescapeHTMLLeaveTags = (escapedHTML) => {
   if (escapedHTML) {
-    return escapedHTML
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&#39;/g, '’')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
+    return (
+      escapedHTML
+        // .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&#39;/g, '’')
+        .replace(/&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+    )
   }
   return escapedHTML
 }
@@ -82,7 +106,11 @@ export const decodeTagsToPlainText = (text) => {
     decoded = decoded.replace(
       /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
       (match, text) => {
-        return text
+        return (
+          String.fromCharCode(parseInt('200B', 16)) +
+          text +
+          String.fromCharCode(parseInt('200B', 16))
+        )
       },
     )
     // Match PH
@@ -90,7 +118,13 @@ export const decodeTagsToPlainText = (text) => {
       /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
       (match, text) => {
         try {
-          return Base64.decode(text)
+          return (
+            String.fromCharCode(parseInt('200B', 16)) +
+            Base64.decode(text) +
+            String.fromCharCode(parseInt('200B', 16))
+          )
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>')
         } catch (e) {
           console.error('Fail decoding tags in text', match, text)
         }
@@ -128,12 +162,18 @@ export const regexWordDelimiter =
   /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
 
 export const getCharactersCounter = (value) => {
-  const {getCharsSize, getCJKMatches, getEmojiMatches, removeHiddenCharacters} =
+  const {getDefaultCharsSize, charsSizeMapping, removeHiddenCharacters} =
     TEXT_UTILS
-  const cleanContent = removeHiddenCharacters(value)
-  const matches = [getCJKMatches(cleanContent), getEmojiMatches(cleanContent)]
+  const cleanedContent = removeHiddenCharacters(value)
+  const defaultCounter = charsSizeMapping.default ?? getDefaultCharsSize
 
-  const counter = cleanContent.split('').reduce((acc, cur, index) => {
+  const matches = Array.isArray(charsSizeMapping.custom)
+    ? charsSizeMapping.custom
+        .filter((map) => typeof map === 'function')
+        .map((map) => map(cleanedContent))
+    : []
+
+  const counter = cleanedContent.split('').reduce((acc, cur, index) => {
     const result = matches.flatMap((collection) => {
       const matchFound = collection.find((match) => match.index === index)
       const isPreviousMatchSlot = collection.some(
@@ -141,7 +181,7 @@ export const getCharactersCounter = (value) => {
       )
       return matchFound ? matchFound : isPreviousMatchSlot ? [{size: 0}] : []
     })[0]
-    return acc + (result ? result.size : getCharsSize(cur))
+    return acc + (result ? result.size : defaultCounter(cur))
   }, 0)
   return counter
 }

@@ -20,6 +20,7 @@ import {
   decodeTagsToPlainText,
   formatText,
   getCharactersCounter,
+  unescapeHTMLinTags,
 } from './textUtils'
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
@@ -52,6 +53,7 @@ const DraftMatecatUtils = {
   getXliffRegExpression,
   getIdAttributeRegEx,
   unescapeHTML,
+  unescapeHTMLinTags,
   unescapeHTMLLeaveTags,
   formatText,
   // Tag Utils
