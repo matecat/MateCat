@@ -465,7 +465,7 @@ class CatUtils {
      */
     private static function replacePlaceholders($string)
     {
-        $placeholderRegex = '/{{(.*)+}}|%%[a-zA-Z0-9]+%%|{{[a-zA-Z0-9]+}}|%{[a-zA-Z0-9]+}|@@[a-zA-Z0-9]+@@|{%[a-zA-Z0-9]+%}|&lt;[a-zA-Z0-9]+&gt;|{[a-zA-Z0-9]+}|%@|%N$@|%s|%@|%N$@|%s|%u|%1$s|%2$d|%d|%@|%1$i|%1\$.2f|%.0f|%c|%2$@|%x|%1%@|%1\$#@file@|%#@file@|$%1\$.2f|%.0f%|%ld|%hi|%lu|%1|%2/iu';
+        $placeholderRegex = '/%%[a-zA-Z0-9]+%%|{{[a-zA-Z0-9 ]+}}|%{[a-zA-Z0-9]+}|@@[a-zA-Z0-9]+@@|{%[a-zA-Z0-9]+%}|&lt;[a-zA-Z0-9]+&gt;|{[a-zA-Z0-9]+}|%@|%N$@|%s|%@|%N$@|%s|%u|%1$s|%2$d|%d|%@|%1$i|%1\$.2f|%.0f|%c|%2$@|%x|%1%@|%1\$#@file@|%#@file@|$%1\$.2f|%.0f%|%ld|%hi|%lu|%1|%2/iu';
 
         preg_match_all($placeholderRegex, $string, $placeholderMatch);
 
