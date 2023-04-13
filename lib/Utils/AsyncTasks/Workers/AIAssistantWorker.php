@@ -3,6 +3,11 @@
 namespace AsyncTasks\Workers;
 
 use AIAssistant\Client as AIAssistantClient;
+use AMQHandler;
+use Exception;
+use INIT;
+use Orhanerday\OpenAi\OpenAi;
+use StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Exceptions\EndQueueException;
@@ -12,7 +17,26 @@ class AIAssistantWorker extends AbstractWorker
     const EXPLAIN_MEANING_ACTION  = 'explain_meaning';
 
     /**
+     * @var OpenAi
+     */
+    private $openAi;
+
+    /**
+     * AIAssistantWorker constructor.
+     * @param AMQHandler $queueHandler
+     */
+    public function __construct(AMQHandler $queueHandler)
+    {
+        parent::__construct($queueHandler);
+
+        $timeOut = ( INIT::$OPEN_AI_TIMEOUT) ? INIT::$OPEN_AI_TIMEOUT : 30;
+        $this->openAi = new OpenAi( INIT::$OPENAI_API_KEY );
+        $this->openAi->setTimeout($timeOut);
+    }
+
+    /**
      * @inheritDoc
+     * @throws EndQueueException
      */
     public function process(AbstractElement $queueElement)
     {
@@ -37,42 +61,60 @@ class AIAssistantWorker extends AbstractWorker
 
     /**
      * @param $payload
-     * @throws \StompException
-     * @throws \Exception
+     * @throws StompException
+     * @throws Exception
      */
     private function explain_meaning($payload)
     {
-        try {
-            $client = $this->getAIAssistantClient();
-            $message = $client->findContextForAWord($payload['word'], $payload['phrase'], $payload['localized_target']);
-            $hasError = false;
-        } catch (\Exception $exception){
-            $message = $exception->getMessage();
-            $hasError = true;
-        }
+        $phrase = strip_tags( html_entity_decode( $payload['phrase'] ) );
+        $txt = "";
 
+        ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload['word'] , $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload) {
+
+            $_d = explode( "data: ", $data );
+
+            foreach( $_d as $clean ){
+
+                if (strpos($data, "[DONE]\n\n") !== false) {
+                    $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
+                } else {
+                    $arr = json_decode($clean, true);
+
+                    if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
+                        $txt .= $arr["choices"][0]["delta"]["content"];
+                        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                    }
+                }
+            }
+
+            // NEEDED by CURLOPT_WRITEFUNCTION function
+            //
+            // For more info see here: https://stackoverflow.com/questions/2294344/what-for-do-we-use-curlopt-writefunction-in-phps-curl
+            return strlen( $data );
+        } );
+    }
+
+    /**
+     * @param $idClient
+     * @param $idSegment
+     * @param $message
+     * @param bool $hasError
+     * @param bool $hasFinished
+     * @throws StompException
+     */
+    private function emitMessage($idClient, $idSegment, $message, $hasError = false, $hasFinished = false)
+    {
         $this->publishMessage([
             '_type' => 'ai_assistant_explain_meaning',
             'data'  => [
-                'id_client' => $payload['id_client'],
+                'id_client' => $idClient,
                 'payload'   => [
-                    'id_segment' => $payload['id_segment'],
+                    'id_segment' => $idSegment,
                     'has_error' => $hasError,
+                    'has_finished' => $hasFinished,
                     'message' => trim($message)
                 ],
             ]
         ]);
-    }
-
-    /**
-     * @return AIAssistantClient|null
-     */
-    private function getAIAssistantClient()
-    {
-        if(\INIT::$OPENAI_API_KEY){
-            return new AIAssistantClient(\INIT::$OPENAI_API_KEY);
-        }
-
-        return null;
     }
 }
