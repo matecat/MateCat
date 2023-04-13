@@ -99,10 +99,10 @@ class AIAssistantWorker extends AbstractWorker
      * @param $idSegment
      * @param $message
      * @param bool $hasError
-     * @param bool $hasFinished
+     * @param bool $completed
      * @throws StompException
      */
-    private function emitMessage($idClient, $idSegment, $message, $hasError = false, $hasFinished = false)
+    private function emitMessage($idClient, $idSegment, $message, $hasError = false, $completed = false)
     {
         $this->publishMessage([
             '_type' => 'ai_assistant_explain_meaning',
@@ -111,7 +111,7 @@ class AIAssistantWorker extends AbstractWorker
                 'payload'   => [
                     'id_segment' => $idSegment,
                     'has_error' => $hasError,
-                    'has_finished' => $hasFinished,
+                    'completed' => $completed,
                     'message' => trim($message)
                 ],
             ]
