@@ -51,16 +51,6 @@ const LXQ = {
     segmentsInfo: {},
   },
 
-  getTargetTextForQa: function (segment) {
-    let clone = $(UI.targetContainerSelector(), segment).clone()
-    return clone.text().replace(/\uFEFF/g, '')
-  },
-  getSourceTextForQa: function (text) {
-    var div = document.createElement('div')
-    var $div = $(div)
-    $div.html(text)
-    return $div.text()
-  },
   doLexiQA: function (segment, isSegmentCompleted, callback) {
     if (!LXQ.enabled()) {
       if (callback !== undefined && typeof callback === 'function') {

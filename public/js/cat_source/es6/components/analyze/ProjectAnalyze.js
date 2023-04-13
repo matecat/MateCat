@@ -10,10 +10,10 @@ class ProjectAnalyze extends React.Component {
 
   getJobs() {
     let idArray = []
-    return this.props.project.get('jobs').map( (job) => {
+    return this.props.project.get('jobs').map((job) => {
       if (
         idArray.indexOf(job.get('id')) < 0 &&
-        !_.isUndefined(this.props.jobsInfo[job.get('id')])
+        !_.isUndefined(this.props.jobsInfo[job.get('id').toString()])
       ) {
         let jobVolumeAnalysisChunk = this.props.volumeAnalysis
           .get(job.get('id').toString())

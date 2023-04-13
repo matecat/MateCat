@@ -54,7 +54,7 @@ let SegmentFilterUtils = {
     if (segment.opened) {
       SegmentActions.scrollToSegment(segment.original_sid)
     } else {
-      segment.el.find(UI.targetContainerSelector()).click()
+      SegmentActions.openSegment(segment.sid)
     }
   },
 

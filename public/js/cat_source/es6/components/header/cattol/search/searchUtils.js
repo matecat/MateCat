@@ -9,6 +9,7 @@ import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import TagUtils from '../../../../utils/tagUtils'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -83,19 +84,11 @@ let SearchUtils = {
       !_.isUndefined(p.source) && !_.isUndefined(p.target)
         ? 'source&target'
         : 'normal'
-    this.whereToFind = ''
-    if (this.searchMode === 'normal') {
-      if (!_.isUndefined(p.target)) {
-        this.whereToFind = '.targetarea'
-      } else if (!_.isUndefined(p.source)) {
-        this.whereToFind = '.source'
-      }
-    }
 
     this.searchParams.searchMode = this.searchMode
 
-    let source = p.source ? TextUtils.htmlEncode(p.source) : ''
-    let target = p.target ? TextUtils.htmlEncode(p.target) : ''
+    let source = p.source ? p.source : ''
+    let target = p.target ? p.target : ''
     let replace = p.replace ? p.replace : ''
 
     UI.body.addClass('searchActive')
@@ -104,8 +97,8 @@ let SearchUtils = {
 
       searchTermIntoSegments({
         token: dd.getTime(),
-        source,
-        target,
+        source: TagUtils.prepareTextToSend(source),
+        target: TagUtils.prepareTextToSend(target),
         status: this.searchParams.status,
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
@@ -461,7 +454,7 @@ let SearchUtils = {
     // text = text.replace(/(\$&)/g, function ( match, text ) {
     //     return tagsArray.shift();
     // });
-    text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
+    //text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
     text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<')
     return text
   },
@@ -477,14 +470,18 @@ let SearchUtils = {
     let ignoreCase = params['match-case'] ? '' : 'i'
     if (this.searchMode === 'source&target') {
       let txt = isSource ? params.source : params.target
-      txt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt))
+      txt = TextUtils.escapeRegExp(txt)
       reg = new RegExp('(' + txt + ')', 'g' + ignoreCase)
     } else if (
       (!_.isUndefined(params.source) && isSource) ||
       (!_.isUndefined(params.target) && !isSource)
     ) {
       let txt = params.source ? params.source : params.target
-      let regTxt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt))
+      txt = txt
+        .replace(/&/g, '&amp;')
+        .replace(/</gi, '&lt;')
+        .replace(/>/gi, '&gt;')
+      let regTxt = TextUtils.escapeRegExp(txt)
       // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
       reg = new RegExp('(' + regTxt + ')', 'g' + ignoreCase)
@@ -499,7 +496,7 @@ let SearchUtils = {
       }
     }
 
-    let {text, tagsIntervals, tagsArray} = this.prepareTextToReplace(textToMark)
+    let {text, tagsIntervals} = this.prepareTextToReplace(textToMark)
 
     let matchIndex = 0
     text = text.replace(reg, (match, text, index) => {
@@ -527,8 +524,7 @@ let SearchUtils = {
         return match
       }
     })
-    text = TextUtils.htmlDecode(text)
-    text = this.restoreTextAfterReplace(text, tagsArray)
+    text = this.restoreTextAfterReplace(text)
     return text
   },
   resetSearch: function () {

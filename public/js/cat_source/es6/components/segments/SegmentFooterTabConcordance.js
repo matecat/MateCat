@@ -8,10 +8,13 @@ import Immutable from 'immutable'
 import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
-import SegmentActions from '../../actions/SegmentActions'
 import {getConcordance} from '../../api/getConcordance'
+import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterTabConcordance extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     let extended = false
@@ -124,11 +127,17 @@ class SegmentFooterTabConcordance extends React.Component {
         let cb = item.created_by
 
         let leftTxt = item.segment
+          .replace(/&/g, '&amp;')
+          .replace(/</gi, '&lt;')
+          .replace(/>/gi, '&gt;')
         leftTxt = TagUtils.decodePlaceholdersToTextSimple(leftTxt)
         leftTxt = leftTxt.replace(/#\{/gi, '<mark>')
         leftTxt = leftTxt.replace(/\}#/gi, '</mark>')
 
         let rightTxt = item.translation
+          .replace(/&/g, '&amp;')
+          .replace(/</gi, '&lt;')
+          .replace(/>/gi, '&gt;')
         rightTxt = TagUtils.decodePlaceholdersToTextSimple(rightTxt)
         rightTxt = rightTxt.replace(/#\{/gi, '<mark>')
         rightTxt = rightTxt.replace(/\}#/gi, '</mark>')
@@ -172,6 +181,7 @@ class SegmentFooterTabConcordance extends React.Component {
     }
     return array
   }
+
   searchSubmit(event) {
     event ? event.preventDefault() : ''
     if (this.state.source.length > 0) {
@@ -236,6 +246,7 @@ class SegmentFooterTabConcordance extends React.Component {
   }
 
   render() {
+    const {clientConnected} = this.context
     let html = '',
       results = '',
       loadingClass = '',
@@ -321,12 +332,19 @@ class SegmentFooterTabConcordance extends React.Component {
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
-        <div className="overflow">
-          {html}
-          <div className="results">{results}</div>
-        </div>
-        <br className="clear" />
-        {this.state.results.length > 3 ? extended : null}
+        {' '}
+        {!clientConnected ? (
+          <SegmentFooterTabError />
+        ) : (
+          <>
+            <div className="overflow">
+              {html}
+              <div className="results">{results}</div>
+            </div>
+            <br className="clear" />
+            {this.state.results.length > 3 ? extended : null}
+          </>
+        )}
       </div>
     )
   }
