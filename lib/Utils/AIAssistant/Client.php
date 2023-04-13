@@ -2,6 +2,8 @@
 
 namespace AIAssistant;
 
+use Exception;
+use INIT;
 use Orhanerday\OpenAi\OpenAi;
 
 class Client
@@ -13,30 +15,28 @@ class Client
 
     /**
      * Client constructor.
-     * @param $apiKey
+     * @param OpenAi $openAi
      */
-    public function __construct($apiKey)
+    public function __construct( OpenAi $openAi )
     {
-        $timeOut = (\INIT::$OPEN_AI_TIMEOUT) ? \INIT::$OPEN_AI_TIMEOUT : 30;
-
-        $this->openAi = new OpenAi($apiKey);
-        $this->openAi->setTimeout($timeOut);
+        $this->openAi = $openAi;
     }
 
     /**
      * @param $word
      * @param $phrase
      * @param $target
+     * @param callable $callback
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function findContextForAWord($word, $phrase, $target)
+    public function findContextForAWord($word, $phrase, $target, Callable $callback)
     {
         $phrase = strip_tags($phrase);
         $content = "Explain, in ".$target.", the meaning of '".$word."' when used in this context : '".$phrase."'";
-        $model =  (\INIT::$OPEN_AI_MODEL and \INIT::$OPEN_AI_MODEL !== '') ? \INIT::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
+        $model =  (INIT::$OPEN_AI_MODEL and INIT::$OPEN_AI_MODEL !== '') ? INIT::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
 
-        $chat = $this->openAi->chat([
+        $opts = [
             'model' => $model,
             'messages' => [
                 [
@@ -48,18 +48,9 @@ class Client
             'max_tokens' => 4000,
             'frequency_penalty' => 0,
             'presence_penalty' => 0,
-        ]);
+            "stream" => true,
+        ];
 
-        $curlInfo = $this->openAi->getCURLInfo();
-
-        if($curlInfo['http_code'] !== 200){
-            throw new \Exception('Open AI API unexpected error');
-        }
-
-        $d = json_decode($chat);
-
-        \Log::doJsonLog('Response to `'.$content.'` from Open AI API: ' . $chat);
-
-        return $d->choices[0]->message->content;
+        $this->openAi->chat( $opts, $callback );
     }
 }
