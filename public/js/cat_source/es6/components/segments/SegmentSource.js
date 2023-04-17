@@ -492,7 +492,7 @@ class SegmentSource extends React.Component {
     const editorHtml = (
       <div
         ref={(source) => (this.source = source)}
-        className={`source source-${config.source_code} item`}
+        className={`source item`}
         tabIndex={0}
         id={'segment-' + segment.sid + '-source'}
         data-original={this.originalSource}
