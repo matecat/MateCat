@@ -34,11 +34,7 @@ class SimpleEditor extends React.Component {
 
     return (
       <div
-        className={`${
-          isTarget
-            ? `target target-${config.target_code}`
-            : `source source-${config.source_code}`
-        } item`}
+        className={`${isTarget ? `target` : `source`} item`}
         id={`segment-${sid}-${isTarget ? 'target' : 'source'}`}
       >
         <div

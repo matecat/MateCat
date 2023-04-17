@@ -711,7 +711,10 @@ class Segment extends React.Component {
         <section
           ref={(section) => (this.section = section)}
           id={'segment-' + this.props.segment.sid}
-          className={segment_classes.join(' ')}
+          className={
+            segment_classes.join(' ') +
+            ` source-${config.source_code} target-${config.target_code}`
+          }
           data-hash={this.props.segment.segment_hash}
           data-autopropagated={this.state.autopropagated}
           data-propagable={autoPropagable}
