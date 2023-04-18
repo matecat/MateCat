@@ -20,6 +20,7 @@ export const translateSegments = async (
   const dataParams = flattenObject({
     segments_id: segments,
     status: 'translated',
+    client_id: config.id_client,
     revision_number: revisionNumber,
   })
   const formData = new FormData()

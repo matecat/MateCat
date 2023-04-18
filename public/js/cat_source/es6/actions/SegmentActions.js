@@ -1290,6 +1290,7 @@ const SegmentActions = {
       src_content: src_content,
       trg_content: trg_content,
       segment_status: segment_status,
+      characters_counter: segment.charactersCounter ?? 0,
     })
       .then((data) => {
         if (data.details && data.details.id_segment) {
