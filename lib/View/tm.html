@@ -548,6 +548,27 @@
                                 </div>
                             </tal:block>
 
+                            <tal:block tal:condition="php: page == 'cattool'">
+                                <div class="options-box ai-assistant">
+                                    <h3>Ai-assistant</h3>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                    </p>
+                                    <div class="onoffswitch-container">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ai-assistant_check" checked="checked" />
+                                            <label class="onoffswitch-label" for="ai-assistant_check">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                                <span class="onoffswitch-label-status-active">Active</span>
+                                                <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                                <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tal:block>
+
                             <div class="options-box multi-match">
                                 <h3>Cross-language Matches</h3>
                                 <p>Get translation suggestions in other target languages you know as reference.</p>
