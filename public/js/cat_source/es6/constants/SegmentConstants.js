@@ -103,6 +103,7 @@ module.exports = keyMirror({
   HIGHLIGHT_TAGS: null,
   SET_SEGMENT_SAVING: null,
   TOGGLE_CHARACTER_COUNTER: null,
+  HIDE_AI_ASSISTANT: null,
   CHARACTER_COUNTER: null,
   GET_MORE_SEGMENTS: null,
   REMOVE_ALL_SEGMENTS: null,
