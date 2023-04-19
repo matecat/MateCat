@@ -24,6 +24,7 @@ class SegmentCommentsContainer extends React.Component {
       user: CommentsStore.getUser(),
       teamUsers: CommentsStore.getTeamUsers(),
       sendCommentError: false,
+      showTagging: false,
     }
     this.types = {sticky: 3, resolve: 2, comment: 1}
     this.updateComments = this.updateComments.bind(this)
@@ -312,7 +313,7 @@ class SegmentCommentsContainer extends React.Component {
     if (teamUsers && teamUsers.length > 0) {
       $('.mbc-comment-textarea').atwho({
         at: '@',
-        displayTpl: '<li>${first_name} ${last_name}</li>',
+        displayTpl: '<li class="tagging-item">${first_name} ${last_name}</li>',
         insertTpl:
           '<span contenteditable="false" class="tagging-item" data-id="${uid}">${first_name} ${last_name}</span>',
         data: teamUsers,
@@ -320,6 +321,12 @@ class SegmentCommentsContainer extends React.Component {
         limit: teamUsers.length,
       })
     }
+    $('.mbc-comment-textarea').on('shown.atwho', () => {
+      this.setState({showTagging: true})
+    })
+    $('.mbc-comment-textarea').on('hidden.atwho', () => {
+      setTimeout(() => this.setState({showTagging: false}), 200)
+    })
   }
 
   scrollToBottom() {
@@ -334,7 +341,7 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   onKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !this.state.showTagging) {
       e.preventDefault()
       this.sendComment()
     }
