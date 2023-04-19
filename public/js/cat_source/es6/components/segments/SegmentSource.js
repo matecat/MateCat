@@ -79,6 +79,8 @@ class SegmentSource extends React.Component {
     this.splitPoint = this.props.segment.split_group
       ? this.props.segment.split_group.length - 1
       : 0
+
+    this.delayAiAssistant
   }
 
   getSearchParams = () => {
@@ -461,6 +463,28 @@ class SegmentSource extends React.Component {
 
   preventEdit = () => 'handled'
 
+  helpAiAssistant = () => {
+    if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
+    const isOpenAiEnabled =
+      Boolean(config.isOpenAiEnabled) &&
+      SegmentUtils.isAiAssistantCounterEnable()
+    if (isOpenAiEnabled) {
+      this.delayAiAssistant = setTimeout(() => {
+        const {segment} = this.context
+        const value = DraftMatecatUtils.getSelectedTextWithoutEntities(
+          this.state.editorState,
+        ).reduce((acc, {value}) => `${acc}${value}`, '')
+
+        if (value) {
+          SegmentActions.helpAiAssistant({
+            sid: segment.sid,
+            value,
+          })
+        }
+      }, 200)
+    }
+  }
+
   render() {
     const {segment} = this.context
     const {editorState} = this.state
@@ -484,12 +508,15 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
           onDragEnd: onDragEndEvent,
-          onMouseUp: () =>
+          onMouseUp: () => {
             this.setState({
               isShowingOptionsToolbar: !this.editor._latestEditorState
                 .getSelection()
                 .isCollapsed(),
-            }),
+            })
+
+            this.helpAiAssistant()
+          },
           onKeyUp: (event) => {
             if (
               event.key === 'ArrowLeft' ||
@@ -502,6 +529,8 @@ class SegmentSource extends React.Component {
                   .getSelection()
                   .isCollapsed(),
               })
+
+              this.helpAiAssistant()
             }
           },
         }
@@ -510,7 +539,7 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
         }
 
-    const optionsToolbar = this.state.isShowingOptionsToolbar && (
+    const optionsToolbar = /*this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) &&
           SegmentUtils.isAiAssistantCounterEnable() && (
@@ -529,7 +558,7 @@ class SegmentSource extends React.Component {
             </li>
           )}
       </ul>
-    )
+      ) */ undefined
 
     // Standard editor
     const editorHtml = (

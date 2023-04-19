@@ -1382,11 +1382,12 @@ const SegmentActions = {
       value,
     })
   },
-  aiSuggestion: ({sid, suggestion, hasError}) => {
+  aiSuggestion: ({sid, suggestion, isCompleted, hasError}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.AI_SUGGESTION,
       sid,
       suggestion,
+      isCompleted,
       hasError,
     })
   },

@@ -2000,11 +2000,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.setAiSuggestion({
         sid: action.sid,
         suggestion: action.suggestion,
+        isCompleted: action.isCompleted,
         hasError: action.hasError,
       })
       SegmentStore.emitChange(SegmentConstants.AI_SUGGESTION, {
         ...action,
       })
+      break
     case SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG:
       SegmentStore.emitChange(
         SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
