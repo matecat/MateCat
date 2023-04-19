@@ -406,7 +406,7 @@ class INIT {
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
                     'g'           => [ '', '', 'extg' ],
-                    'ts'          => [ '', '', 'exts' ],
+                    'QT linguist ts'          => [ '', '', 'exts' ],
             ]
     ];
 

@@ -205,13 +205,15 @@ const SegmentActions = {
   },
 
   removeClassToSegment: function (sid, className) {
-    setTimeout(function () {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
-        id: sid,
-        className: className,
-      })
-    }, 0)
+    if (sid) {
+      setTimeout(function () {
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
+          id: sid,
+          className: className,
+        })
+      }, 0)
+    }
   },
 
   setStatus: function (sid, fid, status) {
