@@ -23,7 +23,16 @@ export const deleteSegmentIssue = async ({
       credentials: 'include',
     },
   )
+  if (!response.ok) {
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({errors: data.errors ?? data})
+    } else {
+      return Promise.reject()
+    }
+  }
 
-  if (!response.ok) return Promise.reject({response})
-  return response
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject({errors})
+  return data
 }
