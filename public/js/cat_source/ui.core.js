@@ -860,11 +860,7 @@ window.UI = {
    * @param goToNextUntranslated
    */
   clickOnTranslatedButton: function (segment, goToNextUntranslated) {
-    var sid = UI.currentSegmentId
-    //??
-    $('.temp-highlight-tags').remove()
-
-    SegmentActions.removeClassToSegment(sid, 'modified')
+    SegmentActions.removeClassToSegment(segment.sid, 'modified')
 
     UI.setTimeToEdit(segment.sid)
 
