@@ -142,13 +142,10 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
       charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
       // Check Ai Asisstant
       const aiAssistantCheck = document.getElementById('ai-assistant_check')
-      aiAssistantCheck.checked = SegmentUtils.isAiAssistantCounterEnable()
+      aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
       aiAssistantCheck.onchange = () => {
-        if (SegmentUtils.isAiAssistantCounterEnable()) {
-          SegmentActions.hideAiAssistant()
-        }
         SegmentUtils.setAiAssistantOptionValue(
-          !SegmentUtils.isAiAssistantCounterEnable(),
+          !SegmentUtils.isAiAssistantAuto(),
         )
       }
     },

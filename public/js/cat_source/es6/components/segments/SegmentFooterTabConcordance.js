@@ -11,6 +11,7 @@ import OfflineUtils from '../../utils/offlineUtils'
 import {getConcordance} from '../../api/getConcordance'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import {TabConcordanceResults} from './TabConcordanceResults'
 
 class SegmentFooterTabConcordance extends React.Component {
   static contextType = SegmentContext
@@ -119,6 +120,7 @@ class SegmentFooterTabConcordance extends React.Component {
         ['last_update_date'],
         ['desc'],
       )
+
       _.each(matches, function (item, index) {
         if (item.segment === '' || item.translation === '') return
         let prime =
@@ -345,6 +347,7 @@ class SegmentFooterTabConcordance extends React.Component {
             {this.state.results.length > 3 ? extended : null}
           </>
         )}
+        <TabConcordanceResults segment={this.props.segment} />
       </div>
     )
   }

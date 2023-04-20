@@ -8,6 +8,8 @@ import {aiSuggestion} from '../../api/aiSuggestion/aiSuggestion'
 import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 
+let memoSuggestions = []
+
 export const SegmentFooterTabAiAssistant = ({
   code,
   active_class,
@@ -18,7 +20,7 @@ export const SegmentFooterTabAiAssistant = ({
   const [hasError, setHasError] = useState(false)
   const [feedbackLeave, setFeedbackLeave] = useState()
 
-  let requestedWord = useRef()
+  const requestedWord = useRef()
 
   const sendFeedback = (feedback) => {
     const message = {
@@ -35,6 +37,14 @@ export const SegmentFooterTabAiAssistant = ({
   }
 
   useEffect(() => {
+    memoSuggestions = memoSuggestions.filter(
+      ({idSegment}) => idSegment === segment.sid,
+    )
+  }, [segment.sid])
+
+  useEffect(() => {
+    let isCachedLastRequest = false
+
     const aiAssistantHandler = ({sid, value}) => {
       if (sid === segment.sid) {
         setSuggestion(undefined)
@@ -43,17 +53,52 @@ export const SegmentFooterTabAiAssistant = ({
         requestedWord.current = value
 
         const sourceContent = TagUtils.prepareTextToSend(segment.updatedSource)
+
+        memoSuggestions = memoSuggestions.filter(({suggestion}) => suggestion)
+
+        const cacheNameKey = `${segment.sid}-${value}`
+        const cacheSuggestion = memoSuggestions.find(
+          ({key}) => key === cacheNameKey,
+        )
+        console.log(
+          'cache suggestion',
+          cacheSuggestion,
+          'all items cache',
+          memoSuggestions,
+        )
+        // check suggestions cache
+        if (cacheSuggestion?.suggestion) {
+          setSuggestion({value: cacheSuggestion.suggestion, isCompleted: true})
+          isCachedLastRequest = true
+          return
+        } else {
+          isCachedLastRequest = false
+        }
+
         aiSuggestion({
           idSegment: segment.sid,
           words: value,
           phrase: sourceContent,
         })
+
+        memoSuggestions.push({key: cacheNameKey, idSegment: segment.sid})
       }
     }
     const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
-      if (!hasError && sid === segment.sid)
+      if (!hasError && sid === segment.sid && !isCachedLastRequest) {
         setSuggestion({value: suggestion, isCompleted})
-      else if (hasError) setHasError(true)
+        if (isCompleted) {
+          const pendingCache = [...memoSuggestions]
+            .reverse()
+            .find(({idSegment}) => idSegment === sid)
+          memoSuggestions = memoSuggestions.map((item) => ({
+            ...item,
+            suggestion: item === pendingCache ? suggestion : item.suggestion,
+          }))
+        } else if (hasError) {
+          setHasError(true)
+        }
+      }
     }
 
     SegmentStore.addListener(
