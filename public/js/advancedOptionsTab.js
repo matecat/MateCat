@@ -140,6 +140,17 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
       const charscounterCheck = document.getElementById('charscounter_check')
       charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
       charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
+      // Check Ai Asisstant
+      const aiAssistantCheck = document.getElementById('ai-assistant_check')
+      aiAssistantCheck.checked = SegmentUtils.isAiAssistantCounterEnable()
+      aiAssistantCheck.onchange = () => {
+        if (SegmentUtils.isAiAssistantCounterEnable()) {
+          SegmentActions.hideAiAssistant()
+        }
+        SegmentUtils.setAiAssistantOptionValue(
+          !SegmentUtils.isAiAssistantCounterEnable(),
+        )
+      }
     },
 
     toggleLexiqaOption: function () {

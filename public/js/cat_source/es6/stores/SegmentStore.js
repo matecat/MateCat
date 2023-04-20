@@ -1069,7 +1069,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   ) {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
-    current_sid = !current_sid ? this.getCurrentSegment().sid : current_sid
+    current_sid = !current_sid ? currentSegment.sid : current_sid
     let allStatus = {
       1: 'APPROVED',
       2: 'DRAFT',
@@ -2000,11 +2000,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.setAiSuggestion({
         sid: action.sid,
         suggestion: action.suggestion,
+        isCompleted: action.isCompleted,
         hasError: action.hasError,
       })
       SegmentStore.emitChange(SegmentConstants.AI_SUGGESTION, {
         ...action,
       })
+      break
     case SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG:
       SegmentStore.emitChange(
         SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,

@@ -22,8 +22,15 @@ class AIAssistantWorker extends AbstractWorker
     private $openAi;
 
     /**
+     * @var \Predis\Client
+     */
+    private $redis;
+
+    /**
      * AIAssistantWorker constructor.
      * @param AMQHandler $queueHandler
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
      */
     public function __construct(AMQHandler $queueHandler)
     {
@@ -32,6 +39,8 @@ class AIAssistantWorker extends AbstractWorker
         $timeOut = ( INIT::$OPEN_AI_TIMEOUT) ? INIT::$OPEN_AI_TIMEOUT : 30;
         $this->openAi = new OpenAi( INIT::$OPENAI_API_KEY );
         $this->openAi->setTimeout($timeOut);
+
+        $this->redis = ( new \RedisHandler() )->getConnection();
     }
 
     /**
@@ -69,7 +78,15 @@ class AIAssistantWorker extends AbstractWorker
         $phrase = strip_tags( html_entity_decode( $payload['phrase'] ) );
         $txt = "";
 
-        ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload['word'] , $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload) {
+        $lockValue = $this->generateLockValue();
+        $this->generateLock($payload['id_segment'], $payload['id_job'], $payload['password'], $lockValue);
+
+        ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload['word'] , $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
+
+            $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
+            if($currentLockValue !== $lockValue){
+                return 0;
+            }
 
             $_d = explode( "data: ", $data );
 
@@ -77,6 +94,7 @@ class AIAssistantWorker extends AbstractWorker
 
                 if (strpos($data, "[DONE]\n\n") !== false) {
                     $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
+                    $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
                 } else {
                     $arr = json_decode($clean, true);
 
@@ -116,5 +134,68 @@ class AIAssistantWorker extends AbstractWorker
                 ],
             ]
         ]);
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @param $value
+     * @return mixed
+     */
+    private function generateLock($idSegment, $idJob, $password, $value)
+    {
+        $key = $this->getLockKey($idSegment, $idJob, $password);
+
+        return $this->redis->set($key, $value);
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @return int
+     */
+    private function destroyLock($idSegment, $idJob, $password)
+    {
+        $key = $this->getLockKey($idSegment, $idJob, $password);
+
+        return $this->redis->del([$key]);
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @return string
+     */
+    private function getLockValue($idSegment, $idJob, $password)
+    {
+        $key = $this->getLockKey($idSegment, $idJob, $password);
+
+        return $this->redis->get($key);
+    }
+
+    /**
+     * @param $idSegment
+     * @param $idJob
+     * @param $password
+     * @return string
+     */
+    private function getLockKey($idSegment, $idJob, $password)
+    {
+        return base64_encode($idSegment.'-'.$idJob.'-'.$password);
+    }
+
+    /**
+     * @param int $length
+     * @return string
+     * @throws Exception
+     */
+    private function generateLockValue($length = 20)
+    {
+        $bytes = random_bytes($length);
+
+        return bin2hex($bytes);
     }
 }

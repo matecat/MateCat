@@ -20,7 +20,7 @@ export const approveSegments = async (
   const dataParams = flattenObject({
     segments_id: segments,
     status: 'approved',
-    client_id: idClient,
+    client_id: config.id_client,
     revision_number: revisionNumber,
   })
   const formData = new FormData()

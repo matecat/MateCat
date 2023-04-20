@@ -1249,6 +1249,11 @@ const SegmentActions = {
       actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
+  hideAiAssistant: () => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HIDE_AI_ASSISTANT,
+    })
+  },
   characterCounter: ({sid, counter, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
@@ -1377,11 +1382,12 @@ const SegmentActions = {
       value,
     })
   },
-  aiSuggestion: ({sid, suggestion, hasError}) => {
+  aiSuggestion: ({sid, suggestion, isCompleted, hasError}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.AI_SUGGESTION,
       sid,
       suggestion,
+      isCompleted,
       hasError,
     })
   },

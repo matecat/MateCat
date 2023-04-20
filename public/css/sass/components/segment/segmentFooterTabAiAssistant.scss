@@ -3,54 +3,60 @@
   justify-content: space-between;
   padding: 24px 32px;
 
-  > :first-child {
-    max-height: 423px;
-    min-height: 42px;
-    overflow: auto;
-    padding-right: 2%;
-  }
-
   > div {
     width: 48%;
     text-align: left;
   }
+}
 
-  .feedback-icons {
+.suggestion {
+  display: flex;
+  flex-direction: column;
+  max-height: 423px;
+  min-height: 42px;
+  overflow: auto;
+  padding-right: 2%;
+
+  > :first-child {
+    font-weight: bold;
+  }
+}
+
+.feedback-icons {
+  display: flex;
+  margin-top: 8px;
+
+  .like,
+  .dislike {
     display: flex;
-    margin-top: 8px;
+    width: 24px;
+    height: 24px;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    border: solid 1px $grey8;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 
-    .like,
-    .dislike {
-      display: flex;
-      width: 24px;
-      height: 24px;
-      align-content: center;
-      justify-content: center;
-      align-items: center;
-      border: solid 1px $grey8;
-      border-radius: 4px;
-      cursor: pointer;
+  .like {
+    color: $approvedGreen;
+    margin-right: 8px;
+
+    &:hover,
+    &.active {
+      border-color: $approvedGreen;
+      background-color: rgba($approvedGreen, 0.1);
     }
+  }
 
-    .like {
-      color: $approvedGreen;
-      margin-right: 8px;
+  .dislike {
+    color: $redDefault;
 
-      &:hover,
-      &.active {
-        border-color: $approvedGreen;
-        background-color: rgba($approvedGreen, 0.1);
-      }
-    }
-
-    .dislike {
-      color: $redDefault;
-
-      &:hover,
-      &.active {
-        border-color: $redDefault;
-        background-color: rgba($redDefault, 0.1);
-      }
+    &:hover,
+    &.active {
+      border-color: $redDefault;
+      background-color: rgba($redDefault, 0.1);
     }
   }
 }

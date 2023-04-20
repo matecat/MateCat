@@ -182,12 +182,22 @@ function SegmentFooter() {
     const closeAllTabs = () => setTabStateChanges({visible: false})
     const showMessage = (sidProp, message) =>
       segment.sid === sidProp && setMessage(message)
+    const hideAIAssistant = () =>
+      setTabStateChanges({
+        name: TAB.AI_ASSISTANT,
+        visible: false,
+        enabled: false,
+      })
 
     document.addEventListener('keydown', handleShortcutsKeyDown)
     SegmentStore.addListener(SegmentConstants.REGISTER_TAB, registerTab)
     SegmentStore.addListener(
       SegmentConstants.MODIFY_TAB_VISIBILITY,
       modifyTabVisibility,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.HIDE_AI_ASSISTANT,
+      hideAIAssistant,
     )
     SegmentStore.addListener(SegmentConstants.OPEN_TAB, openTab)
     SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, addTabIndex)
@@ -200,6 +210,10 @@ function SegmentFooter() {
       SegmentStore.removeListener(
         SegmentConstants.MODIFY_TAB_VISIBILITY,
         modifyTabVisibility,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.HIDE_AI_ASSISTANT,
+        hideAIAssistant,
       )
       SegmentStore.removeListener(SegmentConstants.OPEN_TAB, openTab)
       SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, addTabIndex)
@@ -464,7 +478,11 @@ function SegmentFooter() {
       : false
     const countResult = !isLoading && getTabIndex(tab)
     const onClickRemoveTab = (event) => {
-      SegmentActions.modifyTabVisibility(TAB.AI_ASSISTANT, false)
+      setTabStateChanges({
+        name: TAB.AI_ASSISTANT,
+        visible: false,
+        enabled: false,
+      })
       if (tab.open) SegmentActions.activateTab(segment.sid, TAB.MATCHES)
       event.stopPropagation()
     }
@@ -486,15 +504,17 @@ function SegmentFooter() {
         <a tabIndex="-1">
           {tab.label}
           {!isLoading ? (
-              <span className="number">
+            <span className="number">
               {countResult ? ' (' + countResult + ')' : ''}
             </span>
           ) : clientConnected ? (
-              <span className="loader loader_on" />
-          ) :  <i className="icon-warning2 icon" /> }
+            <span className="loader loader_on" />
+          ) : (
+            <i className="icon-warning2 icon" />
+          )}
 
           {tab.isEnableCloseButton && (
-              <span className="icon-close" onClick={onClickRemoveTab}>
+            <span className="icon-close" onClick={onClickRemoveTab}>
               <IconCloseCircle />
             </span>
           )}

@@ -47,7 +47,11 @@ class SegmentCommentsContainer extends React.Component {
         })
         .then(() => {
           this.setState({sendCommentError: false})
-          setTimeout(() => (this.commentInput.textContent = ''))
+          setTimeout(() => {
+            if (this.commentInput) {
+              this.commentInput.textContent = ''
+            }
+          })
         })
     }
   }

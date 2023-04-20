@@ -90,6 +90,15 @@ const SegmentUtils = {
     )
   },
   /**
+   * AI assistant
+   */
+  isAiAssistantCounterEnable: () =>
+    window.localStorage.getItem('aiAssistant') === null ||
+    JSON.parse(window.localStorage.getItem('aiAssistant')) == true,
+  setAiAssistantOptionValue: (isActive) => {
+    window.localStorage.setItem('aiAssistant', isActive)
+  },
+  /**
    * Selected keys glossary job local storage
    */
   getSelectedKeysGlossary: (keys) => {

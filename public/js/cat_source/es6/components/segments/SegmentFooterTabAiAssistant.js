@@ -14,7 +14,7 @@ export const SegmentFooterTabAiAssistant = ({
   tab_class,
   segment,
 }) => {
-  const [suggestion, setSuggestion] = useState()
+  const [suggestion, setSuggestion] = useState(undefined)
   const [hasError, setHasError] = useState(false)
   const [feedbackLeave, setFeedbackLeave] = useState()
 
@@ -25,7 +25,7 @@ export const SegmentFooterTabAiAssistant = ({
       sid: segment.sid,
       segment: segment.decodedSource,
       request: requestedWord.current,
-      response: suggestion,
+      response: suggestion?.value,
       source: config.source_code,
       target: config.target_code,
       feedback: feedback ? 'Yes' : 'No',
@@ -50,8 +50,9 @@ export const SegmentFooterTabAiAssistant = ({
         })
       }
     }
-    const aiSuggestionHandler = ({sid, suggestion, hasError}) => {
-      if (!hasError && sid === segment.sid) setSuggestion(suggestion)
+    const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
+      if (!hasError && sid === segment.sid)
+        setSuggestion({value: suggestion, isCompleted})
       else if (hasError) setHasError(true)
     }
 
@@ -89,25 +90,36 @@ export const SegmentFooterTabAiAssistant = ({
       className={`tab sub-editor ${active_class} ${tab_class}`}
       id={`segment-${segment.sid}-${tab_class}`}
     >
-      {!hasError && typeof suggestion !== 'undefined' ? (
+      {!hasError && typeof suggestion?.value !== 'undefined' ? (
         <div className="ai-assistant-container">
-          <div>{suggestion}</div>
+          <div className="suggestion">
+            <span>Meaning in context</span>
+            <span>{suggestion.value}</span>
+          </div>
           <div>
-            <span>Was this suggestion useful?</span>
-            <div className="feedback-icons">
-              <span
-                className={`like${feedbackLeave === 'Yes' ? ' active' : ''}`}
-                onClick={() => sendFeedback(true)}
-              >
-                <IconLike />
-              </span>
-              <span
-                className={`dislike${feedbackLeave === 'No' ? ' active' : ''}`}
-                onClick={() => sendFeedback(false)}
-              >
-                <IconDislike />
-              </span>
-            </div>
+            {suggestion?.isCompleted && (
+              <>
+                <span>Was this suggestion useful?</span>
+                <div className="feedback-icons">
+                  <span
+                    className={`like${
+                      feedbackLeave === 'Yes' ? ' active' : ''
+                    }`}
+                    onClick={() => sendFeedback(true)}
+                  >
+                    <IconLike />
+                  </span>
+                  <span
+                    className={`dislike${
+                      feedbackLeave === 'No' ? ' active' : ''
+                    }`}
+                    onClick={() => sendFeedback(false)}
+                  >
+                    <IconDislike />
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : hasError ? (
