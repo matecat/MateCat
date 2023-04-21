@@ -1334,11 +1334,11 @@ ul.suggestion-item.graysmall:last-child {
   display: block;
 }
 
-.tab.concordances.extended .graysmall {
+.tab.concordances .graysmall {
   display: block !important;
 }
 
-.tab.concordances.extended .overflow {
+.tab.concordances .overflow {
   overflow: auto;
 }
 
@@ -1513,7 +1513,7 @@ body .footer.showMatches .sub-editor.open {
   width: 100%;
 }
 
-.sub-editor.concordances .more {
+.concordances .more {
   display: inline-block;
   text-decoration: none;
   color: #fff;

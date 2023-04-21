@@ -92,7 +92,7 @@ const SegmentUtils = {
   /**
    * AI assistant
    */
-  isAiAssistantCounterEnable: () =>
+  isAiAssistantAuto: () =>
     window.localStorage.getItem('aiAssistant') === null ||
     JSON.parse(window.localStorage.getItem('aiAssistant')) == true,
   setAiAssistantOptionValue: (isActive) => {

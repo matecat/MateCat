@@ -465,9 +465,10 @@ class SegmentSource extends React.Component {
 
   helpAiAssistant = () => {
     if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
+
     const isOpenAiEnabled =
-      Boolean(config.isOpenAiEnabled) &&
-      SegmentUtils.isAiAssistantCounterEnable()
+      Boolean(config.isOpenAiEnabled) && SegmentUtils.isAiAssistantAuto()
+
     if (isOpenAiEnabled) {
       this.delayAiAssistant = setTimeout(() => {
         const {segment} = this.context
@@ -539,26 +540,25 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
         }
 
-    const optionsToolbar = /*this.state.isShowingOptionsToolbar && (
+    const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
-        {Boolean(config.isOpenAiEnabled) &&
-          SegmentUtils.isAiAssistantCounterEnable() && (
-            <li
-              title="See the meaning of the highlighted text in this context"
-              onMouseDown={() => {
-                SegmentActions.helpAiAssistant({
-                  sid: segment.sid,
-                  value: DraftMatecatUtils.getSelectedTextWithoutEntities(
-                    editorState,
-                  ).reduce((acc, {value}) => `${acc}${value}`, ''),
-                })
-              }}
-            >
-              <Assistant />
-            </li>
-          )}
+        {Boolean(config.isOpenAiEnabled) && !SegmentUtils.isAiAssistantAuto() && (
+          <li
+            title="See the meaning of the highlighted text in this context"
+            onMouseDown={() => {
+              SegmentActions.helpAiAssistant({
+                sid: segment.sid,
+                value: DraftMatecatUtils.getSelectedTextWithoutEntities(
+                  editorState,
+                ).reduce((acc, {value}) => `${acc}${value}`, ''),
+              })
+            }}
+          >
+            <Assistant />
+          </li>
+        )}
       </ul>
-      ) */ undefined
+    )
 
     // Standard editor
     const editorHtml = (
