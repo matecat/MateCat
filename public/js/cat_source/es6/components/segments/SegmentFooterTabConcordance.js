@@ -1,12 +1,7 @@
 import React from 'react'
-import Cookies from 'js-cookie'
-import _ from 'lodash'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
-import Immutable from 'immutable'
-import TagUtils from '../../utils/tagUtils'
-import CommonUtils from '../../utils/commonUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 import {getConcordance} from '../../api/getConcordance'
 import {SegmentContext} from './SegmentContext'
@@ -18,21 +13,12 @@ class SegmentFooterTabConcordance extends React.Component {
 
   constructor(props) {
     super(props)
-    let extended = false
-    if (Cookies.get('segment_footer_extendend_concordance')) {
-      extended = Cookies.get('segment_footer_extendend_concordance') === 'true'
-    }
 
     this.state = {
-      noResults: false,
       numDisplayContributionMatches: 3,
-      results: this.props.segment.concordance
-        ? this.props.segment.concordance
-        : [],
       loading: false,
       source: '',
       target: '',
-      extended: extended,
     }
 
     this.searchSubmit = this.searchSubmit.bind(this)
@@ -50,35 +36,37 @@ class SegmentFooterTabConcordance extends React.Component {
         this.setState({
           source: '',
           target: data.text,
-          results: [],
         })
       } else {
         this.setState({
           source: data.text,
           target: '',
-          results: [],
         })
       }
       setTimeout(() => this.searchSubmit())
+      // reset component results
+      this.resultsRef.reset()
     }
   }
 
   sourceChange(event) {
-    const previousResult = this.state.results
     this.setState({
       source: event.target.value,
       target: '',
-      results: [],
     })
+
+    // reset component results
+    this.resultsRef.reset()
   }
 
   targetChange(event) {
-    const previousResult = this.state.results
     this.setState({
       source: '',
       target: event.target.value,
-      results: [],
     })
+
+    // reset component results
+    this.resultsRef.reset()
   }
 
   getConcordance(query, type) {
@@ -88,100 +76,23 @@ class SegmentFooterTabConcordance extends React.Component {
     })
     this.setState({
       loading: true,
-      results: [],
     })
+
+    // reset component results
+    this.resultsRef.reset()
   }
 
   renderConcordances(sid, data) {
     if (sid !== this.props.segment.sid) return
     if (data.length) {
       this.setState({
-        results: data,
-        noResults: false,
         loading: false,
       })
     } else {
       this.setState({
-        noResults: true,
-        results: [],
         loading: false,
       })
     }
-  }
-
-  processResults() {
-    let self = this
-    let segment_id = this.props.segment.sid
-    let array = []
-
-    if (this.state.results.length) {
-      let matches = _.orderBy(
-        this.state.results,
-        ['last_update_date'],
-        ['desc'],
-      )
-
-      _.each(matches, function (item, index) {
-        if (item.segment === '' || item.translation === '') return
-        let prime =
-          index < self.state.numDisplayContributionMatches ? ' prime' : ''
-
-        let cb = item.created_by
-
-        let leftTxt = item.segment
-          .replace(/&/g, '&amp;')
-          .replace(/</gi, '&lt;')
-          .replace(/>/gi, '&gt;')
-        leftTxt = TagUtils.decodePlaceholdersToTextSimple(leftTxt)
-        leftTxt = leftTxt.replace(/#\{/gi, '<mark>')
-        leftTxt = leftTxt.replace(/\}#/gi, '</mark>')
-
-        let rightTxt = item.translation
-          .replace(/&/g, '&amp;')
-          .replace(/</gi, '&lt;')
-          .replace(/>/gi, '&gt;')
-        rightTxt = TagUtils.decodePlaceholdersToTextSimple(rightTxt)
-        rightTxt = rightTxt.replace(/#\{/gi, '<mark>')
-        rightTxt = rightTxt.replace(/\}#/gi, '</mark>')
-
-        let element = (
-          <ul
-            key={index}
-            className={['graysmall', prime].join(' ')}
-            data-item={index + 1}
-            data-id={item.id}
-          >
-            <li className={'sugg-source'}>
-              <span
-                id={segment_id + '-tm-' + item.id + '-source'}
-                className={'suggestion_source'}
-                dangerouslySetInnerHTML={self.allowHTML(leftTxt)}
-              />
-            </li>
-            <li className={'b sugg-target'}>
-              <span
-                id={segment_id + '-tm-' + item.id + '-translation'}
-                className={'translation'}
-                dangerouslySetInnerHTML={self.allowHTML(rightTxt)}
-              />
-            </li>
-            <ul className={'graysmall-details'}>
-              <li>{item.last_update_date}</li>
-              <li className={'graydesc'}>
-                <span className={'bold'}>
-                  {CommonUtils.getLanguageNameFromLocale(item.target)}
-                </span>
-              </li>
-              <li className={'graydesc'}>
-                Source: <span className={'bold'}>{cb}</span>
-              </li>
-            </ul>
-          </ul>
-        )
-        array.push(element)
-      })
-    }
-    return array
   }
 
   searchSubmit(event) {
@@ -191,23 +102,6 @@ class SegmentFooterTabConcordance extends React.Component {
     } else if (this.state.target.length > 0) {
       this.getConcordance(this.state.target, 1)
     }
-  }
-
-  toggleExtendend() {
-    if (this.state.extended) {
-      Cookies.set('segment_footer_extendend_concordance', false, {
-        expires: 3650,
-        secure: true,
-      })
-    } else {
-      Cookies.set('segment_footer_extendend_concordance', true, {
-        expires: 3650,
-        secure: true,
-      })
-    }
-    this.setState({
-      extended: !this.state.extended,
-    })
   }
 
   componentDidMount() {
@@ -234,12 +128,7 @@ class SegmentFooterTabConcordance extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      this.state.extended !== nextState.extended ||
-      !Immutable.fromJS(this.state.results).equals(
-        Immutable.fromJS(nextState.results),
-      ) ||
       this.state.loading !== nextState.loading ||
-      this.state.noResults !== nextState.noResults ||
       this.state.source !== nextState.source ||
       this.state.target !== nextState.target ||
       this.props.active_class !== nextProps.active_class ||
@@ -250,20 +139,8 @@ class SegmentFooterTabConcordance extends React.Component {
   render() {
     const {clientConnected} = this.context
     let html = '',
-      results = '',
-      loadingClass = '',
-      extended = '',
-      haveResults = '',
-      isExtendedClass = this.state.extended ? 'extended' : ''
-    extended = (
-      <a className={'more'} onClick={this.toggleExtendend.bind(this)}>
-        {this.state.extended ? 'Fewer' : 'More'}
-      </a>
-    )
+      loadingClass = ''
 
-    if (this.state.results.length > 0) {
-      haveResults = 'have-results'
-    }
     if (this.state.loading) {
       loadingClass = 'loading'
     }
@@ -308,17 +185,6 @@ class SegmentFooterTabConcordance extends React.Component {
       )
     }
 
-    if (this.state.results.length > 0 && !this.state.noResults) {
-      results = this.processResults()
-    }
-    if (this.state.noResults) {
-      results = (
-        <ul className={'graysmall message prime'}>
-          <li>Can&apos;t find any matches. Check the language combination.</li>
-        </ul>
-      )
-    }
-
     return (
       <div
         key={'container_' + this.props.code}
@@ -326,11 +192,7 @@ class SegmentFooterTabConcordance extends React.Component {
           'tab sub-editor ' +
           this.props.active_class +
           ' ' +
-          this.props.tab_class +
-          ' ' +
-          isExtendedClass +
-          ' ' +
-          haveResults
+          this.props.tab_class
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
@@ -341,13 +203,14 @@ class SegmentFooterTabConcordance extends React.Component {
           <>
             <div className="overflow">
               {html}
-              <div className="results">{results}</div>
+              <TabConcordanceResults
+                ref={(resultsRef) => (this.resultsRef = resultsRef)}
+                segment={this.props.segment}
+                isActive={this.props.active_class === 'open'}
+              />
             </div>
-            <br className="clear" />
-            {this.state.results.length > 3 ? extended : null}
           </>
         )}
-        <TabConcordanceResults segment={this.props.segment} />
       </div>
     )
   }
