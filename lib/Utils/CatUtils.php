@@ -463,8 +463,14 @@ class CatUtils {
         preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER );
 
         foreach ($matches as $match){
-            if($match[2] !== 'ctype=\"'.CTypeEnum::HTML.'\"'){
+            $ctype = trim($match[2]);
+            $ctype = str_replace('"', '', $ctype);
+            $ctype = str_replace('ctype=', '', $ctype);
+
+            if($ctype !== CTypeEnum::HTML){
                 $string = str_replace($match[0], 'placeholder', $string);
+            } else {
+                $string = str_replace($match[0], '', $string);
             }
         }
 

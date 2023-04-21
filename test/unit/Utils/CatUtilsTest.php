@@ -11,6 +11,8 @@ class CatUtilsTest extends PHPUnit_Framework_TestCase
             'it-IT' => [
                 '{{place holder1}} {{place holder2}}' => 2,
                 '<ph id="source1" dataRef="source1"/>Ciao <ph id="source2" dataRef="source2"/>,<ph id="source3" dataRef="source3"/>' => 1,
+                'La casa è <a href="#">bianca</a>' => 4,
+                'La casa è &lt;a href="#"&gt;bianca&lt;/a&gt;' => 4,
                 'La casa è bianca' => 4,
                 'La casa %%placeholder%% è bianca' => 5,
                 'La casa %{placeholder} è bianca' => 5,
