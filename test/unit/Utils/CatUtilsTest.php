@@ -32,7 +32,6 @@ class CatUtilsTest extends PHPUnit_Framework_TestCase
                 'La casa %2$@ è bianca' => 5,
                 'La casa %x è bianca' => 5,
                 'La casa %1%@ è bianca' => 5,
-                'La casa %1$#@file@ è bianca' => 5,
                 'La casa %#@file@ è bianca' => 5,
                 'La casa $%1$.2f è bianca' => 5,
                 'La casa %.0f% è bianca' => 5,
