@@ -1,17 +1,29 @@
-import React, {Fragment, useEffect, useState} from 'react'
+import React, {
+  Fragment,
+  useEffect,
+  useImperativeHandle,
+  useState,
+  forwardRef,
+} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CommonUtils from '../../utils/commonUtils'
 import Cookies from 'js-cookie'
 
-export const TabConcordanceResults = ({segment}) => {
+export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)
   const [isExtended, setIsExtended] = useState(
     Cookies.get('segment_footer_extendend_concordance') === 'true',
   )
 
+  useImperativeHandle(ref, () => ({
+    reset: () => setResults(undefined),
+  }))
+
   useEffect(() => {
+    if (!isActive) return
+
     const renderConcordances = (sid, data) => {
       const dataSorted = Array.isArray(data)
         ? data
@@ -64,7 +76,7 @@ export const TabConcordanceResults = ({segment}) => {
         renderConcordances,
       )
     }
-  }, [])
+  }, [isActive])
 
   const toggleExtendend = () => {
     if (isExtended) {
@@ -117,30 +129,27 @@ export const TabConcordanceResults = ({segment}) => {
         data-item={index + 1}
         data-id={item.id}
       >
-        <li className={'sugg-source'}>
+        <li className="sugg-source">
           <span
-            id={sid + '-tm-' + item.id + '-source'}
-            className={'suggestion_source'}
+            id={`${sid}-tm-${item.id}-source`}
+            className="suggestion_source"
           >
             {getContentWithMarkTag(item.segment)}
           </span>
         </li>
-        <li className={'b sugg-target'}>
-          <span
-            id={sid + '-tm-' + item.id + '-translation'}
-            className={'translation'}
-          >
+        <li className="b sugg-target">
+          <span id={`${sid}-tm-${item.id}-translation`} className="translation">
             {getContentWithMarkTag(item.translation)}
           </span>
         </li>
-        <ul className={'graysmall-details'}>
+        <ul className="graysmall-details">
           <li>{item.last_update_date}</li>
-          <li className={'graydesc'}>
-            <span className={'bold'}>
+          <li className="graydesc">
+            <span className="bold">
               {CommonUtils.getLanguageNameFromLocale(item.target)}
             </span>
           </li>
-          <li className={'graydesc'}>
+          <li className="graydesc">
             Source: <span className={'bold'}>{item.created_by}</span>
           </li>
         </ul>
@@ -151,18 +160,22 @@ export const TabConcordanceResults = ({segment}) => {
   const resultsDisplaying =
     results && (isExtended ? results : [...results].splice(0, 3))
 
+  const moreButton = results?.length > MAX_ITEMS_TO_DISPLAY && (
+    <a className="more" onClick={toggleExtendend}>
+      {isExtended ? 'Fewer' : 'More'}
+    </a>
+  )
+
   return (
     <div>
       {Array.isArray(resultsDisplaying) &&
         (resultsDisplaying.length > 0 ? (
           <div>
             <ul>{resultsDisplaying.map(renderResults)}</ul>
-            <a className={'more'} onClick={toggleExtendend}>
-              {isExtended ? 'Fewer' : 'More'}
-            </a>
+            {moreButton}
           </div>
         ) : (
-          <ul className={'graysmall message prime'}>
+          <ul className="graysmall message prime">
             <li>
               Can&apos;t find any matches. Check the language combination.
             </li>
@@ -170,8 +183,11 @@ export const TabConcordanceResults = ({segment}) => {
         ))}
     </div>
   )
-}
+})
+
+TabConcordanceResults.displayName = 'TabConcordanceResults'
 
 TabConcordanceResults.propTypes = {
   segment: PropTypes.object,
+  isActive: PropTypes.bool,
 }
