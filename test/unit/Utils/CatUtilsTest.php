@@ -9,6 +9,8 @@ class CatUtilsTest extends PHPUnit_Framework_TestCase
     {
         $data = [
             'it-IT' => [
+                '​La casa è <object_color>​​<object> bianca' => 4,
+                '​La casa è <object_color>​​ <object> bianca' => 4,
                 '{{place holder1}} {{place holder2}}' => 2,
                 '<ph id="source1" dataRef="source1"/>Ciao <ph id="source2" dataRef="source2"/>,<ph id="source3" dataRef="source3"/>' => 1,
                 'La casa è <a href="#">bianca</a>' => 4,

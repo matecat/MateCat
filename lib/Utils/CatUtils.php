@@ -447,9 +447,7 @@ class CatUtils {
 
         }
 
-
         return $string;
-
     }
 
     /**
