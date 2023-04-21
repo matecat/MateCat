@@ -2,6 +2,7 @@
 
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Validator\IsJobRevisionValidatorObject;
 
@@ -377,13 +378,12 @@ class CatUtils {
      */
     public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null) {
 
-        $string = self::replacePlaceholders($string);
-
         if ( $Filter === null ) {
             $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang, null, []);
         }
 
         $string = $Filter->fromLayer0ToLayer1( $string );
+        $string = self::replacePlaceholders($string);
 
         //return empty on string composed only by spaces
         //do nothing
@@ -453,25 +453,18 @@ class CatUtils {
     }
 
     /**
-     * This function replaces the placeholder with a word. Example:
-     *
-     * La casa %%placeholder%% è bianca ----> La casa placeholder è bianca
-     *
-     * Thanks to this string manipulation, the `clean_raw_string_4_word_count` function is able to count every placeholder as 1 word
-     *
-     * @param string $string
-     *
+     * @param $string
      * @return string
      */
     private static function replacePlaceholders($string)
     {
-        $placeholderRegex = '/%%[a-zA-Z0-9]+%%|{{[a-zA-Z0-9 ]+}}|%{[a-zA-Z0-9]+}|@@[a-zA-Z0-9]+@@|{%[a-zA-Z0-9]+%}|&lt;[a-zA-Z0-9]+&gt;|{[a-zA-Z0-9]+}|%@|%N$@|%s|%@|%N$@|%s|%u|%1$s|%2$d|%d|%@|%1$i|%1\$.2f|%.0f|%c|%2$@|%x|%1%@|%1\$#@file@|%#@file@|$%1\$.2f|%.0f%|%ld|%hi|%lu|%1|%2/iu';
+        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'].+?["\'] ?) ?(equiv-text=["\'].+?["\'] ?)/>|ui';
 
-        preg_match_all($placeholderRegex, $string, $placeholderMatch);
+        preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER );
 
-        if(count($placeholderMatch[0]) > 0){
-            foreach ($placeholderMatch[0] as $placeholderSingleMatch){
-                $string = str_replace( $placeholderSingleMatch, "placeholder", $string );
+        foreach ($matches as $match){
+            if($match[2] !== 'ctype=\"'.CTypeEnum::HTML.'\"'){
+                $string = str_replace($match[0], 'placeholder', $string);
             }
         }
 
