@@ -727,6 +727,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             s.xliff_mrk_ext_succ_tags AS mrk_succ_tags,
             st.translation, 
             st.status,
+            st.serialized_errors_list AS error,
             st.eq_word_count,
             s.raw_word_count,
             od.map as data_ref_map
