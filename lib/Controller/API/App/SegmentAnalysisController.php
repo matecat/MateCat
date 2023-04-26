@@ -185,6 +185,7 @@ class SegmentAnalysisController extends KleinController {
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
                 'status' => $this->getStatusObject($segmentForAnalysis),
+                'last_edit' => $segmentForAnalysis->last_edit,
         ];
     }
 

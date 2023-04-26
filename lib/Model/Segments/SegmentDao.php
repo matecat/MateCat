@@ -1015,6 +1015,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.eq_word_count,
                 st.match_type,
                 ste.source_page,
+                ste.create_date as last_edit,
                 f.filename,
                 fp.tag_key,
                 fp.tag_value,
@@ -1045,7 +1046,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             LEFT JOIN
                 (
                     SELECT 
-                       id_segment AS ste_id_segment, source_page
+                       id_segment AS ste_id_segment, source_page, create_date
                     FROM
                         segment_translation_events
                     JOIN (
