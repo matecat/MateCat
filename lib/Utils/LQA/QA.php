@@ -231,6 +231,11 @@ class QA {
      */
     protected $tagPositionError = [];
 
+    /**
+     * @var int
+     */
+    protected $characters_count;
+
     const ERR_NONE                    = 0;
     const ERR_COUNT                   = 1;
     const ERR_SOURCE                  = 2;
@@ -1048,6 +1053,11 @@ class QA {
      */
     public function setIdSegment( $id_segment ) {
         $this->id_segment = $id_segment;
+    }
+
+    public function setCharactersCount( $characters_count )
+    {
+        $this->characters_count = (int)$characters_count;
     }
 
     /**
@@ -2517,14 +2527,7 @@ class QA {
         // check size restriction
         if ( $this->id_segment ) {
 
-            $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
-
-            // remove trailing space
-            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg() );
-            $preparedTargetToBeChecked = preg_replace( '/&nbsp;/iu', ' ', $preparedTargetToBeChecked );
-            $preparedTargetToBeChecked = rtrim( $preparedTargetToBeChecked );
-
-            if ( false === $this->_filterCheckSizeRestriction( $this->id_segment, $preparedTargetToBeChecked ) ) {
+            if ( false === $this->_filterCheckSizeRestriction( $this->id_segment ) ) {
                 $this->addError( self::ERR_SIZE_RESTRICTION );
             }
 
@@ -2537,7 +2540,11 @@ class QA {
      *
      * @return bool
      */
-    private function _filterCheckSizeRestriction( $segmentId, $text ) {
+    private function _filterCheckSizeRestriction( $segmentId ) {
+
+        if(!$this->characters_count){
+            return true;
+        }
 
         $limit = @Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ];
 
@@ -2548,9 +2555,7 @@ class QA {
                 return true;
             }
 
-            $sizeRestriction = new SizeRestriction( $text, $this->featureSet );
-
-            return $sizeRestriction->checkLimit($limit->meta_value);
+            return $this->characters_count <= $limit->meta_value;
         }
 
         return true;

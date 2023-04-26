@@ -99,6 +99,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   clipboardPlainText: '',
   sideOpen: false,
   isSearchingGlossaryInTarget: false,
+  helpAiAssistantWords: undefined,
+  _aiSuggestions: [],
   /**
    * Update all
    */
@@ -170,7 +172,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             status: status,
             time_to_edit: '0',
             originalDecodedTranslation: translation
-              ? TagUtils.transformTextFromBe(translation)
+              ? DraftMatecatUtils.unescapeHTML(
+                  TagUtils.transformTextFromBe(translation),
+                )
               : '',
             translation: translation
               ? TagUtils.transformTextFromBe(translation)
@@ -222,14 +226,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.searchParams = this.searchParams
         segment.segment = TagUtils.transformTextFromBe(segment.segment)
         segment.translation = TagUtils.transformTextFromBe(segment.translation)
-        ;(segment.originalDecodedTranslation = segment.translation),
-          (segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
-            DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
-          )),
-          (segment.decodedSource = DraftMatecatUtils.unescapeHTML(
-            DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
-          )),
-          (segment.updatedSource = segment.segment)
+        segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
+          segment.translation,
+        )
+        segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
+          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
+        )
+        segment.decodedSource = DraftMatecatUtils.unescapeHTML(
+          DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+        )
+        segment.updatedSource = segment.segment
         segment.openComments = false
         segment.openSplit = false
         newSegments.push(segment)
@@ -1063,7 +1069,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   ) {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
-    current_sid = !current_sid ? this.getCurrentSegment().sid : current_sid
+    current_sid = !current_sid ? currentSegment.sid : current_sid
     let allStatus = {
       1: 'APPROVED',
       2: 'DRAFT',
@@ -1128,10 +1134,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   getNextUntranslatedSegmentId() {
     let current = this.getCurrentSegment()
-      ? this.getCurrentSegment()
-      : this._segments.get(0)
-    let next = this.getNextSegment(current.sid, null, 8, null, true)
-    return next ? next.sid : this.nextUntranslatedFromServer
+    current = current || this._segments.get(0)
+    if (current) {
+      let next = this.getNextSegment(current.sid, null, 8, null, true)
+      return next ? next.sid : this.nextUntranslatedFromServer
+    }
+    return undefined
   },
   getPrevSegment(sid, alsoMutedSegments) {
     let currentSegment = this.getCurrentSegment()
@@ -1281,6 +1289,26 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
+  },
+  getAiSuggestion: (sid) =>
+    SegmentStore._aiSuggestions.find((item) => item.sid === sid),
+  setAiSuggestion: ({sid, suggestion}) => {
+    const MAX_ITEMS = 10
+
+    const filteredWithoutCurrent = SegmentStore._aiSuggestions.filter(
+      (item) => item.sid !== sid,
+    )
+    const difference = filteredWithoutCurrent.length - MAX_ITEMS
+    const update =
+      difference > 0
+        ? filteredWithoutCurrent.slice(difference)
+        : filteredWithoutCurrent
+    SegmentStore._aiSuggestions = [...update, {sid, suggestion}]
+  },
+  setSegmentCharactersCounter: function (sid, counter) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn([index, 'charactersCounter'], counter)
   },
 })
 
@@ -1939,6 +1967,7 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHARACTER_COUNTER:
+      SegmentStore.setSegmentCharactersCounter(action.sid, action.counter)
       SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
         sid: action.sid,
         counter: action.counter,
@@ -1962,6 +1991,31 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_GLOSSARY_TERM, {
         ...action,
       })
+      break
+    case SegmentConstants.HELP_AI_ASSISTANT:
+      SegmentStore.helpAiAssistantWords = {...action}
+      SegmentStore.emitChange(SegmentConstants.HELP_AI_ASSISTANT, {
+        ...action,
+      })
+      break
+    case SegmentConstants.AI_SUGGESTION:
+      SegmentStore.setAiSuggestion({
+        sid: action.sid,
+        suggestion: action.suggestion,
+        isCompleted: action.isCompleted,
+        hasError: action.hasError,
+      })
+      SegmentStore.emitChange(SegmentConstants.AI_SUGGESTION, {
+        ...action,
+      })
+      break
+    case SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG:
+      SegmentStore.emitChange(
+        SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+        {
+          ...action,
+        },
+      )
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

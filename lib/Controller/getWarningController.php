@@ -41,7 +41,8 @@ class getWarningController extends ajaxController {
                 'logs'           => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'segment_status' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ]
+                ],
+                'characters_counter' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
@@ -191,6 +192,11 @@ class getWarningController extends ajaxController {
         $QA->setIdSegment( $this->__postInput->id );
         $QA->setSourceSegLang( $this->chunk->source );
         $QA->setTargetSegLang( $this->chunk->target );
+
+        if(isset($this->__postInput->characters_counter )){
+            $QA->setCharactersCount($this->__postInput->characters_counter);
+        }
+
         $QA->performConsistencyCheck();
 
         $this->invokeLocalWarningsOnFeatures();

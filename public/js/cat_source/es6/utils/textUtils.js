@@ -233,19 +233,6 @@ const TEXT_UTILS = {
     segment = segment.replace(/&gt;/gi, GTPLACEHOLDER)
     return segment
   },
-  view2rawxliff(segment) {
-    // return segment+"____";
-    // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-    // output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
-
-    // caso controverso <g id="4" x="&lt; dfsd &gt;">
-    //segment=htmlDecode(segment);
-    // segment = this.placehold_xliff_tags(segment)
-    segment = this.htmlEncode(segment)
-    // segment = this.restore_xliff_tags(segment)
-
-    return segment
-  },
 
   restore_xliff_tags(segment) {
     let LTPLACEHOLDER = '##LESSTHAN##'
@@ -546,12 +533,12 @@ const TEXT_UTILS = {
       }
     }, [])
   },
-  getCharsSize: (value) => value.length * 1,
-  getCJKCharsSize: (value) => new Blob([value]).size,
-  getEmojiCharsSize: (value) => new Blob([value]).size,
-  getCJKMatches: (value) => {
+  getDefaultCharsSize: (value) => value.length * 1,
+  getUtf8CharsSize: (value) => new Blob([value]).size,
+  getUft16CharsSize: (value) => value.length * 2,
+  getCJKMatches: (value, getSize) => {
     const regex =
-      /[\u3041-\u3096\u30A0-\u30FF\u3400-\u4DB5\u4E00-\u9FCB\uF900-\uFA6A\u2E80-\u2FD5\uFF5F-\uFF9F\u3000-\u303F\u31F0-\u31FF\u3220-\u3243\u3280-\u337F\uFF01-\uFF5E\u3130-\u318F\uAC00-\uD7AF]/g
+      /[\u4E00-\u9FCC\u3400-\u4DB5\u{20000}-\u{2A6D6}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{2B740}-\u{2B81F}\u{2A700}-\u{2B73F}\u30A0-\u30FF\uF900-\uFaff\u{1B000}-\u{1B0FF}\u{1B100}-\u{1B12F}\u{1B130}-\u{1B16F}\uAC00-\uD7AF\uD7B0-\uD7FF]/gu
     let match
     const result = []
 
@@ -561,13 +548,30 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: TEXT_UTILS.getCJKCharsSize(char),
+        size: getSize(char),
       })
     }
 
     return result
   },
-  getEmojiMatches: (value) => {
+  getArmenianMatches: (value, getSize) => {
+    const regex = /[\u0530-\u058F]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  getEmojiMatches: (value, getSize) => {
     const regex = /\p{Extended_Pictographic}/gu
     let match
     const result = []
@@ -578,13 +582,40 @@ const TEXT_UTILS = {
         match: char,
         index: match.index,
         length: char.length,
-        size: TEXT_UTILS.getEmojiCharsSize(char),
+        size: getSize(char),
       })
     }
 
     return result
   },
+  getLatinCharsMatches: (value, getSize) => {
+    let match
+    const result = []
 
+    for (var i = 0; i < value.length; i++) {
+      const char = value[i]
+      if (value.charCodeAt(i) <= 255) {
+        result.push({
+          match: char,
+          index: i,
+          length: char.length,
+          size: getSize(char),
+        })
+      }
+    }
+    return result
+  },
+  /* specify how chars size should be count */
+  charsSizeMapping: {
+    default: (value) => TEXT_UTILS.getDefaultCharsSize(value),
+    custom: [
+      (value) => TEXT_UTILS.getCJKMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getArmenianMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
+    ],
+  },
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
 }
 

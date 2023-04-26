@@ -1,0 +1,101 @@
+.ai-assistant-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 32px;
+
+  > div {
+    width: 48%;
+    text-align: left;
+  }
+}
+
+.suggestion {
+  display: flex;
+  flex-direction: column;
+  max-height: 423px;
+  min-height: 42px;
+  overflow: auto;
+  padding-right: 2%;
+
+  > :first-child {
+    font-weight: bold;
+  }
+}
+
+.feedback-icons {
+  display: flex;
+  margin-top: 8px;
+}
+
+.like,
+.dislike {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  border: solid 1px $grey8;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.like {
+  color: $approvedGreen;
+  margin-right: 8px;
+
+  &:hover,
+  &.active {
+    border-color: $approvedGreen;
+    background-color: rgba($approvedGreen, 0.1);
+  }
+}
+
+.dislike {
+  color: $redDefault;
+
+  &:hover,
+  &.active {
+    border-color: $redDefault;
+    background-color: rgba($redDefault, 0.1);
+  }
+}
+
+.suggestion-error {
+  display: block;
+  padding: 30px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 102px;
+
+  .loader {
+    position: relative;
+    bottom: 0;
+  }
+}
+
+.tm-matches {
+  display: flex;
+  flex-direction: column;
+
+  border-top: solid 1px $grey3;
+}
+
+.tm-matches-title {
+  display: flex;
+  padding: 20px 0 10px 0;
+
+  > :first-child {
+    text-align: left;
+    padding-left: 24px;
+    font-weight: bold;
+  }
+
+  .loading-container {
+    min-height: unset;
+  }
+}

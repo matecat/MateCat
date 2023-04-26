@@ -814,4 +814,37 @@ class Utils {
     public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
         return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
     }
+
+    /**
+     * @return array
+     */
+    public static function allowedLanguages()
+    {
+        $allowedLanguages = [];
+
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
+
+        foreach ($langs['langs'] as $lang){
+            $allowedLanguages[] = $lang['rfc3066code'];
+        }
+
+        return $allowedLanguages;
+    }
+
+    public static function getLocalizedLanguage($rfc3066code)
+    {
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
+
+        foreach ($langs['langs'] as $lang){
+            if($lang['rfc3066code'] === $rfc3066code){
+                return @$lang['localized'][0]['en'];
+            }
+        }
+
+        return null;
+    }
 }

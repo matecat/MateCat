@@ -116,6 +116,13 @@ class INIT {
     public static $MAX_SOURCE_WORDS             = 250000;
 
     /**
+     * OPENAI configuration
+     */
+    public static $OPENAI_API_KEY;
+    public static $OPEN_AI_MODEL;
+    public static $OPEN_AI_TIMEOUT;
+
+    /**
      * DQF configuration
      *
      */
@@ -406,7 +413,7 @@ class INIT {
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
                     'g'           => [ '', '', 'extg' ],
-                    'ts'          => [ '', '', 'exts' ],
+                    'QT linguist ts'          => [ '', '', 'exts' ],
             ]
     ];
 

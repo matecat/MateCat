@@ -205,13 +205,15 @@ const SegmentActions = {
   },
 
   removeClassToSegment: function (sid, className) {
-    setTimeout(function () {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
-        id: sid,
-        className: className,
-      })
-    }, 0)
+    if (sid) {
+      setTimeout(function () {
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
+          id: sid,
+          className: className,
+        })
+      }, 0)
+    }
   },
 
   setStatus: function (sid, fid, status) {
@@ -639,12 +641,15 @@ const SegmentActions = {
       alternatives: alternatives,
     })
   },
-  chooseContribution: function (sid, index) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
-      sid: sid,
-      index: index,
-    })
+  chooseContributionOnCurrentSegment: function (index) {
+    const segment = SegmentStore.getCurrentSegment()
+    if (segment.contributions) {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
+        sid: segment.sid,
+        index: index,
+      })
+    }
   },
   deleteContribution: function (source, target, matchId, sid) {
     TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
@@ -721,7 +726,10 @@ const SegmentActions = {
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
-      if (typeof segment.glossary === 'undefined' || sid === request.sid) {
+      if (
+        segment &&
+        (typeof segment.glossary === 'undefined' || sid === request.sid)
+      ) {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
@@ -1243,6 +1251,11 @@ const SegmentActions = {
       actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
+  hideAiAssistant: () => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HIDE_AI_ASSISTANT,
+    })
+  },
   characterCounter: ({sid, counter, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
@@ -1284,6 +1297,7 @@ const SegmentActions = {
       src_content: src_content,
       trg_content: trg_content,
       segment_status: segment_status,
+      characters_counter: segment.charactersCounter ?? 0,
     })
       .then((data) => {
         if (data.details && data.details.id_segment) {
@@ -1359,6 +1373,30 @@ const SegmentActions = {
       termId,
       type,
       isTarget,
+    })
+  },
+  helpAiAssistant: ({sid, value}) => {
+    SegmentActions.modifyTabVisibility('AiAssistant', true)
+    SegmentActions.activateTab(sid, 'AiAssistant')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HELP_AI_ASSISTANT,
+      sid,
+      value,
+    })
+  },
+  aiSuggestion: ({sid, suggestion, isCompleted, hasError}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_SUGGESTION,
+      sid,
+      suggestion,
+      isCompleted,
+      hasError,
+    })
+  },
+  setIsCurrentSearchOccurrenceTag: (value) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      value,
     })
   },
 }
