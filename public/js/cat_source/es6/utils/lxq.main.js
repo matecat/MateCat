@@ -51,16 +51,6 @@ const LXQ = {
     segmentsInfo: {},
   },
 
-  getTargetTextForQa: function (segment) {
-    let clone = $(UI.targetContainerSelector(), segment).clone()
-    return clone.text().replace(/\uFEFF/g, '')
-  },
-  getSourceTextForQa: function (text) {
-    var div = document.createElement('div')
-    var $div = $(div)
-    $div.html(text)
-    return $div.text()
-  },
   doLexiQA: function (segment, isSegmentCompleted, callback) {
     if (!LXQ.enabled()) {
       if (callback !== undefined && typeof callback === 'function') {
@@ -667,13 +657,15 @@ LXQ.init = function () {
       var targetSeg = splits[1]
       var inSource = splits[splits.length - 1] === 's' ? true : false
       //console.log('ignoring error with id: '+ errorid +' in segment: '+targetSeg);
-      LXQ.lexiqaData.lexiqaWarnings[targetSeg][errorid].ignored = true
-      redoHighlighting(targetSeg, inSource)
-      if (getVisibleWarningsCountForSegment(targetSeg) <= 0) {
-        //remove the segment from database/reduce the number count
-        LXQ.lxqRemoveSegmentFromWarningList(targetSeg)
+      if (LXQ.lexiqaData.lexiqaWarnings[targetSeg]) {
+        LXQ.lexiqaData.lexiqaWarnings[targetSeg][errorid].ignored = true
+        redoHighlighting(targetSeg, inSource)
+        if (getVisibleWarningsCountForSegment(targetSeg) <= 0) {
+          //remove the segment from database/reduce the number count
+          LXQ.lxqRemoveSegmentFromWarningList(targetSeg)
+        }
+        postIgnoreError(errorid)
       }
-      postIgnoreError(errorid)
     }
 
     var redoHighlighting = function (segmentId, insource) {

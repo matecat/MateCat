@@ -59,7 +59,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     this.searchResults = data
   },
   clientConnect: function (clientId) {
-    this.clientConnected = true
+    this.clientConnected = !!clientId
     this.clientId = clientId
   },
   updateJobTmKeys: function (keys) {
@@ -152,7 +152,7 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.CLIENT_CONNECT:
       CatToolStore.clientConnect(action.clientId)
-      CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT)
+      CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT, action.clientId)
       break
     case CatToolConstants.ADD_NOTIFICATION:
       CatToolStore.emitChange(

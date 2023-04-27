@@ -665,57 +665,27 @@
                 that._adjustMaxNumberOfFiles( data.files.length );
                 if ( data.context ) {
                     data.context.each( function ( index ) {
-                        if ( data.errorThrown !== 'abort' && data.errorThrown !== 'Internal Server Error' ) {
-                            var file = data.files[index];
-                            file.error = file.error || data.errorThrown ||
-                                    true;
-                            that._transition( $( this ) ).done(
-                                    function () {
-                                        var node = $( this );
-                                        template = that._renderDownload( [file] )
-                                                .replaceAll( node );
-                                        that._forceReflow( template );
-                                        that._transition( template ).done(
-                                                function () {
-                                                    data.context = $( this );
-                                                    that._trigger( 'failed', e, data );
-                                                }
-                                        );
-                                    }
-                            );
-                        }
-                        else if ( data.errorThrown == 'Internal Server Error' ) {
-                            var file = {
-                                fileName: data.originalFiles[0].name,
-                                size: data.originalFiles[0].size,
-                                type: data.originalFiles[0].type
-                            };
-
-                            file.error = 'An error occurred. Please, be sure that the xliff file has been downloaded from MateCat';
-                            that._transition( $( this ) ).done(
-                                    function () {
-                                        var node = $( this );
-                                        template = that._renderDownload( [file] )
-                                                .replaceAll( node );
-                                        that._forceReflow( template );
-                                        that._transition( template ).done(
-                                                function () {
-                                                    data.context = $( this );
-                                                    that._trigger( 'failed', e, data );
-                                                }
-                                        );
-                                        $( '.size span' ).css( 'visibility', 'visible' );
-                                    }
-                            );
-                        }
-                        else {
-                            that._transition( $( this ) ).done(
-                                    function () {
-                                        $( this ).remove();
-                                        that._trigger( 'failed', e, data );
-                                    }
-                            );
-                        }
+                        var file = {
+                            fileName: data.originalFiles[0].name,
+                            size: data.originalFiles[0].size,
+                            type: data.originalFiles[0].type
+                        };
+                        file.error = 'An error occurred. Please, be sure that the xliff file has been downloaded from MateCat';
+                        that._transition( $( this ) ).done(
+                                function () {
+                                    var node = $( this );
+                                    template = that._renderDownload( [file] )
+                                            .replaceAll( node );
+                                    that._forceReflow( template );
+                                    that._transition( template ).done(
+                                            function () {
+                                                data.context = $( this );
+                                                that._trigger( 'failed', e, data );
+                                            }
+                                    );
+                                    $( '.size span' ).css( 'visibility', 'visible' );
+                                }
+                        );
                     } );
                 } else if ( data.errorThrown !== 'abort' ) {
                     that._adjustMaxNumberOfFiles( -data.files.length );

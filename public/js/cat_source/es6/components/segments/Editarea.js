@@ -1065,7 +1065,7 @@ class Editarea extends React.Component {
       displayPopover,
       editorState,
       triggerText,
-      autocompleteSuggestions: {missingTags, sourceTags},
+      autocompleteSuggestions: {missingTags = [], sourceTags},
     } = this.state
     if (!displayPopover) return
     const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags]

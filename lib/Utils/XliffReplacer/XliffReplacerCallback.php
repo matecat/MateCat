@@ -49,7 +49,20 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * @inheritDoc
      */
-    public function thereAreErrors( $segmentId, $segment, $translation, array $dataRefMap = [] ) {
+    public function thereAreErrors( $segmentId, $segment, $translation, array $dataRefMap = [], $error = null ) {
+
+        // if there are ERR_SIZE_RESTRICTION errors, return true
+        if($error !== null){
+            $errors = json_decode($error);
+
+            if($errors){
+                foreach ($errors as $err){
+                    if(isset($err->outcome) and $err->outcome === QA::ERR_SIZE_RESTRICTION){
+                        return true;
+                    }
+                }
+            }
+        }
 
         $segment     = $this->filter->fromLayer0ToLayer1( $segment );
         $translation = $this->filter->fromLayer0ToLayer1( $translation );

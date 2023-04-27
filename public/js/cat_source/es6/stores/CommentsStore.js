@@ -66,7 +66,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
 
       if (typeof CommentsStore.db.segments[s] === 'undefined') {
         CommentsStore.db.segments[s] = [data]
-      } else {
+      } else if (!CommentsStore.db.segments[s].find((e) => e.id === data.id)) {
         CommentsStore.db.segments[s].push(data)
       }
       if (Number(data.message_type) === this.types.resolve) {
@@ -116,7 +116,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
           CommentsStore.db.segments[segmentID][
             CommentsStore.db.segments[segmentID].length - 1
           ]
-        if (el.message_type && parseInt(el.message_type) === 1) count++
+        if (el && el.message_type && parseInt(el.message_type) === 1) count++
       }
       return count
     },

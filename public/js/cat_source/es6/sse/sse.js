@@ -222,11 +222,6 @@ let SSE = {
 let NOTIFICATIONS = {
   start: function () {
     SSE.init()
-    this.connectionStatus = {
-      connectionOpened: false,
-      connectionError: false,
-      messageAckReceived: false,
-    }
     this.source = SSE.getSource('notifications')
 
     this.addEvents()
@@ -243,8 +238,6 @@ let NOTIFICATIONS = {
         var message = new SSE.Message(JSON.parse(e.data))
         if (message.isValid()) {
           $(document).trigger(message.eventIdentifier, message)
-          if (message._type === 'ack')
-            this.connectionStatus.messageAckReceived = true
         }
       },
       false,
@@ -254,14 +247,8 @@ let NOTIFICATIONS = {
       'error',
       () => {
         console.error('SSE: server disconnect')
-        let {connectionError} = this.connectionStatus
-        if (!connectionError) {
-          const {connectionOpened, connectionError, messageAckReceived} =
-            this.connectionStatus
-          const message = `SSE channel disconnect. Connection opened = ${connectionOpened} / Connection error = ${connectionError} / Some message received = ${messageAckReceived} / Id Client: ${config.id_client}`
-          CommonUtils.dispatchTrackingError(message)
-        }
-        this.connectionStatus.connectionError = true
+        config.id_client = undefined
+        CatToolActions.clientConntected()
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -273,13 +260,7 @@ let NOTIFICATIONS = {
       },
       false,
     )
-    this.source.addEventListener(
-      'open',
-      () => {
-        this.connectionStatus.connectionOpened = true
-      },
-      false,
-    )
+    this.source.addEventListener('open', () => {}, false)
   },
 }
 
