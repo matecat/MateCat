@@ -167,9 +167,13 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
+        $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
+
         $this->template->logged_user      = $this->user->shortName();
         $this->template->extended_user    = $this->user->fullName();
-        $this->template->isAnInternalUser = $this->featureSet->filter( "isAnInternalUser", $this->user->email);
+        $this->template->isAnInternalUser = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+        $this->template->isMMTEnabled     = isset($MMTLicense['enabled']) ? $MMTLicense['enabled'] : false;
+        $this->template->MMTId            = isset($MMTLicense['id']) ? $MMTLicense['id'] : null;
         $this->template->isLoggedIn       = $this->userIsLogged;
         $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
