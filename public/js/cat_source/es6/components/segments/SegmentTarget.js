@@ -371,7 +371,7 @@ class SegmentTarget extends React.Component {
 
     return (
       <div
-        className="target item"
+        className={`target item target-${config.target_code}`}
         id={'segment-' + this.props.segment.sid + '-target'}
         ref={(target) => (this.target = target)}
       >

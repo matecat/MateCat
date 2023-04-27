@@ -538,7 +538,7 @@ const TEXT_UTILS = {
   getUft16CharsSize: (value) => value.length * 2,
   getCJKMatches: (value, getSize) => {
     const regex =
-      /[\u4E00-\u9FCC\u3400-\u4DB5\u{20000}-\u{2A6D6}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{2B740}-\u{2B81F}\u{2A700}-\u{2B73F}\u30A0-\u30FF\uF900-\uFaff\u{1B000}-\u{1B0FF}\u{1B100}-\u{1B12F}\u{1B130}-\u{1B16F}\uAC00-\uD7AF\uD7B0-\uD7FF]/gu
+      /[\u4E00-\u9FCC\u3400-\u4DB5\u{20000}-\u{2A6D6}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{2B740}-\u{2B81F}\u{2A700}-\u{2B73F}\u30A0-\u30FF\uF900-\uFaff\u{1B000}-\u{1B0FF}\u{1B100}-\u{1B12F}\u{1B130}-\u{1B16F}\uAC00-\uD7AF\uD7B0-\uD7FF\u3000-\u303F\u3040-\u309F]/gu
     let match
     const result = []
 
@@ -571,8 +571,26 @@ const TEXT_UTILS = {
 
     return result
   },
+  getGeorgianMatches: (value, getSize) => {
+    const regex = /[\u10A0-\u10FF\u1C90-\u1CBF\u2D00-\u2D2F]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
   getEmojiMatches: (value, getSize) => {
-    const regex = /\p{Extended_Pictographic}/gu
+    const regex =
+      /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g
     let match
     const result = []
 
@@ -589,7 +607,6 @@ const TEXT_UTILS = {
     return result
   },
   getLatinCharsMatches: (value, getSize) => {
-    let match
     const result = []
 
     for (var i = 0; i < value.length; i++) {
@@ -612,6 +629,8 @@ const TEXT_UTILS = {
       (value) => TEXT_UTILS.getCJKMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getArmenianMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getGeorgianMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
     ],
