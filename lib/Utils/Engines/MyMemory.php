@@ -699,16 +699,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
-    public function getStatus( $key, $name = false ) {
+    public function getStatus( $uuid ) {
 
-        $parameters          = [];
-        $parameters[ 'key' ] = trim( $key );
-
-        //if provided, add name parameter
-        if ( $name ) {
-            $parameters[ 'name' ] = $name;
-        }
-
+        $parameters = [ 'uuid' => trim( $uuid ) ];
         $this->call( 'tmx_status_relative_url', $parameters );
 
         return $this->result;

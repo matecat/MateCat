@@ -1,7 +1,6 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 
 /**
  * Created by PhpStorm.
@@ -36,6 +35,7 @@ class loadTMXController extends ajaxController {
     private static $acceptedActions = [ "newTM", "uploadStatus" ];
 
     protected $TMService;
+    private   $uuid;
 
     public function __construct() {
 
@@ -49,6 +49,9 @@ class loadTMXController extends ajaxController {
                 'tm_key' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
+                'uuid'   => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
                 'exec'   => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ]
@@ -59,6 +62,7 @@ class loadTMXController extends ajaxController {
         $this->name   = $postInput->name;
         $this->tm_key = $postInput->tm_key;
         $this->exec   = $postInput->exec;
+        $this->uuid   = $postInput->uuid;
 
         if ( empty( $this->tm_key ) ) {
 
@@ -107,6 +111,8 @@ class loadTMXController extends ajaxController {
 
                 $this->file = $this->TMService->uploadFile();
 
+                $uuids = [];
+
                 foreach ( $this->file as $fileInfo ) {
                     if ( AbstractFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                         throw new Exception( "Please upload a TMX.", -8 );
@@ -114,7 +120,7 @@ class loadTMXController extends ajaxController {
 
                     $this->TMService->setName( $fileInfo->name );
                     $this->TMService->setFile( [ $fileInfo ] );
-                    $this->TMService->addTmxInMyMemory();
+                    $uuids[] = $this->TMService->addTmxInMyMemory()[ 0 ];
 
                     $this->featureSet->run( 'postPushTMX', $fileInfo, $this->user, $this->TMService->getTMKey() );
 
@@ -137,19 +143,21 @@ class loadTMXController extends ajaxController {
                         $searchMemoryKey->tm_key = $key;
                         $userMemoryKey           = $mkDao->read( $searchMemoryKey );
 
-                        if ( empty( $userMemoryKey[0]->tm_key->name ) && !empty( $userMemoryKey ) ) {
-                            $userMemoryKey[0]->tm_key->name = $fileInfo->name;
-                            $mkDao->atomicUpdate( $userMemoryKey[0] );
+                        if ( empty( $userMemoryKey[ 0 ]->tm_key->name ) && !empty( $userMemoryKey ) ) {
+                            $userMemoryKey[ 0 ]->tm_key->name = $fileInfo->name;
+                            $mkDao->atomicUpdate( $userMemoryKey[ 0 ] );
                         }
 
                     }
 
                 }
 
+                $this->result[ 'uuid' ] = $uuids;
+
             } else {
 
                 $this->TMService->setName( Utils::fixFileName( $this->name ) );
-                $status                      = $this->TMService->tmxUploadStatus();
+                $status                      = $this->TMService->tmxUploadStatus( $this->uuid );
                 $this->result[ 'data' ]      = $status[ 'data' ];
                 $this->result[ 'completed' ] = $status[ 'completed' ];
 
