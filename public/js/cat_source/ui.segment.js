@@ -176,7 +176,10 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       // find in next segments
       if (nextTranslatedSegment) {
         SegmentActions.openSegment(nextTranslatedSegment.sid)
-      } else {
+      } else if (
+        UI.nextUntranslatedSegmentIdByServer ||
+        nextTranslatedSegmentInPrevious
+      ) {
         SegmentActions.openSegment(
           UI.nextUntranslatedSegmentIdByServer
             ? UI.nextUntranslatedSegmentIdByServer

@@ -116,7 +116,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
           CommentsStore.db.segments[segmentID][
             CommentsStore.db.segments[segmentID].length - 1
           ]
-        if (el.message_type && parseInt(el.message_type) === 1) count++
+        if (el && el.message_type && parseInt(el.message_type) === 1) count++
       }
       return count
     },
