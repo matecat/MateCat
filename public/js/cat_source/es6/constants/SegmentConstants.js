@@ -113,4 +113,5 @@ module.exports = keyMirror({
   HELP_AI_ASSISTANT: null,
   AI_SUGGESTION: null,
   SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG: null,
+  OPEN_GLOSSARY_FORM_PREFILL: null,
 })

@@ -2017,6 +2017,11 @@ AppDispatcher.register(function (action) {
         },
       )
       break
+    case SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL:
+      SegmentStore.emitChange(SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, {
+        ...action,
+      })
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }

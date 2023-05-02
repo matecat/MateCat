@@ -5037,6 +5037,8 @@ header {
 
 .optionsToolbar {
   margin-top: 16px;
+  display: flex;
+  gap: 8px;
 
   > li {
     display: flex;
@@ -5047,7 +5049,13 @@ header {
     cursor: pointer;
     border-radius: 3px;
     border: 1px solid #c6c6c6;
- }
+    color: $grey1;
+
+    &:hover {
+      color: $black;
+    }
+  }
+}
 /* Custom font for Urdu (ur-PK) language */
 @font-face {
   font-family: 'Jameel Nori Nastaleeq';
