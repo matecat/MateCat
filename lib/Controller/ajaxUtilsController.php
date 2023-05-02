@@ -1,4 +1,7 @@
 <?php
+
+use TMS\TMSService;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: domenico

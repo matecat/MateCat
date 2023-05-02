@@ -12,13 +12,13 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Validators\LoginValidator;
-use DateTime;
 use DirectoryIterator;
 use Exception;
 use Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
-use TMSService;
+use TMS\TMSFile;
+use TMS\TMSService;
 use Users_UserDao;
 use Utils;
 use ZipArchive;
@@ -77,11 +77,11 @@ class GlossariesController extends AbstractStatefulKleinController {
         $this->tm_key        = $postInput->tm_key;
         $this->downloadToken = $postInput->downloadToken;
 
-        $this->TMService->setName( $postInput->name );
-        $this->TMService->setTmKey( $postInput->tm_key );
-
     }
 
+    /**
+     * @throws Exception
+     */
     public function import() {
 
         try {
@@ -116,19 +116,38 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         set_time_limit(600);
 
-        $fileInfo = $this->extractCSV( $stdResult );
+        $this->extractCSV( $stdResult );
 
-        // load it into MyMemory
-        $this->TMService->setName( $postInput->name );
-        $this->TMService->setFile( array( $fileInfo ) );
+        $uuids = [];
 
         try {
-            $uuids = $this->TMService->addGlossaryInMyMemory();
-        } catch ( Exception $e ) {
-            $this->setErrorResponse( $e->getCode(), $e->getMessage() );
-            unlink( $fileInfo->file_path );
 
-            return;
+            foreach( $stdResult as $fileInfo ){
+
+                // load it into MyMemory
+                try {
+
+                    $file = new TMSFile(
+                            $fileInfo->file_path,
+                            $postInput->tm_key,
+                            $postInput->name
+                    );
+
+                    $this->TMService->addGlossaryInMyMemory( $file );
+
+                    $uuids[] = $file->getUuid();
+
+                } catch ( Exception $e ) {
+                    $this->setErrorResponse( $e->getCode(), $e->getMessage() );
+                    throw $e;
+                }
+
+            }
+
+        } finally {
+            foreach ( $stdResult as $_fileInfo ){
+                unlink( $_fileInfo->file_path );
+            }
         }
 
         if ( !$this->response->isLocked() ) {
@@ -136,8 +155,6 @@ class GlossariesController extends AbstractStatefulKleinController {
                     'uuids' => $uuids
             ] );
         }
-
-        unlink( $fileInfo->file_path );
 
     }
 
@@ -276,7 +293,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         }
 
-        return $fileInfo;
+        return $stdResult;
 
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+use TMS\TMSService;
+
 /**
  * Created by PhpStorm.
  * User: roberto

@@ -395,10 +395,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
-                if(in_array("1", $line)){
-                    foreach ($line as $lineKey => $item){
-                        if($item == "1"){
-                            $line[$lineKey] = "True";
+                if ( in_array( "1", $line ) ) {
+                    foreach ( $line as $lineKey => $item ) {
+                        if ( $item == "1" ) {
+                            $line[ $lineKey ] = "True";
                         }
                     }
                 }
@@ -426,23 +426,26 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         // validate the CSV
-        $validateCSVFileErrors = $this->validateCSVFile($file);
+        $validateCSVFileErrors = $this->validateCSVFile( $file );
 
-        if(count($validateCSVFileErrors) > 0){
-            throw new \Exception($validateCSVFileErrors[0]);
+        if ( count( $validateCSVFileErrors ) > 0 ) {
+            throw new \Exception( $validateCSVFileErrors[ 0 ] );
         }
 
         $postFields = [
-            'glossary'    => $this->getCurlFile($file),
-            'key'         => trim( $key ),
+                'glossary' => $this->getCurlFile( $file ),
+                'key'      => trim( $key ),
         ];
 
-        if($name and $name !== ''){
-            $postFields['key_name'] = $name;
+        if ( $name and $name !== '' ) {
+            $postFields[ 'key_name' ] = $name;
         }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
 
+        /**
+         * @var Engines_Results_MyMemory_TmxResponse
+         */
         return $this->result;
     }
 

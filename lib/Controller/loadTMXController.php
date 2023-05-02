@@ -1,6 +1,8 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use TMS\TMSFile;
+use TMS\TMSService;
 
 /**
  * Created by PhpStorm.
@@ -114,15 +116,21 @@ class loadTMXController extends ajaxController {
                 $uuids = [];
 
                 foreach ( $this->file as $fileInfo ) {
+
                     if ( AbstractFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                         throw new Exception( "Please upload a TMX.", -8 );
                     }
 
-                    $this->TMService->setName( $fileInfo->name );
-                    $this->TMService->setFile( [ $fileInfo ] );
-                    $uuids[] = $this->TMService->addTmxInMyMemory()[ 0 ];
+                    $file = new TMSFile(
+                            $fileInfo->file_path,
+                            $this->tm_key,
+                            $fileInfo->name
+                    );
 
-                    $this->featureSet->run( 'postPushTMX', $fileInfo, $this->user, $this->TMService->getTMKey() );
+                    $this->TMService->addTmxInMyMemory( $file );
+                    $uuids[] = $file->getUuid();
+
+                    $this->featureSet->run( 'postPushTMX', $file, $this->user );
 
                     /*
                      * We update the KeyRing only if this is NOT the Default MyMemory Key
@@ -156,7 +164,6 @@ class loadTMXController extends ajaxController {
 
             } else {
 
-                $this->TMService->setName( Utils::fixFileName( $this->name ) );
                 $status                      = $this->TMService->tmxUploadStatus( $this->uuid );
                 $this->result[ 'data' ]      = $status[ 'data' ];
                 $this->result[ 'completed' ] = $status[ 'completed' ];
