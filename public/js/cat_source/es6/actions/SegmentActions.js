@@ -1399,6 +1399,14 @@ const SegmentActions = {
       value,
     })
   },
+  openGlossaryFormPrefill: ({sid, ...filledFields}) => {
+    SegmentActions.activateTab(sid, 'glossary')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
+      sid,
+      ...filledFields,
+    })
+  },
 }
 
 export default SegmentActions

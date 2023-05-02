@@ -171,7 +171,7 @@ export const SegmentFooterTabGlossary = ({
         },
       }
     },
-    [modifyElement, segment.sid, selectsActive, termForm],
+    [modifyElement, segment.sid, selectsActive, termForm, clientId],
   )
 
   // get TM keys and add actions listener
@@ -216,6 +216,14 @@ export const SegmentFooterTabGlossary = ({
       )
       refreshCheckQa()
     }
+    // eslint-disable-next-line
+    const openFormPrefill = ({sid, actionType, ...filledFields}) => {
+      setTermForm({
+        ...initialState.termForm,
+        ...filledFields,
+      })
+      setShowForm(true)
+    }
 
     SegmentStore.addListener(
       SegmentConstants.ADD_GLOSSARY_ITEM,
@@ -235,6 +243,10 @@ export const SegmentFooterTabGlossary = ({
     SegmentStore.addListener(
       CatToolConstants.DELETE_FROM_GLOSSARY,
       onDeleteTerm,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
+      openFormPrefill,
     )
 
     return () => {
@@ -259,6 +271,10 @@ export const SegmentFooterTabGlossary = ({
       SegmentStore.removeListener(
         CatToolConstants.DELETE_FROM_GLOSSARY,
         onDeleteTerm,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
+        openFormPrefill,
       )
     }
   }, [segment.sid, segment.segment, resetForm])
