@@ -284,7 +284,7 @@ class SegmentAnalysisController extends KleinController {
                     'severity'            => $issue_record->severity,
                     'translation_version' => (int)$issue_record->translation_version,
                     'penalty_points'      => floatval($issue_record->penalty_points),
-                    'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
+                    'created_at'          => date( DATE_ISO8601, strtotime( $issue_record->create_date ) ),
             ];
         }
 
@@ -309,7 +309,7 @@ class SegmentAnalysisController extends KleinController {
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
                 'status' => $this->getStatusObject($segmentForAnalysis),
-                'last_edit' => $segmentForAnalysis->last_edit,
+                'last_edit' => date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ),
         ];
     }
 
