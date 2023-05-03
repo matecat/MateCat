@@ -309,7 +309,7 @@ class SegmentAnalysisController extends KleinController {
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
                 'status' => $this->getStatusObject($segmentForAnalysis),
-                'last_edit' => date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ),
+                'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,
         ];
     }
 
