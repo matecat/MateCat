@@ -21,6 +21,7 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
 import TEXT_UTILS from './cat_source/es6/utils/textUtils'
+import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -941,9 +942,7 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         )
         return
       }
-      var path = line.find('.uploadfile').find('input[type="file"]').val()
-      var file = path.split('\\')[path.split('\\').length - 1]
-      this.fileUpload(form, action, 'uploadCallback', file, type)
+      this.fileUpload({form, action, type})
     },
     addTMKeyToList: function (uploading, key) {
       var descr = $('#new-tm-description').val()
@@ -1086,93 +1085,56 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
       UI.hideAllBoxOnTables()
     },
 
-    fileUpload: function (form, action_url, div_id, tmName, type) {
-      // Create the iframe...
-      var ts = new Date().getTime()
-      var ifId = 'upload_iframe-' + ts
-      var iframe = document.createElement('iframe')
-      iframe.setAttribute('id', ifId)
-      iframe.setAttribute('name', 'upload_iframe')
-      iframe.setAttribute('width', '0')
-      iframe.setAttribute('height', '0')
-      iframe.setAttribute('border', '0')
-      iframe.setAttribute('style', 'width: 0; height: 0; border: none;')
-      // Add to document...
-      document.body.appendChild(iframe)
-
-      window.frames['upload_iframe'].name = 'upload_iframe'
-      const iframeId = document.getElementById(ifId)
-      UI.UploadIframeId = iframeId
-
-      // Add event...
-      var eventHandler = function () {
-        let content
-
-        if (iframeId.detachEvent) iframeId.detachEvent('onload', eventHandler)
-        else iframeId.removeEventListener('load', eventHandler, false)
-
-        // Message from server...
-        if (iframeId.contentDocument) {
-          content = iframeId.contentDocument.body.innerHTML
-        } else if (iframeId.contentWindow) {
-          content = iframeId.contentWindow.document.body.innerHTML
-        } else if (iframeId.document) {
-          content = iframeId.document.body.innerHTML
-        }
-
-        document.getElementById(div_id).innerHTML = content
-      }
-
-      if (iframeId.addEventListener)
-        iframeId.addEventListener('load', eventHandler, true)
-      if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
+    fileUpload: function ({form, action, type}) {
       var TR = $(form).parents('tr')
-      var Key = TR.find('.privatekey').first().text().trim()
+      var key = TR.find('.privatekey').first().text().trim()
       var keyName = TR.find('.description').first().text().trim()
 
-      // Set properties of form...
-      form.setAttribute('target', 'upload_iframe')
-      form.setAttribute('action', action_url)
-      form.setAttribute('method', 'post')
-      form.setAttribute('enctype', 'multipart/form-data')
-      form.setAttribute('encoding', 'multipart/form-data')
-      if (type === 'tmx') {
-        $(form).append('<input type="hidden" name="exec" value="newTM" />')
-      }
-      $(form)
-        .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + keyName + '" />')
-        .append('<input type="hidden" name="r" value="1" />')
-        .append('<input type="hidden" name="w" value="1" />')
+      // ----------------------------------------
+      const uploadFilesElement = Array.from($(form)[0].children).find(
+        (element) => element.getAttribute('name') === 'uploaded_file[]',
+      )
+      const filesToUpload = Array.from(uploadFilesElement?.files ?? [])
+      console.log('#filesToUpload', filesToUpload)
+
+      const formData = new FormData()
+
+      if (type === 'tmx') formData.append('exec', 'newTM')
+
+      if (filesToUpload.length)
+        filesToUpload.forEach((file) =>
+          formData.append('uploaded_file[]', file, file.name),
+        )
+
+      formData.append('tm_key', key)
+      formData.append('name', keyName)
+      formData.append('r', '1')
+      formData.append('w', '1')
+
       if (APP.isCattool) {
-        $(form)
-          .append(
-            '<input type="hidden" name="job_id" value="' +
-              config.job_id +
-              '" />',
-          )
-          .append(
-            '<input type="hidden" name="job_pass" value="' +
-              config.password +
-              '" />',
-          )
+        formData.append('job_id', config.job_id)
+        formData.append('job_pass', config.password)
       }
 
-      // Submit the form...
-      form.submit()
+      fetch(`${getMatecatApiDomain()}${action.split('/')[1]}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('#fetch response', data)
+        })
 
-      document.getElementById(div_id).innerHTML = ''
       var filePath = $(form).find('input[type="file"]').val()
       var fileName = filePath.split('\\')[filePath.split('\\').length - 1]
 
       var TRcaller = $(form).parents('.uploadfile')
       // TRcaller.addClass('startUploading');
       UI.showStartUpload(TRcaller)
-      setTimeout(function () {
-        UI.pollForUploadCallback(Key, fileName, TRcaller, type)
-      }, 1000)
-
-      return false
+      // setTimeout(function () {
+      //   UI.pollForUploadCallback(Key, fileName, TRcaller, type)
+      // }, 1000)
     },
     pollForUploadCallback: function (Key, fileName, TRcaller, type) {
       if ($('#uploadCallback').text() != '') {
@@ -1240,6 +1202,9 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         $tr.find('.upload-file-msg-success').show()
         $tr.find('.uploadprogress').hide()
       }, 1000)
+    },
+    pollForUploadProgressNew: ({files}) => {
+      console.log(files)
     },
     pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
       const promise =
