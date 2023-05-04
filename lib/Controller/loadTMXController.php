@@ -128,7 +128,7 @@ class loadTMXController extends ajaxController {
                     );
 
                     $this->TMService->addTmxInMyMemory( $file );
-                    $uuids[] = $file->getUuid();
+                    $uuids[ $file->getUuid() ] = $file->getName();
 
                     $this->featureSet->run( 'postPushTMX', $file, $this->user );
 
@@ -160,7 +160,7 @@ class loadTMXController extends ajaxController {
 
                 }
 
-                $this->result[ 'uuid' ] = $uuids;
+                $this->result[ 'uuids' ] = $uuids;
 
             } else {
 
