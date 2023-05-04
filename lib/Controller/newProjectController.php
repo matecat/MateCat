@@ -67,6 +67,7 @@ class newProjectController extends viewController {
 
         $engineQuery->active = 1;
         $this->mt_engines    = $engine->read( $engineQuery );
+        $this->mt_engines    = $this->removeMMTFromEngines($this->mt_engines);
 
         if ( $this->isLoggedIn() ) {
             $this->featureSet->loadFromUserEmail( $this->user->email );
