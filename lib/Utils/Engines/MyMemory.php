@@ -802,16 +802,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /******************************************/
 
-    public function fastAnalysis( &$segs_array ) {
-        if ( !is_array( $segs_array ) ) {
+    public function fastAnalysis( $segs_array ) {
 
+        if ( !is_array( $segs_array ) ) {
             return null;
         }
-        $json_segs = json_encode( $segs_array );
-
-        $parameters[ 'fast' ] = "1";
-        $parameters[ 'df' ]   = "matecat_array";
-        $parameters[ 'segs' ] = $json_segs;
 
         $this->_setAdditionalCurlParams( [
                         CURLOPT_TIMEOUT => 300
