@@ -20,6 +20,11 @@
 
 @import 'commons/aria-label-tooltip';
 
+.new_project__page {
+  overflow-y: auto;
+  height: 100%;
+}
+
 .translation-row {
   .translation-options,
   #additional-input-params {

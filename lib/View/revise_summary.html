@@ -82,12 +82,12 @@
 <div class="notifications-wrapper"></div>
 
 <footer class="normal-foo"/>
-
+<script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="common.html/footer_includes" />
-<script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
+
 
 <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>
