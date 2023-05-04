@@ -313,60 +313,6 @@ class TMSService {
     }
 
     /**
-     * Set a cyclic barrier to get response about status succes to call the download
-     *
-     * @return resource
-     * @throws Exception
-     */
-    public function downloadTMX() {
-
-        /**
-         * @var $result Engines_Results_MyMemory_ExportResponse
-         */
-        $result = $this->mymemory_engine->createExport(
-                $this->tm_key
-        );
-
-        if ( $result->responseDetails == 'QUEUED' &&
-                $result->responseStatus == 202
-        ) {
-
-            do {
-
-                /**
-                 * @var $result Engines_Results_MyMemory_ExportResponse
-                 */
-                $result = $this->mymemory_engine->checkExport( $this->tm_key );
-
-                usleep( 1500000 ); // 1.5 seconds
-
-            } while ( $result->responseDetails != 'READY' && $result->responseDetails != 'NO SEGMENTS' );
-
-            if ( !isset( $result->responseDetails ) ) {
-                throw new Exception( "Status check failed. Export broken.", -16 );
-            }
-
-            if ( $result->responseDetails == 'NO SEGMENTS' ) {
-                throw new DomainException( "No translation memories found to download.", -17 );
-            }
-
-            $_download_url = parse_url( $result->resourceLink );
-            parse_str( $_download_url[ 'query' ], $secrets );
-            list( $_key, $pass ) = array_values( $secrets );
-
-        } else {
-
-            throw new Exception( "Critical. Export Creation Failed.", -18 );
-
-        }
-
-        $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
-
-        return $resource_pointer;
-
-    }
-
-    /**
      * Send a mail with link for direct prepared download
      *
      * @param $userMail
@@ -388,18 +334,6 @@ class TMSService {
 
         return $response;
 
-    }
-
-    /**
-     * @return string
-     * @throws Exception
-     */
-    public function downloadGlossary() {
-        $fileName = "/tmp/GLOSS_" . $this->tm_key;
-        $fHandle  = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
-        fclose( $fHandle ); //flush data and close
-
-        return $fileName;
     }
 
     /**
