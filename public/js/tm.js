@@ -1100,7 +1100,12 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       promise({filesToUpload, tmKey: key, keyName})
         .then((data) => {
-          UI.pollForUploadProgressNew({files: data.uuids, type, key, TRcaller})
+          UI.pollForUploadProgressNew({
+            files: data.data.uuids,
+            type,
+            key,
+            TRcaller,
+          })
         })
         .catch((errors) => {
           TRcaller.find('.action a').removeClass('disabled')

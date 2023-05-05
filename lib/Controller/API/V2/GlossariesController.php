@@ -266,7 +266,6 @@ class GlossariesController extends AbstractStatefulKleinController {
         $this->response->json( [
                 'errors'    => [],
                 "data"      => $data,
-                "completed" => true,
                 "success"   => true
         ] );
 

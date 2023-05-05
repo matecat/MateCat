@@ -159,13 +159,12 @@ class loadTMXController extends ajaxController {
 
                 }
 
-                $this->result[ 'uuids' ] = $uuids;
+                $this->result[ 'data' ][ 'uuids' ] = $uuids;
 
             } else {
 
                 $status                      = $this->TMService->tmxUploadStatus( $this->uuid );
                 $this->result[ 'data' ]      = $status[ 'data' ];
-                $this->result[ 'completed' ] = $status[ 'completed' ];
 
             }
 
