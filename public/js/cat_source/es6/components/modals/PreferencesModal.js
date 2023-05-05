@@ -217,11 +217,29 @@ class PreferencesModal extends React.Component {
                     Delete
                   </a>
                 </div>
-              ) : (
-                <div className={'user-api-buttons'}>
+              ) : config.isAnInternalUser ? (
+                <div className="user-api-buttons">
                   <a className="btn-ok" onClick={() => this.confirmDelete()}>
                     Delete
                   </a>
+                </div>
+              ) : (
+                <div className="user-api-message">
+                  <div className={'user-api-message-content'}>
+                    <label>
+                      An API key associated to your account is already existing.
+                      If you need a new one, please{' '}
+                      <a
+                        href="mailto:support@matecat.com"
+                        className="email-link"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        contact us
+                      </a>
+                      .
+                    </label>
+                  </div>
                 </div>
               )}
               {this.state.credentialsCreated ? (
@@ -239,23 +257,30 @@ class PreferencesModal extends React.Component {
         ) : (
           <div className="user-api">
             <div className={'user-api-text'}>
-              <label>No API Key associated to your account</label>
+              {config.isAnInternalUser ? (
+                <label>No API Key associated to your account</label>
+              ) : (
+                <label>
+                  There is no API key associated to your account. If you need
+                  one, please{' '}
+                  <a
+                    href="mailto:support@matecat.com"
+                    className="email-link"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    contact us
+                  </a>
+                  .
+                </label>
+              )}
             </div>
             <div className="user-api-buttons">
               {config.isAnInternalUser ? (
                 <a className="btn-ok" onClick={() => this.generateKey()}>
                   Generate
                 </a>
-              ) : (
-                <a
-                  href="mailto:support@matecat.com"
-                  className="email-link"
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Contact us
-                </a>
-              )}
+              ) : null}
             </div>
           </div>
         )}
