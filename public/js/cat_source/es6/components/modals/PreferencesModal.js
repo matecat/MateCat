@@ -257,19 +257,23 @@ class PreferencesModal extends React.Component {
         ) : (
           <div className="user-api">
             <div className={'user-api-text'}>
-              <label>
-                There is no API key associated to your account. If you need one,
-                please{' '}
-                <a
-                  href="mailto:support@matecat.com"
-                  className="email-link"
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  contact us
-                </a>
-                .
-              </label>
+              {config.isAnInternalUser ? (
+                <label>No API Key associated to your account</label>
+              ) : (
+                <label>
+                  There is no API key associated to your account. If you need
+                  one, please{' '}
+                  <a
+                    href="mailto:support@matecat.com"
+                    className="email-link"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    contact us
+                  </a>
+                  .
+                </label>
+              )}
             </div>
             <div className="user-api-buttons">
               {config.isAnInternalUser ? (
