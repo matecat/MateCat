@@ -105,7 +105,6 @@ class loadTMXController extends ajaxController {
         $this->result[ 'errors' ] = [];
 
         $this->TMService = new TMSService();
-        $this->TMService->setTmKey( $this->tm_key );
 
         try {
 

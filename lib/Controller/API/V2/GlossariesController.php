@@ -53,24 +53,24 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         parent::validateRequest();
 
-        $filterArgs = array(
-                'name'          => array(
+        $filterArgs = [
+                'name'          => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
-                ),
-                'tm_key'        => array(
+                ],
+                'tm_key'        => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'downloadToken' => array(
+                ],
+                'downloadToken' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+        ];
 
         $postInput = (object)filter_var_array( $this->request->params(
-                array(
+                [
                         'tm_key',
                         'name',
                         'downloadToken'
-                )
+                ]
         ), $filterArgs );
 
         $this->name          = $postInput->name;
@@ -93,28 +93,28 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         $filterArgs = [
-            'name' => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW
-            ],
-            'tm_key' => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
+                'name'   => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ],
+                'tm_key' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
         ];
 
-        $postInput = (object)filter_var_array( $this->request->params([
-            'tm_key',
-            'name',
-        ]), $filterArgs );
+        $postInput = (object)filter_var_array( $this->request->params( [
+                'tm_key',
+                'name',
+        ] ), $filterArgs );
 
-        if(!isset($postInput->tm_key) or $postInput->tm_key === ""){
+        if ( !isset( $postInput->tm_key ) or $postInput->tm_key === "" ) {
             $this->setErrorResponse( -2, "`TM key` field is mandatory" );
 
             return;
         }
 
-        set_time_limit(600);
+        set_time_limit( 600 );
 
         $this->extractCSV( $stdResult );
 
@@ -122,7 +122,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         try {
 
-            foreach( $stdResult as $fileInfo ){
+            foreach ( $stdResult as $fileInfo ) {
 
                 // load it into MyMemory
                 try {
@@ -145,7 +145,7 @@ class GlossariesController extends AbstractStatefulKleinController {
             }
 
         } finally {
-            foreach ( $stdResult as $_fileInfo ){
+            foreach ( $stdResult as $_fileInfo ) {
                 unlink( $_fileInfo->file_path );
             }
         }
@@ -160,10 +160,10 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     public function uploadStatus() {
 
-        $uuid = $this->params['uuid'];
+        $uuid = $this->params[ 'uuid' ];
 
         try {
-            $result = $this->TMService->glossaryUploadStatus($uuid);
+            $result = $this->TMService->glossaryUploadStatus( $uuid );
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
@@ -171,7 +171,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( $result->responseStatus, $result->responseData );
+            $this->setSuccessResponse( $result->responseStatus, $result[ 'data' ] );
         }
 
     }
@@ -179,36 +179,36 @@ class GlossariesController extends AbstractStatefulKleinController {
     public function download() {
 
         $filterArgs = [
-            'key_name' => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW
-            ],
-            'key' => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
-            'email' => [
-                'filter' => FILTER_SANITIZE_EMAIL,
-                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
+                'key_name' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ],
+                'key'      => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'email'    => [
+                        'filter' => FILTER_SANITIZE_EMAIL,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
         ];
 
-        $postInput = (object)filter_var_array( $this->request->params([
+        $postInput = (object)filter_var_array( $this->request->params( [
                 'email',
                 'key_name',
                 'key',
-        ]), $filterArgs );
+        ] ), $filterArgs );
 
         try {
-            $user = (new Users_UserDao())->getByEmail( $postInput->email );
+            $user = ( new Users_UserDao() )->getByEmail( $postInput->email );
 
-            if(!$user){
-                $this->setErrorResponse( 404, "User with email ".$postInput->email." not found" );
+            if ( !$user ) {
+                $this->setErrorResponse( 404, "User with email " . $postInput->email . " not found" );
 
                 return;
             }
 
-            $result = $this->TMService->glossaryExport($postInput->key, $postInput->key_name, $postInput->email, $user->fullName());
+            $result = $this->TMService->glossaryExport( $postInput->key, $postInput->key_name, $postInput->email, $user->fullName() );
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
@@ -221,14 +221,14 @@ class GlossariesController extends AbstractStatefulKleinController {
     }
 
     protected function logDownloadError( Exception $e ) {
-        $r = "<pre>";
-        $r .= print_r( $e->getMessage(), true );
-        $r .= print_r( $e->getTraceAsString(), true );
-        $r .= "\n\n";
-        $r .= " - API REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-        $r .= " - API REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-        $r .= "\n\n\n";
-        $r .= "</pre>";
+        $r             = "<pre>";
+        $r             .= print_r( $e->getMessage(), true );
+        $r             .= print_r( $e->getTraceAsString(), true );
+        $r             .= "\n\n";
+        $r             .= " - API REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+        $r             .= " - API REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+        $r             .= "\n\n\n";
+        $r             .= "</pre>";
         Log::$fileName = 'php_errors.txt';
         Log::doJsonLog( $r );
         Utils::sendErrMailReport( $r, "API: Download Glossary Error: " . $e->getMessage() );
@@ -252,20 +252,22 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         $this->response->code( 404 );
         $this->response->json( [
-                'errors'  => [ [ "code" => $errCode, "message" => $message ] ],
-                "data"    => [],
-                "success" => false
+                'errors'    => [ [ "code" => $errCode, "message" => $message ] ],
+                "data"      => [],
+                "success"   => false,
+                "completed" => false
         ] );
 
     }
 
-    protected function setSuccessResponse( $code = 200, Array $data = [] ) {
+    protected function setSuccessResponse( $code = 200, array $data = [] ) {
 
         $this->response->code( $code );
         $this->response->json( [
-                'errors'  => [],
-                "data"    => $data,
-                "success" => true
+                'errors'    => [],
+                "data"      => $data,
+                "completed" => true,
+                "success"   => true
         ] );
 
     }

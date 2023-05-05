@@ -105,11 +105,9 @@ class userKeysController extends ajaxController {
 
         try {
             $tmService = new TMSService();
-            $tmService->setTmKey( $this->key );
-
             //validate the key
             try {
-                $keyExists = $tmService->checkCorrectKey();
+                $keyExists = $tmService->checkCorrectKey( $this->key );
             } catch ( Exception $e ) {
                 /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
                 Log::doJsonLog( $e->getMessage() );

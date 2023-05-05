@@ -43,11 +43,10 @@ class ajaxUtilsController extends ajaxController {
                 //get MyMemory apiKey service
 
                 $tmxHandler = new TMSService();
-                $tmxHandler->setTmKey( $this->__postInput[ 'tm_key' ] );
 
                 //validate the key
                 try {
-                    $keyExists = $tmxHandler->checkCorrectKey();
+                    $keyExists = $tmxHandler->checkCorrectKey( $this->__postInput[ 'tm_key' ] );
                 } catch ( Exception $e ) {
                     /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
                     Log::doJsonLog( $e->getMessage() );

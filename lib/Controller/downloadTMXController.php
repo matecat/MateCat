@@ -134,7 +134,6 @@ class downloadTMXController extends ajaxController {
         }
 
         $this->tmxHandler = new TMSService();
-        $this->tmxHandler->setTmKey( $this->tm_key );
         $this->tmxHandler->setName( $this->tm_name );
 
     }
@@ -159,7 +158,8 @@ class downloadTMXController extends ajaxController {
             $this->result[ 'data' ] = $this->tmxHandler->requestTMXEmailDownload(
                     ( $this->download_to_email != false ? $this->download_to_email : $this->user->email ),
                     $this->user->first_name,
-                    $this->user->last_name
+                    $this->user->last_name,
+                    $this->tm_key
             );
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys

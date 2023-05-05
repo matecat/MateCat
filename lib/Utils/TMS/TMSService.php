@@ -4,7 +4,6 @@ namespace TMS;
 
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
-use DomainException;
 use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
@@ -30,11 +29,6 @@ class TMSService {
      * @var string The name of the uploaded TMX
      */
     protected $name;
-
-    /**
-     * @var string The key to be associated to the tmx
-     */
-    private $tm_key;
 
     /**
      * @var TMSFile[]
@@ -80,15 +74,13 @@ class TMSService {
      *
      * @throws Exception
      */
-    public function checkCorrectKey() {
-
-        $isValid = true;
+    public function checkCorrectKey( $tm_key ) {
 
         //validate the key
         //This piece of code need to be executed every time
         try {
 
-            $isValid = $this->mymemory_engine->checkCorrectKey( $this->tm_key );
+            $isValid = $this->mymemory_engine->checkCorrectKey( $tm_key );
 
         } catch ( Exception $e ) {
 
@@ -147,7 +139,7 @@ class TMSService {
      */
     public function addTmxInMyMemory( TMSFile $file ) {
 
-        $this->checkCorrectKey();
+        $this->checkCorrectKey( $file->getTmKey() );
 
         Log::doJsonLog( $this->file );
 
@@ -177,7 +169,7 @@ class TMSService {
      */
     public function addGlossaryInMyMemory( TMSFile $file ) {
 
-        $this->checkCorrectKey();
+        $this->checkCorrectKey( $file->getTmKey() );
 
         Log::doJsonLog( $this->file );
 
@@ -219,7 +211,35 @@ class TMSService {
      * @return array
      */
     public function glossaryUploadStatus( $uuid ) {
-        return $this->mymemory_engine->getGlossaryImportStatus( $uuid );
+
+        $allMemories = $this->mymemory_engine->getGlossaryImportStatus( $uuid );
+
+        if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
+            Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
+            //what the hell? No memories although I've just loaded some? Eject!
+            throw new Exception( "Error response from TMX status check", -15 );
+        }
+
+        switch ( $allMemories->responseData[ 'status' ] ) {
+            case "0":
+                //wait for the daemon to process it
+                //LOADING
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                $result[ 'data' ]      = $allMemories->responseData;
+                $result[ 'completed' ] = false;
+                break;
+            case "1":
+                //loaded (or error, in any case go ahead)
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                $result[ 'data' ]      = $allMemories->responseData;
+                $result[ 'completed' ] = true;
+                break;
+            default:
+                throw new Exception( "Invalid Glossary (\"" . $this->name . "\")", -14 ); // this should never happen
+        }
+
+        return $result;
+
     }
 
     /**
@@ -242,7 +262,7 @@ class TMSService {
 
         $allMemories = $this->mymemory_engine->getStatus( $uuid );
 
-        if ( $allMemories->responseStatus >= 400 ) {
+        if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
             throw new Exception( "Error response from TMX status check", -15 );
@@ -263,7 +283,7 @@ class TMSService {
                 $result[ 'completed' ] = true;
                 break;
             default:
-                throw new Exception( "Invalid TMX (\"" . $this->name . "\")", -14 );
+                throw new Exception( "Invalid TMX (\"" . $this->name . "\")", -14 ); // this should never happen
         }
 
         return $result;
@@ -298,21 +318,6 @@ class TMSService {
     }
 
     /**
-     * @param string $tm_key
-     *
-     * @return $this
-     */
-    public function setTmKey( $tm_key ) {
-        $this->tm_key = $tm_key;
-
-        return $this;
-    }
-
-    public function getTMKey() {
-        return $this->tm_key;
-    }
-
-    /**
      * Send a mail with link for direct prepared download
      *
      * @param $userMail
@@ -322,10 +327,10 @@ class TMSService {
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      */
-    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ) {
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key ) {
 
         $response = $this->mymemory_engine->emailExport(
-                $this->tm_key,
+                $tm_key,
                 $this->name,
                 $userMail,
                 $userName,
