@@ -41,6 +41,7 @@
             allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
             conversionEnabled: true,
             analysisEnabled: ${volume_analysis_enabled},
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             maxFileSize: ${maxFileSize},
             maxTMXFileSize: ${maxTMXFileSize},
             maxNumberFiles: ${maxNumberFiles},
