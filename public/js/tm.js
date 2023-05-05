@@ -251,7 +251,10 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         .on('paste', '#shared-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
-            UI.checkTMKey('change')
+            UI.checkTMKey(
+              'change',
+              document.getElementById('shared-tm-key').value,
+            )
           }, 200)
         })
         .on('input', '#shared-tm-key', function () {
@@ -318,7 +321,6 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
           'click',
           '#activetm tr.new a.addtmxfile:not(.disabled)',
           function () {
-            UI.checkTMKey('tm')
             $(this).addClass('disabled')
           },
         )
@@ -1294,7 +1296,14 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         })
         .catch(({errors}) => {
           var TDcaller = TRcaller
-          UI.showErrorUpload($(TDcaller), errors[0].message)
+          if (errors.length) {
+            UI.showErrorUpload($(TDcaller), errors[0].message)
+          } else {
+            UI.showErrorUpload(
+              $(TDcaller),
+              `Error uploading ${type === 'tmx' ? 'tmx' : 'glossary'}`,
+            )
+          }
           $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
           UI.UploadIframeId.remove()
         })
