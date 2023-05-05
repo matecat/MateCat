@@ -242,9 +242,20 @@ class PreferencesModal extends React.Component {
               <label>No API Key associated to your account</label>
             </div>
             <div className="user-api-buttons">
-              <a className="btn-ok" onClick={() => this.generateKey()}>
-                Generate
-              </a>
+              {config.isAnInternalUser ? (
+                <a className="btn-ok" onClick={() => this.generateKey()}>
+                  Generate
+                </a>
+              ) : (
+                <a
+                  href="mailto:support@matecat.com"
+                  className="email-link"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Contact us
+                </a>
+              )}
             </div>
           </div>
         )}
