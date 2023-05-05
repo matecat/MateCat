@@ -132,8 +132,6 @@ class ProjectManager {
                             'project_name'                 => null,
                             'result'                       => [ "errors" => [], "data" => [] ],
                             'private_tm_key'               => 0,
-                            'private_tm_user'              => null,
-                            'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
                             'array_files_meta'             => [], //list of file meta data
@@ -1057,7 +1055,7 @@ class ProjectManager {
 
                     $file = new TMSFile(
                             "$this->uploadDir/$fileName",
-                            $this->tmxServiceWrapper->getTMKey(),
+                            $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
                             $fileName,
                             $pos
                     );
@@ -1221,7 +1219,6 @@ class ProjectManager {
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
-            $newJob->id_translator     = is_null( $projectStructure[ 'private_tm_user' ] ) ? "" : $projectStructure[ 'private_tm_user' ];
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
             $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
@@ -3206,22 +3203,6 @@ class ProjectManager {
 
         }
 
-        //the base case is when the user clicks on "generate private TM" button:
-        //a (user, pass, key) tuple is generated and can be inserted
-        //if it comes with it's own key without querying the creation API, create a (key,key,key) user
-//        if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
-//            $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-//            $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-//        }
-//
-//        $this->projectStructure[ 'private_tm_key' ] = $this->features->filter( 'filter_project_manager_private_tm_key',
-//                $this->projectStructure[ 'private_tm_key' ],
-//                [ 'project_structure' => $this->projectStructure ]
-//        );
-//
-//        if ( count( $this->projectStructure[ 'private_tm_key' ] ) > 0 ) {
-//            $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
-//        }
     }
 
     /**
