@@ -124,6 +124,16 @@ class ApiKeyController extends KleinController {
      */
     private function allowOnlyInternalUsers() {
 
+        if( !$this->getUser() ){
+            $this->response->status()->setCode( 403 );
+            $this->response->json( [
+                'errors' => [
+                    'Forbidden, please login'
+                ]
+            ] );
+            exit();
+        }
+
         $isAnInternalUser  = $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email);
 
         if( !$isAnInternalUser ){
