@@ -26,7 +26,7 @@
             project_type: '${project_type}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             isReview: ${isReview | string: false},
             source_code: '${source_code}',
             target_code: '${target_code}',

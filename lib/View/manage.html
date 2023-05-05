@@ -29,6 +29,7 @@
             outsource_service_login : '${outsource_service_login}',
             splitEnabled: ${split_enabled},
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
         };
     </script>

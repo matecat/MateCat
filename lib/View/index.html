@@ -91,6 +91,7 @@
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
                 isCJK: ${isCJK},
+                isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
                 isTargetRTL: ${isTargetRTL},
                 isSourceRTL: ${isSourceRTL},
                 /**

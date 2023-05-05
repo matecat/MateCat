@@ -325,7 +325,7 @@ abstract class viewController extends controller {
         if($isAnInternalUser){
             $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
 
-            if(!empty($MMTLicense)){
+            if(!empty($MMTLicense) and isset($MMTLicense['id'])){
                 foreach ($engines as $index => $engine){
                     if($engine->id === $MMTLicense['id']){
                         unset($engines[$index]);

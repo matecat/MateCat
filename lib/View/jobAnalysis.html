@@ -31,6 +31,7 @@
             password: '${project_password}',
             jpassword: '${job_password}',
             outsource_service_login : '${outsource_service_login}',
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             jobs: ${json_jobs},
             jobAnalysis: true,
             isCJK: ${isCJK},
