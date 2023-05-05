@@ -178,7 +178,7 @@ const TermForm = () => {
               highlightMandatoryOnSubmit.originalTerm
                 ? 'highlight_mandatory'
                 : ''
-            }`}
+            } glossary-term-original`}
             name="glossary-term-original"
             value={termForm[ORIGINAL_TERM]}
             onChange={(event) =>
@@ -197,7 +197,7 @@ const TermForm = () => {
               highlightMandatoryOnSubmit.translatedTerm
                 ? 'highlight_mandatory'
                 : ''
-            }`}
+            } glossary-term-translated`}
             name="glossary-term-translated"
             value={termForm[TRANSLATED_TERM]}
             onChange={(event) =>

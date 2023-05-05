@@ -1067,7 +1067,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   ) {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
-    current_sid = !current_sid ? this.getCurrentSegment().sid : current_sid
+    current_sid = !current_sid ? currentSegment.sid : current_sid
     let allStatus = {
       1: 'APPROVED',
       2: 'DRAFT',
