@@ -217,7 +217,7 @@ class PreferencesModal extends React.Component {
                     Delete
                   </a>
                 </div>
-              ) : !config.isAnInternalUser ? (
+              ) : config.isAnInternalUser ? (
                 <div className="user-api-buttons">
                   <a className="btn-ok" onClick={() => this.confirmDelete()}>
                     Delete
