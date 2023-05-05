@@ -33,6 +33,7 @@
             splitEnabled: ${split_enabled},
             targetIsCJK: ${targetIsCJK},
             isCJK: ${isCJK},
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
         };
