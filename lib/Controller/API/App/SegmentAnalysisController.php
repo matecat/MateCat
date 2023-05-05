@@ -288,6 +288,9 @@ class SegmentAnalysisController extends KleinController {
             ];
         }
 
+        // notes
+        // @TODO aggiungere tutte le note per il segmento solo le note a stringa
+
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 

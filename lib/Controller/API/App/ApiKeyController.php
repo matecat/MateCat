@@ -19,6 +19,18 @@ class ApiKeyController extends KleinController {
      * @throws \Exception
      */
     public function create() {
+
+        $isAnInternalUser  = $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email);
+
+        if( !$isAnInternalUser ){
+            $this->response->status()->setCode( 403 );
+            $this->response->json( [
+                'errors' => [
+                    'Forbidden, please contact support for generating a valid API key'
+                ]
+            ] );
+            exit();
+        }
         
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
 
