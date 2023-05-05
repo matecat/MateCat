@@ -22,6 +22,8 @@ import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
 import TEXT_UTILS from './cat_source/es6/utils/textUtils'
 import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
+import {uploadGlossary} from './cat_source/es6/api/uploadGlossary/uploadGlossary'
+import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -929,8 +931,6 @@ import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
       $('.addtmxrow').hide()
     },
     execAddTMOrGlossary: function (el, type) {
-      const action =
-        type == 'glossary' ? '/api/v2/glossaries/import/' : '/?action=loadTMX'
       const line = $(el).parents('tr')
       line.find('.uploadfile').addClass('uploading')
       const form = line.find('.add-TM-Form')[0]
@@ -942,7 +942,7 @@ import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
         )
         return
       }
-      this.fileUpload({form, action, type})
+      this.fileUpload({form, type})
     },
     addTMKeyToList: function (uploading, key) {
       var descr = $('#new-tm-description').val()
@@ -1085,86 +1085,35 @@ import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
       UI.hideAllBoxOnTables()
     },
 
-    fileUpload: function ({form, action, type}) {
-      var TR = $(form).parents('tr')
-      var key = TR.find('.privatekey').first().text().trim()
-      var keyName = TR.find('.description').first().text().trim()
+    fileUpload: function ({form, type}) {
+      const TR = $(form).parents('tr')
+      const key = TR.find('.privatekey').first().text().trim()
+      const keyName = TR.find('.description').first().text().trim()
+      const TRcaller = $(form).parents('.uploadfile')
 
-      // ----------------------------------------
       const uploadFilesElement = Array.from($(form)[0].children).find(
         (element) => element.getAttribute('name') === 'uploaded_file[]',
       )
       const filesToUpload = Array.from(uploadFilesElement?.files ?? [])
-      console.log('#filesToUpload', filesToUpload)
 
-      const formData = new FormData()
+      const promise = type === 'glossary' ? uploadGlossary : uploadTm
 
-      if (type === 'tmx') formData.append('exec', 'newTM')
-
-      if (filesToUpload.length)
-        filesToUpload.forEach((file) =>
-          formData.append('uploaded_file[]', file, file.name),
-        )
-
-      formData.append('tm_key', key)
-      formData.append('name', keyName)
-      formData.append('r', '1')
-      formData.append('w', '1')
-
-      if (APP.isCattool) {
-        formData.append('job_id', config.job_id)
-        formData.append('job_pass', config.password)
-      }
-
-      fetch(`${getMatecatApiDomain()}${action.split('/')[1]}`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      })
-        .then((response) => response.json())
+      promise({filesToUpload, tmKey: key, keyName})
         .then((data) => {
-          console.log('#fetch response', data)
+          UI.pollForUploadProgressNew({files: data.uuids, type, key, TRcaller})
         })
-
-      var filePath = $(form).find('input[type="file"]').val()
-      var fileName = filePath.split('\\')[filePath.split('\\').length - 1]
-
-      var TRcaller = $(form).parents('.uploadfile')
-      // TRcaller.addClass('startUploading');
-      UI.showStartUpload(TRcaller)
-      // setTimeout(function () {
-      //   UI.pollForUploadCallback(Key, fileName, TRcaller, type)
-      // }, 1000)
-    },
-    pollForUploadCallback: function (Key, fileName, TRcaller, type) {
-      if ($('#uploadCallback').text() != '') {
-        var msg = $.parseJSON($('#uploadCallback pre').text())
-        if (msg.success === true) {
-          setTimeout(function () {
-            //delay because server can take some time to process large file
-            // TRcaller.removeClass('startUploading');
-            const uuid =
-              type === 'glossary' && msg.data?.uuids?.length > 0
-                ? msg.data.uuids[0]
-                : undefined
-            UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
-          }, 2000)
-        } else {
+        .catch((errors) => {
           TRcaller.find('.action a').removeClass('disabled')
           UI.showErrorUpload($(TRcaller))
-          UI.UploadIframeId.remove()
 
           if ($(TRcaller).closest('table').attr('id') == 'inactivetm') {
-            UI.showErrorOnInactiveTMTable(msg.errors[0].message)
+            UI.showErrorOnInactiveTMTable(errors[0].message)
           } else {
-            UI.showErrorOnActiveTMTable(msg.errors[0].message)
+            UI.showErrorOnActiveTMTable(errors[0].message)
           }
-        }
-      } else {
-        setTimeout(function () {
-          UI.pollForUploadCallback(Key, fileName, TRcaller, type)
-        }, 1000)
-      }
+        })
+
+      UI.showStartUpload(TRcaller)
     },
     showErrorUpload: function ($tr, text) {
       var msg = text ? text : 'Error uploading your files. Please try again.'
@@ -1192,19 +1141,66 @@ import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
     showSuccessUpload: function ($tr) {
       $tr.find('.action a').removeClass('disabled')
       $tr
-        .find(
-          '.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary',
-        )
+        .find('.canceladdtmx,.addtmxfile, .addglossaryfile, .canceladdglossary')
         .hide()
 
-      $tr.find('.progress .inner').css('width', '90%')
       setTimeout(function () {
         $tr.find('.upload-file-msg-success').show()
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgressNew: ({files}) => {
-      console.log(files)
+    pollForUploadProgressNew: ({files, type, TRcaller, key}) => {
+      let completedCounter = 0
+      const totalFiles = files.length
+      const TDcaller = TRcaller
+
+      const getStatus = ({uuid, name}) => {
+        const promise =
+          type === 'glossary'
+            ? loadGlossaryFile({id: uuid})
+            : loadTMX({uuid, key, name})
+
+        promise
+          .then((response) => {
+            const tr = $(TDcaller).parents('tr')
+
+            const isCompleted = response.data.status === 1
+            if (isCompleted) completedCounter++
+
+            console.log('uuid', uuid, isCompleted, completedCounter, totalFiles)
+
+            // progress bar
+            const progress = (completedCounter / totalFiles) * 100
+            $(TDcaller)
+              .find('.progress .inner')
+              .css('width', progress + '%')
+
+            // files upload completed
+            if (completedCounter === totalFiles) {
+              UI.showSuccessUpload(tr)
+
+              setTimeout(function () {
+                $(TDcaller).slideToggle(function () {
+                  this.remove()
+                })
+              }, 3000)
+              return
+            }
+
+            // refresh get status
+            if (!isCompleted) {
+              setTimeout(function () {
+                getStatus({uuid, name})
+              }, 1000)
+            }
+          })
+          .catch(({errors}) => {
+            UI.showErrorUpload($(TDcaller), errors[0].message)
+            $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
+          })
+      }
+
+      files.forEach((file) => getStatus(file))
     },
     pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
       const promise =
