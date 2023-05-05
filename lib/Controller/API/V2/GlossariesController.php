@@ -135,7 +135,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
                     $this->TMService->addGlossaryInMyMemory( $file );
 
-                    $uuids[] = [ "name" => $file->getUuid(), "uuid" => $file->getName() ];
+                    $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
 
                 } catch ( Exception $e ) {
                     $this->setErrorResponse( $e->getCode(), $e->getMessage() );
