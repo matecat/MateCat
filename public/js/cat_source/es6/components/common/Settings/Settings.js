@@ -30,7 +30,7 @@ export const Settings = ({onClose}) => {
   return (
     <SettingsContext.Provider value={{tabs, setTabs}}>
       <div className="settings-panel">
-        <div className="settings-panel-overlay"></div>
+        <div className="settings-panel-overlay" onClick={close}></div>
         <div className="settings-panel-wrapper">
           <div className="settings-panel-header">
             <img src="../../img/logo_matecat_small_white.svg" />
