@@ -1134,6 +1134,12 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       }
       $tr.addClass('tm-error')
     },
+    resetErrorUpload: function ($tr) {
+      $tr.find('.uploadprogress').show()
+      $tr.find('.upload-file-msg-error').text('')
+      $tr.find('.canceladdglossary, .canceladdtmx').hide()
+      $tr.removeClass('tm-error')
+    },
     showStartUpload: function ($tr) {
       $tr
         .find(
@@ -1159,6 +1165,8 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       const totalFiles = files.length
       const TDcaller = TRcaller
 
+      const MAX_PERCENTAGE_BY_FILE = 100 / totalFiles
+
       const getStatus = ({uuid, name}) => {
         const promise =
           type === 'glossary'
@@ -1169,14 +1177,21 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
           .then((response) => {
             const tr = $(TDcaller).parents('tr')
 
+            const {completed = 0, totals = 0} = response.data
+            const previousPercentage = completedCounter * MAX_PERCENTAGE_BY_FILE
+            const currentPercentage = totals
+              ? (completed / totals) * MAX_PERCENTAGE_BY_FILE
+              : 0
+            const percentage = previousPercentage + currentPercentage
+
             const isCompleted = response.data.status === 1
             if (isCompleted) completedCounter++
 
-            // progress bar
-            const progress = (completedCounter / totalFiles) * 100
+            UI.resetErrorUpload($(TDcaller))
+
             $(TDcaller)
               .find('.progress .inner')
-              .css('width', progress + '%')
+              .css('width', percentage + '%')
 
             // files upload completed
             if (completedCounter === totalFiles) {
@@ -1968,6 +1983,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         format = '.xlsx,.xls, .ods'
       }
       $(elem).closest('tr').find('.action a').addClass('disabled')
+      const multiple = type === 'tmx' ? 'multiple' : ''
       var nr =
         '<td class="uploadfile" style="display: none">' +
         label +
@@ -1975,7 +1991,10 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
         '    <input type="file" name="uploaded_file[]" accept="' +
         format +
-        '" multiple/>' +
+        '"' +
+        ' ' +
+        multiple +
+        '/>' +
         '</form>' +
         '   <a class="pull-right btn-grey canceladd' +
         type +
