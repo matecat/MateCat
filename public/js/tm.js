@@ -1100,14 +1100,14 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       promise({filesToUpload, tmKey: key, keyName})
         .then((data) => {
-          UI.pollForUploadProgressNew({
+          UI.pollForUploadProgress({
             files: data.data.uuids,
             type,
             key,
             TRcaller,
           })
         })
-        .catch((errors) => {
+        .catch(({errors}) => {
           TRcaller.find('.action a').removeClass('disabled')
           UI.showErrorUpload($(TRcaller))
 
@@ -1154,7 +1154,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgressNew: ({files, type, TRcaller, key}) => {
+    pollForUploadProgress: ({files, type, TRcaller, key}) => {
       let completedCounter = 0
       const totalFiles = files.length
       const TDcaller = TRcaller
@@ -1171,8 +1171,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
             const isCompleted = response.data.status === 1
             if (isCompleted) completedCounter++
-
-            console.log('uuid', uuid, isCompleted, completedCounter, totalFiles)
 
             // progress bar
             const progress = (completedCounter / totalFiles) * 100
@@ -1207,65 +1205,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       files.forEach((file) => getStatus(file))
     },
-    pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
-      const promise =
-        type === 'glossary'
-          ? loadGlossaryFile({id: uuid})
-          : loadTMX({key: Key, name: fileName})
-      promise
-        .then((response) => {
-          var TDcaller = TRcaller
-          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
-          UI.showStartUpload($(TDcaller))
-
-          if (response.data.total == null && response.data.totals === null) {
-            setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
-            }, 1000)
-          } else {
-            if (
-              (type === 'tmx' && response.data.completed) ||
-              (type === 'glossary' &&
-                response.data.completed === response.data.totals)
-            ) {
-              var tr = $(TDcaller).parents('tr')
-              UI.showSuccessUpload(tr)
-
-              if (!tr.find('td.description .edit-desc').text()) {
-                tr.find('td.description .edit-desc').text(fileName)
-              }
-
-              setTimeout(function () {
-                $(TDcaller).slideToggle(function () {
-                  this.remove()
-                })
-              }, 3000)
-
-              UI.UploadIframeId.remove()
-
-              return false
-            }
-            const done =
-              type === 'tmx' ? response.data.done : response.data.completed
-            const total =
-              type === 'tmx' ? response.data.total : response.data.totals
-            var progress = (parseInt(done) / parseInt(total)) * 100
-            $(TDcaller)
-              .find('.progress .inner')
-              .css('width', progress + '%')
-            setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
-            }, 1000)
-          }
-        })
-        .catch(({errors}) => {
-          var TDcaller = TRcaller
-          UI.showErrorUpload($(TDcaller), errors[0].message)
-          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
-          UI.UploadIframeId.remove()
-        })
-    },
-
     allTMUploadsCompleted: function () {
       if ($('#activetm .uploadfile.uploading').length) {
         ModalsActions.showModalComponent(
