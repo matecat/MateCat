@@ -87,7 +87,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         try {
             $stdResult = $this->TMService->uploadFile();
         } catch ( Exception $e ) {
-            $this->setErrorResponse( -2, $e->getMessage() );
+            $this->setErrorResponse( 500, $e->getMessage() );
 
             return;
         }
@@ -109,7 +109,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         ] ), $filterArgs );
 
         if ( !isset( $postInput->tm_key ) or $postInput->tm_key === "" ) {
-            $this->setErrorResponse( -2, "`TM key` field is mandatory" );
+            $this->setErrorResponse( 400, "`TM key` field is mandatory" );
 
             return;
         }
@@ -139,6 +139,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
                 } catch ( Exception $e ) {
                     $this->setErrorResponse( $e->getCode(), $e->getMessage() );
+                    return;
                 }
 
             }

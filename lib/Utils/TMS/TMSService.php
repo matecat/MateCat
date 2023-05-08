@@ -197,7 +197,7 @@ class TMSService {
                     $message = 'The file header does not match the accepted structure. Please change the header structure to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">the user guide page</a> and retry upload.';
                 }
 
-                throw new Exception( $message, -15 );
+                throw new Exception( $message, $importStatus->responseStatus );
             default:
         }
 
