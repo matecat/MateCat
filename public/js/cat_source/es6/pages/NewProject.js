@@ -21,6 +21,8 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
+import {Settings} from '../components/common/Settings/Settings'
+import {useCallback} from 'react'
 
 const SELECT_HEIGHT = 324
 
@@ -62,6 +64,9 @@ const NewProject = ({
   const [warnings, setWarnings] = useState()
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
+  const [isOpenSettings, setIsOpenSettings] = useState(false)
+
+  const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -82,7 +87,8 @@ const NewProject = ({
   }
 
   const openTmPanel = () => {
-    APP.openOptionsPanel('tm')
+    // APP.openOptionsPanel('tm')
+    setIsOpenSettings(true)
   }
 
   const changeSourceLanguage = (option) => {
@@ -474,6 +480,7 @@ const NewProject = ({
           }}
         />
       )}
+      {isOpenSettings && <Settings onClose={closeSettings} />}
       <Footer />
     </CreateProjectContext.Provider>
   )

@@ -1,0 +1,42 @@
+@import '../../commons/colors';
+
+.settings-panel {
+  position: absolute;
+  z-index: 12;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.settings-panel-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.settings-panel-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 1024px;
+  background-color: white;
+}
+
+.settings-panel-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.settings-panel-content {
+  > ul {
+    display: flex;
+    gap: 16px;
+  }
+}
+
+.settings-panel-tab {
+  cursor: pointer;
+}
