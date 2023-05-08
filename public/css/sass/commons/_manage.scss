@@ -4,7 +4,15 @@ body.manage {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   background-color: $grey5;
-  overflow: visible;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+div#manage-container {
+  overflow: auto;
+  height: 100%;
+  position: relative;
+  padding-top: 40px;
 }
 
 .ui.icon.button {
@@ -63,7 +71,6 @@ body.manage {
 // Closing Shadow - Transitions for buttons
 
 .project-list {
-  padding-top: 100px;
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {

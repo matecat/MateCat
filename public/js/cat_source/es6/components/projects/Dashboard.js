@@ -136,9 +136,14 @@ class Dashboard extends React.Component {
   scrollDebounceFn = () => _.debounce(() => this.handleScroll(), 300)
 
   handleScroll = () => {
+    let scrollableHeight =
+      document.getElementById('manage-container').scrollHeight -
+      document.getElementById('manage-container').clientHeight
+    // When the user is [modifier]px from the bottom, fire the event.
+    let modifier = 200
     if (
-      $(window).scrollTop() + $(window).height() >
-      $(document).height() - 200
+      document.getElementById('manage-container').scrollTop + modifier >
+      scrollableHeight
     ) {
       console.log('Scroll end')
       this.renderMoreProjects()
@@ -360,7 +365,9 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     this.getData()
-    window.addEventListener('scroll', this.scrollDebounceFn())
+    document
+      .getElementById('manage-container')
+      .addEventListener('scroll', this.scrollDebounceFn())
     let self = this
     $(window).on('blur focus', function (e) {
       const prevType = $(this).data('prevType')
@@ -420,7 +427,9 @@ class Dashboard extends React.Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.scrollDebounceFn())
+    document
+      .getElementById('manage-container')
+      .removeEventListener('scroll', this.scrollDebounceFn())
 
     //Job Actions
     ProjectsStore.removeListener(

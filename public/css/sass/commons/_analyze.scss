@@ -4,14 +4,22 @@ body.analyze {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   background-color: $grey5;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
   header {
     z-index: 1001 !important;
   }
 }
-
+.analyze-page {
+  height: 100%;
+}
 .project-list {
-  padding-top: 102px; /* was 62px with previous header */
+  height: 100%;
+  positon: relative;
+  overflow-y: auto;
+}
+.project-list {
+  padding-top: 40px; /* was 62px with previous header */
   padding-bottom: 160px;
 
   .project {
