@@ -1977,7 +1977,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select up to 10 glossaries in XLSX, XLS or ODS format ' +
+          '<p class="pull-left">Select glossary in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls, .ods'
