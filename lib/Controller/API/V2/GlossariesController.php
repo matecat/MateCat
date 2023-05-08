@@ -139,7 +139,6 @@ class GlossariesController extends AbstractStatefulKleinController {
 
                 } catch ( Exception $e ) {
                     $this->setErrorResponse( $e->getCode(), $e->getMessage() );
-                    throw $e;
                 }
 
             }
