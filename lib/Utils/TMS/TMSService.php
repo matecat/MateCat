@@ -222,6 +222,7 @@ class TMSService {
 
         switch ( $allMemories->responseData[ 'status' ] ) {
             case "0":
+            case "-1":
                 //wait for the daemon to process it
                 //LOADING
                 Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
@@ -270,6 +271,7 @@ class TMSService {
 
         switch ( $allMemories->responseData[ 'status' ] ) {
             case "0":
+            case "-1":
                 //wait for the daemon to process it
                 //LOADING
                 Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
