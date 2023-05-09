@@ -82,7 +82,7 @@
   background-color: white;
 }
 
-.settings-panel-content {
+.settings-panel-contentwrapper {
   > ul {
     display: flex;
     gap: 1px;
@@ -90,6 +90,6 @@
   }
 }
 
-.settings-panel-content-container {
+.settings-panel-contentwrapper-container {
   padding: 20px;
 }

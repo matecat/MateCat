@@ -1,33 +1,29 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsContext} from './SettingsContext'
-import {Content} from './Content'
-import {useLayoutEffect} from 'react'
-import {useEffect} from 'react'
-import {useRef} from 'react'
+import {ContentWrapper} from './ContentWrapper'
 
-const DEFAULT_CONTENTS = [
+const DEFAULT_ContentWrapperS = [
   {
-    id: 0,
     label: 'Translation Memory and Glossary',
-    component: <h2>Content: Translation Memory and Glossary</h2>,
+    component: <h2>ContentWrapper: Translation Memory and Glossary</h2>,
     isOpened: true,
   },
   {
-    id: 1,
     label: 'Machine Translation',
-    component: <h2>Content: Machine Translation</h2>,
+    component: <h2>ContentWrapper: Machine Translation</h2>,
   },
   {
-    id: 2,
     label: 'Advanced Options',
-    component: <h2>Content: Advanced Options</h2>,
+    component: <h2>ContentWrapper: Advanced Options</h2>,
   },
 ]
 
 export const Settings = ({onClose}) => {
   const [isVisible, setIsVisible] = useState(false)
-  const [tabs, setTabs] = useState(DEFAULT_CONTENTS)
+  const [tabs, setTabs] = useState(
+    DEFAULT_ContentWrapperS.map((tab, index) => ({...tab, id: index})),
+  )
 
   const wrapperRef = useRef()
 
@@ -70,7 +66,7 @@ export const Settings = ({onClose}) => {
             <span>Settings</span>
             <div onClick={close} className="close-matecat-modal x-popup" />
           </div>
-          <Content />
+          <ContentWrapper />
         </div>
       </div>
     </SettingsContext.Provider>
