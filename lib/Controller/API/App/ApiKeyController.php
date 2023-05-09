@@ -58,6 +58,8 @@ class ApiKeyController extends KleinController {
     /**
      * show api key for a logged user
      * api_secret is always hidden
+     *
+     * There is no need to protect this route
      */
     public function show() {
 

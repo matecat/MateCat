@@ -15,10 +15,15 @@ if (ReviewExtended.enabled()) {
       const promise = sendSegmentVersionIssue(sid, {
         ...data,
       })
-      promise.then(() => {
-        UI.getSegmentVersionsIssues(sid)
-        CatToolActions.reloadQualityReport()
-      })
+      promise
+        .then(() => {
+          UI.getSegmentVersionsIssues(sid)
+          CatToolActions.reloadQualityReport()
+        })
+        .catch(() => {
+          //todo Capture Error
+          console.log('Error creating issue')
+        })
 
       return promise
     },

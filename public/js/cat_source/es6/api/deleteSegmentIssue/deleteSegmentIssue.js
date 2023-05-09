@@ -30,9 +30,7 @@ export const deleteSegmentIssue = async ({
     } else {
       return Promise.reject()
     }
+  } else {
+    return true
   }
-
-  const {errors, ...data} = await response.json()
-  if (errors && errors.length > 0) return Promise.reject({errors})
-  return data
 }
