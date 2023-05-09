@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {SettingsContext} from './SettingsContext'
 import {ContentWrapper} from './ContentWrapper'
 
-const DEFAULT_ContentWrapperS = [
+const DEFAULT_CONTENTS = [
   {
     label: 'Translation Memory and Glossary',
     component: <h2>ContentWrapper: Translation Memory and Glossary</h2>,
@@ -22,7 +22,7 @@ const DEFAULT_ContentWrapperS = [
 export const Settings = ({onClose}) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
-    DEFAULT_ContentWrapperS.map((tab, index) => ({...tab, id: index})),
+    DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
   )
 
   const wrapperRef = useRef()
