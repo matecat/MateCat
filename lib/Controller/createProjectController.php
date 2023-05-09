@@ -17,8 +17,6 @@ class createProjectController extends ajaxController {
     private $mt_engine;
     private $tms_engine = 1;  //1 default MyMemory
     private $private_tm_key;
-    private $private_tm_user;
-    private $private_tm_pass;
     private $lang_detect_files;
     private $disable_tms_engine_flag;
     private $pretranslate_100;
@@ -53,9 +51,6 @@ class createProjectController extends ajaxController {
                 'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-
-                'private_tm_user'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'private_tm_pass'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'lang_detect_files' => [
                         'filter'  => FILTER_CALLBACK,
                         'options' => "Utils::filterLangDetectArray"
@@ -128,8 +123,6 @@ class createProjectController extends ajaxController {
         $this->mt_engine               = ( $this->postInput[ 'mt_engine' ] != null ? $this->postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
         $this->disable_tms_engine_flag = $this->postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
-        $this->private_tm_user         = $this->postInput[ 'private_tm_user' ];
-        $this->private_tm_pass         = $this->postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -338,8 +331,6 @@ class createProjectController extends ajaxController {
 
         $projectStructure[ 'project_name' ]                 = $this->project_name;
         $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]              = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]              = $this->private_tm_pass;
         $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
         $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
