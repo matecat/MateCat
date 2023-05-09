@@ -17,6 +17,7 @@ use Projects_ProjectStruct;
 use Segments_SegmentDao;
 use Segments_SegmentMetadataDao;
 use Exceptions\NotFoundException;
+use Segments_SegmentNoteDao;
 use Url\JobUrlStruct;
 
 class SegmentAnalysisController extends KleinController {
@@ -289,7 +290,11 @@ class SegmentAnalysisController extends KleinController {
         }
 
         // notes
-        // @TODO aggiungere tutte le note per il segmento solo le note a stringa
+        $notes_records = Segments_SegmentNoteDao::getBySegmentId( $segmentForAnalysis->id );
+        $notes = [];
+        foreach ( $notes_records as $note_records ) {
+            $notes[] = $note_records->note;
+        }
 
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
@@ -311,6 +316,7 @@ class SegmentAnalysisController extends KleinController {
                 'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
                 'issues' => $issues,
+                'notes' => $notes,
                 'status' => $this->getStatusObject($segmentForAnalysis),
                 'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,
         ];
