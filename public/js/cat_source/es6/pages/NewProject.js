@@ -21,7 +21,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {SettingsPanel} from '../components/SettingsPanel'
+import {SettingsPanel} from '../components/settingsPanel'
 
 const SELECT_HEIGHT = 324
 
