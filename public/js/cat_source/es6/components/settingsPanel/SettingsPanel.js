@@ -2,6 +2,8 @@ import React, {useState, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
+import {MachineTranslationTab} from './Contents/MachineTranslationTab'
+import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 
 const DEFAULT_CONTENTS = [
   {
@@ -11,11 +13,11 @@ const DEFAULT_CONTENTS = [
   },
   {
     label: 'Machine Translation',
-    component: <h2>ContentWrapper: Machine Translation</h2>,
+    component: <MachineTranslationTab />,
   },
   {
     label: 'Advanced Options',
-    component: <h2>ContentWrapper: Advanced Options</h2>,
+    component: <AdvancedOptionsTab />,
   },
 ]
 
