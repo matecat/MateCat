@@ -19,7 +19,8 @@ class ApiKeyController extends KleinController {
      * @throws \Exception
      */
     public function create() {
-        
+
+        $this->allowOnlyInternalUsers();
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
 
         // check if logged user already has a key
@@ -60,6 +61,7 @@ class ApiKeyController extends KleinController {
      */
     public function show() {
 
+        $this->allowOnlyInternalUsers();
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
@@ -84,6 +86,7 @@ class ApiKeyController extends KleinController {
      */
     public function delete() {
 
+        $this->allowOnlyInternalUsers();
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
@@ -113,6 +116,34 @@ class ApiKeyController extends KleinController {
                             $e->getMessage()
                     ]
             ] );
+        }
+    }
+
+    /**
+     * Allow only internal users.
+     */
+    private function allowOnlyInternalUsers() {
+
+        if( !$this->getUser() ){
+            $this->response->status()->setCode( 403 );
+            $this->response->json( [
+                'errors' => [
+                    'Forbidden, please login'
+                ]
+            ] );
+            exit();
+        }
+
+        $isAnInternalUser  = $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email);
+
+        if( !$isAnInternalUser ){
+            $this->response->status()->setCode( 403 );
+            $this->response->json( [
+                'errors' => [
+                    'Forbidden, please contact support for generating a valid API key'
+                ]
+            ] );
+            exit();
         }
     }
 }
