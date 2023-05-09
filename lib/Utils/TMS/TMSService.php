@@ -4,6 +4,9 @@ namespace TMS;
 
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Constants_TranslationStatus;
+use DateTime;
+use DateTimeZone;
 use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
@@ -13,6 +16,7 @@ use FeatureSet;
 use INIT;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use SplTempFileObject;
 use stdClass;
 use TMSService\TMSServiceDao;
 use Upload;
