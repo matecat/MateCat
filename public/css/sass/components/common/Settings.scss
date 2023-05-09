@@ -7,12 +7,22 @@
   height: 100%;
   top: 0;
   left: 0;
+  overflow: hidden;
 }
 
 .settings-panel-overlay {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
+  transition: opacity 0.5s ease-in-out;
+}
+
+.settings-panel-overlay-visible {
+  opacity: 1;
+}
+
+.settings-panel-overlay-hide {
+  opacity: 0;
 }
 
 .settings-panel-wrapper {
@@ -24,20 +34,62 @@
   height: 100%;
   max-width: 1024px;
   background-color: white;
+  transition: transform 0.5s ease-in-out;
+}
+
+.settings-panel-wrapper-visible {
+  transform: translateX(0);
+}
+
+.settings-panel-wrapper-hide {
+  transform: translateX(100%);
 }
 
 .settings-panel-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  height: 55px;
+  padding: 0 10px;
+  background-color: $darkBlue;
+  color: white;
+
+  > span {
+    font-size: 22px;
+    font-weight: bold;
+  }
+}
+
+.settings-panel-header-logo {
+  background: url(../../img/logo_matecat_small_white.svg) no-repeat;
+  background-position-y: center;
+  background-size: contain;
+  width: 35px;
+  height: 35px;
+}
+
+.settings-panel-tab {
+  padding: 6px 20px;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  background-color: #cdd4de;
+  color: $grey6;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.settings-panel-tab-active {
+  background-color: white;
 }
 
 .settings-panel-content {
   > ul {
     display: flex;
-    gap: 16px;
+    gap: 1px;
+    background-color: $darkBlue;
   }
 }
 
-.settings-panel-tab {
-  cursor: pointer;
+.settings-panel-content-container {
+  padding: 20px;
 }

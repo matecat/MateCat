@@ -21,7 +21,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {Settings} from '../components/common/Settings/Settings'
+import {Settings} from '../components/common/Settings'
 import {useCallback} from 'react'
 
 const SELECT_HEIGHT = 324

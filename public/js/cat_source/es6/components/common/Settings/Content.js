@@ -15,7 +15,7 @@ export const Content = () => {
           <Tab key={index} {...{...tab}} />
         ))}
       </ul>
-      <div className="content">{activeContent}</div>
+      <div className="settings-panel-content-container">{activeContent}</div>
     </div>
   )
 }
