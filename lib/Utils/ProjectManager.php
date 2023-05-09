@@ -12,8 +12,10 @@ use ActivityLog\ActivityLogStruct;
 use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
+use Exceptions\NotFoundException;
 use Files\FilesPartsDao;
 use Files\FilesPartsStruct;
+use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
@@ -23,13 +25,14 @@ use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
 use Matecat\SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use Matecat\XliffParser\XliffUtils\XliffVersionDetector;
 use ProjectManager\ProjectManagerModel;
-use Matecat\SubFiltering\MateCatFilter;
 use Teams\TeamStruct;
+use TMS\TMSFile;
+use TMS\TMSService;
 use Translators\TranslatorsModel;
 
 class ProjectManager {
@@ -58,10 +61,6 @@ class ProjectManager {
     protected $tmxServiceWrapper;
 
     protected $uploadDir;
-
-    protected $checkTMX;
-
-    protected $checkGlossary;
 
     /*
        flag used to indicate TMX check status:
@@ -104,7 +103,7 @@ class ProjectManager {
     protected $filter;
 
     /**
-     * @var \Files\MetadataDao
+     * @var MetadataDao
      */
     protected $metadataDao;
 
@@ -114,7 +113,7 @@ class ProjectManager {
      * @param ArrayObject|null $projectStructure
      *
      * @throws Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
@@ -133,8 +132,6 @@ class ProjectManager {
                             'project_name'                 => null,
                             'result'                       => [ "errors" => [], "data" => [] ],
                             'private_tm_key'               => 0,
-                            'private_tm_user'              => null,
-                            'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
                             'array_files_meta'             => [], //list of file meta data
@@ -200,8 +197,6 @@ class ProjectManager {
 
         $this->langService = Langs_Languages::getInstance();
 
-        $this->checkTMX = 0;
-
         $this->dbHandler = Database::obtain();
 
         $this->features = new FeatureSet( $this->_getRequestedFeatures() );
@@ -230,7 +225,7 @@ class ProjectManager {
 
         $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
 
-        $this->metadataDao = new \Files\MetadataDao();
+        $this->metadataDao = new MetadataDao();
     }
 
     protected function _log( $_msg ) {
@@ -301,12 +296,12 @@ class ProjectManager {
     /**
      * @param $id
      *
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      */
     public function setProjectIdAndLoadProject( $id ) {
         $this->project = Projects_ProjectDao::findById( $id, 60 * 60 );
         if ( $this->project == false ) {
-            throw new \Exceptions\NotFoundException( "Project was not found: id $id " );
+            throw new NotFoundException( "Project was not found: id $id " );
         }
         $this->projectStructure[ 'id_project' ]  = $this->project->id;
         $this->projectStructure[ 'id_customer' ] = $this->project->id_customer;
@@ -488,15 +483,8 @@ class ProjectManager {
 
                 //found TMX, enable language checking routines
                 if ( $meta[ 'isTMX' ] ) {
-
                     //export the name of the first TMX Files for latter use
                     $firstTMXFileName = ( empty( $firstTMXFileName ) ? $firstTMXFileName = $fileName : null );
-                    $this->checkTMX   = 1;
-                }
-
-                //not used at moment but needed if we want to do a poll for status
-                if ( $meta[ 'isGlossary' ] ) {
-                    $this->checkGlossary = 1;
                 }
 
                 //prepend in front of the list
@@ -527,12 +515,12 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
-        \Log::doJsonLog( $uploadDir );
+        Log::doJsonLog( $uploadDir );
 
         //we are going to access the storage, get model object to manipulate it
         $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
 
-        \Log::doJsonLog( $linkFiles );
+        Log::doJsonLog( $linkFiles );
 
         /*
             loop through all input files to
@@ -907,11 +895,11 @@ class ProjectManager {
         try {
 
             if ( AbstractFilesStorage::isOnS3() ) {
-                \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
+                Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
             } else {
-                \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
+                Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
                 Utils::deleteDir( $this->uploadDir );
                 if ( is_dir( $this->uploadDir . '_converted' ) ) {
                     Utils::deleteDir( $this->uploadDir . '_converted' );
@@ -1051,6 +1039,8 @@ class ProjectManager {
      */
     protected function _pushTMXToMyMemory() {
 
+        $memoryFiles = [];
+
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
@@ -1059,26 +1049,26 @@ class ProjectManager {
 
             $ext = $meta[ 'extension' ];
 
-            $file = new stdClass();
-            if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
-
-                if ( INIT::$FILE_STORAGE_METHOD == 's3' ) {
-                    $this->getSingleS3QueueFile( $fileName );
-                }
-
-                $file->file_path = "$this->uploadDir/$fileName";
-                $this->tmxServiceWrapper->setName( $fileName );
-                $this->tmxServiceWrapper->setFile( [ $file ] );
-
-            }
-
             try {
 
                 if ( 'tmx' == $ext ) {
-                    $this->tmxServiceWrapper->addTmxInMyMemory();
-                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ], $this->tmxServiceWrapper->getTMKey() );
-                } elseif ( 'g' == $ext ) {
-                    $this->tmxServiceWrapper->addGlossaryInMyMemory();
+
+                    $file = new TMSFile(
+                            "$this->uploadDir/$fileName",
+                            $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
+                            $fileName,
+                            $pos
+                    );
+
+                    $memoryFiles[] = $file;
+
+                    if ( INIT::$FILE_STORAGE_METHOD == 's3' ) {
+                        $this->getSingleS3QueueFile( $fileName );
+                    }
+
+                    $this->tmxServiceWrapper->addTmxInMyMemory( $file );
+                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ] );
+
                 } else {
                     //don't call the postPushTMX for normal files
                     continue;
@@ -1098,144 +1088,60 @@ class ProjectManager {
         /**
          * @throws Exception
          */
-        $this->_loopForTMXLoadStatus();
+        $this->_loopForTMXLoadStatus( $memoryFiles );
 
     }
 
     /**
+     * @param $memoryFiles TMSFile[]
+     *
      * @throws Exception
      */
-    protected function _loopForTMXLoadStatus() {
+    protected function _loopForTMXLoadStatus( $memoryFiles ) {
 
         //TMX Management
-
         /****************/
-        //loop again through files to check to check for TMX loading
-        foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
+        //loop again through files to check for TMX loading
+        foreach ( $memoryFiles as $file ) {
 
-            //if TMX,
-            if ( 'tmx' == AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+            //is the TM loaded?
+            //wait until current TMX is loaded
+            while ( true ) {
 
-                $this->tmxServiceWrapper->setName( $fileName );
+                try {
 
-                $result = [];
+                    $result = $this->tmxServiceWrapper->tmxUploadStatus( $file->getUuid() );
 
-                //is the TM loaded?
-                //wait until current TMX is loaded
-                while ( true ) {
+                    if ( $result[ 'completed' ] ) {
 
-                    try {
-
-                        $result = $this->tmxServiceWrapper->tmxUploadStatus();
-
-                        if ( $result[ 'completed' ] ) {
-
-                            //"$fileName" has been loaded into MyMemory"
-                            //exit the loop
-                            break;
-
-                        }
-
-                        //"waiting for "$fileName" to be loaded into MyMemory"
-                        sleep( 3 );
-
-                    } catch ( Exception $e ) {
-
-                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => $e->getCode(), "message" => $e->getMessage()
-                        ];
-
-                        $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
-
-                        //exit project creation
-                        throw new Exception( $e );
+                        //"$fileName" has been loaded into MyMemory"
+                        //exit the loop
+                        break;
 
                     }
+
+                    //"waiting for "$fileName" to be loaded into MyMemory"
+                    sleep( 3 );
+
+                } catch ( Exception $e ) {
+
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                            "code" => $e->getCode(), "message" => $e->getMessage()
+                    ];
+
+                    $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
+
+                    //exit project creation
+                    throw new Exception( $e );
 
                 }
-
-                //once the language is loaded, check if language is compliant (unless something useful has already been found)
-                if ( 1 == $this->checkTMX ) {
-
-                    //get localized target languages of TM (in case it's a multilingual TM)
-                    $tmTargets = explode( ';', $result[ 'data' ][ 'target_lang' ] );
-
-                    //indicates if something has been found for current memory
-                    $found = false;
-
-                    //compare localized target languages array (in case it's a multilingual project) to the TM supplied
-                    //if nothing matches, then the TM supplied can't have matches for this project
-
-                    //create an empty var and add the source language too
-                    $project_languages = array_merge( (array)$this->projectStructure[ 'target_language' ], (array)$this->projectStructure[ 'source_language' ] );
-                    foreach ( $project_languages as $projectTarget ) {
-                        if ( in_array( $projectTarget, $tmTargets ) ) {
-                            $found = true;
-                            break;
-                        }
-                    }
-
-                    //if this TM matches the project lagpair and something has been found
-                    if ( $found and $result[ 'data' ][ 'source_lang' ] == $this->projectStructure[ 'source_language' ] ) {
-
-                        //the TMX is good to go
-                        $this->checkTMX = 0;
-
-                    } elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->projectStructure[ 'source_language' ] ) {
-
-                        /*
-                         * This means that the TMX has a srclang as specification in the header. Warn the user.
-                         * Ex:
-                         * <header creationtool="SDL Language Platform"
-                         *      creationtoolversion="8.0"
-                         *      datatype="rtf"
-                         *      segtype="sentence"
-                         *      adminlang="DE-DE"
-                         *      srclang="DE-DE" />
-                         */
-                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code"    => -16,
-                                "message" => "The TMX you provided explicitly specifies {$result['data']['source_lang']} as source language. Check that the specified language source in the TMX file match the language source of your project or remove that specification in TMX file."
-                        ];
-
-                        $this->checkTMX = 0;
-
-                        $this->_log( $this->projectStructure[ 'result' ] );
-                    }
-
-                }
-
-                unset( $this->projectStructure[ 'array_files' ][ $kname ] );
-                unset( $this->projectStructure[ 'array_files_meta' ][ $kname ] );
 
             }
 
+            unset( $this->projectStructure[ 'array_files' ][ $file->getPosition() ] );
+            unset( $this->projectStructure[ 'array_files_meta' ][ $file->getPosition() ] );
+
         }
-
-        if ( 1 == $this->checkTMX ) {
-            //this means that none of uploaded TMX were usable for this project. Warn the user.
-            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -16,
-                    "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
-            ];
-
-            $this->_log( $this->projectStructure[ 'result' ] );
-
-            throw new Exception( "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project." );
-        }
-
-    }
-
-    protected function _doCheckForErrors() {
-
-        if ( count( $this->projectStructure[ 'result' ][ 'errors' ] ) ) {
-            $this->_log( "Project Creation Failed. Sent to Output all errors." );
-            $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
-
-            return false;
-        }
-
-        return true;
 
     }
 
@@ -1275,7 +1181,7 @@ class ProjectManager {
 
             //get payable rates
             $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
-            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $shortSourceLang, $shortTargetLang  ) );
+            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $shortSourceLang, $shortTargetLang ) );
 
             $password = $this->generatePassword();
 
@@ -1283,15 +1189,15 @@ class ProjectManager {
 
             if ( !empty( $projectStructure[ 'private_tm_key' ] ) ) {
                 foreach ( $projectStructure[ 'private_tm_key' ] as $tmKeyObj ) {
-                    $newTmKey = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
+                    $newTmKey                  = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
                     $newTmKey->complete_format = true;
-                    $newTmKey->tm    = true;
-                    $newTmKey->glos  = true;
-                    $newTmKey->owner = true;
-                    $newTmKey->name  = $tmKeyObj[ 'name' ];
-                    $newTmKey->key   = $tmKeyObj[ 'key' ];
-                    $newTmKey->r     = $tmKeyObj[ 'r' ];
-                    $newTmKey->w     = $tmKeyObj[ 'w' ];
+                    $newTmKey->tm              = true;
+                    $newTmKey->glos            = true;
+                    $newTmKey->owner           = true;
+                    $newTmKey->name            = $tmKeyObj[ 'name' ];
+                    $newTmKey->key             = $tmKeyObj[ 'key' ];
+                    $newTmKey->r               = $tmKeyObj[ 'r' ];
+                    $newTmKey->w               = $tmKeyObj[ 'w' ];
 
                     $tm_key[] = $newTmKey;
                 }
@@ -1313,7 +1219,6 @@ class ProjectManager {
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
-            $newJob->id_translator     = is_null( $projectStructure[ 'private_tm_user' ] ) ? "" : $projectStructure[ 'private_tm_user' ];
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
             $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
@@ -1763,7 +1668,7 @@ class ProjectManager {
              */
             foreach ( $owner_tm_keys as $i => $owner_key ) {
                 $owner_key->complete_format = true;
-                $owner_tm_keys[ $i ] = $owner_key->toArray();
+                $owner_tm_keys[ $i ]        = $owner_key->toArray();
             }
 
             $first_job[ 'tm_keys' ] = json_encode( $owner_tm_keys );
@@ -1859,10 +1764,10 @@ class ProjectManager {
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
 
             // save x-jsont* datatype
-            if(isset( $xliff_file[ 'attr' ][ 'data-type' ] )){
+            if ( isset( $xliff_file[ 'attr' ][ 'data-type' ] ) ) {
                 $dataType = $xliff_file[ 'attr' ][ 'data-type' ];
 
-                if (strpos($dataType, 'x-jsont' ) !== false) {
+                if ( strpos( $dataType, 'x-jsont' ) !== false ) {
                     $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'data-type', $dataType );
                 }
             }
@@ -1881,7 +1786,7 @@ class ProjectManager {
                 $filePartsId = ( new FilesPartsDao() )->insert( $filesPartsStruct );
 
                 // save `custom` meta data
-                if(isset($xliff_file[ 'attr' ][ 'custom' ]) and !empty($xliff_file[ 'attr' ][ 'custom' ])){
+                if ( isset( $xliff_file[ 'attr' ][ 'custom' ] ) and !empty( $xliff_file[ 'attr' ][ 'custom' ] ) ) {
                     $this->metadataDao->bulkInsert( $this->projectStructure[ 'id_project' ], $fid, $xliff_file[ 'attr' ][ 'custom' ], $filePartsId );
                 }
             }
@@ -2742,7 +2647,7 @@ class ProjectManager {
      *
      * @return array
      * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
@@ -3034,8 +2939,8 @@ class ProjectManager {
 
                 if ( !$this->projectStructure[ 'notes' ][ $internal_id ]->offsetExists( 'entries' ) ) {
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'from', new ArrayObject() );
-                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'entries', new ArrayObject() );
-                    $this->projectStructure[ 'notes' ][ $internal_id ]['from']->offsetSet( 'json', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ]->offsetSet( 'entries', new ArrayObject() );
+                    $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ]->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'entries', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json', new ArrayObject() );
                     $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet( 'json_segment_ids', [] );
@@ -3045,7 +2950,7 @@ class ProjectManager {
                 $this->projectStructure[ 'notes' ][ $internal_id ][ $noteKey ]->append( $noteContent );
 
                 // import segments metadata from the `from` attribute
-                if(isset($note[ 'from' ])){
+                if ( isset( $note[ 'from' ] ) ) {
                     $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( $note[ 'from' ] );
                 } else {
                     $this->projectStructure[ 'notes' ][ $internal_id ][ 'from' ][ $noteKey ]->append( 'NO_FROM' );
@@ -3076,7 +2981,7 @@ class ProjectManager {
 
             if ( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ) {
                 array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
-            } else  {
+            } else {
                 array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
             }
 
@@ -3200,20 +3105,18 @@ class ProjectManager {
      *
      * @return bool
      * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function setPrivateTMKeys( $firstTMXFileName ) {
 
-        foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
-
-            $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
+        foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
 
             try {
 
-                $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
+                $keyExists = $this->tmxServiceWrapper->checkCorrectKey( $_tmKey[ 'key' ] );
 
                 if ( !isset( $keyExists ) || $keyExists === false ) {
                     $this->_log( __METHOD__ . " -> TM key is not valid." );
@@ -3300,22 +3203,6 @@ class ProjectManager {
 
         }
 
-        //the base case is when the user clicks on "generate private TM" button:
-        //a (user, pass, key) tuple is generated and can be inserted
-        //if it comes with it's own key without querying the creation API, create a (key,key,key) user
-        if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
-            $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-            $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-        }
-
-        $this->projectStructure[ 'private_tm_key' ] = $this->features->filter( 'filter_project_manager_private_tm_key',
-                $this->projectStructure[ 'private_tm_key' ],
-                [ 'project_structure' => $this->projectStructure ]
-        );
-
-        if ( count( $this->projectStructure[ 'private_tm_key' ] ) > 0 ) {
-            $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
-        }
     }
 
     /**
@@ -3330,7 +3217,7 @@ class ProjectManager {
      * @param $xliff_trans_unit
      *
      * @return bool|mixed
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
