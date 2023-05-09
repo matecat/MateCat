@@ -1,26 +1,41 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Import TMX file
+ * Upload TMX files
  *
  * @param {Object} options
- * @param {string} options.key
- * @param {string} options.name
+ * @param {string} [options.filesToUpload=[]]
+ * @param {string} options.tmKey
+ * @param {string} options.keyName
+ * @param {string} [idJob=config.id_job]
+ * @param {string} [password=config.password]
  * @returns {Promise<object>}
  */
-export const loadTMX = async ({key, name, uuid}) => {
+export const uploadTm = async ({
+  filesToUpload = [],
+  tmKey,
+  keyName,
+  idJob = config.id_job,
+  password = config.password,
+}) => {
   const paramsData = {
     action: 'loadTMX',
-    exec: 'uploadStatus',
-    tm_key: key,
-    name,
-    uuid,
+    exec: 'newTM',
+    tm_key: tmKey,
+    name: keyName,
+    r: '1',
+    w: '1',
+    ...(APP.isCattool && {job_id: idJob, job_pass: password}),
   }
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
+  filesToUpload.forEach((file) =>
+    formData.append('uploaded_file[]', file, file.name),
+  )
+
   const response = await fetch(
     `${getMatecatApiDomain()}?action=${paramsData.action}`,
     {
