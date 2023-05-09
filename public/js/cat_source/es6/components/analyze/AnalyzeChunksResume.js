@@ -143,7 +143,7 @@ class AnalyzeChunksResume extends React.Component {
       >
         <a>Buy Translation</a>
         <span>
-          By
+          from
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="60"

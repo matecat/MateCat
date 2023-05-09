@@ -125,7 +125,7 @@ const NewProject = ({
         })
         .catch((errors) => {
           let errorMsg
-          if (errors) {
+          if (errors && errors.length) {
             switch (errors[0].code) {
               case -230: {
                 errorMsg =

@@ -254,7 +254,10 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         .on('paste', '#shared-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
-            UI.checkTMKey('change')
+            UI.checkTMKey(
+              'change',
+              document.getElementById('shared-tm-key').value,
+            )
           }, 200)
         })
         .on('input', '#shared-tm-key', function () {
@@ -321,7 +324,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
           'click',
           '#activetm tr.new a.addtmxfile:not(.disabled)',
           function () {
-            UI.checkTMKey('tm')
             $(this).addClass('disabled')
           },
         )
