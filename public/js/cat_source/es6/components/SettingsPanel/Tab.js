@@ -1,10 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useContext} from 'react'
-import {SettingsContext} from './SettingsContext'
+import {SettingsPanelContext} from './SettingsPanelContext'
 
 export const Tab = ({id, label}) => {
-  const {tabs, setTabs} = useContext(SettingsContext)
+  const {tabs, setTabs} = useContext(SettingsPanelContext)
 
   const clickHandler = () =>
     setTabs((prevState) =>

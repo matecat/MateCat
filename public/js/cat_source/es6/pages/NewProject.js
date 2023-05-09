@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState, useCallback} from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
@@ -21,8 +21,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {Settings} from '../components/common/Settings'
-import {useCallback} from 'react'
+import {SettingsPanel} from '../components/SettingsPanel'
 
 const SELECT_HEIGHT = 324
 
@@ -86,10 +85,7 @@ const NewProject = ({
     }
   }
 
-  const openTmPanel = () => {
-    // APP.openOptionsPanel('tm')
-    setIsOpenSettings(true)
-  }
+  const openTmPanel = () => setIsOpenSettings(true)
 
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
@@ -480,7 +476,7 @@ const NewProject = ({
           }}
         />
       )}
-      {isOpenSettings && <Settings onClose={closeSettings} />}
+      {isOpenSettings && <SettingsPanel onClose={closeSettings} />}
       <Footer />
     </CreateProjectContext.Provider>
   )

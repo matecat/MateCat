@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
-import {SettingsContext} from './SettingsContext'
+import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
 
 const DEFAULT_CONTENTS = [
@@ -19,7 +19,7 @@ const DEFAULT_CONTENTS = [
   },
 ]
 
-export const Settings = ({onClose}) => {
+export const SettingsPanel = ({onClose}) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
     DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
@@ -43,7 +43,7 @@ export const Settings = ({onClose}) => {
   const close = () => setIsVisible(false)
 
   return (
-    <SettingsContext.Provider value={{tabs, setTabs}}>
+    <SettingsPanelContext.Provider value={{tabs, setTabs}}>
       <div className="settings-panel">
         <div
           className={`settings-panel-overlay${
@@ -69,10 +69,10 @@ export const Settings = ({onClose}) => {
           <ContentWrapper />
         </div>
       </div>
-    </SettingsContext.Provider>
+    </SettingsPanelContext.Provider>
   )
 }
 
-Settings.propTypes = {
+SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
 }

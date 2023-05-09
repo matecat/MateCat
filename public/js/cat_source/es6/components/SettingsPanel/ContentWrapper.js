@@ -1,10 +1,10 @@
 import React from 'react'
 import {useContext} from 'react'
-import {SettingsContext} from './SettingsContext'
+import {SettingsPanelContext} from './SettingsPanelContext'
 import {Tab} from './Tab'
 
 export const ContentWrapper = () => {
-  const {tabs} = useContext(SettingsContext)
+  const {tabs} = useContext(SettingsPanelContext)
 
   const activeContent = tabs.find(({isOpened}) => isOpened)?.component
 
