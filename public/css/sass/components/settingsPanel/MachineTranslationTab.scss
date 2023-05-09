@@ -1,0 +1,13 @@
+.machine-translation-tab {
+  .add-mt-button,
+  .add-mt-container {
+    button {
+      padding: 0 16px;
+      height: 40px;
+    }
+  }
+}
+.add-mt-button {
+  display: flex;
+  justify-content: flex-end;
+}

@@ -775,7 +775,10 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
 
 .ui.button {
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
   min-height: 1em;
   outline: none;
   border: none;
