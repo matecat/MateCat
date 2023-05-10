@@ -63,7 +63,6 @@ class ApiKeyController extends KleinController {
      */
     public function show() {
 
-        $this->allowOnlyInternalUsers();
         $apiKeyDao = new \ApiKeys_ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
