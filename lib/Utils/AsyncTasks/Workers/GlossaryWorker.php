@@ -78,10 +78,10 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
             $this->setResponsePayload(
-            'glossary_check',
+                'glossary_check',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                    $matches
+                $matches
             )
         );
     }
@@ -102,8 +102,8 @@ class GlossaryWorker extends AbstractWorker {
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload' => null,
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
         if($response->responseStatus != 200){
@@ -118,9 +118,9 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $message['error'] = [
-                    'code' => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
@@ -129,12 +129,12 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $this->publishMessage(
-                $this->setResponsePayload(
-                        'glossary_delete',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_delete',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
         );
     }
 
@@ -221,7 +221,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
             $this->setResponsePayload(
-        'glossary_keys',
+                'glossary_keys',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
                 [
@@ -413,9 +413,9 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $message['error'] = [
-                    'code' => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
@@ -478,8 +478,8 @@ class GlossaryWorker extends AbstractWorker {
         $stomp = new Stomp( \INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
         $stomp->send( \INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-                $message,
-                [ 'persistent' => 'false' ]
+            $message,
+            [ 'persistent' => 'false' ]
         );
 
         $this->_doLog( $message );
@@ -518,10 +518,10 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function getUser( $array ) {
         return new \Users_UserStruct( [
-                'uid'         => $array[ 'uid' ],
-                'email'       => $array[ 'email' ],
-                '$first_name' => $array[ 'first_name' ],
-                'last_name'   => $array[ 'last_name' ],
+            'uid'         => $array[ 'uid' ],
+            'email'       => $array[ 'email' ],
+            '$first_name' => $array[ 'first_name' ],
+            'last_name'   => $array[ 'last_name' ],
         ] );
     }
 
