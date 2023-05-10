@@ -45,8 +45,6 @@ class GlossaryWorker extends AbstractWorker {
             self::UPDATE_ACTION,
         ];
 
-        // @TODO add always "de"="tmanalysis_655321@matecat.com" when call MM
-
         if ( false === in_array( $action, $allowedActions ) ) {
             throw new EndQueueException( $action . ' is not an allowed action. ' );
         }
@@ -194,6 +192,7 @@ class GlossaryWorker extends AbstractWorker {
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
+
         $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishMessage(
@@ -266,12 +265,12 @@ class GlossaryWorker extends AbstractWorker {
 
     /**
      * @param $matches
-     * @param array $payload
+     * @param $payload
      *
      * @return array
      * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches($matches, array $payload)
+    private function formatGetGlossaryMatches($matches, $payload)
     {
         $tmKeys = $payload['tmKeys'];
 
