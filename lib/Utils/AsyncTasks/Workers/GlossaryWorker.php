@@ -278,11 +278,12 @@ class GlossaryWorker extends AbstractWorker {
     private function formatGetGlossaryMatches($matches, $tmKeys, $id_segment = null)
     {
         if( !is_array($matches) ){
-            throw new EndQueueException( "Invalid response from Glossary (not an array)" );
+            $this->_doLog("Invalid response received from Glossary (not an array): " . $matches);
+            throw new EndQueueException( "Invalid response received from Glossary (not an array)" );
         }
 
         if ( empty( $matches ) ) {
-            throw new EndQueueException( "Empty response from Glossary" );
+            throw new EndQueueException( "Empty response received from Glossary" );
         }
 
         if($matches['id_segment'] === null or $matches['id_segment'] === ""){
