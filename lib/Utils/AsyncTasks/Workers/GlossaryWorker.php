@@ -195,20 +195,8 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
 
-        if( !is_array($matches) ){
-            throw new EndQueueException( "Invalid response from Glossary (not an array)" );
-        }
-
-        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
-            $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
-            $matches['id_segment'] = $id_segment;
-        }
-
-        if ( empty( $matches ) ) {
-            throw new EndQueueException( "Empty response from Glossary" );
-        }
-
-        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys']);
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys'], $id_segment);
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -267,29 +255,40 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
 
-        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
-            $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
-            $matches['id_segment'] = $id_segment;
-        }
+        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys'], $id_segment);
 
         $this->publishMessage(
             $this->setResponsePayload(
                 'glossary_search',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                $this->formatGetGlossaryMatches($matches, $payload['tmKeys'])
+                $matches
             )
         );
     }
 
     /**
-     * @param array $matches
-     * @param array $tmKeys
-     *
+     * @param $matches
+     * @param $tmKeys
+     * @param null $id_segment
      * @return array
+     * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches(array $matches, $tmKeys)
+    private function formatGetGlossaryMatches($matches, $tmKeys, $id_segment = null)
     {
+        if( !is_array($matches) ){
+            throw new EndQueueException( "Invalid response from Glossary (not an array)" );
+        }
+
+        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
+            $matches['id_segment'] = $id_segment;
+        }
+
+        if ( empty( $matches ) ) {
+            throw new EndQueueException( "Empty response from Glossary" );
+        }
+
         $key = $matches['terms']['metadata']['key'];
 
         foreach ($tmKeys as $index => $tmKey){
