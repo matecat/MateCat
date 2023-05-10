@@ -545,6 +545,7 @@ class GetContributionWorker extends AbstractWorker {
 
             $segmentTranslation =  \Translations_SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
+            // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
             if($segmentTranslation->status === Constants_TranslationStatus::STATUS_NEW){
 
                 $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
