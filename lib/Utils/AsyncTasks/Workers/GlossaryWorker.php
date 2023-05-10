@@ -281,12 +281,12 @@ class GlossaryWorker extends AbstractWorker {
             throw new EndQueueException( "Invalid response from Glossary (not an array)" );
         }
 
-        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
-            $matches['id_segment'] = $id_segment;
-        }
-
         if ( empty( $matches ) ) {
             throw new EndQueueException( "Empty response from Glossary" );
+        }
+
+        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
+            $matches['id_segment'] = $id_segment;
         }
 
         $key = $matches['terms']['metadata']['key'];
