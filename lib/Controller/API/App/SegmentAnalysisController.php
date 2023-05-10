@@ -150,13 +150,14 @@ class SegmentAnalysisController extends KleinController {
 
         $segmentsForAnalysis = Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, 0);
         $projectPasswordsMap  = $this->projectDao->getPasswordsMap($job->getProject()->id);
-        $issuesAndNotes = $this->getIssuesAndNotes($segmentsForAnalysis);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
 
-        $notesAggregate = $issuesAndNotes['notesAggregate'];
-        $issuesAggregate = $issuesAndNotes['issuesAggregate'];
+        $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
+        $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
+        $idRequestsAggregate = $issuesNotesAndIdRequests['idRequestsAggregate'];
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate);
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate);
         }
 
         return $segments;
@@ -260,13 +261,14 @@ class SegmentAnalysisController extends KleinController {
 
         $segmentsForAnalysis = Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
         $projectPasswordsMap  = $this->projectDao->getPasswordsMap($this->project->id);
-        $issuesAndNotes = $this->getIssuesAndNotes($segmentsForAnalysis);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
 
-        $notesAggregate = $issuesAndNotes['notesAggregate'];
-        $issuesAggregate = $issuesAndNotes['issuesAggregate'];
+        $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
+        $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
+        $idRequestsAggregate = $issuesNotesAndIdRequests['idRequestsAggregate'];
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate);
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate);
         }
 
         return $segments;
@@ -276,7 +278,7 @@ class SegmentAnalysisController extends KleinController {
      * @param $segmentsForAnalysis
      * @return array
      */
-    private function getIssuesAndNotes($segmentsForAnalysis)
+    private function getIssuesNotesAndIdRequests($segmentsForAnalysis)
     {
         $segmentIds = [];
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
@@ -285,9 +287,11 @@ class SegmentAnalysisController extends KleinController {
 
         $notesRecords = Segments_SegmentNoteDao::getBySegmentIds( $segmentIds );
         $issuesRecords = EntryDao::getBySegmentIds( $segmentIds );
+        $idRequestRecords = Segments_SegmentMetadataDao::getBySegmentIds($segmentIds, 'id_request');
 
         $notesAggregate = [];
         $issuesAggregate = [];
+        $idRequestsAggregate = [];
 
         foreach ($notesRecords as $notesRecord){
             $notesAggregate[$notesRecord->id_segment][] = $notesRecord->note;
@@ -297,9 +301,14 @@ class SegmentAnalysisController extends KleinController {
             $issuesAggregate[$issuesRecord->id_segment][] = $issuesRecord;
         }
 
+        foreach ($idRequestRecords as $idRequestRecord){
+            $idRequestsAggregate[$idRequestRecord->id_segment] = $idRequestRecord;
+        }
+
         return [
             'notesAggregate' => $notesAggregate,
             'issuesAggregate' => $issuesAggregate,
+            'idRequestsAggregate' => $idRequestsAggregate,
         ];
     }
 
@@ -312,10 +321,10 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function formatSegment(DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate)
+    private function formatSegment(DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate)
     {
         // id_request
-        $idRequest = @Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request')[ 0 ];
+        $idRequest = isset($idRequestsAggregate[$segmentForAnalysis->id]) ? $idRequestsAggregate[$segmentForAnalysis->id] : null;
 
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
