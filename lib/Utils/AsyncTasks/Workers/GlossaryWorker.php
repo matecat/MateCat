@@ -194,9 +194,7 @@ class GlossaryWorker extends AbstractWorker {
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
-
-        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
-        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys'], $id_segment);
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -254,9 +252,7 @@ class GlossaryWorker extends AbstractWorker {
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
-
-        $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
-        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys'], $id_segment);
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -270,15 +266,17 @@ class GlossaryWorker extends AbstractWorker {
 
     /**
      * @param $matches
-     * @param $tmKeys
-     * @param null $id_segment
+     * @param array $payload
+     *
      * @return array
      * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches($matches, $tmKeys, $id_segment = null)
+    private function formatGetGlossaryMatches($matches, array $payload)
     {
+        $tmKeys = $payload['tmKeys'];
+
         if( !is_array($matches) ){
-            $this->_doLog("Invalid response received from Glossary (not an array): " . $matches);
+            $this->_doLog("Invalid response received from Glossary (not an array). This is the payload that was sent: ".json_encode($payload).". Got back from MM: " . $matches);
             throw new EndQueueException( "Invalid response received from Glossary (not an array)" );
         }
 
@@ -287,7 +285,7 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         if($matches['id_segment'] === null or $matches['id_segment'] === ""){
-            $matches['id_segment'] = $id_segment;
+            $matches['id_segment'] = isset($payload['id_segment']) ? $payload['id_segment'] : null;
         }
 
         $key = $matches['terms']['metadata']['key'];
