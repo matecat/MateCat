@@ -4,11 +4,12 @@ import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
+import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 
 const DEFAULT_CONTENTS = [
   {
     label: 'Translation Memory and Glossary',
-    component: <h2>ContentWrapper: Translation Memory and Glossary</h2>,
+    component: <TranslationMemoryGlossaryTab />,
     isOpened: true,
   },
   {

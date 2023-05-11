@@ -1,0 +1,31 @@
+@import '../../commons/colors';
+
+.settings-panel-table {
+  position: relative;
+  z-index: 0;
+  overflow-y: auto;
+}
+
+.settings-panel-table-rowHeading {
+  display: grid;
+  padding-top: 10px;
+}
+
+.settings-panel-row {
+  display: grid;
+
+  min-height: 80px;
+  align-items: center;
+}
+
+.settings-panel-row-drag-handle {
+  position: absolute;
+  margin-left: 8px;
+}
+
+.settings-panel-row-dragging {
+  opacity: 0.5;
+}
+.settings-panel-row-dragover {
+  margin-bottom: 50px;
+}
