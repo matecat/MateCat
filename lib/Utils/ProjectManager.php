@@ -754,6 +754,7 @@ class ProjectManager {
                     $this->_log( "Code: " . $e->getCode() );
                     $this->_log( "Count fileSt.: " . count( $totalFilesStructure ) );
                     $this->_log( "Exceptions: " . $exceptionsFound );
+                    $this->_log( "Failed to parse " . $file_info[ 'original_filename' ] . " " . ( empty( $e->getPrevious() ) ? "" : $e->getPrevious()->getMessage() ) );
 
                     if ( $e->getCode() == -1 && count( $totalFilesStructure ) > 1 && $exceptionsFound < count( $totalFilesStructure ) ) {
                         $this->_log( "No text to translate in the file {$e->getMessage()}." );
