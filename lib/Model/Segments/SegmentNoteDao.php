@@ -20,6 +20,22 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param array $ids
+     * @param int $ttl
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getBySegmentIds(array $ids = [], $ttl = 86400){
+
+        $thisDao = new self();
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_notes WHERE id_segment IN ( " . implode(', ' , $ids ) . " ) " );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
+            new Segments_SegmentNoteStruct(),
+            []
+        );
+    }
+
     public static function insertRecord( $values ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "INSERT INTO segment_notes " . 

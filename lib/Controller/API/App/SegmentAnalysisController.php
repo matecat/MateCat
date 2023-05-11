@@ -150,9 +150,14 @@ class SegmentAnalysisController extends KleinController {
 
         $segmentsForAnalysis = Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, 0);
         $projectPasswordsMap  = $this->projectDao->getPasswordsMap($job->getProject()->id);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
+
+        $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
+        $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
+        $idRequestsAggregate = $issuesNotesAndIdRequests['idRequestsAggregate'];
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap);
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate);
         }
 
         return $segments;
@@ -256,45 +261,70 @@ class SegmentAnalysisController extends KleinController {
 
         $segmentsForAnalysis = Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
         $projectPasswordsMap  = $this->projectDao->getPasswordsMap($this->project->id);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
+
+        $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
+        $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
+        $idRequestsAggregate = $issuesNotesAndIdRequests['idRequestsAggregate'];
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap);
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate);
         }
 
         return $segments;
     }
 
     /**
+     * @param $segmentsForAnalysis
+     * @return array
+     */
+    private function getIssuesNotesAndIdRequests($segmentsForAnalysis)
+    {
+        $segmentIds = [];
+        foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
+            $segmentIds[] = $segmentForAnalysis->id;
+        }
+
+        $notesRecords = Segments_SegmentNoteDao::getBySegmentIds( $segmentIds );
+        $issuesRecords = EntryDao::getBySegmentIds( $segmentIds );
+        $idRequestRecords = Segments_SegmentMetadataDao::getBySegmentIds($segmentIds, 'id_request');
+
+        $notesAggregate = [];
+        $issuesAggregate = [];
+        $idRequestsAggregate = [];
+
+        foreach ($notesRecords as $notesRecord){
+            $notesAggregate[$notesRecord->id_segment][] = $notesRecord->note;
+        }
+
+        foreach ($issuesRecords as $issuesRecord){
+            $issuesAggregate[$issuesRecord->id_segment][] = $issuesRecord;
+        }
+
+        foreach ($idRequestRecords as $idRequestRecord){
+            $idRequestsAggregate[$idRequestRecord->id_segment] = $idRequestRecord;
+        }
+
+        return [
+            'notesAggregate' => $notesAggregate,
+            'issuesAggregate' => $issuesAggregate,
+            'idRequestsAggregate' => $idRequestsAggregate,
+        ];
+    }
+
+    /**
      * @param DataAccess_IDaoStruct $segmentForAnalysis
+     * @param $projectPasswordsMap
+     * @param $notesAggregate
+     * @param $issuesAggregate
      *
      * @return array
      * @throws Exception
      */
-    private function formatSegment(DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap)
+    private function formatSegment(DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate)
     {
         // id_request
-        $idRequest = @Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request')[ 0 ];
-
-        // issues
-        $issues_records = EntryDao::findAllBySegmentId( $segmentForAnalysis->id );
-        $issues         = [];
-        foreach ( $issues_records as $issue_record ) {
-            $issues[] = [
-                    'source_page'         => $this->humanReadableSourcePage($issue_record->source_page),
-                    'id_category'         => (int)$issue_record->id_category,
-                    'severity'            => $issue_record->severity,
-                    'translation_version' => (int)$issue_record->translation_version,
-                    'penalty_points'      => floatval($issue_record->penalty_points),
-                    'created_at'          => date( DATE_ISO8601, strtotime( $issue_record->create_date ) ),
-            ];
-        }
-
-        // notes
-        $notes_records = Segments_SegmentNoteDao::getBySegmentId( $segmentForAnalysis->id );
-        $notes = [];
-        foreach ( $notes_records as $note_records ) {
-            $notes[] = $note_records->note;
-        }
+        $idRequest = isset($idRequestsAggregate[$segmentForAnalysis->id]) ? $idRequestsAggregate[$segmentForAnalysis->id] : null;
 
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
@@ -315,8 +345,8 @@ class SegmentAnalysisController extends KleinController {
                 'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
                 'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
-                'issues' => $issues,
-                'notes' => $notes,
+                'issues' => (!empty($issuesAggregate[$segmentForAnalysis->id]) ? $issuesAggregate[$segmentForAnalysis->id] : []),
+                'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
                 'status' => $this->getStatusObject($segmentForAnalysis),
                 'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,
         ];
