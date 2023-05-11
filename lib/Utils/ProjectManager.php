@@ -1753,7 +1753,7 @@ class ProjectManager {
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
             $this->_log( "Failed to parse " . $file_info[ 'original_filename' ] . join( "\n", $xliff[ 'parser-errors' ] ) );
-            throw new Exception( $file_info[ 'original_filename' ], -4 );
+            throw new Exception( "Failed to parse " . $file_info[ 'original_filename' ], -4 );
         }
 
         //needed to check if a file has only one segment
