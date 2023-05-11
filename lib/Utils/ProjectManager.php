@@ -683,27 +683,27 @@ class ProjectManager {
 
                     } elseif ( $e->getCode() == -11 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
+                                "code" => $e->getCode(), "message" => "Failed to store reference files on disk. Permission denied"
                         ];
                     } elseif ( $e->getCode() == -12 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => -7, "message" => "Failed to store reference files in database"
+                                "code" => $e->getCode(), "message" => "Failed to store reference files in database"
                         ];
                     } // SEVERE EXCEPTIONS HERE
                     elseif ( $e->getCode() == -6 ) {
                         //"File not found on server after upload."
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code"    => -6,
+                                "code"    => $e->getCode(),
                                 "message" => $e->getMessage()
                         ];
                     } elseif ( $e->getCode() == -3 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code"    => -7,
+                                "code"    => -16,
                                 "message" => "File not found. Failed to save XLIFF conversion on disk."
                         ];
                     } elseif ( $e->getCode() == -13 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => -13, "message" => $e->getMessage()
+                                "code" => $e->getCode(), "message" => $e->getMessage()
                         ];
                         //we can not write to disk!! Break project creation
                     } // S3 EXCEPTIONS HERE
@@ -798,7 +798,7 @@ class ProjectManager {
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -7,
-                        "message" => "Internal Error. Xliff Import: Error parsing. ( {$e->getMessage()} )"
+                        "message" => "Xliff Import Error: {$e->getMessage()}"
                 ];
             } elseif ( $e->getCode() == 400 ) {
 
@@ -1747,12 +1747,12 @@ class ProjectManager {
             $xliff     = $xliffParser->xliffToArray( $xliff_file_content );
             $xliffInfo = XliffProprietaryDetect::getInfoByStringData( $xliff_file_content );
         } catch ( Exception $e ) {
-            throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
+            throw new Exception( "Failed to parse " . $file_info[ 'original_filename' ], ( $e->getCode() != 0 ? $e->getCode() : -4 ), $e );
         }
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
-            $this->_log( "Xliff Import: Error parsing. " . join( "\n", $xliff[ 'parser-errors' ] ) );
+            $this->_log( "Failed to parse " . $file_info[ 'original_filename' ] . join( "\n", $xliff[ 'parser-errors' ] ) );
             throw new Exception( $file_info[ 'original_filename' ], -4 );
         }
 
