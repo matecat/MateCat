@@ -3,10 +3,26 @@
 namespace LQA;
 
 use DataAccess\ShapelessConcreteStruct;
+use Segments_SegmentNoteStruct;
 use Utils;
 
 class EntryDao extends \DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     */
+    public static function getBySegmentIds(array $ids = [])
+    {
+        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment IN ( " . implode(', ' , $ids ) . " ) ";
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute();
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+
+        return $stmt->fetchAll();
     }
 
     public static function updateRepliesCount( $id ) {
