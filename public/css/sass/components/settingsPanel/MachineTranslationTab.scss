@@ -11,6 +11,21 @@
       height: 40px;
     }
   }
+  //Dropdown ovwerrides
+  .add-mt-provider .select-with-icon__wrapper {
+    height: 40px;
+  }
+  .add-provider-container .select-with-icon__wrapper {
+    height: 37px;
+  }
+
+  .select-with-label__wrapper {
+    margin-right: 30px;
+  }
+
+  li.dropdown__option {
+    height: 36px;
+  }
 }
 .add-mt-button {
   display: flex;
@@ -27,10 +42,11 @@
   .add-provider-container {
     display: flex;
     padding-top: 15px;
+    align-items: flex-start;
     .add-provider-fields {
       width: 50%;
       text-align: left;
-      padding: 15px;
+      padding: 15px 15px 0 0;
       .provider-data {
         display: flex;
         flex-direction: column;
@@ -46,6 +62,9 @@
         min-width: 0;
         width: 100%;
         font-size: 16px;
+        &:not(:first-child) {
+          margin-top: 20px;
+        }
         &.checkbox {
           flex-direction: row;
           margin: 6px 0;

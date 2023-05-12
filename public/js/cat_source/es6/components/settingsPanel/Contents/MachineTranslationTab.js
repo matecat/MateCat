@@ -9,13 +9,14 @@ import {Intento} from './MtEngines/Intento'
 import {MicrosoftHub} from './MtEngines/MicrosoftHub'
 import {SmartMate} from './MtEngines/SmartMate'
 import {Yandex} from './MtEngines/Yandex'
+
 const enginesList = [
   {name: 'ModernMt', id: 'mmt', component: <ModernMt />},
   {name: 'AltLang', id: 'altlang', component: <AltLang />},
   {name: 'Apertium', id: 'apertium', component: <Apertium />},
   {
-    name: 'googletranslate',
-    id: 'Google Translate',
+    name: 'Google Translate',
+    id: 'googletranslate',
     component: <GoogleTranslate />,
   },
   {name: 'Intento', id: 'intento', component: <Intento />},
@@ -27,6 +28,7 @@ const enginesList = [
   {name: 'SmartMATE', id: 'smartmate', component: <SmartMate />},
   {name: 'Yandex.Translate', id: 'yandextranslate', component: <Yandex />},
 ]
+
 export const MachineTranslationTab = () => {
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeEngine, setActiveEngine] = useState()
@@ -48,7 +50,6 @@ export const MachineTranslationTab = () => {
             <Select
               placeholder="Choose provider"
               id="mt-engine"
-              showSearchBar={true}
               maxHeightDroplist={100}
               options={enginesList}
               activeOption={activeEngine}
