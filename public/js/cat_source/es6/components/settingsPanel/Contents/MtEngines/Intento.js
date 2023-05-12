@@ -3,7 +3,9 @@ import {Select} from '../../../common/Select'
 
 export const Intento = () => {
   const [provider, setProvider] = useState()
-  //const selectOptions = config.intentoProviders ? config.intentoProviders.filter()
+  const selectOptions = config.intento_providers
+    ? Object.values(config.intento_providers)
+    : []
   return (
     <div className="add-provider-container">
       <div className="add-provider-fields">
@@ -31,14 +33,7 @@ export const Intento = () => {
             <Select
               placeholder="Choose provider"
               name="provider"
-              options={[
-                {
-                  id: 'Test',
-                  name: 'provider',
-                  auth_example:
-                    '{"appid":"Your APP ID","access_key":"Your Access Key"}',
-                },
-              ]}
+              options={selectOptions}
               activeOption={provider}
               onSelect={(option) => setProvider(option)}
             />
