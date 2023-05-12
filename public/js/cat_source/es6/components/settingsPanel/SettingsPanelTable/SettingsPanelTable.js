@@ -12,6 +12,7 @@ export const SettingsPanelTableContext = createContext({})
 
 export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
   const [dragOverIndex, setDragOverIndex] = useState()
+  const [dragEndIndex, setDragEndIndex] = useState()
 
   const rowsContainerRef = useRef()
   const rowsRef = useRef([])
@@ -28,6 +29,8 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
     const parentRect = rowsContainerRef.current.getBoundingClientRect()
 
     const indexToMove = rowsRef.current.findIndex(({current}, index) => {
+      if (!current) return false
+
       const rect = current.getBoundingClientRect()
       const currentY = rect.y - parentRect.y
 
@@ -54,17 +57,25 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
       dragOverIndex >= 0 &&
       draggingIndexRef.current?.index !== dragOverIndex
 
-    if (isValidRange)
+    if (isValidRange) {
+      const indexToMove =
+        draggingIndexRef.current.halfPoint === 'bottom'
+          ? dragOverIndex + 1
+          : dragOverIndex
+
       onChangeRowsOrder({
         index: draggingIndexRef.current.index,
-        indexToMove:
-          draggingIndexRef.current.halfPoint === 'bottom'
-            ? dragOverIndex + 1
-            : dragOverIndex,
+        indexToMove,
       })
 
+      console.log(
+        '#',
+        indexToMove > rows.length ? rows.length - 1 : indexToMove,
+        draggingIndexRef.current.halfPoint,
+      )
+    }
     setDragOverIndex(undefined)
-  }, [dragOverIndex, onChangeRowsOrder])
+  }, [dragOverIndex, onChangeRowsOrder, rows.length])
 
   const renderColumns = (column, index) => <div key={index}>{column.name}</div>
   const renderItems = (row, index) => {

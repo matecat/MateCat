@@ -52,21 +52,33 @@ export const SettingsPanelRow = forwardRef(({index, row, isDragOver}, ref) => {
 
   const shouldNotAddApplyDragOver =
     (isDraggable && draggingIndexRef.current?.index + 1 === index) ||
-    draggingIndexRef.current?.index - 1 === index
+    (draggingIndexRef.current?.index > 0 &&
+      draggingIndexRef.current?.index - 1 === index)
+
+  const draggableCssClasses = `${
+    isDraggable ? ' settings-panel-row-draggable' : ''
+  }${isDragging ? ' settings-panel-row-dragging' : ''}`
+
+  const dragOverCssClasses = `${
+    !isDragging && !shouldNotAddApplyDragOver && isDragOver
+      ? halfDragPoint === 'top'
+        ? ' settings-panel-row-dragover-half-top'
+        : ' settings-panel-row-dragover-half-bottom'
+      : ''
+  }`
+
+  const shouldAddDragendCssClass = ''
+
+  // if (!isDragOver && previousIsDragOverRef.current && isDragEnd) {
+  //   console.log(index, halfDragPoint)
+  // }
+  // const indexToDragEnd = !isDragOver && previousIsDragOverRef.current && isDragEnd ? halfDragPoint === 'bottom'
+  // previousIsDragOverRef.current = isDragOver
 
   return (
     <div
       ref={ref}
-      className={`settings-panel-row${
-        isDragging ? ' settings-panel-row-dragging' : ''
-      }
-        ${
-          !isDragging && !shouldNotAddApplyDragOver && isDragOver
-            ? halfDragPoint === 'top'
-              ? ' settings-panel-row-dragover-half-top'
-              : ' settings-panel-row-dragover-half-bottom'
-            : ''
-        }`}
+      className={`settings-panel-row${draggableCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
       draggable={isActiveDrag}
       onDragStart={onDragStartCallback}
       onDragOver={onDragOverCallback}

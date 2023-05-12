@@ -18,6 +18,10 @@
   align-items: center;
 }
 
+.settings-panel-row-draggable {
+  transition: margin 0.2s ease-out 0.15s;
+}
+
 .settings-panel-row-drag-handle {
   position: absolute;
   margin-left: 8px;
@@ -25,6 +29,29 @@
 
 .settings-panel-row-dragging {
   opacity: 0.5;
+}
+
+@keyframes drag-end {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.settings-panel-row-dragend {
+  animation-name: drag-end;
+  animation-duration: 0.8s;
 }
 
 .settings-panel-row-dragover-half-top {
