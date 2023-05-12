@@ -53,6 +53,7 @@
                 allow_link_to_analysis: '${allow_link_to_analysis}',
                 analysis_enabled: '${analysis_enabled}',
                 footer_show_revise_link: ${footer_show_revise_link || string: false},
+                intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
                 get job_id() {
                   console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;

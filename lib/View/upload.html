@@ -78,6 +78,7 @@
             formats_number: ${formats_number},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
+            intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
         };
         /*]]>*/
     </script>
