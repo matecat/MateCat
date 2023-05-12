@@ -1,0 +1,55 @@
+@import '../../commons/colors';
+
+.translation-memory-glossary-tab {
+  display: flex;
+  flex-direction: column;
+}
+
+.translation-memory-glossary-tab-pre-translate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  border: 1px dashed $grey8;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: $grey5;
+}
+
+.translation-memory-glossary-tab-resource-buttons {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+
+  > span:first-of-type {
+    flex-grow: 1;
+    text-align: left;
+  }
+}
+
+.translation-memory-glossary-tab {
+  .settings-panel-table-rowHeading,
+  .settings-panel-row {
+    grid-template-columns: 10% 10% minmax(0, 1fr) 5% 20%;
+  }
+
+  .settings-panel-row {
+    min-height: 50px;
+    border: 1px solid $grey7;
+    border-bottom: unset;
+    background-color: $grey4;
+  }
+
+  .settings-panel-row:last-child {
+    border-bottom: 1px solid $grey7;
+  }
+
+  .settings-panel-row-dragover-half-top {
+    margin-top: 50px;
+  }
+
+  .settings-panel-row-dragover-half-bottom {
+    margin-bottom: 50px;
+  }
+}
