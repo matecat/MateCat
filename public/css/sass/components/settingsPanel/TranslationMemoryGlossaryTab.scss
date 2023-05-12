@@ -44,4 +44,12 @@
   .settings-panel-row:last-child {
     border-bottom: 1px solid $grey7;
   }
+
+  .settings-panel-row-dragover-half-top {
+    margin-top: 50px;
+  }
+
+  .settings-panel-row-dragover-half-bottom {
+    margin-bottom: 50px;
+  }
 }

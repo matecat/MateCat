@@ -1,6 +1,5 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
-import {useContext} from 'react'
 import {SettingsPanelContext} from './SettingsPanelContext'
 
 export const Tab = ({id, label}) => {

@@ -26,6 +26,11 @@
 .settings-panel-row-dragging {
   opacity: 0.5;
 }
-.settings-panel-row-dragover {
-  margin-bottom: 50px;
+
+.settings-panel-row-dragover-half-top {
+  margin-top: 80px;
+}
+
+.settings-panel-row-dragover-half-bottom {
+  margin-bottom: 80px;
 }

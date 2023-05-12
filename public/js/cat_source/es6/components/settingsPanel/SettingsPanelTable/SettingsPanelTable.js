@@ -1,25 +1,33 @@
-import React, {useCallback, useRef, createRef, useState} from 'react'
+import React, {
+  useCallback,
+  useRef,
+  createRef,
+  useState,
+  createContext,
+} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelRow} from './SettingsPanelRow'
 
-export const SettingsPanelTable = ({columns, rows}) => {
+export const SettingsPanelTableContext = createContext({})
+
+export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
   const [dragOverIndex, setDragOverIndex] = useState()
 
   const rowsContainerRef = useRef()
   const rowsRef = useRef([])
-  const dragginIndexRef = useRef()
+  const draggingIndexRef = useRef()
   const previousDragIndex = useRef()
 
   // drag and drop callback's
   const onDragStart = useCallback((index) => {
-    dragginIndexRef.current = index
+    draggingIndexRef.current = {index}
     previousDragIndex.current = undefined
   }, [])
 
-  const onDragOver = useCallback(({y}) => {
+  const onDragOver = useCallback(({y, halfPoint}) => {
     const parentRect = rowsContainerRef.current.getBoundingClientRect()
 
-    const indexToReplace = rowsRef.current.findIndex(({current}, index) => {
+    const indexToMove = rowsRef.current.findIndex(({current}, index) => {
       const rect = current.getBoundingClientRect()
       const currentY = rect.y - parentRect.y
 
@@ -31,23 +39,32 @@ export const SettingsPanelTable = ({columns, rows}) => {
       if (y >= currentY && y <= nextY) return true
     })
 
-    if (previousDragIndex.current !== indexToReplace) {
-      console.log(
-        '# index',
-        dragginIndexRef.current,
-        'index to replace',
-        indexToReplace,
-      )
+    if (previousDragIndex.current !== indexToMove) setDragOverIndex(indexToMove)
 
-      setDragOverIndex(indexToReplace)
+    draggingIndexRef.current = {
+      ...draggingIndexRef.current,
+      halfPoint,
     }
-
-    previousDragIndex.current = indexToReplace
+    previousDragIndex.current = indexToMove
   }, [])
 
   const onDragEnd = useCallback(() => {
+    const isValidRange =
+      draggingIndexRef.current?.index >= 0 &&
+      dragOverIndex >= 0 &&
+      draggingIndexRef.current?.index !== dragOverIndex
+
+    if (isValidRange)
+      onChangeRowsOrder({
+        index: draggingIndexRef.current.index,
+        indexToMove:
+          draggingIndexRef.current.halfPoint === 'bottom'
+            ? dragOverIndex + 1
+            : dragOverIndex,
+      })
+
     setDragOverIndex(undefined)
-  }, [])
+  }, [dragOverIndex, onChangeRowsOrder])
 
   const renderColumns = (column, index) => <div key={index}>{column.name}</div>
   const renderItems = (row, index) => {
@@ -59,33 +76,39 @@ export const SettingsPanelTable = ({columns, rows}) => {
         ref={ref}
         key={index}
         {...{
-          row,
           index,
+          row,
           isDragOver: dragOverIndex === index,
-          parentRef: rowsContainerRef,
-          onDragStart,
-          onDragOver,
-          onDragEnd,
         }}
       />
     )
   }
 
   return (
-    <div className="settings-panel-table">
-      <div>
-        <div className="settings-panel-table-rowHeading">
-          {columns.map(renderColumns)}
+    <SettingsPanelTableContext.Provider
+      value={{
+        rowsContainerRef,
+        draggingIndexRef,
+        onDragStart,
+        onDragOver,
+        onDragEnd,
+      }}
+    >
+      <div className="settings-panel-table">
+        <div>
+          <div className="settings-panel-table-rowHeading">
+            {columns.map(renderColumns)}
+          </div>
+        </div>
+        <div
+          ref={rowsContainerRef}
+          className="settings-panel-table-rows-container"
+        >
+          {Array.isArray(rows) &&
+            (rows.length ? rows.map(renderItems) : <span>No results</span>)}
         </div>
       </div>
-      <div
-        ref={rowsContainerRef}
-        className="settings-panel-table-rows-container"
-      >
-        {Array.isArray(rows) &&
-          (rows.length ? rows.map(renderItems) : <span>No results</span>)}
-      </div>
-    </div>
+    </SettingsPanelTableContext.Provider>
   )
 }
 
@@ -94,4 +117,5 @@ SettingsPanelTable.propTypes = {
     PropTypes.shape({name: PropTypes.string.isRequired}),
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onChangeRowsOrder: PropTypes.func,
 }

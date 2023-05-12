@@ -1,76 +1,101 @@
-import React, {useRef, useState, forwardRef} from 'react'
+import React, {useRef, useState, forwardRef, useContext} from 'react'
 import PropTypes from 'prop-types'
+import {SettingsPanelTableContext} from './SettingsPanelTable'
 
-export const SettingsPanelRow = forwardRef(
-  (
-    {row, index, isDragOver, parentRef, onDragStart, onDragOver, onDragEnd},
-    ref,
-  ) => {
-    const [isActiveDrag, setIsActiveDrag] = useState(false)
-    const [isDragging, setIsDragging] = useState(false)
+export const SettingsPanelRow = forwardRef(({index, row, isDragOver}, ref) => {
+  const {
+    rowsContainerRef,
+    draggingIndexRef,
+    onDragStart,
+    onDragOver,
+    onDragEnd,
+  } = useContext(SettingsPanelTableContext)
 
-    const refDragHandle = useRef()
+  const [isActiveDrag, setIsActiveDrag] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [halfDragPoint, setHalfDragPoint] = useState()
 
-    const {isDraggable, node} = row
+  const refDragHandle = useRef()
 
-    const onDragEndCallback = () => {
-      setIsActiveDrag(false)
-      setIsDragging(false)
-      if (onDragEnd) onDragEnd()
-    }
+  const {isDraggable, node} = row
 
-    const onDragging = (event) => {
-      if (!parentRef?.current) return
+  const onDragStartCallback = () => {
+    setIsDragging(true)
+    onDragStart(index)
+  }
 
-      const rect = parentRef.current.getBoundingClientRect()
-      const point = {x: event.clientX - rect.x, y: event.clientY - rect.y}
-      if (onDragOver) onDragOver({...point})
-    }
+  const onDragOverCallback = (event) => {
+    if (!rowsContainerRef?.current) return
 
-    return (
-      <div
-        ref={ref}
-        className={`settings-panel-row${
-          isDragging ? ' settings-panel-row-dragging' : ''
-        }
-        ${isDragOver ? ' settings-panel-row-dragover' : ''}`}
-        draggable={isActiveDrag}
-        onDragStart={() => {
-          setIsDragging(true)
-          if (onDragStart) onDragStart(index)
-        }}
-        onDragOver={onDragging}
-        onDragEnd={onDragEndCallback}
-      >
-        <>
-          {isDraggable && (
-            <div
-              ref={refDragHandle}
-              className="settings-panel-row-drag-handle"
-              onMouseDown={() => setIsActiveDrag(true)}
-              onMouseUp={onDragEndCallback}
-            >
-              |
-            </div>
-          )}
-          {node}
-        </>
-      </div>
-    )
-  },
-)
+    const rect = rowsContainerRef.current.getBoundingClientRect()
+    const point = {x: event.clientX - rect.x, y: event.clientY - rect.y}
+
+    const relativeY = event.clientY - ref.current.getBoundingClientRect().y
+    const rowHeight = ref.current.offsetHeight
+    const halfPoint = relativeY
+      ? relativeY > rowHeight / 2
+        ? 'bottom'
+        : 'top'
+      : 'bottom'
+
+    if (relativeY)
+      setHalfDragPoint(relativeY > rowHeight / 2 ? 'bottom' : 'top')
+
+    if (onDragOver) onDragOver({...point, halfPoint})
+  }
+
+  const onDragEndCallback = () => {
+    setIsActiveDrag(false)
+    setIsDragging(false)
+    if (onDragEnd) onDragEnd()
+  }
+
+  const shouldNotAddApplyDragOver =
+    (isDraggable && draggingIndexRef.current?.index + 1 === index) ||
+    draggingIndexRef.current?.index - 1 === index
+
+  return (
+    <div
+      ref={ref}
+      className={`settings-panel-row${
+        isDragging ? ' settings-panel-row-dragging' : ''
+      }
+        ${
+          !isDragging && !shouldNotAddApplyDragOver && isDragOver
+            ? halfDragPoint === 'top'
+              ? ' settings-panel-row-dragover-half-top'
+              : ' settings-panel-row-dragover-half-bottom'
+            : ''
+        }`}
+      draggable={isActiveDrag}
+      onDragStart={onDragStartCallback}
+      onDragOver={onDragOverCallback}
+      onDragEnd={onDragEndCallback}
+    >
+      <>
+        {isDraggable && (
+          <div
+            ref={refDragHandle}
+            className="settings-panel-row-drag-handle"
+            onMouseDown={() => setIsActiveDrag(true)}
+            onMouseUp={onDragEndCallback}
+          >
+            |
+          </div>
+        )}
+        {node}
+      </>
+    </div>
+  )
+})
 
 SettingsPanelRow.displayName = 'SettingsPanelRow'
 
 SettingsPanelRow.propTypes = {
+  index: PropTypes.number.isRequired,
   row: PropTypes.shape({
     node: PropTypes.node.isRequired,
     isDraggable: PropTypes.bool,
   }),
-  index: PropTypes.number.isRequired,
   isDragOver: PropTypes.bool,
-  parentRef: PropTypes.object,
-  onDragStart: PropTypes.func,
-  onDragOver: PropTypes.func,
-  onDragEnd: PropTypes.func,
 }

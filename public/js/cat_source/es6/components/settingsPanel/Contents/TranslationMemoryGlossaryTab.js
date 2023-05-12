@@ -1,9 +1,7 @@
-import React from 'react'
-import IconAdd from '../../icons/IconAdd'
+import React, {Fragment, useCallback, useState} from 'react'
 import {SettingsPanelTable} from '../SettingsPanelTable/SettingsPanelTable'
-import {Fragment} from 'react'
-import {useState} from 'react'
-import {useCallback} from 'react'
+
+import IconAdd from '../../icons/IconAdd'
 
 const fakeRows = new Array(10).fill({}).map((item, index) => ({
   node: (
@@ -29,9 +27,26 @@ const COLUMNS_TABLE = [
 export const TranslationMemoryGlossaryTab = () => {
   const [keyRows, setKeyRows] = useState(fakeRows)
 
-  const onDraggingOrderRows = useCallback(({y}) => {
-    console.log('->', y)
-  }, [])
+  const onOrderRows = useCallback(
+    ({index, indexToMove}) => {
+      const rowSelected = keyRows.find((row, indexRow) => indexRow === index)
+
+      const isLastIndexToMove = indexToMove === keyRows.length
+
+      const orderedRows = keyRows.flatMap((row, indexRow) =>
+        indexRow === indexToMove
+          ? [rowSelected, row]
+          : indexRow === index
+          ? []
+          : indexRow === keyRows.length - 1 && isLastIndexToMove
+          ? [row, rowSelected]
+          : row,
+      )
+
+      setKeyRows(orderedRows)
+    },
+    [keyRows],
+  )
 
   return (
     <div className="translation-memory-glossary-tab">
@@ -51,7 +66,7 @@ export const TranslationMemoryGlossaryTab = () => {
       <SettingsPanelTable
         columns={COLUMNS_TABLE}
         rows={keyRows}
-        onDraggingCallback={onDraggingOrderRows}
+        onChangeRowsOrder={onOrderRows}
       />
     </div>
   )
