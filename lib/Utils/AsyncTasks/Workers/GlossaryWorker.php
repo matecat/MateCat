@@ -467,25 +467,6 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * @param $_object
-     *
-     * @throws \StompException
-     */
-    private function publishMessage( $_object ) {
-
-        $message = json_encode( $_object );
-
-        $stomp = new Stomp( \INIT::$QUEUE_BROKER_ADDRESS );
-        $stomp->connect();
-        $stomp->send( \INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-            $message,
-            [ 'persistent' => 'false' ]
-        );
-
-        $this->_doLog( $message );
-    }
-
-    /**
      * @param $featuresString
      *
      * @return \FeatureSet

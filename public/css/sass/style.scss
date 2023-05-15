@@ -1334,11 +1334,11 @@ ul.suggestion-item.graysmall:last-child {
   display: block;
 }
 
-.tab.concordances.extended .graysmall {
+.tab.concordances .graysmall {
   display: block !important;
 }
 
-.tab.concordances.extended .overflow {
+.tab.concordances .overflow {
   overflow: auto;
 }
 
@@ -1447,6 +1447,18 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu li a {
   outline: none;
+  display: flex;
+  align-items: center;
+
+  .number {
+    margin-left: 4px;
+  }
+
+  .icon-close {
+    display: block;
+    height: 15px;
+    color: $grey1;
+  }
 }
 
 .submenu li.active a {
@@ -1501,7 +1513,7 @@ body .footer.showMatches .sub-editor.open {
   width: 100%;
 }
 
-.sub-editor.concordances .more {
+.concordances .more {
   display: inline-block;
   text-decoration: none;
   color: #fff;
@@ -5023,6 +5035,27 @@ header {
   }
 }
 
+.optionsToolbar {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+
+  > li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #c6c6c6;
+    color: $grey1;
+
+    &:hover {
+      color: $black;
+    }
+  }
+}
 /* Custom font for Urdu (ur-PK) language */
 @font-face {
   font-family: 'Jameel Nori Nastaleeq';

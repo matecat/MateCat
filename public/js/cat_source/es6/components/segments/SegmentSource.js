@@ -16,6 +16,9 @@ import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
+import Assistant from '../icons/Assistant'
+import Education from '../icons/Education'
+import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -73,10 +76,13 @@ class SegmentSource extends React.Component {
         [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
       },
+      isShowingOptionsToolbar: false,
     }
     this.splitPoint = this.props.segment.split_group
       ? this.props.segment.split_group.length - 1
       : 0
+
+    this.delayAiAssistant
   }
 
   getSearchParams = () => {
@@ -459,6 +465,29 @@ class SegmentSource extends React.Component {
 
   preventEdit = () => 'handled'
 
+  helpAiAssistant = () => {
+    if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
+
+    const isOpenAiEnabled =
+      Boolean(config.isOpenAiEnabled) && SegmentUtils.isAiAssistantAuto()
+
+    if (isOpenAiEnabled) {
+      this.delayAiAssistant = setTimeout(() => {
+        const {segment} = this.context
+        const value = DraftMatecatUtils.getSelectedTextWithoutEntities(
+          this.state.editorState,
+        ).reduce((acc, {value}) => `${acc}${value}`, '')
+
+        if (value) {
+          SegmentActions.helpAiAssistant({
+            sid: segment.sid,
+            value,
+          })
+        }
+      }, 200)
+    }
+  }
+
   render() {
     const {segment} = this.context
     const {editorState} = this.state
@@ -482,11 +511,70 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
           onDragEnd: onDragEndEvent,
+          onMouseUp: () => {
+            this.setState({
+              isShowingOptionsToolbar: !this.editor._latestEditorState
+                .getSelection()
+                .isCollapsed(),
+            })
+
+            this.helpAiAssistant()
+          },
+          onKeyUp: (event) => {
+            if (
+              event.key === 'ArrowLeft' ||
+              event.key === 'ArrowRight' ||
+              event.key === 'ArrowUp' ||
+              event.key === 'ArrowDown'
+            ) {
+              this.setState({
+                isShowingOptionsToolbar: !this.editor._latestEditorState
+                  .getSelection()
+                  .isCollapsed(),
+              })
+
+              this.helpAiAssistant()
+            }
+          },
         }
       : {
           onClick: () => addSplitTag(),
           onBlur: onBlurEvent,
         }
+
+    const optionsToolbar = this.state.isShowingOptionsToolbar && (
+      <ul className="optionsToolbar">
+        {Boolean(config.isOpenAiEnabled) && !SegmentUtils.isAiAssistantAuto() && (
+          <li
+            title="See the meaning of the highlighted text in this context"
+            onMouseDown={() => {
+              SegmentActions.helpAiAssistant({
+                sid: segment.sid,
+                value: DraftMatecatUtils.getSelectedTextWithoutEntities(
+                  editorState,
+                ).reduce((acc, {value}) => `${acc}${value}`, ''),
+              })
+            }}
+          >
+            <Assistant />
+          </li>
+        )}
+        <li
+          title="Click to add the highlighted text to the glossary"
+          onMouseDown={() => {
+            SegmentActions.openGlossaryFormPrefill({
+              sid: segment.sid,
+              [TERM_FORM_FIELDS.ORIGINAL_TERM]:
+                DraftMatecatUtils.getSelectedTextWithoutEntities(
+                  editorState,
+                ).reduce((acc, {value}) => `${acc}${value}`, ''),
+            })
+          }}
+        >
+          <Education />
+        </li>
+      </ul>
+    )
 
     // Standard editor
     const editorHtml = (
@@ -514,6 +602,7 @@ class SegmentSource extends React.Component {
           textAlignment={config.isSourceRTL ? 'right' : 'left'}
           textDirectionality={config.isSourceRTL ? 'RTL' : 'LTR'}
         />
+        {optionsToolbar}
       </div>
     )
 
@@ -640,6 +729,10 @@ class SegmentSource extends React.Component {
   onBlurEvent = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
+    })
+
+    this.setState({
+      isShowingOptionsToolbar: false,
     })
   }
 
