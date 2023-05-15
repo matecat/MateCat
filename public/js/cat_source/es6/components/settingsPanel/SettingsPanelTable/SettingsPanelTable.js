@@ -60,16 +60,17 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
         dragOverIndex >= 0 &&
         dragStartIndexRef.current?.index !== dragOverIndex
 
+      const {index: startIndex, halfPoint} = dragStartIndexRef.current
+
       if (isValidRange) {
         const indexToMove =
-          dragStartIndexRef.current.halfPoint === 'bottom'
-            ? dragOverIndex + 1
-            : dragOverIndex
+          halfPoint === 'bottom' ? dragOverIndex + 1 : dragOverIndex
 
-        onChangeRowsOrder({
-          index: dragStartIndexRef.current.index,
-          indexToMove,
-        })
+        if (startIndex !== indexToMove)
+          onChangeRowsOrder({
+            index: startIndex,
+            indexToMove,
+          })
       }
 
       setDragOverIndex(undefined)
