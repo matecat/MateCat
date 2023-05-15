@@ -79,30 +79,48 @@ class AIAssistantWorker extends AbstractWorker
         $txt = "";
 
         $lockValue = $this->generateLockValue();
+
+        $this->_doLog("Preparing for OpenAI call for id_segment " . $payload['id_segment']);
         $this->generateLock($payload['id_segment'], $payload['id_job'], $payload['password'], $lockValue);
+        $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload['word'] , $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
 
             $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
             if($currentLockValue !== $lockValue){
+                $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue. ", ".$lockValue." was expected for id_segment " . $payload['id_segment']);
+
                 return 0;
             }
 
+            //
+            // $data returned from Open AI is a string like this:
+            //
+            // data: {"id":"chatcmpl-7GSjecxhnbf7oZfoYahurued904vj","object":"chat.completion.chunk","created":1684158062,"model":"gpt-4-0314","choices":[{"delta":{"role":"assistant"},"index":0,"finish_reason":null}]}
+            //
+            // so we need the explode here:
+            //
             $_d = explode( "data: ", $data );
 
-            foreach( $_d as $clean ){
+            if(is_array($_d)){
+                foreach( $_d as $clean ){
 
-                if (strpos($data, "[DONE]\n\n") !== false) {
-                    $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
-                    $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
-                } else {
-                    $arr = json_decode($clean, true);
+                    if (strpos($data, "[DONE]\n\n") !== false) {
+                        $this->_doLog("Stream from Open Ai is terminated. Segment id:  " . $payload['id_segment']);
+                        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
+                        $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
+                    } else {
+                        $this->_doLog("Received data stream from OpenAI for id_segment " . $payload['id_segment']);
+                        $arr = json_decode($clean, true);
 
-                    if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
-                        $txt .= $arr["choices"][0]["delta"]["content"];
-                        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                        if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
+                            $txt .= $arr["choices"][0]["delta"]["content"];
+                            $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                        }
                     }
                 }
+            } else {
+                $this->_doLog("Data received from OpenAI is not as array: " . serialize($_d)." was received for id_segment " . $payload['id_segment']);
             }
 
             // NEEDED by CURLOPT_WRITEFUNCTION function
@@ -184,7 +202,7 @@ class AIAssistantWorker extends AbstractWorker
      */
     private function getLockKey($idSegment, $idJob, $password)
     {
-        return base64_encode($idSegment.'-'.$idJob.'-'.$password);
+        return $idSegment.'-'.$idJob.'-'.$password;
     }
 
     /**
