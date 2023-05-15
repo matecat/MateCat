@@ -1,7 +1,26 @@
 <?php
 
+namespace TMS;
+
+use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
+use Constants_TranslationStatus;
+use DateTime;
+use DateTimeZone;
+use Engine;
+use Engines_MyMemory;
+use Engines_Results_MyMemory_ExportResponse;
+use Engines_Results_MyMemory_TmxResponse;
+use Exception;
+use FeatureSet;
+use INIT;
+use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use SplTempFileObject;
+use stdClass;
 use TMSService\TMSServiceDao;
+use Upload;
+use Utils;
 
 class TMSService {
 
@@ -16,12 +35,7 @@ class TMSService {
     protected $name;
 
     /**
-     * @var string The key to be associated to the tmx
-     */
-    private $tm_key;
-
-    /**
-     * @var
+     * @var TMSFile[]
      */
     private $file;
 
@@ -64,15 +78,13 @@ class TMSService {
      *
      * @throws Exception
      */
-    public function checkCorrectKey() {
-
-        $isValid = true;
+    public function checkCorrectKey( $tm_key ) {
 
         //validate the key
         //This piece of code need to be executed every time
         try {
 
-            $isValid = $this->mymemory_engine->checkCorrectKey( $this->tm_key );
+            $isValid = $this->mymemory_engine->checkCorrectKey( $tm_key );
 
         } catch ( Exception $e ) {
 
@@ -127,110 +139,73 @@ class TMSService {
 
     /**
      * Import TMX file in MyMemory
-     * @return bool
      * @throws Exception
      */
-    public function addTmxInMyMemory() {
-        $this->checkCorrectKey();
+    public function addTmxInMyMemory( TMSFile $file ) {
+
+        $this->checkCorrectKey( $file->getTmKey() );
 
         Log::doJsonLog( $this->file );
 
-        //if there are files, add them into MyMemory
-        if ( count( $this->file ) > 0 ) {
+        $importStatus = $this->mymemory_engine->import(
+                $file->getFilePath(),
+                $file->getTmKey(),
+                $file->getName()
+        );
 
-            foreach ( $this->file as $k => $fileInfo ) {
-
-                $importStatus = $this->mymemory_engine->import(
-                        $fileInfo->file_path,
-                        $this->tm_key,
-                        $this->name
-                );
-
-                //check for errors during the import
-                switch ( $importStatus->responseStatus ) {
-                    case "503" :
-                    case "400" :
-                        throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
-                        break;
-                    case "403" :
-                        throw new Exception( "Invalid key provided", -15 );
-                        break;
-                    default:
-                }
-            }
-
-            return true;
-
-        } else {
-            throw new Exception( "Can't find uploaded TMX files", -15 );
+        //check for errors during the import
+        switch ( $importStatus->responseStatus ) {
+            case "503" :
+            case "400" :
+                throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
+            case "403" :
+                throw new Exception( "Invalid key provided", -15 );
+            default:
         }
+
+        $file->setUuid( $importStatus->id );
 
     }
 
     /**
      * Import TMX file in MyMemory
-     * @return array
      * @throws Exception
      */
-    public function addGlossaryInMyMemory() {
+    public function addGlossaryInMyMemory( TMSFile $file ) {
 
-        $this->checkCorrectKey();
+        $this->checkCorrectKey( $file->getTmKey() );
 
         Log::doJsonLog( $this->file );
 
-        //if there are files, add them into MyMemory
-        if ( count( $this->file ) > 0 ) {
+        $importStatus = $this->mymemory_engine->glossaryImport(
+                $file->getFilePath(),
+                $file->getTmKey(),
+                $file->getName()
+        );
 
-            $uuids = [];
+        //check for errors during the import
+        /**
+         * @var $importStatus Engines_Results_MyMemory_TmxResponse
+         */
+        switch ( $importStatus->responseStatus ) {
+            case "400" :
+                throw new Exception( "Can't load Glossary file right now, try later", -15 );
+            case "404":
+                throw new Exception( 'File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15 );
+            case "406":
+                throw new Exception( $importStatus->responseDetails, -15 );
+            case "403" :
+                $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
 
-            foreach ( $this->file as $k => $fileInfo ) {
-
-                $importStatus = $this->mymemory_engine->glossaryImport(
-                        $fileInfo->file_path,
-                        $this->tm_key,
-                        $this->name
-                );
-
-                //check for errors during the import
-                /**
-                 * @var $importStatus Engines_Results_MyMemory_TmxResponse
-                 */
-                switch ( $importStatus->responseStatus ) {
-                    case "400" :
-                        throw new Exception( "Can't load Glossary file right now, try later", -15 );
-                        break;
-
-                    case "404":
-                        throw new Exception('File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15);
-                        break;
-
-                    case "406":
-                        throw new Exception( $importStatus->responseDetails, -15 );
-                        break;
-
-                    case "403" :
-                        $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
-
-                        if($importStatus->responseDetails === 'HEADER DON\'T MATCH THE CORRECT STRUCTURE'){
-                            $message = 'The file header does not match the accepted structure. Please change the header structure to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">the user guide page</a> and retry upload.';
-                        }
-
-                        throw new Exception( $message, -15 );
-                        break;
-
-                    default:
+                if ( $importStatus->responseDetails === 'HEADER DON\'T MATCH THE CORRECT STRUCTURE' ) {
+                    $message = 'The file header does not match the accepted structure. Please change the header structure to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">the user guide page</a> and retry upload.';
                 }
 
-                if(isset($importStatus->responseData['UUID'])){
-                    $uuids[] = $importStatus->responseData['UUID'];
-                }
-            }
-
-            return $uuids;
-
-        } else {
-            throw new Exception( "Can't find uploaded Glossary files", -15 );
+                throw new Exception( $message, $importStatus->responseStatus );
+            default:
         }
+
+        $file->setUuid( $importStatus->id );
 
     }
 
@@ -239,9 +214,37 @@ class TMSService {
      *
      * @return array
      */
-    public function glossaryUploadStatus($uuid)
-    {
-        return $this->mymemory_engine->getGlossaryImportStatus($uuid);
+    public function glossaryUploadStatus( $uuid ) {
+
+        $allMemories = $this->mymemory_engine->getGlossaryImportStatus( $uuid );
+
+        if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
+            Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
+            //what the hell? No memories although I've just loaded some? Eject!
+            throw new Exception( "Error response from TMX status check", -15 );
+        }
+
+        switch ( $allMemories->responseData[ 'status' ] ) {
+            case "0":
+            case "-1":
+                //wait for the daemon to process it
+                //LOADING
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                $result[ 'data' ]      = $allMemories->responseData;
+                $result[ 'completed' ] = false;
+                break;
+            case "1":
+                //loaded (or error, in any case go ahead)
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                $result[ 'data' ]      = $allMemories->responseData;
+                $result[ 'completed' ] = true;
+                break;
+            default:
+                throw new Exception( "Invalid Glossary (\"" . $this->name . "\")", -14 ); // this should never happen
+        }
+
+        return $result;
+
     }
 
     /**
@@ -252,74 +255,41 @@ class TMSService {
      *
      * @return array
      */
-    public function glossaryExport($key, $keyName, $userEmail, $userName)
-    {
-       return $this->mymemory_engine->glossaryExport($key, $keyName, $userEmail, $userName);
+    public function glossaryExport( $key, $keyName, $userEmail, $userName ) {
+        return $this->mymemory_engine->glossaryExport( $key, $keyName, $userEmail, $userName );
     }
 
     /**
      * @return array
      * @throws Exception
      */
-    public function tmxUploadStatus() {
+    public function tmxUploadStatus( $uuid ) {
 
-        $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $this->name );
+        $allMemories = $this->mymemory_engine->getStatus( $uuid );
 
-//        Log::doJsonLog( $allMemories );
-
-        if ( $allMemories->responseStatus != "200" || count( $allMemories->responseData[ 'tm' ] ) == 0 ) {
-
-            Log::doJsonLog( "Can't find TMX files to check for status" );
-
+        if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
+            Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( "Can't find TMX files to check for status", -15 );
+            throw new Exception( "Error response from TMX status check", -15 );
         }
 
-        $tmx_max_id = 0;
-        $current_tm = [];
-
-        //scan through memories
-        foreach ( $allMemories->responseData[ 'tm' ] as $memory ) {
-            //obtain max id
-            $tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
-
-            //if maximum is current, pick it (it means that, among duplicates, it's the latest)
-            if ( $tmx_max_id == $memory[ 'id' ] ) {
-                $current_tm = $memory;
-            }
-        }
-
-        $result = [];
-
-        switch ( $current_tm[ 'status' ] ) {
+        switch ( $allMemories->responseData[ 'status' ] ) {
             case "0":
+            case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
-                $result[ 'data' ]      = [
-                        "done"        => $current_tm[ "temp_seg_ins" ],
-                        "total"       => $current_tm[ "num_seg_tot" ],
-                        "source_lang" => $current_tm[ "source_lang" ],
-                        "target_lang" => $current_tm[ "target_lang" ],
-                        'completed'   => false
-                ];
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
-                $result[ 'data' ]      = [
-                        "done"        => $current_tm[ "temp_seg_ins" ],
-                        "total"       => $current_tm[ "num_seg_tot" ],
-                        "source_lang" => $current_tm[ "source_lang" ],
-                        "target_lang" => $current_tm[ "target_lang" ],
-                        'completed'   => true
-                ];
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;
             default:
-                throw new Exception( "Invalid TMX (\"" . $current_tm[ 'file_name' ] . "\")", -14 );
-                break;
+                throw new Exception( "Invalid TMX (\"" . $this->name . "\")", -14 ); // this should never happen
         }
 
         return $result;
@@ -338,7 +308,7 @@ class TMSService {
     }
 
     /**
-     * @param stdClass[] $file
+     * @param TMSFile[] $file
      *
      * <code>
      *   //required
@@ -354,75 +324,6 @@ class TMSService {
     }
 
     /**
-     * @param string $tm_key
-     *
-     * @return $this
-     */
-    public function setTmKey( $tm_key ) {
-        $this->tm_key = $tm_key;
-
-        return $this;
-    }
-
-    public function getTMKey() {
-        return $this->tm_key;
-    }
-
-    /**
-     * Set a cyclic barrier to get response about status succes to call the download
-     *
-     * @return resource
-     * @throws Exception
-     */
-    public function downloadTMX() {
-
-        /**
-         * @var $result Engines_Results_MyMemory_ExportResponse
-         */
-        $result = $this->mymemory_engine->createExport(
-                $this->tm_key
-        );
-
-        if ( $result->responseDetails == 'QUEUED' &&
-                $result->responseStatus == 202
-        ) {
-
-            do {
-
-                /**
-                 * @var $result Engines_Results_MyMemory_ExportResponse
-                 */
-                $result = $this->mymemory_engine->checkExport( $this->tm_key );
-
-                usleep( 1500000 ); // 1.5 seconds
-
-            } while ( $result->responseDetails != 'READY' && $result->responseDetails != 'NO SEGMENTS' );
-
-            if ( !isset( $result->responseDetails ) ) {
-                throw new Exception( "Status check failed. Export broken.", -16 );
-            }
-
-            if ( $result->responseDetails == 'NO SEGMENTS' ) {
-                throw new DomainException( "No translation memories found to download.", -17 );
-            }
-
-            $_download_url = parse_url( $result->resourceLink );
-            parse_str( $_download_url[ 'query' ], $secrets );
-            list( $_key, $pass ) = array_values( $secrets );
-
-        } else {
-
-            throw new Exception( "Critical. Export Creation Failed.", -18 );
-
-        }
-
-        $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
-
-        return $resource_pointer;
-
-    }
-
-    /**
      * Send a mail with link for direct prepared download
      *
      * @param $userMail
@@ -432,10 +333,10 @@ class TMSService {
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      */
-    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ) {
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key ) {
 
         $response = $this->mymemory_engine->emailExport(
-                $this->tm_key,
+                $tm_key,
                 $this->name,
                 $userMail,
                 $userName,
@@ -444,18 +345,6 @@ class TMSService {
 
         return $response;
 
-    }
-
-    /**
-     * @return string
-     * @throws Exception
-     */
-    public function downloadGlossary() {
-        $fileName = "/tmp/GLOSS_" . $this->tm_key;
-        $fHandle  = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
-        fclose( $fHandle ); //flush data and close
-
-        return $fileName;
     }
 
     /**
@@ -475,8 +364,8 @@ class TMSService {
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter  = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [] );
-        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
+        $Filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [] );
+        $tmpFile    = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">

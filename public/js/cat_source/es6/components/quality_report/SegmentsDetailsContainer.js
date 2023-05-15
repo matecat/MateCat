@@ -42,17 +42,20 @@ class SegmentsDetails extends React.Component {
   }
 
   onScroll() {
+    let scrollableHeight =
+      document.getElementById('qr-root').scrollHeight -
+      document.getElementById('qr-root').clientHeight
+    // When the user is [modifier]px from the bottom, fire the event.
+    let modifier = 200
     if (
-      window.innerHeight + window.scrollY >
-      document.body.scrollHeight - 200
+      document.getElementById('qr-root').scrollTop + modifier >
+        scrollableHeight &&
+      this.props.moreSegments
     ) {
-      console.log('Load More Segments!')
-      if (this.props.moreSegments) {
-        QualityReportActions.getMoreQRSegments(
-          this.state.filter,
-          this.props.lastSegment,
-        )
-      }
+      QualityReportActions.getMoreQRSegments(
+        this.state.filter,
+        this.props.lastSegment,
+      )
     }
   }
   filterSegments(filter) {
@@ -63,17 +66,22 @@ class SegmentsDetails extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener('scroll', this.scrollDebounceFn(), false)
+    document
+      .getElementById('qr-root')
+      .addEventListener('scroll', this.scrollDebounceFn(), false)
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.scrollDebounceFn(), false)
+    document
+      .getElementById('qr-root')
+      .removeEventListener('scroll', this.scrollDebounceFn(), false)
   }
 
   render() {
-    let totalSegments = this.props.segmentsFiles
-      ? this.props.segmentsFiles.size
-      : 0
+    let totalSegments = 0
+    if (this.props.segmentsFiles) {
+      this.props.segmentsFiles.forEach((ss) => (totalSegments += ss.size))
+    }
 
     return (
       <div className="qr-segment-details-container shadow-2">
@@ -96,7 +104,7 @@ class SegmentsDetails extends React.Component {
 
           {this.props.moreSegments &&
           this.props.files &&
-          this.props.files.length !== 0 &&
+          this.props.files.size !== 0 &&
           totalSegments >= 20 ? (
             <div className="ui one column grid">
               <div className="one column spinner" style={{height: '100px'}}>

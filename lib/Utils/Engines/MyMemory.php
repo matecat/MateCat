@@ -108,8 +108,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             case 'tmx_status_relative_url':
                 $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
-            case 'tmx_export_create_url' :
-            case 'tmx_export_check_url' :
             case 'tmx_export_email_url' :
             case 'glossary_export_relative_url' :
                 $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
@@ -395,10 +393,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             foreach ( $origFile as $line_num => $line ) {
 
-                if(in_array("1", $line)){
-                    foreach ($line as $lineKey => $item){
-                        if($item == "1"){
-                            $line[$lineKey] = "True";
+                if ( in_array( "1", $line ) ) {
+                    foreach ( $line as $lineKey => $item ) {
+                        if ( $item == "1" ) {
+                            $line[ $lineKey ] = "True";
                         }
                     }
                 }
@@ -426,23 +424,26 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         // validate the CSV
-        $validateCSVFileErrors = $this->validateCSVFile($file);
+        $validateCSVFileErrors = $this->validateCSVFile( $file );
 
-        if(count($validateCSVFileErrors) > 0){
-            throw new \Exception($validateCSVFileErrors[0]);
+        if ( count( $validateCSVFileErrors ) > 0 ) {
+            throw new \Exception( $validateCSVFileErrors[ 0 ] );
         }
 
         $postFields = [
-            'glossary'    => $this->getCurlFile($file),
-            'key'         => trim( $key ),
+                'glossary' => $this->getCurlFile( $file ),
+                'key'      => trim( $key ),
         ];
 
-        if($name and $name !== ''){
-            $postFields['key_name'] = $name;
+        if ( $name and $name !== '' ) {
+            $postFields[ 'key_name' ] = $name;
         }
 
         $this->call( "glossary_import_relative_url", $postFields, true );
 
+        /**
+         * @var Engines_Results_MyMemory_TmxResponse
+         */
         return $this->result;
     }
 
@@ -699,137 +700,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
-    public function getStatus( $key, $name = false ) {
+    public function getStatus( $uuid ) {
 
-        $parameters          = [];
-        $parameters[ 'key' ] = trim( $key );
-
-        //if provided, add name parameter
-        if ( $name ) {
-            $parameters[ 'name' ] = $name;
-        }
-
+        $parameters = [ 'uuid' => trim( $uuid ) ];
         $this->call( 'tmx_status_relative_url', $parameters );
 
         return $this->result;
-    }
-
-    /**
-     * Memory Export creation request.
-     *
-     * <ul>
-     *  <li>key: MyMemory key</li>
-     *  <li>source: all segments with source language ( default 'all' )</li>
-     *  <li>target: all segments with target language ( default 'all' )</li>
-     *  <li>strict: strict check for languages ( no back translations ), only source-target and not target-source
-     * </ul>
-     *
-     * @param string       $key
-     * @param null|string  $source
-     * @param null|string  $target
-     * @param null|boolean $strict
-     *
-     * @return array
-     */
-    public function createExport( $key, $source = null, $target = null, $strict = null ) {
-
-        $parameters = [];
-
-        $parameters[ 'key' ] = trim( $key );
-        ( !empty( $source ) ? $parameters[ 'source' ] = $source : null );
-        ( !empty( $target ) ? $parameters[ 'target' ] = $target : null );
-        ( !empty( $strict ) ? $parameters[ 'strict' ] = $strict : null );
-
-        $this->call( 'tmx_export_create_url', $parameters );
-
-        return $this->result;
-
-    }
-
-    /**
-     * Memory Export check for status,
-     * <br />invoke with the same parameters of createExport
-     *
-     * @param      $key
-     * @param null $source
-     * @param null $target
-     * @param null $strict
-     *
-     * @return mixed
-     * @see Engines_MyMemory::createExport
-     *      ,
-     *      $this->name,
-     *      $userMail,
-     *      $userName,
-     *      $userSurname
-     */
-    public function checkExport( $key, $source = null, $target = null, $strict = null ) {
-
-        $parameters = [];
-
-        $parameters[ 'key' ] = trim( $key );
-        ( !empty( $source ) ? $parameters[ 'source' ] = $source : null );
-        ( !empty( $target ) ? $parameters[ 'target' ] = $target : null );
-        ( !empty( $strict ) ? $parameters[ 'strict' ] = $strict : null );
-
-        $this->call( 'tmx_export_check_url', $parameters );
-
-        return $this->result;
-
-    }
-
-    /**
-     * Get the zip file with the TM inside or a "EMPTY ARCHIVE" message
-     * <br> if there are not segments inside the TM
-     *
-     * @param $key
-     * @param $hashPass
-     * @param $isGlossary
-     * @param $fileName
-     *
-     * @return resource
-     *
-     * @throws Exception
-     */
-    public function downloadExport( $key, $hashPass = null, $isGlossary = false, $fileName = null ) {
-
-        $parameters = [];
-
-        $parameters[ 'key' ]  = trim( $key );
-        $parameters[ 'pass' ] = trim( $hashPass );
-
-        ( $isGlossary ? $method = "glossary_export_relative_url" : $method = "tmx_export_download_url" );
-
-        if ( is_null( $fileName ) ) {
-            $fileName = "/tmp/TMX" . $key;
-        }
-        $handle = fopen( $fileName, "w+" );
-
-        $this->_setAdditionalCurlParams( [
-                CURLOPT_TIMEOUT => 120,
-                CURLOPT_FILE    => $handle
-        ] );
-
-        $this->call( $method, $parameters );
-
-        /**
-         * Code block not useful at moment until MyMemory does not respond with HTTP 404
-         *
-         * $result Engines_Results_MyMemory_ExportResponse
-         */
-        /*
-         *
-         *        if ( $this->result->responseStatus >= 400 ) {
-         *            throw new Exception( $this->result->error->message, $this->result->responseStatus );
-         *        }
-         *        fwrite( $handle, $this->result );
-         */
-
-        fflush( $handle );
-        rewind( $handle );
-
-        return $handle;
-
     }
 
     /**
@@ -926,16 +802,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /******************************************/
 
-    public function fastAnalysis( &$segs_array ) {
-        if ( !is_array( $segs_array ) ) {
+    public function fastAnalysis( $segs_array ) {
 
+        if ( !is_array( $segs_array ) ) {
             return null;
         }
-        $json_segs = json_encode( $segs_array );
-
-        $parameters[ 'fast' ] = "1";
-        $parameters[ 'df' ]   = "matecat_array";
-        $parameters[ 'segs' ] = $json_segs;
 
         $this->_setAdditionalCurlParams( [
                         CURLOPT_TIMEOUT => 300

@@ -4,10 +4,20 @@ namespace API\App;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
+use CatUtils;
+use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
+use DataAccess_IDaoStruct;
+use Exception;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobDao;
 use LQA\EntryDao;
-use Url\JobUrlBuilder;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Segments_SegmentDao;
+use Segments_SegmentMetadataDao;
 use Exceptions\NotFoundException;
+use Segments_SegmentNoteDao;
 use Url\JobUrlStruct;
 
 class SegmentAnalysisController extends KleinController {
@@ -15,22 +25,142 @@ class SegmentAnalysisController extends KleinController {
     const MAX_PER_PAGE = 200;
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Chunks_ChunkStruct
      */
     private $chunk;
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     private $project;
 
     /**
-     * @var \Projects_ProjectDao
+     * @var Projects_ProjectDao
      */
     private $projectDao;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    /**
+     * Segment list
+     * from id job/password
+     */
+    public function job() {
+
+        $page = ($this->request->param('page')) ? (int)$this->request->param('page') : 1;
+        $perPage = ($this->request->param('per_page')) ? (int)$this->request->param('per_page') : 50;
+
+        if($perPage > self::MAX_PER_PAGE){
+            $perPage = self::MAX_PER_PAGE;
+        }
+
+        $idJob = $this->request->param('id_job');
+        $password = $this->request->param('password');
+        $segmentsCount = Chunks_ChunkDao::getSegmentsCount($idJob, $password, 0);
+
+        try {
+            $this->response->json($this->getSegmentsForAJob($idJob, $password, $page, $perPage, $segmentsCount));
+            exit();
+        } catch (Exception $exception){
+            $this->response->code( 500 );
+            $this->response->json( [
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
+            ] );
+        }
+    }
+
+    /**
+     * @param $idJob
+     * @param $password
+     * @param $page
+     * @param $perPage
+     * @param $segmentsCount
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function getSegmentsForAJob( $idJob, $password, $page, $perPage, $segmentsCount)
+    {
+        $totalPages = ceil($segmentsCount/$perPage);
+        $isLast = ((int)$page === (int)$totalPages);
+
+        if($page > $totalPages or $page <= 0){
+            throw new Exception('Page number '.$page.' is not valid');
+        }
+
+        $chunk = Chunks_ChunkDao::getByIdAndPassword($idJob, $password);
+
+        if($chunk === null){
+            throw new Exception('Job not found');
+        }
+
+        $this->chunk = $chunk;
+
+        $prev = ($page > 1 ) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page-1)."&per_page=".$perPage : null;
+        $next = (!$isLast and $totalPages > 1) ? "/api/app/jobs/".$idJob."/".$password."/segment-analysis?page=".($page+1)."&per_page=".$perPage : null;
+        $items = $this->getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage);
+
+        return [
+            '_links' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => $totalPages,
+                'total_items' => $segmentsCount,
+                'next_page' => $next,
+                'prev_page' => $prev,
+            ],
+            'items' => $items
+        ];
+    }
+
+    /**
+     * @param $idJob
+     * @param $password
+     * @param $page
+     * @param $perPage
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
+    {
+        // https://dev.matecat.com/api/app/projects/9/64a02abbb1b6/segment-analysis
+        // https://dev.matecat.com/api/app/jobs/3/2fa321f18a18/segment-analysis
+
+        $segments = [];
+        $limit = $perPage;
+        $offset = ($page-1)*$perPage;
+        $this->projectDao = new Projects_ProjectDao();
+
+        try {
+            $job = Jobs_JobDao::getByIdAndPassword($idJob, $password);
+        } catch (Exception $exception) {
+            $this->response->code( 404 );
+            $this->response->json( [
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
+            ] );
+            exit();
+        }
+
+        $segmentsForAnalysis = Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, 0);
+        $projectPasswordsMap  = $this->projectDao->getPasswordsMap($job->getProject()->id);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
+
+        $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
+        $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
+        $idRequestsAggregate = $issuesNotesAndIdRequests['idRequestsAggregate'];
+
+        foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate);
+        }
+
+        return $segments;
     }
 
     /**
@@ -49,7 +179,7 @@ class SegmentAnalysisController extends KleinController {
         $idProject = $this->request->param('id_project');
         $password = $this->request->param('password');
 
-        $this->projectDao = new \Projects_ProjectDao();
+        $this->projectDao = new Projects_ProjectDao();
 
         try {
             $this->project = $this->projectDao->findByIdAndPassword($idProject, $password);
@@ -63,12 +193,12 @@ class SegmentAnalysisController extends KleinController {
             exit();
         }
 
-        $segmentsCount = \CatUtils::getSegmentTranslationsCount($this->project);
+        $segmentsCount = CatUtils::getSegmentTranslationsCount($this->project);
 
         try {
             $this->response->json($this->getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount));
             exit();
-        } catch (\Exception $exception){
+        } catch (Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
                     'error' => [
@@ -86,7 +216,7 @@ class SegmentAnalysisController extends KleinController {
      * @param $segmentsCount
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function getSegmentsForAProject($idProject, $password, $page, $perPage, $segmentsCount)
     {
@@ -94,7 +224,7 @@ class SegmentAnalysisController extends KleinController {
         $isLast = ((int)$page === (int)$totalPages);
 
         if($page > $totalPages or $page <= 0){
-            throw new \Exception('Page number '.$page.' is not valid');
+            throw new Exception('Page number '.$page.' is not valid');
         }
 
         $prev = ($page > 1 ) ? "/api/app/projects/".$idProject."/".$password."/segment-analysis?page=".($page-1)."&per_page=".$perPage : null;
@@ -121,7 +251,7 @@ class SegmentAnalysisController extends KleinController {
      * @param $perPage
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage)
     {
@@ -129,40 +259,72 @@ class SegmentAnalysisController extends KleinController {
         $limit = $perPage;
         $offset = ($page-1)*$perPage;
 
-        $segmentsForAnalysis = \Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
+        $segmentsForAnalysis = Segments_SegmentDao::getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, 0);
         $projectPasswordsMap  = $this->projectDao->getPasswordsMap($this->project->id);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
+
+        $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
+        $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
+        $idRequestsAggregate = $issuesNotesAndIdRequests['idRequestsAggregate'];
 
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
-            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap);
+            $segments[] = $this->formatSegment($segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate);
         }
 
         return $segments;
     }
 
     /**
-     * @param \DataAccess_IDaoStruct $segmentForAnalysis
+     * @param $segmentsForAnalysis
+     * @return array
+     */
+    private function getIssuesNotesAndIdRequests($segmentsForAnalysis)
+    {
+        $segmentIds = [];
+        foreach ( $segmentsForAnalysis as $segmentForAnalysis ){
+            $segmentIds[] = $segmentForAnalysis->id;
+        }
+
+        $notesRecords = Segments_SegmentNoteDao::getBySegmentIds( $segmentIds );
+        $issuesRecords = EntryDao::getBySegmentIds( $segmentIds );
+        $idRequestRecords = Segments_SegmentMetadataDao::getBySegmentIds($segmentIds, 'id_request');
+
+        $notesAggregate = [];
+        $issuesAggregate = [];
+        $idRequestsAggregate = [];
+
+        foreach ($notesRecords as $notesRecord){
+            $notesAggregate[$notesRecord->id_segment][] = $notesRecord->note;
+        }
+
+        foreach ($issuesRecords as $issuesRecord){
+            $issuesAggregate[$issuesRecord->id_segment][] = $issuesRecord;
+        }
+
+        foreach ($idRequestRecords as $idRequestRecord){
+            $idRequestsAggregate[$idRequestRecord->id_segment] = $idRequestRecord;
+        }
+
+        return [
+            'notesAggregate' => $notesAggregate,
+            'issuesAggregate' => $issuesAggregate,
+            'idRequestsAggregate' => $idRequestsAggregate,
+        ];
+    }
+
+    /**
+     * @param DataAccess_IDaoStruct $segmentForAnalysis
+     * @param $projectPasswordsMap
+     * @param $notesAggregate
+     * @param $issuesAggregate
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    private function formatSegment(\DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap)
+    private function formatSegment(DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate)
     {
         // id_request
-        $idRequest = @\Segments_SegmentMetadataDao::get($segmentForAnalysis->id, 'id_request')[ 0 ];
-
-        // issues
-        $issues_records = EntryDao::findAllBySegmentId( $segmentForAnalysis->id );
-        $issues         = [];
-        foreach ( $issues_records as $issue_record ) {
-            $issues[] = [
-                    'source_page'         => $this->humanReadableSourcePage($issue_record->source_page),
-                    'id_category'         => (int)$issue_record->id_category,
-                    'severity'            => $issue_record->severity,
-                    'translation_version' => (int)$issue_record->translation_version,
-                    'penalty_points'      => floatval($issue_record->penalty_points),
-                    'created_at'          => date( 'c', strtotime( $issue_record->create_date ) ),
-            ];
-        }
+        $idRequest = isset($idRequestsAggregate[$segmentForAnalysis->id]) ? $idRequestsAggregate[$segmentForAnalysis->id] : null;
 
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
@@ -179,12 +341,14 @@ class SegmentAnalysisController extends KleinController {
                 'target' => $segmentForAnalysis->translation,
                 'source_lang' => $segmentForAnalysis->source,
                 'target_lang' => $segmentForAnalysis->target,
-                'source_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
-                'target_raw_word_count' => \CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
+                'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
+                'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
                 'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
                 'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
-                'issues' => $issues,
+                'issues' => (!empty($issuesAggregate[$segmentForAnalysis->id]) ? $issuesAggregate[$segmentForAnalysis->id] : []),
+                'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
                 'status' => $this->getStatusObject($segmentForAnalysis),
+                'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,
         ];
     }
 
