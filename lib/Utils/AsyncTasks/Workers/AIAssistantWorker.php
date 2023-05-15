@@ -92,21 +92,23 @@ class AIAssistantWorker extends AbstractWorker
 
             $_d = explode( "data: ", $data );
 
-            foreach( $_d as $clean ){
+            if(is_array($_d)){
+                foreach( $_d as $clean ){
 
-                if (strpos($data, "[DONE]\n\n") !== false) {
-                    $this->_doLog("Current lock key is: " . $this->getLockKey($payload['id_segment'], $payload['id_job'], $payload['password']));
-                    $this->_doLog("Current lock value is: " . $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']));
-                    $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
-                    $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
-                } else {
-                    $arr = json_decode($clean, true);
+                    if (strpos($data, "[DONE]\n\n") !== false) {
+                        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
+                        $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
+                    } else {
+                        $arr = json_decode($clean, true);
 
-                    if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
-                        $txt .= $arr["choices"][0]["delta"]["content"];
-                        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                        if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
+                            $txt .= $arr["choices"][0]["delta"]["content"];
+                            $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                        }
                     }
                 }
+            } else {
+                $this->_doLog("Data received from OpenAI is not as array: " . serialize($_d)." was received");
             }
 
             // NEEDED by CURLOPT_WRITEFUNCTION function
