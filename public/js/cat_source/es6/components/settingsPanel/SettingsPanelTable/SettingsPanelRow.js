@@ -2,104 +2,105 @@ import React, {useRef, useState, forwardRef, useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelTableContext} from './SettingsPanelTable'
 
-export const SettingsPanelRow = forwardRef(({index, row, isDragOver}, ref) => {
-  const {
-    rowsContainerRef,
-    draggingIndexRef,
-    onDragStart,
-    onDragOver,
-    onDragEnd,
-  } = useContext(SettingsPanelTableContext)
+export const SettingsPanelRow = forwardRef(
+  ({index, row, isDragOver, wasDragged}, ref) => {
+    const {
+      rowsContainerRef,
+      dragStartIndexRef,
+      onDragStart,
+      onDragOver,
+      onDragEnd,
+    } = useContext(SettingsPanelTableContext)
 
-  const [isActiveDrag, setIsActiveDrag] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const [halfDragPoint, setHalfDragPoint] = useState()
+    const [isActiveDrag, setIsActiveDrag] = useState(false)
+    const [isDragging, setIsDragging] = useState(false)
+    const [halfDragPoint, setHalfDragPoint] = useState()
 
-  const refDragHandle = useRef()
+    const refDragHandle = useRef()
 
-  const {isDraggable, node} = row
+    const {isDraggable, node} = row
 
-  const onDragStartCallback = () => {
-    setIsDragging(true)
-    onDragStart(index)
-  }
+    const onDragStartCallback = () => {
+      setIsDragging(true)
+      onDragStart(index)
+    }
 
-  const onDragOverCallback = (event) => {
-    if (!rowsContainerRef?.current) return
+    const onDragOverCallback = (event) => {
+      if (!rowsContainerRef?.current) return
 
-    const rect = rowsContainerRef.current.getBoundingClientRect()
-    const point = {x: event.clientX - rect.x, y: event.clientY - rect.y}
+      const rect = rowsContainerRef.current.getBoundingClientRect()
+      const point = {x: event.clientX - rect.x, y: event.clientY - rect.y}
 
-    const relativeY = event.clientY - ref.current.getBoundingClientRect().y
-    const rowHeight = ref.current.offsetHeight
-    const halfPoint = relativeY
-      ? relativeY > rowHeight / 2
-        ? 'bottom'
-        : 'top'
-      : 'bottom'
+      const relativeY = event.clientY - ref.current.getBoundingClientRect().y
+      const rowHeight = ref.current.offsetHeight
+      const halfPoint = relativeY
+        ? relativeY > rowHeight / 2
+          ? 'bottom'
+          : 'top'
+        : 'bottom'
 
-    if (relativeY)
-      setHalfDragPoint(relativeY > rowHeight / 2 ? 'bottom' : 'top')
+      if (relativeY)
+        setHalfDragPoint(relativeY > rowHeight / 2 ? 'bottom' : 'top')
 
-    if (onDragOver) onDragOver({...point, halfPoint})
-  }
+      if (onDragOver) onDragOver({...point, halfPoint})
+    }
 
-  const onDragEndCallback = () => {
-    setIsActiveDrag(false)
-    setIsDragging(false)
-    if (onDragEnd) onDragEnd()
-  }
+    const onDragEndCallback = () => {
+      setIsActiveDrag(false)
+      setIsDragging(false)
+      if (onDragEnd) onDragEnd({row})
+    }
 
-  const shouldNotAddApplyDragOver =
-    (isDraggable && draggingIndexRef.current?.index + 1 === index) ||
-    (draggingIndexRef.current?.index > 0 &&
-      draggingIndexRef.current?.index - 1 === index)
+    const shouldNotAddApplyDragOver =
+      (isDraggable &&
+        dragStartIndexRef.current?.index + 1 === index &&
+        halfDragPoint === 'top') ||
+      (dragStartIndexRef.current?.index > 0 &&
+        dragStartIndexRef.current?.index - 1 === index &&
+        halfDragPoint === 'bottom')
 
-  const draggableCssClasses = `${
-    isDraggable ? ' settings-panel-row-draggable' : ''
-  }${isDragging ? ' settings-panel-row-dragging' : ''}`
+    const draggableCssClasses = `${
+      isDraggable ? ' settings-panel-row-draggable' : ''
+    }${isDragging ? ' settings-panel-row-dragging' : ''}`
 
-  const dragOverCssClasses = `${
-    !isDragging && !shouldNotAddApplyDragOver && isDragOver
-      ? halfDragPoint === 'top'
-        ? ' settings-panel-row-dragover-half-top'
-        : ' settings-panel-row-dragover-half-bottom'
+    const dragOverCssClasses = `${
+      !isDragging && !shouldNotAddApplyDragOver && isDragOver
+        ? halfDragPoint === 'top'
+          ? ' settings-panel-row-dragover-half-top'
+          : ' settings-panel-row-dragover-half-bottom'
+        : ''
+    }`
+
+    const shouldAddDragendCssClass = wasDragged
+      ? ' settings-panel-row-dragend'
       : ''
-  }`
 
-  const shouldAddDragendCssClass = ''
-
-  // if (!isDragOver && previousIsDragOverRef.current && isDragEnd) {
-  //   console.log(index, halfDragPoint)
-  // }
-  // const indexToDragEnd = !isDragOver && previousIsDragOverRef.current && isDragEnd ? halfDragPoint === 'bottom'
-  // previousIsDragOverRef.current = isDragOver
-
-  return (
-    <div
-      ref={ref}
-      className={`settings-panel-row${draggableCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
-      draggable={isActiveDrag}
-      onDragStart={onDragStartCallback}
-      onDragOver={onDragOverCallback}
-      onDragEnd={onDragEndCallback}
-    >
-      <>
-        {isDraggable && (
-          <div
-            ref={refDragHandle}
-            className="settings-panel-row-drag-handle"
-            onMouseDown={() => setIsActiveDrag(true)}
-            onMouseUp={onDragEndCallback}
-          >
-            |
-          </div>
-        )}
-        {node}
-      </>
-    </div>
-  )
-})
+    return (
+      <div
+        ref={ref}
+        className={`settings-panel-row${draggableCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
+        draggable={isActiveDrag}
+        onDragStart={onDragStartCallback}
+        onDragOver={onDragOverCallback}
+        onDragEnd={onDragEndCallback}
+      >
+        <>
+          {isDraggable && (
+            <div
+              ref={refDragHandle}
+              className="settings-panel-row-drag-handle"
+              onMouseDown={() => setIsActiveDrag(true)}
+              onMouseUp={onDragEndCallback}
+            >
+              |
+            </div>
+          )}
+          {node}
+        </>
+      </div>
+    )
+  },
+)
 
 SettingsPanelRow.displayName = 'SettingsPanelRow'
 
@@ -110,4 +111,5 @@ SettingsPanelRow.propTypes = {
     isDraggable: PropTypes.bool,
   }),
   isDragOver: PropTypes.bool,
+  wasDragged: PropTypes.bool,
 }
