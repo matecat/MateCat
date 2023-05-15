@@ -99,6 +99,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   clipboardPlainText: '',
   sideOpen: false,
   isSearchingGlossaryInTarget: false,
+  helpAiAssistantWords: undefined,
+  _aiSuggestions: [],
   /**
    * Update all
    */
@@ -1288,6 +1290,21 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
+  getAiSuggestion: (sid) =>
+    SegmentStore._aiSuggestions.find((item) => item.sid === sid),
+  setAiSuggestion: ({sid, suggestion}) => {
+    const MAX_ITEMS = 10
+
+    const filteredWithoutCurrent = SegmentStore._aiSuggestions.filter(
+      (item) => item.sid !== sid,
+    )
+    const difference = filteredWithoutCurrent.length - MAX_ITEMS
+    const update =
+      difference > 0
+        ? filteredWithoutCurrent.slice(difference)
+        : filteredWithoutCurrent
+    SegmentStore._aiSuggestions = [...update, {sid, suggestion}]
+  },
   setSegmentCharactersCounter: function (sid, counter) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
@@ -1975,6 +1992,23 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
+    case SegmentConstants.HELP_AI_ASSISTANT:
+      SegmentStore.helpAiAssistantWords = {...action}
+      SegmentStore.emitChange(SegmentConstants.HELP_AI_ASSISTANT, {
+        ...action,
+      })
+      break
+    case SegmentConstants.AI_SUGGESTION:
+      SegmentStore.setAiSuggestion({
+        sid: action.sid,
+        suggestion: action.suggestion,
+        isCompleted: action.isCompleted,
+        hasError: action.hasError,
+      })
+      SegmentStore.emitChange(SegmentConstants.AI_SUGGESTION, {
+        ...action,
+      })
+      break
     case SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG:
       SegmentStore.emitChange(
         SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
@@ -1982,6 +2016,11 @@ AppDispatcher.register(function (action) {
           ...action,
         },
       )
+      break
+    case SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL:
+      SegmentStore.emitChange(SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

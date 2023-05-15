@@ -1251,6 +1251,11 @@ const SegmentActions = {
       actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
+  hideAiAssistant: () => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HIDE_AI_ASSISTANT,
+    })
+  },
   characterCounter: ({sid, counter, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
@@ -1370,10 +1375,36 @@ const SegmentActions = {
       isTarget,
     })
   },
+  helpAiAssistant: ({sid, value}) => {
+    SegmentActions.modifyTabVisibility('AiAssistant', true)
+    SegmentActions.activateTab(sid, 'AiAssistant')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HELP_AI_ASSISTANT,
+      sid,
+      value,
+    })
+  },
+  aiSuggestion: ({sid, suggestion, isCompleted, hasError}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_SUGGESTION,
+      sid,
+      suggestion,
+      isCompleted,
+      hasError,
+    })
+  },
   setIsCurrentSearchOccurrenceTag: (value) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
       value,
+    })
+  },
+  openGlossaryFormPrefill: ({sid, ...filledFields}) => {
+    SegmentActions.activateTab(sid, 'glossary')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
+      sid,
+      ...filledFields,
     })
   },
 }
