@@ -90,15 +90,24 @@ class AIAssistantWorker extends AbstractWorker
                 return 0;
             }
 
+            //
+            // $data returned from Open AI is a string like this:
+            //
+            // data: {"id":"chatcmpl-7GSjecxhnbf7oZfoYahurued904vj","object":"chat.completion.chunk","created":1684158062,"model":"gpt-4-0314","choices":[{"delta":{"role":"assistant"},"index":0,"finish_reason":null}]}
+            //
+            // so we need the explode here:
+            //
             $_d = explode( "data: ", $data );
 
             if(is_array($_d)){
                 foreach( $_d as $clean ){
 
                     if (strpos($data, "[DONE]\n\n") !== false) {
+                        $this->_doLog("Stream from Open Ai is terminated. Segment id:  " . $payload['id_segment']);
                         $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
                         $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
                     } else {
+                        $this->_doLog("Received data stream from OpenAI for id_segment " . $payload['id_segment']);
                         $arr = json_decode($clean, true);
 
                         if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
