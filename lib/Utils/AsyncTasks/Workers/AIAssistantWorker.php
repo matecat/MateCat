@@ -116,6 +116,8 @@ class AIAssistantWorker extends AbstractWorker
                         if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
                             $txt .= $arr["choices"][0]["delta"]["content"];
                             $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                        } else {
+                            $this->_doLog("Received wrong data from OpenAI for id_segment " . $payload['id_segment']. serialize($clean) ." was received");
                         }
                     }
                 }
