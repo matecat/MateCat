@@ -85,7 +85,7 @@ class AIAssistantWorker extends AbstractWorker
 
             $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
             if($currentLockValue !== $lockValue){
-                $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue. ", ".$lockValue." was expected");
+                $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue. ", ".$lockValue." was expected for id_segment " . $payload['id_segment']);
 
                 return 0;
             }
@@ -108,7 +108,7 @@ class AIAssistantWorker extends AbstractWorker
                     }
                 }
             } else {
-                $this->_doLog("Data received from OpenAI is not as array: " . serialize($_d)." was received");
+                $this->_doLog("Data received from OpenAI is not as array: " . serialize($_d)." was received for id_segment " . $payload['id_segment']);
             }
 
             // NEEDED by CURLOPT_WRITEFUNCTION function
