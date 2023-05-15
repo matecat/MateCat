@@ -107,7 +107,7 @@ class AIAssistantController extends KleinController {
             \WorkerClient::enqueue( $queue, '\AsyncTasks\Workers\AIAssistantWorker', $params, [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
         } catch ( \Exception $e ) {
             # Handle the error, logging, ...
-            $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
+            $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
             \Log::doJsonLog( $output );
