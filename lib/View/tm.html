@@ -570,7 +570,7 @@
                                 </div>
                             </tal:block>
 
-                            <tal:block tal:condition="php: page == 'cattool'">
+                            <tal:block tal:condition="php: page == 'cattool' && isOpenAiEnabled == true">
                                 <div class="options-box ai-assistant">
                                     <h3>Automatic AI assistant</h3>
                                     <p>
