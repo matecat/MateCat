@@ -85,6 +85,8 @@ class AIAssistantWorker extends AbstractWorker
 
             $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
             if($currentLockValue !== $lockValue){
+                $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue. ", ".$lockValue." was expected");
+
                 return 0;
             }
 
@@ -93,6 +95,8 @@ class AIAssistantWorker extends AbstractWorker
             foreach( $_d as $clean ){
 
                 if (strpos($data, "[DONE]\n\n") !== false) {
+                    $this->_doLog("Current lock key is: " . $this->getLockKey($payload['id_segment'], $payload['id_job'], $payload['password']));
+                    $this->_doLog("Current lock value is: " . $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']));
                     $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
                     $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
                 } else {
@@ -184,7 +188,7 @@ class AIAssistantWorker extends AbstractWorker
      */
     private function getLockKey($idSegment, $idJob, $password)
     {
-        return base64_encode($idSegment.'-'.$idJob.'-'.$password);
+        return $idSegment.'-'.$idJob.'-'.$password;
     }
 
     /**
