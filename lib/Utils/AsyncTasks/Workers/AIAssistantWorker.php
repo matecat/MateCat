@@ -79,7 +79,10 @@ class AIAssistantWorker extends AbstractWorker
         $txt = "";
 
         $lockValue = $this->generateLockValue();
+
+        $this->_doLog("Preparing for OpenAI call for id_segment " . $payload['id_segment']);
         $this->generateLock($payload['id_segment'], $payload['id_job'], $payload['password'], $lockValue);
+        $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload['word'] , $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
 
