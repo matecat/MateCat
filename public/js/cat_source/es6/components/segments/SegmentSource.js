@@ -575,21 +575,27 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
         }
 
-    const isShowingAiAssistantButton =
-      Boolean(config.isOpenAiEnabled) &&
-      !SegmentUtils.isAiAssistantAuto() &&
-      isValidPhraseToAiAssistant({phrase: getSelectedWords()})
+    const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
+      phrase: getSelectedWords(),
+    })
 
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
-        {isShowingAiAssistantButton && (
+        {Boolean(config.isOpenAiEnabled) && !SegmentUtils.isAiAssistantAuto() && (
           <li
-            title="See the meaning of the highlighted text in this context"
+            title={
+              isEnabledAiAssistantButton
+                ? 'See the meaning of the highlighted text in this context'
+                : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
+            }
+            className={!isEnabledAiAssistantButton ? 'disabled' : ''}
             onMouseDown={() => {
-              SegmentActions.helpAiAssistant({
-                sid: segment.sid,
-                value: getSelectedWords(),
-              })
+              if (isEnabledAiAssistantButton) {
+                SegmentActions.helpAiAssistant({
+                  sid: segment.sid,
+                  value: getSelectedWords(),
+                })
+              }
             }}
           >
             <Assistant />
