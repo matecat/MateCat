@@ -4,6 +4,9 @@ namespace TMS;
 
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Constants_TranslationStatus;
+use DateTime;
+use DateTimeZone;
 use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
@@ -13,6 +16,7 @@ use FeatureSet;
 use INIT;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use SplTempFileObject;
 use stdClass;
 use TMSService\TMSServiceDao;
 use Upload;
@@ -165,6 +169,7 @@ class TMSService {
 
     /**
      * Import TMX file in MyMemory
+     * @param TMSFile $file
      * @throws Exception
      */
     public function addGlossaryInMyMemory( TMSFile $file ) {
@@ -207,8 +212,8 @@ class TMSService {
 
     /**
      * @param $uuid
-     *
-     * @return array
+     * @return mixed
+     * @throws Exception
      */
     public function glossaryUploadStatus( $uuid ) {
 
@@ -331,16 +336,13 @@ class TMSService {
      */
     public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key ) {
 
-        $response = $this->mymemory_engine->emailExport(
+        return $this->mymemory_engine->emailExport(
                 $tm_key,
                 $this->name,
                 $userMail,
                 $userName,
                 $userSurname
         );
-
-        return $response;
-
     }
 
     /**
@@ -359,7 +361,7 @@ class TMSService {
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         $Filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [] );
         $tmpFile    = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
