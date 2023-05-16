@@ -117,6 +117,15 @@ export const SegmentFooterTabAiAssistant = ({
             ...item,
             suggestion: item === pendingCache ? suggestion : item.suggestion,
           }))
+          const message = {
+            sid: segment.sid,
+            segment: segment.decodedSource,
+            request: requestedWord.current,
+            response: suggestion,
+            source: config.source_code,
+            target: config.target_code,
+          }
+          CommonUtils.dispatchTrackingEvents('AiAssistantResponse', message)
         } else if (hasError) {
           setHasError(true)
         }

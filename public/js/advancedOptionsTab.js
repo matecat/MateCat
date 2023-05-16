@@ -6,7 +6,6 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
-
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -146,14 +145,16 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       const aiAssistantCheck = document.getElementById('ai-assistant_check')
       aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
       aiAssistantCheck.onchange = () => {
-        if (SegmentUtils.isAiAssistantAuto()) {
+        if (!SegmentUtils.isAiAssistantAuto()) {
           //Track Event
           const message = {
             user: APP.USER.STORE.user.uid,
             page: location.href,
-            disabled: true,
           }
-          CommonUtils.dispatchTrackingEvents('AiAssistantDisabled', message)
+          CommonUtils.dispatchTrackingEvents(
+            'AiAssistantEnableHighlight',
+            message,
+          )
         }
         SegmentUtils.setAiAssistantOptionValue(
           !SegmentUtils.isAiAssistantAuto(),
