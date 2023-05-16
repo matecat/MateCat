@@ -52,16 +52,15 @@ export const SettingsPanelRow = forwardRef(
     }
 
     const shouldNotAddApplyDragOver =
-      (isDraggable &&
-        dragStartIndexRef.current?.index + 1 === index &&
+      (dragStartIndexRef.current?.index + 1 === index &&
         halfDragPoint === 'top') ||
       (dragStartIndexRef.current?.index > 0 &&
         dragStartIndexRef.current?.index - 1 === index &&
         halfDragPoint === 'bottom')
 
-    const draggableCssClasses = `${
-      isDraggable ? ' settings-panel-row-draggable' : ''
-    }${isDragging ? ' settings-panel-row-dragging' : ''}`
+    const draggingCssClasses = `${
+      isDragging ? ' settings-panel-row-dragging' : ''
+    }`
 
     const dragOverCssClasses = `${
       !isDragging && !shouldNotAddApplyDragOver && isDragOver
@@ -78,7 +77,7 @@ export const SettingsPanelRow = forwardRef(
     return (
       <div
         ref={ref}
-        className={`settings-panel-row${draggableCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
+        className={`settings-panel-row${draggingCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
         draggable={isActiveDrag}
         onDragStart={onDragStartCallback}
         onDragOver={onDragOverCallback}
@@ -109,7 +108,7 @@ SettingsPanelRow.propTypes = {
   row: PropTypes.shape({
     node: PropTypes.node.isRequired,
     isDraggable: PropTypes.bool,
-  }),
+  }).isRequired,
   isDragOver: PropTypes.bool,
   wasDragged: PropTypes.bool,
 }

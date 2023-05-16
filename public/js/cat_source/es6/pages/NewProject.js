@@ -476,7 +476,13 @@ const NewProject = ({
           }}
         />
       )}
-      {isOpenSettings && <SettingsPanel onClose={closeSettings} />}
+      {isOpenSettings && (
+        <SettingsPanel
+          onClose={closeSettings}
+          tmKeys={tmKeys}
+          isCreateProjectPage={true}
+        />
+      )}
       <Footer />
     </CreateProjectContext.Provider>
   )

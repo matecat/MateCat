@@ -22,7 +22,7 @@ const DEFAULT_CONTENTS = [
   },
 ]
 
-export const SettingsPanel = ({onClose}) => {
+export const SettingsPanel = ({onClose, tmKeys, isCreateProjectPage}) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
     DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
@@ -46,7 +46,9 @@ export const SettingsPanel = ({onClose}) => {
   const close = () => setIsVisible(false)
 
   return (
-    <SettingsPanelContext.Provider value={{tabs, setTabs}}>
+    <SettingsPanelContext.Provider
+      value={{tabs, setTabs, tmKeys, isCreateProjectPage}}
+    >
       <div className="settings-panel">
         <div
           className={`settings-panel-overlay${
@@ -78,4 +80,6 @@ export const SettingsPanel = ({onClose}) => {
 
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
+  tmKeys: PropTypes.array,
+  isCreateProjectPage: PropTypes.bool,
 }
