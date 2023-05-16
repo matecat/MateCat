@@ -5034,11 +5034,39 @@ header {
     }
   }
 }
+
 .optionsToolbar {
   margin-top: 16px;
   display: flex;
   gap: 8px;
 
+  > li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #c6c6c6;
+    color: $grey1;
+
+    &:hover:not(.disabled) {
+      color: $black;
+    }
+
+    &.disabled {
+      cursor: unset;
+      opacity: 0.6;
+    }
+  }
+}
+/* Custom font for Urdu (ur-PK) language */
+@font-face {
+  font-family: 'Jameel Nori Nastaleeq';
+  src: url('../fonts/Jameel_Noori_Nastaleeq.ttf');
+  font-weight: normal;
+  font-style: normal;
   > li {
     display: flex;
     align-items: center;

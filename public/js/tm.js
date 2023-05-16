@@ -1970,7 +1970,9 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       var label, format
       if (type == 'tmx') {
         label =
-          '<p class="pull-left">Select up to 10 TMX files to be imported</p>'
+          //'<p class="pull-left">Select up to 10 TMX files to be imported</p>'
+          '<p class="pull-left">Select a tmx file to import</p>'
+
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -1985,7 +1987,8 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         format = '.xlsx,.xls, .ods'
       }
       $(elem).closest('tr').find('.action a').addClass('disabled')
-      const multiple = type === 'tmx' ? 'multiple' : ''
+      //const multiple = type === 'tmx' ? 'multiple' : ''
+      const multiple = ''
       var nr =
         '<td class="uploadfile" style="display: none">' +
         label +

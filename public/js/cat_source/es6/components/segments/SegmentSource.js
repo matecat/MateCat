@@ -465,6 +465,37 @@ class SegmentSource extends React.Component {
 
   preventEdit = () => 'handled'
 
+  getSelectedWords = () =>
+    DraftMatecatUtils.getSelectedTextWithoutEntities(
+      this.state.editorState,
+    ).reduce((acc, {value}) => `${acc}${value}`, '')
+
+  isValidPhraseToAiAssistant = ({
+    phrase,
+    sourceLanguageCode = config.source_code,
+  }) => {
+    if (!phrase) return false
+
+    const phraseValidator = {
+      'zh-CN': (value) => value.split('').length <= 6,
+      'zh-TW': (value) => value.split('').length <= 6,
+      'zh-HK': (value) => value.split('').length <= 6,
+      'zh-MO': (value) => value.split('').length <= 6,
+      'ja-JP': (value) => value.split('').length <= 10,
+      default: (value) => value.split(' ').length <= 3,
+    }
+
+    const handler = {
+      get: function (target, prop) {
+        const counter = target[prop] ? target[prop] : target.default
+        return counter(phrase)
+      },
+    }
+
+    const proxy = new Proxy(phraseValidator, handler)
+    return proxy[sourceLanguageCode]
+  }
+
   helpAiAssistant = () => {
     if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
 
@@ -474,11 +505,11 @@ class SegmentSource extends React.Component {
     if (isOpenAiEnabled) {
       this.delayAiAssistant = setTimeout(() => {
         const {segment} = this.context
-        const value = DraftMatecatUtils.getSelectedTextWithoutEntities(
-          this.state.editorState,
-        ).reduce((acc, {value}) => `${acc}${value}`, '')
+        const value = this.getSelectedWords()
 
-        if (value) {
+        const isValid = this.isValidPhraseToAiAssistant({phrase: value})
+
+        if (isValid) {
           SegmentActions.helpAiAssistant({
             sid: segment.sid,
             value,
@@ -500,6 +531,8 @@ class SegmentSource extends React.Component {
       addSplitTag,
       splitSegmentNew,
       preventEdit,
+      getSelectedWords,
+      isValidPhraseToAiAssistant,
     } = this
     // Set correct handlers
     const handlers = !segment.openSplit
@@ -542,18 +575,27 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
         }
 
+    const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
+      phrase: getSelectedWords(),
+    })
+
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) && !SegmentUtils.isAiAssistantAuto() && (
           <li
-            title="See the meaning of the highlighted text in this context"
+            title={
+              isEnabledAiAssistantButton
+                ? 'See the meaning of the highlighted text in this context'
+                : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
+            }
+            className={!isEnabledAiAssistantButton ? 'disabled' : ''}
             onMouseDown={() => {
-              SegmentActions.helpAiAssistant({
-                sid: segment.sid,
-                value: DraftMatecatUtils.getSelectedTextWithoutEntities(
-                  editorState,
-                ).reduce((acc, {value}) => `${acc}${value}`, ''),
-              })
+              if (isEnabledAiAssistantButton) {
+                SegmentActions.helpAiAssistant({
+                  sid: segment.sid,
+                  value: getSelectedWords(),
+                })
+              }
             }}
           >
             <Assistant />
@@ -564,10 +606,7 @@ class SegmentSource extends React.Component {
           onMouseDown={() => {
             SegmentActions.openGlossaryFormPrefill({
               sid: segment.sid,
-              [TERM_FORM_FIELDS.ORIGINAL_TERM]:
-                DraftMatecatUtils.getSelectedTextWithoutEntities(
-                  editorState,
-                ).reduce((acc, {value}) => `${acc}${value}`, ''),
+              [TERM_FORM_FIELDS.ORIGINAL_TERM]: getSelectedWords(),
             })
           }}
         >

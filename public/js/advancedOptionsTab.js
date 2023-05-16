@@ -6,7 +6,6 @@ import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
-
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -143,21 +142,22 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
       charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
       // Check Ai Asisstant
-      const aiAssistantCheck = document.getElementById('ai-assistant_check')
-      aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
-      aiAssistantCheck.onchange = () => {
-        if (SegmentUtils.isAiAssistantAuto()) {
+      if (config.isOpenAiEnabled) {
+        const aiAssistantCheck = document.getElementById('ai-assistant_check')
+        aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
+        aiAssistantCheck.onchange = () => {
           //Track Event
           const message = {
             user: APP.USER.STORE.user.uid,
             page: location.href,
-            disabled: true,
+            onHighlight: !SegmentUtils.isAiAssistantAuto(),
           }
-          CommonUtils.dispatchTrackingEvents('AiAssistantDisabled', message)
+          CommonUtils.dispatchTrackingEvents('AiAssistantSwitch', message)
+
+          SegmentUtils.setAiAssistantOptionValue(
+            !SegmentUtils.isAiAssistantAuto(),
+          )
         }
-        SegmentUtils.setAiAssistantOptionValue(
-          !SegmentUtils.isAiAssistantAuto(),
-        )
       }
     },
 
