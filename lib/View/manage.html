@@ -5,6 +5,10 @@
     <title>Manage Projects - Matecat</title>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
+    <meta property="og:title" content="Translate a file with Matecat" />
+    <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:url" content="https://www.matecat.com" />
+    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
@@ -25,6 +29,7 @@
             outsource_service_login : '${outsource_service_login}',
             splitEnabled: ${split_enabled},
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
         };
     </script>

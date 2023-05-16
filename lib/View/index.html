@@ -4,6 +4,10 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta property="og:title" content="Translate a file with Matecat" />
+        <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
+        <meta property="og:url" content="https://www.matecat.com" />
+        <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
         <title tal:content="pageTitle">Page Title</title>
         <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
         <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
@@ -87,6 +91,7 @@
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
                 isCJK: ${isCJK},
+                isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
                 isTargetRTL: ${isTargetRTL},
                 isSourceRTL: ${isSourceRTL},
                 /**

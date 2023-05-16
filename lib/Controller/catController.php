@@ -182,6 +182,7 @@ class catController extends viewController {
          *
          */
         $this->translation_engines = array_unique( array_merge( $active_mt_engine, $tms_engine, $mt_engines ) );
+        $this->translation_engines = $this->removeMMTFromEngines($this->translation_engines);
 
         $this->_saveActivity();
 

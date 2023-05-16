@@ -3,8 +3,12 @@
 <head>
     <meta charset="utf-8"/>
     <title>Volume Analysis - Matecat</title>
-    <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
+    <meta property="og:title" content="Translate a file with Matecat" />
+    <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:url" content="https://www.matecat.com" />
+    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
@@ -30,6 +34,7 @@
             splitEnabled: ${split_enabled},
             targetIsCJK: ${targetIsCJK},
             isCJK: ${isCJK},
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
         };

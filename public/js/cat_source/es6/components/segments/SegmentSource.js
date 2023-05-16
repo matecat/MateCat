@@ -17,6 +17,8 @@ import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
+import Education from '../icons/Education'
+import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -557,6 +559,20 @@ class SegmentSource extends React.Component {
             <Assistant />
           </li>
         )}
+        <li
+          title="Click to add the highlighted text to the glossary"
+          onMouseDown={() => {
+            SegmentActions.openGlossaryFormPrefill({
+              sid: segment.sid,
+              [TERM_FORM_FIELDS.ORIGINAL_TERM]:
+                DraftMatecatUtils.getSelectedTextWithoutEntities(
+                  editorState,
+                ).reduce((acc, {value}) => `${acc}${value}`, ''),
+            })
+          }}
+        >
+          <Education />
+        </li>
       </ul>
     )
 

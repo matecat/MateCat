@@ -543,52 +543,52 @@ class GetContributionWorker extends AbstractWorker {
 
         if ( count( $matches ) > 0 ) {
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
+            $segmentTranslation =  \Translations_SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
-            foreach ( $matches as $k => $m ) {
+            // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
+            if($segmentTranslation->status === Constants_TranslationStatus::STATUS_NEW){
 
-                $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
+                $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
 
-                if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
-                    $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
-                } else {
-                    $user = new \Users_UserStruct();
+                foreach ( $matches as $k => $m ) {
 
-                    if ( !$contributionStruct->getUser()->isAnonymous() ) {
-                        $user = $contributionStruct->getUser();
-                    }
+                    $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
-                    $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                    if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
+                        $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                    } else {
+                        $user = new \Users_UserStruct();
+
+                        if ( !$contributionStruct->getUser()->isAnonymous() ) {
+                            $user = $contributionStruct->getUser();
+                        }
+
+                        $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                             $m,
                             $contributionStruct->getJobStruct()->tm_keys,
                             $contributionStruct->getJobStruct()->owner,
                             $user->uid
-                    );
-
+                        );
+                    }
                 }
 
-            }
+                $suggestions_json_array = json_encode( $matches );
+                $match                  = $matches[ 0 ];
 
-            $suggestions_json_array = json_encode( $matches );
-            $match                  = $matches[ 0 ];
+                $data                        = [];
+                $data[ 'suggestions_array' ] = $suggestions_json_array;
+                $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+                $data[ 'translation' ]       = $match[ 'raw_translation' ];
+                $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $data                        = [];
-            $data[ 'suggestions_array' ] = $suggestions_json_array;
-            $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
-            $data[ 'translation' ]       = $match[ 'raw_translation' ];
-            $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
-
-            $where = [
+                $where = [
                     'id_segment' => $contributionStruct->segmentId,
                     'id_job'     => $contributionStruct->getJobStruct()->id,
                     'status'     => Constants_TranslationStatus::STATUS_NEW
-            ];
+                ];
 
-            \Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
-
-
+                \Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
+            }
         }
-
     }
-
 }
