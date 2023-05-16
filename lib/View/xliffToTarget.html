@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
-    <meta property="og:title" content="Translate a file with MateCat"/>
+    <meta property="og:title" content="Translate a file with Matecat"/>
     <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!"/>
     <meta property="og:url" content="https://www.matecat.com"/>
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png"/>
@@ -671,7 +671,7 @@
                             size: data.originalFiles[0].size,
                             type: data.originalFiles[0].type
                         };
-                        file.error = 'An error occurred. Please, be sure that the xliff file has been downloaded from MateCat';
+                        file.error = 'An error occurred. Please, be sure that the xliff file has been downloaded from Matecat';
                         that._transition( $( this ) ).done(
                                 function () {
                                     var node = $( this );
@@ -806,7 +806,7 @@
             var msg = '';
 
             if ( file.type.match( /^image/ ) ) {
-                msg = 'Images not allowed in MateCat';
+                msg = 'Images not allowed in Matecat';
             } else {
                 msg = 'Filetype not allowed in this page. Please upload an xliff file';
             }
