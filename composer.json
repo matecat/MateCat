@@ -35,5 +35,6 @@
         "ext-mbstring": "*",
         "ext-zlib": "*",
         "orhanerday/open-ai": "^4.7"
+
     }
 }

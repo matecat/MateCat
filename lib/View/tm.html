@@ -591,6 +591,27 @@
                                 </div>
                             </tal:block>
 
+                            <tal:block tal:condition="php: page == 'cattool' && isOpenAiEnabled == true">
+                                <div class="options-box ai-assistant">
+                                    <h3>Automatic AI assistant</h3>
+                                    <p>
+                                        By default, a button to activate the AI assistant appears under the source segment when you highlight a word. If you set this option to active, the AI assistant will activate automatically when a word is highlighted. The AI assistant can be activated for a maximum or 3 words, 6 Chinese characters or 10 Japanese characters.
+                                    </p>
+                                    <div class="onoffswitch-container">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="ai-assistant_check" checked="checked" />
+                                            <label class="onoffswitch-label" for="ai-assistant_check">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                                <span class="onoffswitch-label-status-active">Active</span>
+                                                <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                                <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tal:block>
+
                             <div class="options-box multi-match">
                                 <h3>Cross-language Matches</h3>
                                 <p>Get translation suggestions in other target languages you know as reference.</p>
