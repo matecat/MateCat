@@ -17,11 +17,17 @@ class JobMetadataModal extends React.Component {
   }
 
   createFileList() {
-    const {currentFile} = this.props
+    const {currentFile, currentFilePart} = this.props
     return this.props.files.map((file) => {
-      let currentClass = currentFile && currentFile === file.id ? 'current' : ''
+      let isCurrentFile =
+        (currentFile && currentFile === file.id) ||
+        (currentFilePart && currentFilePart === file.id)
+
+      let currentClass = isCurrentFile ? 'current' : ''
       currentClass =
-        this.props.files.lenght > 1 ? currentClass + ' active' : currentClass
+        this.props.files.length === 1 || isCurrentFile
+          ? currentClass + ' active'
+          : currentClass
       if (file.metadata && file.metadata.instructions) {
         return (
           <div key={'file' + file.id}>
@@ -40,7 +46,7 @@ class JobMetadataModal extends React.Component {
               >
                 {file.file_name}
               </span>
-              {currentFile && currentFile === file.id && (
+              {isCurrentFile && (
                 <div className="current-icon">
                   <CurrentIcon />
                 </div>
