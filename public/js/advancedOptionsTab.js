@@ -145,17 +145,14 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       const aiAssistantCheck = document.getElementById('ai-assistant_check')
       aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
       aiAssistantCheck.onchange = () => {
-        if (!SegmentUtils.isAiAssistantAuto()) {
-          //Track Event
-          const message = {
-            user: APP.USER.STORE.user.uid,
-            page: location.href,
-          }
-          CommonUtils.dispatchTrackingEvents(
-            'AiAssistantEnableHighlight',
-            message,
-          )
+        //Track Event
+        const message = {
+          user: APP.USER.STORE.user.uid,
+          page: location.href,
+          onHighlight: !SegmentUtils.isAiAssistantAuto(),
         }
+        CommonUtils.dispatchTrackingEvents('AiAssistantSwitch', message)
+
         SegmentUtils.setAiAssistantOptionValue(
           !SegmentUtils.isAiAssistantAuto(),
         )
