@@ -109,6 +109,8 @@ class AIAssistantWorker extends AbstractWorker
                         $this->_doLog("Stream from Open Ai is terminated. Segment id:  " . $payload['id_segment']);
                         $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
                         $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
+
+                        return 0; // exit
                     } else {
                         $this->_doLog("Received data stream from OpenAI for id_segment " . $payload['id_segment']);
                         $arr = json_decode($clean, true);
