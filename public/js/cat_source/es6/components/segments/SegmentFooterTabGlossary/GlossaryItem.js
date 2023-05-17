@@ -98,7 +98,10 @@ export const GlossaryItem = ({
             </LabelWithTooltip>
           )}
           <div className="glossary_source_details">
-            <LabelWithTooltip tooltipPosition="bottom">
+            <LabelWithTooltip
+              className="glossary_source_tooltip"
+              tooltipPosition="bottom"
+            >
               <div className="glossary_source">
                 <b>
                   {metadata.key_name
