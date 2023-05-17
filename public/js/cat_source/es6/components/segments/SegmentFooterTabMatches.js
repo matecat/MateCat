@@ -182,9 +182,9 @@ class SegmentFooterTabMatches extends React.Component {
             {CommonUtils.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
-        <li className="graydesc">
+        <li className="graydesc graydesc-sourcekey">
           Source:
-          <span className="bold" style={{fontSize: '14px'}}>
+          <span className="bold" style={{fontSize: '14px'}} title={match.cb}>
             {' '}
             {match.cb}
           </span>
