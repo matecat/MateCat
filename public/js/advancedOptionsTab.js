@@ -146,6 +146,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
         const aiAssistantCheck = document.getElementById('ai-assistant_check')
         aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
         aiAssistantCheck.onchange = () => {
+
           if (SegmentUtils.isAiAssistantAuto()) {
             //Track Event
             const message = {
@@ -155,6 +156,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
             }
             CommonUtils.dispatchTrackingEvents('AiAssistantDisabled', message)
           }
+
           SegmentUtils.setAiAssistantOptionValue(
             !SegmentUtils.isAiAssistantAuto(),
           )
