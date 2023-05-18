@@ -106,26 +106,28 @@ export const SegmentFooterTabAiAssistant = ({
       }
     }
     const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
-      if (!hasError && sid === segment.sid && !isCachedLastRequest) {
-        setSuggestion({value: suggestion, isCompleted})
-        if (isCompleted) {
-          const pendingCache = [...memoSuggestions]
-            .reverse()
-            .find(({idSegment}) => idSegment === sid)
-          memoSuggestions = memoSuggestions.map((item) => ({
-            ...item,
-            suggestion: item === pendingCache ? suggestion : item.suggestion,
-          }))
-          const message = {
-            sid: segment.sid,
-            segment: segment.decodedSource,
-            request: requestedWord.current,
-            response: suggestion,
-            source: config.source_code,
-            target: config.target_code,
+      if (sid === segment.sid && !isCachedLastRequest) {
+        if (!hasError) {
+          setSuggestion({value: suggestion, isCompleted})
+          if (isCompleted) {
+            const pendingCache = [...memoSuggestions]
+              .reverse()
+              .find(({idSegment}) => idSegment === sid)
+            memoSuggestions = memoSuggestions.map((item) => ({
+              ...item,
+              suggestion: item === pendingCache ? suggestion : item.suggestion,
+            }))
+            const message = {
+              sid: segment.sid,
+              segment: segment.decodedSource,
+              request: requestedWord.current,
+              response: suggestion,
+              source: config.source_code,
+              target: config.target_code,
+            }
+            CommonUtils.dispatchTrackingEvents('AiAssistantResponse', message)
           }
-          CommonUtils.dispatchTrackingEvents('AiAssistantResponse', message)
-        } else if (hasError) {
+        } else {
           setHasError(true)
 
           // Tracking ai error
