@@ -266,6 +266,14 @@ class Utils {
 
     }
 
+    /**
+     * @param $string
+     * @return bool
+     */
+    public static function isJson( $string ) {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
 
     public static function mysqlTimestamp( $time ) {
         return date( 'Y-m-d H:i:s', $time );
@@ -846,5 +854,20 @@ class Utils {
         }
 
         return null;
+    }
+
+    /**
+     * @param string $phrase
+     * @param int $max_words
+     * @return mixed
+     */
+    public static function truncatePhrase($phrase, $max_words){
+
+        $phrase_array = explode(' ',$phrase);
+        if(count($phrase_array) > $max_words && $max_words > 0){
+            $phrase = implode(' ',array_slice($phrase_array, 0, $max_words));
+        }
+
+        return $phrase;
     }
 }
