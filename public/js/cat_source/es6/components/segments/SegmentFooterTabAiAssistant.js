@@ -108,6 +108,7 @@ export const SegmentFooterTabAiAssistant = ({
     const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
       if (sid === segment.sid && !isCachedLastRequest) {
         if (!hasError) {
+          setHasError(true)
           setSuggestion({value: suggestion, isCompleted})
           if (isCompleted) {
             const pendingCache = [...memoSuggestions]
