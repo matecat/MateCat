@@ -120,11 +120,15 @@ class AIAssistantWorker extends AbstractWorker
                             $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
                         } else {
                             $this->_doLog("Received wrong data from OpenAI for id_segment " . $payload['id_segment']. $clean ." was received");
+
+                            return 0; // exit
                         }
                     }
                 }
             } else {
                 $this->_doLog("Data received from OpenAI is not as array: " . serialize($_d)." was received for id_segment " . $payload['id_segment']);
+
+                return 0; // exit
             }
 
             // NEEDED by CURLOPT_WRITEFUNCTION function
