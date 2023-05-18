@@ -395,6 +395,11 @@ class ProjectManager {
         $this->_sanitizeProjectName();
         $this->_validateUploadToken();
 
+        $this->projectStructure[ 'project_features' ] = new RecursiveArrayObject( $this->projectStructure[ 'project_features' ] );
+
+        $features = new FeatureSet( $this->_getRequestedFeatures() );
+        $features->run( 'sanitizeProjectStructureInCreation', $this->projectStructure );
+
     }
 
     /**
