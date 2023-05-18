@@ -5,7 +5,6 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import IconLike from '../icons/IconLike'
 import IconDislike from '../icons/IconDislike'
 import {aiSuggestion} from '../../api/aiSuggestion/aiSuggestion'
-import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import {TabConcordanceResults} from './TabConcordanceResults'
 import {getConcordance} from '../../api/getConcordance'
@@ -128,6 +127,17 @@ export const SegmentFooterTabAiAssistant = ({
           CommonUtils.dispatchTrackingEvents('AiAssistantResponse', message)
         } else if (hasError) {
           setHasError(true)
+
+          // Tracking ai error
+          const message = {
+            sid: segment.sid,
+            segment: segment.decodedSource,
+            request: requestedWord.current,
+            source: config.source_code,
+            target: config.target_code,
+            error: suggestion,
+          }
+          CommonUtils.dispatchTrackingEvents('AiAssistantError', message)
         }
       }
     }
@@ -158,7 +168,7 @@ export const SegmentFooterTabAiAssistant = ({
         aiSuggestionHandler,
       )
     }
-  }, [segment.sid, segment.updatedSource])
+  }, [segment.sid, segment.decodedSource])
 
   const isTabOpen = active_class === 'open'
 
