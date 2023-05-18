@@ -178,11 +178,12 @@ class CategoryDao extends \DataAccess_AbstractDao {
 
         $map = [];
         foreach ( json_decode( $json[ 'options' ], true ) as $key => $value ) {
-            if ( $key == 'code' ) {
-                $map[] = [ 'key' => $key, 'value' => $value ];
+            if ( $key != 'code' ) {
+                continue;
             }
+            $map[] = [ 'key' => $key, 'value' => $value ];
         }
         return $map;
-        
+
     }
 }
