@@ -232,8 +232,8 @@ export const SegmentFooterTabAiAssistant = ({
         </div>
       ) : hasError ? (
         <span className="suggestion-error">
-          It looks like we have encountered an error with this request. Please
-          refresh the page and try again
+          The service is at capacity right now. We are allowing users in as we
+          increase capacity.
         </span>
       ) : (
         <div className="loading-container">
