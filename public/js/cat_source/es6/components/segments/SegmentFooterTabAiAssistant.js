@@ -72,7 +72,7 @@ export const SegmentFooterTabAiAssistant = ({
         setFeedbackLeave(undefined)
         requestedWord.current = value
 
-        const sourceContent = TagUtils.prepareTextToSend(segment.updatedSource)
+        const sourceContent = segment.decodedSource
 
         memoSuggestions = memoSuggestions.filter(({suggestion}) => suggestion)
 
