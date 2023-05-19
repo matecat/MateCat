@@ -16,7 +16,7 @@
   background: $grey5;
 }
 
-.translation-memory-glossary-tab-resource-buttons {
+.translation-memory-glossary-tab-table-title {
   display: flex;
   align-items: center;
   font-size: 24px;
@@ -31,7 +31,7 @@
 .translation-memory-glossary-tab {
   .settings-panel-table-rowHeading,
   .settings-panel-row {
-    grid-template-columns: 10% 10% minmax(0, 1fr) 5% 20%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 5% 20%;
   }
 
   .settings-panel-row {
@@ -51,5 +51,35 @@
 
   .settings-panel-row-dragover-half-bottom {
     margin-bottom: 50px;
+  }
+}
+
+.translation-memory-glossary-tab-active-resources {
+  margin-bottom: 20px;
+}
+
+.translation-memory-glossary-tab-table-title {
+  margin-bottom: 20px;
+}
+
+.translation-memory-glossary-tab-inactive-table {
+  > :first-child {
+    display: none;
+  }
+}
+
+.tm-key-lookup,
+.tm-key-update {
+  display: flex;
+  justify-content: center;
+}
+
+.tm-key-row-name {
+  background-color: unset;
+  border: 1px solid $grey8;
+
+  &:focus,
+  &:hover {
+    background-color: white;
   }
 }

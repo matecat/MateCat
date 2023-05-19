@@ -14,38 +14,42 @@ const COLUMNS_TABLE = [
 ]
 
 export const TranslationMemoryGlossaryTab = () => {
-  const {tmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
 
   const [keysRows, setKeysRows] = useState([])
 
-  const onOrderRows = useCallback(
+  const onOrderActiveRows = useCallback(
     ({index, indexToMove}) => {
-      const rowSelected = keysRows.find((row, indexRow) => indexRow === index)
+      const activeRows = keysRows.filter(({isActive}) => isActive)
+      const rowSelected = activeRows.find((row, indexRow) => indexRow === index)
 
-      const isLastIndexToMove = indexToMove === keysRows.length
+      const isLastIndexToMove = indexToMove === activeRows.length
 
-      const orderedRows = keysRows.flatMap((row, indexRow) =>
+      const orderedRows = activeRows.flatMap((row, indexRow) =>
         indexRow === indexToMove
           ? [rowSelected, row]
           : indexRow === index
           ? []
-          : indexRow === keysRows.length - 1 && isLastIndexToMove
+          : indexRow === activeRows.length - 1 && isLastIndexToMove
           ? [row, rowSelected]
           : row,
       )
 
-      setKeysRows(orderedRows)
+      setKeysRows((prevState) => [
+        ...prevState.filter(({isActive}) => !isActive),
+        ...orderedRows,
+      ])
     },
     [keysRows],
   )
 
   useEffect(() => {
     if (!tmKeys) return
-
     setKeysRows(
       tmKeys.map((row, index) => ({
         node: <TmKeyRow key={index} {...{row}} />,
-        isDraggable: true,
+        isDraggable: row.isActive,
+        isActive: row.isActive,
       })),
     )
   }, [tmKeys])
@@ -56,20 +60,32 @@ export const TranslationMemoryGlossaryTab = () => {
         <input type="checkbox" />
         Pre-translate 100% matches from TM
       </div>
-      <div className="translation-memory-glossary-tab-resource-buttons">
-        <span>Active Resources</span>
-        <button className="ui primary button">
-          <IconAdd /> Add shared resource
-        </button>
-        <button className="ui primary button">
-          <IconAdd /> New resource
-        </button>
+      <div className="translation-memory-glossary-tab-active-resources">
+        <div className="translation-memory-glossary-tab-table-title">
+          <span>Active Resources</span>
+          <button className="ui primary button">
+            <IconAdd /> Add shared resource
+          </button>
+          <button className="ui primary button">
+            <IconAdd /> New resource
+          </button>
+        </div>
+        <SettingsPanelTable
+          columns={COLUMNS_TABLE}
+          rows={keysRows.filter(({isActive}) => isActive)}
+          onChangeRowsOrder={onOrderActiveRows}
+        />
       </div>
-      <SettingsPanelTable
-        columns={COLUMNS_TABLE}
-        rows={keysRows}
-        onChangeRowsOrder={onOrderRows}
-      />
+      <div className="translation-memory-glossary-tab-inactive-resources">
+        <div className="translation-memory-glossary-tab-table-title">
+          <span>Inactive Resources</span>
+        </div>
+        <SettingsPanelTable
+          className="translation-memory-glossary-tab-inactive-table"
+          columns={COLUMNS_TABLE}
+          rows={keysRows.filter(({isActive}) => !isActive)}
+        />
+      </div>
     </div>
   )
 }

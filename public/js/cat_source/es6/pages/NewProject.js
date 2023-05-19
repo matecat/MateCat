@@ -43,7 +43,6 @@ const NewProject = ({
   const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [tmKeySelected, setTmKeySelected] = useState([])
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState(
     sourceLanguageSelected
@@ -233,18 +232,14 @@ const NewProject = ({
   }, [])
   useEffect(() => {
     const activateKey = (event, desc, key) => {
-      const prevTmKeys = tmKeys ?? []
-      let tmSelected = prevTmKeys.find((item) => item.id === key)
-      if (!tmSelected) {
-        tmSelected = {id: key, name: desc, key}
-        setTmKeys(prevTmKeys.concat(tmSelected))
-      }
-      if (!tmKeySelected.find((item) => item.id === key)) {
-        setTmKeySelected(tmKeySelected.concat([tmSelected]))
-      }
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === key ? {...tm, isActive: true} : tm)),
+      )
     }
     const deactivateKey = (event, key) => {
-      setTmKeySelected(tmKeySelected.filter((item) => item.id !== key))
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === key ? {...tm, isActive: false} : tm)),
+      )
     }
     const removeKey = () => {
       getTmKeys()
@@ -258,7 +253,7 @@ const NewProject = ({
       $('#activetm').off('removeTm')
       $('#activetm').off('deleteTm')
     }
-  }, [tmKeys, tmKeySelected])
+  }, [tmKeys])
 
   useEffect(
     () =>
@@ -279,8 +274,7 @@ const NewProject = ({
         setTargetLangs,
         setIsOpenMultiselectLanguages,
         tmKeys,
-        tmKeySelected,
-        setTmKeySelected,
+        setTmKeys,
         sourceLang,
         changeSourceLanguage,
       }}
@@ -478,9 +472,10 @@ const NewProject = ({
       )}
       {isOpenSettings && (
         <SettingsPanel
-          onClose={closeSettings}
-          tmKeys={tmKeys}
-          isCreateProjectPage={true}
+          {...{
+            context: CreateProjectContext,
+            onClose: closeSettings,
+          }}
         />
       )}
       <Footer />

@@ -8,7 +8,12 @@
 
 .settings-panel-table-rowHeading {
   display: grid;
-  padding-top: 10px;
+  align-items: center;
+  background-color: $grey;
+  height: 30px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
 }
 
 .settings-panel-row {

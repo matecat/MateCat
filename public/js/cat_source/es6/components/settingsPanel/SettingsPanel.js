@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
@@ -22,7 +22,9 @@ const DEFAULT_CONTENTS = [
   },
 ]
 
-export const SettingsPanel = ({onClose, tmKeys, isCreateProjectPage}) => {
+export const SettingsPanel = ({context, onClose}) => {
+  const {tmKeys, setTmKeys} = useContext(context)
+
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
     DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
@@ -46,9 +48,7 @@ export const SettingsPanel = ({onClose, tmKeys, isCreateProjectPage}) => {
   const close = () => setIsVisible(false)
 
   return (
-    <SettingsPanelContext.Provider
-      value={{tabs, setTabs, tmKeys, isCreateProjectPage}}
-    >
+    <SettingsPanelContext.Provider value={{tabs, setTabs, tmKeys, setTmKeys}}>
       <div className="settings-panel">
         <div
           className={`settings-panel-overlay${

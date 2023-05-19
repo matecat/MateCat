@@ -10,7 +10,12 @@ import {SettingsPanelRow} from './SettingsPanelRow'
 
 export const SettingsPanelTableContext = createContext({})
 
-export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
+export const SettingsPanelTable = ({
+  columns,
+  rows,
+  onChangeRowsOrder,
+  className,
+}) => {
   const [dragOverIndex, setDragOverIndex] = useState()
 
   const rowsContainerRef = useRef()
@@ -98,6 +103,8 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
     )
   }
 
+  const customClassName = className ? ` ${className}` : ''
+
   return (
     <SettingsPanelTableContext.Provider
       value={{
@@ -108,7 +115,7 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
         onDragEnd,
       }}
     >
-      <div className="settings-panel-table">
+      <div className={`settings-panel-table${customClassName}`}>
         <div>
           <div className="settings-panel-table-rowHeading">
             {columns.map(renderColumns)}
@@ -132,4 +139,5 @@ SettingsPanelTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   onChangeRowsOrder: PropTypes.func,
+  className: PropTypes.string,
 }
