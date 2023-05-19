@@ -387,6 +387,10 @@ class ProjectManager {
      * Perform sanitization of the projectStructure and assign errors.
      * Resets the errors array to avoid subsequent calls to pile up errors.
      *
+     * Please NOTE: this method is called by controllers and by ProjectManager itself, in the latter case
+     *  'project_features' field already contains a RecursiveArrayObject,
+     *   so use an ArrayObject, it accepts both array and RecursiveArrayObject
+     *
      * @throws Exception
      */
     public function sanitizeProjectStructure() {
@@ -394,6 +398,11 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
         $this->_sanitizeProjectName();
         $this->_validateUploadToken();
+
+        $this->projectStructure[ 'project_features' ] = new ArrayObject( $this->projectStructure[ 'project_features' ] );
+
+        $features = new FeatureSet( $this->_getRequestedFeatures() );
+        $features->run( 'sanitizeProjectStructureInCreation', $this->projectStructure );
 
     }
 
@@ -1540,15 +1549,13 @@ class ProjectManager {
             $translatorModel->update();
         }
 
-        // calculate total_raw_wc and standard_analysis_wc
-        $num_split                     = count( $projectStructure[ 'split_result' ][ 'chunks' ] );
-        $total_raw_wc                  = $jobToSplit[ 'total_raw_wc' ];
-        $splitted_total_raw_wc         = round( $total_raw_wc / $num_split );
-        $splitted_standard_analysis_wc = round( $projectStructure[ 'split_result' ][ 'standard_analysis_count' ] / $num_split );
+        $chunks = $projectStructure[ 'split_result' ][ 'chunks' ];
 
-        $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $splitted_standard_analysis_wc, $splitted_total_raw_wc );
+        // update the first chunk of the job to split
+        $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $chunks[0]['eq_word_count'], $chunks[0]['raw_word_count'] );
 
-        foreach ( $projectStructure[ 'split_result' ][ 'chunks' ] as $chunk => $contents ) {
+        // create the other chunks of the job to split
+        foreach ( $chunks as $chunk => $contents ) {
 
             //IF THIS IS NOT the original job, UPDATE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
@@ -1562,8 +1569,8 @@ class ProjectManager {
             $jobToSplit[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
             $jobToSplit[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
             $jobToSplit[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
-            $jobToSplit[ 'standard_analysis_wc' ] = $splitted_standard_analysis_wc;
-            $jobToSplit[ 'total_raw_wc' ]         = $splitted_total_raw_wc;
+            $jobToSplit[ 'standard_analysis_wc' ] = $contents[ 'eq_word_count' ];
+            $jobToSplit[ 'total_raw_wc' ]         = $contents['raw_word_count'];
 
             $stmt = $jobDao->getSplitJobPreparedStatement( $jobToSplit );
             $stmt->execute();
