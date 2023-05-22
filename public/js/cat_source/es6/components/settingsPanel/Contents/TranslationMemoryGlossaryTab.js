@@ -13,8 +13,16 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
+const DEFAULT_TRANSLATION_MEMORY = {
+  id: 'mmSharedKey',
+  name: 'MyMemory: Collaborative translation memory shared with all Matecat users.',
+  isActive: true,
+  isDraggable: false,
+  isLocked: true,
+}
+
 export const TranslationMemoryGlossaryTab = () => {
-  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys} = useContext(SettingsPanelContext)
 
   const [keysRows, setKeysRows] = useState([])
 
@@ -45,11 +53,14 @@ export const TranslationMemoryGlossaryTab = () => {
 
   useEffect(() => {
     if (!tmKeys) return
+    const rows = [DEFAULT_TRANSLATION_MEMORY, ...tmKeys]
+
     setKeysRows(
-      tmKeys.map((row, index) => ({
+      rows.map((row, index) => ({
         node: <TmKeyRow key={index} {...{row}} />,
-        isDraggable: row.isActive,
+        isDraggable: row.isDraggable ?? row.isActive,
         isActive: row.isActive,
+        isLocked: row.isLocked,
       })),
     )
   }, [tmKeys])

@@ -18,7 +18,7 @@ export const SettingsPanelRow = forwardRef(
 
     const refDragHandle = useRef()
 
-    const {isDraggable, node} = row
+    const {isDraggable, isLocked, node} = row
 
     const onDragStartCallback = () => {
       setIsDragging(true)
@@ -52,6 +52,7 @@ export const SettingsPanelRow = forwardRef(
     }
 
     const shouldNotAddApplyDragOver =
+      isLocked ||
       (dragStartIndexRef.current?.index + 1 === index &&
         halfDragPoint === 'top') ||
       (dragStartIndexRef.current?.index > 0 &&
