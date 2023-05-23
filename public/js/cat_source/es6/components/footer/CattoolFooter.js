@@ -96,11 +96,11 @@ export const CattolFooter = ({
   let targetLang = languagesArray.find((item) => item.code == target)?.name
 
   if (!sourceLang) {
-    sourceLang = 'Undefined'
+    sourceLang = source
   }
 
   if (!targetLang) {
-    targetLang = 'Undefined'
+    targetLang = target
   }
 
   React.useEffect(() => {
