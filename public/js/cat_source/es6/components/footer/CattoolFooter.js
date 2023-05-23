@@ -91,8 +91,17 @@ export const CattolFooter = ({
     progressBar: false,
     todo: false,
   })
-  const sourceLang = languagesArray.find((item) => item.code == source).name
-  const targetLang = languagesArray.find((item) => item.code == target).name
+
+  let sourceLang = languagesArray.find((item) => item.code == source)?.name
+  let targetLang = languagesArray.find((item) => item.code == target)?.name
+
+  if (!sourceLang) {
+    sourceLang = 'Undefined'
+  }
+
+  if (!targetLang) {
+    targetLang = 'Undefined'
+  }
 
   React.useEffect(() => {
     const listener = (stats) => {

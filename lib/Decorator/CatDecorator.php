@@ -198,8 +198,8 @@ class CatDecorator extends \AbstractDecorator {
         $lang_handler = Langs_Languages::getInstance();
         $isSourceRTL = $lang_handler->isRTL( $this->controller->source_code );
         $isTargetRTL = $lang_handler->isRTL( $this->controller->target_code );
-        $this->template->isTargetRTL = $isTargetRTL;
-        $this->template->isSourceRTL = $isSourceRTL;
+        $this->template->isTargetRTL = $isTargetRTL ?: 0;
+        $this->template->isSourceRTL = $isSourceRTL ?: 0;
         $this->template->source_rtl = $isSourceRTL ? ' rtl-source' : '';
         $this->template->target_rtl = $isTargetRTL ? ' rtl-target' : '';
 
