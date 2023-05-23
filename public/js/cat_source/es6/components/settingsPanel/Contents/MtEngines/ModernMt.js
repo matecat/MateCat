@@ -1,33 +1,46 @@
 import React from 'react'
+import {useForm} from 'react-hook-form'
 
-export const ModernMt = () => {
+export const ModernMt = ({addMTEngine}) => {
+  const {register, handleSubmit} = useForm({
+    defaultValues: {
+      preimport: config.isAnInternalUser ? false : true,
+      context_analyzer: config.isAnInternalUser ? false : true,
+      pretranslate: config.isAnInternalUser ? true : false,
+    },
+  })
+  const onSubmit = (data) => {
+    addMTEngine(data)
+  }
   return (
     <div className="add-provider-container">
       <div className="add-provider-fields">
         <div className="provider-data">
           <div className="provider-field">
-            <label>ModernMT License</label>
+            <label>
+              ModernMT License<sup>*</sup>
+            </label>
             <input
               className="required"
-              name="secret"
               type="text"
               placeholder="Enter your license"
+              {...register('secret', {required: true})}
             />
           </div>
           <div className="provider-field checkbox first">
             {config.isAnInternalUser ? (
               <input
                 className="required"
-                name="preimport"
                 type="checkbox"
                 disabled="disabled"
+                {...register('preimport')}
               />
             ) : (
               <input
                 className="required"
-                name="preimport"
                 type="checkbox"
                 checked="checked"
+                {...register('preimport')}
               />
             )}
             <label className="checkbox-label">Pre-import your TMs </label>
@@ -36,16 +49,16 @@ export const ModernMt = () => {
             {config.isAnInternalUser ? (
               <input
                 className="required"
-                name="context_analyzer"
                 type="checkbox"
                 disabled="disabled"
+                {...register('context_analyzer')}
               />
             ) : (
               <input
                 className="required"
-                name="context_analyzer"
                 type="checkbox"
                 checked="checked"
+                {...register('context_analyzer')}
               />
             )}
             <label className="checkbox-label">Activate context analyzer</label>
@@ -54,17 +67,25 @@ export const ModernMt = () => {
             {config.isAnInternalUser ? (
               <input
                 className="required"
-                name="pretranslate"
                 type="checkbox"
-                checked="checked"
                 disabled="disabled"
+                {...register('pretranslate')}
               />
             ) : (
-              <input className="required" name="pretranslate" type="checkbox" />
+              <input
+                className="required"
+                type="checkbox"
+                {...register('pretranslate')}
+              />
             )}
             <label className="checkbox-label">Pre-translate files</label>
           </div>
-          <button className="ui primary button">Confirm</button>
+          <button
+            className="ui primary button"
+            onClick={handleSubmit(onSubmit)}
+          >
+            Confirm
+          </button>
         </div>
       </div>
       <div className="add-provider-message">

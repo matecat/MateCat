@@ -1,6 +1,11 @@
 import React from 'react'
+import {useForm} from 'react-hook-form'
 
-export const SmartMate = () => {
+export const SmartMate = ({addMTEngine}) => {
+  const {register, handleSubmit} = useForm()
+  const onSubmit = (data) => {
+    addMTEngine(data)
+  }
   return (
     <div className="add-provider-container">
       <div className="add-provider-fields">
@@ -11,24 +16,38 @@ export const SmartMate = () => {
             </label>
             <input
               className="new-engine-name required"
-              name="engine-name"
               type="text"
+              {...register('name', {required: true})}
             />
           </div>
           <div className="provider-field">
             <label>
               User<sup>*</sup>
             </label>
-            <input className="required" name="client_id" type="text" />
+            <input
+              className="required"
+              type="text"
+              {...register('client_id', {required: true})}
+            />
           </div>
           <div className="provider-field">
             <label>
               Key<sup>*</sup>
             </label>
-            <input className="required" name="secret" type="text" />
+            <input
+              className="required"
+              name="secret"
+              type="text"
+              {...register('secret', {required: true})}
+            />
           </div>
 
-          <button className="ui primary button">Confirm</button>
+          <button
+            className="ui primary button"
+            onClick={handleSubmit(onSubmit)}
+          >
+            Confirm
+          </button>
         </div>
       </div>
       <div className="add-provider-message">

@@ -1,6 +1,11 @@
 import React from 'react'
+import {useForm} from 'react-hook-form'
 
-export const MicrosoftHub = () => {
+export const MicrosoftHub = ({addMTEngine}) => {
+  const {register, handleSubmit} = useForm()
+  const onSubmit = (data) => {
+    addMTEngine(data)
+  }
   return (
     <div className="add-provider-container">
       <div className="add-provider-fields">
@@ -11,22 +16,32 @@ export const MicrosoftHub = () => {
             </label>
             <input
               className="new-engine-name required"
-              name="engine-name"
               type="text"
+              {...register('name', {required: true})}
             />
           </div>
           <div className="provider-field">
             <label>
               KeyId<sup>*</sup>
             </label>
-            <input className="required" name="secret" type="text" />
+            <input
+              className="required"
+              name="secret"
+              type="text"
+              {...register('secret', {required: true})}
+            />
           </div>
           <div className="provider-field">
             <label>Category</label>
-            <input name="category" type="text" />
+            <input name="category" type="text" {...register('category')} />
           </div>
 
-          <button className="ui primary button">Confirm</button>
+          <button
+            className="ui primary button"
+            onClick={handleSubmit(onSubmit)}
+          >
+            Confirm
+          </button>
         </div>
       </div>
       <div className="add-provider-message">

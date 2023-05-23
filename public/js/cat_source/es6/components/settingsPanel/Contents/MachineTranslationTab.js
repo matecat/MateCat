@@ -9,29 +9,33 @@ import {Intento} from './MtEngines/Intento'
 import {MicrosoftHub} from './MtEngines/MicrosoftHub'
 import {SmartMate} from './MtEngines/SmartMate'
 import {Yandex} from './MtEngines/Yandex'
-
-const enginesList = [
-  {name: 'ModernMt', id: 'mmt', component: <ModernMt />},
-  {name: 'AltLang', id: 'altlang', component: <AltLang />},
-  {name: 'Apertium', id: 'apertium', component: <Apertium />},
-  {
-    name: 'Google Translate',
-    id: 'googletranslate',
-    component: <GoogleTranslate />,
-  },
-  {name: 'Intento', id: 'intento', component: <Intento />},
-  {
-    name: 'Microsoft Translator Hub',
-    id: 'microsofthub',
-    component: <MicrosoftHub />,
-  },
-  {name: 'SmartMATE', id: 'smartmate', component: <SmartMate />},
-  {name: 'Yandex.Translate', id: 'yandextranslate', component: <Yandex />},
-]
-
 export const MachineTranslationTab = () => {
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeEngine, setActiveEngine] = useState()
+
+  const enginesList = [
+    {name: 'ModernMt', id: 'mmt', component: ModernMt},
+    {name: 'AltLang', id: 'altlang', component: AltLang},
+    {name: 'Apertium', id: 'apertium', component: Apertium},
+    {
+      name: 'Google Translate',
+      id: 'googletranslate',
+      component: GoogleTranslate,
+    },
+    {name: 'Intento', id: 'intento', component: Intento},
+    {
+      name: 'Microsoft Translator Hub',
+      id: 'microsofthub',
+      component: MicrosoftHub,
+    },
+    {name: 'SmartMATE', id: 'smartmate', component: SmartMate},
+    {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
+  ]
+
+  const addMTEngine = (data) => {
+    console.log('ADD MT ->', activeEngine.id, data.name, data)
+  }
+
   return (
     <div className="machine-translation-tab">
       {!addMTVisible ? (
@@ -62,7 +66,9 @@ export const MachineTranslationTab = () => {
               Close
             </button>
           </div>
-          {activeEngine ? activeEngine.component : null}
+          {activeEngine ? (
+            <activeEngine.component addMTEngine={addMTEngine} />
+          ) : null}
         </div>
       )}
     </div>
