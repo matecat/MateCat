@@ -2343,6 +2343,17 @@
                     "en": "Odia"
                 }
             ],
+            "isocode": "or",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "or-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Oriya"
+                }
+            ],
             "isocode": "ory",
             "enabled": true,
             "rtl": false,
