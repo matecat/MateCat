@@ -25,7 +25,7 @@
 
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta property="og:title" content="Translate a file with MateCat" />
+    <meta property="og:title" content="Translate a file with Matecat" />
     <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
@@ -54,6 +54,7 @@
             hostpath: '${hostpath | string:/}',
             unsupportedFileTypes: '${unsupported_file_types}',
             allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
+            isOpenAiEnabled: ${isOpenAiEnabled},
             conversionEnabled: ${conversion_enabled},
             analysisEnabled: ${volume_analysis_enabled},
             maxFileSize: ${maxFileSize},
@@ -76,6 +77,7 @@
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
             subject_array: ${subjects | string:[]]},
             formats_number: ${formats_number},
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
         };
         /*]]>*/

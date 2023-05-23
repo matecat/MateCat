@@ -157,7 +157,7 @@ export const GlossaryItem = ({
                 highlight && !highlight.isTarget
                   ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
                   : ''
-              }`}
+              } source_label`}
             >{`${source.term} `}</span>
             {source.sentence && (
               <div

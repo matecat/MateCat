@@ -167,15 +167,19 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
+        $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
+        $isAnInternalUser  = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+
         $this->template->logged_user      = $this->user->shortName();
         $this->template->extended_user    = $this->user->fullName();
-        $this->template->isAnInternalUser = $this->featureSet->filter( "isAnInternalUser", $this->user->email);
+        $this->template->isAnInternalUser = $isAnInternalUser;
+        $this->template->isMMTEnabled     = (isset($MMTLicense['enabled']) and $isAnInternalUser) ? $MMTLicense['enabled'] : false;
+        $this->template->MMTId            = (isset($MMTLicense['id']) and $isAnInternalUser) ? $MMTLicense['id'] : null;
         $this->template->isLoggedIn       = $this->userIsLogged;
         $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::areOauthKeysPresent() && Bootstrap::isGDriveConfigured();
-
     }
 
     /**
@@ -262,10 +266,10 @@ abstract class viewController extends controller {
             $this->template->supportedBrowser    = $this->supportedBrowser;
             $this->template->platform            = $this->platform;
             $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
-
-            $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
-            $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-            $this->template->dqf_enabled    = false;
+            $this->template->maxFileSize         = INIT::$MAX_UPLOAD_FILE_SIZE;
+            $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+            $this->template->dqf_enabled         = false;
+            $this->template->isOpenAiEnabled     = !empty(INIT::$OPENAI_API_KEY);
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
@@ -301,6 +305,36 @@ abstract class viewController extends controller {
         $this->project = $project;
 
         return $this;
+    }
+
+    /**
+     * Remove MMT from mt_engines if is an internal user
+     *
+     * @param array $engines
+     * @return array
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    protected function removeMMTFromEngines(array $engines = []) {
+
+        $isAnInternalUser  = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+
+        if($isAnInternalUser){
+            $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
+
+            if(!empty($MMTLicense) and isset($MMTLicense['id'])){
+                foreach ($engines as $index => $engine){
+                    if($engine->id === $MMTLicense['id']){
+                        unset($engines[$index]);
+                    }
+                }
+            }
+        }
+
+        return $engines;
     }
 
 }

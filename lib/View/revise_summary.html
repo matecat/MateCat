@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title>Quality Report - Matecat</title>
-    <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
     <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
@@ -26,7 +26,7 @@
             project_type: '${project_type}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-
+            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             isReview: ${isReview | string: false},
             source_code: '${source_code}',
             target_code: '${target_code}',
@@ -82,12 +82,12 @@
 <div class="notifications-wrapper"></div>
 
 <footer class="normal-foo"/>
-
+<script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="common.html/footer_includes" />
-<script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
+
 
 <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>

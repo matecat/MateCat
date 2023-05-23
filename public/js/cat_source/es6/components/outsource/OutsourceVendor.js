@@ -114,11 +114,6 @@ class OutsourceVendor extends React.Component {
           jobOutsourced: chunk.get('outsourced') === '1',
           outsourceConfirmed: chunk.get('outsourced') === '1',
         })
-
-        // Event ga
-        $(document).trigger('outsource-rendered', {
-          quote_data: self.quoteResponse,
-        })
       } else {
         self.setState({
           outsource: false,

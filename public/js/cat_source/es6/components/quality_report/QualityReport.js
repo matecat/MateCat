@@ -133,7 +133,7 @@ class QualityReport extends React.Component {
       height: '100%',
       width: '100%',
       backgroundColor: 'rgba(76, 69, 69, 0.3)',
-      top: $(window).scrollTop(),
+      top: document.getElementById('qr-root').scrollTop,
       left: 0,
       zIndex: 3,
     }

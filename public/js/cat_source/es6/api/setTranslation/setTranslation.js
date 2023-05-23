@@ -74,7 +74,7 @@ export const setTranslation = async ({
     },
   )
 
-  if (!response.ok) return Promise.reject({response})
+  if (!response.ok) return Promise.reject({response, errors: undefined})
 
   const {errors, ...data} = await response.json()
   if (errors && errors.length > 0) return Promise.reject({errors})

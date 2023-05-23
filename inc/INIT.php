@@ -116,6 +116,15 @@ class INIT {
     public static $MAX_SOURCE_WORDS             = 250000;
 
     /**
+     * OPENAI configuration
+     */
+    public static $OPENAI_API_KEY;
+    public static $OPEN_AI_MODEL;
+    public static $OPEN_AI_TIMEOUT;
+    public static $OPEN_AI_MAX_TOKENS;
+    public static $OPEN_AI_MAX_REQUEST_TOKENS;
+
+    /**
      * DQF configuration
      *
      */

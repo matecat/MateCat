@@ -28,7 +28,7 @@ header .wrapper {
   height: 60px;
   display: grid;
   grid-template-columns: 170px auto auto 64px;
-  padding: 0 33px;
+  padding: 0 24px;
   align-content: center;
   box-sizing: border-box;
   top: 0;
@@ -1334,11 +1334,11 @@ ul.suggestion-item.graysmall:last-child {
   display: block;
 }
 
-.tab.concordances.extended .graysmall {
+.tab.concordances .graysmall {
   display: block !important;
 }
 
-.tab.concordances.extended .overflow {
+.tab.concordances .overflow {
   overflow: auto;
 }
 
@@ -1447,6 +1447,18 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu li a {
   outline: none;
+  display: flex;
+  align-items: center;
+
+  .number {
+    margin-left: 4px;
+  }
+
+  .icon-close {
+    display: block;
+    height: 15px;
+    color: $grey1;
+  }
 }
 
 .submenu li.active a {
@@ -1501,7 +1513,7 @@ body .footer.showMatches .sub-editor.open {
   width: 100%;
 }
 
-.sub-editor.concordances .more {
+.concordances .more {
   display: inline-block;
   text-decoration: none;
   color: #fff;
@@ -4601,8 +4613,8 @@ header {
       background: url(../../img/logo_matecat_big_white.svg) 0 0 no-repeat;
       width: 190px;
       height: 40px;
-      top: 0;
-      left: 0;
+      top: 1px;
+      left: 6px;
     }
   }
 
@@ -5019,6 +5031,33 @@ header {
       font-stretch: normal;
       line-height: 1.5;
       color: black;
+    }
+  }
+}
+
+.optionsToolbar {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+
+  > li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #c6c6c6;
+    color: $grey1;
+
+    &:hover:not(.disabled) {
+      color: $black;
+    }
+
+    &.disabled {
+      cursor: unset;
+      opacity: 0.6;
     }
   }
 }

@@ -19,7 +19,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     height: '100%',
     width: '100%',
     backgroundColor: 'rgba(76, 69, 69, 0.3)',
-    top: $(window).scrollTop(),
+    top: $('#analyze-container').scrollTop(),
     left: 0,
     zIndex: 3,
   }
@@ -50,12 +50,16 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
   }
 
   const handleScroll = () => {
-    setScrollTop($(window).scrollTop())
+    setScrollTop($('#analyze-container').scrollTop())
   }
   useEffect(() => {
-    window.addEventListener('scroll', _.debounce(handleScroll, 200))
+    document
+      .getElementById('analyze-container')
+      .addEventListener('scroll', _.debounce(handleScroll, 200))
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      document
+        .getElementById('analyze-container')
+        .removeEventListener('scroll', handleScroll)
     }
   })
 
