@@ -1,2583 +1,3591 @@
 {
     "langs": [
         {
-            "localized":[{
-                "en":"Afrikaans"
-            }],
-            "isocode":"af",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"af-ZA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Albanian"
-            }],
-            "isocode":"sq",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sq-AL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Amharic"
-            }],
-            "isocode":"am",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"am-ET"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Antigua and Barbuda Creole English"
-            }],
-            "isocode":"aig",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"aig-AG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Arabic"
-            }],
-            "isocode":"ar",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"ar-SA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Arabic Egyptian"
-            }],
-            "isocode":"ar",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"ar-EG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Aragonese"
-            }],
-            "isocode":"an",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"an-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Armenian"
-            }],
-            "isocode":"hy",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hy-AM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Assamese"
-            }],
-            "isocode":"asm",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"as-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Asturian"
-            }],
-            "isocode":"ast",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ast-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Austrian German"
-            }],
-            "isocode":"de",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"de-AT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Azerbaijani"
-            }],
-            "isocode":"az",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"az-AZ",
-            "languageRegionCode":"az-Latn-AZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bahamas Creole English"
-            }],
-            "isocode":"bah",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bah-BS"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bajan"
-            }],
-            "isocode":"bjs",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bjs-BB"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Balkan Gipsy"
-            }],
-            "isocode":"rm",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"rm-RO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bashkir"
-            }],
-            "isocode":"ba",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ba-RU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Basque"
-            }],
-            "isocode":"eu",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"eu-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bemba"
-            }],
-            "isocode":"bem",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bem-ZM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bengali"
-            }],
-            "isocode":"bn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bn-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Belarusian"
-            }],
-            "isocode":"be",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"be-BY"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Belgian French"
-            }],
-            "isocode":"fr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fr-BE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bihari"
-            }],
-            "isocode":"bh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bh-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bislama"
-            }],
-            "isocode":"bi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bi-VU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Borana"
-            }],
-            "isocode":"gax",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gax-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bosnian"
-            }],
-            "isocode":"bs",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bs-BA",
-            "languageRegionCode":"bs-Latn-BA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bosnian (Cyrillic)"
-            }],
-            "isocode":"bs",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bs-Cyrl-BA",
-            "languageRegionCode":"bs-Cyrl-BA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Breton"
-            }],
-            "isocode":"br",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"br-FR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Bulgarian"
-            }],
-            "isocode":"bg",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bg-BG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Burmese"
-            }],
-            "isocode":"my",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"my-MM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Catalan"
-            }],
-            "isocode":"ca",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ca-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Catalan Valencian"
-            }],
-            "isocode":"cav",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"cav-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Cebuano"
-            }],
-            "isocode":"cb",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"cb-PH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Chadian Arabic"
-            }],
-            "isocode":"shu",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"shu-TD"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Chamorro"
-            }],
-            "isocode":"ch",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ch-GU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Cherokee"
-            }],
-            "isocode":"chr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"chr-US"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Chinese Simplified"
-            }],
-            "isocode":"zh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"zh-CN"
-        }
-    ,
-
-        {
-            "localized":[{
-                "en":"Chinese Traditional"
-            }],
-            "isocode":"zh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"zh-TW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Chinese Trad. (Hong Kong)"
-            }],
-            "isocode":"zh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"zh-HK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Chinese Traditional Macau"
-            }],
-            "isocode":"zh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"zh-MO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Chittagonian"
-            }],
-            "isocode":"ctg",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ctg-BD"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Classical Greek"
-            }],
-            "isocode":"grc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"grc-GR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Comorian Ngazidja"
-            }],
-            "isocode":"zdj",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"zdj-KM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Coptic"
-            }],
-            "isocode":"cop",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"cop-EG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Crioulo Upper Guinea"
-            }],
-            "isocode":"pov",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pov-GW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Croatian"
-            }],
-            "isocode":"hr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hr-HR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Czech"
-            }],
-            "isocode":"cs",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"cs-CZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Danish"
-            }],
-            "isocode":"da",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"da-DK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Dari"
-            }],
-            "isocode":"fa",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"fa-AF"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Dutch"
-            }],
-            "isocode":"nl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nl-NL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Dzongkha"
-            }],
-            "isocode":"dz",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"dz-BT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-GB"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English US"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-US"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English Australia"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-AU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English Canada"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-CA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English India"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English Ireland"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-IE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English New Zealand"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-NZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English Singapore"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-SG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"English South Africa"
-            }],
-            "isocode":"en",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"en-ZA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Emakhuwa"
-            }],
-            "isocode":"vmw",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"vmw-MZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Esperanto"
-            }],
-            "isocode":"eo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"eo-EU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Estonian"
-            }],
-            "isocode":"et",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"et-EE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Fanagalo"
-            }],
-            "isocode":"fn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fn-FNG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Faroese"
-            }],
-            "isocode":"fo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fo-FO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Fijian"
-            }],
-            "isocode":"fj",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fj-FJ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Fula"
-            }],
-            "isocode":"ff",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ff-FUL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Filipino"
-            }],
-            "isocode":"fil",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fil-PH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Finnish"
-            }],
-            "isocode":"fi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fi-FI"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Flemish"
-            }],
-            "isocode":"nl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nl-BE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"French"
-            }],
-            "isocode":"fr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fr-FR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"French Canada"
-            }],
-            "isocode":"fr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fr-CA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"French Swiss"
-            }],
-            "isocode":"fr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"fr-CH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Galician"
-            }],
-            "isocode":"gl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gl-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Gamargu"
-            }],
-            "isocode":"mfi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mfi-NG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Garo"
-            }],
-            "isocode":"grt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"grt-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Georgian"
-            }],
-            "isocode":"ka",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ka-GE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"German"
-            }],
-            "isocode":"de",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"de-DE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Gilbertese"
-            }],
-            "isocode":"gil",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gil-KI"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Glavda"
-            }],
-            "isocode":"glw",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"glw-NG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Greek"
-            }],
-            "isocode":"el",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"el-GR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Grenadian Creole English"
-            }],
-            "isocode":"gcl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gcl-GD"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Gujarati"
-            }],
-            "isocode":"gu",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gu-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Guyanese Creole English"
-            }],
-            "isocode":"gyn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gyn-GY"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Haitian Creole French"
-            }],
-            "isocode":"ht",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ht-HT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hausa"
-            }],
-            "isocode":"ha",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ha-NE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hawaiian"
-            }],
-            "isocode":"HAW",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"haw-US"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hebrew"
-            }],
-            "isocode":"he",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"he-IL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Higi"
-            }],
-            "isocode":"hig",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hig-NG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hiligaynon"
-            }],
-            "isocode":"hil",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hil-PH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hill Mari"
-            }],
-            "isocode":"mrj",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mrj-RU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hindi"
-            }],
-            "isocode":"hi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hi-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hmong"
-            }],
-            "isocode":"hmn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hmn-CN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Hungarian"
-            }],
-            "isocode":"hu",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"hu-HU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Icelandic"
-            }],
-            "isocode":"is",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"is-IS"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Igbo"
-            }],
-            "isocode":"ig",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ibo-NG"
-        }
-    ,        {
-            "localized":[{
-                "en":"Ilocano"
-            }],
-            "isocode":"ilo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ilo-PH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Indonesian"
-            }],
-            "isocode":"id",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"id-ID"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Inuktitut Greenlandic"
-            }],
-            "isocode":"kal",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kl-GL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Irish Gaelic"
-            }],
-            "isocode":"ga",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ga-IE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Italian"
-            }],
-            "isocode":"it",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"it-IT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Italian Swiss"
-            }],
-            "isocode":"it",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"it-CH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Jamaican Creole English"
-            }],
-            "isocode":"jam",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"jam-JM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Japanese"
-            }],
-            "isocode":"ja",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ja-JP"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Javanese"
-            }],
-            "isocode":"jv",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"jv-ID"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"K'iche'"
-            }],
-            "isocode":"quc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"quc-GT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kabuverdianu"
-            }],
-            "isocode":"kea",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kea-CV"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kabylian"
-            }],
-            "isocode":"kab",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kab-DZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kalenjin"
-            }],
-            "isocode":"kln",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kln-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kamba"
-            }],
-            "isocode":"kam",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kam-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kannada"
-            }],
-            "isocode":"kn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kn-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kanuri"
-            }],
-            "isocode":"kn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kr-KAU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Karen"
-            }],
-            "isocode":"kar",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kar-MM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kashmiri"
-            }],
-            "isocode":"ks",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ks-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kazakh"
-            }],
-            "isocode":"kk",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kk-KZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Khasi"
-            }],
-            "isocode":"kha",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kha-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Khmer"
-            }],
-            "isocode":"km",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"km-KH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kikuyu"
-            }],
-            "isocode":"kik",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kik-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kinyarwanda"
-            }],
-            "isocode":"rw",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"rw-RW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kirundi"
-            }],
-            "isocode":"run",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"rn-BI"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kisii"
-            }],
-            "isocode":"guz",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"guz-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Konkani"
-            }],
-            "isocode":"kok",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"kok-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Korean"
-            }],
-            "isocode":"ko",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ko-KR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kurdish Kurmanji"
-            }],
-            "isocode":"ku",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ku-KMR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kurdish Sorani"
-            }],
-            "isocode":"ku",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"ckb-IQ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Kyrgyz"
-            }],
-            "isocode":"ky",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ky-KG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Lao"
-            }],
-            "isocode":"lo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lo-LA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Latin"
-            }],
-            "isocode":"la",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"la-XN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Latvian"
-            }],
-            "isocode":"lv",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lv-LV"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Lingala"
-            }],
-            "isocode":"ln",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ln-LIN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Lithuanian"
-            }],
-            "isocode":"lt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lt-LT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Luba-Kasai"
-            }],
-            "isocode":"lua",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lua-CD"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Luganda"
-            }],
-            "isocode":"lug",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lg-UG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Luo"
-            }],
-            "isocode":"luo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"luo-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Luhya"
-            }],
-            "isocode":"luy",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"luy-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Luxembourgish"
-            }],
-            "isocode":"lb",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lb-LU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Maa"
-            }],
-            "isocode":"mas",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mas-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Macedonian"
-            }],
-            "isocode":"mk",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mk-MK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Malagasy"
-            }],
-            "isocode":"mg",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mg-MG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Malay"
-            }],
-            "isocode":"ms",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ms-MY"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Malayalam"
-            }],
-            "isocode":"ml",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ml-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Maldivian"
-            }],
-            "isocode":"div",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"dv-MV"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Maltese"
-            }],
-            "isocode":"mt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mt-MT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Mandara"
-            }],
-            "isocode":"mfi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mfi-CM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Manipuri"
-            }],
-            "isocode":"mni",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mni-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Manx Gaelic"
-            }],
-            "isocode":"gv",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gv-IM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Margi"
-            }],
-            "isocode":"mrt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mrt-NG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Mari"
-            }],
-            "isocode":"mhr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mhr-RU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Moroccan Arabic"
-            }],
-            "isocode":"ar",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"ar-MA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Maori"
-            }],
-            "isocode":"mi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mi-NZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Marathi"
-            }],
-            "isocode":"mr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mr-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Marshallese"
-            }],
-            "isocode":"mh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mh-MH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Mende"
-            }],
-            "isocode":"men",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"men-SL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Meru"
-            }],
-            "isocode":"mer",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mer-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Mijikenda"
-            }],
-            "isocode":"nyf",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nyf-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Mizo"
-            }],
-            "isocode":"lus",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"lus-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Mongolian"
-            }],
-            "isocode":"mn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mn-MN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Montenegrin"
-            }],
-            "isocode":"me",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sr-ME",
-            "languageRegionCode":"sr-Latn-RS"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Morisyen"
-            }],
-            "isocode":"mfe",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"mfe-MU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Ndau"
-            }],
-            "isocode":"ndc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ndc-MZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Ndebele"
-            }],
-            "isocode":"nr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nr-ZA",
-            "languageRegionCode":"nso-ZA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Nepali"
-            }],
-            "isocode":"ne",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ne-NP"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Niuean"
-            }],
-            "isocode":"niu",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"niu-NU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Northern Sotho"
-            }],
-            "isocode":"nso",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nso-ZA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Norwegian Bokmål"
-            }],
-            "isocode":"nb",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nb-NO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Norwegian Nynorsk"
-            }],
-            "isocode":"nn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"nn-NO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Nyanja"
-            }],
-            "isocode":"ny",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ny-MW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Occitan"
-            }],
-            "isocode":"oc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"oc-FR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Occitan Aran"
-            }],
-            "isocode":"oc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"oc-ES"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Odia"
-            }],
-            "isocode":"ory",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ory-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Palauan"
-            }],
-            "isocode":"pau",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pau-PW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Pali"
-            }],
-            "isocode":"pi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pi-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Punjabi"
-            }],
-            "isocode":"pa",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pa-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Punjabi (Pakistan)"
-            }],
-            "isocode":"pa",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"pnb-PK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Pakistani"
-            }],
-            "isocode":"ur",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"ur-PK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Papiamentu"
-            }],
-            "isocode":"pap",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pap-CW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Pashto"
-            }],
-            "isocode":"ps",
-            "enabled":true,
-            "rtl":true,
-            "languageRegionCode":"ps-AF",
-            "rfc3066code":"ps-PK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Persian"
-            }],
-            "isocode":"fa",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"fa-IR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Pijin"
-            }],
-            "isocode":"pis",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pis-SB"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Polish"
-            }],
-            "isocode":"pl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pl-PL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Portuguese"
-            }],
-            "isocode":"pt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pt-PT"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Portuguese Brazil"
-            }],
-            "isocode":"pt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pt-BR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Potawatomi"
-            }],
-            "isocode":"pot",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"pot-US"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Quechua"
-            }],
-            "isocode":"qu",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"qu-PE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Rohingya"
-            }],
-            "isocode":"rhg",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"rhg-MM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Rohingyalish"
-            }],
-            "isocode":"rhl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"rhl-MM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Romanian"
-            }],
-            "isocode":"ro",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ro-RO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Romansh"
-            }],
-            "isocode":"rm",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"roh-CH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Rundi"
-            }],
-            "isocode":"run",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"run-BI"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Russian"
-            }],
-            "isocode":"ru",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ru-RU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Saint Lucian Creole French"
-            }],
-            "isocode":"acf",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"acf-LC"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Samoan"
-            }],
-            "isocode":"smo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sm-WS"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Sango"
-            }],
-            "isocode":"sg",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sg-CF"
-        }
-    ,
-	{
-            "localized":[{
-                "en":"Sanskrit"
-            }],
-            "isocode":"sa",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sa-IN"
-        }
-    ,
-	{
-            "localized":[{
-                "en":"Santali"
-            }],
-            "isocode":"sat",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sat-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Scots Gaelic"
-            }],
-            "isocode":"gd",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"gd-GB"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Sena"
-            }],
-            "isocode":"seh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"seh-ZW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Serbian Latin"
-            }],
-            "isocode":"sr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sr-Latn-RS",
-            "languageRegionCode":"sr-Latn-RS"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Serbian Cyrillic"
-            }],
-            "isocode":"sr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sr-Cyrl-RS",
-            "languageRegionCode":"sr-Cyrl-RS"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Seselwa Creole French"
-            }],
-            "isocode":"crs",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"crs-SC"
-        }
-    ,
-        {
-            "localized": [{
-                "en": "Sesotho"
-            }],
-            "isocode": "ns",
+            "localized": [
+                {
+                    "en": "Acehnese"
+                }
+            ],
+            "isocode": "ace",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ace-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Afrikaans"
+                }
+            ],
+            "isocode": "af",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "af-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Akan"
+                }
+            ],
+            "isocode": "ak",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ak-GH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Albanian"
+                }
+            ],
+            "isocode": "sq",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sq-AL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Amharic"
+                }
+            ],
+            "isocode": "am",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "am-ET"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Antigua and Barbuda Creole English"
+                }
+            ],
+            "isocode": "aig",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "aig-AG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Arabic"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-SA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Arabic Egyptian"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-EG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Aragonese"
+                }
+            ],
+            "isocode": "an",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "an-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Armenian"
+                }
+            ],
+            "isocode": "hy",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hy-AM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Assamese"
+                }
+            ],
+            "isocode": "asm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "as-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Asturian"
+                }
+            ],
+            "isocode": "ast",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ast-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Austrian German"
+                }
+            ],
+            "isocode": "de",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "de-AT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Awadhi"
+                }
+            ],
+            "isocode": "awa",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "awa-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ayacucho Quechua"
+                }
+            ],
+            "isocode": "quy",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "quy-PE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Azerbaijani"
+                }
+            ],
+            "isocode": "az",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "az-AZ",
+            "languageRegionCode": "az-Latn-AZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bahamas Creole English"
+                }
+            ],
+            "isocode": "bah",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bah-BS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bajan"
+                }
+            ],
+            "isocode": "bjs",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bjs-BB"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Balinese"
+                }
+            ],
+            "isocode": "ban",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ban-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Balkan Gipsy"
+                }
+            ],
+            "isocode": "rm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "rm-RO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bambara"
+                }
+            ],
+            "isocode": "bm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bm-ML"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Banjar"
+                }
+            ],
+            "isocode": "bjn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bjn-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bashkir"
+                }
+            ],
+            "isocode": "ba",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ba-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Basque"
+                }
+            ],
+            "isocode": "eu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "eu-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Belarusian"
+                }
+            ],
+            "isocode": "be",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "be-BY"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Belgian French"
+                }
+            ],
+            "isocode": "fr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fr-BE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bemba"
+                }
+            ],
+            "isocode": "bem",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bem-ZM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bengali"
+                }
+            ],
+            "isocode": "bn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bn-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bhojpuri"
+                }
+            ],
+            "isocode": "bho",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bho-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bihari"
+                }
+            ],
+            "isocode": "bh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bh-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bislama"
+                }
+            ],
+            "isocode": "bi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bi-VU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Borana"
+                }
+            ],
+            "isocode": "gax",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gax-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bosnian"
+                }
+            ],
+            "isocode": "bs",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bs-BA",
+            "languageRegionCode": "bs-Latn-BA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bosnian (Cyrillic)"
+                }
+            ],
+            "isocode": "bs",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bs-Cyrl-BA",
+            "languageRegionCode": "bs-Cyrl-BA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Breton"
+                }
+            ],
+            "isocode": "br",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "br-FR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Buginese"
+                }
+            ],
+            "isocode": "bug",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bug-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bulgarian"
+                }
+            ],
+            "isocode": "bg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bg-BG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Burmese"
+                }
+            ],
+            "isocode": "my",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "my-MM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Catalan"
+                }
+            ],
+            "isocode": "ca",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ca-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Catalan Valencian"
+                }
+            ],
+            "isocode": "cav",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cav-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Cebuano"
+                }
+            ],
+            "isocode": "cb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ceb-PH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Central Atlas Tamazight"
+                }
+            ],
+            "isocode": "tzm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tzm-MA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Central Aymara"
+                }
+            ],
+            "isocode": "ayr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ayr-BO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Central Kanuri (Latin script)"
+                }
+            ],
+            "isocode": "knc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "knc-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chadian Arabic"
+                }
+            ],
+            "isocode": "shu",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "shu-TD"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chamorro"
+                }
+            ],
+            "isocode": "ch",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ch-GU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Cherokee"
+                }
+            ],
+            "isocode": "chr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "chr-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chhattisgarhi"
+                }
+            ],
+            "isocode": "hne",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hne-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chinese Simplified"
+                }
+            ],
+            "isocode": "zh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zh-CN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chinese Trad. (Hong Kong)"
+                }
+            ],
+            "isocode": "zh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zh-HK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chinese Traditional"
+                }
+            ],
+            "isocode": "zh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zh-TW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chinese Traditional Macau"
+                }
+            ],
+            "isocode": "zh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zh-MO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chittagonian"
+                }
+            ],
+            "isocode": "ctg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ctg-BD"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chokwe"
+                }
+            ],
+            "isocode": "cjk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cjk-AO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Classical Greek"
+                }
+            ],
+            "isocode": "grc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "grc-GR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Comorian Ngazidja"
+                }
+            ],
+            "isocode": "zdj",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zdj-KM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Coptic"
+                }
+            ],
+            "isocode": "cop",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cop-EG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Crimean Tatar"
+                }
+            ],
+            "isocode": "crh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "crh-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Crioulo Upper Guinea"
+                }
+            ],
+            "isocode": "pov",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pov-GW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Croatian"
+                }
+            ],
+            "isocode": "hr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hr-HR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Czech"
+                }
+            ],
+            "isocode": "cs",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cs-CZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Danish"
+                }
+            ],
+            "isocode": "da",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "da-DK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Dari"
+                }
+            ],
+            "isocode": "fa",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "prs-AF"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Dimli"
+                }
+            ],
+            "isocode": "diq",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "diq-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Dutch"
+                }
+            ],
+            "isocode": "nl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nl-NL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Dyula"
+                }
+            ],
+            "isocode": "dyu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "dyu-CI"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Dzongkha"
+                }
+            ],
+            "isocode": "dz",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "dz-BT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Eastern Yiddish"
+                }
+            ],
+            "isocode": "ydd",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ydd-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Emakhuwa"
+                }
+            ],
+            "isocode": "vmw",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "vmw-MZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-GB"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English Australia"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-AU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English Canada"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-CA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English India"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English Ireland"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-IE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English New Zealand"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-NZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English Singapore"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-SG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English South Africa"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "English US"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Esperanto"
+                }
+            ],
+            "isocode": "eo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "eo-EU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Estonian"
+                }
+            ],
+            "isocode": "et",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "et-EE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ewe"
+                }
+            ],
+            "isocode": "ee",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ee-GH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Fanagalo"
+                }
+            ],
+            "isocode": "fn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fn-FNG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Faroese"
+                }
+            ],
+            "isocode": "fo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fo-FO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Fijian"
+                }
+            ],
+            "isocode": "fj",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fj-FJ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Filipino"
+                }
+            ],
+            "isocode": "fil",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fil-PH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Finnish"
+                }
+            ],
+            "isocode": "fi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fi-FI"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Flemish"
+                }
+            ],
+            "isocode": "nl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nl-BE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Fon"
+                }
+            ],
+            "isocode": "fon",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fon-BJ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "French"
+                }
+            ],
+            "isocode": "fr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fr-FR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "French Canada"
+                }
+            ],
+            "isocode": "fr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fr-CA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "French Swiss"
+                }
+            ],
+            "isocode": "fr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fr-CH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Friulian"
+                }
+            ],
+            "isocode": "fur",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fur-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Fula"
+                }
+            ],
+            "isocode": "ff",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ff-FUL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Galician"
+                }
+            ],
+            "isocode": "gl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gl-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Gamargu"
+                }
+            ],
+            "isocode": "mfi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mfi-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Garo"
+                }
+            ],
+            "isocode": "grt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "grt-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Georgian"
+                }
+            ],
+            "isocode": "ka",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ka-GE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "German"
+                }
+            ],
+            "isocode": "de",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "de-DE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Gilbertese"
+                }
+            ],
+            "isocode": "gil",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gil-KI"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Glavda"
+                }
+            ],
+            "isocode": "glw",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "glw-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Greek"
+                }
+            ],
+            "isocode": "el",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "el-GR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Grenadian Creole English"
+                }
+            ],
+            "isocode": "gcl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gcl-GD"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Guarani"
+                }
+            ],
+            "isocode": "gn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gn-PY"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Gujarati"
+                }
+            ],
+            "isocode": "gu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gu-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Guyanese Creole English"
+                }
+            ],
+            "isocode": "gyn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gyn-GY"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Haitian Creole French"
+                }
+            ],
+            "isocode": "ht",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ht-HT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Halh Mongolian"
+                }
+            ],
+            "isocode": "khk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "khk-MN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hausa"
+                }
+            ],
+            "isocode": "ha",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ha-NE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hawaiian"
+                }
+            ],
+            "isocode": "HAW",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "haw-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hebrew"
+                }
+            ],
+            "isocode": "he",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "he-IL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Higi"
+                }
+            ],
+            "isocode": "hig",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hig-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hiligaynon"
+                }
+            ],
+            "isocode": "hil",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hil-PH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hill Mari"
+                }
+            ],
+            "isocode": "mrj",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mrj-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hindi"
+                }
+            ],
+            "isocode": "hi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hi-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hmong"
+                }
+            ],
+            "isocode": "hmn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hmn-CN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hungarian"
+                }
+            ],
+            "isocode": "hu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hu-HU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Icelandic"
+                }
+            ],
+            "isocode": "is",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "is-IS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Igbo"
+                }
+            ],
+            "isocode": "ig",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ibo-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Igbo"
+                }
+            ],
+            "isocode": "ig",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ig-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ilocano"
+                }
+            ],
+            "isocode": "ilo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ilo-PH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Indonesian"
+                }
+            ],
+            "isocode": "id",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "id-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Inuktitut Greenlandic"
+                }
+            ],
+            "isocode": "kal",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kl-GL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Irish Gaelic"
+                }
+            ],
+            "isocode": "ga",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ga-IE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Italian"
+                }
+            ],
+            "isocode": "it",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "it-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Italian Swiss"
+                }
+            ],
+            "isocode": "it",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "it-CH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Jamaican Creole English"
+                }
+            ],
+            "isocode": "jam",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "jam-JM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Japanese"
+                }
+            ],
+            "isocode": "ja",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ja-JP"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Javanese"
+                }
+            ],
+            "isocode": "jv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "jv-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Jingpho"
+                }
+            ],
+            "isocode": "kac",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kac-MM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "K'iche'"
+                }
+            ],
+            "isocode": "quc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "quc-GT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kabiy\u00e8"
+                }
+            ],
+            "isocode": "kbp",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kbp-TG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kabuverdianu"
+                }
+            ],
+            "isocode": "kea",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kea-CV"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kabylian"
+                }
+            ],
+            "isocode": "kab",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kab-DZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kalenjin"
+                }
+            ],
+            "isocode": "kln",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kln-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kamba"
+                }
+            ],
+            "isocode": "kam",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kam-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kannada"
+                }
+            ],
+            "isocode": "kn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kn-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kanuri"
+                }
+            ],
+            "isocode": "kn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kr-KAU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Karen"
+                }
+            ],
+            "isocode": "kar",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kar-MM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kashmiri"
+                }
+            ],
+            "isocode": "ks",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ks-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kashmiri (Arabic script)"
+                }
+            ],
+            "isocode": "kas",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "kas-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kashmiri (Devanagari script)"
+                }
+            ],
+            "isocode": "ks",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ks-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kazakh"
+                }
+            ],
+            "isocode": "kk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kk-KZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Khasi"
+                }
+            ],
+            "isocode": "kha",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kha-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Khmer"
+                }
+            ],
+            "isocode": "km",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "km-KH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kikuyu"
+                }
+            ],
+            "isocode": "kik",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kik-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kikuyu"
+                }
+            ],
+            "isocode": "ki",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ki-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kimbundu"
+                }
+            ],
+            "isocode": "kmb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kmb-AO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kinyarwanda"
+                }
+            ],
+            "isocode": "rw",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "rw-RW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kirundi"
+                }
+            ],
+            "isocode": "run",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "rn-BI"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kisii"
+                }
+            ],
+            "isocode": "guz",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "guz-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kongo"
+                }
+            ],
+            "isocode": "kg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kg-CG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Konkani"
+                }
+            ],
+            "isocode": "kok",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kok-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Korean"
+                }
+            ],
+            "isocode": "ko",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ko-KR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kurdish Kurmanji"
+                }
+            ],
+            "isocode": "ku",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kmr-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kurdish Sorani"
+                }
+            ],
+            "isocode": "ku",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ckb-IQ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kyrgyz"
+                }
+            ],
+            "isocode": "ky",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ky-KG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Lao"
+                }
+            ],
+            "isocode": "lo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lo-LA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Latgalian"
+                }
+            ],
+            "isocode": "ltg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ltg-LV"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Latin"
+                }
+            ],
+            "isocode": "la",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "la-XN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Latvian"
+                }
+            ],
+            "isocode": "lv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lv-LV"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ligurian"
+                }
+            ],
+            "isocode": "lij",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lij-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Limburgish"
+                }
+            ],
+            "isocode": "li",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "li-NL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Lingala"
+                }
+            ],
+            "isocode": "ln",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ln-LIN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Lithuanian"
+                }
+            ],
+            "isocode": "lt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lt-LT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Lombard"
+                }
+            ],
+            "isocode": "lmo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lmo-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Luba-Kasai"
+                }
+            ],
+            "isocode": "lua",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lua-CD"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Luganda"
+                }
+            ],
+            "isocode": "lug",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lg-UG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Luhya"
+                }
+            ],
+            "isocode": "luy",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "luy-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Luo"
+                }
+            ],
+            "isocode": "luo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "luo-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Luxembourgish"
+                }
+            ],
+            "isocode": "lb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lb-LU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Maa"
+                }
+            ],
+            "isocode": "mas",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mas-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Macedonian"
+                }
+            ],
+            "isocode": "mk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mk-MK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Magahi"
+                }
+            ],
+            "isocode": "mag",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mag-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Maithili"
+                }
+            ],
+            "isocode": "mai",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mai-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Malagasy"
+                }
+            ],
+            "isocode": "mg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mg-MG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Malay"
+                }
+            ],
+            "isocode": "ms",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ms-MY"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Malayalam"
+                }
+            ],
+            "isocode": "ml",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ml-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Maldivian"
+                }
+            ],
+            "isocode": "div",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "dv-MV"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Maltese"
+                }
+            ],
+            "isocode": "mt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mt-MT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mandara"
+                }
+            ],
+            "isocode": "mfi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mfi-CM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Manipuri"
+                }
+            ],
+            "isocode": "mni",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mni-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Manx Gaelic"
+                }
+            ],
+            "isocode": "gv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gv-IM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Maori"
+                }
+            ],
+            "isocode": "mi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mi-NZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Marathi"
+                }
+            ],
+            "isocode": "mr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mr-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Margi"
+                }
+            ],
+            "isocode": "mrt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mrt-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mari"
+                }
+            ],
+            "isocode": "mhr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mhr-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Marshallese"
+                }
+            ],
+            "isocode": "mh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mh-MH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mende"
+                }
+            ],
+            "isocode": "men",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "men-SL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Meru"
+                }
+            ],
+            "isocode": "mer",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mer-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mijikenda"
+                }
+            ],
+            "isocode": "nyf",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nyf-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Minangkabau"
+                }
+            ],
+            "isocode": "min",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "min-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mizo"
+                }
+            ],
+            "isocode": "lus",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lus-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mongolian"
+                }
+            ],
+            "isocode": "mn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mn-MN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Montenegrin"
+                }
+            ],
+            "isocode": "me",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sr-ME",
+            "languageRegionCode": "sr-Latn-RS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Morisyen"
+                }
+            ],
+            "isocode": "mfe",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mfe-MU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Moroccan Arabic"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-MA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mossi"
+                }
+            ],
+            "isocode": "mos",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mos-BF"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ndau"
+                }
+            ],
+            "isocode": "ndc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ndc-MZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ndebele"
+                }
+            ],
+            "isocode": "nr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nr-ZA",
+            "languageRegionCode": "nso-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Nepali"
+                }
+            ],
+            "isocode": "ne",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ne-NP"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Nigerian Fulfulde"
+                }
+            ],
+            "isocode": "fuv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fuv-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Niuean"
+                }
+            ],
+            "isocode": "niu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "niu-NU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "North Azerbaijani"
+                }
+            ],
+            "isocode": "azj",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "azj-AZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Northern Kurdish"
+                }
+            ],
+            "isocode": "kmr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kmr-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Northern Sotho"
+                }
+            ],
+            "isocode": "nso",
             "enabled": true,
             "rtl": false,
             "rfc3066code": "nso-ZA"
-        }
-    ,
-        {
-            "localized": [{
-                "en": "Setswana (South Africa)"
-            }],
-            "isocode": "tn",
-            "enabled": true,
-            "rtl": false,
-            "rfc3066code": "tn-ZA"
         },
         {
-            "localized":[{
-                "en":"Shona"
-            }],
-            "isocode":"sna",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sn-ZW"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Northern Uzbek"
+                }
+            ],
+            "isocode": "uzn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "uzn-UZ"
+        },
         {
-            "localized":[{
-                "en":"Sindhi"
-            }],
-            "isocode":"sd",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"snd-PK"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Norwegian Bokm\u00e5l"
+                }
+            ],
+            "isocode": "nb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nb-NO"
+        },
         {
-            "localized":[{
-                "en":"Sinhala"
-            }],
-            "isocode":"si",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"si-LK"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Norwegian Nynorsk"
+                }
+            ],
+            "isocode": "nn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nn-NO"
+        },
         {
-            "localized":[{
-                "en":"Slovak"
-            }],
-            "isocode":"sk",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sk-SK"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Nuer"
+                }
+            ],
+            "isocode": "nus",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nus-SS"
+        },
         {
-            "localized":[{
-                "en":"Slovenian"
-            }],
-            "isocode":"sl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sl-SI"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Nyanja"
+                }
+            ],
+            "isocode": "ny",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ny-MW"
+        },
         {
-            "localized":[{
-                "en":"Somali"
-            }],
-            "isocode":"so",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"so-SO"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Occitan"
+                }
+            ],
+            "isocode": "oc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "oc-FR"
+        },
         {
-            "localized":[{
-                "en":"Sotho Southern"
-            }],
-            "isocode":"st",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"st-LS"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Occitan Aran"
+                }
+            ],
+            "isocode": "oc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "oc-ES"
+        },
         {
-            "localized":[{
-                "en":"Spanish"
-            }],
-            "isocode":"es",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"es-ES"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Odia"
+                }
+            ],
+            "isocode": "ory",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ory-IN"
+        },
         {
-            "localized":[{
-                "en":"Spanish United States"
-            }],
-            "isocode":"es",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"es-US"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Spanish Argentina"
-            }],
-            "isocode":"es",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"es-AR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Spanish Mexico"
-            }],
-            "isocode":"es",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"es-MX"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Spanish Latin America"
-            }],
-            "isocode":"es",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"es-419"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Spanish Colombia"
-            }],
-            "isocode":"es",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"es-CO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Sranan Tongo"
-            }],
-            "isocode":"srn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"srn-SR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Sundanese"
-            }],
-            "isocode":"su",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"su-ID"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Swahili"
-            }],
-            "isocode":"sw",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sw-KE",
-            "languageRegionCode":"sw-KE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Swedish"
-            }],
-            "isocode":"sv",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"sv-SE"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Swiss German"
-            }],
-            "isocode":"de",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"de-CH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Syriac (Aramaic)"
-            }],
-            "isocode":"syc",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"syc-TR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tagalog"
-            }],
-            "isocode":"tl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tl-PH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tajik"
-            }],
-            "isocode":"tg",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tg-TJ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tamashek (Tuareg)"
-            }],
-            "isocode":"tmh",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"tmh-DZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tamil India"
-            }],
-            "isocode":"ta",
-            "enabled":true,
-            "rtl":false,
-            "languageRegionCode":"ta-IN",
-            "rfc3066code":"ta-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tamil Sri Lanka"
-            }],
-            "isocode":"ta",
-            "enabled":true,
-            "rtl":false,
-            "languageRegionCode":"ta-LK",
-            "rfc3066code":"ta-LK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Telugu"
-            }],
-            "isocode":"te",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"te-IN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tatar"
-            }],
-            "isocode":"tt",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tt-RU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tetum"
-            }],
-            "isocode":"tet",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tet-TL"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Thai"
-            }],
-            "isocode":"th",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"th-TH"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tahitian"
-            }],
-            "isocode":"ty",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ty-PF"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tibetan"
-            }],
-            "isocode":"bod",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"bo-CN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tigrinya"
-            }],
-            "isocode":"ti",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ti-ET"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tokelauan"
-            }],
-            "isocode":"tkl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tkl-TK"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tok Pisin"
-            }],
-            "isocode":"tpi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tpi-PG"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tongan"
-            }],
-            "isocode":"ton",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"to-TO"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tsonga"
-            }],
-            "isocode":"ts",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ts-ZA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tswa"
-            }],
-            "isocode":"tsc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tsc-MZ"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tswana"
-            }],
-            "isocode":"tn",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tn-BW"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Turkish"
-            }],
-            "isocode":"tr",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tr-TR"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Turkmen"
-            }],
-            "isocode":"tk",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tk-TM"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Tuvaluan"
-            }],
-            "isocode":"tvl",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"tvl-TV"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Udmurt"
-            }],
-            "isocode":"udm",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"udm-RU"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Uyghur"
-            }],
-            "isocode":"ug",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"uig-CN"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Ukrainian"
-            }],
-            "isocode":"uk",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"uk-UA"
-        }
-    ,
-        {
-            "localized":[{
-                "en":"Uma"
-            }],
-            "isocode":"ppk",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"ppk-ID"
-        }
-    ,
-        {
-            "localized": [{
-                "en": "Urdu"
-            }],
+            "localized": [
+                {
+                    "en": "Pakistani"
+                }
+            ],
             "isocode": "ur",
             "enabled": true,
             "rtl": true,
             "rfc3066code": "ur-PK"
         },
         {
-            "localized":[{
-                "en":"Uzbek"
-            }],
-            "isocode":"uz",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"uz-UZ",
-            "languageRegionCode":"uz-Latn-UZ"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Palauan"
+                }
+            ],
+            "isocode": "pau",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pau-PW"
+        },
         {
-            "localized":[{
-                "en":"Vietnamese"
-            }],
-            "isocode":"vi",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"vi-VN"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Pali"
+                }
+            ],
+            "isocode": "pi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pi-IN"
+        },
         {
-            "localized":[{
-                "en":"Vincentian Creole English"
-            }],
-            "isocode":"svc",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"svc-VC"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Pangasinan"
+                }
+            ],
+            "isocode": "pag",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pag-PH"
+        },
         {
-            "localized":[{
-                "en":"Virgin Islands Creole English"
-            }],
-            "isocode":"vic",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"vic-US"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Papiamentu"
+                }
+            ],
+            "isocode": "pap",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pap-CW"
+        },
         {
-            "localized":[{
-                "en":"Wallisian"
-            }],
-            "isocode":"wls",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"wls-WF"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Pashto"
+                }
+            ],
+            "isocode": "ps",
+            "enabled": true,
+            "rtl": true,
+            "languageRegionCode": "ps-AF",
+            "rfc3066code": "ps-PK"
+        },
         {
-            "localized":[{
-                "en":"Welsh"
-            }],
-            "isocode":"cy",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"cy-GB"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Persian"
+                }
+            ],
+            "isocode": "fa",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "fa-IR"
+        },
         {
-            "localized":[{
-                "en":"Wolof"
-            }],
-            "isocode":"wo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"wo-SN"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Pijin"
+                }
+            ],
+            "isocode": "pis",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pis-SB"
+        },
         {
-            "localized":[{
-                "en":"Xhosa"
-            }],
-            "isocode":"xh",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"xh-ZA"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Plateau Malagasy"
+                }
+            ],
+            "isocode": "plt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "plt-MG"
+        },
         {
-            "localized":[{
-                "en":"Yiddish"
-            }],
-            "isocode":"yi",
-            "enabled":true,
-            "rtl":true,
-            "rfc3066code":"yi-YD"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Polish"
+                }
+            ],
+            "isocode": "pl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pl-PL"
+        },
         {
-            "localized":[{
-                "en":"Yoruba"
-            }],
-            "isocode":"yo",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"yo-NG"
-        }
-    ,
+            "localized": [
+                {
+                    "en": "Portuguese"
+                }
+            ],
+            "isocode": "pt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pt-PT"
+        },
         {
-            "localized":[{
-                "en":"Zulu"
-            }],
-            "isocode":"zu",
-            "enabled":true,
-            "rtl":false,
-            "rfc3066code":"zu-ZA"
+            "localized": [
+                {
+                    "en": "Portuguese Brazil"
+                }
+            ],
+            "isocode": "pt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pt-BR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Potawatomi"
+                }
+            ],
+            "isocode": "pot",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pot-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Punjabi"
+                }
+            ],
+            "isocode": "pa",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pa-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Punjabi (Pakistan)"
+                }
+            ],
+            "isocode": "pa",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "pnb-PK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Quechua"
+                }
+            ],
+            "isocode": "qu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "qu-PE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Rohingya"
+                }
+            ],
+            "isocode": "rhg",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "rhg-MM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Rohingyalish"
+                }
+            ],
+            "isocode": "rhl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "rhl-MM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Romanian"
+                }
+            ],
+            "isocode": "ro",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ro-RO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Romansh"
+                }
+            ],
+            "isocode": "rm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "roh-CH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Rundi"
+                }
+            ],
+            "isocode": "run",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "run-BI"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Russian"
+                }
+            ],
+            "isocode": "ru",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ru-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Saint Lucian Creole French"
+                }
+            ],
+            "isocode": "acf",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "acf-LC"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Samoan"
+                }
+            ],
+            "isocode": "smo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sm-WS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sango"
+                }
+            ],
+            "isocode": "sg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sg-CF"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sanskrit"
+                }
+            ],
+            "isocode": "sa",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sa-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Santali"
+                }
+            ],
+            "isocode": "sat",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sat-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sardinian"
+                }
+            ],
+            "isocode": "sc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sc-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Scots Gaelic"
+                }
+            ],
+            "isocode": "gd",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gd-GB"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sena"
+                }
+            ],
+            "isocode": "seh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "seh-ZW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Serbian Cyrillic"
+                }
+            ],
+            "isocode": "sr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sr-Cyrl-RS",
+            "languageRegionCode": "sr-Cyrl-RS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Serbian Latin"
+                }
+            ],
+            "isocode": "sr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sr-Latn-RS",
+            "languageRegionCode": "sr-Latn-RS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Seselwa Creole French"
+                }
+            ],
+            "isocode": "crs",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "crs-SC"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sesotho"
+                }
+            ],
+            "isocode": "ns",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nso-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Setswana (South Africa)"
+                }
+            ],
+            "isocode": "tn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tn-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Shan"
+                }
+            ],
+            "isocode": "shn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "shn-MM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Shona"
+                }
+            ],
+            "isocode": "sna",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sn-ZW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sicilian"
+                }
+            ],
+            "isocode": "scn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "scn-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Silesian"
+                }
+            ],
+            "isocode": "szl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "szl-PL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sindhi"
+                }
+            ],
+            "isocode": "sd",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "snd-PK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sindhi"
+                }
+            ],
+            "isocode": "sd",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "sd-PK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sinhala"
+                }
+            ],
+            "isocode": "si",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "si-LK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Slovak"
+                }
+            ],
+            "isocode": "sk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sk-SK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Slovenian"
+                }
+            ],
+            "isocode": "sl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sl-SI"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Somali"
+                }
+            ],
+            "isocode": "so",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "so-SO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sotho Southern"
+                }
+            ],
+            "isocode": "st",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "st-LS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "South Azerbaijani"
+                }
+            ],
+            "isocode": "azb",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "azb-AZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Southern Pashto"
+                }
+            ],
+            "isocode": "pbt",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "pbt-PK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Southwestern Dinka"
+                }
+            ],
+            "isocode": "dik",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "dik-SS"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-ES"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish Argentina"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-AR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish Colombia"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-CO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish Latin America"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-419"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish Mexico"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-MX"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish United States"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sranan Tongo"
+                }
+            ],
+            "isocode": "srn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "srn-SR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Standard Latvian"
+                }
+            ],
+            "isocode": "lvs",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "lvs-LV"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Standard Malay"
+                }
+            ],
+            "isocode": "zsm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zsm-MY"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sundanese"
+                }
+            ],
+            "isocode": "su",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "su-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Swahili"
+                }
+            ],
+            "isocode": "sw",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sw-KE",
+            "languageRegionCode": "sw-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Swati"
+                }
+            ],
+            "isocode": "ss",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ss-SZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Swedish"
+                }
+            ],
+            "isocode": "sv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sv-SE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Swiss German"
+                }
+            ],
+            "isocode": "de",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "de-CH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Syriac (Aramaic)"
+                }
+            ],
+            "isocode": "syc",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "syc-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tagalog"
+                }
+            ],
+            "isocode": "tl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tl-PH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tahitian"
+                }
+            ],
+            "isocode": "ty",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ty-PF"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tajik"
+                }
+            ],
+            "isocode": "tg",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tg-TJ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tamashek (Tuareg)"
+                }
+            ],
+            "isocode": "tmh",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "tmh-DZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tamasheq"
+                }
+            ],
+            "isocode": "taq",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "taq-ML"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tamil India"
+                }
+            ],
+            "isocode": "ta",
+            "enabled": true,
+            "rtl": false,
+            "languageRegionCode": "ta-IN",
+            "rfc3066code": "ta-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tamil Sri Lanka"
+                }
+            ],
+            "isocode": "ta",
+            "enabled": true,
+            "rtl": false,
+            "languageRegionCode": "ta-LK",
+            "rfc3066code": "ta-LK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Taroko"
+                }
+            ],
+            "isocode": "trv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "trv-TW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tatar"
+                }
+            ],
+            "isocode": "tt",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tt-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Telugu"
+                }
+            ],
+            "isocode": "te",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "te-IN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tetum"
+                }
+            ],
+            "isocode": "tet",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tet-TL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Thai"
+                }
+            ],
+            "isocode": "th",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "th-TH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tibetan"
+                }
+            ],
+            "isocode": "bod",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bo-CN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tigrinya"
+                }
+            ],
+            "isocode": "ti",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ti-ET"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tok Pisin"
+                }
+            ],
+            "isocode": "tpi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tpi-PG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tokelauan"
+                }
+            ],
+            "isocode": "tkl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tkl-TK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tongan"
+                }
+            ],
+            "isocode": "ton",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "to-TO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tosk Albanian"
+                }
+            ],
+            "isocode": "als",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "als-AL"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tsonga"
+                }
+            ],
+            "isocode": "ts",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ts-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tswa"
+                }
+            ],
+            "isocode": "tsc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tsc-MZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tswana"
+                }
+            ],
+            "isocode": "tn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tn-BW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tumbuka"
+                }
+            ],
+            "isocode": "tum",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tum-MW"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Turkish"
+                }
+            ],
+            "isocode": "tr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tr-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Turkmen"
+                }
+            ],
+            "isocode": "tk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tk-TM"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tuvaluan"
+                }
+            ],
+            "isocode": "tvl",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tvl-TV"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Twi"
+                }
+            ],
+            "isocode": "tw",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tw-GH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Udmurt"
+                }
+            ],
+            "isocode": "udm",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "udm-RU"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Ukrainian"
+                }
+            ],
+            "isocode": "uk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "uk-UA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Uma"
+                }
+            ],
+            "isocode": "ppk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ppk-ID"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Umbundu"
+                }
+            ],
+            "isocode": "umb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "umb-AO"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Urdu"
+                }
+            ],
+            "isocode": "ur",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ur-PK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Uyghur"
+                }
+            ],
+            "isocode": "ug",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "uig-CN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Uyghur"
+                }
+            ],
+            "isocode": "ug",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ug-CN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Uzbek"
+                }
+            ],
+            "isocode": "uz",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "uz-UZ",
+            "languageRegionCode": "uz-Latn-UZ"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Venetian"
+                }
+            ],
+            "isocode": "vec",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "vec-IT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Vietnamese"
+                }
+            ],
+            "isocode": "vi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "vi-VN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Vincentian Creole English"
+                }
+            ],
+            "isocode": "svc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "svc-VC"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Virgin Islands Creole English"
+                }
+            ],
+            "isocode": "vic",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "vic-US"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Wallisian"
+                }
+            ],
+            "isocode": "wls",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "wls-WF"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Waray (Philippines)"
+                }
+            ],
+            "isocode": "war",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "war-PH"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Welsh"
+                }
+            ],
+            "isocode": "cy",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cy-GB"
+        },
+        {
+            "localized": [
+                {
+                    "en": "West Central Oromo"
+                }
+            ],
+            "isocode": "gaz",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "gaz-ET"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Western Persian"
+                }
+            ],
+            "isocode": "pes",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "pes-IR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Wolof"
+                }
+            ],
+            "isocode": "wo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "wo-SN"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Xhosa"
+                }
+            ],
+            "isocode": "xh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "xh-ZA"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Yiddish"
+                }
+            ],
+            "isocode": "yi",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "yi-YD"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Yoruba"
+                }
+            ],
+            "isocode": "yo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "yo-NG"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Zulu"
+                }
+            ],
+            "isocode": "zu",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zu-ZA"
         }
     ]
 }
