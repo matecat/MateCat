@@ -2554,6 +2554,20 @@ body.rtl-target .editor .editarea span {
   padding: 0;
 }
 
+.graysmall-details .graydesc-sourcekey {
+  display: flex;
+  justify-content: end;
+  max-width: 30%;
+  gap: 2px;
+
+  .bold {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 //.glossary .graysmall .graysmall-details {
 //  margin-top: 0;
 //}
