@@ -22,13 +22,29 @@
   }
 }
 
+.feedback-container {
+  display: flex;
+  gap: 20px;
+  color: $grey6;
+}
+
+.feedback-container-submited {
+  gap: 10px;
+}
+
+.feedback-paragraph {
+  line-height: 16px;
+  margin-top: 4px;
+}
+
 .feedback-icons {
   display: flex;
   margin-top: 8px;
 }
 
 .like,
-.dislike {
+.dislike,
+.submited {
   display: flex;
   width: 24px;
   height: 24px;
@@ -59,6 +75,12 @@
     border-color: $redDefault;
     background-color: rgba($redDefault, 0.1);
   }
+}
+
+.submited {
+  border: none;
+  background-color: rgba($grey1, 0.1);
+  cursor: unset;
 }
 
 .suggestion-error {

@@ -175,6 +175,44 @@ export const SegmentFooterTabAiAssistant = ({
 
   const isTabOpen = active_class === 'open'
 
+  const feedbackContent =
+    typeof feedbackLeave === 'undefined' ? (
+      <>
+        <span className="feedback-paragraph">
+          <b>Submit your feedback</b>
+          <br />
+          Was this suggestion useful?
+        </span>
+        <div className="feedback-icons">
+          <span
+            className={`like${feedbackLeave === 'Yes' ? ' active' : ''}`}
+            onClick={() => sendFeedback(true)}
+          >
+            <IconLike />
+          </span>
+          <span
+            className={`dislike${feedbackLeave === 'No' ? ' active' : ''}`}
+            onClick={() => sendFeedback(false)}
+          >
+            <IconDislike />
+          </span>
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="feedback-icons">
+          <span className="submited" onClick={() => sendFeedback(true)}>
+            {feedbackLeave === 'Yes' ? <IconLike /> : <IconDislike />}
+          </span>
+        </div>
+        <span className="feedback-paragraph">
+          <b>Thank you!</b>
+          <br />
+          We really appreciate your feedback.
+        </span>
+      </>
+    )
+
   return (
     <div
       key={`container_${code}`}
@@ -188,30 +226,14 @@ export const SegmentFooterTabAiAssistant = ({
               <span>Meaning in context</span>
               <span>{suggestion.value}</span>
             </div>
-            <div>
-              {suggestion?.isCompleted && (
-                <>
-                  <span>Was this suggestion useful?</span>
-                  <div className="feedback-icons">
-                    <span
-                      className={`like${
-                        feedbackLeave === 'Yes' ? ' active' : ''
-                      }`}
-                      onClick={() => sendFeedback(true)}
-                    >
-                      <IconLike />
-                    </span>
-                    <span
-                      className={`dislike${
-                        feedbackLeave === 'No' ? ' active' : ''
-                      }`}
-                      onClick={() => sendFeedback(false)}
-                    >
-                      <IconDislike />
-                    </span>
-                  </div>
-                </>
-              )}
+            <div
+              className={`feedback-container${
+                typeof feedbackLeave !== 'undefined'
+                  ? ' feedback-container-submited'
+                  : ''
+              }`}
+            >
+              {suggestion?.isCompleted && feedbackContent}
             </div>
           </div>
           <div className="tm-matches concordances">
