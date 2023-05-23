@@ -2,6 +2,7 @@
 
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Validator\IsJobRevisionValidatorObject;
 
@@ -368,21 +369,21 @@ class CatUtils {
     /**
      * Remove Tags and treat numbers as one word
      *
-     * @param                 $string
-     * @param string          $source_lang
-     *
-     * @param MateCatFilter|null     $Filter
+     * @param                    $string
+     * @param string             $source_lang
+     * @param MateCatFilter|null $Filter
      *
      * @return mixed|string
      * @throws \Exception
      */
-    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null ) {
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null) {
 
         if ( $Filter === null ) {
             $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang, null, []);
         }
 
         $string = $Filter->fromLayer0ToLayer1( $string );
+        $string = self::replacePlaceholders($string);
 
         //return empty on string composed only by spaces
         //do nothing
@@ -446,18 +447,40 @@ class CatUtils {
 
         }
 
+        return $string;
+    }
+
+    /**
+     * @param $string
+     * @return string
+     */
+    private static function replacePlaceholders($string)
+    {
+        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'].+?["\'] ?) ?(equiv-text=["\'].+?["\'] ?)/>|ui';
+
+        preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER );
+
+        foreach ($matches as $match){
+            $ctype = trim($match[2]);
+            $ctype = str_replace('"', '', $ctype);
+            $ctype = str_replace('ctype=', '', $ctype);
+
+            if($ctype !== CTypeEnum::HTML){
+                $string = str_replace($match[0], 'placeholder', $string);
+            } else {
+                $string = str_replace($match[0], '', $string);
+            }
+        }
 
         return $string;
-
     }
 
     /**
      * Count words in a string
      *
-     * @param                 $string
-     * @param string          $source_lang
-     *
-     * @param MateCatFilter|null     $filter
+     * @param                    $string
+     * @param string             $source_lang
+     * @param MateCatFilter|null $filter
      *
      * @return float|int
      * @throws Exception
