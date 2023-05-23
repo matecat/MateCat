@@ -534,6 +534,9 @@ const CommonUtils = {
   parseFiles: (files) => {
     return files
   },
+  //Plugins
+  fileHasInstructions: (file) =>
+    file && file.metadata && file.metadata.instructions,
 
   /**
    * Returns true if the current OS is MacOS or iOS, false otherwise
