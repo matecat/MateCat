@@ -1,10 +1,16 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {useRef} from 'react'
 import PropTypes from 'prop-types'
+import usePortal from '../../hooks/usePortal'
 import TEXT_UTILS from '../../utils/textUtils'
 
-const LabelWithTooltip = ({children, tooltip, tooltipPosition, className}) => {
+const LabelWithTooltip = ({children, className, tooltipTarget}) => {
+  const TooltipPortal = usePortal(tooltipTarget ? tooltipTarget : document.body)
+
+  const [tooltipCoords, setTooltipCoords] = useState()
+
   const ref = useRef()
+  const tooltipDelayRef = useRef()
 
   const getContentText = () => {
     let textContent = children
@@ -37,25 +43,48 @@ const LabelWithTooltip = ({children, tooltip, tooltipPosition, className}) => {
     getOverflowChildren(),
   )
 
+  const mouseEnter = () => {
+    const rect = ref.current.getBoundingClientRect()
+
+    tooltipDelayRef.current = setTimeout(() => {
+      setTooltipCoords({
+        left: rect.left + rect.width / 2,
+        top: rect.y - 10,
+      })
+    }, 200)
+  }
+
+  const mouseLeave = () => {
+    setTooltipCoords(undefined)
+    clearTimeout(tooltipDelayRef.current)
+  }
+
   return (
     <div
       ref={ref}
       {...(className && {className})}
-      {...(shouldShowTooltip && {
-        'aria-label': tooltip ? tooltip : getContentText(),
-      })}
-      {...(tooltipPosition && {'tooltip-position': tooltipPosition})}
+      onMouseEnter={mouseEnter}
+      onMouseLeave={mouseLeave}
     >
       {children}
+      {shouldShowTooltip && tooltipCoords && (
+        <TooltipPortal>
+          <div
+            className="label-with-tooltip"
+            style={{left: tooltipCoords.left, top: tooltipCoords.top}}
+          >
+            <p className="label-with-tooltip-content">{getContentText()}</p>
+          </div>
+        </TooltipPortal>
+      )}
     </div>
   )
 }
 
 LabelWithTooltip.propTypes = {
   children: PropTypes.node.isRequired,
-  tooltip: PropTypes.string,
-  tooltipPosition: PropTypes.string,
   className: PropTypes.string,
+  tooltipTarget: PropTypes.node,
 }
 
 export default LabelWithTooltip
