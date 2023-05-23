@@ -80,15 +80,22 @@ class Files_FileDao extends DataAccess_AbstractDao {
 
     /**
      * @param $id
-     *
-     * @return Files_FileStruct
+     * @param int $ttl
+     * @return DataAccess_IDaoStruct|null
      */
-    public static function getById( $id ) {
+    public static function getById( $id, $ttl = 0 ) {
+
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id = :id ");
-        $stmt->execute( array( 'id' => $id ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
-        return $stmt->fetch();
+        $stmt = $conn->prepare("SELECT * FROM files where id = :id");
+
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id' => $id ] );
+
+        if(empty($result)){
+            return null;
+        }
+
+        return $result[0];
     }
 
     public function deleteFailedProjectFiles( $idFiles = [] ){
