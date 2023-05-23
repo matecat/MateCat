@@ -82,26 +82,17 @@ export const GlossaryItem = ({
             <span>{metadata.definition}</span>
           </div>
           {metadata.domain && (
-            <LabelWithTooltip
-              className="glossary_badge"
-              tooltipPosition="bottom"
-            >
+            <LabelWithTooltip className="glossary_badge">
               <span>{metadata.domain}</span>
             </LabelWithTooltip>
           )}
           {metadata.subdomain && (
-            <LabelWithTooltip
-              className="glossary_badge"
-              tooltipPosition="bottom"
-            >
+            <LabelWithTooltip className="glossary_badge">
               <span>{metadata.subdomain}</span>
             </LabelWithTooltip>
           )}
           <div className="glossary_source_details">
-            <LabelWithTooltip
-              className="glossary_source_tooltip"
-              tooltipPosition="bottom"
-            >
+            <LabelWithTooltip className="glossary_source_tooltip">
               <div className="glossary_source">
                 <b>
                   {metadata.key_name
