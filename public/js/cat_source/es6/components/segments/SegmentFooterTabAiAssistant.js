@@ -201,7 +201,7 @@ export const SegmentFooterTabAiAssistant = ({
     ) : (
       <>
         <div className="feedback-icons">
-          <span className="submited" onClick={() => sendFeedback(true)}>
+          <span className="submited">
             {feedbackLeave === 'Yes' ? <IconLike /> : <IconDislike />}
           </span>
         </div>
