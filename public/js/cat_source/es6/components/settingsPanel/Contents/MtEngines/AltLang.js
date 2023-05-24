@@ -1,8 +1,12 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const AltLang = ({addMTEngine}) => {
-  const {register, handleSubmit} = useForm()
+export const AltLang = ({addMTEngine, error}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = useForm()
   const onSubmit = (data) => {
     addMTEngine(data)
   }
@@ -19,6 +23,7 @@ export const AltLang = ({addMTEngine}) => {
               type="text"
               {...register('name', {required: true})}
             />
+            {errors.name && <span className="field-error">Required field</span>}
           </div>
           <div className="provider-field">
             <label>
@@ -29,14 +34,20 @@ export const AltLang = ({addMTEngine}) => {
               type="text"
               {...register('secret', {required: true})}
             />
+            {errors.secret && (
+              <span className="field-error">Required field</span>
+            )}
           </div>
 
-          <button
-            className="ui primary button"
-            onClick={handleSubmit(onSubmit)}
-          >
-            Confirm
-          </button>
+          <div className="provider-field">
+            {error && <span className={'mt-error'}>{error.message}</span>}
+            <button
+              className="ui primary button"
+              onClick={handleSubmit(onSubmit)}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
       <div className="add-provider-message">

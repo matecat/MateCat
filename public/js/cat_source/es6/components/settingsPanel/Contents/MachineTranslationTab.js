@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import IconAdd from '../../icons/IconAdd'
 import {Select} from '../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
@@ -9,9 +9,13 @@ import {Intento} from './MtEngines/Intento'
 import {MicrosoftHub} from './MtEngines/MicrosoftHub'
 import {SmartMate} from './MtEngines/SmartMate'
 import {Yandex} from './MtEngines/Yandex'
+import {addMTEngine} from '../../../api/addMTEngine'
+import {getMTEngines} from '../../../api/getMTEngines'
+
 export const MachineTranslationTab = () => {
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeEngine, setActiveEngine] = useState()
+  const [error, setError] = useState()
 
   const enginesList = [
     {name: 'ModernMt', id: 'mmt', component: ModernMt},
@@ -32,9 +36,27 @@ export const MachineTranslationTab = () => {
     {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
   ]
 
-  const addMTEngine = (data) => {
-    console.log('ADD MT ->', activeEngine.id, data.name, data)
+  const addMTEngineRequest = (data) => {
+    addMTEngine({
+      name: data.name,
+      provider: activeEngine.id,
+      dataMt: data,
+    })
+      .then((response) => {
+        setAddMTVisible(false)
+        setError()
+        //TODO: ADD TM to the list and activate
+      })
+      .catch((error) => {
+        if (error && error.length) setError(error[0])
+      })
   }
+
+  useEffect(() => {
+    getMTEngines().then((response) => {
+      console.log('MT ENGINES', response)
+    })
+  })
 
   return (
     <div className="machine-translation-tab">
@@ -57,7 +79,10 @@ export const MachineTranslationTab = () => {
               maxHeightDroplist={100}
               options={enginesList}
               activeOption={activeEngine}
-              onSelect={(option) => setActiveEngine(option)}
+              onSelect={(option) => {
+                setActiveEngine(option)
+                setError()
+              }}
             />
             <button
               className="ui button orange"
@@ -67,7 +92,10 @@ export const MachineTranslationTab = () => {
             </button>
           </div>
           {activeEngine ? (
-            <activeEngine.component addMTEngine={addMTEngine} />
+            <activeEngine.component
+              addMTEngine={addMTEngineRequest}
+              error={error}
+            />
           ) : null}
         </div>
       )}

@@ -2,12 +2,12 @@ import React, {useState} from 'react'
 import {Select} from '../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 
-export const Intento = ({addMTEngine}) => {
-  const [provider, setProvider] = useState()
+export const Intento = ({addMTEngine, error}) => {
   const {
     register,
     handleSubmit,
     control,
+    watch,
     formState: {errors},
   } = useForm()
   const onSubmit = (data) => {
@@ -16,6 +16,8 @@ export const Intento = ({addMTEngine}) => {
   const selectOptions = config.intento_providers
     ? Object.values(config.intento_providers)
     : []
+  const provider = watch('provider')
+  console.log('Errors', errors)
   return (
     <div className="add-provider-container">
       <div className="add-provider-fields">
@@ -29,6 +31,7 @@ export const Intento = ({addMTEngine}) => {
               type="text"
               {...register('name', {required: true})}
             />
+            {errors.name && <span className="field-error">Required field</span>}
           </div>
           <div className="provider-field">
             <label>
@@ -40,6 +43,9 @@ export const Intento = ({addMTEngine}) => {
               type="text"
               {...register('secret', {required: true})}
             />
+            {errors.secret && (
+              <span className="field-error">Required field</span>
+            )}
           </div>
           <div className="provider-field">
             <label>
@@ -49,15 +55,23 @@ export const Intento = ({addMTEngine}) => {
               name="provider"
               control={control}
               rules={{required: true}}
-              render={() => (
+              render={({
+                field: {onChange, value, name},
+                fieldState: {error},
+              }) => (
                 <Select
+                  name={name}
                   placeholder="Choose provider"
                   options={selectOptions}
-                  activeOption={provider}
-                  onSelect={(option) => setProvider(option)}
+                  activeOption={value}
+                  onSelect={(option) => onChange(option)}
+                  error={error}
                 />
               )}
             />
+            {errors.provider && (
+              <span className="field-error">Required field</span>
+            )}
           </div>
           <div className="provider-field">
             <label>Provider auth data</label>
@@ -78,12 +92,15 @@ export const Intento = ({addMTEngine}) => {
             />
           </div>
 
-          <button
-            className="ui primary button"
-            onClick={handleSubmit(onSubmit)}
-          >
-            Confirm
-          </button>
+          <div className="provider-field">
+            {error && <span className={'mt-error'}>{error.message}</span>}
+            <button
+              className="ui primary button"
+              onClick={handleSubmit(onSubmit)}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
       <div className="add-provider-message">

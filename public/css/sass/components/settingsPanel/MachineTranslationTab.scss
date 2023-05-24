@@ -38,6 +38,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2;
   }
   .add-provider-container {
     display: flex;
@@ -88,6 +89,14 @@
             border-color: rgba(34, 36, 38, 0.35);
             box-shadow: none;
           }
+        }
+        .field-error {
+          color: $redDefault;
+          font-size: 12px;
+        }
+        .mt-error {
+          color: $redDefault;
+          position: absolute;
         }
       }
     }

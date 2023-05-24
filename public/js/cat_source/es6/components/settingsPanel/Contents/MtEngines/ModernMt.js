@@ -1,8 +1,12 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const ModernMt = ({addMTEngine}) => {
-  const {register, handleSubmit} = useForm({
+export const ModernMt = ({addMTEngine, error}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
     defaultValues: {
       preimport: config.isAnInternalUser ? false : true,
       context_analyzer: config.isAnInternalUser ? false : true,
@@ -26,6 +30,9 @@ export const ModernMt = ({addMTEngine}) => {
               placeholder="Enter your license"
               {...register('secret', {required: true})}
             />
+            {errors.secret && (
+              <span className="field-error">Required field</span>
+            )}
           </div>
           <div className="provider-field checkbox first">
             {config.isAnInternalUser ? (
@@ -80,12 +87,15 @@ export const ModernMt = ({addMTEngine}) => {
             )}
             <label className="checkbox-label">Pre-translate files</label>
           </div>
-          <button
-            className="ui primary button"
-            onClick={handleSubmit(onSubmit)}
-          >
-            Confirm
-          </button>
+          <div className="provider-field">
+            {error && <span className={'mt-error'}>{error.message}</span>}
+            <button
+              className="ui primary button"
+              onClick={handleSubmit(onSubmit)}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
       <div className="add-provider-message">

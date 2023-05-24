@@ -45,6 +45,7 @@ export const Select = ({
   checkSpaceToReverse = true,
   maxHeightDroplist = 128,
   children,
+  error,
 }) => {
   const dropDownRef = useRef()
   const wrapperRef = useRef()

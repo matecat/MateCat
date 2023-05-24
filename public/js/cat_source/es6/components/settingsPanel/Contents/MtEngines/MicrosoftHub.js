@@ -1,8 +1,12 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const MicrosoftHub = ({addMTEngine}) => {
-  const {register, handleSubmit} = useForm()
+export const MicrosoftHub = ({addMTEngine, error}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = useForm()
   const onSubmit = (data) => {
     addMTEngine(data)
   }
@@ -19,6 +23,7 @@ export const MicrosoftHub = ({addMTEngine}) => {
               type="text"
               {...register('name', {required: true})}
             />
+            {errors.name && <span className="field-error">Required field</span>}
           </div>
           <div className="provider-field">
             <label>
@@ -30,18 +35,28 @@ export const MicrosoftHub = ({addMTEngine}) => {
               type="text"
               {...register('secret', {required: true})}
             />
+            {errors.secret && (
+              <span className="field-error">Required field</span>
+            )}
           </div>
           <div className="provider-field">
             <label>Category</label>
             <input name="category" type="text" {...register('category')} />
           </div>
 
-          <button
-            className="ui primary button"
-            onClick={handleSubmit(onSubmit)}
-          >
-            Confirm
-          </button>
+          <div className="provider-field">
+            {error && (
+              <span className={'mt-error'}>
+                {error.message ? error.message : 'KeyId not valid'}
+              </span>
+            )}
+            <button
+              className="ui primary button"
+              onClick={handleSubmit(onSubmit)}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
       <div className="add-provider-message">
