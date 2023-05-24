@@ -232,6 +232,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 "SELECT
                     SUM( raw_word_count ) AS raw_word_count,
                     SUM( eq_word_count ) AS eq_word_count,
+                    SUM( st.standard_word_count ) AS standard_word_count,
 
                     job_first_segment, job_last_segment, s.id, s.show_in_cattool
                         FROM segments s

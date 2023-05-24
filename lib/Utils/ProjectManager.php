@@ -185,7 +185,7 @@ class ProjectManager {
                     'due_date'                     => null,
                     'qa_model'                     => null,
                     'target_language_mt_engine_id' => [],
-                    'standard_analysis_wc'         => 0
+                    'standard_word_count'         => 0
                 ] );
 
         }
@@ -1440,12 +1440,13 @@ class ProjectManager {
         $counter = [];
         $chunk   = 0;
 
-        $reverse_count = [ 'eq_word_count' => 0, 'raw_word_count' => 0 ];
+        $reverse_count = [ 'standard_word_count' => 0, 'eq_word_count' => 0, 'raw_word_count' => 0 ];
 
         foreach ( $rows as $row ) {
 
             if ( !array_key_exists( $chunk, $counter ) ) {
                 $counter[ $chunk ] = [
+                    'standard_word_count' => 0,
                     'eq_word_count'       => 0,
                     'raw_word_count'      => 0,
                     'segment_start'       => $row[ 'id' ],
@@ -1454,6 +1455,7 @@ class ProjectManager {
                 ];
             }
 
+            $counter[ $chunk ][ 'standard_word_count' ]  += $row[ 'standard_word_count' ];
             $counter[ $chunk ][ 'eq_word_count' ]  += $row[ 'eq_word_count' ];
             $counter[ $chunk ][ 'raw_word_count' ] += $row[ 'raw_word_count' ];
             $counter[ $chunk ][ 'segment_end' ]    = $row[ 'id' ];
@@ -1467,9 +1469,11 @@ class ProjectManager {
             //and we are below the requested number of splits.
             //in this manner, we add to the last chunk all rests
             if ( $counter[ $chunk ][ $count_type ] >= $words_per_job[ $chunk ] && $chunk < $num_split - 1 /* chunk is zero based */ ) {
+                $counter[ $chunk ][ 'standard_word_count' ]  = (int)$counter[ $chunk ][ 'standard_word_count' ];
                 $counter[ $chunk ][ 'eq_word_count' ]  = (int)$counter[ $chunk ][ 'eq_word_count' ];
                 $counter[ $chunk ][ 'raw_word_count' ] = (int)$counter[ $chunk ][ 'raw_word_count' ];
 
+                $reverse_count[ 'standard_word_count' ]  += (int)$counter[ $chunk ][ 'standard_word_count' ];
                 $reverse_count[ 'eq_word_count' ]  += (int)$counter[ $chunk ][ 'eq_word_count' ];
                 $reverse_count[ 'raw_word_count' ] += (int)$counter[ $chunk ][ 'raw_word_count' ];
 
@@ -1479,9 +1483,11 @@ class ProjectManager {
 
         if ( $total_words > $reverse_count[ $count_type ] ) {
             if ( !empty( $counter[ $chunk ] ) ) {
+                $counter[ $chunk ][ 'standard_word_count' ]  = round( $row_totals[ 'standard_word_count' ] - $reverse_count[ 'standard_word_count' ] );
                 $counter[ $chunk ][ 'eq_word_count' ]  = round( $row_totals[ 'eq_word_count' ] - $reverse_count[ 'eq_word_count' ] );
                 $counter[ $chunk ][ 'raw_word_count' ] = round( $row_totals[ 'raw_word_count' ] - $reverse_count[ 'raw_word_count' ] );
             } else {
+                $counter[ $chunk - 1 ][ 'standard_word_count' ]  += round( $row_totals[ 'standard_word_count' ] - $reverse_count[ 'standard_word_count' ] );
                 $counter[ $chunk - 1 ][ 'eq_word_count' ]  += round( $row_totals[ 'eq_word_count' ] - $reverse_count[ 'eq_word_count' ] );
                 $counter[ $chunk - 1 ][ 'raw_word_count' ] += round( $row_totals[ 'raw_word_count' ] - $reverse_count[ 'raw_word_count' ] );
             }
@@ -1552,7 +1558,7 @@ class ProjectManager {
         $chunks = $projectStructure[ 'split_result' ][ 'chunks' ];
 
         // update the first chunk of the job to split
-        $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $chunks[0]['eq_word_count'], $chunks[0]['raw_word_count'] );
+        $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count'] );
 
         // create the other chunks of the job to split
         foreach ( $chunks as $chunk => $contents ) {
@@ -1569,8 +1575,8 @@ class ProjectManager {
             $jobToSplit[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
             $jobToSplit[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
             $jobToSplit[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
-            $jobToSplit[ 'standard_analysis_wc' ] = $contents[ 'eq_word_count' ];
-            $jobToSplit[ 'total_raw_wc' ]         = $contents['raw_word_count'];
+            $jobToSplit[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
+            $jobToSplit[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
 
             $stmt = $jobDao->getSplitJobPreparedStatement( $jobToSplit );
             $stmt->execute();
@@ -1659,14 +1665,14 @@ class ProjectManager {
 
         //get the min and
         $total_raw_wc         = 0;
-        $standard_analysis_wc = 0;
+        $standard_word_count = 0;
 
         //merge TM keys: preserve only owner's keys
         $tm_keys = [];
         foreach ( $jobStructs as $chunk_info ) {
             $tm_keys[] = $chunk_info[ 'tm_keys' ];
             $total_raw_wc         = $total_raw_wc + $chunk_info[ 'total_raw_wc' ];
-            $standard_analysis_wc = $standard_analysis_wc + $chunk_info[ 'standard_analysis_wc' ];
+            $standard_word_count = $standard_word_count + $chunk_info[ 'standard_analysis_wc' ];
         }
 
         try {
@@ -1714,7 +1720,7 @@ class ProjectManager {
 
         $jobDao = new Jobs_JobDao();
 
-        $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], $standard_analysis_wc, $total_raw_wc );
+        $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], $standard_word_count, $total_raw_wc );
 
         $this->dbHandler->getConnection()->commit();
 
