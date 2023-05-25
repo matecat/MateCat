@@ -18,10 +18,16 @@
 
 .settings-panel-row {
   display: grid;
-
-  min-height: 80px;
+  min-height: 50px;
+  border: 1px solid $grey7;
+  border-bottom: unset;
+  background-color: $grey4;
   align-items: center;
   transition: margin 0.2s ease-out 0.15s;
+}
+
+.settings-panel-row:last-child {
+  border-bottom: 1px solid $grey7;
 }
 
 .settings-panel-row-drag-handle {
@@ -58,9 +64,9 @@
 }
 
 .settings-panel-row-dragover-half-top {
-  margin-top: 80px;
+  margin-top: 50px;
 }
 
 .settings-panel-row-dragover-half-bottom {
-  margin-bottom: 80px;
+  margin-bottom: 50px;
 }

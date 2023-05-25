@@ -33,25 +33,6 @@
   .settings-panel-row {
     grid-template-columns: 8% 5% minmax(0, 1fr) 5% 20%;
   }
-
-  .settings-panel-row {
-    min-height: 50px;
-    border: 1px solid $grey7;
-    border-bottom: unset;
-    background-color: $grey4;
-  }
-
-  .settings-panel-row:last-child {
-    border-bottom: 1px solid $grey7;
-  }
-
-  .settings-panel-row-dragover-half-top {
-    margin-top: 50px;
-  }
-
-  .settings-panel-row-dragover-half-bottom {
-    margin-bottom: 50px;
-  }
 }
 
 .translation-memory-glossary-tab-active-resources {
