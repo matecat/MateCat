@@ -5,6 +5,12 @@ export const MTRow = ({row}) => {
     <>
       <div>{row.name}</div>
       <div>{row.description}</div>
+      <div>
+        <input type="checkbox"></input>
+      </div>
+      <div>
+        <button className="settings-panel-button">Delete</button>
+      </div>
     </>
   )
 }

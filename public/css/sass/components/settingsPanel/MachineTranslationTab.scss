@@ -6,10 +6,6 @@
       line-height: 40px;
       font-size: 20px;
     }
-    button {
-      padding: 0 16px;
-      height: 40px;
-    }
   }
   //Dropdown ovwerrides
   .add-mt-provider .select-with-icon__wrapper {
@@ -118,6 +114,17 @@
       p {
         line-height: 26px;
       }
+    }
+  }
+}
+.machine-translation-tab {
+  .settings-panel-table-rowHeading,
+  .settings-panel-row {
+    grid-template-columns: 15% minmax(0, 1fr) 15% 15%;
+  }
+  .active-mt {
+    .settings-panel-row {
+      background-color: $transparentBlue;
     }
   }
 }

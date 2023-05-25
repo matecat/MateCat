@@ -67,7 +67,9 @@ export const TmKeyRow = ({row}) => {
         onChange={(e) => setName(e.currentTarget.value)}
       ></input>
       <span>I</span>
-      <button>Import TMX</button>
+      <div>
+        <button className="settings-panel-button">Import TMX</button>
+      </div>
     </Fragment>
   )
 }

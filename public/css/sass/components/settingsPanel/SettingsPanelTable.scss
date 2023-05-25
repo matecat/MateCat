@@ -4,6 +4,18 @@
   position: relative;
   z-index: 0;
   overflow-y: auto;
+
+  .settings-panel-button {
+    cursor: pointer;
+    color: $black;
+    background: $grey8;
+    border-radius: 2px 0 0 2px;
+    padding: 6px 30px;
+    border: 1px solid $grey;
+    &:hover {
+      background-color: $grey7;
+    }
+  }
 }
 
 .settings-panel-table-rowHeading {

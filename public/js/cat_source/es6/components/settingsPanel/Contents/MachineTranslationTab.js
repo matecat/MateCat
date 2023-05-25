@@ -19,7 +19,7 @@ export const MachineTranslationTab = () => {
     useContext(SettingsPanelContext)
 
   const [addMTVisible, setAddMTVisible] = useState(false)
-  const [activeEngine, setActiveEngine] = useState()
+  const [activeAddEngine, setActiveAddEngine] = useState()
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
 
@@ -52,7 +52,7 @@ export const MachineTranslationTab = () => {
   const addMTEngineRequest = (data) => {
     addMTEngine({
       name: data.name,
-      provider: activeEngine.id,
+      provider: activeAddEngine.id,
       dataMt: data,
     })
       .then((response) => {
@@ -67,11 +67,16 @@ export const MachineTranslationTab = () => {
 
   useEffect(() => {
     setMTRows(
-      mtEngines.map((row, index) => ({
-        node: <MTRow key={index} {...{row}} />,
-      })),
+      mtEngines
+        .filter((row) => row.id !== activeMTEngine.id)
+        .map((row, index) => {
+          return {
+            node: <MTRow key={index} {...{row}} />,
+            isDraggable: false,
+          }
+        }),
     )
-  }, [])
+  }, [activeMTEngine, mtEngines])
 
   return (
     <div className="machine-translation-tab">
@@ -93,9 +98,9 @@ export const MachineTranslationTab = () => {
               id="mt-engine"
               maxHeightDroplist={100}
               options={enginesList}
-              activeOption={activeEngine}
+              activeOption={activeAddEngine}
               onSelect={(option) => {
-                setActiveEngine(option)
+                setActiveAddEngine(option)
                 setError()
               }}
             />
@@ -106,22 +111,27 @@ export const MachineTranslationTab = () => {
               Close
             </button>
           </div>
-          {activeEngine ? (
-            <activeEngine.component
+          {activeAddEngine ? (
+            <activeAddEngine.component
               addMTEngine={addMTEngineRequest}
               error={error}
             />
           ) : null}
         </div>
       )}
-      <div>
+      <div className="active-mt">
         <h2>Active MT</h2>
         <SettingsPanelTable
           columns={COLUMNS_TABLE}
-          rows={[{node: <MTRow key={'active'} row={activeMTEngine} />}]}
+          rows={[
+            {
+              node: <MTRow key={'active'} row={activeMTEngine} />,
+              isDraggable: false,
+            },
+          ]}
         />
       </div>
-      <div>
+      <div className="inactive-mt">
         <h2>Inactive MT</h2>
         <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
       </div>

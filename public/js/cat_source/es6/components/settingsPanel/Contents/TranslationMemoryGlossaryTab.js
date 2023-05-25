@@ -73,13 +73,15 @@ export const TranslationMemoryGlossaryTab = () => {
       </div>
       <div className="translation-memory-glossary-tab-active-resources">
         <div className="translation-memory-glossary-tab-table-title">
-          <span>Active Resources</span>
-          <button className="ui primary button">
-            <IconAdd /> Add shared resource
-          </button>
-          <button className="ui primary button">
-            <IconAdd /> New resource
-          </button>
+          <h2>Active Resources</h2>
+          <div>
+            <button className="ui primary button">
+              <IconAdd /> Add shared resource
+            </button>
+            <button className="ui primary button">
+              <IconAdd /> New resource
+            </button>
+          </div>
         </div>
         <SettingsPanelTable
           columns={COLUMNS_TABLE}
@@ -89,7 +91,7 @@ export const TranslationMemoryGlossaryTab = () => {
       </div>
       <div className="translation-memory-glossary-tab-inactive-resources">
         <div className="translation-memory-glossary-tab-table-title">
-          <span>Inactive Resources</span>
+          <h2>Inactive Resources</h2>
         </div>
         <SettingsPanelTable
           className="translation-memory-glossary-tab-inactive-table"

@@ -21,6 +21,7 @@
   align-items: center;
   font-size: 24px;
   font-weight: bold;
+  justify-content: space-between;
 
   > span:first-of-type {
     flex-grow: 1;
@@ -33,14 +34,6 @@
   .settings-panel-row {
     grid-template-columns: 8% 5% minmax(0, 1fr) 5% 20%;
   }
-}
-
-.translation-memory-glossary-tab-active-resources {
-  margin-bottom: 20px;
-}
-
-.translation-memory-glossary-tab-table-title {
-  margin-bottom: 20px;
 }
 
 .translation-memory-glossary-tab-inactive-table {
