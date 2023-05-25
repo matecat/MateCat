@@ -90,7 +90,11 @@ export const SettingsPanelTable = ({
     [dragOverIndex, onChangeRowsOrder],
   )
 
-  const renderColumns = (column, index) => <div key={index}>{column.name}</div>
+  const renderColumns = (column, index) => (
+    <div key={index} className="settings-panel-table-rowHeading-column">
+      {column.name}
+    </div>
+  )
   const renderItems = (row, index) => {
     const ref = createRef()
     rowsRef.current[index] = ref

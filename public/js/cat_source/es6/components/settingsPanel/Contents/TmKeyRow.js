@@ -58,10 +58,10 @@ export const TmKeyRow = ({row}) => {
 
   return (
     <Fragment>
-      <div className="tm-key-lookup">
+      <div className="tm-key-lookup align-center">
         <input checked={isLookup} onChange={onChangeIsLookup} type="checkbox" />
       </div>
-      <div className="tm-key-update">
+      <div className="tm-key-update align-center">
         {row.isActive && (
           <input
             checked={isMMSharedKey ? isMMSharedUpdateChecked : isUpdating}
@@ -79,9 +79,9 @@ export const TmKeyRow = ({row}) => {
         onChange={onChangeName}
         disabled={isMMSharedKey}
       ></input>
-      <span>I</span>
+      <span className="align-center">I</span>
       {!isMMSharedKey && (
-        <div>
+        <div className="align-center">
           <button className="settings-panel-button">Import TMX</button>
         </div>
       )}

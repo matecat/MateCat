@@ -28,14 +28,29 @@
   font-weight: bold;
 }
 
+.settings-panel-table-rowHeading-column {
+  text-align: left;
+  padding: 0 10px;
+}
+
 .settings-panel-row {
   display: grid;
   min-height: 50px;
-  border: 1px solid $grey7;
+  border: 1px solid $grey8;
   border-bottom: unset;
-  background-color: $grey4;
+  background-color: $grey9;
   align-items: center;
   transition: margin 0.2s ease-out 0.15s;
+}
+
+.settings-panel-row > *:not(.settings-panel-row-drag-handle) {
+  text-align: left;
+  padding: 0 10px;
+
+  &.align-center {
+    text-align: center;
+    padding: 0;
+  }
 }
 
 .settings-panel-row-active {
@@ -43,7 +58,7 @@
 }
 
 .settings-panel-row:last-child {
-  border-bottom: 1px solid $grey7;
+  border-bottom: 1px solid $grey8;
 }
 
 .settings-panel-row-drag-handle {

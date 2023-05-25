@@ -13,7 +13,7 @@
   border: 1px dashed $grey8;
   padding: 10px;
   margin-bottom: 20px;
-  background: $grey5;
+  background: $grey9;
 }
 
 .translation-memory-glossary-tab-table-title {
@@ -33,6 +33,11 @@
   .settings-panel-table-rowHeading,
   .settings-panel-row {
     grid-template-columns: 8% 5% minmax(0, 1fr) 5% 20%;
+  }
+
+  .settings-panel-table-rowHeading-column {
+    text-align: center;
+    padding: 0;
   }
 }
 
