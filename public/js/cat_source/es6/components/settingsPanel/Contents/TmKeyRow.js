@@ -56,6 +56,13 @@ export const TmKeyRow = ({row}) => {
 
   const isMMSharedUpdateChecked = !tmKeys.some(({w}) => w)
 
+  const isOwner = true
+  const iconClasses = isMMSharedKey
+    ? 'icon-earth icon-owner-public'
+    : !row.is_shared
+    ? 'icon-lock icon-owner-private'
+    : ''
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
@@ -79,7 +86,9 @@ export const TmKeyRow = ({row}) => {
         onChange={onChangeName}
         disabled={isMMSharedKey}
       ></input>
-      <span className="align-center">I</span>
+      <div
+        className={`align-center${isOwner ? ' icon-owner' : ''} ${iconClasses}`}
+      ></div>
       {!isMMSharedKey && (
         <div className="align-center">
           <button className="settings-panel-button">Import TMX</button>
