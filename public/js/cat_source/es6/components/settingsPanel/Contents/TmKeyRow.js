@@ -5,8 +5,8 @@ import {SettingsPanelContext} from '../SettingsPanelContext'
 export const TmKeyRow = ({row}) => {
   const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
 
-  const [isLookup, setIsLookup] = useState(row.isActive ?? false)
-  const [isUpdating, setIsUpdating] = useState(row.isActive ?? false)
+  const [isLookup, setIsLookup] = useState(row.r ?? false)
+  const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name)
 
   const isMMSharedKey = row.id === 'mmSharedKey'
@@ -36,13 +36,25 @@ export const TmKeyRow = ({row}) => {
                 : !isLookup && !isUpdating
                 ? false
                 : true,
+              r: isLookup,
+              w: !tm.isActive ? isLookup : isUpdating,
             }
           : tm,
       ),
     )
   }
 
-  const isMMSharedUpdateChecked = !tmKeys.some(({isActive}) => isActive)
+  const onChangeName = (e) => {
+    const {value: name} = e.currentTarget ?? {}
+    if (name) {
+      setName(name)
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === row.id ? {...tm, name} : tm)),
+      )
+    }
+  }
+
+  const isMMSharedUpdateChecked = !tmKeys.some(({w}) => w)
 
   return (
     <Fragment>
@@ -52,9 +64,7 @@ export const TmKeyRow = ({row}) => {
       <div className="tm-key-update">
         {row.isActive && (
           <input
-            checked={
-              isMMSharedKey ? isUpdating && isMMSharedUpdateChecked : isUpdating
-            }
+            checked={isMMSharedKey ? isMMSharedUpdateChecked : isUpdating}
             onChange={onChangeIsUpdating}
             type="checkbox"
             disabled={isMMSharedKey}
@@ -62,14 +72,19 @@ export const TmKeyRow = ({row}) => {
         )}
       </div>
       <input
-        className="tm-key-row-name"
+        className={`tm-key-row-name${
+          isMMSharedKey ? ' tm-key-row-name-disabled' : ''
+        }`}
         value={name}
-        onChange={(e) => setName(e.currentTarget.value)}
+        onChange={onChangeName}
+        disabled={isMMSharedKey}
       ></input>
       <span>I</span>
-      <div>
-        <button className="settings-panel-button">Import TMX</button>
-      </div>
+      {!isMMSharedKey && (
+        <div>
+          <button className="settings-panel-button">Import TMX</button>
+        </div>
+      )}
     </Fragment>
   )
 }

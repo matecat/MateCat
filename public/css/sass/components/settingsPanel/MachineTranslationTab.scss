@@ -122,9 +122,4 @@
   .settings-panel-row {
     grid-template-columns: 15% minmax(0, 1fr) 15% 15%;
   }
-  .active-mt {
-    .settings-panel-row {
-      background-color: $transparentBlue;
-    }
-  }
 }

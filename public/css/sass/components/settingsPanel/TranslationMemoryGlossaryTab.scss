@@ -57,3 +57,11 @@
     background-color: white;
   }
 }
+
+.tm-key-row-name-disabled {
+  border: unset;
+  &:focus,
+  &:hover {
+    background-color: unset;
+  }
+}

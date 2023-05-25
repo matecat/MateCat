@@ -38,6 +38,11 @@
   transition: margin 0.2s ease-out 0.15s;
 }
 
+..background-color: $transparentBlue; {
+  {
+  background-color: $transparentBlue;
+}
+
 .settings-panel-row:last-child {
   border-bottom: 1px solid $grey7;
 }
@@ -46,6 +51,11 @@
   position: absolute;
   margin-left: 8px;
   cursor: move;
+  border: 2px dotted #ccc;
+  border-top: 0;
+  border-bottom: 0;
+  width: 2px;
+  height: 30px;
 }
 
 .settings-panel-row-dragging {

@@ -31,8 +31,14 @@ export const SettingsPanelTable = ({
     dragEndRow.current = undefined
   }, [])
 
-  const onDragOver = useCallback(({y, halfPoint}) => {
+  const onDragOver = useCallback(({y, halfPoint, row}) => {
     const parentRect = rowsContainerRef.current.getBoundingClientRect()
+
+    if (row.isLocked) {
+      setDragOverIndex(undefined)
+      previousDragOverIndex.current = undefined
+      return
+    }
 
     const indexToMove = rowsRef.current.findIndex(({current}, index) => {
       if (!current) return false

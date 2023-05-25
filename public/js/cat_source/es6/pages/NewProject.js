@@ -292,6 +292,8 @@ const NewProject = ({
     <CreateProjectContext.Provider
       value={{
         SELECT_HEIGHT,
+        tmKeys,
+        setTmKeys,
         languages,
         targetLangs,
         setTargetLangs,

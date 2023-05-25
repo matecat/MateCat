@@ -19,6 +19,8 @@ const DEFAULT_TRANSLATION_MEMORY = {
   isActive: true,
   isDraggable: false,
   isLocked: true,
+  r: true,
+  w: true,
 }
 
 export const TranslationMemoryGlossaryTab = () => {

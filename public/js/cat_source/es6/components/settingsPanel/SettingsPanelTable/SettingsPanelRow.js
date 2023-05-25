@@ -42,7 +42,7 @@ export const SettingsPanelRow = forwardRef(
       if (relativeY)
         setHalfDragPoint(relativeY > rowHeight / 2 ? 'bottom' : 'top')
 
-      if (onDragOver) onDragOver({...point, halfPoint})
+      if (onDragOver) onDragOver({...point, halfPoint, row})
     }
 
     const onDragEndCallback = () => {
@@ -78,7 +78,9 @@ export const SettingsPanelRow = forwardRef(
     return (
       <div
         ref={ref}
-        className={`settings-panel-row${draggingCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
+        className={`settings-panel-row${draggingCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}${
+          row.isActive && !row.isLocked ? ' settings-panel-row-active' : ''
+        }`}
         draggable={isActiveDrag}
         onDragStart={onDragStartCallback}
         onDragOver={onDragOverCallback}
@@ -91,9 +93,7 @@ export const SettingsPanelRow = forwardRef(
               className="settings-panel-row-drag-handle"
               onMouseDown={() => setIsActiveDrag(true)}
               onMouseUp={onDragEndCallback}
-            >
-              |
-            </div>
+            ></div>
           )}
           {node}
         </>

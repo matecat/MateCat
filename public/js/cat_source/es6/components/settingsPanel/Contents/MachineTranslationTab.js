@@ -119,7 +119,7 @@ export const MachineTranslationTab = () => {
           ) : null}
         </div>
       )}
-      <div className="active-mt">
+      <div>
         <h2>Active MT</h2>
         <SettingsPanelTable
           columns={COLUMNS_TABLE}
@@ -127,6 +127,7 @@ export const MachineTranslationTab = () => {
             {
               node: <MTRow key={'active'} row={activeMTEngine} />,
               isDraggable: false,
+              isActive: true,
             },
           ]}
         />
