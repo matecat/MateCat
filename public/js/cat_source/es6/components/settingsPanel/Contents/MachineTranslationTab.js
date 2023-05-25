@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import IconAdd from '../../icons/IconAdd'
 import {Select} from '../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
@@ -10,12 +10,18 @@ import {MicrosoftHub} from './MtEngines/MicrosoftHub'
 import {SmartMate} from './MtEngines/SmartMate'
 import {Yandex} from './MtEngines/Yandex'
 import {addMTEngine} from '../../../api/addMTEngine'
-import {getMTEngines} from '../../../api/getMTEngines'
+import {SettingsPanelTable} from '../SettingsPanelTable'
+import {MTRow} from './MTRow'
+import {SettingsPanelContext} from '../SettingsPanelContext'
 
 export const MachineTranslationTab = () => {
+  const {mtEngines, setMtEngines, activeMTEngine, setActiveMTEngine} =
+    useContext(SettingsPanelContext)
+
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeEngine, setActiveEngine] = useState()
   const [error, setError] = useState()
+  const [MTRows, setMTRows] = useState([])
 
   const enginesList = [
     {name: 'ModernMt', id: 'mmt', component: ModernMt},
@@ -36,6 +42,13 @@ export const MachineTranslationTab = () => {
     {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
   ]
 
+  const COLUMNS_TABLE = [
+    {name: 'Engine Name'},
+    {name: 'Description'},
+    {name: 'Use in this project'},
+    {name: 'Action'},
+  ]
+
   const addMTEngineRequest = (data) => {
     addMTEngine({
       name: data.name,
@@ -53,10 +66,12 @@ export const MachineTranslationTab = () => {
   }
 
   useEffect(() => {
-    getMTEngines().then((response) => {
-      console.log('MT ENGINES', response)
-    })
-  })
+    setMTRows(
+      mtEngines.map((row, index) => ({
+        node: <MTRow key={index} {...{row}} />,
+      })),
+    )
+  }, [])
 
   return (
     <div className="machine-translation-tab">
@@ -99,6 +114,17 @@ export const MachineTranslationTab = () => {
           ) : null}
         </div>
       )}
+      <div>
+        <h2>Active MT</h2>
+        <SettingsPanelTable
+          columns={COLUMNS_TABLE}
+          rows={[{node: <MTRow key={'active'} row={activeMTEngine} />}]}
+        />
+      </div>
+      <div>
+        <h2>Inactive MT</h2>
+        <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+      </div>
     </div>
   )
 }

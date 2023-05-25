@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useContext} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
@@ -22,9 +22,15 @@ const DEFAULT_CONTENTS = [
   },
 ]
 
-export const SettingsPanel = ({context, onClose}) => {
-  const {tmKeys, setTmKeys} = useContext(context)
-
+export const SettingsPanel = ({
+  onClose,
+  tmKeys,
+  setTmKeys,
+  mtEngines,
+  setMtEngines,
+  activeMTEngine,
+  setActiveMTEngine,
+}) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
     DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
@@ -48,7 +54,18 @@ export const SettingsPanel = ({context, onClose}) => {
   const close = () => setIsVisible(false)
 
   return (
-    <SettingsPanelContext.Provider value={{tabs, setTabs, tmKeys, setTmKeys}}>
+    <SettingsPanelContext.Provider
+      value={{
+        tabs,
+        setTabs,
+        tmKeys,
+        setTmKeys,
+        mtEngines,
+        setMtEngines,
+        activeMTEngine,
+        setActiveMTEngine,
+      }}
+    >
       <div className="settings-panel">
         <div
           className={`settings-panel-overlay${
@@ -81,5 +98,9 @@ export const SettingsPanel = ({context, onClose}) => {
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   tmKeys: PropTypes.array,
-  isCreateProjectPage: PropTypes.bool,
+  setTmKeys: PropTypes.func,
+  mtEngines: PropTypes.array,
+  setMtEngines: PropTypes.func,
+  activeMTEngine: PropTypes.object,
+  setActiveMTEngine: PropTypes.func,
 }

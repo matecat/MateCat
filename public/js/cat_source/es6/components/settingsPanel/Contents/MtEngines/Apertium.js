@@ -63,8 +63,8 @@ export const Apertium = ({addMTEngine, error}) => {
         </p>
         <p>
           <strong>Apertium</strong> is superfast, fully customisable and very
-          good for closely-related languages. Don't think twice and contact us
-          if you want to try it out integrated in MateCat!
+          good for closely-related languages. Don&apos;t think twice and contact
+          us if you want to try it out integrated in MateCat!
         </p>
         <p>
           More info on{' '}
