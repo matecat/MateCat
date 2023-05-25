@@ -5,7 +5,6 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import IconLike from '../icons/IconLike'
 import IconDislike from '../icons/IconDislike'
 import {aiSuggestion} from '../../api/aiSuggestion/aiSuggestion'
-import TagUtils from '../../utils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
 import {TabConcordanceResults} from './TabConcordanceResults'
 import {getConcordance} from '../../api/getConcordance'
@@ -72,7 +71,7 @@ export const SegmentFooterTabAiAssistant = ({
         setFeedbackLeave(undefined)
         requestedWord.current = value
 
-        const sourceContent = TagUtils.prepareTextToSend(segment.updatedSource)
+        const sourceContent = segment.decodedSource
 
         memoSuggestions = memoSuggestions.filter(({suggestion}) => suggestion)
 
@@ -107,27 +106,41 @@ export const SegmentFooterTabAiAssistant = ({
       }
     }
     const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
-      if (!hasError && sid === segment.sid && !isCachedLastRequest) {
-        setSuggestion({value: suggestion, isCompleted})
-        if (isCompleted) {
-          const pendingCache = [...memoSuggestions]
-            .reverse()
-            .find(({idSegment}) => idSegment === sid)
-          memoSuggestions = memoSuggestions.map((item) => ({
-            ...item,
-            suggestion: item === pendingCache ? suggestion : item.suggestion,
-          }))
+      if (sid === segment.sid && !isCachedLastRequest) {
+        if (!hasError) {
+          setHasError(false)
+          setSuggestion({value: suggestion, isCompleted})
+          if (isCompleted) {
+            const pendingCache = [...memoSuggestions]
+              .reverse()
+              .find(({idSegment}) => idSegment === sid)
+            memoSuggestions = memoSuggestions.map((item) => ({
+              ...item,
+              suggestion: item === pendingCache ? suggestion : item.suggestion,
+            }))
+            const message = {
+              sid: segment.sid,
+              segment: segment.decodedSource,
+              request: requestedWord.current,
+              response: suggestion,
+              source: config.source_code,
+              target: config.target_code,
+            }
+            CommonUtils.dispatchTrackingEvents('AiAssistantResponse', message)
+          }
+        } else {
+          setHasError(true)
+
+          // Tracking ai error
           const message = {
             sid: segment.sid,
             segment: segment.decodedSource,
             request: requestedWord.current,
-            response: suggestion,
             source: config.source_code,
             target: config.target_code,
+            error: suggestion,
           }
-          CommonUtils.dispatchTrackingEvents('AiAssistantResponse', message)
-        } else if (hasError) {
-          setHasError(true)
+          CommonUtils.dispatchTrackingEvents('AiAssistantError', message)
         }
       }
     }
@@ -158,7 +171,7 @@ export const SegmentFooterTabAiAssistant = ({
         aiSuggestionHandler,
       )
     }
-  }, [segment.sid, segment.updatedSource])
+  }, [segment.sid, segment.decodedSource])
 
   const isTabOpen = active_class === 'open'
 
@@ -219,8 +232,8 @@ export const SegmentFooterTabAiAssistant = ({
         </div>
       ) : hasError ? (
         <span className="suggestion-error">
-          It looks like we have encountered an error with this request. Please
-          refresh the page and try again
+          The service is at capacity right now. We are allowing users in as we
+          increase capacity.
         </span>
       ) : (
         <div className="loading-container">

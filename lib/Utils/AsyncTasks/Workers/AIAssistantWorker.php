@@ -11,6 +11,7 @@ use StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Exceptions\EndQueueException;
+use Utils;
 
 class AIAssistantWorker extends AbstractWorker
 {
@@ -75,7 +76,9 @@ class AIAssistantWorker extends AbstractWorker
      */
     private function explain_meaning($payload)
     {
+        $phraseTrimLimit = ceil(INIT::$OPEN_AI_MAX_TOKENS / 2);
         $phrase = strip_tags( html_entity_decode( $payload['phrase'] ) );
+        $phrase = Utils::truncatePhrase($phrase, $phraseTrimLimit);
         $txt = "";
 
         $lockValue = $this->generateLockValue();
@@ -119,12 +122,32 @@ class AIAssistantWorker extends AbstractWorker
                             $txt .= $arr["choices"][0]["delta"]["content"];
                             $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
                         } else {
-                            $this->_doLog("Received wrong data from OpenAI for id_segment " . $payload['id_segment']. $clean ." was received");
+                            // Trigger error only if $clean is not empty
+                            if(!empty($clean) and $clean !== ''){
+
+                                // Trigger real errors here
+                                if(Utils::isJson($clean)){
+                                    $clean = json_decode($clean, true);
+
+                                    if(
+                                        isset($clean['error']) and
+                                        isset($clean['error']["message"])
+                                    ){
+                                        $message = "Received wrong JSON data from OpenAI for id_segment " . $payload['id_segment']. ":" . $clean['error']["message"] ." was received";
+                                        $this->emitErrorMessage( $message, $payload);
+
+                                        return 0; // exit
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             } else {
-                $this->_doLog("Data received from OpenAI is not as array: " . serialize($_d)." was received for id_segment " . $payload['id_segment']);
+                $message = "Data received from OpenAI is not as array: " . $_d ." was received for id_segment " . $payload['id_segment'];
+                $this->emitErrorMessage( $message, $payload);
+
+                return 0; // exit
             }
 
             // NEEDED by CURLOPT_WRITEFUNCTION function
@@ -132,6 +155,17 @@ class AIAssistantWorker extends AbstractWorker
             // For more info see here: https://stackoverflow.com/questions/2294344/what-for-do-we-use-curlopt-writefunction-in-phps-curl
             return strlen( $data );
         } );
+    }
+
+    /**
+     * @param $message
+     * @param $payload
+     * @throws StompException
+     */
+    private function emitErrorMessage($message, $payload)
+    {
+        $this->_doLog($message);
+        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $message, true );
     }
 
     /**

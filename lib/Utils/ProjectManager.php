@@ -387,6 +387,10 @@ class ProjectManager {
      * Perform sanitization of the projectStructure and assign errors.
      * Resets the errors array to avoid subsequent calls to pile up errors.
      *
+     * Please NOTE: this method is called by controllers and by ProjectManager itself, in the latter case
+     *  'project_features' field already contains a RecursiveArrayObject,
+     *   so use an ArrayObject, it accepts both array and RecursiveArrayObject
+     *
      * @throws Exception
      */
     public function sanitizeProjectStructure() {
@@ -394,6 +398,11 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
         $this->_sanitizeProjectName();
         $this->_validateUploadToken();
+
+        $this->projectStructure[ 'project_features' ] = new ArrayObject( $this->projectStructure[ 'project_features' ] );
+
+        $features = new FeatureSet( $this->_getRequestedFeatures() );
+        $features->run( 'sanitizeProjectStructureInCreation', $this->projectStructure );
 
     }
 
