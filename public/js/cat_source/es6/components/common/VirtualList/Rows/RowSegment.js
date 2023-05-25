@@ -103,7 +103,7 @@ function RowSegment({
               </span>
             </div>
           ) : null}
-          {file && file.metadata && file.metadata.instructions ? (
+          {CommonUtils.fileHasInstructions(file) ? (
             <div
               className={'button-notes'}
               onClick={() => openInstructionsModal(idFileSegment)}
