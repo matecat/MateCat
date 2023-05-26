@@ -1,11 +1,18 @@
 .settingsPanel-notification {
   display: flex;
   align-items: center;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 15px;
   justify-content: space-between;
+  padding: 15px 10px;
+  border: 1px solid $grey8;
+  margin: 15px 0;
+  > div {
+    display: flex;
+    gap: 4px;
+  }
   p {
     text-align: left;
+    margin: 0;
   }
   &.settingsPanel-notification_success {
     border-top: 3px solid $greenDefault;

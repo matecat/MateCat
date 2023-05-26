@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Close from '../../../../../../img/icons/Close'
 
 export const MessageNotification = ({
   type = 'warning',
@@ -11,10 +12,16 @@ export const MessageNotification = ({
     <div
       className={`settingsPanel-notification_${type} settingsPanel-notification`}
     >
-      {message}
+      <p dangerouslySetInnerHTML={{__html: message}} />
       <div>
-        {confirmCallback && <button onClick={confirmCallback}>Confirm</button>}
-        <button onClick={() => closeCallback()}>x</button>
+        {confirmCallback && (
+          <button className="ui primary button" onClick={confirmCallback}>
+            Confirm
+          </button>
+        )}
+        <button className="ui button orange" onClick={() => closeCallback()}>
+          <Close />
+        </button>
       </div>
     </div>
   )

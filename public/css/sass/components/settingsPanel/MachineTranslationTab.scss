@@ -122,4 +122,8 @@
   .settings-panel-row {
     grid-template-columns: 15% minmax(0, 1fr) 15% 15%;
   }
+  .settings-panel-table-rowHeading-column:nth-child(3),
+  .settings-panel-table-rowHeading-column:nth-child(4) {
+    text-align: center;
+  }
 }

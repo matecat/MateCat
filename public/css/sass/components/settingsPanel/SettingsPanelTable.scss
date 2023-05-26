@@ -40,6 +40,11 @@
   border-bottom: unset;
   background-color: $grey9;
   transition: margin 0.2s ease-out 0.15s;
+  .settings-panel-cell-center {
+    align-self: center;
+    justify-content: center;
+    display: flex;
+  }
 }
 
 .settings-panel-row-content {

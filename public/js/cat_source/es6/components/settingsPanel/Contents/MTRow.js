@@ -13,7 +13,7 @@ export const MTRow = ({row, deleteMT}) => {
       <div>{row.name}</div>
       <div>{row.description}</div>
       {!config.is_cattool && (
-        <div>
+        <div className="settings-panel-cell-center">
           <input
             type="checkbox"
             checked={row.id === activeMTEngine.id ? true : false}
@@ -22,7 +22,7 @@ export const MTRow = ({row, deleteMT}) => {
         </div>
       )}
       {!row.default && !config.is_cattool && (
-        <div>
+        <div className="settings-panel-cell-center">
           <button className="settings-panel-button" onClick={deleteMT}>
             Delete
           </button>

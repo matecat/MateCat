@@ -15,9 +15,10 @@ import {MTRow} from './MTRow'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 import {deleteMTEngine} from '../../../api/deleteMTEngine'
 import {MessageNotification} from './MessageNotification'
+import Close from '../../../../../../img/icons/Close'
 
 export const MachineTranslationTab = () => {
-  const {mtEngines, setMtEngines, activeMTEngine, setActiveMTEngine} =
+  const {mtEngines, setMtEngines, activeMTEngine} =
     useContext(SettingsPanelContext)
 
   const [addMTVisible, setAddMTVisible] = useState(false)
@@ -25,6 +26,7 @@ export const MachineTranslationTab = () => {
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
+  const [errorDeletingMT, setErrorDeletingMT] = useState(false)
 
   const enginesList = [
     {name: 'ModernMt', id: 'mmt', component: ModernMt},
@@ -59,9 +61,19 @@ export const MachineTranslationTab = () => {
       dataMt: data,
     })
       .then((response) => {
+        const {data} = response
         setAddMTVisible(false)
         setError()
-        //TODO: ADD TM to the list and activate
+        if (data.id) {
+          const newMT = {
+            name: data.name,
+            id: parseInt(response.data.id),
+            description: activeAddEngine.name,
+          }
+          setMtEngines((prevStateMT) => {
+            return [newMT, ...prevStateMT]
+          })
+        }
       })
       .catch((error) => {
         if (error && error.length) setError(error[0])
@@ -72,9 +84,16 @@ export const MachineTranslationTab = () => {
     setDeleteMTRequest(mt)
   }
   const deleteMT = () => {
-    deleteMTEngine({id: row.id})
-      .then(() => {})
-      .catch(() => {})
+    deleteMTEngine({id: deleteMTRequest.id})
+      .then(() => {
+        setMtEngines((prevStateMT) => {
+          return prevStateMT.filter((MT) => MT.id !== deleteMTRequest.id)
+        })
+        setDeleteMTRequest()
+      })
+      .catch(() => {
+        setErrorDeletingMT(true)
+      })
   }
 
   useEffect(() => {
@@ -94,6 +113,7 @@ export const MachineTranslationTab = () => {
           }
         }),
     )
+    setDeleteMTRequest()
   }, [activeMTEngine, mtEngines])
 
   return (
@@ -101,9 +121,16 @@ export const MachineTranslationTab = () => {
       {deleteMTRequest && (
         <MessageNotification
           type={'warning'}
-          message={'Do you really want to delete this MT?'}
+          message={`Do you really want to delete the MT: <b>${deleteMTRequest.name}</b>?`}
           confirmCallback={deleteMT}
           closeCallback={() => setDeleteMTRequest()}
+        />
+      )}
+      {errorDeletingMT && (
+        <MessageNotification
+          type={'error'}
+          message={'There was an error saving your data. Please retry!'}
+          closeCallback={() => setErrorDeletingMT(false)}
         />
       )}
       {!addMTVisible ? (
@@ -134,7 +161,7 @@ export const MachineTranslationTab = () => {
               className="ui button orange"
               onClick={() => setAddMTVisible(false)}
             >
-              Close
+              <Close />
             </button>
           </div>
           {activeAddEngine ? (
