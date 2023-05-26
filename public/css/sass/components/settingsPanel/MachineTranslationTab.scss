@@ -119,7 +119,7 @@
 }
 .machine-translation-tab {
   .settings-panel-table-rowHeading,
-  .settings-panel-row {
+  .settings-panel-row-content {
     grid-template-columns: 15% minmax(0, 1fr) 15% 15%;
   }
   .settings-panel-table-rowHeading-column:nth-child(3),
