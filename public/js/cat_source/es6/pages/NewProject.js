@@ -31,6 +31,7 @@ const DEFAULT_ENGINE_MEMORY = {
   name: 'MyMemory',
   description:
     'Machine translation by the MT engine best suited to your project.',
+  default: true,
 }
 
 const historySourceTargets = {

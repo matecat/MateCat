@@ -13,6 +13,8 @@ import {addMTEngine} from '../../../api/addMTEngine'
 import {SettingsPanelTable} from '../SettingsPanelTable'
 import {MTRow} from './MTRow'
 import {SettingsPanelContext} from '../SettingsPanelContext'
+import {deleteMTEngine} from '../../../api/deleteMTEngine'
+import {MessageNotification} from './MessageNotification'
 
 export const MachineTranslationTab = () => {
   const {mtEngines, setMtEngines, activeMTEngine, setActiveMTEngine} =
@@ -22,6 +24,7 @@ export const MachineTranslationTab = () => {
   const [activeAddEngine, setActiveAddEngine] = useState()
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
+  const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const enginesList = [
     {name: 'ModernMt', id: 'mmt', component: ModernMt},
@@ -65,13 +68,28 @@ export const MachineTranslationTab = () => {
       })
   }
 
+  const deleteMTConfirm = (mt) => {
+    setDeleteMTRequest(mt)
+  }
+  const deleteMT = () => {
+    deleteMTEngine({id: row.id})
+      .then(() => {})
+      .catch(() => {})
+  }
+
   useEffect(() => {
     setMTRows(
       mtEngines
         .filter((row) => row.id !== activeMTEngine.id)
         .map((row, index) => {
           return {
-            node: <MTRow key={index} {...{row}} />,
+            node: (
+              <MTRow
+                key={index}
+                {...{row}}
+                deleteMT={() => deleteMTConfirm(row)}
+              />
+            ),
             isDraggable: false,
           }
         }),
@@ -80,6 +98,14 @@ export const MachineTranslationTab = () => {
 
   return (
     <div className="machine-translation-tab">
+      {deleteMTRequest && (
+        <MessageNotification
+          type={'warning'}
+          message={'Do you really want to delete this MT?'}
+          confirmCallback={deleteMT}
+          closeCallback={() => setDeleteMTRequest()}
+        />
+      )}
       {!addMTVisible ? (
         <div className="add-mt-button">
           <button
@@ -125,7 +151,13 @@ export const MachineTranslationTab = () => {
           columns={COLUMNS_TABLE}
           rows={[
             {
-              node: <MTRow key={'active'} row={activeMTEngine} />,
+              node: (
+                <MTRow
+                  key={'active'}
+                  row={{...activeMTEngine}}
+                  deleteMT={() => deleteMTConfirm(activeMTEngine)}
+                />
+              ),
               isDraggable: false,
               isActive: true,
             },

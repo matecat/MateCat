@@ -1,0 +1,22 @@
+.settingsPanel-notification {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  justify-content: space-between;
+  p {
+    text-align: left;
+  }
+  &.settingsPanel-notification_success {
+    border-top: 3px solid $greenDefault;
+    background-color: $greenDefaultTransparent2;
+  }
+  &.settingsPanel-notification_warning {
+    border-top: 3px solid #ffcc01;
+    background-color: $orangeDefaultTransparent2;
+  }
+  &.settingsPanel-notification_error {
+    border-top: 3px solid $redDefault;
+    background-color: $redDefaultTransparent;
+  }
+}
