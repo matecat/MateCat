@@ -20,13 +20,16 @@ export const SettingsPanelTable = ({
 
   const rowsContainerRef = useRef()
   const rowsRef = useRef([])
-  const dragStartIndexRef = useRef()
+  const dragStartInfoRef = useRef()
   const previousDragOverIndex = useRef()
   const dragEndRow = useRef()
 
   // drag and drop callback's
   const onDragStart = useCallback((index) => {
-    dragStartIndexRef.current = {index}
+    dragStartInfoRef.current = {
+      index,
+      targetContainer: rowsContainerRef.current,
+    }
     previousDragOverIndex.current = undefined
     dragEndRow.current = undefined
   }, [])
@@ -57,8 +60,8 @@ export const SettingsPanelTable = ({
     if (previousDragOverIndex.current !== indexToMove)
       setDragOverIndex(indexToMove)
 
-    dragStartIndexRef.current = {
-      ...dragStartIndexRef.current,
+    dragStartInfoRef.current = {
+      ...dragStartInfoRef.current,
       halfPoint,
     }
     previousDragOverIndex.current = indexToMove
@@ -67,11 +70,11 @@ export const SettingsPanelTable = ({
   const onDragEnd = useCallback(
     ({row}) => {
       const isValidRange =
-        dragStartIndexRef.current?.index >= 0 &&
+        dragStartInfoRef.current?.index >= 0 &&
         dragOverIndex >= 0 &&
-        dragStartIndexRef.current?.index !== dragOverIndex
+        dragStartInfoRef.current?.index !== dragOverIndex
 
-      const {index: startIndex, halfPoint} = dragStartIndexRef.current
+      const {index: startIndex, halfPoint} = dragStartInfoRef.current
 
       if (isValidRange) {
         const indexToMove =
@@ -119,7 +122,7 @@ export const SettingsPanelTable = ({
     <SettingsPanelTableContext.Provider
       value={{
         rowsContainerRef,
-        dragStartIndexRef,
+        dragStartInfoRef,
         onDragStart,
         onDragOver,
         onDragEnd,

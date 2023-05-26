@@ -57,13 +57,27 @@ export const TranslationMemoryGlossaryTab = () => {
     if (!tmKeys) return
     const rows = [DEFAULT_TRANSLATION_MEMORY, ...tmKeys]
 
-    setKeysRows(
-      rows.map((row, index) => ({
-        node: <TmKeyRow key={index} {...{row}} />,
-        isDraggable: row.isDraggable ?? row.isActive,
-        isActive: row.isActive,
-        isLocked: row.isLocked,
-      })),
+    const onExpandRow = ({row, shouldExpand}) =>
+      setKeysRows((prevState) =>
+        prevState.map((item) =>
+          item.id === row.id ? {...item, isExpanded: shouldExpand} : item,
+        ),
+      )
+
+    setKeysRows((prevState) =>
+      rows.map((row, index) => {
+        const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
+        const {id, isActive, isLocked} = row
+        const {isExpanded} = prevStateRow
+        return {
+          id,
+          isDraggable: isActive,
+          isActive,
+          isLocked,
+          isExpanded,
+          node: <TmKeyRow key={index} {...{row, onExpandRow}} />,
+        }
+      }),
     )
   }, [tmKeys])
 

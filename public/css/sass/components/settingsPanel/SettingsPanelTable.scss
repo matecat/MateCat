@@ -34,16 +34,22 @@
 }
 
 .settings-panel-row {
-  display: grid;
-  min-height: 50px;
+  display: flex;
+  flex-direction: column;
   border: 1px solid $grey8;
   border-bottom: unset;
   background-color: $grey9;
-  align-items: center;
   transition: margin 0.2s ease-out 0.15s;
 }
 
-.settings-panel-row > *:not(.settings-panel-row-drag-handle) {
+.settings-panel-row-content {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  min-height: 50px;
+}
+
+.settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
   text-align: left;
   padding: 0 10px;
 
@@ -64,6 +70,7 @@
 .settings-panel-row-drag-handle {
   position: absolute;
   margin-left: 8px;
+  margin-top: 8px;
   cursor: move;
   border: 2px dotted #ccc;
   border-top: 0;
@@ -105,4 +112,8 @@
 
 .settings-panel-row-dragover-half-bottom {
   margin-bottom: 50px;
+}
+
+.settings-panel-row-extra-content {
+  height: 100px;
 }

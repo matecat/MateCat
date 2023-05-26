@@ -6,7 +6,7 @@ export const SettingsPanelRow = forwardRef(
   ({index, row, isDragOver, wasDragged}, ref) => {
     const {
       rowsContainerRef,
-      dragStartIndexRef,
+      dragStartInfoRef,
       onDragStart,
       onDragOver,
       onDragEnd,
@@ -16,9 +16,9 @@ export const SettingsPanelRow = forwardRef(
     const [isDragging, setIsDragging] = useState(false)
     const [halfDragPoint, setHalfDragPoint] = useState()
 
-    const refDragHandle = useRef()
+    const dragHandleRef = useRef()
 
-    const {isDraggable, isLocked, node} = row
+    const {isDraggable, isLocked, isExpanded, node} = row
 
     const onDragStartCallback = () => {
       setIsDragging(true)
@@ -26,7 +26,11 @@ export const SettingsPanelRow = forwardRef(
     }
 
     const onDragOverCallback = (event) => {
-      if (!rowsContainerRef?.current) return
+      if (
+        !rowsContainerRef.current ||
+        rowsContainerRef.current !== dragStartInfoRef.current?.targetContainer
+      )
+        return
 
       const rect = rowsContainerRef.current.getBoundingClientRect()
       const point = {x: event.clientX - rect.x, y: event.clientY - rect.y}
@@ -53,10 +57,10 @@ export const SettingsPanelRow = forwardRef(
 
     const shouldNotAddApplyDragOver =
       isLocked ||
-      (dragStartIndexRef.current?.index + 1 === index &&
+      (dragStartInfoRef.current?.index + 1 === index &&
         halfDragPoint === 'top') ||
-      (dragStartIndexRef.current?.index > 0 &&
-        dragStartIndexRef.current?.index - 1 === index &&
+      (dragStartInfoRef.current?.index > 0 &&
+        dragStartInfoRef.current?.index - 1 === index &&
         halfDragPoint === 'bottom')
 
     const draggingCssClasses = `${
@@ -89,13 +93,16 @@ export const SettingsPanelRow = forwardRef(
         <>
           {isDraggable && (
             <div
-              ref={refDragHandle}
+              ref={dragHandleRef}
               className="settings-panel-row-drag-handle"
               onMouseDown={() => setIsActiveDrag(true)}
               onMouseUp={onDragEndCallback}
             ></div>
           )}
-          {node}
+          <div className="settings-panel-row-content">{node}</div>
+          {isExpanded && (
+            <div className="settings-panel-row-extra-content"></div>
+          )}
         </>
       </div>
     )
@@ -107,8 +114,10 @@ SettingsPanelRow.displayName = 'SettingsPanelRow'
 SettingsPanelRow.propTypes = {
   index: PropTypes.number.isRequired,
   row: PropTypes.shape({
-    node: PropTypes.node.isRequired,
     isDraggable: PropTypes.bool,
+    isLocked: PropTypes.bool,
+    isExpanded: PropTypes.bool,
+    node: PropTypes.node.isRequired,
   }).isRequired,
   isDragOver: PropTypes.bool,
   wasDragged: PropTypes.bool,

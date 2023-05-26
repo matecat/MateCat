@@ -2,7 +2,7 @@ import React, {Fragment, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 
-export const TmKeyRow = ({row}) => {
+export const TmKeyRow = ({row, onExpandRow}) => {
   const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
@@ -91,7 +91,12 @@ export const TmKeyRow = ({row}) => {
       ></div>
       {!isMMSharedKey && (
         <div className="align-center">
-          <button className="settings-panel-button">Import TMX</button>
+          <button
+            className="settings-panel-button"
+            onClick={() => onExpandRow({row, shouldExpand: true})}
+          >
+            Import TMX
+          </button>
         </div>
       )}
     </Fragment>
@@ -100,4 +105,5 @@ export const TmKeyRow = ({row}) => {
 
 TmKeyRow.propTypes = {
   row: PropTypes.object.isRequired,
+  onExpandRow: PropTypes.func.isRequired,
 }
