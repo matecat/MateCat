@@ -53,6 +53,11 @@ export const SettingsPanel = ({
 
   const close = () => setIsVisible(false)
 
+  const openLoginModal = () => {
+    setIsVisible(false)
+    APP.openLoginModal()
+  }
+
   return (
     <SettingsPanelContext.Provider
       value={{
@@ -64,6 +69,7 @@ export const SettingsPanel = ({
         setMtEngines,
         activeMTEngine,
         setActiveMTEngine,
+        openLoginModal,
       }}
     >
       <div className="settings-panel">

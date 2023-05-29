@@ -55,7 +55,6 @@ export const TranslationMemoryGlossaryTab = () => {
 
   useEffect(() => {
     if (!tmKeys) return
-    const rows = [DEFAULT_TRANSLATION_MEMORY, ...tmKeys]
 
     const onExpandRow = ({row, shouldExpand}) =>
       setKeysRows((prevState) =>
@@ -64,8 +63,31 @@ export const TranslationMemoryGlossaryTab = () => {
         ),
       )
 
-    setKeysRows((prevState) =>
-      rows.map((row, index) => {
+    setKeysRows((prevState) => {
+      const rows = [DEFAULT_TRANSLATION_MEMORY, ...tmKeys]
+      // preserve rows order
+      const rowsActive = rows
+        .filter(({isActive}) => isActive)
+        .reduce((acc, cur) => {
+          const copyAcc = [...acc]
+          const index = prevState
+            .filter(({isActive}) => isActive)
+            .findIndex(({id}) => id === cur.id)
+
+          if (index >= 0) {
+            const previousItem = copyAcc[index]
+            copyAcc[index] = cur
+            if (previousItem) copyAcc.push(previousItem)
+          } else {
+            copyAcc.push(cur)
+          }
+          return copyAcc
+        }, [])
+        .filter((row) => row)
+
+      const rowsNotActive = rows.filter(({isActive}) => !isActive)
+
+      return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
         const {id, isActive, isLocked} = row
         const {isExpanded} = prevStateRow
@@ -75,10 +97,10 @@ export const TranslationMemoryGlossaryTab = () => {
           isActive,
           isLocked,
           isExpanded,
-          node: <TmKeyRow key={index} {...{row, onExpandRow}} />,
+          node: <TmKeyRow key={row.id} {...{row, onExpandRow}} />,
         }
-      }),
-    )
+      })
+    })
   }, [tmKeys])
 
   return (

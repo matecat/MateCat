@@ -18,7 +18,7 @@ import {MessageNotification} from './MessageNotification'
 import Close from '../../../../../../img/icons/Close'
 
 export const MachineTranslationTab = () => {
-  const {mtEngines, setMtEngines, activeMTEngine} =
+  const {mtEngines, setMtEngines, activeMTEngine, openLoginModal} =
     useContext(SettingsPanelContext)
 
   const [addMTVisible, setAddMTVisible] = useState(false)
@@ -191,10 +191,18 @@ export const MachineTranslationTab = () => {
           ]}
         />
       </div>
-      <div className="inactive-mt">
-        <h2>Inactive MT</h2>
-        <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
-      </div>
+      {config.isLoggedIn ? (
+        <div className="inactive-mt">
+          <h2>Inactive MT</h2>
+          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+        </div>
+      ) : (
+        <div className="not-logged-user">
+          <button className="ui primary button" onClick={openLoginModal}>
+            Login to see your custom MT engines
+          </button>
+        </div>
+      )}
     </div>
   )
 }

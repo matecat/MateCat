@@ -100,9 +100,11 @@ export const SettingsPanelRow = forwardRef(
             ></div>
           )}
           <div className="settings-panel-row-content">{node}</div>
-          {isExpanded && (
-            <div className="settings-panel-row-extra-content"></div>
-          )}
+          <div
+            className={`settings-panel-row-extra-content${
+              isExpanded ? ' settings-panel-row-extra-content-expanded' : ''
+            }`}
+          ></div>
         </>
       </div>
     )
