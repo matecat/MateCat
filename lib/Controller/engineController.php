@@ -82,6 +82,7 @@ class engineController extends ajaxController {
      * When Called it perform the controller action to retrieve/manipulate data
      *
      * @return mixed
+     * @throws Exception
      */
     public function doAction() {
         if ( count( $this->result[ 'errors' ] ) > 0 ) {
@@ -106,6 +107,7 @@ class engineController extends ajaxController {
 
     /**
      * This method adds an engine in a user's keyring
+     * @throws Exception
      */
     private function add() {
 
@@ -239,6 +241,7 @@ class engineController extends ajaxController {
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
+            $engineDAO->destroyCache($newEngineStruct);
         }
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
@@ -265,6 +268,7 @@ class engineController extends ajaxController {
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
                 $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
+                $engineDAO->destroyCache($newCreatedDbRowStruct);
 
                 return;
             }
@@ -282,6 +286,7 @@ class engineController extends ajaxController {
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
                 $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
+                $engineDAO->destroyCache($newCreatedDbRowStruct);
 
                 return;
             }
@@ -304,6 +309,8 @@ class engineController extends ajaxController {
 
     /**
      * This method deletes an engine from a user's keyring
+     *
+     * @throws Exception
      */
     private function disable() {
 
@@ -319,6 +326,7 @@ class engineController extends ajaxController {
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result    = $engineDAO->disable( $engineToBeDeleted );
+        $engineDAO->destroyCache($engineToBeDeleted);
 
         if ( !$result instanceof EnginesModel_EngineStruct ) {
             $this->result[ 'errors' ][] = [ 'code' => -9, 'message' => "Deletion failed. Generic error" ];
