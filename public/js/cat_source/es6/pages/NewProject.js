@@ -26,14 +26,14 @@ import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 
 const SELECT_HEIGHT = 324
 
-const DEFAULT_ENGINE_MEMORY = {
+export const DEFAULT_ENGINE_MEMORY = {
   id: '1',
   name: 'MyMemory',
   description:
     'Machine translation by the MT engine best suited to your project.',
   default: true,
 }
-
+const MMT_NAME = 'ModernMT'
 const historySourceTargets = {
   // source: 'es-ES',
   // targets: 'it-IT,es-ES,es-MX||',
@@ -122,6 +122,12 @@ const NewProject = ({
         //TODO: if internal user active is MMT
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
+        if (config.isAnInternalUser) {
+          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          if (mmt) {
+            setActiveMTEngine(mmt)
+          }
+        }
       })
     }
   }

@@ -139,7 +139,13 @@ export const SettingsPanelTable = ({
           className="settings-panel-table-rows-container"
         >
           {Array.isArray(rows) &&
-            (rows.length ? rows.map(renderItems) : <span>No results</span>)}
+            (rows.length ? (
+              rows.map(renderItems)
+            ) : (
+              <div className="settings-panel-table-row-empty">
+                <span>No results</span>
+              </div>
+            ))}
         </div>
       </div>
     </SettingsPanelTableContext.Provider>

@@ -16,6 +16,7 @@ import {SettingsPanelContext} from '../SettingsPanelContext'
 import {deleteMTEngine} from '../../../api/deleteMTEngine'
 import {MessageNotification} from './MessageNotification'
 import Close from '../../../../../../img/icons/Close'
+import {DEFAULT_ENGINE_MEMORY} from '../../../pages/NewProject'
 
 export const MachineTranslationTab = () => {
   const {mtEngines, setMtEngines, activeMTEngine, openLoginModal} =
@@ -81,6 +82,7 @@ export const MachineTranslationTab = () => {
   }
 
   const deleteMTConfirm = (mt) => {
+    setErrorDeletingMT(false)
     setDeleteMTRequest(mt)
   }
   const deleteMT = () => {
@@ -90,6 +92,9 @@ export const MachineTranslationTab = () => {
           return prevStateMT.filter((MT) => MT.id !== deleteMTRequest.id)
         })
         setDeleteMTRequest()
+        if (activeMTEngine.id === deleteMTRequest.id) {
+          setActiveMTEngine(DEFAULT_ENGINE_MEMORY)
+        }
       })
       .catch(() => {
         setErrorDeletingMT(true)
@@ -194,7 +199,7 @@ export const MachineTranslationTab = () => {
       {config.isLoggedIn ? (
         <div className="inactive-mt">
           <h2>Inactive MT</h2>
-          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+          <SettingsPanelTable columns={[]} rows={MTRows} />
         </div>
       ) : (
         <div className="not-logged-user">
