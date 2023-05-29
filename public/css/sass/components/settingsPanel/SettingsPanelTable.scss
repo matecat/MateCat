@@ -4,33 +4,121 @@
   position: relative;
   z-index: 0;
   overflow-y: auto;
+
+  .settings-panel-button {
+    cursor: pointer;
+    color: $black;
+    background: $grey8;
+    border-radius: 2px 0 0 2px;
+    padding: 6px 30px;
+    border: 1px solid $grey;
+    &:hover {
+      background-color: $grey7;
+    }
+  }
 }
 
 .settings-panel-table-rowHeading {
   display: grid;
-  padding-top: 10px;
+  align-items: center;
+  background-color: $grey;
+  height: 30px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.settings-panel-table-rowHeading-column {
+  text-align: left;
+  padding: 0 10px;
 }
 
 .settings-panel-row {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $grey8;
+  border-bottom: unset;
+  background-color: $grey9;
+  transition: margin 0.2s ease-out 0.15s;
+  .settings-panel-cell-center {
+    align-self: center;
+    justify-content: center;
+    display: flex;
+  }
+}
 
-  min-height: 80px;
+.settings-panel-row-content {
+  display: grid;
   align-items: center;
+  width: 100%;
+  min-height: 50px;
+}
+
+.settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
+  text-align: left;
+  padding: 0 10px;
+
+  &.align-center {
+    text-align: center;
+    padding: 0;
+  }
+}
+
+.settings-panel-row-active {
+  background-color: $transparentBlue;
+}
+
+.settings-panel-row:last-child {
+  border-bottom: 1px solid $grey8;
 }
 
 .settings-panel-row-drag-handle {
   position: absolute;
   margin-left: 8px;
+  margin-top: 8px;
+  cursor: move;
+  border: 2px dotted #ccc;
+  border-top: 0;
+  border-bottom: 0;
+  width: 2px;
+  height: 30px;
 }
 
 .settings-panel-row-dragging {
   opacity: 0.5;
 }
 
+@keyframes drag-end {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.settings-panel-row-dragend {
+  animation-name: drag-end;
+  animation-duration: 0.8s;
+}
+
 .settings-panel-row-dragover-half-top {
-  margin-top: 80px;
+  margin-top: 50px;
 }
 
 .settings-panel-row-dragover-half-bottom {
-  margin-bottom: 80px;
+  margin-bottom: 50px;
+}
+
+.settings-panel-row-extra-content {
+  height: 100px;
 }

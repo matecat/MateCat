@@ -91,5 +91,19 @@
 }
 
 .settings-panel-contentwrapper-container {
+  font-size: 14px;
   padding: 20px;
+  h2 {
+    text-align: left;
+    padding: 30px 0px 15px 10px;
+    font-size: 20px;
+  }
+  .button {
+    padding: 0 16px;
+    height: 40px;
+    font-size: 16px;
+  }
+  input {
+    font-size: 14px;
+  }
 }

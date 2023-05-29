@@ -218,6 +218,7 @@ APP.getCreateProjectParams = function ({
   targetLang,
   jobSubject,
   selectedTeam,
+  activeMT,
 }) {
   var dqf = APP.getDQFParameters()
   return {
@@ -227,7 +228,7 @@ APP.getCreateProjectParams = function ({
     source_lang: sourceLang,
     target_lang: targetLang,
     job_subject: jobSubject,
-    mt_engine: $('.mgmt-mt .activemt').data('id'),
+    mt_engine: activeMT,
     private_keys_list: UI.extractTMdataFromTable(),
     lang_detect_files: UI.skipLangDetectArr,
     pretranslate_100: $('#pretranslate100').is(':checked') ? 1 : 0,

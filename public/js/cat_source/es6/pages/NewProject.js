@@ -22,8 +22,17 @@ import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
 import {SettingsPanel} from '../components/settingsPanel'
+import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 
 const SELECT_HEIGHT = 324
+
+const DEFAULT_ENGINE_MEMORY = {
+  id: '1',
+  name: 'MyMemory',
+  description:
+    'Machine translation by the MT engine best suited to your project.',
+  default: true,
+}
 
 const historySourceTargets = {
   // source: 'es-ES',
@@ -43,7 +52,8 @@ const NewProject = ({
   const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [tmKeySelected, setTmKeySelected] = useState([])
+  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState(
     sourceLanguageSelected
@@ -105,6 +115,17 @@ const NewProject = ({
     }
   }
 
+  const getMTEngines = () => {
+    if (config.isLoggedIn) {
+      getMtEnginesApi().then((mtEngines) => {
+        console.log('MT ENGINES', mtEngines)
+        //TODO: if internal user active is MMT
+        mtEngines.push(DEFAULT_ENGINE_MEMORY)
+        setMtEngines(mtEngines)
+      })
+    }
+  }
+
   const createProject = () => {
     if (!projectSent) {
       if (!UI.allTMUploadsCompleted()) {
@@ -120,6 +141,7 @@ const NewProject = ({
           targetLang: targetLangs.map((lang) => lang.id).join(),
           jobSubject: subject.id,
           selectedTeam: selectedTeam ? selectedTeam.id : undefined,
+          activeMT: activeMTEngine.id,
         }),
       )
         .then(({data}) => {
@@ -198,6 +220,7 @@ const NewProject = ({
     }
 
     getTmKeys()
+    getMTEngines()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
@@ -233,18 +256,14 @@ const NewProject = ({
   }, [])
   useEffect(() => {
     const activateKey = (event, desc, key) => {
-      const prevTmKeys = tmKeys ?? []
-      let tmSelected = prevTmKeys.find((item) => item.id === key)
-      if (!tmSelected) {
-        tmSelected = {id: key, name: desc, key}
-        setTmKeys(prevTmKeys.concat(tmSelected))
-      }
-      if (!tmKeySelected.find((item) => item.id === key)) {
-        setTmKeySelected(tmKeySelected.concat([tmSelected]))
-      }
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === key ? {...tm, isActive: true} : tm)),
+      )
     }
     const deactivateKey = (event, key) => {
-      setTmKeySelected(tmKeySelected.filter((item) => item.id !== key))
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === key ? {...tm, isActive: false} : tm)),
+      )
     }
     const removeKey = () => {
       getTmKeys()
@@ -258,7 +277,7 @@ const NewProject = ({
       $('#activetm').off('removeTm')
       $('#activetm').off('deleteTm')
     }
-  }, [tmKeys, tmKeySelected])
+  }, [tmKeys])
 
   useEffect(
     () =>
@@ -274,13 +293,12 @@ const NewProject = ({
     <CreateProjectContext.Provider
       value={{
         SELECT_HEIGHT,
+        tmKeys,
+        setTmKeys,
         languages,
         targetLangs,
         setTargetLangs,
         setIsOpenMultiselectLanguages,
-        tmKeys,
-        tmKeySelected,
-        setTmKeySelected,
         sourceLang,
         changeSourceLanguage,
       }}
@@ -476,7 +494,17 @@ const NewProject = ({
           }}
         />
       )}
-      {isOpenSettings && <SettingsPanel onClose={closeSettings} />}
+      {isOpenSettings && (
+        <SettingsPanel
+          tmKeys={tmKeys}
+          onClose={closeSettings}
+          setTmKeys={setTmKeys}
+          mtEngines={mtEngines}
+          setMtEngines={setMtEngines}
+          activeMTEngine={activeMTEngine}
+          setActiveMTEngine={setActiveMTEngine}
+        />
+      )}
       <Footer />
     </CreateProjectContext.Provider>
   )

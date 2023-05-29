@@ -778,7 +778,7 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
   min-height: 1em;
   outline: none;
   border: none;

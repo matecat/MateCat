@@ -10,24 +10,42 @@ import {SettingsPanelRow} from './SettingsPanelRow'
 
 export const SettingsPanelTableContext = createContext({})
 
-export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
+export const SettingsPanelTable = ({
+  columns,
+  rows,
+  onChangeRowsOrder,
+  className,
+}) => {
   const [dragOverIndex, setDragOverIndex] = useState()
 
   const rowsContainerRef = useRef()
   const rowsRef = useRef([])
-  const draggingIndexRef = useRef()
-  const previousDragIndex = useRef()
+  const dragStartInfoRef = useRef()
+  const previousDragOverIndex = useRef()
+  const dragEndRow = useRef()
 
   // drag and drop callback's
   const onDragStart = useCallback((index) => {
-    draggingIndexRef.current = {index}
-    previousDragIndex.current = undefined
+    dragStartInfoRef.current = {
+      index,
+      targetContainer: rowsContainerRef.current,
+    }
+    previousDragOverIndex.current = undefined
+    dragEndRow.current = undefined
   }, [])
 
-  const onDragOver = useCallback(({y, halfPoint}) => {
+  const onDragOver = useCallback(({y, halfPoint, row}) => {
     const parentRect = rowsContainerRef.current.getBoundingClientRect()
 
+    if (row.isLocked) {
+      setDragOverIndex(undefined)
+      previousDragOverIndex.current = undefined
+      return
+    }
+
     const indexToMove = rowsRef.current.findIndex(({current}, index) => {
+      if (!current) return false
+
       const rect = current.getBoundingClientRect()
       const currentY = rect.y - parentRect.y
 
@@ -39,34 +57,47 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
       if (y >= currentY && y <= nextY) return true
     })
 
-    if (previousDragIndex.current !== indexToMove) setDragOverIndex(indexToMove)
+    if (previousDragOverIndex.current !== indexToMove)
+      setDragOverIndex(indexToMove)
 
-    draggingIndexRef.current = {
-      ...draggingIndexRef.current,
+    dragStartInfoRef.current = {
+      ...dragStartInfoRef.current,
       halfPoint,
     }
-    previousDragIndex.current = indexToMove
+    previousDragOverIndex.current = indexToMove
   }, [])
 
-  const onDragEnd = useCallback(() => {
-    const isValidRange =
-      draggingIndexRef.current?.index >= 0 &&
-      dragOverIndex >= 0 &&
-      draggingIndexRef.current?.index !== dragOverIndex
+  const onDragEnd = useCallback(
+    ({row}) => {
+      const isValidRange =
+        dragStartInfoRef.current?.index >= 0 &&
+        dragOverIndex >= 0 &&
+        dragStartInfoRef.current?.index !== dragOverIndex
 
-    if (isValidRange)
-      onChangeRowsOrder({
-        index: draggingIndexRef.current.index,
-        indexToMove:
-          draggingIndexRef.current.halfPoint === 'bottom'
-            ? dragOverIndex + 1
-            : dragOverIndex,
-      })
+      const {index: startIndex, halfPoint} = dragStartInfoRef.current
 
-    setDragOverIndex(undefined)
-  }, [dragOverIndex, onChangeRowsOrder])
+      if (isValidRange) {
+        const indexToMove =
+          halfPoint === 'bottom' ? dragOverIndex + 1 : dragOverIndex
 
-  const renderColumns = (column, index) => <div key={index}>{column.name}</div>
+        if (startIndex !== indexToMove)
+          onChangeRowsOrder({
+            index: startIndex,
+            indexToMove,
+          })
+      }
+
+      setDragOverIndex(undefined)
+      dragEndRow.current = row
+    },
+    [dragOverIndex, onChangeRowsOrder],
+  )
+
+  const renderColumns = (column, index) => (
+    <div key={index} className="settings-panel-table-rowHeading-column">
+      {column.name}
+    </div>
+  )
   const renderItems = (row, index) => {
     const ref = createRef()
     rowsRef.current[index] = ref
@@ -79,22 +110,25 @@ export const SettingsPanelTable = ({columns, rows, onChangeRowsOrder}) => {
           index,
           row,
           isDragOver: dragOverIndex === index,
+          wasDragged: dragEndRow.current === row,
         }}
       />
     )
   }
 
+  const customClassName = className ? ` ${className}` : ''
+
   return (
     <SettingsPanelTableContext.Provider
       value={{
         rowsContainerRef,
-        draggingIndexRef,
+        dragStartInfoRef,
         onDragStart,
         onDragOver,
         onDragEnd,
       }}
     >
-      <div className="settings-panel-table">
+      <div className={`settings-panel-table${customClassName}`}>
         <div>
           <div className="settings-panel-table-rowHeading">
             {columns.map(renderColumns)}
@@ -118,4 +152,5 @@ SettingsPanelTable.propTypes = {
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
   onChangeRowsOrder: PropTypes.func,
+  className: PropTypes.string,
 }

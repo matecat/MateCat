@@ -13,14 +13,15 @@
   border: 1px dashed $grey8;
   padding: 10px;
   margin-bottom: 20px;
-  background: $grey5;
+  background: $grey9;
 }
 
-.translation-memory-glossary-tab-resource-buttons {
+.translation-memory-glossary-tab-table-title {
   display: flex;
   align-items: center;
   font-size: 24px;
   font-weight: bold;
+  justify-content: space-between;
 
   > span:first-of-type {
     flex-grow: 1;
@@ -30,26 +31,42 @@
 
 .translation-memory-glossary-tab {
   .settings-panel-table-rowHeading,
-  .settings-panel-row {
-    grid-template-columns: 10% 10% minmax(0, 1fr) 5% 20%;
+  .settings-panel-row-content {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 5% 20%;
   }
 
-  .settings-panel-row {
-    min-height: 50px;
-    border: 1px solid $grey7;
-    border-bottom: unset;
-    background-color: $grey4;
+  .settings-panel-table-rowHeading-column {
+    text-align: center;
+    padding: 0;
   }
+}
 
-  .settings-panel-row:last-child {
-    border-bottom: 1px solid $grey7;
+.translation-memory-glossary-tab-inactive-table {
+  > :first-child {
+    display: none;
   }
+}
 
-  .settings-panel-row-dragover-half-top {
-    margin-top: 50px;
+.tm-key-lookup,
+.tm-key-update {
+  display: flex;
+  justify-content: center;
+}
+
+.tm-key-row-name {
+  background-color: unset;
+  border: 1px solid $grey8;
+
+  &:focus,
+  &:hover {
+    background-color: white;
   }
+}
 
-  .settings-panel-row-dragover-half-bottom {
-    margin-bottom: 50px;
+.tm-key-row-name-disabled {
+  border: unset;
+  &:focus,
+  &:hover {
+    background-color: unset;
   }
 }

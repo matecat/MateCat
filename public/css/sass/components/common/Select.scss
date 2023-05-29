@@ -13,6 +13,18 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  .select {
+    font-size: 16px;
+    padding: 9px 46px 9px 12px;
+    border-radius: 2px;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    box-shadow: inset 0 1px 3px #ddd;
+    color: black;
+    &:hover {
+      border-color: rgba(34, 36, 38, 0.35);
+      box-shadow: none;
+    }
+  }
   label {
     display: block;
     margin-bottom: 4px;
@@ -41,7 +53,7 @@
   padding: 4px 8px;
   outline: none;
   font-size: 14px;
-  line-height: 16px;
+  //line-height: 16px;
   width: 100%;
   background-color: $white;
   white-space: nowrap;
@@ -70,6 +82,7 @@
   display: flex;
   position: relative;
   z-index: 1;
+  text-align: left;
 
   input + svg {
     position: absolute;
@@ -106,6 +119,14 @@
 }
 
 // Select's dropdown wrapper
+.select__dropdown-wrapper {
+  min-width: 280px;
+  border: solid 1px #96c8da;
+  border-top: unset;
+  z-index: 1;
+  margin-top: 1px;
+}
+
 .select__dropdown-wrapper:not(.select__dropdown-wrapper--is-multiselect) {
   position: absolute;
   top: 100%;

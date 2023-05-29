@@ -22,7 +22,15 @@ const DEFAULT_CONTENTS = [
   },
 ]
 
-export const SettingsPanel = ({onClose}) => {
+export const SettingsPanel = ({
+  onClose,
+  tmKeys,
+  setTmKeys,
+  mtEngines,
+  setMtEngines,
+  activeMTEngine,
+  setActiveMTEngine,
+}) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
     DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
@@ -46,7 +54,18 @@ export const SettingsPanel = ({onClose}) => {
   const close = () => setIsVisible(false)
 
   return (
-    <SettingsPanelContext.Provider value={{tabs, setTabs}}>
+    <SettingsPanelContext.Provider
+      value={{
+        tabs,
+        setTabs,
+        tmKeys,
+        setTmKeys,
+        mtEngines,
+        setMtEngines,
+        activeMTEngine,
+        setActiveMTEngine,
+      }}
+    >
       <div className="settings-panel">
         <div
           className={`settings-panel-overlay${
@@ -78,4 +97,10 @@ export const SettingsPanel = ({onClose}) => {
 
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
+  tmKeys: PropTypes.array,
+  setTmKeys: PropTypes.func,
+  mtEngines: PropTypes.array,
+  setMtEngines: PropTypes.func,
+  activeMTEngine: PropTypes.object,
+  setActiveMTEngine: PropTypes.func,
 }
