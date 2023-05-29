@@ -241,7 +241,11 @@ class engineController extends ajaxController {
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
-            $engineDAO->destroyCache($newEngineStruct);
+
+            $engineStruct     = EnginesModel_EngineStruct::getStruct();
+            $engineStruct->uid = $this->user->uid;
+            $engineStruct->active = true;
+            $this->destroyUserEnginesCache();
         }
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
@@ -268,7 +272,7 @@ class engineController extends ajaxController {
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
                 $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
-                $engineDAO->destroyCache($newCreatedDbRowStruct);
+                $this->destroyUserEnginesCache();
 
                 return;
             }
@@ -286,7 +290,7 @@ class engineController extends ajaxController {
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
                 $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
-                $engineDAO->destroyCache($newCreatedDbRowStruct);
+                $this->destroyUserEnginesCache();
 
                 return;
             }
@@ -326,7 +330,7 @@ class engineController extends ajaxController {
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result    = $engineDAO->disable( $engineToBeDeleted );
-        $engineDAO->destroyCache($engineToBeDeleted);
+        $this->destroyUserEnginesCache();
 
         if ( !$result instanceof EnginesModel_EngineStruct ) {
             $this->result[ 'errors' ][] = [ 'code' => -9, 'message' => "Deletion failed. Generic error" ];
@@ -385,4 +389,18 @@ class engineController extends ajaxController {
 //        $this->result[ 'data' ][ 'result' ] = $executeResult;
     }
 
+    /**
+     * Destroy cache for engine users query
+     *
+     * @throws Exception
+     */
+    private function destroyUserEnginesCache()
+    {
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineStruct = EnginesModel_EngineStruct::getStruct();
+        $engineStruct->uid = $this->user->uid;
+        $engineStruct->active = true;
+
+        $engineDAO->destroyCache($engineStruct);
+    }
 }
