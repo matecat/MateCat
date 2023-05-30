@@ -130,9 +130,9 @@ const NewProject = ({
 
   const createProject = () => {
     if (!projectSent) {
-      if (!UI.allTMUploadsCompleted()) {
+      /*if (!UI.allTMUploadsCompleted()) {
         return false
-      }
+      }*/
       setErrors()
       setWarnings()
       setProjectSent(true)

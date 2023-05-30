@@ -42,15 +42,12 @@ export const TmGlossarySelect = () => {
               tm.id === option.id ? {...tm, isActive: false} : tm,
             ),
           )
-
-          UI.disableTm(option.id)
         } else {
           setTmKeys((prevState) =>
             prevState.map((tm) =>
               tm.id === option.id ? {...tm, isActive: true} : tm,
             ),
           )
-          UI.selectTm(option.id)
         }
       }}
     >

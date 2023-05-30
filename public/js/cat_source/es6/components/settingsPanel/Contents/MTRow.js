@@ -28,6 +28,12 @@ export const MTRow = ({row, deleteMT}) => {
           </button>
         </div>
       )}
+      {config.is_cattool && row.id === activeMTEngine.id && (
+        <>
+          <div></div>
+          <div className="settings-panel-cell-center">Enabled</div>
+        </>
+      )}
     </>
   )
 }

@@ -71,6 +71,10 @@ function CatTool() {
             setActiveMTEngine(mmt)
           }
         }
+        if (config.mt_id) {
+          const activeMT = mtEngines.find((mt) => mt.id === config.mt_id)
+          activeMT && setActiveMTEngine(activeMT)
+        }
       })
     }
   }
