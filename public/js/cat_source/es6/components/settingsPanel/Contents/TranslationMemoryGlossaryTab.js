@@ -1,7 +1,8 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react'
 import {SettingsPanelTable} from '../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../SettingsPanelContext'
-import {TmKeyRow} from './TmKeyRow'
+import {TMKeyRow} from './TMKeyRow/TMKeyRow'
+import {TMCreateResourceRow} from './TMKeyRow/TMCreateResourceRow'
 
 import IconAdd from '../../icons/IconAdd'
 
@@ -13,8 +14,14 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
+export const SPECIAL_ROWS_ID = {
+  defaultTranslationMemory: 'mmSharedKey',
+  addSharedResource: 'addSharedResource',
+  newResource: 'newResource',
+}
+
 const DEFAULT_TRANSLATION_MEMORY = {
-  id: 'mmSharedKey',
+  id: SPECIAL_ROWS_ID.defaultTranslationMemory,
   name: 'MyMemory: Collaborative translation memory shared with all Matecat users.',
   isActive: true,
   isDraggable: false,
@@ -23,9 +30,18 @@ const DEFAULT_TRANSLATION_MEMORY = {
   w: true,
 }
 
+const ADD_SHARED_RESOURCE = {
+  id: SPECIAL_ROWS_ID.addSharedResource,
+  isActive: true,
+  isLocked: true,
+  r: true,
+  w: true,
+}
+
 export const TranslationMemoryGlossaryTab = () => {
   const {tmKeys} = useContext(SettingsPanelContext)
 
+  const [specialRows, setSpecialRows] = useState([DEFAULT_TRANSLATION_MEMORY])
   const [keysRows, setKeysRows] = useState([])
 
   const onOrderActiveRows = useCallback(
@@ -64,9 +80,23 @@ export const TranslationMemoryGlossaryTab = () => {
       )
 
     setKeysRows((prevState) => {
-      const rows = [DEFAULT_TRANSLATION_MEMORY, ...tmKeys]
+      const defaultTranslationMemoryRow = specialRows.find(
+        ({id}) => id === SPECIAL_ROWS_ID.defaultTranslationMemory,
+      )
+      const createResourceRow = specialRows.find(
+        ({id}) =>
+          id === SPECIAL_ROWS_ID.addSharedResource ||
+          id === SPECIAL_ROWS_ID.newResource,
+      )
+
+      const allRows = [
+        defaultTranslationMemoryRow,
+        ...tmKeys,
+        ...(createResourceRow ? [createResourceRow] : []),
+      ]
+
       // preserve rows order
-      const rowsActive = rows
+      const rowsActive = allRows
         .filter(({isActive}) => isActive)
         .reduce((acc, cur) => {
           const copyAcc = [...acc]
@@ -85,23 +115,39 @@ export const TranslationMemoryGlossaryTab = () => {
         }, [])
         .filter((row) => row)
 
-      const rowsNotActive = rows.filter(({isActive}) => !isActive)
+      const rowsNotActive = allRows.filter(({isActive}) => !isActive)
 
       return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
         const {id, isActive, isLocked} = row
         const {isExpanded} = prevStateRow
+
+        const isCreateResourceRow =
+          id === SPECIAL_ROWS_ID.addSharedResource ||
+          id === SPECIAL_ROWS_ID.newResource
+
+        const isSpecialRow = Object.values(SPECIAL_ROWS_ID).some(
+          (value) => value === id,
+        )
+
         return {
           id,
-          isDraggable: isActive,
+          isDraggable: isActive && !isSpecialRow,
           isActive,
           isLocked,
           isExpanded,
-          node: <TmKeyRow key={row.id} {...{row, onExpandRow}} />,
+          node: !isCreateResourceRow ? (
+            <TMKeyRow key={row.id} {...{row, onExpandRow, setSpecialRows}} />
+          ) : (
+            <TMCreateResourceRow key={row.id} {...{row, setSpecialRows}} />
+          ),
         }
       })
     })
-  }, [tmKeys])
+  }, [tmKeys, specialRows])
+
+  const onAddSharedResource = () =>
+    setSpecialRows([DEFAULT_TRANSLATION_MEMORY, ADD_SHARED_RESOURCE])
 
   return (
     <div className="translation-memory-glossary-tab">
@@ -113,7 +159,7 @@ export const TranslationMemoryGlossaryTab = () => {
         <div className="translation-memory-glossary-tab-table-title">
           <h2>Active Resources</h2>
           <div>
-            <button className="ui primary button">
+            <button className="ui primary button" onClick={onAddSharedResource}>
               <IconAdd /> Add shared resource
             </button>
             <button className="ui primary button">

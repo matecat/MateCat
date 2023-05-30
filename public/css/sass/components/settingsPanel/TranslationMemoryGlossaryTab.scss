@@ -32,7 +32,7 @@
 .translation-memory-glossary-tab {
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 5% 20%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 20%;
   }
 
   .settings-panel-table-rowHeading-column {
@@ -69,4 +69,8 @@
   &:hover {
     background-color: unset;
   }
+}
+
+.tm-key-row-icons {
+  color: $grey;
 }
