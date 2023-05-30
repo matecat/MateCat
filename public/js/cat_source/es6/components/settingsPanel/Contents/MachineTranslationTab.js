@@ -16,7 +16,7 @@ import {SettingsPanelContext} from '../SettingsPanelContext'
 import {deleteMTEngine} from '../../../api/deleteMTEngine'
 import {MessageNotification} from './MessageNotification'
 import Close from '../../../../../../img/icons/Close'
-import {DEFAULT_ENGINE_MEMORY} from '../../../pages/NewProject'
+import {DEFAULT_ENGINE_MEMORY} from '../SettingsPanel'
 
 export const MachineTranslationTab = () => {
   const {mtEngines, setMtEngines, activeMTEngine, openLoginModal} =
@@ -48,12 +48,14 @@ export const MachineTranslationTab = () => {
     {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
   ]
 
-  const COLUMNS_TABLE = [
-    {name: 'Engine Name'},
-    {name: 'Description'},
-    {name: 'Use in this project'},
-    {name: 'Action'},
-  ]
+  const COLUMNS_TABLE = config.is_cattool
+    ? [{name: 'Engine Name'}, {name: 'Description'}]
+    : [
+        {name: 'Engine Name'},
+        {name: 'Description'},
+        {name: 'Use in this project'},
+        {name: 'Action'},
+      ]
 
   const addMTEngineRequest = (data) => {
     addMTEngine({
@@ -138,45 +140,47 @@ export const MachineTranslationTab = () => {
           closeCallback={() => setErrorDeletingMT(false)}
         />
       )}
-      {!addMTVisible ? (
-        <div className="add-mt-button">
-          <button
-            className="ui primary button"
-            onClick={() => setAddMTVisible(true)}
-          >
-            <IconAdd /> Add MT engine
-          </button>
-        </div>
-      ) : (
-        <div className="add-mt-container">
-          <h2>Add MT Engine</h2>
-          <div className="add-mt-provider">
-            <Select
-              placeholder="Choose provider"
-              id="mt-engine"
-              maxHeightDroplist={100}
-              options={enginesList}
-              activeOption={activeAddEngine}
-              onSelect={(option) => {
-                setActiveAddEngine(option)
-                setError()
-              }}
-            />
+      {!config.is_cattool ? (
+        !addMTVisible ? (
+          <div className="add-mt-button">
             <button
-              className="ui button orange"
-              onClick={() => setAddMTVisible(false)}
+              className="ui primary button"
+              onClick={() => setAddMTVisible(true)}
             >
-              <Close />
+              <IconAdd /> Add MT engine
             </button>
           </div>
-          {activeAddEngine ? (
-            <activeAddEngine.component
-              addMTEngine={addMTEngineRequest}
-              error={error}
-            />
-          ) : null}
-        </div>
-      )}
+        ) : (
+          <div className="add-mt-container">
+            <h2>Add MT Engine</h2>
+            <div className="add-mt-provider">
+              <Select
+                placeholder="Choose provider"
+                id="mt-engine"
+                maxHeightDroplist={100}
+                options={enginesList}
+                activeOption={activeAddEngine}
+                onSelect={(option) => {
+                  setActiveAddEngine(option)
+                  setError()
+                }}
+              />
+              <button
+                className="ui button orange"
+                onClick={() => setAddMTVisible(false)}
+              >
+                <Close />
+              </button>
+            </div>
+            {activeAddEngine ? (
+              <activeAddEngine.component
+                addMTEngine={addMTEngineRequest}
+                error={error}
+              />
+            ) : null}
+          </div>
+        )
+      ) : null}
       <div>
         <h2>Active MT</h2>
         <SettingsPanelTable
@@ -199,7 +203,7 @@ export const MachineTranslationTab = () => {
       {config.isLoggedIn ? (
         <div className="inactive-mt">
           <h2>Inactive MT</h2>
-          <SettingsPanelTable columns={[]} rows={MTRows} />
+          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
         </div>
       ) : (
         <div className="not-logged-user">

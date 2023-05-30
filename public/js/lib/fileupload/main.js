@@ -30,10 +30,6 @@ window.UI = {
 
         base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
-
-        if (this.initTM) {
-            this.initTM();
-        }
         if ( Cookies.get( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {

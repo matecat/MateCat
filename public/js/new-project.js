@@ -83,7 +83,7 @@ APP.changeSourceLang = function (lang) {
  *
  */
 APP.checkForLexiQALangs = function (source) {
-  var acceptedLanguages = config.lexiqa_languages.slice()
+  /*var acceptedLanguages = config.lexiqa_languages.slice()
   var LXQCheck = $('.options-box.qa-box')
   var notAcceptedLanguages = []
   var targetLanguages = localStorage.getItem('currentTargetLang').split(',')
@@ -125,7 +125,7 @@ APP.checkForLexiQALangs = function (source) {
     $('.options-box #lexi_qa').prop('disabled', disableLexiQA)
     UI.setLanguageTooltipLXQ()
   }
-  $('.options-box #lexi_qa').attr('checked', !disableLexiQA)
+  $('.options-box #lexi_qa').attr('checked', !disableLexiQA)*/
 }
 
 /**

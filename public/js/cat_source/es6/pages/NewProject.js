@@ -21,19 +21,15 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {SettingsPanel} from '../components/settingsPanel'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  MMT_NAME,
+  SettingsPanel,
+} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 
 const SELECT_HEIGHT = 324
 
-export const DEFAULT_ENGINE_MEMORY = {
-  id: '1',
-  name: 'MyMemory',
-  description:
-    'Machine translation by the MT engine best suited to your project.',
-  default: true,
-}
-const MMT_NAME = 'ModernMT'
 const historySourceTargets = {
   // source: 'es-ES',
   // targets: 'it-IT,es-ES,es-MX||',

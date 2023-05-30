@@ -205,7 +205,6 @@
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
         <div class="page-content"></div>
-        <div metal:use-macro="tm.html/tm_panel"></div>
     </body>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>

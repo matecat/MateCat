@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
@@ -15,11 +15,22 @@ import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import CommonUtils from '../utils/commonUtils'
+import {getTmKeysUser} from '../api/getTmKeysUser'
+import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  MMT_NAME,
+  SettingsPanel,
+} from '../components/settingsPanel'
 
 function CatTool() {
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
+  const [isOpenSettings, setIsOpenSettings] = useState(false)
+  const [tmKeys, setTmKeys] = useState()
+  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -32,9 +43,43 @@ function CatTool() {
       where: options?.where,
     })
 
+  const closeSettings = useCallback(() => setIsOpenSettings(false), [])
+  const openTmPanel = () => setIsOpenSettings(true)
+
+  const getTmKeys = () => {
+    if (config.isLoggedIn) {
+      getTmKeysUser().then(({tm_keys}) =>
+        setTmKeys(
+          tm_keys.map((key) => {
+            return {...key, id: key.key}
+          }),
+        ),
+      )
+    }
+  }
+
+  const getMTEngines = () => {
+    if (config.isLoggedIn) {
+      getMtEnginesApi().then((mtEngines) => {
+        console.log('MT ENGINES', mtEngines)
+        //TODO: if internal user active is MMT
+        mtEngines.push(DEFAULT_ENGINE_MEMORY)
+        setMtEngines(mtEngines)
+        if (config.isAnInternalUser) {
+          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          if (mmt) {
+            setActiveMTEngine(mmt)
+          }
+        }
+      })
+    }
+  }
+
   // actions listener
   useEffect(() => {
     // CatTool onRender action
+    getTmKeys()
+    getMTEngines()
     const onRenderHandler = (options) => {
       const {
         actionType, // eslint-disable-line
@@ -215,6 +260,7 @@ function CatTool() {
         analysisEnabled={config.analysis_enabled}
         isGDriveProject={config.isGDriveProject}
         showReviseLink={config.footer_show_revise_link}
+        openTmPanel={openTmPanel}
       />
 
       <div className="main-container">
@@ -253,7 +299,17 @@ function CatTool() {
       <div className="notifications-wrapper">
         <NotificationBox />
       </div>
-
+      {isOpenSettings && (
+        <SettingsPanel
+          tmKeys={tmKeys}
+          onClose={closeSettings}
+          setTmKeys={setTmKeys}
+          mtEngines={mtEngines}
+          setMtEngines={setMtEngines}
+          activeMTEngine={activeMTEngine}
+          setActiveMTEngine={setActiveMTEngine}
+        />
+      )}
       <CattolFooter
         idProject={config.id_project}
         idJob={config.id_job}

@@ -12,11 +12,8 @@ $.extend(window.UI, {
     // of SegmentFilter, see below.
     UI.firstLoad = true
     UI.body = $('body')
-    UI.checkCrossLanguageSettings()
+    // UI.checkCrossLanguageSettings()
     CommonUtils.setBrowserHistoryBehavior()
-    $('article').each(function () {
-      APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30)
-    })
 
     // page content mount point
     const targetPageContent = document.getElementsByClassName('page-content')[0]
@@ -46,8 +43,6 @@ $.extend(window.UI, {
     this.executingSetTranslation = []
 
     this.checkVersion()
-    this.initTM()
-    this.initAdvanceOptions()
 
     // SET EVENTS
     this.setEvents()
