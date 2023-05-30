@@ -528,8 +528,8 @@ class CatUtils {
             return 0;
         }
 
-
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
+            $string_with_no_spaces = str_replace('placeholder', 'p', $string_with_no_spaces);
             $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
         } else {
 
