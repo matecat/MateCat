@@ -38,11 +38,11 @@ const TAGS_UTILS = {
     let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
     tx = tx
       .replace(/&lt;/gi, '<')
-      .replace(/<((ph.*?)\s*?\/)&gt;/gi, brTx1) // <ph \/&gt;
+      .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
       .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
       .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
-      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/gi, brTx1)
-      .replace(/<((ph.*?)\sid[^<“]*?\/)>/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
       .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
       .replace(/</gi, '&lt;')
     tx = tx.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/g, '&')
@@ -198,11 +198,11 @@ const TAGS_UTILS = {
       .replace(/<span/gi, '<_plh_')
       .replace(/<\/span/gi, '</_plh_')
       .replace(/&lt;/gi, '<')
-      .replace(/(<(ph.*?)\s*?\/&gt;)/gi, brTxPlPh1) // <ph \/&gt;
+      .replace(/(<(ph.*?)\s*?\/&gt;)/g, brTxPlPh1) // <ph \/&gt;
       .replace(/(<g .*?\bid[^<“]*?&gt;)/gi, brTx1)
       .replace(/(<(x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?&gt;)/gi, brTx3)
-      .replace(/(<(ph.*?)\sid[^<“]*?&gt;)/gi, brTxPlPh1)
-      .replace(/(<(ph.*?)\sid[^<“]*?\/>)/gi, brTxPlPh1)
+      .replace(/(<(ph.*?)\sid[^<“]*?&gt;)/g, brTxPlPh1)
+      .replace(/(<(ph.*?)\sid[^<“]*?\/>)/g, brTxPlPh1)
       .replace(/</gi, '&lt;')
       .replace(/&lt;_plh_/gi, '<span')
       .replace(/&lt;\/_plh_/gi, '</span')
@@ -216,7 +216,7 @@ const TAGS_UTILS = {
       .replace(/&lt;\/del/gi, '</del') // For translation conflicts tab
       .replace(/&lt;br/gi, '<br')
       .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|it|mrk)\s*&gt;)/gi, brTx2)
-      .replace(/(&lt;\s*\/\s*(ph)\s*&gt;)/gi, brTxPlPh12)
+      .replace(/(&lt;\s*\/\s*(ph)\s*&gt;)/g, brTxPlPh12)
 
     tx = tx.replace(
       /(<span contenteditable="false" class="[^"]*">)(:?<span contenteditable="false" class="[^"]*">)(.*?)(<\/span>){2}/gi,
