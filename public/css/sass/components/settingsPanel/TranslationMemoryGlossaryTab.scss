@@ -54,6 +54,7 @@
 }
 
 .tm-key-row-name {
+  width: 100%;
   background-color: unset;
   border: 1px solid $grey8;
 
@@ -77,4 +78,8 @@
 
 .translation-memory-glossary-tab-buttons-group {
   display: flex;
+}
+
+.tm-key-create-resource-row-input {
+  width: 100%;
 }

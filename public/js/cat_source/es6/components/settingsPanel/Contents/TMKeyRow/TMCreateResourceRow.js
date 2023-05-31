@@ -67,15 +67,19 @@ export const TMCreateResourceRow = ({row, setSpecialRows}) => {
           type="checkbox"
         />
       </div>
-      <input
-        placeholder="Please insert a name for the resource"
-        value={name}
-        onChange={onChangeName}
-      ></input>
+      <div>
+        <input
+          placeholder="Please insert a name for the resource"
+          className="tm-key-create-resource-row-input"
+          value={name}
+          onChange={onChangeName}
+        ></input>
+      </div>
       <div>
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
           <input
             placeholder="Add the shared key here"
+            className="tm-key-create-resource-row-input"
             value={keyCode}
             onChange={onChangeKeyCode}
           ></input>

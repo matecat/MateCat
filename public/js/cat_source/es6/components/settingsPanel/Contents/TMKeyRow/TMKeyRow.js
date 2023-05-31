@@ -106,14 +106,16 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
           />
         )}
       </div>
-      <input
-        className={`tm-key-row-name${
-          isMMSharedKey ? ' tm-key-row-name-disabled' : ''
-        }`}
-        value={name}
-        onChange={onChangeName}
-        disabled={isMMSharedKey}
-      ></input>
+      <div>
+        <input
+          className={`tm-key-row-name${
+            isMMSharedKey ? ' tm-key-row-name-disabled' : ''
+          }`}
+          value={name}
+          onChange={onChangeName}
+          disabled={isMMSharedKey}
+        ></input>
+      </div>
       <div>{row.key}</div>
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
