@@ -51,11 +51,11 @@ export const TranslationMemoryGlossaryTab = () => {
   const {tmKeys} = useContext(SettingsPanelContext)
 
   const [specialRows, setSpecialRows] = useState([DEFAULT_TRANSLATION_MEMORY])
-  const [keysRows, setKeysRows] = useState([])
+  const [keyRows, setKeyRows] = useState([])
 
   const onOrderActiveRows = useCallback(
     ({index, indexToMove}) => {
-      const activeRows = keysRows.filter(({isActive}) => isActive)
+      const activeRows = keyRows.filter(({isActive}) => isActive)
       const rowSelected = activeRows.find((row, indexRow) => indexRow === index)
 
       const isLastIndexToMove = indexToMove === activeRows.length
@@ -70,25 +70,25 @@ export const TranslationMemoryGlossaryTab = () => {
           : row,
       )
 
-      setKeysRows((prevState) => [
+      setKeyRows((prevState) => [
         ...prevState.filter(({isActive}) => !isActive),
         ...orderedRows,
       ])
     },
-    [keysRows],
+    [keyRows],
   )
 
   useEffect(() => {
     if (!tmKeys) return
 
     const onExpandRow = ({row, shouldExpand}) =>
-      setKeysRows((prevState) =>
+      setKeyRows((prevState) =>
         prevState.map((item) =>
           item.id === row.id ? {...item, isExpanded: shouldExpand} : item,
         ),
       )
 
-    setKeysRows((prevState) => {
+    setKeyRows((prevState) => {
       const defaultTranslationMemoryRow = specialRows.find(
         ({id}) => id === SPECIAL_ROWS_ID.defaultTranslationMemory,
       )
@@ -145,6 +145,10 @@ export const TranslationMemoryGlossaryTab = () => {
           isActive,
           isLocked,
           isExpanded,
+          className:
+            id === SPECIAL_ROWS_ID.defaultTranslationMemory
+              ? 'row-content-default-memory'
+              : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow, setSpecialRows}} />
           ) : (
@@ -186,7 +190,7 @@ export const TranslationMemoryGlossaryTab = () => {
         </div>
         <SettingsPanelTable
           columns={COLUMNS_TABLE}
-          rows={keysRows.filter(({isActive}) => isActive)}
+          rows={keyRows.filter(({isActive}) => isActive)}
           onChangeRowsOrder={onOrderActiveRows}
         />
       </div>
@@ -197,7 +201,7 @@ export const TranslationMemoryGlossaryTab = () => {
         <SettingsPanelTable
           className="translation-memory-glossary-tab-inactive-table"
           columns={COLUMNS_TABLE}
-          rows={keysRows.filter(({isActive}) => !isActive)}
+          rows={keyRows.filter(({isActive}) => !isActive)}
         />
       </div>
     </div>

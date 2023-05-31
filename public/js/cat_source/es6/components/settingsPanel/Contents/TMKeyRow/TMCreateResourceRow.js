@@ -2,6 +2,9 @@ import React, {Fragment, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
 
+import Close from '../../../../../../../img/icons/Close'
+import Checkmark from '../../../../../../../img/icons/Checkmark'
+
 export const TMCreateResourceRow = ({row, setSpecialRows}) => {
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -86,10 +89,16 @@ export const TMCreateResourceRow = ({row, setSpecialRows}) => {
         )}
       </div>
       <div />
-      <div>
-        <button className="settings-panel-button">Confirm</button>
-        <button className="settings-panel-button" onClick={onClose}>
-          Close
+      <div className="translation-memory-glossary-tab-buttons-group align-center">
+        <button className="ui primary button settings-panel-button-icon tm-key-create-resource-row-button">
+          <Checkmark size={16} />
+          Confirm
+        </button>
+        <button
+          className="ui button orange tm-key-create-resource-row-button"
+          onClick={onClose}
+        >
+          <Close />
         </button>
       </div>
     </Fragment>

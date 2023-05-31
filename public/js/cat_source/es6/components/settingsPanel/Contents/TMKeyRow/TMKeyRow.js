@@ -121,7 +121,7 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
         {iconDetails.icon}
       </div>
       {!isMMSharedKey && (
-        <div>
+        <div className="align-center">
           <button
             className="settings-panel-button"
             onClick={() => onExpandRow({row, shouldExpand: true})}

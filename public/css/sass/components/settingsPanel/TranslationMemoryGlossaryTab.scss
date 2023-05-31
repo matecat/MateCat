@@ -83,3 +83,13 @@
 .tm-key-create-resource-row-input {
   width: 100%;
 }
+
+.settings-panel-row {
+  .row-content-default-memory {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 20%;
+  }
+}
+
+.tm-key-create-resource-row-button {
+  height: 32px;
+}
