@@ -1,5 +1,6 @@
 import React, {Fragment, useState} from 'react'
 import PropTypes from 'prop-types'
+import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
 
 export const TMCreateResourceRow = ({row, setSpecialRows}) => {
   const [isLookup, setIsLookup] = useState(row.r ?? false)
@@ -45,6 +46,15 @@ export const TMCreateResourceRow = ({row, setSpecialRows}) => {
     )
   }
 
+  const onClose = () =>
+    setSpecialRows((prevState) =>
+      prevState.filter(
+        ({id}) =>
+          id !== SPECIAL_ROWS_ID.addSharedResource &&
+          id !== SPECIAL_ROWS_ID.newResource,
+      ),
+    )
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
@@ -63,16 +73,20 @@ export const TMCreateResourceRow = ({row, setSpecialRows}) => {
         onChange={onChangeName}
       ></input>
       <div>
-        <input
-          placeholder="Add the shared key here"
-          value={keyCode}
-          onChange={onChangeKeyCode}
-        ></input>
+        {row.id === SPECIAL_ROWS_ID.addSharedResource && (
+          <input
+            placeholder="Add the shared key here"
+            value={keyCode}
+            onChange={onChangeKeyCode}
+          ></input>
+        )}
       </div>
       <div />
       <div>
         <button className="settings-panel-button">Confirm</button>
-        <button className="settings-panel-button">Close</button>
+        <button className="settings-panel-button" onClick={onClose}>
+          Close
+        </button>
       </div>
     </Fragment>
   )

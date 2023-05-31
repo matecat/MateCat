@@ -4,7 +4,8 @@ import {SettingsPanelContext} from '../SettingsPanelContext'
 import {TMKeyRow} from './TMKeyRow/TMKeyRow'
 import {TMCreateResourceRow} from './TMKeyRow/TMCreateResourceRow'
 
-import IconAdd from '../../icons/IconAdd'
+import Users from '../../../../../../img/icons/Users'
+import AddWide from '../../../../../../img/icons/AddWide'
 
 const COLUMNS_TABLE = [
   {name: 'Lookup'},
@@ -32,6 +33,14 @@ const DEFAULT_TRANSLATION_MEMORY = {
 
 const ADD_SHARED_RESOURCE = {
   id: SPECIAL_ROWS_ID.addSharedResource,
+  isActive: true,
+  isLocked: true,
+  r: true,
+  w: true,
+}
+
+const NEW_RESOURCE = {
+  id: SPECIAL_ROWS_ID.newResource,
   isActive: true,
   isLocked: true,
   r: true,
@@ -148,6 +157,8 @@ export const TranslationMemoryGlossaryTab = () => {
 
   const onAddSharedResource = () =>
     setSpecialRows([DEFAULT_TRANSLATION_MEMORY, ADD_SHARED_RESOURCE])
+  const onNewResource = () =>
+    setSpecialRows([DEFAULT_TRANSLATION_MEMORY, NEW_RESOURCE])
 
   return (
     <div className="translation-memory-glossary-tab">
@@ -158,12 +169,18 @@ export const TranslationMemoryGlossaryTab = () => {
       <div className="translation-memory-glossary-tab-active-resources">
         <div className="translation-memory-glossary-tab-table-title">
           <h2>Active Resources</h2>
-          <div>
-            <button className="ui primary button" onClick={onAddSharedResource}>
-              <IconAdd /> Add shared resource
+          <div className="translation-memory-glossary-tab-buttons-group">
+            <button
+              className="ui primary button settings-panel-button-icon"
+              onClick={onAddSharedResource}
+            >
+              <Users size={22} /> Add shared resource
             </button>
-            <button className="ui primary button">
-              <IconAdd /> New resource
+            <button
+              className="ui primary button settings-panel-button-icon"
+              onClick={onNewResource}
+            >
+              <AddWide size={18} /> New resource
             </button>
           </div>
         </div>

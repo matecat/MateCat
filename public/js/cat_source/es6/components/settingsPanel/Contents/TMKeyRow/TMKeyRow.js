@@ -1,10 +1,11 @@
 import React, {Fragment, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
+
 import Earth from '../../../../../../../img/icons/Earth'
 import Lock from '../../../../../../../img/icons/Lock'
 import Users from '../../../../../../../img/icons/Users'
-import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
 
 export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
   const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)

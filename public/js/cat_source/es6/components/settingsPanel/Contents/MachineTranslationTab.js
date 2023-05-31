@@ -1,5 +1,4 @@
 import React, {useContext, useEffect, useState} from 'react'
-import IconAdd from '../../icons/IconAdd'
 import {Select} from '../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
@@ -17,6 +16,7 @@ import {deleteMTEngine} from '../../../api/deleteMTEngine'
 import {MessageNotification} from './MessageNotification'
 import Close from '../../../../../../img/icons/Close'
 import {DEFAULT_ENGINE_MEMORY} from '../SettingsPanel'
+import AddWide from '../../../../../../img/icons/AddWide'
 
 export const MachineTranslationTab = () => {
   const {mtEngines, setMtEngines, activeMTEngine, openLoginModal} =
@@ -144,10 +144,10 @@ export const MachineTranslationTab = () => {
         !addMTVisible ? (
           <div className="add-mt-button">
             <button
-              className="ui primary button"
+              className="ui primary button settings-panel-button-icon"
               onClick={() => setAddMTVisible(true)}
             >
-              <IconAdd /> Add MT engine
+              <AddWide size={18} /> Add MT engine
             </button>
           </div>
         ) : (
