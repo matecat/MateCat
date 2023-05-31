@@ -38,20 +38,12 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
       setResults(
         dataSorted.map((item) => {
-          const source = TagUtils.decodePlaceholdersToTextSimple(
-            item.segment
-              .replace(/&/g, '&amp;')
-              .replace(/</gi, '&lt;')
-              .replace(/>/gi, '&gt;'),
-          )
+          const source = TagUtils.decodePlaceholdersToTextSimple(item.segment)
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')
 
           const translation = TagUtils.decodePlaceholdersToTextSimple(
-            item.translation
-              .replace(/&/g, '&amp;')
-              .replace(/</gi, '&lt;')
-              .replace(/>/gi, '&gt;'),
+            item.translation,
           )
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')
@@ -115,13 +107,14 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
         typeof piece === 'object' ? (
           <mark key={index}>{piece.tagContent}</mark>
         ) : (
-          <Fragment key={index}>{piece}</Fragment>
+          <Fragment key={index}>
+            <span dangerouslySetInnerHTML={{__html: piece}} />
+          </Fragment>
         ),
       )
 
   const renderResults = (item, index) => {
     const {sid} = segment
-
     return (
       <ul
         key={index}
