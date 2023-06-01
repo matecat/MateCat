@@ -1226,6 +1226,17 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
+            // ==================
+            // Fix for AWS
+            // ==================
+            // Sometimes, we got this error:
+            //
+            // SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'only_private_tm' at row 1
+            //
+            // During project creation.
+            //
+            $only_private_tm = ($projectStructure[ 'only_private' ] == '' or empty($projectStructure[ 'only_private' ])) ? 0 : (int)$projectStructure[ 'only_private' ];
+
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
@@ -1241,7 +1252,7 @@ class ProjectManager {
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
             $newJob->payable_rates     = $payableRates;
             $newJob->total_raw_wc      = $this->files_word_count;
-            $newJob->only_private_tm   = $projectStructure[ 'only_private' ];
+            $newJob->only_private_tm   = $only_private_tm;
 
             $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
                     'total_project_segments' => $this->total_segments,
