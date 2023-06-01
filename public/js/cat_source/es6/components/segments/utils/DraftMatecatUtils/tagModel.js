@@ -46,7 +46,7 @@ const tagSignatures = {
   ph: {
     type: 'ph',
     regex:
-      /&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/gi,
+      /&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,

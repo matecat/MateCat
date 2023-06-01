@@ -115,7 +115,7 @@ export const decodeTagsToPlainText = (text) => {
     )
     // Match PH
     decoded = decoded.replace(
-      /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi,
+      /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/g,
       (match, text) => {
         try {
           return (
