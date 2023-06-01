@@ -92,4 +92,8 @@
 
 .tm-key-create-resource-row-button {
   height: 32px;
+
+  &:last-child {
+    padding: 0 8px;
+  }
 }

@@ -178,7 +178,7 @@ export const TranslationMemoryGlossaryTab = () => {
               className="ui primary button settings-panel-button-icon"
               onClick={onAddSharedResource}
             >
-              <Users size={22} /> Add shared resource
+              <Users size={18} /> Add shared resource
             </button>
             <button
               className="ui primary button settings-panel-button-icon"
