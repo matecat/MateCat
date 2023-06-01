@@ -27,6 +27,12 @@
     flex-grow: 1;
     text-align: left;
   }
+
+  .filter-resources {
+    border-radius: 2px;
+    border: 1px solid $grey8;
+    padding: 6px;
+  }
 }
 
 .translation-memory-glossary-tab {
@@ -45,6 +51,10 @@
   > :first-child {
     display: none;
   }
+}
+
+.translation-memory-glossary-tab-inactive-resources {
+  margin-top: 20px;
 }
 
 .tm-key-lookup,

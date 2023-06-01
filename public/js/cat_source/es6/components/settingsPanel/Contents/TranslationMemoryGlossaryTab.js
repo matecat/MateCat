@@ -52,6 +52,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
   const [specialRows, setSpecialRows] = useState([DEFAULT_TRANSLATION_MEMORY])
   const [keyRows, setKeyRows] = useState([])
+  const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
 
   const onOrderActiveRows = useCallback(
     ({index, indexToMove}) => {
@@ -128,7 +129,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
       return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
-        const {id, isActive, isLocked} = row
+        const {id, name, isActive, isLocked} = row
         const {isExpanded} = prevStateRow
 
         const isCreateResourceRow =
@@ -141,6 +142,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
         return {
           id,
+          name,
           isDraggable: isActive && !isSpecialRow,
           isActive,
           isLocked,
@@ -197,11 +199,23 @@ export const TranslationMemoryGlossaryTab = () => {
       <div className="translation-memory-glossary-tab-inactive-resources">
         <div className="translation-memory-glossary-tab-table-title">
           <h2>Inactive Resources</h2>
+          <input
+            className="filter-resources"
+            placeholder="Filter resources"
+            value={filterInactiveKeys}
+            onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+          />
         </div>
         <SettingsPanelTable
           className="translation-memory-glossary-tab-inactive-table"
           columns={COLUMNS_TABLE}
-          rows={keyRows.filter(({isActive}) => !isActive)}
+          rows={keyRows.filter(
+            ({isActive, name}) =>
+              !isActive &&
+              (filterInactiveKeys
+                ? new RegExp(filterInactiveKeys, 'gi').test(name)
+                : true),
+          )}
         />
       </div>
     </div>
