@@ -46,12 +46,12 @@ const tagSignatures = {
   ph: {
     type: 'ph',
     regex:
-      /&lt;ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-[0-9a-zA-Z\-]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/&gt;/gi,
+      /&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/gi,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
     placeholderRegex:
-      /&lt;ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-[0-9a-zA-Z\-]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/&gt;/,
+      /&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/,
     decodeNeeded: true,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
