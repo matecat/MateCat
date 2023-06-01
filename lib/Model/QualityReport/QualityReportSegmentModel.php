@@ -213,7 +213,7 @@ class QualityReportSegmentModel {
             $this->_commonSegmentAssignments( $seg, $Filter, $featureSet, $this->chunk, $isForUI );
             $this->_assignIssues( $seg, isset( $issues ) ? $issues : [], $issue_comments );
             $this->_assignComments( $seg, $comments );
-            $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
+            $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes, $isForUI );
 
             // If the segment is pre-translated (maybe from a previously XLIFF file)
 
@@ -400,14 +400,15 @@ class QualityReportSegmentModel {
      * @param $Filter
      * @param $last_revisions
      * @param $codes
+     * @param $isForUI
      *
      * @throws \Exception
      */
-    protected function _populateLastTranslationAndRevision( $seg, MateCatFilter $Filter, $last_translations, $last_revisions, $codes ) {
-        $last_translation = $this->_findLastTransaltion( $seg, $Filter, $last_translations );
+    protected function _populateLastTranslationAndRevision( $seg, MateCatFilter $Filter, $last_translations, $last_revisions, $codes, $isForUI = false ) {
+        $last_translation = $this->_findLastTransaltion( $seg, $Filter, $last_translations, $isForUI );
 
         // last revision version object
-        $last_segment_revisions = $this->_findLastRevision( $seg, $Filter, $last_revisions );
+        $last_segment_revisions = $this->_findLastRevision( $seg, $Filter, $last_revisions, $isForUI );
 
         if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED or $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
             if ( !empty( $last_translation ) ) {
@@ -441,18 +442,20 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param               $seg
+     * @param $seg
      * @param MateCatFilter $Filter
-     * @param               $last_translations
-     *
-     * @return null
+     * @param $last_translations
+     * @param bool $isForUI
+     * @return mixed|null
+     * @throws \Exception
      */
-    protected function _findLastTransaltion( $seg, MateCatFilter $Filter, $last_translations ) {
+    protected function _findLastTransaltion( $seg, MateCatFilter $Filter, $last_translations, $isForUI = false ) {
         $find_last_translation_version = null;
         if ( isset( $last_translations ) && !empty( $last_translations ) ) {
             foreach ( $last_translations as $last_translation ) {
                 if ( $last_translation->id_segment == $seg->sid ) {
-                    $last_translation->translation = $Filter->fromLayer0ToLayer2( $last_translation->translation );
+                    $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2( $last_translation->translation ) : $last_translation->translation;
+                    $last_translation->translation = $translation;
                     $find_last_translation_version = $last_translation;
                     break;
                 }
@@ -466,18 +469,20 @@ class QualityReportSegmentModel {
      * @param               $seg
      * @param MateCatFilter $Filter
      * @param               $last_revisions
+     * @param               $isForUI
      *
      * @return null
      * @throws \Exception
      */
-    protected function _findLastRevision( $seg, MateCatFilter $Filter, $last_revisions ) {
+    protected function _findLastRevision( $seg, MateCatFilter $Filter, $last_revisions, $isForUI = false ) {
         $segment_last_revisions = [];
 
         if ( !empty( $last_revisions ) ) {
             foreach ( $last_revisions as $source_page => $source_page_revisions ) {
                 foreach ( $source_page_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_revision->translation             = $Filter->fromLayer0ToLayer2( $last_revision->translation );
+                        $last_translation = ($isForUI) ? $Filter->fromLayer0ToLayer2( $last_revision->translation ) : $last_revision->translation;
+                        $last_revision->translation             = $last_translation;
                         $segment_last_revisions[ $source_page ] = $last_revision;
                         break;
                     }
