@@ -14,7 +14,7 @@ const Switch = ({
   }
 
   return (
-    <label className={`container ${className}`}>
+    <label className={`switch-container ${className}`}>
       <input
         type="checkbox"
         name={name}

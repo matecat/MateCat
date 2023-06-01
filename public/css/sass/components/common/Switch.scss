@@ -1,4 +1,4 @@
-.container {
+.switch-container {
   position: relative;
   display: inline-block;
   width: 42px;
@@ -19,7 +19,7 @@
     right: 0;
     bottom: 0;
     border-radius: 12px;
-    background-color: #9e9e9e;
+    background-color: $grey7;
     transition: background-color 0.2s ease-out;
 
     &::before {
@@ -36,7 +36,7 @@
   }
 
   input:checked + span {
-    background-color: $linkBlu;
+    background-color: $linkBlue;
   }
 
   input:checked + span::before {
