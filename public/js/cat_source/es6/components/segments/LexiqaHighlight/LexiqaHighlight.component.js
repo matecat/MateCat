@@ -84,7 +84,10 @@ class LexiqaHighlight extends Component {
         onMouseLeave={() => this.hideTooltip(300)}
       >
         {showTooltip && segmentOpened && warning && warning.messages && (
-          <LexiqaTooltipInfo messages={warning.messages} />
+          <LexiqaTooltipInfo
+            messages={warning.messages}
+            onReplaceWord={this.props.replaceWordAt}
+          />
         )}
         <span style={{backgroundColor: warning.messages ? warning.color : ''}}>
           {children}

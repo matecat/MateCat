@@ -104,7 +104,7 @@
       .icon-cancel-circle:before {
         line-height: 40px;
         float: left;
-        font-size: 18px;
+        font-size: 16px;
       }
       .tooltip-error-ignore-text {
         margin-left: 5px;
@@ -116,6 +116,19 @@
     &:not(:first-child) {
       border-top: 1px solid rgba(255, 255, 255, 0.36);
     }
+  }
+  .tooltip-suggestion-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0.5rem 0.5rem;
+  }
+  .tooltip-suggestion-container ul > li {
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 22px;
+  }
+  .tooltip-suggestion-container ul > li:hover {
+    color: #4184c4;
   }
 }
 /*

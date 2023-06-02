@@ -621,6 +621,18 @@ LXQ.init = function () {
           })
         }
       })
+      if (!isSource) {
+        // let warningData = LXQ.lexiqaData.lexiqaWarnings[sid]
+        const {suggestions, start, end} = range
+        $.each(suggestions, function (i, suggest) {
+          messages.push({
+            msg: suggest,
+            start: start,
+            end: end,
+            type: 'suggestion',
+          })
+        })
+      }
       return messages
     }
 
