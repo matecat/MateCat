@@ -79,6 +79,7 @@ export const SettingsPanel = ({
         activeMTEngine,
         setActiveMTEngine,
         openLoginModal,
+        wrapperRef,
       }}
     >
       <div className="settings-panel">

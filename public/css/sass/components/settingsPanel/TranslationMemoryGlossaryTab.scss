@@ -82,6 +82,13 @@
   }
 }
 
+.tm-key-row-button-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $grey6;
+}
+
 .tm-key-row-icons {
   color: $grey;
 }

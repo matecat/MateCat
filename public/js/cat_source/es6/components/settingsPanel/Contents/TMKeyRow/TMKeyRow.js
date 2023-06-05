@@ -2,13 +2,19 @@ import React, {Fragment, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
+import {MenuButton} from '../../../common/MenuButton/MenuButton'
+import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 
 import Earth from '../../../../../../../img/icons/Earth'
 import Lock from '../../../../../../../img/icons/Lock'
 import Users from '../../../../../../../img/icons/Users'
+import Upload from '../../../../../../../img/icons/Upload'
+import Download from '../../../../../../../img/icons/Download'
+import Share from '../../../../../../../img/icons/Share'
+import Trash from '../../../../../../../img/icons/Trash'
 
 export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
-  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys, wrapperRef} = useContext(SettingsPanelContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -122,12 +128,37 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
       </div>
       {!isMMSharedKey && (
         <div className="align-center">
-          <button
-            className="settings-panel-button"
+          <MenuButton
+            label="Import TMX"
             onClick={() => onExpandRow({row, shouldExpand: true})}
+            itemsTarget={wrapperRef.current}
           >
-            Import TMX
-          </button>
+            <MenuButtonItem>
+              <div className="tm-key-row-button-item">
+                <Upload size={20} /> Import Glossary
+              </div>
+            </MenuButtonItem>
+            <MenuButtonItem>
+              <div className="tm-key-row-button-item">
+                <Download size={20} /> Export TMX
+              </div>
+            </MenuButtonItem>
+            <MenuButtonItem>
+              <div className="tm-key-row-button-item">
+                <Download size={20} /> Export Glossary
+              </div>
+            </MenuButtonItem>
+            <MenuButtonItem>
+              <div className="tm-key-row-button-item">
+                <Share size={20} /> Share resource
+              </div>
+            </MenuButtonItem>
+            <MenuButtonItem>
+              <div className="tm-key-row-button-item">
+                <Trash size={20} /> Delete resource
+              </div>
+            </MenuButtonItem>
+          </MenuButton>
         </div>
       )}
     </Fragment>

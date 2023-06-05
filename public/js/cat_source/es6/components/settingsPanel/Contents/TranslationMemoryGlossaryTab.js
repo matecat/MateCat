@@ -166,6 +166,14 @@ export const TranslationMemoryGlossaryTab = () => {
   const onNewResource = () =>
     setSpecialRows([DEFAULT_TRANSLATION_MEMORY, NEW_RESOURCE])
 
+  const inactiveKeys = keyRows.filter(
+    ({isActive, name}) =>
+      !isActive &&
+      (filterInactiveKeys
+        ? new RegExp(filterInactiveKeys, 'gi').test(name)
+        : true),
+  )
+
   return (
     <div className="translation-memory-glossary-tab">
       <div className="translation-memory-glossary-tab-pre-translate">
@@ -209,13 +217,7 @@ export const TranslationMemoryGlossaryTab = () => {
         <SettingsPanelTable
           className="translation-memory-glossary-tab-inactive-table"
           columns={COLUMNS_TABLE}
-          rows={keyRows.filter(
-            ({isActive, name}) =>
-              !isActive &&
-              (filterInactiveKeys
-                ? new RegExp(filterInactiveKeys, 'gi').test(name)
-                : true),
-          )}
+          rows={inactiveKeys}
         />
       </div>
     </div>
