@@ -466,7 +466,7 @@ class CatUtils {
             $ctype = str_replace('ctype=', '', $ctype);
 
             if($ctype !== CTypeEnum::HTML){
-                $string = str_replace($match[0], 'placeholder', $string);
+                $string = str_replace($match[0], 'P', $string);
             } else {
                 $string = str_replace($match[0], '', $string);
             }
@@ -527,7 +527,6 @@ class CatUtils {
         if ( $string_with_no_spaces == "" ) {
             return 0;
         }
-
 
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
             $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
