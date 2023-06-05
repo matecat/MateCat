@@ -125,10 +125,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare(
-                "SELECT (job_last_segment - job_first_segment + 1 ) as segments_count FROM jobs WHERE " .
-                " id = :id_job AND password = :password "
-        );
+        $stmt    = $conn->prepare("
+            select count(st.id_segment) as total 
+            from segment_translations st
+            join jobs j on j.id=st.id_job
+            where j.id = :id_job and j.password = :password");
 
         $struct = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job'   => $id_job,
