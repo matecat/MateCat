@@ -136,7 +136,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 'password' => $password
         ] )[ 0 ];
 
-        return ($struct->segments_count) ? (int)$struct->segments_count : 0;
+        return ($struct->total) ? (int)$struct->total : 0;
     }
 
     /**
