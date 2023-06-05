@@ -4,7 +4,13 @@ import {MenuButtonItem} from './MenuButtonItem'
 import usePortal from '../../../hooks/usePortal'
 import ArrowDown from '../../../../../../img/icons/ArrowDown'
 
-export const MenuButton = ({label, onClick, itemsTarget, children}) => {
+export const MenuButton = ({
+  label,
+  onClick,
+  className = '',
+  itemsTarget,
+  children,
+}) => {
   const ItemsPortal = usePortal(itemsTarget ? itemsTarget : document.body)
   const [itemsCoords, setItemsCoords] = useState()
 
@@ -30,7 +36,7 @@ export const MenuButton = ({label, onClick, itemsTarget, children}) => {
   }
 
   return (
-    <div className="menu-button">
+    <div className={`menu-button ${className}`}>
       <div ref={ref} className="menu-button-wrapper">
         <button onClick={onClick}>{label}</button>
         <button onClick={onShowingItems}>
@@ -62,6 +68,7 @@ const MenuButtonItemType = PropTypes.shape({
 MenuButton.propTypes = {
   label: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
   itemsTarget: PropTypes.object,
   children: PropTypes.arrayOf(MenuButtonItemType),
 }

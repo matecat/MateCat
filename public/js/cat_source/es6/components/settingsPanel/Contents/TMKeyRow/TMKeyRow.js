@@ -131,6 +131,7 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
           <MenuButton
             label="Import TMX"
             onClick={() => onExpandRow({row, shouldExpand: true})}
+            className="tm-key-row-menu-button"
             itemsTarget={wrapperRef.current}
           >
             <MenuButtonItem>

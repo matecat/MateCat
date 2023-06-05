@@ -89,6 +89,14 @@
   color: $grey6;
 }
 
+.tm-key-row-menu-button {
+  .menu-button-wrapper {
+    > :first-child {
+      min-width: 140px;
+    }
+  }
+}
+
 .tm-key-row-icons {
   color: $grey;
 }
