@@ -466,7 +466,7 @@ class CatUtils {
             $ctype = str_replace('ctype=', '', $ctype);
 
             if($ctype !== CTypeEnum::HTML){
-                $string = str_replace($match[0], 'placeholder', $string);
+                $string = str_replace($match[0], 'P', $string);
             } else {
                 $string = str_replace($match[0], '', $string);
             }
