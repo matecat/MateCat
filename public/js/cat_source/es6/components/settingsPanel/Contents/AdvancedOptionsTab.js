@@ -100,7 +100,7 @@ export const AdvancedOptionsTab = () => {
         <select
           name="multi-match-2"
           id="multi-match-2"
-          disabled="true"
+          disabled={true}
           title="Secondary language suggestion"
         >
           <option value="">Secondary language suggestion</option>
