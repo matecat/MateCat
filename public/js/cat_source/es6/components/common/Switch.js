@@ -8,24 +8,39 @@ const Switch = ({
   onChange = () => {},
   className = '',
   testId,
+  activeText = 'Active',
+  disabledText = 'Unavailable',
+  inactiveText = 'Inactive',
 }) => {
   const handleChange = (e) => {
     onChange(e.target.checked)
   }
 
   return (
-    <label className={`switch-container ${className}`}>
-      <input
-        type="checkbox"
-        name={name}
-        onChange={handleChange}
-        checked={active}
-        aria-checked={active}
-        disabled={disabled}
-        data-testid={testId}
-      />
-      <span></span>
-    </label>
+    <div className="switch-container-outer">
+      <label className={`switch-container ${className}`}>
+        <input
+          type="checkbox"
+          name={name}
+          onChange={handleChange}
+          checked={active}
+          aria-checked={active}
+          disabled={disabled}
+          data-testid={testId}
+        />
+
+        <span></span>
+      </label>
+      {disabled && disabledText && (
+        <span className="switch-container-disabled">{disabledText}</span>
+      )}
+      {active && activeText && (
+        <span className="switch-container-active">{activeText}</span>
+      )}
+      {!active && inactiveText && (
+        <span className="switch-container-inactive">{inactiveText}</span>
+      )}
+    </div>
   )
 }
 
@@ -36,6 +51,9 @@ Switch.propTypes = {
   onChange: PropTypes.func,
   className: PropTypes.string,
   testId: PropTypes.string,
+  activeText: PropTypes.string,
+  disabledText: PropTypes.string,
+  inactiveText: PropTypes.string,
 }
 
 export default Switch

@@ -1,3 +1,17 @@
+.switch-container-outer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  .switch-container-disabled,
+  .switch-container-active,
+  .switch-container-inactive {
+    font-size: 18px;
+    color: $grey6;
+  }
+  .switch-container-active {
+    color: $linkBlue;
+  }
+}
 .switch-container {
   position: relative;
   display: inline-block;

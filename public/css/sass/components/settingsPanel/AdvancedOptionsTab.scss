@@ -1,0 +1,75 @@
+.advanced-options-box {
+  float: left;
+  width: 100%;
+  padding: 20px;
+}
+
+.options-box {
+  margin: 0;
+  width: 96%;
+  float: left;
+  padding: 30px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cattool .advanced-options-box .seg_rule h3,
+.cattool .advanced-options-box .seg_rule p {
+  opacity: 0.6;
+}
+
+.options-box.dqf_options_box {
+  display: none;
+}
+
+.options-box.multi-match p {
+  height: 60px;
+}
+
+.advanced-options-box .options-box:last-child {
+  border-bottom: 0;
+}
+
+.advanced-options-box h2 {
+  font-size: 30px;
+  text-align: left;
+  margin-bottom: 15px;
+  margin-top: 0px;
+}
+
+.advanced-options-box .options-box h3 {
+  text-align: right;
+  font-size: 19px;
+  float: left;
+  width: 18%;
+  margin: 3px 0 0;
+}
+
+.advanced-options-box .options-box p {
+  float: left;
+  width: 46%;
+  clear: none;
+  font-size: 15px;
+  margin: 0px 2% 0 5%;
+  line-height: 22px;
+  text-align: left;
+}
+
+.advanced-options-box .options-box.option-unavailable p,
+.advanced-options-box .options-box.option-unavailable h3 {
+  opacity: 0.6;
+}
+
+.advanced-options-box .options-box.qa-box img {
+  width: 65px !important;
+  margin-right: 10px !important;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.advanced-options-box .options-box select,
+.advanced-options-box .options-box input {
+  float: left;
+  width: 26%;
+  height: 30px;
+  font-size: 16px;
+}
