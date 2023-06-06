@@ -18,7 +18,14 @@ export const SettingsPanelRow = forwardRef(
 
     const dragHandleRef = useRef()
 
-    const {isDraggable, isLocked, isExpanded, className = '', node} = row
+    const {
+      isDraggable,
+      isLocked,
+      isExpanded,
+      className = '',
+      node,
+      extraNode,
+    } = row
 
     const onDragStartCallback = () => {
       setIsDragging(true)
@@ -106,7 +113,9 @@ export const SettingsPanelRow = forwardRef(
             className={`settings-panel-row-extra-content${
               isExpanded ? ' settings-panel-row-extra-content-expanded' : ''
             }`}
-          ></div>
+          >
+            {isExpanded && extraNode}
+          </div>
         </>
       </div>
     )

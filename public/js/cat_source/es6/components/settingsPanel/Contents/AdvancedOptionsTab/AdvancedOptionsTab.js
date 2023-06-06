@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
-import Switch from '../../common/Switch'
-import {SpeechToText} from './AdvancedOptions/SpeechToText'
+import Switch from '../../../common/Switch'
+import {SpeechToText} from './SpeechToText'
 
 export const AdvancedOptionsTab = () => {
   return (

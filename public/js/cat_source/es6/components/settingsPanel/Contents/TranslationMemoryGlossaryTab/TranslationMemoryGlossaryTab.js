@@ -1,11 +1,11 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react'
-import {SettingsPanelTable} from '../SettingsPanelTable/SettingsPanelTable'
-import {SettingsPanelContext} from '../SettingsPanelContext'
-import {TMKeyRow} from './TMKeyRow/TMKeyRow'
-import {TMCreateResourceRow} from './TMKeyRow/TMCreateResourceRow'
+import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {TMKeyRow} from './TMKeyRow'
+import {TMCreateResourceRow} from './TMCreateResourceRow'
 
-import Users from '../../../../../../img/icons/Users'
-import AddWide from '../../../../../../img/icons/AddWide'
+import Users from '../../../../../../../img/icons/Users'
+import AddWide from '../../../../../../../img/icons/AddWide'
 
 const COLUMNS_TABLE = [
   {name: 'Lookup'},
@@ -156,6 +156,7 @@ export const TranslationMemoryGlossaryTab = () => {
           ) : (
             <TMCreateResourceRow key={row.id} {...{row, setSpecialRows}} />
           ),
+          ...(!isCreateResourceRow && {extraNode: <h1>We wewewe</h1>}),
         }
       })
     })

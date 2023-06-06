@@ -1,7 +1,7 @@
 import React, {Fragment, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
+import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 

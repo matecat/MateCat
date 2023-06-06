@@ -1,5 +1,5 @@
 import React, {useContext} from 'react'
-import {SettingsPanelContext} from '../SettingsPanelContext'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
 
 export const MTRow = ({row, deleteMT}) => {
   const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)

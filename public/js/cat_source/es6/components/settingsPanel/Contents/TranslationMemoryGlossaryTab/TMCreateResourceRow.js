@@ -1,6 +1,6 @@
 import React, {Fragment, useState} from 'react'
 import PropTypes from 'prop-types'
-import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab'
+import {SPECIAL_ROWS_ID} from './TranslationMemoryGlossaryTab'
 
 import Close from '../../../../../../../img/icons/Close'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
