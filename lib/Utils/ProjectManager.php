@@ -1241,7 +1241,7 @@ class ProjectManager {
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
             $newJob->payable_rates     = $payableRates;
             $newJob->total_raw_wc      = $this->files_word_count;
-            $newJob->only_private_tm   = $projectStructure[ 'only_private' ];
+            $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
             $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
                     'total_project_segments' => $this->total_segments,
