@@ -105,10 +105,12 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
       }
 
   const handleExpandeRow = (Component) => {
+    const onClose = () => onExpandRow({row, shouldExpand: false})
+
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{row}} />,
+      content: <Component {...{row, onClose}} />,
     })
   }
 

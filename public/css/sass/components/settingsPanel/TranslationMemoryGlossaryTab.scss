@@ -132,12 +132,13 @@
   }
 }
 
-.translation-memory-glossary-tab-import-tmx {
+.translation-memory-glossary-tab-import {
   display: flex;
+  flex-direction: column;
   padding: 10px;
   min-height: 50px;
 
-  .import-tmx-form {
+  .import-form {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -146,6 +147,43 @@
     > :first-child {
       display: flex;
       gap: 10px;
+    }
+  }
+
+  .import-files {
+    margin-top: 20px;
+
+    > ul {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+
+      > li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 6px;
+      }
+
+      > li:nth-child(even) {
+        background-color: $grey4;
+      }
+    }
+
+    .loading-bar {
+      width: 260px;
+      height: 4px;
+      background-color: $grey8;
+
+      > :first-child {
+        background-color: $approvedGreen;
+        height: 100%;
+      }
+    }
+
+    .import-completed {
+      color: $approvedGreenHover;
     }
   }
 }
