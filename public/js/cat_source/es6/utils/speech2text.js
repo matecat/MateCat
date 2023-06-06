@@ -1,4 +1,3 @@
-import {sprintf} from 'sprintf-js'
 import CatToolActions from '../actions/CatToolActions'
 
 import SegmentActions from '../actions/SegmentActions'

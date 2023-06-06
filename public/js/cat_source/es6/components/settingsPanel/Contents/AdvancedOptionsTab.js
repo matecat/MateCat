@@ -1,26 +1,13 @@
 import React, {useState} from 'react'
 import Switch from '../../common/Switch'
+import {SpeechToText} from './AdvancedOptions/SpeechToText'
 
 export const AdvancedOptionsTab = () => {
-  const [dictationOption, setDictationOption] = useState(false)
   return (
     <div className="advanced-options-box">
       {/*<h2>Advanced Options</h2>*/}
 
-      <div className="options-box s2t-box">
-        <h3>Dictation</h3>
-        <p>
-          <span className="option-s2t-box-chrome-label">
-            Available on Chrome.{' '}
-          </span>
-          Improved accessibility thanks to a speech-to-text component to dictate
-          your translations instead of typing them.
-        </p>
-        <Switch
-          active={dictationOption}
-          onChange={() => setDictationOption((prevState) => !prevState)}
-        />
-      </div>
+      <SpeechToText />
 
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
       <div className="options-box tagp">

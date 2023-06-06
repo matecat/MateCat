@@ -195,7 +195,6 @@ const NewProject = ({
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
-    APP.checkForSpeechToText()
     APP.checkForDqf()
     APP.checkGDriveEvents()
     UI.addEvents()

@@ -264,40 +264,6 @@ APP.getFilenameFromUploadedFiles = function () {
   return files.substr(7)
 }
 
-/**
- * Disable/Enable SpeechToText
- *
- */
-APP.checkForSpeechToText = function () {
-  //disable Tag Projection
-  var disableS2T = !config.defaults.speech2text
-  var speech2textCheck = $('.s2t-box')
-  speech2textCheck.removeClass('option-unavailable')
-  speech2textCheck.find('.onoffswitch').off('click')
-  if (!('webkitSpeechRecognition' in window)) {
-    disableS2T = true
-    $('.options-box #s2t_check').prop('disabled', disableS2T)
-    speech2textCheck
-      .find('.option-s2t-box-chrome-label')
-      .css('display', 'inline')
-    speech2textCheck
-      .find('.onoffswitch')
-      .off('click')
-      .on('click', function () {
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'This options is only available on your browser.',
-            buttonText: 'Continue',
-          },
-          'Option not available',
-        )
-      })
-    speech2textCheck.addClass('option-unavailable')
-  }
-  $('.options-box #s2t_check').attr('checked', !disableS2T)
-}
-
 APP.checkForDqf = function () {
   var dqfCheck = $('.dqf-box #dqf_switch')
   dqfCheck.prop('disabled', false)

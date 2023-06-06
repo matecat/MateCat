@@ -1,7 +1,7 @@
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import LXQ from './cat_source/es6/utils/lxq.main'
 import SegmentUtils from './cat_source/es6/utils/segmentUtils'
-import Speech2Text from './cat_source/es6/utils/speech2text'
+// import Speech2Text from './cat_source/es6/utils/speech2text'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
@@ -9,7 +9,7 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
   $.extend(UI, {
     initAdvanceOptions: function () {
       var lexiqaCheck = $('.qa-box #lexi_qa')
-      var speech2textCheck = $('.s2t-box #s2t_check')
+      // var speech2textCheck = $('.s2t-box #s2t_check')
       var tagProjectionCheck = $('.tagp #tagp_check')
       var dqfCheck = $('.dqf-box #dqf_switch')
       var segmentationRule =
@@ -98,7 +98,7 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
         tpContainer.addClass('option-unavailable')
       }
       //Check Speech To Text
-      if (!('webkitSpeechRecognition' in window)) {
+      /*if (!('webkitSpeechRecognition' in window)) {
         var speech2textContainer = $('.s2t-box')
         speech2textCheck.prop('disabled', true).attr('checked', false)
         // speech2textContainer.css({opacity: 0.6 });
@@ -122,7 +122,7 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
         Speech2Text.enabled()
           ? speech2textCheck.attr('checked', true)
           : speech2textCheck.attr('checked', false)
-      }
+      }*/
 
       // Check DQF
       if (UI.checkDqfCanActivate()) {
@@ -147,10 +147,10 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
       selected ? LXQ.enable() : LXQ.disable()
     },
 
-    toggleSpeech2TextOption: function () {
+    /*    toggleSpeech2TextOption: function () {
       var selected = $('.s2t-box #s2t_check').is(':checked')
       selected ? Speech2Text.enable() : Speech2Text.disable()
-    },
+    },*/
 
     toggleTagProjectionOption: function () {
       var selected = $('.tagp #tagp_check').is(':checked')

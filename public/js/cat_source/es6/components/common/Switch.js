@@ -6,6 +6,7 @@ const Switch = ({
   active = false,
   disabled = false,
   onChange = () => {},
+  onClick = () => {},
   className = '',
   testId,
   activeText = 'Active',
@@ -17,7 +18,7 @@ const Switch = ({
   }
 
   return (
-    <div className="switch-container-outer">
+    <div className="switch-container-outer" onClick={onClick}>
       <label className={`switch-container ${className}`}>
         <input
           type="checkbox"
@@ -31,15 +32,13 @@ const Switch = ({
 
         <span></span>
       </label>
-      {disabled && disabledText && (
+      {disabled && disabledText ? (
         <span className="switch-container-disabled">{disabledText}</span>
-      )}
-      {active && activeText && (
+      ) : active && activeText ? (
         <span className="switch-container-active">{activeText}</span>
-      )}
-      {!active && inactiveText && (
+      ) : !active && inactiveText ? (
         <span className="switch-container-inactive">{inactiveText}</span>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -49,6 +48,7 @@ Switch.propTypes = {
   active: PropTypes.bool,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
+  onClick: PropTypes.func,
   className: PropTypes.string,
   testId: PropTypes.string,
   activeText: PropTypes.string,
