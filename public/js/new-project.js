@@ -558,7 +558,7 @@ $(document).ready(function () {
   const rootNewProjectPage = createRoot(newProjectPage)
   rootNewProjectPage.render(
     <NewProject
-      isLoggedIn={config.isLoggedIn}
+      isLoggedIn={!!config.isLoggedIn}
       languages={config.languages_array.map((lang) => {
         return {...lang, id: lang.code}
       })}
@@ -567,9 +567,9 @@ $(document).ready(function () {
       subjectsArray={config.subject_array.map((item) => {
         return {...item, id: item.key, name: item.display}
       })}
-      conversionEnabled={config.conversionEnabled}
+      conversionEnabled={!!config.conversionEnabled}
       formatsNumber={config.formats_number}
-      googleDriveEnabled={config.googleDriveEnabled}
+      googleDriveEnabled={!!config.googleDriveEnabled}
     />,
   )
 

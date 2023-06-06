@@ -3,7 +3,6 @@ import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
-import Customizations from './es6/utils/customizations'
 
 $.extend(window.UI, {
   start: function () {
@@ -34,7 +33,6 @@ $.extend(window.UI, {
     this.byButton = false
     this.displayedMessages = []
 
-    Customizations.loadCustomization()
     $('html').trigger('init')
     this.warningStopped = false
     this.unsavedSegmentsToRecover = []

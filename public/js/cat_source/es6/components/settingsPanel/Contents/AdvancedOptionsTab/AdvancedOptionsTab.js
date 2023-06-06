@@ -1,14 +1,18 @@
 import React, {useContext, useState} from 'react'
+import PropTypes from 'prop-types'
 import Switch from '../../../common/Switch'
 import {SpeechToText} from './SpeechToText'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import PropTypes from 'prop-types'
-import {SettingsPanel} from '../../SettingsPanel'
 import {GuessTag} from './GuessTag'
 
 export const AdvancedOptionsTab = () => {
-  const {setSpeechToTextActive, setGuessTagActive} =
-    useContext(SettingsPanelContext)
+  const {
+    setSpeechToTextActive,
+    guessTagActive,
+    setGuessTagActive,
+    sourceLang,
+    targetLangs,
+  } = useContext(SettingsPanelContext)
   return (
     <div className="advanced-options-box">
       {/*<h2>Advanced Options</h2>*/}
@@ -16,7 +20,12 @@ export const AdvancedOptionsTab = () => {
       <SpeechToText setSpeechToTextActive={setSpeechToTextActive} />
 
       {config.show_tag_projection && (
-        <GuessTag setGuessTagActive={setGuessTagActive} />
+        <GuessTag
+          setGuessTagActive={setGuessTagActive}
+          guessTagActive={guessTagActive}
+          sourceLang={sourceLang}
+          targetLangs={targetLangs}
+        />
       )}
 
       {/*  Lexiqa

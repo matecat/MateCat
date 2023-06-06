@@ -141,7 +141,8 @@ export const MachineTranslationTab = () => {
           closeCallback={() => setErrorDeletingMT(false)}
         />
       )}
-      {!config.is_cattool ? (
+
+      {!config.is_cattool && config.isLoggedIn ? (
         !addMTVisible ? (
           <div className="add-mt-button">
             <button

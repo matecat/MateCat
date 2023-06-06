@@ -40,7 +40,10 @@ export const SettingsPanel = ({
   activeMTEngine,
   setActiveMTEngine,
   setSpeechToTextActive,
+  guessTagActive,
   setGuessTagActive,
+  sourceLang,
+  targetLangs,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
@@ -83,6 +86,10 @@ export const SettingsPanel = ({
         openLoginModal,
         wrapperRef,
         setSpeechToTextActive,
+        guessTagActive,
+        setGuessTagActive,
+        sourceLang,
+        targetLangs,
       }}
     >
       <div className="settings-panel">
@@ -122,5 +129,8 @@ SettingsPanel.propTypes = {
   setMtEngines: PropTypes.func,
   activeMTEngine: PropTypes.object,
   setActiveMTEngine: PropTypes.func,
+  guessTagActive: PropTypes.bool,
   setGuessTagActive: PropTypes.func,
+  sourceLang: PropTypes.object,
+  targetLangs: PropTypes.array,
 }

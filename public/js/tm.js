@@ -157,76 +157,76 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
             placement: 's',
           })
         }
-        if (provider === 'letsmt') {
-          // Tilde MT (letsmt) uses a standalone web component
-          // we'll hide the button because it's easier to use the webcomponent's builtin buttons
-          $('#add-mt-provider-confirm').addClass('hide')
-          // when done, we'll want to simulate clicking the original button. for this it must be enabled
-          $('#add-mt-provider-confirm').removeClass('disabled')
-        }
+        // if (provider === 'letsmt') {
+        //   // Tilde MT (letsmt) uses a standalone web component
+        //   // we'll hide the button because it's easier to use the webcomponent's builtin buttons
+        //   $('#add-mt-provider-confirm').addClass('hide')
+        //   // when done, we'll want to simulate clicking the original button. for this it must be enabled
+        //   $('#add-mt-provider-confirm').removeClass('disabled')
+        // }
       })
-      $('.add-mt-engine').click(function () {
-        if ($(this).hasClass('disabled')) {
-          var props = {
-            modalName: 'mmt-message-modal-not-logged-in',
-            text: 'If you want to add an MT engine for use in your projects, please login first.',
-            successText: 'Login',
-            successCallback: function () {
-              ModalsActions.onCloseModal()
-              $('#modal').trigger('openlogin')
-            },
-            warningText: 'Cancel',
-            warningCallback: function () {
-              ModalsActions.onCloseModal()
-            },
-          }
-          ModalsActions.showModalComponent(
-            ConfirmMessageModal,
-            props,
-            'Add MT Engine',
-          )
-          return false
-        }
-        $(this).hide()
-        UI.resetMTProviderPanel()
-        $('.mgmt-table-mt tr.new').removeClass('hide').show()
-        $('#add-mt-provider-cancel').show()
-        $('#add-mt-provider-confirm').addClass('hide')
-        $('.insert-tm').removeClass('hide')
-      })
+      // $('.add-mt-engine').click(function () {
+      //   if ($(this).hasClass('disabled')) {
+      //     var props = {
+      //       modalName: 'mmt-message-modal-not-logged-in',
+      //       text: 'If you want to add an MT engine for use in your projects, please login first.',
+      //       successText: 'Login',
+      //       successCallback: function () {
+      //         ModalsActions.onCloseModal()
+      //         $('#modal').trigger('openlogin')
+      //       },
+      //       warningText: 'Cancel',
+      //       warningCallback: function () {
+      //         ModalsActions.onCloseModal()
+      //       },
+      //     }
+      //     ModalsActions.showModalComponent(
+      //       ConfirmMessageModal,
+      //       props,
+      //       'Add MT Engine',
+      //     )
+      //     return false
+      //   }
+      //   $(this).hide()
+      //   UI.resetMTProviderPanel()
+      //   $('.mgmt-table-mt tr.new').removeClass('hide').show()
+      //   $('#add-mt-provider-cancel').show()
+      //   $('#add-mt-provider-confirm').addClass('hide')
+      //   $('.insert-tm').removeClass('hide')
+      // })
 
-      $('#add-mt-provider-confirm').click(function (e) {
-        e.preventDefault()
-        if ($(this).hasClass('disabled')) return false
-        var provider = $('#mt_engine_int').val()
-        var providerName = $('#mt_engine_int option:selected').text()
-        UI.addMTEngine(provider, providerName)
-      })
-      $('#add-mt-provider-cancel').click(function () {
-        $('.add-mt-engine').show()
-        $('.insert-tm').addClass('hide')
-        $('#mt_engine_int').val('none').trigger('change')
-        $('.insert-tm').addClass('hide').removeAttr('style')
-        $('#add-mt-provider-cancel').show()
-      })
-      $('#add-mt-provider-cancel-int').click(function () {
-        $('.add-mt-engine').show()
-        $('.insert-tm').addClass('hide')
-        $('#mt_engine_int').val('none').trigger('change')
-        $('.insert-tm').addClass('hide').removeAttr('style')
-        $('#add-mt-provider-cancel').show()
-      })
-      $('html').on('input', '#mt-provider-details input', function () {
-        let num = 0
-        $('#mt-provider-details input.required').each(function () {
-          if ($(this).val() == '') num++
-        })
-        if (num) {
-          $('#add-mt-provider-confirm').addClass('disabled')
-        } else {
-          $('#add-mt-provider-confirm').removeClass('disabled')
-        }
-      })
+      // $('#add-mt-provider-confirm').click(function (e) {
+      //   e.preventDefault()
+      //   if ($(this).hasClass('disabled')) return false
+      //   var provider = $('#mt_engine_int').val()
+      //   var providerName = $('#mt_engine_int option:selected').text()
+      //   UI.addMTEngine(provider, providerName)
+      // })
+      // $('#add-mt-provider-cancel').click(function () {
+      //   $('.add-mt-engine').show()
+      //   $('.insert-tm').addClass('hide')
+      //   $('#mt_engine_int').val('none').trigger('change')
+      //   $('.insert-tm').addClass('hide').removeAttr('style')
+      //   $('#add-mt-provider-cancel').show()
+      // })
+      // $('#add-mt-provider-cancel-int').click(function () {
+      //   $('.add-mt-engine').show()
+      //   $('.insert-tm').addClass('hide')
+      //   $('#mt_engine_int').val('none').trigger('change')
+      //   $('.insert-tm').addClass('hide').removeAttr('style')
+      //   $('#add-mt-provider-cancel').show()
+      // })
+      // $('html').on('input', '#mt-provider-details input', function () {
+      //   let num = 0
+      //   $('#mt-provider-details input.required').each(function () {
+      //     if ($(this).val() == '') num++
+      //   })
+      //   if (num) {
+      //     $('#add-mt-provider-confirm').addClass('disabled')
+      //   } else {
+      //     $('#add-mt-provider-confirm').removeClass('disabled')
+      //   }
+      // })
 
       // script per fare apparire e scomparire la riga con l'upload della tmx
       $('body')
@@ -576,14 +576,14 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         $(tmElem).trigger('click')
       }
     },
-    enableTM: function (el) {
-      UI.checkTMGrantsModifications(el)
-      if (APP.isCattool) UI.saveTMdata(false)
-      UI.checkTMKeysUpdateChecks()
-    },
-    disableAllTM: function () {
-      $('#activetm tr.mine .activate input').trigger('click')
-    },
+    // enableTM: function (el) {
+    //   UI.checkTMGrantsModifications(el)
+    //   if (APP.isCattool) UI.saveTMdata(false)
+    //   UI.checkTMKeysUpdateChecks()
+    // },
+    // disableAllTM: function () {
+    //   $('#activetm tr.mine .activate input').trigger('click')
+    // },
     checkOpenTabFromParameters: function () {
       var keyParam = CommonUtils.getParameterByName('openTab')
       if (keyParam) {
@@ -1489,265 +1489,265 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
           )
         })
     },
-    deleteMT: function (id) {
-      deleteMTEngine({
-        id,
-      })
-        .then(({data}) => {
-          UI.hideAllBoxOnTables()
-          $('.mgmt-table-mt tr[data-id=' + data.id + ']').remove()
-          $('#mt_engine option[value=' + data.id + ']').remove()
-          if (!$('#mt_engine option[selected=selected]').length)
-            $('#mt_engine option[value=0]').attr('selected', 'selected')
-        })
-        .catch(() => {
-          $('.mgmt-table-mt .tm-error-message')
-            .text('There was an error saving your data. Please retry!')
-            .show()
-        })
-    },
+    // deleteMT: function (id) {
+    //   deleteMTEngine({
+    //     id,
+    //   })
+    //     .then(({data}) => {
+    //       UI.hideAllBoxOnTables()
+    //       $('.mgmt-table-mt tr[data-id=' + data.id + ']').remove()
+    //       $('#mt_engine option[value=' + data.id + ']').remove()
+    //       if (!$('#mt_engine option[selected=selected]').length)
+    //         $('#mt_engine option[value=0]').attr('selected', 'selected')
+    //     })
+    //     .catch(() => {
+    //       $('.mgmt-table-mt .tm-error-message')
+    //         .text('There was an error saving your data. Please retry!')
+    //         .show()
+    //     })
+    // },
 
-    addMTEngine: function (provider, providerName) {
-      var providerData = {}
-      $('.insert-tm .provider-data .provider-field').each(function () {
-        const field = $(this).find('input, select').first()
-        if (field.prop('type') === 'checkbox') {
-          providerData[field.attr('data-field-name')] = field.prop('checked')
-        } else {
-          providerData[field.attr('data-field-name')] = field.val()
-        }
-      })
+    // addMTEngine: function (provider, providerName) {
+    //   var providerData = {}
+    //   $('.insert-tm .provider-data .provider-field').each(function () {
+    //     const field = $(this).find('input, select').first()
+    //     if (field.prop('type') === 'checkbox') {
+    //       providerData[field.attr('data-field-name')] = field.prop('checked')
+    //     } else {
+    //       providerData[field.attr('data-field-name')] = field.val()
+    //     }
+    //   })
+    //
+    //   var name = $('#new-engine-name').val()
+    //
+    //   const props = {
+    //     name,
+    //     provider,
+    //     data: JSON.stringify(providerData),
+    //     providerName,
+    //   }
+    //
+    //   addMTEngineApi({
+    //     name: props.name,
+    //     provider: props.provider,
+    //     dataMt: props.data,
+    //   })
+    //     .then((response) => {
+    //       if (
+    //         response.data.config &&
+    //         Object.keys(response.data.config).length
+    //       ) {
+    //         UI.renderMTConfig(provider, response.name, response.data.config)
+    //       } else {
+    //         UI.renderNewMT(props, response.data)
+    //         if (!APP.isCattool) {
+    //           UI.activateMT(
+    //             $(
+    //               'table.mgmt-mt tr[data-id=' +
+    //                 response.data.id +
+    //                 '] .enable-mt input',
+    //             ),
+    //           )
+    //           $('#mt_engine').append(
+    //             '<option value="' +
+    //               response.data.id +
+    //               '">' +
+    //               response.data.name +
+    //               '</option>',
+    //           )
+    //           $('#mt_engine option:selected').removeAttr('selected')
+    //           $('#mt_engine option[value="' + response.data.id + '"]').attr(
+    //             'selected',
+    //             'selected',
+    //           )
+    //         }
+    //         $('#mt_engine_int').val('none').trigger('change')
+    //         UI.decorateMMTRow && UI.decorateMMTRow()
+    //       }
+    //     })
+    //     .catch((errors) => {
+    //       if (errors[0].code !== undefined) {
+    //         $('#mt-provider-details .mt-error-key')
+    //           .text(errors[0].message)
+    //           .show()
+    //       } else {
+    //         $('#mt-provider-details .mt-error-key')
+    //           .text('API key not valid')
+    //           .show()
+    //       }
+    //     })
+    // },
+    // renderNewMT: function (data, serverResponse) {
+    //   var newTR =
+    //     '<tr data-id="' +
+    //     serverResponse.id +
+    //     '">' +
+    //     '    <td class="mt-provider">' +
+    //     serverResponse.name +
+    //     '</td>' +
+    //     '    <td class="engine-name">' +
+    //     data.providerName +
+    //     '</td>' +
+    //     '    <td class="enable-mt text-center">' +
+    //     '        <input type="checkbox" checked />' +
+    //     '    </td>' +
+    //     '    <td class="action">' +
+    //     '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
+    //     '    </td>' +
+    //     '</tr>'
+    //   if (APP.isCattool) {
+    //     $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR)
+    //   } else {
+    //     $('table.mgmt-mt tbody tr.activemt')
+    //       .removeClass('activemt')
+    //       .find('.enable-mt input')
+    //       .click()
+    //     $('table.mgmt-mt.active-mt tbody').prepend(newTR)
+    //   }
+    // },
 
-      var name = $('#new-engine-name').val()
+    // /* codice inserito da Daniele */
+    // pulseMTadded: function (row) {
+    //   setTimeout(function () {
+    //     $('.activemt').animate({scrollTop: 5000}, 0)
+    //     row.fadeOut()
+    //     row.fadeIn()
+    //   }, 10)
+    //   setTimeout(function () {
+    //     $('.activemt').animate({scrollTop: 5000}, 0)
+    //   }, 1000)
+    // },
+    // resetMTProviderPanel: function () {
+    //   if ($('.insert-tm .step2').css('display') == 'block') {
+    //     $('#add-mt-provider-cancel-int').click()
+    //     $('.add-mt-engine').click()
+    //   }
+    // },
+    // activateMT: function (el) {
+    //   var tr = $(el).parents('tr')
+    //   $(el).replaceWith('<input type="checkbox" checked class="temp" />')
+    //
+    //   const activeMtBody = $('.mgmt-mt.active-mt tbody')
+    //   activeMtBody.append(tr)
+    //   // var tbody = tr.parents('tbody')
+    //   tr.removeClass('inactivemt')
+    //   activeMtBody.find('.activemt input[type=checkbox]').each((i, elem) => {
+    //     UI.deactivateMT(elem)
+    //   })
+    //   // $(tbody).prepend(tr)
+    //   tr.addClass('activemt').removeClass('inactivemt').removeClass('temp')
+    //   $('#mt_engine option').removeAttr('selected')
+    //   $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr(
+    //     'selected',
+    //     'selected',
+    //   )
+    //   UI.pulseMTadded($('.activemt').last())
+    // },
+    // deactivateMT: function (el) {
+    //   var tr = $(el).parents('tr')
+    //   $(el).replaceWith('<input type="checkbox" />')
+    //   tr.removeClass('activemt').addClass('inactivemt')
+    //   $('#mt_engine option').removeAttr('selected')
+    //   $('#mt_engine option[value=0]').attr('selected', 'selected')
+    //   const inactiveMtBody = $('.mgmt-mt.inactive-mt tbody')
+    //   inactiveMtBody.prepend(tr)
+    //   UI.pulseMTadded($('.inactivemt').first())
+    // },
+    // openTMActionDropdown: function (switcher) {
+    //   $(switcher).parents('td').find('.dropdown').toggle()
+    // },
+    // closeTMActionDropdown: function (el) {
+    //   $(el).parents('td').find('.wrapper-dropdown-5').click()
+    // },
 
-      const props = {
-        name,
-        provider,
-        data: JSON.stringify(providerData),
-        providerName,
-      }
-
-      addMTEngineApi({
-        name: props.name,
-        provider: props.provider,
-        dataMt: props.data,
-      })
-        .then((response) => {
-          if (
-            response.data.config &&
-            Object.keys(response.data.config).length
-          ) {
-            UI.renderMTConfig(provider, response.name, response.data.config)
-          } else {
-            UI.renderNewMT(props, response.data)
-            if (!APP.isCattool) {
-              UI.activateMT(
-                $(
-                  'table.mgmt-mt tr[data-id=' +
-                    response.data.id +
-                    '] .enable-mt input',
-                ),
-              )
-              $('#mt_engine').append(
-                '<option value="' +
-                  response.data.id +
-                  '">' +
-                  response.data.name +
-                  '</option>',
-              )
-              $('#mt_engine option:selected').removeAttr('selected')
-              $('#mt_engine option[value="' + response.data.id + '"]').attr(
-                'selected',
-                'selected',
-              )
-            }
-            $('#mt_engine_int').val('none').trigger('change')
-            UI.decorateMMTRow && UI.decorateMMTRow()
-          }
-        })
-        .catch((errors) => {
-          if (errors[0].code !== undefined) {
-            $('#mt-provider-details .mt-error-key')
-              .text(errors[0].message)
-              .show()
-          } else {
-            $('#mt-provider-details .mt-error-key')
-              .text('API key not valid')
-              .show()
-          }
-        })
-    },
-    renderNewMT: function (data, serverResponse) {
-      var newTR =
-        '<tr data-id="' +
-        serverResponse.id +
-        '">' +
-        '    <td class="mt-provider">' +
-        serverResponse.name +
-        '</td>' +
-        '    <td class="engine-name">' +
-        data.providerName +
-        '</td>' +
-        '    <td class="enable-mt text-center">' +
-        '        <input type="checkbox" checked />' +
-        '    </td>' +
-        '    <td class="action">' +
-        '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
-        '    </td>' +
-        '</tr>'
-      if (APP.isCattool) {
-        $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR)
-      } else {
-        $('table.mgmt-mt tbody tr.activemt')
-          .removeClass('activemt')
-          .find('.enable-mt input')
-          .click()
-        $('table.mgmt-mt.active-mt tbody').prepend(newTR)
-      }
-    },
-
-    /* codice inserito da Daniele */
-    pulseMTadded: function (row) {
-      setTimeout(function () {
-        $('.activemt').animate({scrollTop: 5000}, 0)
-        row.fadeOut()
-        row.fadeIn()
-      }, 10)
-      setTimeout(function () {
-        $('.activemt').animate({scrollTop: 5000}, 0)
-      }, 1000)
-    },
-    resetMTProviderPanel: function () {
-      if ($('.insert-tm .step2').css('display') == 'block') {
-        $('#add-mt-provider-cancel-int').click()
-        $('.add-mt-engine').click()
-      }
-    },
-    activateMT: function (el) {
-      var tr = $(el).parents('tr')
-      $(el).replaceWith('<input type="checkbox" checked class="temp" />')
-
-      const activeMtBody = $('.mgmt-mt.active-mt tbody')
-      activeMtBody.append(tr)
-      // var tbody = tr.parents('tbody')
-      tr.removeClass('inactivemt')
-      activeMtBody.find('.activemt input[type=checkbox]').each((i, elem) => {
-        UI.deactivateMT(elem)
-      })
-      // $(tbody).prepend(tr)
-      tr.addClass('activemt').removeClass('inactivemt').removeClass('temp')
-      $('#mt_engine option').removeAttr('selected')
-      $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr(
-        'selected',
-        'selected',
-      )
-      UI.pulseMTadded($('.activemt').last())
-    },
-    deactivateMT: function (el) {
-      var tr = $(el).parents('tr')
-      $(el).replaceWith('<input type="checkbox" />')
-      tr.removeClass('activemt').addClass('inactivemt')
-      $('#mt_engine option').removeAttr('selected')
-      $('#mt_engine option[value=0]').attr('selected', 'selected')
-      const inactiveMtBody = $('.mgmt-mt.inactive-mt tbody')
-      inactiveMtBody.prepend(tr)
-      UI.pulseMTadded($('.inactivemt').first())
-    },
-    openTMActionDropdown: function (switcher) {
-      $(switcher).parents('td').find('.dropdown').toggle()
-    },
-    closeTMActionDropdown: function (el) {
-      $(el).parents('td').find('.wrapper-dropdown-5').click()
-    },
-
-    setDropDown: function () {
-      //init dropdown events on every class
-      new UI.DropDown($('.wrapper-dropdown-5'))
-
-      //set control events
-      $('.action').off('mouseleave')
-      $('.action').mouseleave(function () {
-        $('.wrapper-dropdown-5').removeClass('activeMenu')
-      })
-
-      $(document).click(function () {
-        // all dropdowns
-        $('.wrapper-dropdown-5').removeClass('activeMenu')
-      })
-    },
-
-    DropDown: function (el) {
-      this.initEvents = function () {
-        var obj = this
-        var fun = function (event) {
-          $(this).toggleClass('activeMenu')
-          event.preventDefault()
-          if ($(this).hasClass('activeMenu')) {
-            event.stopPropagation()
-          }
-        }
-        obj.dd.off('click')
-        obj.dd.on('click', fun)
-      }
-      this.dd = el
-      this.initEvents()
-    },
-
-    renderMTConfig: function (provider, newEngineName, configData) {
-      if (provider == 'none') {
-        $('.step2 .fields').html('')
-        $('.step2').hide()
-        $('.step3').hide()
-        $('#add-mt-provider-cancel').show()
-      } else {
-        $('.step2 .fields').html(
-          $('#mt-provider-' + provider + '-config-fields').html(),
-        )
-        $('.step3 .text-left').html(
-          $('#mt-provider-' + provider + '-config-msg').html(),
-        )
-        $('.step2').show()
-        $('.step3').show()
-        $('#add-mt-provider-confirm').removeClass('hide')
-      }
-
-      $('#new-engine-name').val(newEngineName)
-
-      // Populate the template fields with given values and store extra data within their data attributes
-      var selectorBase = '.insert-tm .provider-data .provider-field'
-      for (var fieldName in configData) {
-        var field = $(selectorBase + " [data-field-name='" + fieldName + "']")
-        var tagName = field.prop('tagName')
-        if (tagName == 'INPUT') {
-          var fieldContents = configData[fieldName]['value']
-          field.val(fieldContents)
-
-          var fieldData = configData[fieldName]['data']
-          for (var dataKeyField in fieldData) {
-            field.attr('data-' + dataKeyField, fieldData[dataKeyField])
-          }
-        } else if (tagName == 'SELECT') {
-          for (var optionKey in configData[fieldName]) {
-            var optionName = configData[fieldName][optionKey]['value']
-            var option = $(
-              "<option value='" + optionKey + "'>" + optionName + '</option>',
-            )
-
-            var optionData = configData[fieldName][optionKey]['data']
-            for (var dataKey in optionData) {
-              option.attr('data-' + dataKey, optionData[dataKey])
-            }
-
-            field.append(option)
-          }
-        }
-      }
-
-      // notify the template's javascript that the template has been populated
-      if (typeof renderMTConfigCallback == 'function') {
-        renderMTConfigCallback()
-      }
-    },
+    // setDropDown: function () {
+    //   //init dropdown events on every class
+    //   new UI.DropDown($('.wrapper-dropdown-5'))
+    //
+    //   //set control events
+    //   $('.action').off('mouseleave')
+    //   $('.action').mouseleave(function () {
+    //     $('.wrapper-dropdown-5').removeClass('activeMenu')
+    //   })
+    //
+    //   $(document).click(function () {
+    //     // all dropdowns
+    //     $('.wrapper-dropdown-5').removeClass('activeMenu')
+    //   })
+    // },
+    //
+    // DropDown: function (el) {
+    //   this.initEvents = function () {
+    //     var obj = this
+    //     var fun = function (event) {
+    //       $(this).toggleClass('activeMenu')
+    //       event.preventDefault()
+    //       if ($(this).hasClass('activeMenu')) {
+    //         event.stopPropagation()
+    //       }
+    //     }
+    //     obj.dd.off('click')
+    //     obj.dd.on('click', fun)
+    //   }
+    //   this.dd = el
+    //   this.initEvents()
+    // },
+    //
+    // renderMTConfig: function (provider, newEngineName, configData) {
+    //   if (provider == 'none') {
+    //     $('.step2 .fields').html('')
+    //     $('.step2').hide()
+    //     $('.step3').hide()
+    //     $('#add-mt-provider-cancel').show()
+    //   } else {
+    //     $('.step2 .fields').html(
+    //       $('#mt-provider-' + provider + '-config-fields').html(),
+    //     )
+    //     $('.step3 .text-left').html(
+    //       $('#mt-provider-' + provider + '-config-msg').html(),
+    //     )
+    //     $('.step2').show()
+    //     $('.step3').show()
+    //     $('#add-mt-provider-confirm').removeClass('hide')
+    //   }
+    //
+    //   $('#new-engine-name').val(newEngineName)
+    //
+    //   // Populate the template fields with given values and store extra data within their data attributes
+    //   var selectorBase = '.insert-tm .provider-data .provider-field'
+    //   for (var fieldName in configData) {
+    //     var field = $(selectorBase + " [data-field-name='" + fieldName + "']")
+    //     var tagName = field.prop('tagName')
+    //     if (tagName == 'INPUT') {
+    //       var fieldContents = configData[fieldName]['value']
+    //       field.val(fieldContents)
+    //
+    //       var fieldData = configData[fieldName]['data']
+    //       for (var dataKeyField in fieldData) {
+    //         field.attr('data-' + dataKeyField, fieldData[dataKeyField])
+    //       }
+    //     } else if (tagName == 'SELECT') {
+    //       for (var optionKey in configData[fieldName]) {
+    //         var optionName = configData[fieldName][optionKey]['value']
+    //         var option = $(
+    //           "<option value='" + optionKey + "'>" + optionName + '</option>',
+    //         )
+    //
+    //         var optionData = configData[fieldName][optionKey]['data']
+    //         for (var dataKey in optionData) {
+    //           option.attr('data-' + dataKey, optionData[dataKey])
+    //         }
+    //
+    //         field.append(option)
+    //       }
+    //     }
+    //   }
+    //
+    //   // notify the template's javascript that the template has been populated
+    //   if (typeof renderMTConfigCallback == 'function') {
+    //     renderMTConfigCallback()
+    //   }
+    // },
 
     openAddNewTm: function () {
       UI.removeErrorOnKeyInput()

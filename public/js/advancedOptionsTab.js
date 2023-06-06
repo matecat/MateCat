@@ -68,7 +68,9 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
         UI.setLanguageTooltipLXQ()
       }
       //Check Tag Projection
-      if (SegmentUtils.checkTpCanActivate()) {
+      if (
+        SegmentUtils.checkTpCanActivate(config.source_rfc, config.target_rfc)
+      ) {
         SegmentUtils.checkTPEnabled()
           ? tagProjectionCheck.attr('checked', true)
           : tagProjectionCheck.attr('checked', false)

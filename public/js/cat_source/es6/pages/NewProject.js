@@ -28,6 +28,7 @@ import {
   SettingsPanel,
 } from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
+import SegmentUtils from '../utils/segmentUtils'
 
 const SELECT_HEIGHT = 324
 
@@ -71,8 +72,12 @@ const NewProject = ({
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
   const [isOpenSettings, setIsOpenSettings] = useState(false)
-  const [speechToTextActive, setSpeechToTextActive] = useState(false)
-  const [guessTagActive, setGuessTagActive] = useState(false)
+  const [speechToTextActive, setSpeechToTextActive] = useState(
+    config.defaults.speech2text,
+  )
+  const [guessTagActive, setGuessTagActive] = useState(
+    !!config.defaults.tag_projection,
+  )
 
   const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
@@ -99,7 +104,6 @@ const NewProject = ({
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
     APP.sourceLangChangedCallback()
-    APP.checkForTagProjectionLangs(sourceLang)
   }
 
   const getTmKeys = () => {
@@ -194,14 +198,18 @@ const NewProject = ({
       APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
     }
     APP.checkForLexiQALangs(sourceLang)
-    APP.checkForTagProjectionLangs(sourceLang)
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
     APP.checkForDqf()
     APP.checkGDriveEvents()
     UI.addEvents()
-
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
     const updateUser = (user) => {
       setUser(user)
       setSelectedTeam(
@@ -508,7 +516,10 @@ const NewProject = ({
           activeMTEngine={activeMTEngine}
           setActiveMTEngine={setActiveMTEngine}
           setSpeechToTextActive={setSpeechToTextActive}
+          guessTagActive={guessTagActive}
           setGuessTagActive={setGuessTagActive}
+          sourceLang={sourceLang}
+          targetLangs={targetLangs}
         />
       )}
       <Footer />
@@ -522,7 +533,7 @@ NewProject.propTypes = {
   targetLanguagesSelected: PropTypes.string,
   subjectsArray: PropTypes.array,
   conversionEnabled: PropTypes.bool,
-  formatsNumber: PropTypes.string,
+  formatsNumber: PropTypes.number,
   googleDriveEnabled: PropTypes.bool,
 }
 export default NewProject

@@ -23,6 +23,7 @@ import {
   SettingsPanel,
 } from '../components/settingsPanel'
 import Speech2TextFeature from '../utils/speech2text'
+import SegmentUtils from '../utils/segmentUtils'
 
 function CatTool() {
   const [options, setOptions] = useState({})
@@ -32,7 +33,9 @@ function CatTool() {
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
-  const [guessTagActive, setGuessTagActive] = useState(false)
+  const [guessTagActive, setGuessTagActive] = useState(
+    SegmentUtils.checkTPEnabled(),
+  )
   const [speechToTextActive, setSpeechToTextActive] = useState(
     Speech2TextFeature.enabled(),
   )
@@ -316,8 +319,19 @@ function CatTool() {
           setMtEngines={setMtEngines}
           activeMTEngine={activeMTEngine}
           setActiveMTEngine={setActiveMTEngine}
+          guessTagActive={guessTagActive}
           setGuessTagActive={setGuessTagActive}
           setSpeechToTextActive={setSpeechToTextActive}
+          sourceLang={{
+            name: CommonUtils.getLanguageNameFromLocale(config.source_rfc),
+            code: config.source_rfc,
+          }}
+          targetLangs={[
+            {
+              name: CommonUtils.getLanguageNameFromLocale(config.target_rfc),
+              code: config.target_rfc,
+            },
+          ]}
         />
       )}
       <CattolFooter

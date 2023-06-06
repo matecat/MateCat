@@ -1,39 +1,99 @@
 import Switch from '../../../common/Switch'
-import React, {useState} from 'react'
-import PropTypes from 'prop-types'
+import React, {useEffect, useState} from 'react'
+import PropTypes, {object} from 'prop-types'
 
-export const GuessTag = ({setGuessTagActive = () => {}}) => {
-  const [active, setActive] = useState(false)
-  const disabled = false
+export const GuessTag = ({
+  guessTagActive,
+  setGuessTagActive,
+  sourceLang,
+  targetLangs,
+}) => {
+  const [disabled, setDisable] = useState(false)
+  const [notSupportedLangs, setNotSupportedLangs] = useState([])
+  const onChange = (selected) => {
+    console.log('@@@@@guessTagActive', guessTagActive)
+    setGuessTagActive(selected)
+  }
+  useEffect(() => {
+    const acceptedLanguages = config.tag_projection_languages
+    const sourceLanguageCode = sourceLang.code
+    const sourceLanguageText = sourceLang.name
+    let languageCombinations = []
+    let notSupportedCouples = []
 
+    targetLangs.forEach(function (target) {
+      var elem = {}
+      elem.targetCode = target.code
+      elem.sourceCode = sourceLanguageCode
+      elem.targetName = target.name
+      elem.sourceName = sourceLanguageText
+      languageCombinations.push(elem)
+    })
+    //Intersection between the combination of choosen languages and the supported
+    const arrayIntersection = languageCombinations.filter(function (n) {
+      const elemST =
+        n.sourceCode.split('-')[0] + '-' + n.targetCode.split('-')[0]
+      const elemTS =
+        n.targetCode.split('-')[0] + '-' + n.sourceCode.split('-')[0]
+      if (
+        typeof acceptedLanguages[elemST] == 'undefined' &&
+        typeof acceptedLanguages[elemTS] == 'undefined'
+      ) {
+        notSupportedCouples.push(n.sourceName + ' - ' + n.targetName)
+      }
+      return (
+        typeof acceptedLanguages[elemST] !== 'undefined' ||
+        typeof acceptedLanguages[elemTS] !== 'undefined'
+      )
+    })
+
+    if (notSupportedCouples.length > 0) {
+      setNotSupportedLangs(notSupportedCouples)
+    }
+    //disable Tag Projection
+    if (arrayIntersection.length == 0) {
+      setGuessTagActive(false)
+      setDisable(true)
+    }
+  }, [sourceLang, targetLangs])
   return (
     <div className="options-box tagp">
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
       <h3>Guess tag position</h3>
       <p>
-        <span className="option-tagp-languages">
-          Not available for:
-          <span className="option-notsupported-languages"></span>.
-          <br />
-        </span>
-        <span className="option-tagp-revise">
-          Not available in revise mode.
-          <br />
-        </span>
+        {notSupportedLangs.length && (
+          <span className="option-tagp-languages">
+            Not available for:
+            <span className="option-notsupported-languages">
+              {notSupportedLangs.join(', ')}
+            </span>
+            .
+            <br />
+          </span>
+        )}
+        {config.isReview && (
+          <span className="option-tagp-revise">
+            Not available in revise mode.
+            <br />
+          </span>
+        )}
         Enable this functionality to let Matecat automatically place the tags
         where they belong.
         <a
           className="tooltip-guess-tags"
-          href="https://site.matecat.com/support/translating-projects/guess-tag-position/#gtp_lang"
+          href="https://guides.matecat.com/guess-tag-position"
           target="_blank"
         >
           Supported languages
         </a>
       </p>
-      <Switch onChange={active} active={active} disabled={disabled} />
+      <Switch onChange={onChange} active={guessTagActive} disabled={disabled} />
     </div>
   )
 }
 GuessTag.propTypes = {
   setGuessTagActive: PropTypes.func,
+  guessTagActive: PropTypes.bool,
+  sourceLang: PropTypes.object,
+  targetLangs: PropTypes.array,
 }

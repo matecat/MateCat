@@ -73,3 +73,12 @@
   height: 30px;
   font-size: 16px;
 }
+
+.options-box p span.option-notsupported-languages,
+.options-box p span.option-tagp-revise,
+.options-box p span.option-qa-box-languages,
+.options-box p span.option-tagp-languages {
+  line-height: 25px;
+  font-weight: bold;
+  margin-left: 6px;
+}
