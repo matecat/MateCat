@@ -82,10 +82,16 @@ export const TranslationMemoryGlossaryTab = () => {
   useEffect(() => {
     if (!tmKeys) return
 
-    const onExpandRow = ({row, shouldExpand}) =>
+    const onExpandRow = ({row, shouldExpand, content}) =>
       setKeyRows((prevState) =>
         prevState.map((item) =>
-          item.id === row.id ? {...item, isExpanded: shouldExpand} : item,
+          item.id === row.id
+            ? {
+                ...item,
+                isExpanded: shouldExpand,
+                ...(shouldExpand && {extraNode: content}),
+              }
+            : item,
         ),
       )
 
@@ -130,7 +136,7 @@ export const TranslationMemoryGlossaryTab = () => {
       return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
         const {id, name, isActive, isLocked} = row
-        const {isExpanded} = prevStateRow
+        const {isExpanded, extraNode} = prevStateRow
 
         const isCreateResourceRow =
           id === SPECIAL_ROWS_ID.addSharedResource ||
@@ -156,7 +162,7 @@ export const TranslationMemoryGlossaryTab = () => {
           ) : (
             <TMCreateResourceRow key={row.id} {...{row, setSpecialRows}} />
           ),
-          ...(!isCreateResourceRow && {extraNode: <h1>We wewewe</h1>}),
+          ...(extraNode && {extraNode}),
         }
       })
     })

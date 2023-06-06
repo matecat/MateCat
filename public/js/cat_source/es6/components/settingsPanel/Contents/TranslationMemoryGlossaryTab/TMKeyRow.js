@@ -4,6 +4,12 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
+import {ImportTMX} from './ImportTMX'
+import {ImportGlossary} from './ImportGlossary'
+import {ExportTMX} from './ExportTMX'
+import {ExportGlossary} from './ExportGlossary'
+import {ShareResource} from './ShareResource'
+import {DeleteResource} from './DeleteResource'
 
 import Earth from '../../../../../../../img/icons/Earth'
 import Lock from '../../../../../../../img/icons/Lock'
@@ -98,6 +104,14 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
         icon: <Users size={16} />,
       }
 
+  const handleExpandeRow = (Component) => {
+    onExpandRow({
+      row,
+      shouldExpand: true,
+      content: <Component {...{row}} />,
+    })
+  }
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
@@ -131,32 +145,38 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
         <div className="align-center">
           <MenuButton
             label="Import TMX"
-            onClick={() => onExpandRow({row, shouldExpand: true})}
+            onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
             itemsTarget={wrapperRef.current}
           >
-            <MenuButtonItem>
+            <MenuButtonItem
+              onMouseDown={() => handleExpandeRow(ImportGlossary)}
+            >
               <div className="tm-key-row-button-item">
                 <Upload size={20} /> Import Glossary
               </div>
             </MenuButtonItem>
-            <MenuButtonItem>
+            <MenuButtonItem onMouseDown={() => handleExpandeRow(ExportTMX)}>
               <div className="tm-key-row-button-item">
                 <Download size={20} /> Export TMX
               </div>
             </MenuButtonItem>
-            <MenuButtonItem>
+            <MenuButtonItem
+              onMouseDown={() => handleExpandeRow(ExportGlossary)}
+            >
               <div className="tm-key-row-button-item">
                 <Download size={20} /> Export Glossary
               </div>
             </MenuButtonItem>
-            <MenuButtonItem>
+            <MenuButtonItem onMouseDown={() => handleExpandeRow(ShareResource)}>
               <div className="tm-key-row-button-item">
                 <Share size={20} /> Share resource
               </div>
             </MenuButtonItem>
-            <MenuButtonItem>
+            <MenuButtonItem
+              onMouseDown={() => handleExpandeRow(DeleteResource)}
+            >
               <div className="tm-key-row-button-item">
                 <Trash size={20} /> Delete resource
               </div>
