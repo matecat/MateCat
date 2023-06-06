@@ -91,8 +91,17 @@
 
 .tm-key-row-menu-button {
   .menu-button-wrapper {
+    gap: 8px;
+
     > :first-child {
       min-width: 140px;
+      border-radius: 2px;
+    }
+
+    > :last-child {
+      border: none;
+      background-color: unset;
+      color: $grey6;
     }
   }
 }

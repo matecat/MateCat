@@ -12,6 +12,7 @@ import Upload from '../../../../../../../img/icons/Upload'
 import Download from '../../../../../../../img/icons/Download'
 import Share from '../../../../../../../img/icons/Share'
 import Trash from '../../../../../../../img/icons/Trash'
+import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
 export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
   const {tmKeys, setTmKeys, wrapperRef} = useContext(SettingsPanelContext)
@@ -131,6 +132,7 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
           <MenuButton
             label="Import TMX"
             onClick={() => onExpandRow({row, shouldExpand: true})}
+            icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
             itemsTarget={wrapperRef.current}
           >

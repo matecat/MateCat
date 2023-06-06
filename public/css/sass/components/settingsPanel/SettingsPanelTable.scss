@@ -125,13 +125,13 @@
 
 .settings-panel-row-extra-content {
   visibility: hidden;
-  height: 0px;
+  max-height: 0px;
   border-top: 1px solid #e1e1e1;
   box-shadow: inset 0px 2px 5px 0px #e4e4e4;
-  transition: height ease-in-out 0.3s;
+  transition: max-height ease-in-out 0.3s;
 }
 
 .settings-panel-row-extra-content-expanded {
   visibility: visible;
-  height: 100px;
+  max-height: 300px;
 }

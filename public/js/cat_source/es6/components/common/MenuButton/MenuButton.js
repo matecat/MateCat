@@ -7,6 +7,7 @@ import ArrowDown from '../../../../../../img/icons/ArrowDown'
 export const MenuButton = ({
   label,
   onClick,
+  icon = <ArrowDown />,
   className = '',
   itemsTarget,
   children,
@@ -23,25 +24,29 @@ export const MenuButton = ({
     return () => document.removeEventListener('mouseup', handler)
   }, [])
 
-  const onShowingItems = () => {
+  const onShowingItems = (e) => {
     const rect = ref.current.getBoundingClientRect()
     const difference = itemsTarget
       ? itemsTarget.getBoundingClientRect().left
       : 0
 
-    setItemsCoords({
-      left: rect.left - difference,
-      top: rect.y + rect.height,
-    })
+    setItemsCoords(
+      !itemsCoords
+        ? {
+            left: rect.left - difference,
+            top: rect.y + rect.height,
+          }
+        : undefined,
+    )
+
+    e.stopPropagation()
   }
 
   return (
     <div className={`menu-button ${className}`}>
       <div ref={ref} className="menu-button-wrapper">
         <button onClick={onClick}>{label}</button>
-        <button onClick={onShowingItems}>
-          <ArrowDown />
-        </button>
+        <button onMouseUp={onShowingItems}>{icon}</button>
       </div>
       {itemsCoords && (
         <ItemsPortal>
@@ -68,6 +73,7 @@ const MenuButtonItemType = PropTypes.shape({
 MenuButton.propTypes = {
   label: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
+  icon: PropTypes.node,
   className: PropTypes.string,
   itemsTarget: PropTypes.object,
   children: PropTypes.arrayOf(MenuButtonItemType),
