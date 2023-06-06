@@ -216,3 +216,4 @@ export const MachineTranslationTab = () => {
     </div>
   )
 }
+MachineTranslationTab.propTypes = {}

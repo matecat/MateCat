@@ -1,13 +1,17 @@
-import React, {useState} from 'react'
+import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
 import {SpeechToText} from './SpeechToText'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
+import PropTypes from 'prop-types'
+import {SettingsPanel} from '../../SettingsPanel'
 
 export const AdvancedOptionsTab = () => {
+  const {setSpeechToTextActive} = useContext(SettingsPanelContext)
   return (
     <div className="advanced-options-box">
       {/*<h2>Advanced Options</h2>*/}
 
-      <SpeechToText />
+      <SpeechToText setSpeechToTextActive={setSpeechToTextActive} />
 
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
       <div className="options-box tagp">
@@ -132,3 +136,4 @@ export const AdvancedOptionsTab = () => {
     </div>
   )
 }
+AdvancedOptionsTab.propTypes = {}

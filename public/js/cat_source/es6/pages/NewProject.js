@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react'
+import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
@@ -70,6 +71,7 @@ const NewProject = ({
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
   const [isOpenSettings, setIsOpenSettings] = useState(false)
+  const [speechToTextActive, setSpeechToTextActive] = useState(false)
 
   const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
@@ -114,8 +116,6 @@ const NewProject = ({
   const getMTEngines = () => {
     if (config.isLoggedIn) {
       getMtEnginesApi().then((mtEngines) => {
-        console.log('MT ENGINES', mtEngines)
-        //TODO: if internal user active is MMT
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
         if (config.isAnInternalUser) {
@@ -144,6 +144,7 @@ const NewProject = ({
           jobSubject: subject.id,
           selectedTeam: selectedTeam ? selectedTeam.id : undefined,
           activeMT: activeMTEngine.id,
+          speech2text: speechToTextActive,
         }),
       )
         .then(({data}) => {
@@ -302,6 +303,7 @@ const NewProject = ({
         setIsOpenMultiselectLanguages,
         sourceLang,
         changeSourceLanguage,
+        speechToTextActive,
       }}
     >
       <HeaderPortal>
@@ -504,11 +506,21 @@ const NewProject = ({
           setMtEngines={setMtEngines}
           activeMTEngine={activeMTEngine}
           setActiveMTEngine={setActiveMTEngine}
+          setSpeechToTextActive={setSpeechToTextActive}
         />
       )}
       <Footer />
     </CreateProjectContext.Provider>
   )
 }
-
+NewProject.propTypes = {
+  isLoggedIn: PropTypes.bool,
+  languages: PropTypes.array,
+  sourceLanguageSelected: PropTypes.string,
+  targetLanguagesSelected: PropTypes.string,
+  subjectsArray: PropTypes.array,
+  conversionEnabled: PropTypes.bool,
+  formatsNumber: PropTypes.string,
+  googleDriveEnabled: PropTypes.bool,
+}
 export default NewProject

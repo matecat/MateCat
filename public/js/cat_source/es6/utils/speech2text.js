@@ -109,7 +109,6 @@ Speech2Text.init = function () {
         if (Speech2Text.shouldEmptyTargetElement(segment)) {
           Speech2Text.finalTranscript = ''
           SegmentActions.replaceEditAreaTextContent(Speech2Text.sid, '')
-          // Speech2Text.targetElement.html('');
         } else {
           Speech2Text.finalTranscript = segment.translation + ' '
         }

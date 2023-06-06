@@ -219,6 +219,7 @@ APP.getCreateProjectParams = function ({
   jobSubject,
   selectedTeam,
   activeMT,
+  speech2text,
 }) {
   var dqf = APP.getDQFParameters()
   return {
@@ -235,9 +236,7 @@ APP.getCreateProjectParams = function ({
     lexiqa: !!(
       $('#lexi_qa').prop('checked') && !$('#lexi_qa').prop('disabled')
     ),
-    speech2text: !!(
-      $('#s2t_check').prop('checked') && !$('#s2t_check').prop('disabled')
-    ),
+    speech2text,
     tag_projection: !!(
       $('#tagp_check').prop('checked') && !$('#tagp_check').prop('disabled')
     ),

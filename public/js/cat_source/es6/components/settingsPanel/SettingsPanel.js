@@ -39,6 +39,7 @@ export const SettingsPanel = ({
   setMtEngines,
   activeMTEngine,
   setActiveMTEngine,
+  setSpeechToTextActive,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
@@ -80,6 +81,7 @@ export const SettingsPanel = ({
         setActiveMTEngine,
         openLoginModal,
         wrapperRef,
+        setSpeechToTextActive,
       }}
     >
       <div className="settings-panel">

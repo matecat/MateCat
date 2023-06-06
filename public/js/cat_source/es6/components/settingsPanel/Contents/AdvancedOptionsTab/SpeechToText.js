@@ -4,8 +4,9 @@ import ModalsActions from '../../../../actions/ModalsActions'
 import Speech2TextFeature from '../../../../utils/speech2text'
 
 import AlertModal from '../../../modals/AlertModal'
+import PropTypes from 'prop-types'
 
-export const SpeechToText = () => {
+export const SpeechToText = ({setSpeechToTextActive = () => {}}) => {
   const isCattool = config.is_cattool
   const [dictationOption, setDictationOption] = useState(() => {
     if (isCattool) {
@@ -33,9 +34,11 @@ export const SpeechToText = () => {
     if (selected) {
       isCattool && Speech2TextFeature.enable()
       setDictationOption(true)
+      setSpeechToTextActive(true)
     } else {
       isCattool && Speech2TextFeature.disable()
       setDictationOption(false)
+      setSpeechToTextActive(false)
     }
   }
   return (
@@ -56,4 +59,8 @@ export const SpeechToText = () => {
       />
     </div>
   )
+}
+
+SpeechToText.propTypes = {
+  setSpeechToTextActive: PropTypes.func,
 }
