@@ -40,6 +40,7 @@ use TaskRunner\Commons\QueueElement;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
+use TMS\TMSFile;
 use Users\MetadataDao;
 use Users_UserDao;
 use Users_UserStruct;
@@ -507,15 +508,14 @@ class Mmt extends BaseFeature {
 
     /**
      *
-     * @param stdClass $file
+     * @param TMSFile $file
      * @param          $user
-     * @param          $tm_key
      *
      * Called in @see \ProjectManager::_pushTMXToMyMemory()
      * Called in @see \loadTMXController::doAction()
      *
      */
-    public function postPushTMX( stdClass $file, $user, $tm_key ) {
+    public function postPushTMX( TMSFile $file, $user ) {
 
         //Project is not anonymous
         if ( !empty( $user ) ) {
@@ -546,9 +546,9 @@ class Mmt extends BaseFeature {
                     $associatedMemories = $MMTEngine->getAllMemories();
                     foreach ( $associatedMemories as $memory ) {
 
-                        if ( 'x_mm-' . trim( $tm_key ) === $memory[ 'externalId' ] ) {
-                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
-                            $result   = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
+                        if ( 'x_mm-' . trim( $file->getTmKey() ) === $memory[ 'externalId' ] ) {
+                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->getFilePath(), PATHINFO_FILENAME );
+                            $result   = $MMTEngine->import( $file->getFilePath(), $file->getTmKey(), $fileName );
 
                             if ( $result->responseStatus >= 400 ) {
                                 throw new Exception( $result->error->message );

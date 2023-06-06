@@ -17,6 +17,7 @@ use Projects_ProjectStruct;
 use Segments_SegmentDao;
 use Segments_SegmentMetadataDao;
 use Exceptions\NotFoundException;
+use Segments_SegmentNoteDao;
 use Url\JobUrlStruct;
 
 class SegmentAnalysisController extends KleinController {
@@ -185,9 +186,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (NotFoundException $exception) {
             $this->response->code( 500 );
             $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
             ] );
             exit();
         }
@@ -200,9 +201,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
             ] );
         }
     }
@@ -231,15 +232,15 @@ class SegmentAnalysisController extends KleinController {
         $items = $this->getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage);
 
         return [
-                '_links' => [
-                        'page' => $page,
-                        'per_page' => $perPage,
-                        'total_pages' => $totalPages,
-                        'total_items' => $segmentsCount,
-                        'next_page' => $next,
-                        'prev_page' => $prev,
-                ],
-                'items' => $items
+            '_links' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => $totalPages,
+                'total_items' => $segmentsCount,
+                'next_page' => $next,
+                'prev_page' => $prev,
+            ],
+            'items' => $items
         ];
     }
 
@@ -296,8 +297,15 @@ class SegmentAnalysisController extends KleinController {
             $notesAggregate[$notesRecord->id_segment][] = $notesRecord->note;
         }
 
-        foreach ($issuesRecords as $issuesRecord){
-            $issuesAggregate[$issuesRecord->id_segment][] = $issuesRecord;
+        foreach ( $issuesRecords as $issuesRecord ) {
+            $issuesAggregate[$issuesRecord->id_segment][] = [
+                'source_page'         => $this->humanReadableSourcePage($issuesRecord->source_page),
+                'id_category'         => (int)$issuesRecord->id_category,
+                'severity'            => $issuesRecord->severity,
+                'translation_version' => (int)$issuesRecord->translation_version,
+                'penalty_points'      => floatval($issuesRecord->penalty_points),
+                'created_at'          => date( DATE_ISO8601, strtotime( $issuesRecord->create_date ) ),
+            ];
         }
 
         foreach ($idRequestRecords as $idRequestRecord){

@@ -188,6 +188,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                 <tr>
                     <th width="40%">Office</th>
                     <th width="15%">Web</th>
+                    <th width="15%">Scanned Files</th>
                     <th width="15%">Interchange Formats</th>
                     <th width="15%">Desktop Publishing</th>
                     <th width="15%">Localization</th>
@@ -198,6 +199,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                     <td>
                         <ul class="office">
                             <li><span class="extdoc">doc</span></li>
+                            <li><span class="extdoc">pages</span></li>
                             <li><span class="extdoc">dot</span></li>
                             <li><span class="extdoc">docx</span></li>
                             <li><span class="extdoc">dotx</span></li>
@@ -205,28 +207,33 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                             <li><span class="extdoc">dotm</span></li>
                             <li><span class="extdoc">rtf</span></li>
                             <li><span class="extdoc">odt</span></li>
-                            <li><span class="extdoc">sxw</span></li>
-                            <li><span class="exttxt">txt</span></li>
+                            <li><span class="extdoc">ott</span></li>
                             <li><span class="extpdf">pdf</span></li>
+                            <li><span class="extxls">numbers</span></li>
+                            <li><span class="exttxt">txt</span></li>
                             <li><span class="extxls">xls</span></li>
                             <li><span class="extxls">xlt</span></li>
                             <li><span class="extxls">xlsm</span></li>
                             <li><span class="extxls">xlsx</span></li>
                             <li><span class="extxls">xltx</span></li>
+                            <li><span class="extxls">xltm</span></li>
                             <li><span class="extxls">ods</span></li>
-                            <li><span class="extxls">sxc</span></li>
-                            <li><span class="extxls">csv</span></li>
-                            <li><span class="extppt">pot</span></li>
-                            <li><span class="extppt">pps</span></li>
+                            <li><span class="extxls">ots</span></li>
+                            <li><span class="extxls">tsv</span></li>
+                            <li><span class="extppt">key</span></li>
                             <li><span class="extppt">ppt</span></li>
-                            <li><span class="extppt">potm</span></li>
-                            <li><span class="extppt">potx</span></li>
-                            <li><span class="extppt">ppsm</span></li>
-                            <li><span class="extppt">ppsx</span></li>
-                            <li><span class="extppt">pptm</span></li>
+                            <li><span class="extppt">pps</span></li>
+                            <li><span class="extppt">pot</span></li>
                             <li><span class="extppt">pptx</span></li>
+                            <li><span class="extppt">pptm</span></li>
+                            <li><span class="extppt">ppsx</span></li>
+                            <li><span class="extppt">ppsm</span></li>
+                            <li><span class="extppt">potx</span></li>
+                            <li><span class="extppt">potm</span></li>
                             <li><span class="extppt">odp</span></li>
-                            <li><span class="extppt">sxi</span></li>
+                            <li><span class="extppt">otp</span></li>
+                            <li><span class="extxml">xml</span></li>
+                            <li><span class="extzip">zip</span></li>
                         </ul>
                     </td>
                     <td>
@@ -235,6 +242,25 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                             <li><span class="exthtm">html</span></li>
                             <li><span class="exthtm">xhtml</span></li>
                             <li><span class="extxml">xml</span></li>
+                            <li><span class="extxml">dtd</span></li>
+                            <li><span class="extxml">json</span></li>
+                            <li><span class="extxml">jsont</span></li>
+                            <li><span class="extxml">jsont2</span></li>
+                            <li><span class="extxml">yaml</span></li>
+                            <li><span class="extxml">yml</span></li>
+                            <li><span class="extxml">md</span></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li><span class="extpdf">pdf</span></li>
+                            <li><span class="extimg">bmp</span></li>
+                            <li><span class="extimg">png</span></li>
+                            <li><span class="extimg">gif</span></li>
+                            <li><span class="extimg">jpeg</span></li>
+                            <li><span class="extimg">jpg</span></li>
+                            <li><span class="extimg">jfif</span></li>
+                            <li><span class="extimg">tiff</span></li>
                         </ul>
                     </td>
                     <td>
@@ -250,11 +276,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                     <td>
                         <ul>
                             <li><span class="extmif">mif</span></li>
-                            <li><span class="extidd">inx</span></li>
                             <li><span class="extidd">idml</span></li>
                             <li><span class="extidd">icml</span></li>
-                            <li><span class="extqxp">xtg</span></li>
-                            <li><span class="exttag">tag</span></li>
                             <li><span class="extxml">xml</span></li>
                             <li><span class="extdit">dita</span></li>
                         </ul>
@@ -262,14 +285,20 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                     <td>
                         <ul>
                             <li><span class="extpro">properties</span></li>
-                            <li><span class="extrcc">rc</span></li>
                             <li><span class="extres">resx</span></li>
                             <li><span class="extxml">xml</span></li>
+                            <li><span class="extxml">sxml</span></li>
+                            <li><span class="extxml">txml</span></li>
                             <li><span class="extdit">dita</span></li>
-                            <li><span class="extsgl">sgml</span></li>
-                            <li><span class="extsgm">sgm</span></li>
                             <li><span class="extxml">Android xml</span></li>
                             <li><span class="extstr">strings</span></li>
+                            <li><span class="extsbv">sbv</span></li>
+                            <li><span class="extsrt">srt</span></li>
+                            <li><span class="extvtt">vtt</span></li>
+                            <li><span class="extwix">wix</span></li>
+                            <li><span class="extpo">po</span></li>
+                            <li><span class="extg">g</span></li>
+                            <li><span class="exts">QT linguist ts</span></li>
                         </ul>
                     </td>
                 </tr>

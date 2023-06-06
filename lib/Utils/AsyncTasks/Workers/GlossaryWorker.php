@@ -45,8 +45,6 @@ class GlossaryWorker extends AbstractWorker {
             self::UPDATE_ACTION,
         ];
 
-        // @TODO add always "de"="tmanalysis_655321@matecat.com" when call MM
-
         if ( false === in_array( $action, $allowedActions ) ) {
             throw new EndQueueException( $action . ' is not an allowed action. ' );
         }
@@ -80,10 +78,10 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
             $this->setResponsePayload(
-            'glossary_check',
+                'glossary_check',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                    $matches
+                $matches
             )
         );
     }
@@ -104,8 +102,8 @@ class GlossaryWorker extends AbstractWorker {
         $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload' => null,
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
         if($response->responseStatus != 200){
@@ -120,9 +118,9 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $message['error'] = [
-                    'code' => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
@@ -131,12 +129,12 @@ class GlossaryWorker extends AbstractWorker {
         }
 
         $this->publishMessage(
-                $this->setResponsePayload(
-                        'glossary_delete',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_delete',
+                $payload[ 'id_client' ],
+                $payload[ 'jobData' ],
+                $message
+            )
         );
     }
 
@@ -195,20 +193,7 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
 
-        if( !is_array($matches) ){
-            throw new EndQueueException( "Invalid response from Glossary (not an array)" );
-        }
-
-        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
-            $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
-            $matches['id_segment'] = $id_segment;
-        }
-
-        if ( empty( $matches ) ) {
-            throw new EndQueueException( "Empty response from Glossary" );
-        }
-
-        $matches = $this->formatGetGlossaryMatches($matches, $payload['tmKeys']);
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishMessage(
             $this->setResponsePayload(
@@ -236,7 +221,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $this->publishMessage(
             $this->setResponsePayload(
-        'glossary_keys',
+                'glossary_keys',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
                 [
@@ -266,30 +251,42 @@ class GlossaryWorker extends AbstractWorker {
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
-
-        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
-            $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
-            $matches['id_segment'] = $id_segment;
-        }
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishMessage(
             $this->setResponsePayload(
                 'glossary_search',
                 $payload[ 'id_client' ],
                 $payload[ 'jobData' ],
-                $this->formatGetGlossaryMatches($matches, $payload['tmKeys'])
+                $matches
             )
         );
     }
 
     /**
-     * @param array $matches
-     * @param array $tmKeys
+     * @param $matches
+     * @param $payload
      *
      * @return array
+     * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches(array $matches, $tmKeys)
+    private function formatGetGlossaryMatches($matches, $payload)
     {
+        $tmKeys = $payload['tmKeys'];
+
+        if( !is_array($matches) ){
+            $this->_doLog("Invalid response received from Glossary (not an array). This is the payload that was sent: ".json_encode($payload).". Got back from MM: " . $matches);
+            throw new EndQueueException( "Invalid response received from Glossary (not an array)" );
+        }
+
+        if ( empty( $matches ) ) {
+            throw new EndQueueException( "Empty response received from Glossary" );
+        }
+
+        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
+            $matches['id_segment'] = isset($payload['id_segment']) ? $payload['id_segment'] : null;
+        }
+
         $key = $matches['terms']['metadata']['key'];
 
         foreach ($tmKeys as $index => $tmKey){
@@ -416,9 +413,9 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $message['error'] = [
-                    'code' => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
@@ -470,25 +467,6 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * @param $_object
-     *
-     * @throws \StompException
-     */
-    private function publishMessage( $_object ) {
-
-        $message = json_encode( $_object );
-
-        $stomp = new Stomp( \INIT::$QUEUE_BROKER_ADDRESS );
-        $stomp->connect();
-        $stomp->send( \INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-                $message,
-                [ 'persistent' => 'false' ]
-        );
-
-        $this->_doLog( $message );
-    }
-
-    /**
      * @param $featuresString
      *
      * @return \FeatureSet
@@ -521,10 +499,10 @@ class GlossaryWorker extends AbstractWorker {
      */
     private function getUser( $array ) {
         return new \Users_UserStruct( [
-                'uid'         => $array[ 'uid' ],
-                'email'       => $array[ 'email' ],
-                '$first_name' => $array[ 'first_name' ],
-                'last_name'   => $array[ 'last_name' ],
+            'uid'         => $array[ 'uid' ],
+            'email'       => $array[ 'email' ],
+            '$first_name' => $array[ 'first_name' ],
+            'last_name'   => $array[ 'last_name' ],
         ] );
     }
 

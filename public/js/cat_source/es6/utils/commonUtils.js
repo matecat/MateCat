@@ -534,6 +534,9 @@ const CommonUtils = {
   parseFiles: (files) => {
     return files
   },
+  //Plugins
+  fileHasInstructions: (file) =>
+    file && file.metadata && file.metadata.instructions,
 
   /**
    * Returns true if the current OS is MacOS or iOS, false otherwise
@@ -552,6 +555,10 @@ const CommonUtils = {
   isAllowedLinkRedirect: () => false,
   dispatchTrackingError: (message) => {
     const event = new CustomEvent('track-error', {detail: message})
+    document.dispatchEvent(event)
+  },
+  dispatchTrackingEvents: (name, message) => {
+    const event = new CustomEvent('track-event', {detail: {name, message}})
     document.dispatchEvent(event)
   },
 }

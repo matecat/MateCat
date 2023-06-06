@@ -266,6 +266,14 @@ class Utils {
 
     }
 
+    /**
+     * @param $string
+     * @return bool
+     */
+    public static function isJson( $string ) {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
 
     public static function mysqlTimestamp( $time ) {
         return date( 'Y-m-d H:i:s', $time );
@@ -813,5 +821,53 @@ class Utils {
      */
     public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
         return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
+    }
+
+    /**
+     * @return array
+     */
+    public static function allowedLanguages()
+    {
+        $allowedLanguages = [];
+
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
+
+        foreach ($langs['langs'] as $lang){
+            $allowedLanguages[] = $lang['rfc3066code'];
+        }
+
+        return $allowedLanguages;
+    }
+
+    public static function getLocalizedLanguage($rfc3066code)
+    {
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
+
+        foreach ($langs['langs'] as $lang){
+            if($lang['rfc3066code'] === $rfc3066code){
+                return @$lang['localized'][0]['en'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $phrase
+     * @param int $max_words
+     * @return mixed
+     */
+    public static function truncatePhrase($phrase, $max_words){
+
+        $phrase_array = explode(' ',$phrase);
+        if(count($phrase_array) > $max_words && $max_words > 0){
+            $phrase = implode(' ',array_slice($phrase_array, 0, $max_words));
+        }
+
+        return $phrase;
     }
 }

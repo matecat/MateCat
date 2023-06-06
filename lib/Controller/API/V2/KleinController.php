@@ -303,5 +303,4 @@ abstract class KleinController implements IController {
     protected function afterValidate() {
 
     }
-
 }

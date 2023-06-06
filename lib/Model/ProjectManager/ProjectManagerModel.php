@@ -60,6 +60,7 @@ class ProjectManagerModel {
      * @param             $file_name
      * @param             $mime_type
      * @param             $fileDateSha1Path
+     * @param array|null  $meta
      *
      * @return mixed|string
      * @throws Exception
@@ -72,7 +73,7 @@ class ProjectManagerModel {
         $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
         $data[ 'mime_type' ]          = $mime_type;
         $data[ 'sha1_original_file' ] = $fileDateSha1Path;
-        $data[ 'is_converted' ]       = isset($meta['mustBeConverted']) ? $meta['mustBeConverted'] : null;
+        $data[ 'is_converted' ]       = isset( $meta[ 'mustBeConverted' ] ) ? (int)$meta[ 'mustBeConverted' ] : 0;
 
         $db = Database::obtain();
 

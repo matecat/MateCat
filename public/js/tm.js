@@ -21,6 +21,9 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import {downloadGlossary} from './cat_source/es6/api/downloadGlossary'
 import TEXT_UTILS from './cat_source/es6/utils/textUtils'
+import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
+import {uploadGlossary} from './cat_source/es6/api/uploadGlossary/uploadGlossary'
+import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 ;(function ($) {
   function isVisible($el) {
     var winTop = $(window).scrollTop()
@@ -930,8 +933,6 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
       $('.addtmxrow').hide()
     },
     execAddTMOrGlossary: function (el, type) {
-      const action =
-        type == 'glossary' ? '/api/v2/glossaries/import/' : '/?action=loadTMX'
       const line = $(el).parents('tr')
       line.find('.uploadfile').addClass('uploading')
       const form = line.find('.add-TM-Form')[0]
@@ -943,9 +944,7 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         )
         return
       }
-      var path = line.find('.uploadfile').find('input[type="file"]').val()
-      var file = path.split('\\')[path.split('\\').length - 1]
-      this.fileUpload(form, action, 'uploadCallback', file, type)
+      this.fileUpload({form, type})
     },
     addTMKeyToList: function (uploading, key) {
       var descr = $('#new-tm-description').val()
@@ -1088,123 +1087,40 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
       UI.hideAllBoxOnTables()
     },
 
-    fileUpload: function (form, action_url, div_id, tmName, type) {
-      // Create the iframe...
-      var ts = new Date().getTime()
-      var ifId = 'upload_iframe-' + ts
-      var iframe = document.createElement('iframe')
-      iframe.setAttribute('id', ifId)
-      iframe.setAttribute('name', 'upload_iframe')
-      iframe.setAttribute('width', '0')
-      iframe.setAttribute('height', '0')
-      iframe.setAttribute('border', '0')
-      iframe.setAttribute('style', 'width: 0; height: 0; border: none;')
-      // Add to document...
-      document.body.appendChild(iframe)
+    fileUpload: function ({form, type}) {
+      const TR = $(form).parents('tr')
+      const key = TR.find('.privatekey').first().text().trim()
+      const keyName = TR.find('.description').first().text().trim()
+      const TRcaller = $(form).parents('.uploadfile')
 
-      window.frames['upload_iframe'].name = 'upload_iframe'
-      const iframeId = document.getElementById(ifId)
-      UI.UploadIframeId = iframeId
+      const uploadFilesElement = Array.from($(form)[0].children).find(
+        (element) => element.getAttribute('name') === 'uploaded_file[]',
+      )
+      const filesToUpload = Array.from(uploadFilesElement?.files ?? [])
 
-      // Add event...
-      var eventHandler = function () {
-        let content
+      const promise = type === 'glossary' ? uploadGlossary : uploadTm
 
-        if (iframeId.detachEvent) iframeId.detachEvent('onload', eventHandler)
-        else iframeId.removeEventListener('load', eventHandler, false)
-
-        // Message from server...
-        if (iframeId.contentDocument) {
-          content = iframeId.contentDocument.body.innerHTML
-        } else if (iframeId.contentWindow) {
-          content = iframeId.contentWindow.document.body.innerHTML
-        } else if (iframeId.document) {
-          content = iframeId.document.body.innerHTML
-        }
-
-        document.getElementById(div_id).innerHTML = content
-      }
-
-      if (iframeId.addEventListener)
-        iframeId.addEventListener('load', eventHandler, true)
-      if (iframeId.attachEvent) iframeId.attachEvent('onload', eventHandler)
-      var TR = $(form).parents('tr')
-      var Key = TR.find('.privatekey').first().text().trim()
-      var keyName = TR.find('.description').first().text().trim()
-
-      // Set properties of form...
-      form.setAttribute('target', 'upload_iframe')
-      form.setAttribute('action', action_url)
-      form.setAttribute('method', 'post')
-      form.setAttribute('enctype', 'multipart/form-data')
-      form.setAttribute('encoding', 'multipart/form-data')
-      if (type === 'tmx') {
-        $(form).append('<input type="hidden" name="exec" value="newTM" />')
-      }
-      $(form)
-        .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-        .append('<input type="hidden" name="name" value="' + keyName + '" />')
-        .append('<input type="hidden" name="r" value="1" />')
-        .append('<input type="hidden" name="w" value="1" />')
-      if (APP.isCattool) {
-        $(form)
-          .append(
-            '<input type="hidden" name="job_id" value="' +
-              config.job_id +
-              '" />',
-          )
-          .append(
-            '<input type="hidden" name="job_pass" value="' +
-              config.password +
-              '" />',
-          )
-      }
-
-      // Submit the form...
-      form.submit()
-
-      document.getElementById(div_id).innerHTML = ''
-      var filePath = $(form).find('input[type="file"]').val()
-      var fileName = filePath.split('\\')[filePath.split('\\').length - 1]
-
-      var TRcaller = $(form).parents('.uploadfile')
-      // TRcaller.addClass('startUploading');
-      UI.showStartUpload(TRcaller)
-      setTimeout(function () {
-        UI.pollForUploadCallback(Key, fileName, TRcaller, type)
-      }, 1000)
-
-      return false
-    },
-    pollForUploadCallback: function (Key, fileName, TRcaller, type) {
-      if ($('#uploadCallback').text() != '') {
-        var msg = $.parseJSON($('#uploadCallback pre').text())
-        if (msg.success === true) {
-          setTimeout(function () {
-            //delay because server can take some time to process large file
-            // TRcaller.removeClass('startUploading');
-            const uuid =
-              type === 'glossary' && msg.data?.uuids?.length > 0
-                ? msg.data.uuids[0]
-                : undefined
-            UI.pollForUploadProgress(Key, fileName, TRcaller, type, uuid)
-          }, 2000)
-        } else {
+      promise({filesToUpload, tmKey: key, keyName})
+        .then((data) => {
+          UI.pollForUploadProgress({
+            files: data.data.uuids,
+            type,
+            key,
+            TRcaller,
+          })
+        })
+        .catch(({errors}) => {
           TRcaller.find('.action a').removeClass('disabled')
           UI.showErrorUpload($(TRcaller))
-          UI.UploadIframeId.remove()
 
           if ($(TRcaller).closest('table').attr('id') == 'inactivetm') {
-            UI.showErrorOnInactiveTMTable(msg.errors[0].message)
+            UI.showErrorOnInactiveTMTable(errors[0].message)
           } else {
-            UI.showErrorOnActiveTMTable(msg.errors[0].message)
+            UI.showErrorOnActiveTMTable(errors[0].message)
           }
-        }
-      } else {
-        setTimeout(function () {
-          UI.pollForUploadCallback(Key, fileName, TRcaller, type)
-        }, 1000)
-      }
+        })
+
+      UI.showStartUpload(TRcaller)
     },
     showErrorUpload: function ($tr, text) {
       var msg = text ? text : 'Error uploading your files. Please try again.'
@@ -1220,6 +1136,12 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
       }
       $tr.addClass('tm-error')
     },
+    resetErrorUpload: function ($tr) {
+      $tr.find('.uploadprogress').show()
+      $tr.find('.upload-file-msg-error').text('')
+      $tr.find('.canceladdglossary, .canceladdtmx').hide()
+      $tr.removeClass('tm-error')
+    },
     showStartUpload: function ($tr) {
       $tr
         .find(
@@ -1232,83 +1154,74 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
     showSuccessUpload: function ($tr) {
       $tr.find('.action a').removeClass('disabled')
       $tr
-        .find(
-          '.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary',
-        )
+        .find('.canceladdtmx,.addtmxfile, .addglossaryfile, .canceladdglossary')
         .hide()
 
-      $tr.find('.progress .inner').css('width', '90%')
       setTimeout(function () {
         $tr.find('.upload-file-msg-success').show()
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
-    pollForUploadProgress: function (Key, fileName, TRcaller, type, uuid) {
-      const promise =
-        type === 'glossary'
-          ? loadGlossaryFile({id: uuid})
-          : loadTMX({key: Key, name: fileName})
-      promise
-        .then((response) => {
-          var TDcaller = TRcaller
-          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
-          UI.showStartUpload($(TDcaller))
+    pollForUploadProgress: ({files, type, TRcaller, key}) => {
+      let completedCounter = 0
+      const totalFiles = files.length
+      const TDcaller = TRcaller
 
-          if (response.data.total == null && response.data.totals === null) {
-            setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
-            }, 1000)
-          } else {
-            if (
-              (type === 'tmx' && response.data.completed) ||
-              (type === 'glossary' &&
-                response.data.completed === response.data.totals)
-            ) {
-              var tr = $(TDcaller).parents('tr')
+      const MAX_PERCENTAGE_BY_FILE = 100 / totalFiles
+
+      const getStatus = ({uuid, name}) => {
+        const promise =
+          type === 'glossary'
+            ? loadGlossaryFile({id: uuid})
+            : loadTMX({uuid, key, name})
+
+        promise
+          .then((response) => {
+            const tr = $(TDcaller).parents('tr')
+
+            const {completed = 0, totals = 0} = response.data
+            const previousPercentage = completedCounter * MAX_PERCENTAGE_BY_FILE
+            const currentPercentage = totals
+              ? (completed / totals) * MAX_PERCENTAGE_BY_FILE
+              : 0
+            const percentage = previousPercentage + currentPercentage
+
+            const isCompleted = response.data.status === 1
+            if (isCompleted) completedCounter++
+
+            UI.resetErrorUpload($(TDcaller))
+
+            $(TDcaller)
+              .find('.progress .inner')
+              .css('width', percentage + '%')
+
+            // files upload completed
+            if (completedCounter === totalFiles) {
               UI.showSuccessUpload(tr)
-
-              if (!tr.find('td.description .edit-desc').text()) {
-                tr.find('td.description .edit-desc').text(fileName)
-              }
 
               setTimeout(function () {
                 $(TDcaller).slideToggle(function () {
                   this.remove()
                 })
               }, 3000)
-
-              UI.UploadIframeId.remove()
-
-              return false
+              return
             }
-            const done =
-              type === 'tmx' ? response.data.done : response.data.completed
-            const total =
-              type === 'tmx' ? response.data.total : response.data.totals
-            var progress = (parseInt(done) / parseInt(total)) * 100
-            $(TDcaller)
-              .find('.progress .inner')
-              .css('width', progress + '%')
-            setTimeout(function () {
-              UI.pollForUploadProgress(Key, fileName, TDcaller, type, uuid)
-            }, 1000)
-          }
-        })
-        .catch(({errors}) => {
-          var TDcaller = TRcaller
-          if (errors.length) {
-            UI.showErrorUpload($(TDcaller), errors[0].message)
-          } else {
-            UI.showErrorUpload(
-              $(TDcaller),
-              `Error uploading ${type === 'tmx' ? 'tmx' : 'glossary'}`,
-            )
-          }
-          $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
-          UI.UploadIframeId.remove()
-        })
-    },
 
+            // refresh get status
+            if (!isCompleted) {
+              setTimeout(function () {
+                getStatus({uuid, name})
+              }, 1000)
+            }
+          })
+          .catch(({errors}) => {
+            UI.showErrorUpload($(TDcaller), errors[0].message)
+            $(TDcaller).closest('tr').find('.action a').removeClass('disabled')
+          })
+      }
+
+      files.forEach((file) => getStatus(file))
+    },
     allTMUploadsCompleted: function () {
       if ($('#activetm .uploadfile.uploading').length) {
         ModalsActions.showModalComponent(
@@ -2057,7 +1970,9 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
       var label, format
       if (type == 'tmx') {
         label =
-          '<p class="pull-left">Select up to 10 TMX files to be imported</p>'
+          //'<p class="pull-left">Select up to 10 TMX files to be imported</p>'
+          '<p class="pull-left">Select a tmx file to import</p>'
+
         format = '.tmx'
         if ($(elem).parents('tr').find('.uploadfile').length > 0) {
           // $(elem).parents('tr').find('.uploadfile').slideToggle();
@@ -2066,12 +1981,14 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         }
       } else if (type == 'glossary') {
         label =
-          '<p class="pull-left">Select up to 10 glossaries in XLSX, XLS or ODS format ' +
+          '<p class="pull-left">Select glossary in XLSX, XLS or ODS format ' +
           '   <a href="https://guides.matecat.com/how-to-add-a-glossary" target="_blank">(How-to)</a>' +
           '</p>'
         format = '.xlsx,.xls, .ods'
       }
       $(elem).closest('tr').find('.action a').addClass('disabled')
+      //const multiple = type === 'tmx' ? 'multiple' : ''
+      const multiple = ''
       var nr =
         '<td class="uploadfile" style="display: none">' +
         label +
@@ -2079,7 +1996,10 @@ import TEXT_UTILS from './cat_source/es6/utils/textUtils'
         '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
         '    <input type="file" name="uploaded_file[]" accept="' +
         format +
-        '" multiple/>' +
+        '"' +
+        ' ' +
+        multiple +
+        '/>' +
         '</form>' +
         '   <a class="pull-right btn-grey canceladd' +
         type +

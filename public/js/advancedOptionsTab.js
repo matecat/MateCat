@@ -5,6 +5,7 @@ import SegmentUtils from './cat_source/es6/utils/segmentUtils'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import SegmentActions from './cat_source/es6/actions/SegmentActions'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
@@ -140,6 +141,24 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
       const charscounterCheck = document.getElementById('charscounter_check')
       charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
       charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
+      // Check Ai Asisstant
+      if (config.isOpenAiEnabled) {
+        const aiAssistantCheck = document.getElementById('ai-assistant_check')
+        aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
+        aiAssistantCheck.onchange = () => {
+          //Track Event
+          const message = {
+            user: APP.USER.STORE.user.uid,
+            page: location.href,
+            onHighlight: !SegmentUtils.isAiAssistantAuto(),
+          }
+          CommonUtils.dispatchTrackingEvents('AiAssistantSwitch', message)
+
+          SegmentUtils.setAiAssistantOptionValue(
+            !SegmentUtils.isAiAssistantAuto(),
+          )
+        }
+      }
     },
 
     toggleLexiqaOption: function () {

@@ -33,7 +33,8 @@
         "ext-zip": "*",
         "ext-fileinfo": "*",
         "ext-mbstring": "*",
-        "ext-zlib": "*"
+        "ext-zlib": "*",
+        "orhanerday/open-ai": "^4.7"
 
     }
 }
