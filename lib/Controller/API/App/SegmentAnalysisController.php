@@ -186,9 +186,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (NotFoundException $exception) {
             $this->response->code( 500 );
             $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
             ] );
             exit();
         }
@@ -201,9 +201,9 @@ class SegmentAnalysisController extends KleinController {
         } catch (Exception $exception){
             $this->response->code( 500 );
             $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
+                'error' => [
+                    'message' => $exception->getMessage()
+                ]
             ] );
         }
     }
@@ -232,15 +232,15 @@ class SegmentAnalysisController extends KleinController {
         $items = $this->getSegmentsFromIdProjectAndPassword($idProject, $password, $page, $perPage);
 
         return [
-                '_links' => [
-                        'page' => $page,
-                        'per_page' => $perPage,
-                        'total_pages' => $totalPages,
-                        'total_items' => $segmentsCount,
-                        'next_page' => $next,
-                        'prev_page' => $prev,
-                ],
-                'items' => $items
+            '_links' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => $totalPages,
+                'total_items' => $segmentsCount,
+                'next_page' => $next,
+                'prev_page' => $prev,
+            ],
+            'items' => $items
         ];
     }
 
@@ -297,8 +297,15 @@ class SegmentAnalysisController extends KleinController {
             $notesAggregate[$notesRecord->id_segment][] = $notesRecord->note;
         }
 
-        foreach ($issuesRecords as $issuesRecord){
-            $issuesAggregate[$issuesRecord->id_segment][] = $issuesRecord;
+        foreach ( $issuesRecords as $issuesRecord ) {
+            $issuesAggregate[$issuesRecord->id_segment][] = [
+                'source_page'         => $this->humanReadableSourcePage($issuesRecord->source_page),
+                'id_category'         => (int)$issuesRecord->id_category,
+                'severity'            => $issuesRecord->severity,
+                'translation_version' => (int)$issuesRecord->translation_version,
+                'penalty_points'      => floatval($issuesRecord->penalty_points),
+                'created_at'          => date( DATE_ISO8601, strtotime( $issuesRecord->create_date ) ),
+            ];
         }
 
         foreach ($idRequestRecords as $idRequestRecord){
@@ -330,25 +337,25 @@ class SegmentAnalysisController extends KleinController {
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
         return [
-                'id_segment' => (int)$segmentForAnalysis->id,
-                'id_chunk' => (int)$segmentForAnalysis->id_job,
-                'chunk_password' => $segmentForAnalysis->job_password,
-                'urls' => $this->getJobUrls($segmentForAnalysis, $projectPasswordsMap),
-                'id_request' => ($idRequest) ? $idRequest->meta_value : null,
-                'filename' => $segmentForAnalysis->filename,
-                'original_filename' => $originalFile,
-                'source' => $segmentForAnalysis->segment,
-                'target' => $segmentForAnalysis->translation,
-                'source_lang' => $segmentForAnalysis->source,
-                'target_lang' => $segmentForAnalysis->target,
-                'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
-                'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-                'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
-                'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
-                'issues' => (!empty($issuesAggregate[$segmentForAnalysis->id]) ? $issuesAggregate[$segmentForAnalysis->id] : []),
-                'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
-                'status' => $this->getStatusObject($segmentForAnalysis),
-                'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,
+            'id_segment' => (int)$segmentForAnalysis->id,
+            'id_chunk' => (int)$segmentForAnalysis->id_job,
+            'chunk_password' => $segmentForAnalysis->job_password,
+            'urls' => $this->getJobUrls($segmentForAnalysis, $projectPasswordsMap),
+            'id_request' => ($idRequest) ? $idRequest->meta_value : null,
+            'filename' => $segmentForAnalysis->filename,
+            'original_filename' => $originalFile,
+            'source' => $segmentForAnalysis->segment,
+            'target' => $segmentForAnalysis->translation,
+            'source_lang' => $segmentForAnalysis->source,
+            'target_lang' => $segmentForAnalysis->target,
+            'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
+            'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
+            'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
+            'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
+            'issues' => (!empty($issuesAggregate[$segmentForAnalysis->id]) ? $issuesAggregate[$segmentForAnalysis->id] : []),
+            'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
+            'status' => $this->getStatusObject($segmentForAnalysis),
+            'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,
         ];
     }
 
