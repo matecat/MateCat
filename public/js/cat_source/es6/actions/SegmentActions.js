@@ -318,12 +318,6 @@ const SegmentActions = {
       fid: fid,
     })
   },
-  disableTagLock: function () {
-    UI.tagLockEnabled = false
-  },
-  enableTagLock: function () {
-    UI.tagLockEnabled = true
-  },
 
   setSegmentWarnings: function (sid, warnings, tagMismatch) {
     AppDispatcher.dispatch({

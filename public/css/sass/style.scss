@@ -3884,19 +3884,6 @@ section .toolbar .autofillTag {
 .splitBar .buttons a {
 }
 
-body:not(.tagModes) .tagModeToggle {
-  display: none;
-}
-body.rtl-source.tagModes.tagmode-default-extended
-  .suggestion_source
-  .monad.marker,
-body.rtl-source.tagModes.tagmode-default-extended .source .monad.marker,
-body.rtl-target.tagModes.tagmode-default-extended .editarea .monad.marker,
-body.rtl-target.tagModes.tagmode-default-extended .spliArea .monad.marker,
-body.rtl-target.tagModes.tagmode-default-extended .translation .monad.marker {
-  direction: ltr;
-}
-
 .monad .marker-inside {
   display: none;
 }
@@ -3963,12 +3950,12 @@ section.editor .toolbar {
   margin-right: 10px;
 }
 
-body.tagModes .editor.hasTags .textarea-container .tagMode {
+body .editor.hasTags .textarea-container .tagMode {
   display: block;
 }
 
-body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
-body.tagModes .editor.hasTagsToggle .toolbar .tagLockCustomize,
+body .editor.hasTagsToggle .toolbar .tagModeToggle,
+body .editor.hasTagsToggle .toolbar .tagLockCustomize,
 body .editor.hasTagsAutofill .toolbar .autofillTag {
   display: block;
 }

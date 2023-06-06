@@ -547,7 +547,6 @@ class Segment extends React.Component {
     if (this.props.segment.opened) {
       setTimeout(() => {
         this.openSegment()
-        Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section)
       })
       setTimeout(() => {
         UI.setCurrentSegment()
@@ -600,7 +599,8 @@ class Segment extends React.Component {
       nextState.selectedTextObj !== this.state.selectedTextObj ||
       nextProps.sideOpen !== this.props.sideOpen ||
       nextState.showActions !== this.state.showActions ||
-      nextProps.clientConnected !== this.props.clientConnected
+      nextProps.clientConnected !== this.props.clientConnected ||
+      nextProps.speechToTextActive !== this.props.speechToTextActive
     )
   }
 
@@ -623,13 +623,19 @@ class Segment extends React.Component {
         if (this.props.segment.opened && !this.props.segment.openComments) {
           SegmentActions.closeSegmentComment(this.props.segment.sid)
         }
-        Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section)
       })
     } else if (prevProps.segment.opened && !this.props.segment.opened) {
       clearTimeout(this.timeoutScroll)
       setTimeout(() => {
         SegmentActions.saveSegmentBeforeClose(this.props.segment)
       })
+    }
+    if (
+      Speech2Text.enabled() &&
+      ((!prevProps.speechToTextActive && this.props.speechToTextActive) ||
+        (!prevProps.segment.opened && this.props.segment.opened))
+    ) {
+      setTimeout(() => Speech2Text.enableMicrophone(this.$section))
     }
     if (!prevProps.clientConnected && this.props.clientConnected) {
       SegmentActions.getGlossaryForSegment({
@@ -684,7 +690,6 @@ class Segment extends React.Component {
         segment,
         files,
         speech2textEnabledFn,
-        tagModesEnabled,
       } = this.props
       return {
         enableTagProjection: enableTagProjection && !this.props.segment.tagged,
@@ -695,7 +700,6 @@ class Segment extends React.Component {
         segment,
         files,
         speech2textEnabledFn,
-        tagModesEnabled,
         readonly: this.state.readonly,
         locked,
         removeSelection: this.removeSelection.bind(this),

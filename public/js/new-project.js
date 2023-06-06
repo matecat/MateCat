@@ -220,6 +220,7 @@ APP.getCreateProjectParams = function ({
   selectedTeam,
   activeMT,
   speech2text,
+  guessTags,
 }) {
   var dqf = APP.getDQFParameters()
   return {
@@ -237,9 +238,7 @@ APP.getCreateProjectParams = function ({
       $('#lexi_qa').prop('checked') && !$('#lexi_qa').prop('disabled')
     ),
     speech2text,
-    tag_projection: !!(
-      $('#tagp_check').prop('checked') && !$('#tagp_check').prop('disabled')
-    ),
+    tag_projection: guessTags,
     segmentation_rule: $('#segm_rule').val(),
     id_team: selectedTeam,
     dqf: dqf.dqfEnabled,

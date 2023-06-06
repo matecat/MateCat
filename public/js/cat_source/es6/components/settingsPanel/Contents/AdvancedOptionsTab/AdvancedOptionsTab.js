@@ -4,40 +4,20 @@ import {SpeechToText} from './SpeechToText'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import PropTypes from 'prop-types'
 import {SettingsPanel} from '../../SettingsPanel'
+import {GuessTag} from './GuessTag'
 
 export const AdvancedOptionsTab = () => {
-  const {setSpeechToTextActive} = useContext(SettingsPanelContext)
+  const {setSpeechToTextActive, setGuessTagActive} =
+    useContext(SettingsPanelContext)
   return (
     <div className="advanced-options-box">
       {/*<h2>Advanced Options</h2>*/}
 
       <SpeechToText setSpeechToTextActive={setSpeechToTextActive} />
 
-      {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
-      <div className="options-box tagp">
-        <h3>Guess tag position</h3>
-        <p>
-          <span className="option-tagp-languages">
-            Not available for:
-            <span className="option-notsupported-languages"></span>.
-            <br />
-          </span>
-          <span className="option-tagp-revise">
-            Not available in revise mode.
-            <br />
-          </span>
-          Enable this functionality to let Matecat automatically place the tags
-          where they belong.
-          <a
-            className="tooltip-guess-tags"
-            href="https://site.matecat.com/support/translating-projects/guess-tag-position/#gtp_lang"
-            target="_blank"
-          >
-            Supported languages
-          </a>
-        </p>
-        <Switch />
-      </div>
+      {config.show_tag_projection && (
+        <GuessTag setGuessTagActive={setGuessTagActive} />
+      )}
 
       {/*  Lexiqa
     TODO: check lexiqa licence active

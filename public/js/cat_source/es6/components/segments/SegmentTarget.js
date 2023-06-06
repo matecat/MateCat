@@ -135,25 +135,6 @@ class SegmentTarget extends React.Component {
       var s2tMicro = ''
       var tagModeButton = ''
       var tagCopyButton = ''
-      var tagLockCustomizable
-      if (
-        this.props.segment.segment.match(/&lt;.*?&gt;/gi) &&
-        config.tagLockCustomizable
-      ) {
-        tagLockCustomizable = UI.tagLockEnabled ? (
-          <a
-            className="tagLockCustomize icon-lock"
-            title="Toggle Tag Lock"
-            onClick={() => SegmentActions.disableTagLock()}
-          />
-        ) : (
-          <a
-            className="tagLockCustomize icon-unlocked3"
-            title="Toggle Tag Lock"
-            onClick={() => SegmentActions.enableTagLock()}
-          />
-        )
-      }
 
       //Speeche2Text
       var s2t_enabled = this.context.speech2textEnabledFn()
@@ -187,31 +168,9 @@ class SegmentTarget extends React.Component {
         )
       }
 
-      //Tag Mode Buttons
-
-      if (
-        /*this.context.tagModesEnabled &&*/ !this.context.enableTagProjection &&
-        UI.tagLockEnabled
-      ) {
-        var buttonClass = $('body').hasClass('tagmode-default-extended')
-          ? 'active'
-          : ''
-        tagModeButton = (
-          <a
-            className={'tagModeToggle ' + buttonClass}
-            alt="Display full/short tags"
-            onClick={() => Customizations.toggleTagsMode()}
-            title="Display full/short tags"
-          >
-            <span className="icon-chevron-left" />
-            <span className="icon-tag-expand" />
-            <span className="icon-chevron-right" />
-          </a>
-        )
-      }
       // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
       if (
-        /*this.context.tagModesEnabled  &&*/ segment.missingTagsInTarget &&
+        segment.missingTagsInTarget &&
         segment.missingTagsInTarget.length > 0 &&
         this.editArea
       ) {
@@ -266,7 +225,6 @@ class SegmentTarget extends React.Component {
                 QR
               </a>
             ) : null}
-            {tagLockCustomizable}
             {tagModeButton}
             {tagCopyButton}
             <ul

@@ -40,6 +40,7 @@ export const SettingsPanel = ({
   activeMTEngine,
   setActiveMTEngine,
   setSpeechToTextActive,
+  setGuessTagActive,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
@@ -121,4 +122,5 @@ SettingsPanel.propTypes = {
   setMtEngines: PropTypes.func,
   activeMTEngine: PropTypes.object,
   setActiveMTEngine: PropTypes.func,
+  setGuessTagActive: PropTypes.func,
 }

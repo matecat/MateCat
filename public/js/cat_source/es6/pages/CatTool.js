@@ -22,6 +22,7 @@ import {
   MMT_NAME,
   SettingsPanel,
 } from '../components/settingsPanel'
+import Speech2TextFeature from '../utils/speech2text'
 
 function CatTool() {
   const [options, setOptions] = useState({})
@@ -31,6 +32,10 @@ function CatTool() {
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
+  const [guessTagActive, setGuessTagActive] = useState(false)
+  const [speechToTextActive, setSpeechToTextActive] = useState(
+    Speech2TextFeature.enabled(),
+  )
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -61,8 +66,6 @@ function CatTool() {
   const getMTEngines = () => {
     if (config.isLoggedIn) {
       getMtEnginesApi().then((mtEngines) => {
-        console.log('MT ENGINES', mtEngines)
-        //TODO: if internal user active is MMT
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
         if (config.isAnInternalUser) {
@@ -288,9 +291,10 @@ function CatTool() {
                 isReviewExtended={ReviewExtended.enabled()}
                 reviewType={Review.type}
                 enableTagProjection={UI.enableTagProjection}
-                tagModesEnabled={UI.tagModesEnabled}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
+                guessTagActive={guessTagActive}
+                speechToTextActive={speechToTextActive}
               />
             </div>
           </article>
@@ -312,6 +316,8 @@ function CatTool() {
           setMtEngines={setMtEngines}
           activeMTEngine={activeMTEngine}
           setActiveMTEngine={setActiveMTEngine}
+          setGuessTagActive={setGuessTagActive}
+          setSpeechToTextActive={setSpeechToTextActive}
         />
       )}
       <CattolFooter

@@ -72,6 +72,7 @@ const NewProject = ({
     useState(false)
   const [isOpenSettings, setIsOpenSettings] = useState(false)
   const [speechToTextActive, setSpeechToTextActive] = useState(false)
+  const [guessTagActive, setGuessTagActive] = useState(false)
 
   const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
@@ -145,6 +146,7 @@ const NewProject = ({
           selectedTeam: selectedTeam ? selectedTeam.id : undefined,
           activeMT: activeMTEngine.id,
           speech2text: speechToTextActive,
+          guessTags: guessTagActive,
         }),
       )
         .then(({data}) => {
@@ -303,7 +305,6 @@ const NewProject = ({
         setIsOpenMultiselectLanguages,
         sourceLang,
         changeSourceLanguage,
-        speechToTextActive,
       }}
     >
       <HeaderPortal>
@@ -507,6 +508,7 @@ const NewProject = ({
           activeMTEngine={activeMTEngine}
           setActiveMTEngine={setActiveMTEngine}
           setSpeechToTextActive={setSpeechToTextActive}
+          setGuessTagActive={setGuessTagActive}
         />
       )}
       <Footer />

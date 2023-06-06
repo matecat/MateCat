@@ -5,6 +5,7 @@ import Speech2TextFeature from '../../../../utils/speech2text'
 
 import AlertModal from '../../../modals/AlertModal'
 import PropTypes from 'prop-types'
+import {toggleSpeechToText} from '../../../../api/toggleSpeechToText'
 
 export const SpeechToText = ({setSpeechToTextActive = () => {}}) => {
   const isCattool = config.is_cattool
@@ -32,13 +33,19 @@ export const SpeechToText = ({setSpeechToTextActive = () => {}}) => {
   }
   const onChange = (selected) => {
     if (selected) {
-      isCattool && Speech2TextFeature.enable()
       setDictationOption(true)
-      setSpeechToTextActive(true)
+      toggleSpeechToText({enabled: true}).then(() => {
+        setSpeechToTextActive(true)
+        isCattool && Speech2TextFeature.enable()
+        Speech2TextFeature.init()
+        Speech2TextFeature.loadRecognition()
+      })
     } else {
-      isCattool && Speech2TextFeature.disable()
       setDictationOption(false)
-      setSpeechToTextActive(false)
+      toggleSpeechToText({enabled: false}).then(() => {
+        setSpeechToTextActive(false)
+        isCattool && Speech2TextFeature.disable()
+      })
     }
   }
   return (
