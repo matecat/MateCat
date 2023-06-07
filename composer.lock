@@ -918,16 +918,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.2.2",
+            "version": "v1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "deecc407feacd297b115b44f3f2ee618df05f698"
+                "reference": "d1bfeebd4c8e958ba084065b84d2ec6bd57a53fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/deecc407feacd297b115b44f3f2ee618df05f698",
-                "reference": "deecc407feacd297b115b44f3f2ee618df05f698",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d1bfeebd4c8e958ba084065b84d2ec6bd57a53fc",
+                "reference": "d1bfeebd4c8e958ba084065b84d2ec6bd57a53fc",
                 "shasum": ""
             },
             "require": {
@@ -970,7 +970,7 @@
                 "issues": "https://github.com/matecat/subfiltering/issues",
                 "source": "https://github.com/matecat/subfiltering/tree/v1.2.3"
             },
-            "time": "2023-05-31T13:30:05+00:00"
+            "time": "2023-06-06T14:06:39+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1027,16 +1027,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.108",
+            "version": "v1.0.109",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "795f56e23a10be4f1bf4f1ad677f56e1a61d3664"
+                "reference": "0ec298f971aa9ea69a226fe7e47cf5ba27f8b0bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/795f56e23a10be4f1bf4f1ad677f56e1a61d3664",
-                "reference": "795f56e23a10be4f1bf4f1ad677f56e1a61d3664",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/0ec298f971aa9ea69a226fe7e47cf5ba27f8b0bb",
+                "reference": "0ec298f971aa9ea69a226fe7e47cf5ba27f8b0bb",
                 "shasum": ""
             },
             "require": {
@@ -1086,9 +1086,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.108"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.109"
             },
-            "time": "2023-05-16T09:59:25+00:00"
+            "time": "2023-06-05T13:59:14+00:00"
         },
         {
             "name": "monolog/monolog",
