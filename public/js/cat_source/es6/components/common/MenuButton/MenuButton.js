@@ -18,10 +18,12 @@ export const MenuButton = ({
   const ref = useRef()
 
   useEffect(() => {
-    const handler = () => setItemsCoords(undefined)
-    document.addEventListener('mouseup', handler)
+    const handler = (e) => {
+      if (!ref.current.children[1].contains(e.target)) setItemsCoords(undefined)
+    }
+    document.addEventListener('mousedown', handler)
 
-    return () => document.removeEventListener('mouseup', handler)
+    return () => document.removeEventListener('mousedown', handler)
   }, [])
 
   const onShowingItems = (e) => {
@@ -30,15 +32,14 @@ export const MenuButton = ({
       ? itemsTarget.getBoundingClientRect().left
       : 0
 
-    setItemsCoords(
-      !itemsCoords
+    setItemsCoords((prevState) =>
+      !prevState
         ? {
             left: rect.left - difference,
             top: rect.y + rect.height,
           }
         : undefined,
     )
-
     e.stopPropagation()
   }
 
@@ -55,7 +56,7 @@ export const MenuButton = ({
             style={{
               left: itemsCoords.left,
               top: itemsCoords.top,
-              minWidth: ref.current.offsetWidth,
+              minWidth: ref.current.firstChild.offsetWidth,
             }}
           >
             {children.map((item) => item)}

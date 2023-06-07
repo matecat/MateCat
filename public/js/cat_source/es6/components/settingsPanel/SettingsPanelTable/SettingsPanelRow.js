@@ -89,9 +89,7 @@ export const SettingsPanelRow = forwardRef(
     return (
       <div
         ref={ref}
-        className={`settings-panel-row${draggingCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}${
-          row.isActive && !row.isLocked ? ' settings-panel-row-active' : ''
-        }`}
+        className={`settings-panel-row${draggingCssClasses}${dragOverCssClasses}${shouldAddDragendCssClass}`}
         draggable={isActiveDrag}
         onDragStart={onDragStartCallback}
         onDragOver={onDragOverCallback}
@@ -106,7 +104,11 @@ export const SettingsPanelRow = forwardRef(
               onMouseUp={onDragEndCallback}
             ></div>
           )}
-          <div className={`settings-panel-row-content ${className}`}>
+          <div
+            className={`settings-panel-row-content ${
+              row.isActive && !row.isLocked ? ' settings-panel-row-active' : ''
+            } ${className}`}
+          >
             {node}
           </div>
           <div

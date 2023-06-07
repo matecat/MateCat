@@ -42,7 +42,6 @@
   flex-direction: column;
   border: 1px solid $grey8;
   border-bottom: unset;
-  background-color: $grey9;
   transition: margin 0.2s ease-out 0.15s;
   .settings-panel-cell-center {
     align-self: center;
@@ -56,6 +55,7 @@
   align-items: center;
   width: 100%;
   min-height: 50px;
+  background-color: $grey9;
 }
 
 .settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
@@ -124,6 +124,7 @@
 }
 
 .settings-panel-row-extra-content {
+  background-color: $white;
   overflow: hidden;
   min-height: 0px;
   max-height: 0px;

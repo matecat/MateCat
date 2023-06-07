@@ -1,7 +1,10 @@
 import React, {Fragment, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {SPECIAL_ROWS_ID} from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
+import {
+  SPECIAL_ROWS_ID,
+  TranslationMemoryGlossaryTabContext,
+} from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import {ImportTMX} from './ImportTMX'
@@ -20,8 +23,9 @@ import Share from '../../../../../../../img/icons/Share'
 import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
-export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
+export const TMKeyRow = ({row, onExpandRow}) => {
   const {tmKeys, setTmKeys, wrapperRef} = useContext(SettingsPanelContext)
+  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -153,33 +157,42 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
             itemsTarget={wrapperRef.current}
           >
             <MenuButtonItem
+              className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ImportGlossary)}
             >
-              <div className="tm-key-row-button-item">
+              <div>
                 <Upload size={20} /> Import Glossary
               </div>
             </MenuButtonItem>
-            <MenuButtonItem onMouseDown={() => handleExpandeRow(ExportTMX)}>
-              <div className="tm-key-row-button-item">
+            <MenuButtonItem
+              className="tm-key-row-button-item"
+              onMouseDown={() => handleExpandeRow(ExportTMX)}
+            >
+              <div>
                 <Download size={20} /> Export TMX
               </div>
             </MenuButtonItem>
             <MenuButtonItem
+              className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ExportGlossary)}
             >
-              <div className="tm-key-row-button-item">
+              <div>
                 <Download size={20} /> Export Glossary
               </div>
             </MenuButtonItem>
-            <MenuButtonItem onMouseDown={() => handleExpandeRow(ShareResource)}>
-              <div className="tm-key-row-button-item">
+            <MenuButtonItem
+              className="tm-key-row-button-item"
+              onMouseDown={() => handleExpandeRow(ShareResource)}
+            >
+              <div>
                 <Share size={20} /> Share resource
               </div>
             </MenuButtonItem>
             <MenuButtonItem
+              className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(DeleteResource)}
             >
-              <div className="tm-key-row-button-item">
+              <div>
                 <Trash size={20} /> Delete resource
               </div>
             </MenuButtonItem>
@@ -193,5 +206,4 @@ export const TMKeyRow = ({row, onExpandRow, setSpecialRows}) => {
 TMKeyRow.propTypes = {
   row: PropTypes.object.isRequired,
   onExpandRow: PropTypes.func.isRequired,
-  setSpecialRows: PropTypes.func.isRequired,
 }

@@ -1087,6 +1087,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       UI.hideAllBoxOnTables()
     },
 
+    // TODO: da eliminare
     fileUpload: function ({form, type}) {
       const TR = $(form).parents('tr')
       const key = TR.find('.privatekey').first().text().trim()
@@ -1122,6 +1123,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       UI.showStartUpload(TRcaller)
     },
+    // TODO da eliminare gestione errore upload tm e glossary
     showErrorUpload: function ($tr, text) {
       var msg = text ? text : 'Error uploading your files. Please try again.'
       var msg2 = text ? text : 'Error uploading your files. Please try again.'
@@ -1162,6 +1164,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         $tr.find('.uploadprogress').hide()
       }, 1000)
     },
+    // TODO: da eliminare update status
     pollForUploadProgress: ({files, type, TRcaller, key}) => {
       let completedCounter = 0
       const totalFiles = files.length

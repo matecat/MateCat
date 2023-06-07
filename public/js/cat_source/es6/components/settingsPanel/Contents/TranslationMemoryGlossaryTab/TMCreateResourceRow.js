@@ -1,11 +1,16 @@
-import React, {Fragment, useState} from 'react'
+import React, {Fragment, useContext, useState} from 'react'
 import PropTypes from 'prop-types'
-import {SPECIAL_ROWS_ID} from './TranslationMemoryGlossaryTab'
+import {
+  SPECIAL_ROWS_ID,
+  TranslationMemoryGlossaryTabContext,
+} from './TranslationMemoryGlossaryTab'
 
 import Close from '../../../../../../../img/icons/Close'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 
-export const TMCreateResourceRow = ({row, setSpecialRows}) => {
+export const TMCreateResourceRow = ({row}) => {
+  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
+
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name ?? '')
@@ -89,13 +94,13 @@ export const TMCreateResourceRow = ({row, setSpecialRows}) => {
         )}
       </div>
       <div />
-      <div className="translation-memory-glossary-tab-buttons-group align-center">
-        <button className="ui primary button settings-panel-button-icon tm-key-create-resource-row-button">
+      <div className="translation-memory-glossary-tab-buttons-group">
+        <button className="ui primary button settings-panel-button-icon tm-key-small-row-button">
           <Checkmark size={16} />
           Confirm
         </button>
         <button
-          className="ui button orange tm-key-create-resource-row-button"
+          className="ui button orange tm-key-small-row-button"
           onClick={onClose}
         >
           <Close />
@@ -107,5 +112,4 @@ export const TMCreateResourceRow = ({row, setSpecialRows}) => {
 
 TMCreateResourceRow.propTypes = {
   row: PropTypes.object.isRequired,
-  setSpecialRows: PropTypes.func.isRequired,
 }

@@ -1,4 +1,10 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TMKeyRow} from './TMKeyRow'
@@ -6,6 +12,7 @@ import {TMCreateResourceRow} from './TMCreateResourceRow'
 
 import Users from '../../../../../../../img/icons/Users'
 import AddWide from '../../../../../../../img/icons/AddWide'
+import {MessageNotification} from '../MessageNotification'
 
 const COLUMNS_TABLE = [
   {name: 'Lookup'},
@@ -47,12 +54,15 @@ const NEW_RESOURCE = {
   w: true,
 }
 
+export const TranslationMemoryGlossaryTabContext = createContext({})
+
 export const TranslationMemoryGlossaryTab = () => {
   const {tmKeys} = useContext(SettingsPanelContext)
 
   const [specialRows, setSpecialRows] = useState([DEFAULT_TRANSLATION_MEMORY])
   const [keyRows, setKeyRows] = useState([])
   const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
+  const [notification, setNotification] = useState({})
 
   const onOrderActiveRows = useCallback(
     ({index, indexToMove}) => {
@@ -158,9 +168,9 @@ export const TranslationMemoryGlossaryTab = () => {
               ? 'row-content-default-memory'
               : '',
           node: !isCreateResourceRow ? (
-            <TMKeyRow key={row.id} {...{row, onExpandRow, setSpecialRows}} />
+            <TMKeyRow key={row.id} {...{row, onExpandRow}} />
           ) : (
-            <TMCreateResourceRow key={row.id} {...{row, setSpecialRows}} />
+            <TMCreateResourceRow key={row.id} {...{row}} />
           ),
           ...(extraNode && {extraNode}),
         }
@@ -181,52 +191,78 @@ export const TranslationMemoryGlossaryTab = () => {
         : true),
   )
 
+  const resetNotification = () => setNotification({})
+
+  const {type, message, rowKey} = notification
+
+  const isActiveResourceNotification = keyRows.some(
+    (row) => row.key === rowKey && row.isActive,
+  )
+  const activeResourcersNotification = message &&
+    isActiveResourceNotification && (
+      <MessageNotification
+        {...{type, message, closeCallback: resetNotification}}
+      />
+    )
+  const inactiveResourcersNotification = message &&
+    !isActiveResourceNotification && (
+      <MessageNotification
+        {...{type, message, closeCallback: resetNotification}}
+      />
+    )
+
   return (
-    <div className="translation-memory-glossary-tab">
-      <div className="translation-memory-glossary-tab-pre-translate">
-        <input type="checkbox" />
-        Pre-translate 100% matches from TM
-      </div>
-      <div className="translation-memory-glossary-tab-active-resources">
-        <div className="translation-memory-glossary-tab-table-title">
-          <h2>Active Resources</h2>
-          <div className="translation-memory-glossary-tab-buttons-group">
-            <button
-              className="ui primary button settings-panel-button-icon"
-              onClick={onAddSharedResource}
-            >
-              <Users size={18} /> Add shared resource
-            </button>
-            <button
-              className="ui primary button settings-panel-button-icon"
-              onClick={onNewResource}
-            >
-              <AddWide size={18} /> New resource
-            </button>
-          </div>
+    <TranslationMemoryGlossaryTabContext.Provider
+      value={{setSpecialRows, setNotification}}
+    >
+      <div className="translation-memory-glossary-tab">
+        <div className="translation-memory-glossary-tab-pre-translate">
+          <input type="checkbox" />
+          Pre-translate 100% matches from TM
         </div>
-        <SettingsPanelTable
-          columns={COLUMNS_TABLE}
-          rows={keyRows.filter(({isActive}) => isActive)}
-          onChangeRowsOrder={onOrderActiveRows}
-        />
-      </div>
-      <div className="translation-memory-glossary-tab-inactive-resources">
-        <div className="translation-memory-glossary-tab-table-title">
-          <h2>Inactive Resources</h2>
-          <input
-            className="filter-resources"
-            placeholder="Search resources"
-            value={filterInactiveKeys}
-            onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+        <div className="translation-memory-glossary-tab-active-resources">
+          <div className="translation-memory-glossary-tab-table-title">
+            {activeResourcersNotification}
+            <h2>Active Resources</h2>
+            <div className="translation-memory-glossary-tab-buttons-group">
+              <button
+                className="ui primary button settings-panel-button-icon"
+                onClick={onAddSharedResource}
+              >
+                <Users size={18} /> Add shared resource
+              </button>
+              <button
+                className="ui primary button settings-panel-button-icon"
+                onClick={onNewResource}
+              >
+                <AddWide size={18} /> New resource
+              </button>
+            </div>
+          </div>
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={keyRows.filter(({isActive}) => isActive)}
+            onChangeRowsOrder={onOrderActiveRows}
           />
         </div>
-        <SettingsPanelTable
-          className="translation-memory-glossary-tab-inactive-table"
-          columns={COLUMNS_TABLE}
-          rows={inactiveKeys}
-        />
+        <div className="translation-memory-glossary-tab-inactive-resources">
+          {inactiveResourcersNotification}
+          <div className="translation-memory-glossary-tab-table-title">
+            <h2>Inactive Resources</h2>
+            <input
+              className="filter-resources"
+              placeholder="Search resources"
+              value={filterInactiveKeys}
+              onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+            />
+          </div>
+          <SettingsPanelTable
+            className="translation-memory-glossary-tab-inactive-table"
+            columns={COLUMNS_TABLE}
+            rows={inactiveKeys}
+          />
+        </div>
       </div>
-    </div>
+    </TranslationMemoryGlossaryTabContext.Provider>
   )
 }

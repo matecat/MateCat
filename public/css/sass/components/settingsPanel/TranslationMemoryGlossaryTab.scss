@@ -38,7 +38,7 @@
 .translation-memory-glossary-tab {
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 20%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 22%;
   }
 
   .settings-panel-table-rowHeading-column {
@@ -83,10 +83,13 @@
 }
 
 .tm-key-row-button-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   color: $grey6;
+
+  > :first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 }
 
 .tm-key-row-menu-button {
@@ -94,7 +97,7 @@
     gap: 8px;
 
     > :first-child {
-      min-width: 140px;
+      min-width: 170px;
       border-radius: 2px;
     }
 
@@ -112,6 +115,8 @@
 
 .translation-memory-glossary-tab-buttons-group {
   display: flex;
+  gap: 8px;
+  justify-content: end;
 }
 
 .tm-key-create-resource-row-input {
@@ -120,12 +125,13 @@
 
 .settings-panel-row {
   .row-content-default-memory {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 20%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
   }
 }
 
-.tm-key-create-resource-row-button {
+.tm-key-small-row-button {
   height: 32px;
+  margin: 0 !important;
 
   &:last-child {
     padding: 0 8px;
@@ -150,8 +156,14 @@
     }
   }
 
+  .import-form-error {
+    input[type='file'] {
+      color: $redDefault;
+    }
+  }
+
   .import-files {
-    margin-top: 20px;
+    margin-top: 30px;
 
     > ul {
       display: flex;
@@ -163,7 +175,18 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        padding: 6px;
+
+        .filename {
+          font-weight: bold;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 60%;
+        }
+
+        .filename-error {
+          color: $redDefault;
+        }
       }
 
       > li:nth-child(even) {
@@ -173,17 +196,30 @@
 
     .loading-bar {
       width: 260px;
-      height: 4px;
+      height: 6px;
+      border-radius: 4px;
       background-color: $grey8;
 
       > :first-child {
         background-color: $approvedGreen;
         height: 100%;
+        border-radius: 4px;
       }
     }
 
     .import-completed {
       color: $approvedGreenHover;
+    }
+
+    .message-error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $redDefault;
+
+      > button {
+        padding: 4px;
+      }
     }
   }
 }
