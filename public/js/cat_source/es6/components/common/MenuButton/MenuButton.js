@@ -29,7 +29,7 @@ export const MenuButton = ({
   const onShowingItems = (e) => {
     const rect = ref.current.getBoundingClientRect()
     const difference = itemsTarget
-      ? itemsTarget.getBoundingClientRect().left
+      ? itemsTarget.getBoundingClientRect().left - itemsTarget.offsetLeft
       : 0
 
     setItemsCoords((prevState) =>

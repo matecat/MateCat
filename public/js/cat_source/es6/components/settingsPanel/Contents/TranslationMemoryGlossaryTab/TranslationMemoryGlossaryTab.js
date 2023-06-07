@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
@@ -63,6 +64,8 @@ export const TranslationMemoryGlossaryTab = () => {
   const [keyRows, setKeyRows] = useState([])
   const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
   const [notification, setNotification] = useState({})
+
+  const ref = useRef()
 
   const onOrderActiveRows = useCallback(
     ({index, indexToMove}) => {
@@ -213,9 +216,9 @@ export const TranslationMemoryGlossaryTab = () => {
 
   return (
     <TranslationMemoryGlossaryTabContext.Provider
-      value={{setSpecialRows, setNotification}}
+      value={{ref, setSpecialRows, setNotification}}
     >
-      <div className="translation-memory-glossary-tab">
+      <div ref={ref} className="translation-memory-glossary-tab">
         <div className="translation-memory-glossary-tab-pre-translate">
           <input type="checkbox" />
           Pre-translate 100% matches from TM

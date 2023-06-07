@@ -24,8 +24,8 @@ import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
-  const {tmKeys, setTmKeys, wrapperRef} = useContext(SettingsPanelContext)
-  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
+  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
+  const {setSpecialRows, ref} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -154,7 +154,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
-            itemsTarget={wrapperRef.current}
+            itemsTarget={ref.current}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"
