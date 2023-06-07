@@ -1,6 +1,7 @@
 import Switch from '../../../common/Switch'
 import React, {useEffect, useState} from 'react'
 import PropTypes, {object} from 'prop-types'
+import SegmentActions from '../../../../actions/SegmentActions'
 
 export const GuessTag = ({
   guessTagActive,
@@ -8,12 +9,15 @@ export const GuessTag = ({
   sourceLang,
   targetLangs,
 }) => {
-  const [disabled, setDisable] = useState(false)
+  const [disabled, setDisable] = useState(!!config.isReview)
   const [notSupportedLangs, setNotSupportedLangs] = useState([])
   const onChange = (selected) => {
-    console.log('@@@@@guessTagActive', guessTagActive)
     setGuessTagActive(selected)
+    if (config.is_cattool) {
+      SegmentActions.changeTagProjectionStatus(selected)
+    }
   }
+
   useEffect(() => {
     const acceptedLanguages = config.tag_projection_languages
     const sourceLanguageCode = sourceLang.code
@@ -61,7 +65,7 @@ export const GuessTag = ({
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
       <h3>Guess tag position</h3>
       <p>
-        {notSupportedLangs.length && (
+        {notSupportedLangs.length > 0 && (
           <span className="option-tagp-languages">
             Not available for:
             <span className="option-notsupported-languages">

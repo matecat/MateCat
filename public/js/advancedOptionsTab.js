@@ -68,38 +68,38 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
         UI.setLanguageTooltipLXQ()
       }
       //Check Tag Projection
-      if (
-        SegmentUtils.checkTpCanActivate(config.source_rfc, config.target_rfc)
-      ) {
-        SegmentUtils.checkTPEnabled()
-          ? tagProjectionCheck.attr('checked', true)
-          : tagProjectionCheck.attr('checked', false)
-        tagProjectionCheck.on(
-          'change',
-          this.toggleTagProjectionOption.bind(this),
-        )
-      } else {
-        var tpContainer = $('.options-box.tagp')
-
-        $('.options-box #tagp_check')
-          .prop('disabled', true)
-          .attr('checked', false)
-        if (config.isReview) {
-          tpContainer.addClass('option-unavailable-revise')
-        } else {
-          var sourceLang = config.languages_array.find(function (e) {
-            return e.code === config.source_rfc
-          })
-          var targetLang = config.languages_array.find(function (e) {
-            return e.code === config.target_rfc
-          })
-          sourceLang = sourceLang ? sourceLang.name : config.source_rfc
-          targetLang = targetLang ? targetLang.name : config.target_rfc
-          var label = sourceLang + ' - ' + targetLang
-          tpContainer.find('.option-notsupported-languages').html(label)
-        }
-        tpContainer.addClass('option-unavailable')
-      }
+      // if (
+      //   SegmentUtils.checkTpCanActivate(config.source_rfc, config.target_rfc)
+      // ) {
+      //   SegmentUtils.checkTPEnabled()
+      //     ? tagProjectionCheck.attr('checked', true)
+      //     : tagProjectionCheck.attr('checked', false)
+      //   tagProjectionCheck.on(
+      //     'change',
+      //     this.toggleTagProjectionOption.bind(this),
+      //   )
+      // } else {
+      //   var tpContainer = $('.options-box.tagp')
+      //
+      //   $('.options-box #tagp_check')
+      //     .prop('disabled', true)
+      //     .attr('checked', false)
+      //   if (config.isReview) {
+      //     tpContainer.addClass('option-unavailable-revise')
+      //   } else {
+      //     var sourceLang = config.languages_array.find(function (e) {
+      //       return e.code === config.source_rfc
+      //     })
+      //     var targetLang = config.languages_array.find(function (e) {
+      //       return e.code === config.target_rfc
+      //     })
+      //     sourceLang = sourceLang ? sourceLang.name : config.source_rfc
+      //     targetLang = targetLang ? targetLang.name : config.target_rfc
+      //     var label = sourceLang + ' - ' + targetLang
+      //     tpContainer.find('.option-notsupported-languages').html(label)
+      //   }
+      //   tpContainer.addClass('option-unavailable')
+      // }
       //Check Speech To Text
       /*if (!('webkitSpeechRecognition' in window)) {
         var speech2textContainer = $('.s2t-box')
@@ -173,10 +173,10 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       selected ? Speech2Text.enable() : Speech2Text.disable()
     },*/
 
-    toggleTagProjectionOption: function () {
-      var selected = $('.tagp #tagp_check').is(':checked')
-      selected ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob()
-    },
+    // toggleTagProjectionOption: function () {
+    //   var selected = $('.tagp #tagp_check').is(':checked')
+    //   selected ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob()
+    // },
 
     checkDqfCanActivate: function () {
       return !!config.dqf_enabled
@@ -184,7 +184,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
     checkDqfIsActive: function () {
       return config.dqf_active_on_project
     },
-    setTagProjectionChecked: (value) =>
-      ($('.tagp #tagp_check')[0].checked = value),
+    // setTagProjectionChecked: (value) =>
+    //   ($('.tagp #tagp_check')[0].checked = value),
   })
 })(jQuery, UI)

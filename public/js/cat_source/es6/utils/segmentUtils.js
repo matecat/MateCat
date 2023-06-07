@@ -93,7 +93,7 @@ const SegmentUtils = {
    * Tag Projection: check if is enable the Tag Projection
    */
   checkTPEnabled: function () {
-    return !!config.tag_projection_enabled
+    return !!config.tag_projection_enabled && !!!config.isReview
   },
   /**
    * Check if the  the Tag Projection in the current segment is enabled and still not tagged

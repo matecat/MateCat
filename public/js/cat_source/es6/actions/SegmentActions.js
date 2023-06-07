@@ -30,6 +30,7 @@ import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
+import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -285,9 +286,13 @@ const SegmentActions = {
     })
   },
   changeTagProjectionStatus: function (enabled) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_GUESS_TAGS,
-      enabled: enabled,
+    //TODO: transform paremeter to bool
+    config.tag_projection_enabled = enabled ? 1 : 0
+    toggleTagProjectionJob({enabled}).then(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SET_GUESS_TAGS,
+        enabled: enabled,
+      })
     })
   },
   /**
