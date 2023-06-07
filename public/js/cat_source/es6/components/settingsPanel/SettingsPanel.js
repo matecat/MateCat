@@ -44,6 +44,8 @@ export const SettingsPanel = ({
   setGuessTagActive,
   sourceLang,
   targetLangs,
+  lexiqaActive,
+  setLexiqaActive,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
@@ -90,6 +92,8 @@ export const SettingsPanel = ({
         setGuessTagActive,
         sourceLang,
         targetLangs,
+        lexiqaActive,
+        setLexiqaActive,
       }}
     >
       <div className="settings-panel">

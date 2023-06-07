@@ -36,6 +36,7 @@ function CatTool() {
   const [guessTagActive, setGuessTagActive] = useState(
     SegmentUtils.checkTPEnabled(),
   )
+  const [lexiqaActive, setLexiqaActive] = useState(LXQ.checkCanActivate())
   const [speechToTextActive, setSpeechToTextActive] = useState(
     Speech2TextFeature.enabled(),
   )
@@ -332,6 +333,8 @@ function CatTool() {
               code: config.target_rfc,
             },
           ]}
+          lexiqaActive={lexiqaActive}
+          setLexiqaActive={setLexiqaActive}
         />
       )}
       <CattolFooter

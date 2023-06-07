@@ -84,7 +84,7 @@ export const GuessTag = ({
         Enable this functionality to let Matecat automatically place the tags
         where they belong.
         <a
-          className="tooltip-guess-tags"
+          className="tooltip-options"
           href="https://guides.matecat.com/guess-tag-position"
           target="_blank"
         >

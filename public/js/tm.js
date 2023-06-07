@@ -39,7 +39,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     initTM: function () {
       // script per lo slide del pannello di manage tmx
       UI.setDropDown()
-      UI.initOptionsTip()
+      //UI.initOptionsTip()
       UI.initTmxTooltips()
       //Fix: When you move to a page using the browser arrow the checkbox seems to be not checked
       $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true)
@@ -2087,31 +2087,31 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         UI.showErrorOnActiveTMTable(message)
       }
     },
-    initOptionsTip: function () {
-      var acceptedLanguagesLXQ = config.lexiqa_languages.slice()
-      var lexiqaText =
-        "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Any combination of the supported languages:</div>" +
-        '<ul>'
-      acceptedLanguagesLXQ.forEach(function (elem) {
-        var lang = config.languages_array.find(function (e) {
-          return e.code === elem
-        })
-        if (lang && lang.name) {
-          lexiqaText =
-            lexiqaText +
-            "<li class='powerTip-options-tm-list'>" +
-            lang.name +
-            '</li>'
-        }
-      })
-      lexiqaText = lexiqaText + '</ul></div>'
-
-      $('.tooltip-lexiqa').data('powertip', lexiqaText)
-      $('.tooltip-lexiqa').powerTip({
-        placement: 's',
-        mouseOnToPopup: true,
-      })
-    },
+    // initOptionsTip: function () {
+    //   var acceptedLanguagesLXQ = config.lexiqa_languages.slice()
+    //   var lexiqaText =
+    //     "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Any combination of the supported languages:</div>" +
+    //     '<ul>'
+    //   acceptedLanguagesLXQ.forEach(function (elem) {
+    //     var lang = config.languages_array.find(function (e) {
+    //       return e.code === elem
+    //     })
+    //     if (lang && lang.name) {
+    //       lexiqaText =
+    //         lexiqaText +
+    //         "<li class='powerTip-options-tm-list'>" +
+    //         lang.name +
+    //         '</li>'
+    //     }
+    //   })
+    //   lexiqaText = lexiqaText + '</ul></div>'
+    //
+    //   $('.tooltip-lexiqa').data('powertip', lexiqaText)
+    //   $('.tooltip-lexiqa').powerTip({
+    //     placement: 's',
+    //     mouseOnToPopup: true,
+    //   })
+    // },
 
     initTmxTooltips: function () {
       //Description input
@@ -2166,25 +2166,25 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       })
     },
 
-    setLanguageTooltipLXQ: function () {
-      var lxTooltip = $('.tooltip-lexiqa').data('powertip')
+    // setLanguageTooltipLXQ: function () {
+    //   var lxTooltip = $('.tooltip-lexiqa').data('powertip')
+    //
+    //   $('.qa-box .onoffswitch-container').data('powertip', lxTooltip)
+    //   $('.qa-box .onoffswitch-container').powerTip({
+    //     placement: 's',
+    //     mouseOnToPopup: true,
+    //   })
+    // },
 
-      $('.qa-box .onoffswitch-container').data('powertip', lxTooltip)
-      $('.qa-box .onoffswitch-container').powerTip({
-        placement: 's',
-        mouseOnToPopup: true,
-      })
-    },
+    // removeTooltipTP: function () {
+    //   $('.qa-box .onoffswitch-container').powerTip('destroy')
+    //   $('.tagp .onoffswitch-container').powerTip('destroy')
+    // },
 
-    removeTooltipTP: function () {
+    /*    removeTooltipLXQ: function () {
       $('.qa-box .onoffswitch-container').powerTip('destroy')
       $('.tagp .onoffswitch-container').powerTip('destroy')
-    },
-
-    removeTooltipLXQ: function () {
-      $('.qa-box .onoffswitch-container').powerTip('destroy')
-      $('.tagp .onoffswitch-container').powerTip('destroy')
-    },
+    },*/
 
     checkTMKeysUpdateChecks: function () {
       var updateCheck = $('#activetm').find(

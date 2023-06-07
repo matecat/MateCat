@@ -9,9 +9,9 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
 ;(function ($, UI) {
   $.extend(UI, {
     initAdvanceOptions: function () {
-      var lexiqaCheck = $('.qa-box #lexi_qa')
+      // var lexiqaCheck = $('.qa-box #lexi_qa')
       // var speech2textCheck = $('.s2t-box #s2t_check')
-      var tagProjectionCheck = $('.tagp #tagp_check')
+      // var tagProjectionCheck = $('.tagp #tagp_check')
       var dqfCheck = $('.dqf-box #dqf_switch')
       var segmentationRule =
         config.segmentation_rule === '' ||
@@ -34,10 +34,10 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
         )
       })
       //Check Lexiqa check
-      if (LXQ.checkCanActivate()) {
-        LXQ.enabled()
-          ? lexiqaCheck.attr('checked', true)
-          : lexiqaCheck.attr('checked', false)
+      /*if (LXQ.checkCanActivate()) {
+        // LXQ.enabled()
+        //   ? lexiqaCheck.attr('checked', true)
+        //   : lexiqaCheck.attr('checked', false)
         lexiqaCheck.on('change', this.toggleLexiqaOption.bind(this))
       } else {
         var notAcceptedLanguages = []
@@ -66,7 +66,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
         $('.options-box #lexi_qa').prop('disabled', true).attr('checked', false)
         LXQContainer.addClass('option-unavailable')
         UI.setLanguageTooltipLXQ()
-      }
+      }*/
       //Check Tag Projection
       // if (
       //   SegmentUtils.checkTpCanActivate(config.source_rfc, config.target_rfc)
@@ -163,10 +163,10 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       }
     },
 
-    toggleLexiqaOption: function () {
+    /*   toggleLexiqaOption: function () {
       var selected = $('.qa-box #lexi_qa').is(':checked')
       selected ? LXQ.enable() : LXQ.disable()
-    },
+    },*/
 
     /*    toggleSpeech2TextOption: function () {
       var selected = $('.s2t-box #s2t_check').is(':checked')

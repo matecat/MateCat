@@ -29,6 +29,7 @@ import {
 } from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
+import LXQ from '../utils/lxq.main'
 
 const SELECT_HEIGHT = 324
 
@@ -78,6 +79,7 @@ const NewProject = ({
   const [guessTagActive, setGuessTagActive] = useState(
     !!config.defaults.tag_projection,
   )
+  const [lexiqaActive, setLexiqaActive] = useState(!!config.defaults.lexiqa)
 
   const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
@@ -192,10 +194,16 @@ const NewProject = ({
 
   useEffect(() => {
     if (sourceLang) {
-      APP.changeSourceLang(sourceLang.id)
+      const lang = sourceLang.id
+      if (localStorage.getItem('currentSourceLang') != lang) {
+        localStorage.setItem('currentSourceLang', lang)
+      }
     }
     if (targetLangs) {
-      APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
+      const lang = targetLangs.map((lang) => lang.id).join()
+      if (localStorage.getItem('currentTargetLang') != lang) {
+        localStorage.setItem('currentTargetLang', lang)
+      }
     }
     APP.checkForLexiQALangs(sourceLang)
     setGuessTagActive(
@@ -520,6 +528,8 @@ const NewProject = ({
           setGuessTagActive={setGuessTagActive}
           sourceLang={sourceLang}
           targetLangs={targetLangs}
+          lexiqaActive={lexiqaActive}
+          setLexiqaActive={setLexiqaActive}
         />
       )}
       <Footer />

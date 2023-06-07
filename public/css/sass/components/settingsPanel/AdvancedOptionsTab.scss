@@ -7,7 +7,7 @@
 .options-box {
   margin: 0;
   width: 96%;
-  float: left;
+  display: flex;
   padding: 30px 0;
   border-bottom: 1px solid #eee;
 }
@@ -80,5 +80,17 @@
 .options-box p span.option-tagp-languages {
   line-height: 25px;
   font-weight: bold;
+}
+
+.options-box p span.option-notsupported-languages {
+  margin-left: 6px;
+}
+
+.tooltip-options {
+  cursor: help;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #000;
+  cursor: pointer;
   margin-left: 6px;
 }

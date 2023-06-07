@@ -4,6 +4,7 @@ import Switch from '../../../common/Switch'
 import {SpeechToText} from './SpeechToText'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {GuessTag} from './GuessTag'
+import {Lexiqa} from './Lexiqa'
 
 export const AdvancedOptionsTab = () => {
   const {
@@ -12,6 +13,8 @@ export const AdvancedOptionsTab = () => {
     setGuessTagActive,
     sourceLang,
     targetLangs,
+    lexiqaActive,
+    setLexiqaActive,
   } = useContext(SettingsPanelContext)
   return (
     <div className="advanced-options-box">
@@ -27,6 +30,13 @@ export const AdvancedOptionsTab = () => {
           targetLangs={targetLangs}
         />
       )}
+
+      <Lexiqa
+        lexiqaActive={lexiqaActive}
+        setLexiqaActive={setLexiqaActive}
+        sourceLang={sourceLang}
+        targetLangs={targetLangs}
+      />
 
       {config.is_cattool && (
         <div className="options-box charscounter">

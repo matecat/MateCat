@@ -67,6 +67,7 @@
                 speech2text : false,
                 lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
             },
+            lxq_license: '${lxq_license | string:}',
             lexiqa_languages: ${lexiqa_languages| string:[]},
             tag_projection_languages: ${tag_projection_languages},
             languages_array : ${languages_array},

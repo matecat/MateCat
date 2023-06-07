@@ -66,25 +66,24 @@ window.clearNotCompletedUploads = function () {
   clearNotCompletedUploadsApi()
 }
 
-APP.changeTargetLang = function (lang) {
-  if (localStorage.getItem('currentTargetLang') != lang) {
-    localStorage.setItem('currentTargetLang', lang)
-  }
-}
-
-APP.changeSourceLang = function (lang) {
-  if (localStorage.getItem('currentSourceLang') != lang) {
-    localStorage.setItem('currentSourceLang', lang)
-  }
-}
+// APP.changeTargetLang = function (lang) {
+//   if (localStorage.getItem('currentTargetLang') != lang) {
+//     localStorage.setItem('currentTargetLang', lang)
+//   }
+// }
+//
+// APP.changeSourceLang = function (lang) {
+//   if (localStorage.getItem('currentSourceLang') != lang) {
+//     localStorage.setItem('currentSourceLang', lang)
+//   }
+// }
 
 /**
  * Disable/Enable languages for LexiQA
  *
  */
-APP.checkForLexiQALangs = function (source) {
-  /*var acceptedLanguages = config.lexiqa_languages.slice()
-  var LXQCheck = $('.options-box.qa-box')
+/*APP.checkForLexiQALangs = function (source) {
+  var acceptedLanguages = config.lexiqa_languages.slice()
   var notAcceptedLanguages = []
   var targetLanguages = localStorage.getItem('currentTargetLang').split(',')
   var sourceAccepted = acceptedLanguages.indexOf(source.code) > -1
@@ -102,12 +101,6 @@ APP.checkForLexiQALangs = function (source) {
   if (!sourceAccepted) {
     notAcceptedLanguages.push(source.name)
   }
-
-  LXQCheck.find('.onoffswitch').off('click')
-  $('.options-box #lexi_qa').removeAttr('disabled')
-  LXQCheck.removeClass('option-unavailable')
-  LXQCheck.find('.option-qa-box-languages').hide()
-  UI.removeTooltipLXQ()
   //disable LexiQA
   var disableLexiQA = !(
     sourceAccepted &&
@@ -115,24 +108,18 @@ APP.checkForLexiQALangs = function (source) {
     config.defaults.lexiqa
   )
   if (notAcceptedLanguages.length > 0) {
-    LXQCheck.find('.option-notsupported-languages')
-      .html(notAcceptedLanguages.join(', '))
-      .show()
-    LXQCheck.find('.option-qa-box-languages').show()
+    //Languages not supported
   }
   if (!(sourceAccepted && targetAccepted)) {
-    LXQCheck.addClass('option-unavailable')
-    $('.options-box #lexi_qa').prop('disabled', disableLexiQA)
-    UI.setLanguageTooltipLXQ()
+    //Disable
   }
-  $('.options-box #lexi_qa').attr('checked', !disableLexiQA)*/
-}
+}*/
 
 /**
  * Disable/Enable languages for LexiQA
  *
  */
-APP.checkForTagProjectionLangs = function (source) {
+/*APP. = function (source) {
   if ($('.options-box #tagp_check').length == 0) return
 
   var acceptedLanguages = config.tag_projection_languages
@@ -189,7 +176,7 @@ APP.checkForTagProjectionLangs = function (source) {
     $('.options-box #tagp_check').prop('disabled', disableTP)
   }
   $('.options-box #tagp_check').attr('checked', !disableTP)
-}
+}*/
 
 APP.getDQFParameters = function () {
   var dqf = {
