@@ -90,25 +90,6 @@ export const AdvancedOptionsTab = () => {
           <option value="paragraph">Paragraph (beta)</option>
         </select>
       </div>
-
-      {/*DQF
-    TODO:
-     - check if enabled dqf_enabled
-     - show onli for logged user?
-     - check parameters in login modal
-  */}
-      <div className="options-box dqf-box">
-        <h3>DQF </h3>
-        <p>
-          Enable this option to use DQF in Matecat.
-          <span className="dqf-settings">Open Settings</span>
-        </p>
-        {/*<p tal:condition="php: empty(logged_user)">*/}
-        {/*  Login and set your DQF credentials to use DQF in Matecat.*/}
-        {/*</p>*/}
-
-        <Switch />
-      </div>
     </div>
   )
 }

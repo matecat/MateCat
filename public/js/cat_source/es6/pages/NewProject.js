@@ -211,7 +211,6 @@ const NewProject = ({
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
-    APP.checkForDqf()
     APP.checkGDriveEvents()
     UI.addEvents()
     setGuessTagActive(

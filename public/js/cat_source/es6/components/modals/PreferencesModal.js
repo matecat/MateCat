@@ -1,6 +1,5 @@
 import React from 'react'
 
-import DQFCredentials from './DQFCredentials'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {getUserApiKey} from '../../api/getUserApiKey'
@@ -99,17 +98,6 @@ class PreferencesModal extends React.Component {
         window.location.reload()
       }
     })
-  }
-
-  getDqfHtml() {
-    if (config.dqf_enabled === 1) {
-      return (
-        <div className="dqf-container">
-          <h2>DQF Credentials</h2>
-          <DQFCredentials metadata={this.props.metadata} />
-        </div>
-      )
-    }
   }
 
   generateKey() {
@@ -393,21 +381,10 @@ class PreferencesModal extends React.Component {
           <div className="user-reset-password">{gdriveMessage}</div>
           {this.getApiKeyHtml()}
           {googleDrive}
-          {this.getDqfHtml()}
         </div>
       </div>
     )
   }
 }
-
-const fieldValidations = [
-  RuleRunner.ruleRunner('dqfUsername', 'Username', FormRules.requiredRule),
-  RuleRunner.ruleRunner(
-    'dqfPassword',
-    'Password',
-    FormRules.requiredRule,
-    FormRules.minLength(8),
-  ),
-]
 
 export default PreferencesModal

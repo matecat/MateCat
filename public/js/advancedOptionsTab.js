@@ -12,14 +12,12 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       // var lexiqaCheck = $('.qa-box #lexi_qa')
       // var speech2textCheck = $('.s2t-box #s2t_check')
       // var tagProjectionCheck = $('.tagp #tagp_check')
-      var dqfCheck = $('.dqf-box #dqf_switch')
       var segmentationRule =
         config.segmentation_rule === '' ||
         config.segmentation_rule === 'standard'
           ? ''
           : config.segmentation_rule
 
-      $('.mgmt-table-options .options-box.dqf_options_box').hide()
       $('.mgmt-table-options .options-box.seg_rule select#segm_rule')
         .val(segmentationRule)
         .attr('disabled', true)
@@ -127,18 +125,6 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
           : speech2textCheck.attr('checked', false)
       }*/
 
-      // Check DQF
-      if (UI.checkDqfCanActivate()) {
-        UI.checkDqfIsActive()
-          ? dqfCheck.attr('checked', true)
-          : dqfCheck.attr('checked', false)
-        dqfCheck.prop('disabled', true)
-
-        $('.dqf-box .dqf-settings').on('click', function () {
-          ModalsActions.openDQFModal()
-        })
-      }
-
       // Check character counter
       const charscounterCheck = document.getElementById('charscounter_check')
       charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
@@ -178,12 +164,6 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
     //   selected ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob()
     // },
 
-    checkDqfCanActivate: function () {
-      return !!config.dqf_enabled
-    },
-    checkDqfIsActive: function () {
-      return config.dqf_active_on_project
-    },
     // setTagProjectionChecked: (value) =>
     //   ($('.tagp #tagp_check')[0].checked = value),
   })

@@ -178,27 +178,6 @@ window.clearNotCompletedUploads = function () {
   $('.options-box #tagp_check').attr('checked', !disableTP)
 }*/
 
-APP.getDQFParameters = function () {
-  var dqf = {
-    dqfEnabled: false,
-  }
-  if (!config.dqf_enabled) {
-    return dqf
-  }
-
-  dqf.dqfEnabled = !!(
-    $('#dqf_switch').prop('checked') && !$('#dqf_switch').prop('disabled')
-  )
-
-  if (dqf.dqfEnabled) {
-    dqf.dqf_content_type = APP.USER.STORE.metadata.dqf_options.contentType
-    dqf.dqf_industry = APP.USER.STORE.metadata.dqf_options.industry
-    dqf.dqf_process = APP.USER.STORE.metadata.dqf_options.process
-    dqf.dqf_quality_level = APP.USER.STORE.metadata.dqf_options.qualityLevel
-  }
-  return dqf
-}
-
 APP.getCreateProjectParams = function ({
   projectName,
   sourceLang,
@@ -209,7 +188,6 @@ APP.getCreateProjectParams = function ({
   speech2text,
   guessTags,
 }) {
-  var dqf = APP.getDQFParameters()
   return {
     action: 'createProject',
     file_name: APP.getFilenameFromUploadedFiles(),
@@ -228,11 +206,6 @@ APP.getCreateProjectParams = function ({
     tag_projection: guessTags,
     segmentation_rule: $('#segm_rule').val(),
     id_team: selectedTeam,
-    dqf: dqf.dqfEnabled,
-    dqf_content_type: dqf.dqf_content_type,
-    dqf_industry: dqf.dqf_industry,
-    dqf_process: dqf.dqf_process,
-    dqf_quality_level: dqf.dqf_quality_level,
     get_public_matches: $('#activetm')
       .find('tr.mymemory .lookup input')
       .is(':checked'),
@@ -247,44 +220,6 @@ APP.getFilenameFromUploadedFiles = function () {
     files += '@@SEP@@' + $(this).text()
   })
   return files.substr(7)
-}
-
-APP.checkForDqf = function () {
-  var dqfCheck = $('.dqf-box #dqf_switch')
-  dqfCheck.prop('disabled', false)
-  dqfCheck.prop('checked', false)
-  $('.dqf-box .dqf-settings').on('click', function () {
-    ModalsActions.openDQFModal()
-  })
-
-  dqfCheck.off('click').on('click', function (e) {
-    if (dqfCheck.prop('checked')) {
-      if (_.isUndefined(APP.USER.STORE.metadata)) {
-        e.stopPropagation()
-        e.preventDefault()
-        $('#modal').trigger('openlogin')
-        return
-      } else if (
-        !_.isUndefined(APP.USER.STORE.metadata) &&
-        (_.isUndefined(APP.USER.STORE.metadata.dqf_username) ||
-          _.isUndefined(APP.USER.STORE.metadata.dqf_options))
-      ) {
-        e.stopPropagation()
-        e.preventDefault()
-      }
-      ModalsActions.openDQFModal()
-    }
-  })
-
-  dqfCheck.on('dqfEnable', function () {
-    dqfCheck.attr('checked', true)
-    dqfCheck.prop('checked', true)
-  })
-
-  dqfCheck.on('dqfDisable', function () {
-    dqfCheck.attr('checked', false)
-    dqfCheck.prop('checked', false)
-  })
 }
 
 UI.UPLOAD_PAGE = {}
