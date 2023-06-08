@@ -56,7 +56,7 @@ export const ImportGlossary = ({row, onClose}) => {
     <div className="translation-memory-glossary-tab-import">
       <form
         ref={formRef}
-        className={`import-form${isErrorUpload ? ' import-form-error' : ''}`}
+        className={`action-form${isErrorUpload ? ' action-form-error' : ''}`}
         onSubmit={onSubmit}
         onReset={onReset}
       >

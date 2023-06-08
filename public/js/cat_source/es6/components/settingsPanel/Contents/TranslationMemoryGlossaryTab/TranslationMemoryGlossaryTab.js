@@ -253,7 +253,7 @@ export const TranslationMemoryGlossaryTab = () => {
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Inactive Resources</h2>
             <input
-              className="filter-resources"
+              className="translation-memory-glossary-tab-input-text"
               placeholder="Search resources"
               value={filterInactiveKeys}
               onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}

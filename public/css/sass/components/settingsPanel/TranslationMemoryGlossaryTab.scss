@@ -27,12 +27,12 @@
     flex-grow: 1;
     text-align: left;
   }
+}
 
-  .filter-resources {
-    border-radius: 2px;
-    border: 1px solid $grey8;
-    padding: 6px;
-  }
+.translation-memory-glossary-tab-input-text {
+  border-radius: 2px;
+  border: 1px solid $grey8;
+  padding: 6px;
 }
 
 .translation-memory-glossary-tab {
@@ -138,13 +138,14 @@
   }
 }
 
-.translation-memory-glossary-tab-import {
+.translation-memory-glossary-tab-import,
+.translation-memory-glossary-tab-export {
   display: flex;
   flex-direction: column;
   padding: 10px;
   min-height: 50px;
 
-  .import-form {
+  .action-form {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -153,11 +154,12 @@
     > :first-child {
       display: flex;
       gap: 10px;
+      align-items: center;
     }
   }
 
-  .import-form-error {
-    input[type='file'] {
+  .action-form-error {
+    input {
       color: $redDefault;
     }
   }
@@ -221,5 +223,22 @@
         padding: 4px;
       }
     }
+  }
+
+  .export-successfull {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+
+    > :last-child {
+      color: $approvedGreenHover;
+    }
+  }
+}
+
+.translation-memory-glossary-tab-export {
+  .translation-memory-glossary-tab-input-text {
+    width: 300px;
   }
 }
