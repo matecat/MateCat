@@ -205,7 +205,6 @@ const NewProject = ({
         localStorage.setItem('currentTargetLang', lang)
       }
     }
-    APP.checkForLexiQALangs(sourceLang)
     setGuessTagActive(
       SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
     )
