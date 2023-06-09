@@ -44,7 +44,7 @@ export const AdvancedOptionsTab = () => {
 
       {config.is_cattool && <CharacterCounter />}
 
-      <AiAssistant />
+      {config.is_cattool && config.isOpenAiEnabled && <AiAssistant />}
 
       <CrossLanguagesMatches />
 
