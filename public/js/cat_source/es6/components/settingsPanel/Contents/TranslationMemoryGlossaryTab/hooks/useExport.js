@@ -43,8 +43,8 @@ function useExport({type, row, onClose}) {
           type: 'error',
           message: errorsObject.message,
           rowKey: row.key,
-        }),
-          setStatus({errors: errorsObject})
+        })
+        setStatus({errors: errorsObject})
       })
 
     event.preventDefault()

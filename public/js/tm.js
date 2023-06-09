@@ -2026,6 +2026,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       $(elem).parents('tr').append(nr)
       $(elem).parents('tr').find('.uploadfile').slideToggle()
     },
+    // TODO: eliminare
     showErrorOnActiveTMTable: function (message) {
       setTimeout(function () {
         $('.mgmt-container .active-tm-container .tm-error-message')
@@ -2068,6 +2069,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
           .fadeIn(100)
       })
     },
+    // fine
 
     hideAllBoxOnTables: function () {
       $(
@@ -2195,6 +2197,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         $('#activetm').find('tr.mymemory .update input').prop('checked', false)
       }
     },
+    // TODO: eliminare
     clickOnShareButton(button) {
       var tr = button.closest('tr')
       var key = tr.data('key')
