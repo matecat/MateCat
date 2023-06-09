@@ -80,6 +80,9 @@ const NewProject = ({
     !!config.defaults.tag_projection,
   )
   const [lexiqaActive, setLexiqaActive] = useState(!!config.defaults.lexiqa)
+  const [multiMatchLangs, setMultiMatchLangs] = useState(
+    SegmentUtils.checkCrossLanguageSettings(),
+  )
 
   const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
@@ -528,6 +531,8 @@ const NewProject = ({
           targetLangs={targetLangs}
           lexiqaActive={lexiqaActive}
           setLexiqaActive={setLexiqaActive}
+          multiMatchLangs={multiMatchLangs}
+          setMultiMatchLangs={setMultiMatchLangs}
         />
       )}
       <Footer />

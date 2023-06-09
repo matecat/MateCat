@@ -197,6 +197,14 @@ const SegmentUtils = {
       : false
   },
   /**
+   * Check Multi match languages
+   */
+  checkCrossLanguageSettings: function () {
+    const settings = localStorage.getItem('multiMatchLangs')
+    if (settings) return JSON.parse(settings)
+    return undefined
+  },
+  /**
    * Retrieve the file id of a segment
    * NOTE: used by plugins
    * @param segment

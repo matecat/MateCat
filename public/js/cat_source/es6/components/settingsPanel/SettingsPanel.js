@@ -46,6 +46,8 @@ export const SettingsPanel = ({
   targetLangs,
   lexiqaActive,
   setLexiqaActive,
+  multiMatchLangs,
+  setMultiMatchLangs,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
@@ -94,6 +96,8 @@ export const SettingsPanel = ({
         targetLangs,
         lexiqaActive,
         setLexiqaActive,
+        multiMatchLangs,
+        setMultiMatchLangs,
       }}
     >
       <div className="settings-panel">

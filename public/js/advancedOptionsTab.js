@@ -126,12 +126,12 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       }*/
 
       // Check character counter
-      const charscounterCheck = document.getElementById('charscounter_check')
+      /*const charscounterCheck = document.getElementById('charscounter_check')
       charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
-      charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
+      charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()*/
 
       // Check Ai Asisstant
-      if (config.isOpenAiEnabled) {
+      /*if (config.isOpenAiEnabled) {
         const aiAssistantCheck = document.getElementById('ai-assistant_check')
         aiAssistantCheck.checked = SegmentUtils.isAiAssistantAuto()
         aiAssistantCheck.onchange = () => {
@@ -147,7 +147,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
             !SegmentUtils.isAiAssistantAuto(),
           )
         }
-      }
+      }*/
     },
 
     /*   toggleLexiqaOption: function () {

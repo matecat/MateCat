@@ -81,7 +81,6 @@
 .select-with-icon__wrapper {
   display: flex;
   position: relative;
-  z-index: 1;
   text-align: left;
 
   input + svg {
@@ -130,7 +129,7 @@
 .select__dropdown-wrapper:not(.select__dropdown-wrapper--is-multiselect) {
   position: absolute;
   top: 100%;
-  z-index: 1;
+  z-index: 2;
   width: 100%;
 
   &.select__dropdown--is-reversed {

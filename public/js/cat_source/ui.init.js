@@ -11,7 +11,6 @@ $.extend(window.UI, {
     // of SegmentFilter, see below.
     UI.firstLoad = true
     UI.body = $('body')
-    // UI.checkCrossLanguageSettings()
     CommonUtils.setBrowserHistoryBehavior()
 
     // page content mount point

@@ -19,6 +19,8 @@ export const AdvancedOptionsTab = () => {
     targetLangs,
     lexiqaActive,
     setLexiqaActive,
+    multiMatchLangs,
+    setMultiMatchLangs,
   } = useContext(SettingsPanelContext)
   return (
     <div className="advanced-options-box">
@@ -46,7 +48,10 @@ export const AdvancedOptionsTab = () => {
 
       {config.is_cattool && config.isOpenAiEnabled && <AiAssistant />}
 
-      <CrossLanguagesMatches />
+      <CrossLanguagesMatches
+        multiMatchLangs={multiMatchLangs}
+        setMultiMatchLangs={setMultiMatchLangs}
+      />
 
       {!config.is_cattool && <SegmentationRule />}
     </div>

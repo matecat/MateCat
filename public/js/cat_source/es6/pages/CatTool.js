@@ -40,6 +40,9 @@ function CatTool() {
   const [speechToTextActive, setSpeechToTextActive] = useState(
     Speech2TextFeature.enabled(),
   )
+  const [multiMatchLangs, setMultiMatchLangs] = useState(
+    SegmentUtils.checkCrossLanguageSettings(),
+  )
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -335,6 +338,8 @@ function CatTool() {
           ]}
           lexiqaActive={lexiqaActive}
           setLexiqaActive={setLexiqaActive}
+          multiMatchLangs={multiMatchLangs}
+          setMultiMatchLangs={setMultiMatchLangs}
         />
       )}
       <CattolFooter
