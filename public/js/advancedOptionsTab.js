@@ -129,6 +129,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
       const charscounterCheck = document.getElementById('charscounter_check')
       charscounterCheck.checked = SegmentUtils.isCharacterCounterEnable()
       charscounterCheck.onchange = () => SegmentActions.toggleCharacterCounter()
+
       // Check Ai Asisstant
       if (config.isOpenAiEnabled) {
         const aiAssistantCheck = document.getElementById('ai-assistant_check')
