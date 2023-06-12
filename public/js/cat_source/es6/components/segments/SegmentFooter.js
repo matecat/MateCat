@@ -101,7 +101,7 @@ function SegmentFooter() {
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
 
-  const {segment, clientConnected} = useContext(SegmentContext)
+  const {segment, clientConnected, multiMatchLangs} = useContext(SegmentContext)
 
   const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
@@ -246,9 +246,7 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasMultiMatches = Boolean(
-      UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
-    )
+    const hasMultiMatches = Boolean(multiMatchLangs && multiMatchLangs.primary)
 
     setTabItems((prevState) =>
       prevState.map((item) => ({
@@ -269,7 +267,7 @@ function SegmentFooter() {
         }),
       })),
     )
-  }, [segment])
+  }, [segment, multiMatchLangs])
 
   // check if no tab is open
   useEffect(() => {

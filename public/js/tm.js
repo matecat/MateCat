@@ -2282,37 +2282,37 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       return promise
     },
 
-    storeMultiMatchLangs: function () {
-      var primary = $('#multi-match-1').val()
-        ? $('#multi-match-1').val()
-        : undefined
-      var secondary = $('#multi-match-2').val()
-        ? $('#multi-match-2').val()
-        : undefined
-      if (primary) {
-        $('#multi-match-2').removeAttr('disabled')
-      } else {
-        $('#multi-match-2').attr('disabled', true)
-        $('#multi-match-2').val('')
-        secondary = undefined
-      }
-      UI.crossLanguageSettings = {primary: primary, secondary: secondary}
-      localStorage.setItem(
-        'multiMatchLangs',
-        JSON.stringify(UI.crossLanguageSettings),
-      )
-      if (SegmentActions.getContribution) {
-        if (primary) {
-          SegmentActions.modifyTabVisibility('multiMatches', true)
-          $('section.loaded').removeClass('loaded')
-          SegmentActions.getContribution(UI.currentSegmentId, true)
-        } else {
-          SegmentActions.modifyTabVisibility('multiMatches', false)
-          SegmentActions.activateTab(UI.currentSegmentId, 'matches')
-          SegmentActions.updateAllSegments()
-        }
-      }
-    },
+    // storeMultiMatchLangs: function () {
+    //   var primary = $('#multi-match-1').val()
+    //     ? $('#multi-match-1').val()
+    //     : undefined
+    //   var secondary = $('#multi-match-2').val()
+    //     ? $('#multi-match-2').val()
+    //     : undefined
+    //   if (primary) {
+    //     $('#multi-match-2').removeAttr('disabled')
+    //   } else {
+    //     $('#multi-match-2').attr('disabled', true)
+    //     $('#multi-match-2').val('')
+    //     secondary = undefined
+    //   }
+    //   // UI.crossLanguageSettings = {primary: primary, secondary: secondary}
+    //   localStorage.setItem(
+    //     'multiMatchLangs',
+    //     JSON.stringify(UI.crossLanguageSettings),
+    //   )
+    //   if (SegmentActions.getContribution) {
+    //     if (primary) {
+    //       SegmentActions.modifyTabVisibility('multiMatches', true)
+    //       $('section.loaded').removeClass('loaded')
+    //       SegmentActions.getContribution(UI.currentSegmentId, true)
+    //     } else {
+    //       SegmentActions.modifyTabVisibility('multiMatches', false)
+    //       SegmentActions.activateTab(UI.currentSegmentId, 'matches')
+    //       SegmentActions.updateAllSegments()
+    //     }
+    //   }
+    // },
 
     /*checkCrossLanguageSettings: function () {
       var settings = localStorage.getItem('multiMatchLangs')

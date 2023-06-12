@@ -302,6 +302,7 @@ function CatTool() {
                 firstJobSegment={config.first_job_segment}
                 guessTagActive={guessTagActive}
                 speechToTextActive={speechToTextActive}
+                multiMatchLangs={multiMatchLangs}
               />
             </div>
           </article>

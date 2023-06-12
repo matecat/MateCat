@@ -21,25 +21,22 @@ export const CrossLanguagesMatches = ({
   )
 
   useEffect(() => {
-    UI.crossLanguageSettings = {
+    const settings = {
       primary: activeLang1?.id,
       secondary: activeLang2?.id,
     }
-    localStorage.setItem(
-      'multiMatchLangs',
-      JSON.stringify(UI.crossLanguageSettings),
-    )
-    /*if (SegmentActions.getContribution) {
-      if (primary) {
+    setMultiMatchLangs(settings)
+    localStorage.setItem('multiMatchLangs', JSON.stringify(settings))
+    if (SegmentActions.getContribution) {
+      if (settings.activeLang1) {
         SegmentActions.modifyTabVisibility('multiMatches', true)
-        $('section.loaded').removeClass('loaded')
-        SegmentActions.getContribution(UI.currentSegmentId, true)
+        SegmentActions.getContribution(UI.currentSegmentId, settings, true)
       } else {
         SegmentActions.modifyTabVisibility('multiMatches', false)
         SegmentActions.activateTab(UI.currentSegmentId, 'matches')
         SegmentActions.updateAllSegments()
       }
-    }*/
+    }
   }, [activeLang1, activeLang2])
   return (
     <div className="options-box multi-match">
@@ -57,7 +54,14 @@ export const CrossLanguagesMatches = ({
           options={languages}
           activeOption={activeLang1}
           showSearchBar={true}
-          onSelect={(lang) => setActiveLang1(lang)}
+          onToggleOption={(option) => {
+            if (activeLang1 && activeLang1.id === option.id) {
+              setActiveLang1()
+            } else {
+              setActiveLang1(option)
+            }
+          }}
+          multipleSelect="dropdown"
         />
         <Select
           name="multi-match-1"
@@ -68,7 +72,14 @@ export const CrossLanguagesMatches = ({
           activeOption={activeLang2}
           showSearchBar={true}
           isDisabled={!!!activeLang1}
-          onSelect={(lang) => setActiveLang2(lang)}
+          onToggleOption={(option) => {
+            if (activeLang2 && activeLang2.id === option.id) {
+              setActiveLang2()
+            } else {
+              setActiveLang2(option)
+            }
+          }}
+          multipleSelect="dropdown"
         />
       </div>
     </div>

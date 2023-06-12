@@ -915,14 +915,14 @@ const SegmentActions = {
     })
   },
 
-  getContributions: function (sid) {
-    TranslationMatches.getContribution(sid, 0)
-    TranslationMatches.getContribution(sid, 1)
-    TranslationMatches.getContribution(sid, 2)
+  getContributions: function (sid, multiMatchLangs) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
+    TranslationMatches.getContribution(sid, 1, multiMatchLangs)
+    TranslationMatches.getContribution(sid, 2, multiMatchLangs)
   },
 
-  getContribution: function (sid, force) {
-    TranslationMatches.getContribution(sid, 0, force)
+  getContribution: function (sid, multiMatchLangs) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
   },
 
   getContributionsSuccess: function (data, sid) {

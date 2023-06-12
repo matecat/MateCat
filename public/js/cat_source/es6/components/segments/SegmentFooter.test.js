@@ -296,7 +296,6 @@ afterAll(() => {
 require('../../../ui.core')
 require('../../../ui.segment')
 UI.start = () => {}
-UI.checkCrossLanguageSettings = () => {}
 
 const props = {
   segment: JSON.parse(
@@ -362,10 +361,10 @@ test('Rendering elements', () => {
 })
 
 test('Add tab', () => {
-  UI.crossLanguageSettings = {primary: 'it-IT'}
+  const multiMatchLangs = {primary: 'it-IT'}
   UI.registerFooterTabs()
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
     </SegmentContext.Provider>,
   )
@@ -377,10 +376,10 @@ test('Add tab', () => {
 })
 
 test('Remove tab', () => {
-  UI.crossLanguageSettings = undefined
+  const multiMatchLangs = {primary: 'it-IT'}
   UI.registerFooterTabs()
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
     </SegmentContext.Provider>,
   )

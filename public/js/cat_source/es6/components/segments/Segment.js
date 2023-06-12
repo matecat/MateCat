@@ -690,6 +690,7 @@ class Segment extends React.Component {
         segment,
         files,
         speech2textEnabledFn,
+        multiMatchLangs,
       } = this.props
       return {
         enableTagProjection: enableTagProjection && !this.props.segment.tagged,
@@ -707,6 +708,7 @@ class Segment extends React.Component {
         isReviewImproved: this.props.isReviewImproved,
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
+        multiMatchLangs,
       }
     }
 

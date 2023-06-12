@@ -44,6 +44,7 @@ function SegmentsContainer({
   firstJobSegment,
   guessTagActive,
   speechToTextActive,
+  multiMatchLangs,
 }) {
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
@@ -672,6 +673,7 @@ function SegmentsContainer({
       collectionTypeSeparator,
       guessTagActive,
       speechToTextActive,
+      multiMatchLangs,
     }
   }
 
