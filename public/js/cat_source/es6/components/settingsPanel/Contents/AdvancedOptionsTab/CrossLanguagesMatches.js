@@ -45,7 +45,7 @@ export const CrossLanguagesMatches = ({
         Get translation suggestions in other target languages you know as
         reference.
       </p>
-      <div className="multi-match-select-container">
+      <div className="options-select-container">
         <Select
           name="multi-match-1"
           id="multi-match-1"

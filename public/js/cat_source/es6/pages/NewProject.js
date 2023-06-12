@@ -83,6 +83,10 @@ const NewProject = ({
   const [multiMatchLangs, setMultiMatchLangs] = useState(
     SegmentUtils.checkCrossLanguageSettings(),
   )
+  const [segmentationRule, setSegmentationRule] = useState({
+    name: 'General',
+    id: '',
+  })
 
   const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
@@ -156,6 +160,7 @@ const NewProject = ({
           activeMT: activeMTEngine.id,
           speech2text: speechToTextActive,
           guessTags: guessTagActive,
+          segmentationRule,
         }),
       )
         .then(({data}) => {
@@ -533,6 +538,8 @@ const NewProject = ({
           setLexiqaActive={setLexiqaActive}
           multiMatchLangs={multiMatchLangs}
           setMultiMatchLangs={setMultiMatchLangs}
+          segmentationRule={segmentationRule}
+          setSegmentationRule={setSegmentationRule()}
         />
       )}
       <Footer />

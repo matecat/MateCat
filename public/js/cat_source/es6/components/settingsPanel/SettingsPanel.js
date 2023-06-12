@@ -48,6 +48,8 @@ export const SettingsPanel = ({
   setLexiqaActive,
   multiMatchLangs,
   setMultiMatchLangs,
+  segmentationRule,
+  setSegmentationRule,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(
@@ -98,6 +100,8 @@ export const SettingsPanel = ({
         setLexiqaActive,
         multiMatchLangs,
         setMultiMatchLangs,
+        segmentationRule,
+        setSegmentationRule,
       }}
     >
       <div className="settings-panel">

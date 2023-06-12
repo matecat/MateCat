@@ -187,6 +187,7 @@ APP.getCreateProjectParams = function ({
   activeMT,
   speech2text,
   guessTags,
+  segmentationRule,
 }) {
   return {
     action: 'createProject',
@@ -204,7 +205,7 @@ APP.getCreateProjectParams = function ({
     ),
     speech2text,
     tag_projection: guessTags,
-    segmentation_rule: $('#segm_rule').val(),
+    segmentation_rule: segmentationRule.id,
     id_team: selectedTeam,
     get_public_matches: $('#activetm')
       .find('tr.mymemory .lookup input')

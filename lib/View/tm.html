@@ -586,18 +586,18 @@
                                 </div>
                             </tal:block>-->
 
-                            <div class="options-box multi-match">
-                                <h3>Cross-language Matches</h3>
-                                <p>Get translation suggestions in other target languages you know as reference.</p>
-                                <select name="multi-match-1" id="multi-match-1" title="Primary language suggestion">
-                                    <option value="">Primary language suggestion</option>
-                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code"/>
-                                </select>
-                                <select name="multi-match-2" id="multi-match-2" disabled="true" title="Secondary language suggestion">
-                                    <option value="">Secondary language suggestion</option>
-                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code">Patent</option>
-                                </select>
-                            </div>
+<!--                            <div class="options-box multi-match">-->
+<!--                                <h3>Cross-language Matches</h3>-->
+<!--                                <p>Get translation suggestions in other target languages you know as reference.</p>-->
+<!--                                <select name="multi-match-1" id="multi-match-1" title="Primary language suggestion">-->
+<!--                                    <option value="">Primary language suggestion</option>-->
+<!--                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code"/>-->
+<!--                                </select>-->
+<!--                                <select name="multi-match-2" id="multi-match-2" disabled="true" title="Secondary language suggestion">-->
+<!--                                    <option value="">Secondary language suggestion</option>-->
+<!--                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code">Patent</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
 
                             <div class="options-box seg_rule">
                                 <h3>Segmentation Rules</h3>
@@ -644,14 +644,14 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
-    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-mmt" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-microsofthub" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-apertium" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-altlang" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-smartmate" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-yandextranslate" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-googletranslate" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-intento" />
+<!--    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-mmt" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-microsofthub" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-apertium" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-altlang" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-smartmate" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-yandextranslate" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-googletranslate" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-intento" />-->
 
 </div>
 </body>

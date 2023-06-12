@@ -21,6 +21,8 @@ export const AdvancedOptionsTab = () => {
     setLexiqaActive,
     multiMatchLangs,
     setMultiMatchLangs,
+    segmentationRule,
+    setSegmentationRule,
   } = useContext(SettingsPanelContext)
   return (
     <div className="advanced-options-box">
@@ -53,7 +55,10 @@ export const AdvancedOptionsTab = () => {
         setMultiMatchLangs={setMultiMatchLangs}
       />
 
-      {!config.is_cattool && <SegmentationRule />}
+      <SegmentationRule
+        segmentationRule={segmentationRule}
+        setSegmentationRule={setSegmentationRule}
+      />
     </div>
   )
 }
