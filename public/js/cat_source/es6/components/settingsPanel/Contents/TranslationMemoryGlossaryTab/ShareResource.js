@@ -110,7 +110,6 @@ export const ShareResource = ({row, onClose}) => {
             className="ui primary button settings-panel-button-icon tm-key-small-row-button"
             disabled={isFormDisabled || isErrorExport}
           >
-            <Checkmark size={16} />
             Share
           </button>
 

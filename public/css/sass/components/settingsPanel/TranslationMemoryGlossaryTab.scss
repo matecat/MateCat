@@ -121,11 +121,23 @@
 
 .tm-key-create-resource-row-input {
   width: 100%;
+  border: solid 1px $grey3;
+
+  &.error {
+    border: solid 1px $redDefault;
+  }
 }
 
 .settings-panel-row {
   .row-content-default-memory {
     grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
+  }
+  .row-content-create-resource {
+    grid-template-columns: 100%;
+
+    > form {
+      padding: 0 !important;
+    }
   }
 }
 
@@ -139,7 +151,8 @@
 }
 
 .translation-memory-glossary-tab-import,
-.translation-memory-glossary-tab-export {
+.translation-memory-glossary-tab-export,
+.translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -241,4 +254,9 @@
   .translation-memory-glossary-tab-input-text {
     width: 300px;
   }
+}
+
+.translation-memory-glossary-tab-delete {
+  border-top: 3px solid #ffcc01;
+  background-color: $orangeDefaultTransparent2;
 }

@@ -82,12 +82,11 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const onChangeName = (e) => {
     const {value: name} = e.currentTarget ?? {}
-    if (name) {
-      setName(name)
+    setName(name)
+    if (name)
       setTmKeys((prevState) =>
         prevState.map((tm) => (tm.id === row.id ? {...tm, name} : tm)),
       )
-    }
   }
 
   const isMMSharedUpdateChecked = !tmKeys.some(({w}) => w)

@@ -22,7 +22,7 @@
     border: 1px solid $grey7;
   }
 
-  :first-child {
+  > :first-child {
     border-radius: 2px 0 0 2px;
 
     &:hover {

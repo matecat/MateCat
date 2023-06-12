@@ -169,6 +169,9 @@ export const TranslationMemoryGlossaryTab = () => {
           className:
             id === SPECIAL_ROWS_ID.defaultTranslationMemory
               ? 'row-content-default-memory'
+              : id === SPECIAL_ROWS_ID.addSharedResource ||
+                id === SPECIAL_ROWS_ID.newResource
+              ? 'row-content-create-resource'
               : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />

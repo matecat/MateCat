@@ -1,20 +1,28 @@
-import React, {Fragment, useContext, useState} from 'react'
+import React, {useContext, useState} from 'react'
 import PropTypes from 'prop-types'
 import {
   SPECIAL_ROWS_ID,
   TranslationMemoryGlossaryTabContext,
 } from './TranslationMemoryGlossaryTab'
+import {tmCreateRandUser} from '../../../../api/tmCreateRandUser'
+import {createNewTmKey} from '../../../../api/createNewTmKey'
+import {checkTMKey} from '../../../../api/checkTMKey'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
 
-import Close from '../../../../../../../img/icons/Close'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
+import Close from '../../../../../../../img/icons/Close'
 
 export const TMCreateResourceRow = ({row}) => {
-  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
+  const {setTmKeys} = useContext(SettingsPanelContext)
+  const {setSpecialRows, setNotification} = useContext(
+    TranslationMemoryGlossaryTabContext,
+  )
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name ?? '')
   const [keyCode, setKeyCode] = useState('')
+  const [submitCheckErrors, setSubmitCheckErrors] = useState()
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
@@ -30,13 +38,15 @@ export const TMCreateResourceRow = ({row}) => {
 
   const onChangeName = (e) => {
     const {value: name} = e.currentTarget ?? {}
-    if (name) {
-      setName(name)
-      updateRow({isUpdating, isLookup, name})
-    }
+    setName(name)
+    if (name) updateRow({isUpdating, isLookup, name})
+    setSubmitCheckErrors(undefined)
   }
 
-  const onChangeKeyCode = (e) => setKeyCode(e.currentTarget.value)
+  const onChangeKeyCode = (e) => {
+    setKeyCode(e.currentTarget.value)
+    setSubmitCheckErrors(undefined)
+  }
 
   const updateRow = ({isLookup, isUpdating, name, keyCode}) => {
     setSpecialRows((prevState) =>
@@ -54,7 +64,7 @@ export const TMCreateResourceRow = ({row}) => {
     )
   }
 
-  const onClose = () =>
+  const onReset = () => {
     setSpecialRows((prevState) =>
       prevState.filter(
         ({id}) =>
@@ -63,8 +73,91 @@ export const TMCreateResourceRow = ({row}) => {
       ),
     )
 
+    setSubmitCheckErrors(undefined)
+  }
+
+  const onSubmit = (e) => {
+    e.preventDefault()
+
+    const isValid = validateForm()
+    if (!isValid) return
+
+    if (row.id === SPECIAL_ROWS_ID.newResource) createNewResource()
+  }
+
+  const validateForm = () => {
+    setSubmitCheckErrors(Symbol())
+    if (
+      !name ||
+      (!name && !keyCode && row.id === SPECIAL_ROWS_ID.addSharedResource)
+    )
+      return false
+
+    return true
+  }
+
+  const getNewItem = (key) => ({
+    r: isLookup,
+    w: isUpdating,
+    tm: true,
+    glos: true,
+    owner: null,
+    name,
+    key,
+    is_shared: false,
+    id: key,
+    isActive: true,
+  })
+
+  const createNewResource = () => {
+    tmCreateRandUser().then((response) => {
+      const {key} = response.data
+
+      const checkTMKeyCallback = () =>
+        checkTMKey({
+          tmKey: key,
+        })
+          .then((data) => {
+            if (data.success === true) {
+              setTmKeys((prevState) => [...prevState, getNewItem(key)])
+              onReset()
+            }
+          })
+          .catch(() => {
+            setNotification({
+              type: 'error',
+              message: 'The key is not valid.',
+            })
+          })
+
+      if (config.isLoggedIn) {
+        createNewTmKey({
+          key,
+          description: name,
+        })
+          .then(() => checkTMKeyCallback())
+          .catch((errors) => {
+            setNotification({
+              type: 'error',
+              message:
+                errors[0].code === '23000'
+                  ? 'The key you entered is invalid.'
+                  : errors[0].message,
+            })
+          })
+      }
+    })
+  }
+
+  const inputNameClasses = `tm-key-create-resource-row-input ${
+    typeof submitCheckErrors === 'symbol' && !name ? ' error' : ''
+  }`
+  const inputKeyCodeClasses = `tm-key-create-resource-row-input ${
+    typeof submitCheckErrors === 'symbol' && !keyCode ? ' error' : ''
+  }`
+
   return (
-    <Fragment>
+    <form className="settings-panel-row-content" onSubmit={onSubmit}>
       <div className="tm-key-lookup align-center">
         <input checked={isLookup} onChange={onChangeIsLookup} type="checkbox" />
       </div>
@@ -78,7 +171,7 @@ export const TMCreateResourceRow = ({row}) => {
       <div>
         <input
           placeholder="Please insert a name for the resource"
-          className="tm-key-create-resource-row-input"
+          className={inputNameClasses}
           value={name}
           onChange={onChangeName}
         ></input>
@@ -87,7 +180,7 @@ export const TMCreateResourceRow = ({row}) => {
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
           <input
             placeholder="Add the shared key here"
-            className="tm-key-create-resource-row-input"
+            className={inputKeyCodeClasses}
             value={keyCode}
             onChange={onChangeKeyCode}
           ></input>
@@ -95,18 +188,22 @@ export const TMCreateResourceRow = ({row}) => {
       </div>
       <div />
       <div className="translation-memory-glossary-tab-buttons-group">
-        <button className="ui primary button settings-panel-button-icon tm-key-small-row-button">
+        <button
+          className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+          type="submit"
+        >
           <Checkmark size={16} />
           Confirm
         </button>
         <button
           className="ui button orange tm-key-small-row-button"
-          onClick={onClose}
+          onClick={onReset}
+          type="reset"
         >
           <Close />
         </button>
       </div>
-    </Fragment>
+    </form>
   )
 }
 
