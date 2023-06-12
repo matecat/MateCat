@@ -186,7 +186,15 @@ class ProjectManagerModel {
                     if(isset($attributes['json'][$index])) {
                         $metaKey = $attributes['json'][$index];
 
-                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                        $metaDataKeys = [
+                            'id_request',
+                            'id_content',
+                            'id_order',
+                            'id_order_group',
+                            'screenshot'
+                        ];
+
+                        if(!in_array($metaKey, $metaDataKeys)){
                             $insert_values[] = [ $id_segment, $internal_id, null, $json ];
                         }
 
@@ -253,7 +261,15 @@ class ProjectManagerModel {
                         $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
                         $metaValue = strip_tags(html_entity_decode($note));
 
-                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                        $metaDataKeys = [
+                            'id_request',
+                            'id_content',
+                            'id_order',
+                            'id_order_group',
+                            'screenshot'
+                        ];
+
+                        if(in_array($metaKey, $metaDataKeys)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
