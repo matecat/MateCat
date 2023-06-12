@@ -80,6 +80,7 @@
             formats_number: ${formats_number},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
+            not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
             intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
             show_tag_projection: ${show_tag_projection | string: false},
             get_public_matches: ${get_public_matches | string: false}

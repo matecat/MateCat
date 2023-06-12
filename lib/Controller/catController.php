@@ -350,6 +350,7 @@ class catController extends viewController {
 
         $this->template->mt_engines = $this->translation_engines;
         $this->template->mt_id      = $this->chunk->id_mt_engine ;
+        $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
         $this->template->translation_engines_intento_prov_json = str_replace("\\\"","\\\\\\\"", json_encode(Intento::getProviderList())); // needed by JSON.parse() function

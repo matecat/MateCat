@@ -53,6 +53,7 @@
                 id_project: '${pid}',
                 allow_link_to_analysis: '${allow_link_to_analysis}',
                 analysis_enabled: '${analysis_enabled}',
+                not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
                 footer_show_revise_link: ${footer_show_revise_link || string: false},
                 intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
                 get job_id() {
