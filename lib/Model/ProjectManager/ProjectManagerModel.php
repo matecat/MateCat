@@ -170,7 +170,7 @@ class ProjectManagerModel {
                         $metaKey = strip_tags( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
 
                         // check for metaKey is `notes`
-                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                        if(!self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
                         }
 
@@ -267,7 +267,7 @@ class ProjectManagerModel {
                         $metaKey = $attributes['json'][$index];
                         $metaValue = $json;
 
-                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                        if(self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
