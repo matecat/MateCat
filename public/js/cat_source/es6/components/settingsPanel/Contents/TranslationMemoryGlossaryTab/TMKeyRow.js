@@ -13,6 +13,7 @@ import {ExportTMX} from './ExportTMX'
 import {ExportGlossary} from './ExportGlossary'
 import {ShareResource} from './ShareResource'
 import {DeleteResource} from './DeleteResource'
+import {updateTmKey} from '../../../../api/updateTmKey'
 
 import Earth from '../../../../../../../img/icons/Earth'
 import Lock from '../../../../../../../img/icons/Lock'
@@ -25,7 +26,9 @@ import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
-  const {setSpecialRows, ref} = useContext(TranslationMemoryGlossaryTabContext)
+  const {setSpecialRows, setNotification, ref} = useContext(
+    TranslationMemoryGlossaryTabContext,
+  )
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -89,6 +92,18 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       )
   }
 
+  const updateKeyName = () => {
+    updateTmKey({
+      key: row.key,
+      description: name,
+    }).catch((errors) => {
+      setNotification({
+        type: 'error',
+        message: errors[0].message,
+      })
+    })
+  }
+
   const isMMSharedUpdateChecked = !tmKeys.some(({w}) => w)
 
   const iconDetails = isMMSharedKey
@@ -140,6 +155,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           value={name}
           onChange={onChangeName}
           disabled={isMMSharedKey}
+          onBlur={updateKeyName}
         ></input>
       </div>
       <div>{row.key}</div>
