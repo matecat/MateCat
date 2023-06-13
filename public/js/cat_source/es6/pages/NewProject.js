@@ -539,7 +539,7 @@ const NewProject = ({
           multiMatchLangs={multiMatchLangs}
           setMultiMatchLangs={setMultiMatchLangs}
           segmentationRule={segmentationRule}
-          setSegmentationRule={setSegmentationRule()}
+          setSegmentationRule={setSegmentationRule}
         />
       )}
       <Footer />
