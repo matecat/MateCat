@@ -376,7 +376,7 @@ test('Add tab', () => {
 })
 
 test('Remove tab', () => {
-  const multiMatchLangs = {primary: 'it-IT'}
+  const multiMatchLangs = undefined
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
