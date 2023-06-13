@@ -1,7 +1,12 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import {useForm} from 'react-hook-form'
+import Tooltip from '../../../../common/Tooltip'
+import InfoIcon from '../../../../../../../../img/icons/InfoIcon'
 
 export const ModernMt = ({addMTEngine, error}) => {
+  const infoIcon1 = useRef()
+  const infoIcon2 = useRef()
+  const infoIcon3 = useRef()
   const {
     register,
     handleSubmit,
@@ -51,6 +56,27 @@ export const ModernMt = ({addMTEngine, error}) => {
               />
             )}
             <label className="checkbox-label">Pre-import your TMs </label>
+            <Tooltip
+              content={
+                <div>
+                  If the option is enabled, all the TMs linked to your Matecat
+                  account
+                  <br />
+                  will be automatically imported to your ModernMT account for
+                  adaptation purposes.
+                  <br />
+                  If the option is not enabled, the only TMs imported to your
+                  ModernMT account
+                  <br />
+                  will be those used on projects that use ModernMT as their MT
+                  engine.
+                </div>
+              }
+            >
+              <div ref={infoIcon1}>
+                <InfoIcon />
+              </div>
+            </Tooltip>
           </div>
           <div className="provider-field checkbox">
             {config.isAnInternalUser ? (
@@ -69,6 +95,29 @@ export const ModernMt = ({addMTEngine, error}) => {
               />
             )}
             <label className="checkbox-label">Activate context analyzer</label>
+            <Tooltip
+              content={
+                <div>
+                  If the option is enabled, ModernMT will adapt the suggestions
+                  provided for a job
+                  <br />
+                  using mainly the content of the TMs that you activate for that
+                  job and your corrections during translation,
+                  <br />
+                  but it will also scan all your other TMs for further
+                  adaptation based on the context of the document that you are
+                  translating.
+                  <br />
+                  If the option is not enabled, ModernMT will only adapt based
+                  on the TMs that you activate for a job and on your corrections
+                  during translation.
+                </div>
+              }
+            >
+              <div ref={infoIcon2}>
+                <InfoIcon />
+              </div>
+            </Tooltip>
           </div>
           <div className="provider-field checkbox">
             {config.isAnInternalUser ? (
@@ -86,6 +135,29 @@ export const ModernMt = ({addMTEngine, error}) => {
               />
             )}
             <label className="checkbox-label">Pre-translate files</label>
+            <Tooltip
+              content={
+                <div>
+                  If the option is enabled, ModernMT is used during the analysis
+                  phase.
+                  <br />
+                  This makes downloading drafts from the translation interface
+                  quicker,
+                  <br />
+                  but may lead to additional charges for plans other than the
+                  "Professional" one.
+                  <br />
+                  If the option is not enabled, ModernMT is only used to provide
+                  adaptive
+                  <br />
+                  suggestions when opening segments.
+                </div>
+              }
+            >
+              <div ref={infoIcon3}>
+                <InfoIcon />
+              </div>
+            </Tooltip>
           </div>
           <div className="provider-field">
             {error && <span className={'mt-error'}>{error.message}</span>}

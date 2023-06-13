@@ -68,9 +68,12 @@
         &.checkbox {
           flex-direction: row;
           margin: 6px 0;
-          gap: 10px;
+          align-items: center;
           &.first {
             margin-top: 20px;
+          }
+          input {
+            margin-right: 10px;
           }
         }
         span {
