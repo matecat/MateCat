@@ -121,7 +121,7 @@ export const SegmentFooterTabAiAssistant = ({
     }
     const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
       if (sid === segment.sid && !isCachedLastRequest) {
-        requestConcordanceCallback()
+        if (requestConcordanceCallback) requestConcordanceCallback()
         if (!hasError) {
           setHasError(false)
           setSuggestion({value: suggestion, isCompleted})
