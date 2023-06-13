@@ -25,78 +25,78 @@ import {getMatecatApiDomain} from './cat_source/es6/utils/getMatecatApiDomain'
 import {uploadGlossary} from './cat_source/es6/api/uploadGlossary/uploadGlossary'
 import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 ;(function ($) {
-  function isVisible($el) {
-    var winTop = $(window).scrollTop()
-    var winBottom = winTop + $(window).height()
-    var elTop = $el.offset().top
-    var elBottom = elTop + $el.height()
-    return elBottom <= winBottom && elTop >= winTop
-  }
+  // function isVisible($el) {
+  //   var winTop = $(window).scrollTop()
+  //   var winBottom = winTop + $(window).height()
+  //   var elTop = $el.offset().top
+  //   var elBottom = elTop + $el.height()
+  //   return elBottom <= winBottom && elTop >= winTop
+  // }
 
   var checkAnalyzabilityTimer
 
   $.extend(UI, {
     initTM: function () {
       // script per lo slide del pannello di manage tmx
-      UI.setDropDown()
+      // UI.setDropDown()
       //UI.initOptionsTip()
       UI.initTmxTooltips()
       //Fix: When you move to a page using the browser arrow the checkbox seems to be not checked
-      $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true)
-      $('#inactivetm').find('tr.mine input').prop('checked', false)
+      // $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true)
+      // $('#inactivetm').find('tr.mine input').prop('checked', false)
 
       UI.checkTMKeysUpdateChecks()
-      UI.checkCrossLanguageSettings()
-      $('.popup-tm .x-popup, .popup-tm h1 .continue').click(function (e) {
-        e.preventDefault()
-        UI.saveTMdata(true)
-      })
+      // UI.checkCrossLanguageSettings()
+      // $('.popup-tm .x-popup, .popup-tm h1 .continue').click(function (e) {
+      //   e.preventDefault()
+      //   UI.saveTMdata(true)
+      // })
 
-      $('.outer-tm').click(function () {
-        UI.saveTMdata(true)
-      })
+      // $('.outer-tm').click(function () {
+      //   UI.saveTMdata(true)
+      // })
+      //
+      // $('.popup-tm li.mgmt-tm').click(function (e) {
+      //   e.preventDefault()
+      //   $(this).addClass('active')
+      //   $('.mgmt-mt,.mgmt-opt').removeClass('active')
+      //   $('.mgmt-table-mt').hide()
+      //   $('.mgmt-table-tm').show()
+      //   $('.mgmt-table-options').hide()
+      // })
+      // $('.popup-tm .tm-mgmt').click(function (e) {
+      //   e.preventDefault()
+      //   $('.mgmt-mt').addClass('active')
+      //   $('.mgmt-tm,.mgmt-opt').removeClass('active')
+      //   $('.mgmt-table-tm,.mgmt-table-options').hide()
+      //   $('.mgmt-table-mt').show()
+      // })
+      // $('.popup-tm .mgmt-opt').click(function (e) {
+      //   e.preventDefault()
+      //   $('.mgmt-opt').addClass('active')
+      //   $('.mgmt-tm,.mgmt-mt').removeClass('active')
+      //   $('.mgmt-table-tm,.mgmt-table-mt').hide()
+      //   $('.mgmt-table-options').show()
+      // })
 
-      $('.popup-tm li.mgmt-tm').click(function (e) {
-        e.preventDefault()
-        $(this).addClass('active')
-        $('.mgmt-mt,.mgmt-opt').removeClass('active')
-        $('.mgmt-table-mt').hide()
-        $('.mgmt-table-tm').show()
-        $('.mgmt-table-options').hide()
-      })
-      $('.popup-tm .tm-mgmt').click(function (e) {
-        e.preventDefault()
-        $('.mgmt-mt').addClass('active')
-        $('.mgmt-tm,.mgmt-opt').removeClass('active')
-        $('.mgmt-table-tm,.mgmt-table-options').hide()
-        $('.mgmt-table-mt').show()
-      })
-      $('.popup-tm .mgmt-opt').click(function (e) {
-        e.preventDefault()
-        $('.mgmt-opt').addClass('active')
-        $('.mgmt-tm,.mgmt-mt').removeClass('active')
-        $('.mgmt-table-tm,.mgmt-table-mt').hide()
-        $('.mgmt-table-options').show()
-      })
-
-      $('li.mgmt-mt').click(function (e) {
-        e.preventDefault()
-        $(this).addClass('active')
-        $('.mgmt-tm,.mgmt-opt').removeClass('active')
-        $('.mgmt-table-tm').hide()
-        $('.mgmt-table-mt').show()
-        $('.mgmt-table-options').hide()
-      })
-      $('#mt_engine').change(function () {
-        if ($(this).val() == 0) {
-          $('table.mgmt-mt tr.activemt').removeClass('activemt')
-        } else {
-          var checkbox = $(
-            'table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input',
-          )
-          UI.activateMT(checkbox)
-        }
-      })
+      // $('li.mgmt-mt').click(function (e) {
+      //   e.preventDefault()
+      //   $(this).addClass('active')
+      //   $('.mgmt-tm,.mgmt-opt').removeClass('active')
+      //   $('.mgmt-table-tm').hide()
+      //   $('.mgmt-table-mt').show()
+      //   $('.mgmt-table-options').hide()
+      // })
+      // $('#mt_engine').change(function () {
+      //   if ($(this).val() == 0) {
+      //     $('table.mgmt-mt tr.activemt').removeClass('activemt')
+      //   } else {
+      //     var checkbox = $(
+      //       'table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input',
+      //     )
+      //     UI.activateMT(checkbox)
+      //   }
+      // })
       $('#mt_engine_int').change(function () {
         // $('#add-mt-provider-cancel').hide();
         $('#mt-provider-details .error').empty()
@@ -230,27 +230,27 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       // script per fare apparire e scomparire la riga con l'upload della tmx
       $('body')
-        .on(
-          'click',
-          'tr a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile',
-          function () {
-            $(this).parents('tr').find('.action a').removeClass('disabled')
-            $(this)
-              .parents('td.uploadfile, .share-tmx-container')
-              .slideToggle(function () {
-                $(this).remove()
-              })
-            UI.hideAllBoxOnTables()
-          },
-        )
-        .on('mousedown', '.addtmx:not(.disabled)', function (e) {
-          e.preventDefault()
-          UI.addFormUpload(this, 'tmx')
-        })
-        .on('mousedown', '.addGlossary:not(.disabled)', function (e) {
-          e.preventDefault()
-          UI.addFormUpload(this, 'glossary')
-        })
+        // .on(
+        //   'click',
+        //   'tr a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile',
+        //   function () {
+        //     $(this).parents('tr').find('.action a').removeClass('disabled')
+        //     $(this)
+        //       .parents('td.uploadfile, .share-tmx-container')
+        //       .slideToggle(function () {
+        //         $(this).remove()
+        //       })
+        //     UI.hideAllBoxOnTables()
+        //   },
+        // )
+        // .on('mousedown', '.addtmx:not(.disabled)', function (e) {
+        //   e.preventDefault()
+        //   UI.addFormUpload(this, 'tmx')
+        // })
+        // .on('mousedown', '.addGlossary:not(.disabled)', function (e) {
+        //   e.preventDefault()
+        //   UI.addFormUpload(this, 'glossary')
+        // })
         .on('paste', '#shared-tm-key', function () {
           // set Timeout to get the text value after paste event, otherwise it is empty
           setTimeout(function () {
@@ -260,217 +260,217 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
             )
           }, 200)
         })
-        .on('input', '#shared-tm-key', function () {
-          // set Timeout to get the text value after paste event, otherwise it is empty
-          $('#activetm tr.new .uploadtm').removeClass('disabled')
-        })
-        .on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function () {
-          UI.createNewTmKey()
-        })
-        .on('keydown', '.new #new-tm-description', function (e) {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            UI.createNewTmKey()
-          }
-        })
-        .on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function () {
-          $(this).addClass('disabled')
-          $(this).parents('.uploadfile').find('.error').text('').hide()
-          UI.execAddTMOrGlossary(this, 'tmx')
-        })
-        .on(
-          'click',
-          'tr .uploadfile .addglossaryfile:not(.disabled)',
-          function () {
-            $(this).addClass('disabled')
-            $(this).parents('.uploadfile').find('.error').text('').hide()
-
-            UI.execAddTMOrGlossary(this, 'glossary')
-          },
-        )
-        .on('click', '.mgmt-tm tr.mine td.description .edit-desc', function () {
-          // $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
-          $(
-            '#activetm tr.mine td.description .edit-desc:not(.current)',
-          ).removeAttr('contenteditable')
-
-          $(this).attr('contenteditable', true)
-          $(this).focus()
-        })
-        .on(
-          'blur',
-          '#activetm td.description .edit-desc, #inactivetm td.description .edit-desc',
-          function () {
-            $(this).removeAttr('contenteditable')
-            UI.saveTMdescription($(this))
-          },
-        )
-        .on(
-          'keydown',
-          '.mgmt-tm td.description .edit-desc',
-          'return',
-          function (e) {
-            if (e.which == 13) {
-              e.preventDefault()
-              $(this).trigger('blur')
-            }
-          },
-        )
-        .on('click', '.popup-tm h1 .btn-ok', function (e) {
-          e.preventDefault()
-          UI.saveTMdata(true)
-        })
-        .on(
-          'click',
-          '#activetm tr.new a.addtmxfile:not(.disabled)',
-          function () {
-            $(this).addClass('disabled')
-          },
-        )
-        .on('click', 'a.disabletm', function () {
-          UI.disableTM(this)
-        })
-        .on('change', '.mgmt-table-tm tr.mine .activate input', function () {
-          UI.enableTM(this)
-        })
-        .on('click', '.mgmt-table-mt tr .enable-mt input', function () {
-          if ($(this).is(':checked')) {
-            UI.activateMT(this)
-          } else {
-            UI.deactivateMT(this)
-          }
-        })
-        .on(
-          'click',
-          '#activetm .lookup input, #activetm .update input',
-          function () {
-            var tr = $(this).parents('tr.mine')
-            if (
-              !tr.find('td.lookup input').is(':checked') &&
-              !tr.find('td.update input').is(':checked')
-            ) {
-              UI.checkTMGrantsModifications(this)
-              tr.find('.activate input').prop('checked', false)
-            }
-            UI.checkTMKeysUpdateChecks()
-          },
-        )
-        .on('click', '.mgmt-table-mt tr .action .deleteMT', function () {
-          UI.showMTDeletingMessage($(this))
-        })
-        .on('click', 'a.usetm', function () {
-          UI.useTM(this)
-        })
-        .on('change', '#new-tm-read, #new-tm-write', function () {
-          UI.checkTMgrants()
-        })
-        .on(
-          'change',
-          'tr td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]',
-          function () {
-            UI.hideAllBoxOnTables()
-            if (this.files && this.files[0].size > config.maxTMXFileSize) {
-              const numMb = config.maxTMXFileSize / (1024 * 1024)
-              ModalsActions.showModalComponent(
-                AlertModal,
-                {
-                  text:
-                    'File is too big.<br/>The maximuxm size allowed is ' +
-                    numMb +
-                    'MB.',
-                  buttonText: 'OK',
-                },
-                'File too big',
-              )
-              return false
-            }
-            if ($(this).val() == '') {
-              $(this)
-                .parents('.uploadfile')
-                .find('.addtmxfile, .addglossaryfile')
-                .hide()
-            } else {
-              $(this)
-                .parents('.uploadfile')
-                .find('.addtmxfile, .addglossaryfile')
-                .removeClass('disabled')
-                .show()
-              $(this)
-                .parents('.uploadfile')
-                .find('.upload-file-msg-error')
-                .hide()
-            }
-          },
-        )
-        .on('keyup', '#filterInactive', function () {
-          if ($(this).val() == '') {
-            $('#inactivetm').removeClass('filtering')
-            $('#inactivetm tbody tr.found').removeClass('found')
-          } else {
-            $('#inactivetm').addClass('filtering')
-            UI.filterInactiveTM($('#filterInactive').val())
-          }
-        })
-        .on('mousedown', '.mgmt-tm .downloadtmx:not(.disabled)', function (e) {
-          e.preventDefault()
-
-          UI.openExport(this, 'tmx')
-        })
-        .on('click', '.shareKey:not(.disabled)', function () {
-          var tr = $(this).closest('tr')
-          if (
-            tr.hasClass('mymemory') ||
-            ((tr.hasClass('ownergroup') || tr.hasClass('anonymous')) &&
-              !config.isLoggedIn)
-          )
-            return
-          UI.openShareResource($(this))
-        })
-        .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
-          if ($(this).hasClass('disabled')) return false
-          UI.openExport($(this), 'glossary')
-        })
-        .on('mousedown', '.mgmt-tm .export-tmx .export-button', function (e) {
-          e.preventDefault()
-          UI.startExport(this, 'tmx')
-        })
-        .on(
-          'mousedown',
-          '.mgmt-tm .export-glossary .export-button',
-          function (e) {
-            e.preventDefault()
-            UI.startExport(this, 'glossary')
-          },
-        )
-        .on('keydown', '.export-tmx .email-export.mgmt-input', function (e) {
-          if (e.which == 13) {
-            // enter
-            e.preventDefault()
-            UI.startExport(this, 'tmx')
-          }
-          UI.hideAllBoxOnTables()
-        })
-        .on(
-          'keydown',
-          '.export-glossary .email-export.mgmt-input',
-          function (e) {
-            if (e.which == 13) {
-              // enter
-              e.preventDefault()
-              UI.startExport(this, 'glossary')
-            }
-            UI.hideAllBoxOnTables()
-          },
-        )
-        .on('mousedown', '.mgmt-tm .canceladd-export', function (e) {
-          e.preventDefault()
-          UI.closeExport($(this).closest('tr'))
-          UI.hideAllBoxOnTables()
-        })
-        .on('mousedown', '.mgmt-tm .deleteTM:not(.disabled)', function (e) {
-          e.preventDefault()
-          UI.showDeleteTmMessage(this)
-        })
+        // .on('input', '#shared-tm-key', function () {
+        //   // set Timeout to get the text value after paste event, otherwise it is empty
+        //   $('#activetm tr.new .uploadtm').removeClass('disabled')
+        // })
+        // .on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function () {
+        //   UI.createNewTmKey()
+        // })
+        // .on('keydown', '.new #new-tm-description', function (e) {
+        //   if (e.key === 'Enter') {
+        //     e.preventDefault()
+        //     UI.createNewTmKey()
+        //   }
+        // })
+        // .on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function () {
+        //   $(this).addClass('disabled')
+        //   $(this).parents('.uploadfile').find('.error').text('').hide()
+        //   UI.execAddTMOrGlossary(this, 'tmx')
+        // })
+        // .on(
+        //   'click',
+        //   'tr .uploadfile .addglossaryfile:not(.disabled)',
+        //   function () {
+        //     $(this).addClass('disabled')
+        //     $(this).parents('.uploadfile').find('.error').text('').hide()
+        //
+        //     UI.execAddTMOrGlossary(this, 'glossary')
+        //   },
+        // )
+        // .on('click', '.mgmt-tm tr.mine td.description .edit-desc', function () {
+        //   // $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
+        //   $(
+        //     '#activetm tr.mine td.description .edit-desc:not(.current)',
+        //   ).removeAttr('contenteditable')
+        //
+        //   $(this).attr('contenteditable', true)
+        //   $(this).focus()
+        // })
+        // .on(
+        //   'blur',
+        //   '#activetm td.description .edit-desc, #inactivetm td.description .edit-desc',
+        //   function () {
+        //     $(this).removeAttr('contenteditable')
+        //     UI.saveTMdescription($(this))
+        //   },
+        // )
+        // .on(
+        //   'keydown',
+        //   '.mgmt-tm td.description .edit-desc',
+        //   'return',
+        //   function (e) {
+        //     if (e.which == 13) {
+        //       e.preventDefault()
+        //       $(this).trigger('blur')
+        //     }
+        //   },
+        // )
+        // .on('click', '.popup-tm h1 .btn-ok', function (e) {
+        //   e.preventDefault()
+        //   UI.saveTMdata(true)
+        // })
+        // .on(
+        //   'click',
+        //   '#activetm tr.new a.addtmxfile:not(.disabled)',
+        //   function () {
+        //     $(this).addClass('disabled')
+        //   },
+        // )
+        // .on('click', 'a.disabletm', function () {
+        //   UI.disableTM(this)
+        // })
+        // .on('change', '.mgmt-table-tm tr.mine .activate input', function () {
+        //   UI.enableTM(this)
+        // })
+        // .on('click', '.mgmt-table-mt tr .enable-mt input', function () {
+        //   if ($(this).is(':checked')) {
+        //     UI.activateMT(this)
+        //   } else {
+        //     UI.deactivateMT(this)
+        //   }
+        // })
+        // .on(
+        //   'click',
+        //   '#activetm .lookup input, #activetm .update input',
+        //   function () {
+        //     var tr = $(this).parents('tr.mine')
+        //     if (
+        //       !tr.find('td.lookup input').is(':checked') &&
+        //       !tr.find('td.update input').is(':checked')
+        //     ) {
+        //       UI.checkTMGrantsModifications(this)
+        //       tr.find('.activate input').prop('checked', false)
+        //     }
+        //     UI.checkTMKeysUpdateChecks()
+        //   },
+        // )
+        // .on('click', '.mgmt-table-mt tr .action .deleteMT', function () {
+        //   UI.showMTDeletingMessage($(this))
+        // })
+        // .on('click', 'a.usetm', function () {
+        //   UI.useTM(this)
+        // })
+        // .on('change', '#new-tm-read, #new-tm-write', function () {
+        //   UI.checkTMgrants()
+        // })
+        // .on(
+        //   'change',
+        //   'tr td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]',
+        //   function () {
+        //     UI.hideAllBoxOnTables()
+        //     if (this.files && this.files[0].size > config.maxTMXFileSize) {
+        //       const numMb = config.maxTMXFileSize / (1024 * 1024)
+        //       ModalsActions.showModalComponent(
+        //         AlertModal,
+        //         {
+        //           text:
+        //             'File is too big.<br/>The maximuxm size allowed is ' +
+        //             numMb +
+        //             'MB.',
+        //           buttonText: 'OK',
+        //         },
+        //         'File too big',
+        //       )
+        //       return false
+        //     }
+        //     if ($(this).val() == '') {
+        //       $(this)
+        //         .parents('.uploadfile')
+        //         .find('.addtmxfile, .addglossaryfile')
+        //         .hide()
+        //     } else {
+        //       $(this)
+        //         .parents('.uploadfile')
+        //         .find('.addtmxfile, .addglossaryfile')
+        //         .removeClass('disabled')
+        //         .show()
+        //       $(this)
+        //         .parents('.uploadfile')
+        //         .find('.upload-file-msg-error')
+        //         .hide()
+        //     }
+        //   },
+        // )
+        // .on('keyup', '#filterInactive', function () {
+        //   if ($(this).val() == '') {
+        //     $('#inactivetm').removeClass('filtering')
+        //     $('#inactivetm tbody tr.found').removeClass('found')
+        //   } else {
+        //     $('#inactivetm').addClass('filtering')
+        //     UI.filterInactiveTM($('#filterInactive').val())
+        //   }
+        // })
+        // .on('mousedown', '.mgmt-tm .downloadtmx:not(.disabled)', function (e) {
+        //   e.preventDefault()
+        //
+        //   UI.openExport(this, 'tmx')
+        // })
+        // .on('click', '.shareKey:not(.disabled)', function () {
+        //   var tr = $(this).closest('tr')
+        //   if (
+        //     tr.hasClass('mymemory') ||
+        //     ((tr.hasClass('ownergroup') || tr.hasClass('anonymous')) &&
+        //       !config.isLoggedIn)
+        //   )
+        //     return
+        //   UI.openShareResource($(this))
+        // })
+        // .on('mousedown', '.mgmt-tm .downloadGlossary', function () {
+        //   if ($(this).hasClass('disabled')) return false
+        //   UI.openExport($(this), 'glossary')
+        // })
+        // .on('mousedown', '.mgmt-tm .export-tmx .export-button', function (e) {
+        //   e.preventDefault()
+        //   UI.startExport(this, 'tmx')
+        // })
+        // .on(
+        //   'mousedown',
+        //   '.mgmt-tm .export-glossary .export-button',
+        //   function (e) {
+        //     e.preventDefault()
+        //     UI.startExport(this, 'glossary')
+        //   },
+        // )
+        // .on('keydown', '.export-tmx .email-export.mgmt-input', function (e) {
+        //   if (e.which == 13) {
+        //     // enter
+        //     e.preventDefault()
+        //     UI.startExport(this, 'tmx')
+        //   }
+        //   UI.hideAllBoxOnTables()
+        // })
+        // .on(
+        //   'keydown',
+        //   '.export-glossary .email-export.mgmt-input',
+        //   function (e) {
+        //     if (e.which == 13) {
+        //       // enter
+        //       e.preventDefault()
+        //       UI.startExport(this, 'glossary')
+        //     }
+        //     UI.hideAllBoxOnTables()
+        //   },
+        // )
+        // .on('mousedown', '.mgmt-tm .canceladd-export', function (e) {
+        //   e.preventDefault()
+        //   UI.closeExport($(this).closest('tr'))
+        //   UI.hideAllBoxOnTables()
+        // })
+        // .on('mousedown', '.mgmt-tm .deleteTM:not(.disabled)', function (e) {
+        //   e.preventDefault()
+        //   UI.showDeleteTmMessage(this)
+        // })
         .on('keydown', function (e) {
           var esc = 27
 
@@ -497,85 +497,85 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
             UI.clickOnShareButton($(this).parent().find('.share-button'))
           }
         })
-        .on('change', '#multi-match-1, #multi-match-2', function () {
-          UI.storeMultiMatchLangs()
-        })
-      $('.popup-tm.slide-panel').on('scroll', function () {
-        if (!isVisible($('.active-tm-container thead'))) {
-          $('.active-tm-container .notification-message').addClass('fixed-msg')
-        } else {
-          $('.active-tm-container .notification-message').removeClass(
-            'fixed-msg',
-          )
-        }
-        if (!isVisible($('.inactive-tm-container h3'))) {
-          $('.inactive-tm-container .notification-message').addClass(
-            'fixed-msg',
-          )
-        } else {
-          $('.inactive-tm-container .notification-message').removeClass(
-            'fixed-msg',
-          )
-        }
-      })
+      // .on('change', '#multi-match-1, #multi-match-2', function () {
+      //   UI.storeMultiMatchLangs()
+      // })
+      // $('.popup-tm.slide-panel').on('scroll', function () {
+      //   if (!isVisible($('.active-tm-container thead'))) {
+      //     $('.active-tm-container .notification-message').addClass('fixed-msg')
+      //   } else {
+      //     $('.active-tm-container .notification-message').removeClass(
+      //       'fixed-msg',
+      //     )
+      //   }
+      //   if (!isVisible($('.inactive-tm-container h3'))) {
+      //     $('.inactive-tm-container .notification-message').addClass(
+      //       'fixed-msg',
+      //     )
+      //   } else {
+      //     $('.inactive-tm-container .notification-message').removeClass(
+      //       'fixed-msg',
+      //     )
+      //   }
+      // })
 
       // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
       $(document).ready(function () {
-        UI.setTMsortable()
+        // UI.setTMsortable()
         UI.checkCreateTmKeyFromQueryString()
         UI.checkOpenTabFromParameters()
       })
 
-      $('.mgmt-table-tm .add-tm').click(function () {
-        // $(this).hide()
-        UI.openAddNewTm()
-      })
+      // $('.mgmt-table-tm .add-tm').click(function () {
+      //   // $(this).hide()
+      //   UI.openAddNewTm()
+      // })
       $('.mgmt-table-tm .add-shared-tm').click(function () {
         // $(this).hide()
         UI.openAddNewTmShared()
       })
-      $(
-        '.mgmt-tm tr.new .canceladdtmx, .mgmt-tm tr.new .canceladdglossary',
-      ).click(function () {
-        UI.clearTMPanel()
-      })
+      // $(
+      //   '.mgmt-tm tr.new .canceladdtmx, .mgmt-tm tr.new .canceladdglossary',
+      // ).click(function () {
+      //   UI.clearTMPanel()
+      // })
 
-      $('.add-gl').click(function () {
-        $(this).hide()
-        $('.addrow-gl').show()
-      })
+      // $('.add-gl').click(function () {
+      //   $(this).hide()
+      //   $('.addrow-gl').show()
+      // })
+      //
+      // $('.cancel-tm').click(function () {
+      //   $('.mgmt-tm tr.new').hide()
+      //   $('.add-tm').show()
+      // })
 
-      $('.cancel-tm').click(function () {
-        $('.mgmt-tm tr.new').hide()
-        $('.add-tm').show()
-      })
-
-      $('#sign-in').click(function () {
-        $('.loginpopup').show()
-      })
+      // $('#sign-in').click(function () {
+      //   $('.loginpopup').show()
+      // })
     },
-    selectTm: function (value) {
-      var tmElem = $(
-        '.mgmt-table-tm #inactivetm tr.mine[data-key=' +
-          value +
-          '] .activate input',
-      )
-      if (tmElem.length > 0) {
-        $(tmElem).trigger('click')
-      }
-    },
+    // selectTm: function (value) {
+    //   var tmElem = $(
+    //     '.mgmt-table-tm #inactivetm tr.mine[data-key=' +
+    //       value +
+    //       '] .activate input',
+    //   )
+    //   if (tmElem.length > 0) {
+    //     $(tmElem).trigger('click')
+    //   }
+    // },
 
-    disableTm: function (value) {
-      var tmElem = $(
-        '.mgmt-table-tm #activetm tr.mine[data-key=' +
-          value +
-          '] .activate input',
-      )
-      if (tmElem.length > 0) {
-        $(tmElem).trigger('click')
-      }
-    },
+    // disableTm: function (value) {
+    //   var tmElem = $(
+    //     '.mgmt-table-tm #activetm tr.mine[data-key=' +
+    //       value +
+    //       '] .activate input',
+    //   )
+    //   if (tmElem.length > 0) {
+    //     $(tmElem).trigger('click')
+    //   }
+    // },
     // enableTM: function (el) {
     //   UI.checkTMGrantsModifications(el)
     //   if (APP.isCattool) UI.saveTMdata(false)
@@ -661,24 +661,24 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         UI.checkTMKeysUpdateChecks()
       }
     },
-    activateInactiveKey: function (keyParam) {
-      var objectsArray = $('#inactivetm tr:not(".new") .privatekey')
-      var trKey = $.grep(objectsArray, function (value) {
-        if ($(value).text().slice(-5) == keyParam.slice(-5)) {
-          return value
-        }
-      })
-      //Check the inputs
-      var row = $(trKey).closest('tr')
-      row
-        .find('td.lookup input, td.activate input, td.update input')
-        .attr('checked', true)
-      UI.useTM(trKey)
-      UI.checkTMKeysUpdateChecks()
-      setTimeout(function () {
-        $('#activetm').trigger('update', ['', keyParam])
-      }, 500)
-    },
+    // activateInactiveKey: function (keyParam) {
+    //   var objectsArray = $('#inactivetm tr:not(".new") .privatekey')
+    //   var trKey = $.grep(objectsArray, function (value) {
+    //     if ($(value).text().slice(-5) == keyParam.slice(-5)) {
+    //       return value
+    //     }
+    //   })
+    //   //Check the inputs
+    //   var row = $(trKey).closest('tr')
+    //   row
+    //     .find('td.lookup input, td.activate input, td.update input')
+    //     .attr('checked', true)
+    //   UI.useTM(trKey)
+    //   UI.checkTMKeysUpdateChecks()
+    //   setTimeout(function () {
+    //     $('#activetm').trigger('update', ['', keyParam])
+    //   }, 500)
+    // },
     openLanguageResourcesPanel: function (tab, elToClick) {
       if ($('.popup-tm').hasClass('open')) {
         return false
@@ -695,20 +695,20 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       if (elToClick) $(elToClick).click()
       // $.cookie('tmpanel-open', 1, { path: '/' });
     },
-    setTMsortable: function () {
-      var fixHelper = function (e, ui) {
-        ui.children().each(function () {
-          $(this).width($(this).width())
-        })
-        return ui
-      }
-
-      $('#activetm tbody').sortable({
-        helper: fixHelper,
-        handle: '.dragrow',
-        items: '.mine',
-      })
-    },
+    // setTMsortable: function () {
+    //   var fixHelper = function (e, ui) {
+    //     ui.children().each(function () {
+    //       $(this).width($(this).width())
+    //     })
+    //     return ui
+    //   }
+    //
+    //   $('#activetm tbody').sortable({
+    //     helper: fixHelper,
+    //     handle: '.dragrow',
+    //     items: '.mine',
+    //   })
+    // },
 
     checkTMKey: function (operation, keyValue) {
       //check if the key already exists, it can not be sent nor added twice
@@ -797,37 +797,37 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       $('#activetm tr.new').removeClass('badkey')
       UI.checkTMAddAvailability()
     },
-    checkTMAddAvailability: function () {
-      if (
-        $('#activetm tr.new').hasClass('badkey') ||
-        $('#activetm tr.new').hasClass('badgrants')
-      ) {
-        $('#activetm tr.new .uploadtm').addClass('disabled')
-      } else {
-        $('#activetm tr.new .uploadtm').removeClass('disabled')
-      }
-    },
+    // checkTMAddAvailability: function () {
+    //   if (
+    //     $('#activetm tr.new').hasClass('badkey') ||
+    //     $('#activetm tr.new').hasClass('badgrants')
+    //   ) {
+    //     $('#activetm tr.new .uploadtm').addClass('disabled')
+    //   } else {
+    //     $('#activetm tr.new .uploadtm').removeClass('disabled')
+    //   }
+    // },
 
-    checkTMgrants: function () {
-      const panel = $('.mgmt-tm tr.new')
-      var r = $(panel).find('.r').is(':checked') ? 1 : 0
-      var w = $(panel).find('.w').is(':checked') ? 1 : 0
-      if (!r && !w) {
-        $('#activetm tr.new').addClass('badgrants')
-        UI.showErrorOnActiveTMTable(
-          'Either "Lookup" or "Update" must be checked',
-        )
-        UI.checkTMAddAvailability()
-
-        return false
-      } else {
-        UI.hideAllBoxOnTables()
-        $('#activetm tr.new').removeClass('badgrants')
-        UI.checkTMAddAvailability()
-
-        return true
-      }
-    },
+    // checkTMgrants: function () {
+    //   const panel = $('.mgmt-tm tr.new')
+    //   var r = $(panel).find('.r').is(':checked') ? 1 : 0
+    //   var w = $(panel).find('.w').is(':checked') ? 1 : 0
+    //   if (!r && !w) {
+    //     $('#activetm tr.new').addClass('badgrants')
+    //     UI.showErrorOnActiveTMTable(
+    //       'Either "Lookup" or "Update" must be checked',
+    //     )
+    //     UI.checkTMAddAvailability()
+    //
+    //     return false
+    //   } else {
+    //     UI.hideAllBoxOnTables()
+    //     $('#activetm tr.new').removeClass('badgrants')
+    //     UI.checkTMAddAvailability()
+    //
+    //     return true
+    //   }
+    // },
     checkTMGrantsModifications: function (el) {
       var tr = $(el).parents('tr.mine')
       var isActive =
@@ -896,56 +896,56 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       $('#activetm').trigger('deleteTm', [options.key])
     },
 
-    disableTM: function (el) {
-      var row = $(el).closest('tr')
-      if (row.find('td.uploadfile').length) {
-        row.find('td.uploadfile .canceladdtmx').click()
-        row.find('.addtmx').removeAttr('style')
-      }
-      row.detach()
-      $('#inactivetm').prepend(row)
+    // disableTM: function (el) {
+    //   var row = $(el).closest('tr')
+    //   if (row.find('td.uploadfile').length) {
+    //     row.find('td.uploadfile .canceladdtmx').click()
+    //     row.find('.addtmx').removeAttr('style')
+    //   }
+    //   row.detach()
+    //   $('#inactivetm').prepend(row)
+    //
+    //   row.css('display', 'block')
+    //
+    //   // draw the user's attention to it
+    //   row.fadeOut()
+    //   row.fadeIn()
+    //
+    //   $('.addtmxrow').hide()
+    // },
 
-      row.css('display', 'block')
-
-      // draw the user's attention to it
-      row.fadeOut()
-      row.fadeIn()
-
-      $('.addtmxrow').hide()
-    },
-
-    useTM: function (el) {
-      var row = $(el).closest('tr')
-      row.detach()
-      $('#activetm tr.new').before(row)
-      if (!$('#inactivetm tbody tr:not(.noresults)').length)
-        $('#inactivetm tr.noresults').show()
-      row.addClass('mine')
-      row.find('td.lookup input, td.update input').attr('checked', true)
-      row.find('td.lookup input, td.update input').prop('checked', true)
-      row.css('display', 'block')
-
-      //update datatable struct
-      // draw the user's attention to it
-      row.fadeOut()
-      row.fadeIn()
-
-      $('.addtmxrow').hide()
-    },
-    execAddTMOrGlossary: function (el, type) {
-      const line = $(el).parents('tr')
-      line.find('.uploadfile').addClass('uploading')
-      const form = line.find('.add-TM-Form')[0]
-      const filesLength = $(form).find('input[type=file]').get(0).files.length
-      if (filesLength > 10) {
-        UI.showErrorUpload(
-          $(form).parents('.uploadfile'),
-          'You can only upload a maximum of 10 files',
-        )
-        return
-      }
-      this.fileUpload({form, type})
-    },
+    // useTM: function (el) {
+    //   var row = $(el).closest('tr')
+    //   row.detach()
+    //   $('#activetm tr.new').before(row)
+    //   if (!$('#inactivetm tbody tr:not(.noresults)').length)
+    //     $('#inactivetm tr.noresults').show()
+    //   row.addClass('mine')
+    //   row.find('td.lookup input, td.update input').attr('checked', true)
+    //   row.find('td.lookup input, td.update input').prop('checked', true)
+    //   row.css('display', 'block')
+    //
+    //   //update datatable struct
+    //   // draw the user's attention to it
+    //   row.fadeOut()
+    //   row.fadeIn()
+    //
+    //   $('.addtmxrow').hide()
+    // },
+    // execAddTMOrGlossary: function (el, type) {
+    //   const line = $(el).parents('tr')
+    //   line.find('.uploadfile').addClass('uploading')
+    //   const form = line.find('.add-TM-Form')[0]
+    //   const filesLength = $(form).find('input[type=file]').get(0).files.length
+    //   if (filesLength > 10) {
+    //     UI.showErrorUpload(
+    //       $(form).parents('.uploadfile'),
+    //       'You can only upload a maximum of 10 files',
+    //     )
+    //     return
+    //   }
+    //   this.fileUpload({form, type})
+    // },
     addTMKeyToList: function (uploading, key) {
       var descr = $('#new-tm-description').val()
       descr = descr.length ? descr : 'Private resource'
@@ -996,135 +996,135 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
      *   };
      * </code>
      */
-    appendNewTmKeyToPanel: function (keyParams) {
-      keyParams = {
-        r: typeof keyParams.r !== 'undefined' ? keyParams.r : 0,
-        w: typeof keyParams.w !== 'undefined' ? keyParams.w : 0,
-        desc: typeof keyParams.desc !== 'undefined' ? keyParams.desc : '',
-        TMKey: typeof keyParams.TMKey !== 'undefined' ? keyParams.TMKey : '',
-      }
+    // appendNewTmKeyToPanel: function (keyParams) {
+    //   keyParams = {
+    //     r: typeof keyParams.r !== 'undefined' ? keyParams.r : 0,
+    //     w: typeof keyParams.w !== 'undefined' ? keyParams.w : 0,
+    //     desc: typeof keyParams.desc !== 'undefined' ? keyParams.desc : '',
+    //     TMKey: typeof keyParams.TMKey !== 'undefined' ? keyParams.TMKey : '',
+    //   }
+    //
+    //   var newTr =
+    //     '<tr class="mine" data-tm="1" data-glos="1" data-key="' +
+    //     keyParams.TMKey +
+    //     '" data-owner="' +
+    //     config.ownerIsMe +
+    //     '">' +
+    //     '    <td class="dragrow"><div class="status"></div></td>' +
+    //     '    <td class="activate"><input type="checkbox" checked="checked"/></td>' +
+    //     '    <td class="lookup check text-center"><input type="checkbox"' +
+    //     (keyParams.r ? ' checked="checked"' : '') +
+    //     ' /></td>' +
+    //     '    <td class="update check text-center"><input type="checkbox"' +
+    //     (keyParams.w ? ' checked="checked"' : '') +
+    //     ' /></td>' +
+    //     '    <td class="description"><div class="edit-desc" data-descr="' +
+    //     keyParams.desc +
+    //     '">' +
+    //     keyParams.desc +
+    //     '</div></td>' +
+    //     '    <td class="privatekey">' +
+    //     keyParams.TMKey +
+    //     '</td>' +
+    //     '    <td class="owner text-center">' +
+    //     '       <a class="icon-owner icon-lock icon-owner-private"></a>' +
+    //     '   </td>' +
+    //     '    <td class="action">' +
+    //     '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>' +
+    //     '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;' +
+    //     '              <ul class="dropdown pull-left">' +
+    //     '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>' +
+    //     '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
+    //     '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>' +
+    //     '                   <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-share"></span>Share resource</a></li>' +
+    //     '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>' +
+    //     '              </ul>' +
+    //     '          </div>' +
+    //     '</td>' +
+    //     '</tr>'
+    //
+    //   $('#activetm').find('tr.new').before(newTr)
+    //
+    //   UI.setTMsortable()
+    //   setTimeout(function () {
+    //     $('#activetm').trigger('update', [keyParams.desc, keyParams.TMKey])
+    //   }, 500)
+    // },
 
-      var newTr =
-        '<tr class="mine" data-tm="1" data-glos="1" data-key="' +
-        keyParams.TMKey +
-        '" data-owner="' +
-        config.ownerIsMe +
-        '">' +
-        '    <td class="dragrow"><div class="status"></div></td>' +
-        '    <td class="activate"><input type="checkbox" checked="checked"/></td>' +
-        '    <td class="lookup check text-center"><input type="checkbox"' +
-        (keyParams.r ? ' checked="checked"' : '') +
-        ' /></td>' +
-        '    <td class="update check text-center"><input type="checkbox"' +
-        (keyParams.w ? ' checked="checked"' : '') +
-        ' /></td>' +
-        '    <td class="description"><div class="edit-desc" data-descr="' +
-        keyParams.desc +
-        '">' +
-        keyParams.desc +
-        '</div></td>' +
-        '    <td class="privatekey">' +
-        keyParams.TMKey +
-        '</td>' +
-        '    <td class="owner text-center">' +
-        '       <a class="icon-owner icon-lock icon-owner-private"></a>' +
-        '   </td>' +
-        '    <td class="action">' +
-        '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>' +
-        '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;' +
-        '              <ul class="dropdown pull-left">' +
-        '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>' +
-        '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
-        '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>' +
-        '                   <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-share"></span>Share resource</a></li>' +
-        '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>' +
-        '              </ul>' +
-        '          </div>' +
-        '</td>' +
-        '</tr>'
-
-      $('#activetm').find('tr.new').before(newTr)
-
-      UI.setTMsortable()
-      setTimeout(function () {
-        $('#activetm').trigger('update', [keyParams.desc, keyParams.TMKey])
-      }, 500)
-    },
-
-    pulseTMadded: function (row) {
-      setTimeout(function () {
-        $('#activetm tbody').animate({scrollTop: 5000}, 0)
-        row.fadeOut()
-        row.fadeIn()
-      }, 10)
-      setTimeout(function () {
-        $('#activetm tbody').animate({scrollTop: 5000}, 0)
-      }, 1000)
-    },
-    clearTMUploadPanel: function () {
-      $('#shared-tm-key, #new-tm-description').val('')
-      $('#new-tm-read, #new-tm-write').prop('checked', true)
-    },
-    clearAddTMRow: function () {
-      $('#new-tm-description').val('')
-      $('#activetm .fileupload').val('')
-      $('.mgmt-tm tr.new').removeClass('badkey badgrants')
-      $('.mgmt-tm tr.new .message').text('')
-      $('.mgmt-tm tr.new .error span').text('').hide()
-      $('.mgmt-tm tr.new .addtmxfile, .mgmt-tm tr.new .addglossaryfile').show()
-    },
-    clearTMPanel: function () {
-      $('#activetm .edit-desc').removeAttr('contenteditable')
-      $('#activetm td.action a').removeClass('disabled')
-      $('#activetm tr.new').hide()
-      $('tr.tm-key-deleting').removeClass('tm-key-deleting')
-      $(
-        '#activetm tr.new .addtmxfile, #activetm tr.new .addtmxfile .addglossaryfile',
-      ).removeClass('disabled')
-      $('.mgmt-table-tm .add-tm').show()
-      UI.clearTMUploadPanel()
-      UI.clearAddTMRow()
-      UI.hideAllBoxOnTables()
-    },
+    // pulseTMadded: function (row) {
+    //   setTimeout(function () {
+    //     $('#activetm tbody').animate({scrollTop: 5000}, 0)
+    //     row.fadeOut()
+    //     row.fadeIn()
+    //   }, 10)
+    //   setTimeout(function () {
+    //     $('#activetm tbody').animate({scrollTop: 5000}, 0)
+    //   }, 1000)
+    // },
+    // clearTMUploadPanel: function () {
+    //   $('#shared-tm-key, #new-tm-description').val('')
+    //   $('#new-tm-read, #new-tm-write').prop('checked', true)
+    // },
+    // clearAddTMRow: function () {
+    //   $('#new-tm-description').val('')
+    //   $('#activetm .fileupload').val('')
+    //   $('.mgmt-tm tr.new').removeClass('badkey badgrants')
+    //   $('.mgmt-tm tr.new .message').text('')
+    //   $('.mgmt-tm tr.new .error span').text('').hide()
+    //   $('.mgmt-tm tr.new .addtmxfile, .mgmt-tm tr.new .addglossaryfile').show()
+    // },
+    // clearTMPanel: function () {
+    //   $('#activetm .edit-desc').removeAttr('contenteditable')
+    //   $('#activetm td.action a').removeClass('disabled')
+    //   $('#activetm tr.new').hide()
+    //   $('tr.tm-key-deleting').removeClass('tm-key-deleting')
+    //   $(
+    //     '#activetm tr.new .addtmxfile, #activetm tr.new .addtmxfile .addglossaryfile',
+    //   ).removeClass('disabled')
+    //   $('.mgmt-table-tm .add-tm').show()
+    //   UI.clearTMUploadPanel()
+    //   UI.clearAddTMRow()
+    //   UI.hideAllBoxOnTables()
+    // },
 
     // TODO: da eliminare
-    fileUpload: function ({form, type}) {
-      const TR = $(form).parents('tr')
-      const key = TR.find('.privatekey').first().text().trim()
-      const keyName = TR.find('.description').first().text().trim()
-      const TRcaller = $(form).parents('.uploadfile')
-
-      const uploadFilesElement = Array.from($(form)[0].children).find(
-        (element) => element.getAttribute('name') === 'uploaded_file[]',
-      )
-      const filesToUpload = Array.from(uploadFilesElement?.files ?? [])
-
-      const promise = type === 'glossary' ? uploadGlossary : uploadTm
-
-      promise({filesToUpload, tmKey: key, keyName})
-        .then((data) => {
-          UI.pollForUploadProgress({
-            files: data.data.uuids,
-            type,
-            key,
-            TRcaller,
-          })
-        })
-        .catch(({errors}) => {
-          TRcaller.find('.action a').removeClass('disabled')
-          UI.showErrorUpload($(TRcaller))
-
-          if ($(TRcaller).closest('table').attr('id') == 'inactivetm') {
-            UI.showErrorOnInactiveTMTable(errors[0].message)
-          } else {
-            UI.showErrorOnActiveTMTable(errors[0].message)
-          }
-        })
-
-      UI.showStartUpload(TRcaller)
-    },
+    // fileUpload: function ({form, type}) {
+    //   const TR = $(form).parents('tr')
+    //   const key = TR.find('.privatekey').first().text().trim()
+    //   const keyName = TR.find('.description').first().text().trim()
+    //   const TRcaller = $(form).parents('.uploadfile')
+    //
+    //   const uploadFilesElement = Array.from($(form)[0].children).find(
+    //     (element) => element.getAttribute('name') === 'uploaded_file[]',
+    //   )
+    //   const filesToUpload = Array.from(uploadFilesElement?.files ?? [])
+    //
+    //   const promise = type === 'glossary' ? uploadGlossary : uploadTm
+    //
+    //   promise({filesToUpload, tmKey: key, keyName})
+    //     .then((data) => {
+    //       UI.pollForUploadProgress({
+    //         files: data.data.uuids,
+    //         type,
+    //         key,
+    //         TRcaller,
+    //       })
+    //     })
+    //     .catch(({errors}) => {
+    //       TRcaller.find('.action a').removeClass('disabled')
+    //       UI.showErrorUpload($(TRcaller))
+    //
+    //       if ($(TRcaller).closest('table').attr('id') == 'inactivetm') {
+    //         UI.showErrorOnInactiveTMTable(errors[0].message)
+    //       } else {
+    //         UI.showErrorOnActiveTMTable(errors[0].message)
+    //       }
+    //     })
+    //
+    //   UI.showStartUpload(TRcaller)
+    // },
     // TODO da eliminare gestione errore upload tm e glossary
-    showErrorUpload: function ($tr, text) {
+    /*showErrorUpload: function ($tr, text) {
       var msg = text ? text : 'Error uploading your files. Please try again.'
       var msg2 = text ? text : 'Error uploading your files. Please try again.'
       $tr.find('.addtmxfile, .addglossaryfile, .uploadprogress').hide()
@@ -1163,7 +1163,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         $tr.find('.upload-file-msg-success').show()
         $tr.find('.uploadprogress').hide()
       }, 1000)
-    },
+    },*/
     // TODO: da eliminare update status
     pollForUploadProgress: ({files, type, TRcaller, key}) => {
       let completedCounter = 0
@@ -1249,48 +1249,48 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       }
     },
 
-    extractTMdataFromTable: function () {
-      var categories = ['ownergroup', 'mine', 'anonymous']
-      var newArray = {}
-      $.each(categories, function (index, value) {
-        newArray[value] = UI.extractTMDataFromRowCategory(this)
-      })
-      return JSON.stringify(newArray)
-    },
-    extractTMDataFromRowCategory: function (cat) {
-      var tt = $('#activetm tbody tr.' + cat)
-      var dataOb = []
-      $(tt).each(function () {
-        var r = $(this).find('.lookup input').is(':checked') ? 1 : 0
-        var w = $(this).find('.update input').is(':checked') ? 1 : 0
-        var isMymemory = $(this).hasClass('mymemory')
-        if ((!r && !w) || isMymemory) {
-          return true
-        }
-        var dd = {
-          tm: $(this).attr('data-tm'),
-          glos: $(this).attr('data-glos'),
-          owner: $(this).attr('data-owner'),
-          key: $(this).find('.privatekey').text().trim(), // remove spaces and unwanted chars from string
-          name: $(this).find('.description').text().trim(),
-          r: r,
-          w: w,
-        }
-        dataOb.push(dd)
-      })
-      return dataOb
-    },
+    // extractTMdataFromTable: function () {
+    //   var categories = ['ownergroup', 'mine', 'anonymous']
+    //   var newArray = {}
+    //   $.each(categories, function (index, value) {
+    //     newArray[value] = UI.extractTMDataFromRowCategory(this)
+    //   })
+    //   return JSON.stringify(newArray)
+    // },
+    // extractTMDataFromRowCategory: function (cat) {
+    //   var tt = $('#activetm tbody tr.' + cat)
+    //   var dataOb = []
+    //   $(tt).each(function () {
+    //     var r = $(this).find('.lookup input').is(':checked') ? 1 : 0
+    //     var w = $(this).find('.update input').is(':checked') ? 1 : 0
+    //     var isMymemory = $(this).hasClass('mymemory')
+    //     if ((!r && !w) || isMymemory) {
+    //       return true
+    //     }
+    //     var dd = {
+    //       tm: $(this).attr('data-tm'),
+    //       glos: $(this).attr('data-glos'),
+    //       owner: $(this).attr('data-owner'),
+    //       key: $(this).find('.privatekey').text().trim(), // remove spaces and unwanted chars from string
+    //       name: $(this).find('.description').text().trim(),
+    //       r: r,
+    //       w: w,
+    //     }
+    //     dataOb.push(dd)
+    //   })
+    //   return dataOb
+    // },
 
-    extractTMdataFromRow: function (tr) {
-      return {
-        tm_key: tr.find('.privatekey').text(),
-        key: this.tm_key,
-        tmx_name: tr.find('.description').text(),
-        name: this.tmx_name,
-        r: tr.find('.lookup input').is(':checked') ? 1 : 0,
-        w: tr.find('.update input').is(':checked') ? 1 : 0,
-      }
-    },
+    // extractTMdataFromRow: function (tr) {
+    //   return {
+    //     tm_key: tr.find('.privatekey').text(),
+    //     key: this.tm_key,
+    //     tmx_name: tr.find('.description').text(),
+    //     name: this.tmx_name,
+    //     r: tr.find('.lookup input').is(':checked') ? 1 : 0,
+    //     w: tr.find('.update input').is(':checked') ? 1 : 0,
+    //   }
+    // },
 
     saveTMdata: function (closeAfter) {
       if (closeAfter) {
@@ -1345,37 +1345,37 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
           UI.showErrorOnActiveTMTable(errors[0].message)
         })
     },
-    saveTMkey: function (desc) {
-      if (desc.length == 0) {
-        desc = 'Private resource'
-      }
-
-      //call API
-      return tmCreateRandUser().then((response) => {
-        const {key} = response.data
-        if (!config.isLoggedIn) {
-          UI.checkTMKey('key', key)
-          return
-        }
-        createNewTmKey({
-          key: key,
-          description: desc,
-        })
-          .then(() => {
-            UI.checkTMKey('key', key)
-            UI.hideAllBoxOnTables()
-          })
-          .catch((errors) => {
-            setTimeout(function () {
-              if (errors[0].code === '23000') {
-                UI.showErrorOnActiveTMTable('The key you entered is invalid.')
-              } else {
-                UI.showErrorOnActiveTMTable(errors[0].message)
-              }
-            }, 200)
-          })
-      })
-    },
+    // saveTMkey: function (desc) {
+    //   if (desc.length == 0) {
+    //     desc = 'Private resource'
+    //   }
+    //
+    //   //call API
+    //   return tmCreateRandUser().then((response) => {
+    //     const {key} = response.data
+    //     if (!config.isLoggedIn) {
+    //       UI.checkTMKey('key', key)
+    //       return
+    //     }
+    //     createNewTmKey({
+    //       key: key,
+    //       description: desc,
+    //     })
+    //       .then(() => {
+    //         UI.checkTMKey('key', key)
+    //         UI.hideAllBoxOnTables()
+    //       })
+    //       .catch((errors) => {
+    //         setTimeout(function () {
+    //           if (errors[0].code === '23000') {
+    //             UI.showErrorOnActiveTMTable('The key you entered is invalid.')
+    //           } else {
+    //             UI.showErrorOnActiveTMTable(errors[0].message)
+    //           }
+    //         }, 200)
+    //       })
+    //   })
+    // },
 
     closeTMPanel: function () {
       $('.popup-tm').removeClass('open').animate({right: '-1100px'}, 400)
@@ -1392,106 +1392,106 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
           }, 500)
       }
     },
-    filterInactiveTM: function (txt) {
-      const inactiveItems = Array.from(
-        document.getElementById('inactivetm')?.getElementsByClassName('list')[0]
-          ?.children,
-      )
-      inactiveItems.forEach((item) => {
-        const description = item
-          .getElementsByClassName('description')[0]
-          .getElementsByClassName('edit-desc')[0]
-          .getAttribute('data-descr')
-
-        const regex = new RegExp(TEXT_UTILS.escapeRegExp(txt), 'gi')
-        if (regex.test(description)) {
-          item.classList.add('found')
-        } else {
-          item.classList.remove('found')
-        }
-      })
-    },
-    showMTDeletingMessage: function (button) {
-      var tr = button.closest('tr')
-      var id = tr.data('id')
-      $('.mgmt-table-mt .tm-warning-message')
-        .html(
-          'Do you really want to delete this MT? ' +
-            '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>' +
-            '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete">       <span class="text">Confirm</span>   </a>',
-        )
-        .show()
-      $('.continueDeletingMT, .cancelDeletingMT').off('click')
-      $('.continueDeletingMT').on('click', function (e) {
-        e.preventDefault()
-        UI.deleteMT(id)
-        $('.mgmt-table-mt .tm-warning-message').empty().hide()
-      })
-      $('.cancelDeletingMT').on('click', function (e) {
-        e.preventDefault()
-        UI.hideAllBoxOnTables()
-      })
-    },
-    showDeleteTmMessage: function (button) {
-      $('tr.tm-key-deleting').removeClass('tm-key-deleting')
-      var message =
-        'Do you really want to delete this resource (<b>XXX</b>)? ' +
-        '<a class="pull-right btn-orange-medium cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
-        '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>'
-      var elem = $(button).closest('table')
-      var tr = $(button).closest('tr')
-      tr.addClass('tm-key-deleting')
-      var key = tr.find('.privatekey').text()
-      message = message.replace('XXX', key)
-      // message = message.replace('YYY', descr);
-      if (elem.attr('id') === 'activetm') {
-        UI.showWarningOnActiveTMTable(message)
-      } else {
-        UI.showWarningOnInactiveTMTable(message)
-      }
-      var removeListeners = function () {
-        $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click')
-      }
-      setTimeout(function () {
-        $('.confirm-tm-key-delete').off('click')
-        $('.confirm-tm-key-delete').on('click', function (e) {
-          e.preventDefault()
-          UI.deleteTM(button)
-          UI.hideAllBoxOnTables()
-          removeListeners()
-        })
-        $('.cancel-tm-key-delete').off('click')
-        $('.cancel-tm-key-delete').on('click', function (e) {
-          e.preventDefault()
-          UI.hideAllBoxOnTables()
-          $('tr.tm-key-deleting').removeClass('tm-key-deleting')
-          removeListeners()
-        })
-      }, 200)
-    },
-    deleteTM: function (button) {
-      const tr = $(button).parents('tr').first()
-      $(tr).fadeOut('normal', function () {
-        $(this).remove()
-      })
-
-      deleteTmKey({
-        key: tr.find('.privatekey').text(),
-      })
-        .then(() => {
-          UI.hideAllBoxOnTables()
-          setTimeout(function () {
-            $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
-          }, 500)
-          // TODO: update keys for glossary
-          if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
-        })
-        .catch(() => {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your data. Please retry!',
-          )
-        })
-    },
+    // filterInactiveTM: function (txt) {
+    //   const inactiveItems = Array.from(
+    //     document.getElementById('inactivetm')?.getElementsByClassName('list')[0]
+    //       ?.children,
+    //   )
+    //   inactiveItems.forEach((item) => {
+    //     const description = item
+    //       .getElementsByClassName('description')[0]
+    //       .getElementsByClassName('edit-desc')[0]
+    //       .getAttribute('data-descr')
+    //
+    //     const regex = new RegExp(TEXT_UTILS.escapeRegExp(txt), 'gi')
+    //     if (regex.test(description)) {
+    //       item.classList.add('found')
+    //     } else {
+    //       item.classList.remove('found')
+    //     }
+    //   })
+    // },
+    // showMTDeletingMessage: function (button) {
+    //   var tr = button.closest('tr')
+    //   var id = tr.data('id')
+    //   $('.mgmt-table-mt .tm-warning-message')
+    //     .html(
+    //       'Do you really want to delete this MT? ' +
+    //         '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>' +
+    //         '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete">       <span class="text">Confirm</span>   </a>',
+    //     )
+    //     .show()
+    //   $('.continueDeletingMT, .cancelDeletingMT').off('click')
+    //   $('.continueDeletingMT').on('click', function (e) {
+    //     e.preventDefault()
+    //     UI.deleteMT(id)
+    //     $('.mgmt-table-mt .tm-warning-message').empty().hide()
+    //   })
+    //   $('.cancelDeletingMT').on('click', function (e) {
+    //     e.preventDefault()
+    //     UI.hideAllBoxOnTables()
+    //   })
+    // },
+    // showDeleteTmMessage: function (button) {
+    //   $('tr.tm-key-deleting').removeClass('tm-key-deleting')
+    //   var message =
+    //     'Do you really want to delete this resource (<b>XXX</b>)? ' +
+    //     '<a class="pull-right btn-orange-medium cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
+    //     '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>'
+    //   var elem = $(button).closest('table')
+    //   var tr = $(button).closest('tr')
+    //   tr.addClass('tm-key-deleting')
+    //   var key = tr.find('.privatekey').text()
+    //   message = message.replace('XXX', key)
+    //   // message = message.replace('YYY', descr);
+    //   if (elem.attr('id') === 'activetm') {
+    //     UI.showWarningOnActiveTMTable(message)
+    //   } else {
+    //     UI.showWarningOnInactiveTMTable(message)
+    //   }
+    //   var removeListeners = function () {
+    //     $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click')
+    //   }
+    //   setTimeout(function () {
+    //     $('.confirm-tm-key-delete').off('click')
+    //     $('.confirm-tm-key-delete').on('click', function (e) {
+    //       e.preventDefault()
+    //       UI.deleteTM(button)
+    //       UI.hideAllBoxOnTables()
+    //       removeListeners()
+    //     })
+    //     $('.cancel-tm-key-delete').off('click')
+    //     $('.cancel-tm-key-delete').on('click', function (e) {
+    //       e.preventDefault()
+    //       UI.hideAllBoxOnTables()
+    //       $('tr.tm-key-deleting').removeClass('tm-key-deleting')
+    //       removeListeners()
+    //     })
+    //   }, 200)
+    // },
+    // deleteTM: function (button) {
+    //   const tr = $(button).parents('tr').first()
+    //   $(tr).fadeOut('normal', function () {
+    //     $(this).remove()
+    //   })
+    //
+    //   deleteTmKey({
+    //     key: tr.find('.privatekey').text(),
+    //   })
+    //     .then(() => {
+    //       UI.hideAllBoxOnTables()
+    //       setTimeout(function () {
+    //         $('#activetm').trigger('deleteTm', [tr.find('.privatekey').text()])
+    //       }, 500)
+    //       // TODO: update keys for glossary
+    //       if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
+    //     })
+    //     .catch(() => {
+    //       UI.showErrorOnActiveTMTable(
+    //         'There was an error saving your data. Please retry!',
+    //       )
+    //     })
+    // },
     // deleteMT: function (id) {
     //   deleteMTEngine({
     //     id,
@@ -1752,12 +1752,12 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     //   }
     // },
 
-    openAddNewTm: function () {
-      UI.removeErrorOnKeyInput()
-      $('#shared-tm-key').addClass('hide')
-      $('.mgmt-table-tm tr.new').removeClass('hide').show()
-      $('#new-tm-description').focus()
-    },
+    // openAddNewTm: function () {
+    //   UI.removeErrorOnKeyInput()
+    //   $('#shared-tm-key').addClass('hide')
+    //   $('.mgmt-table-tm tr.new').removeClass('hide').show()
+    //   $('#new-tm-description').focus()
+    // },
     openAddNewTmShared: function () {
       UI.removeErrorOnKeyInput()
       $('#shared-tm-key').removeClass('hide')
@@ -1765,43 +1765,43 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       $('#new-tm-description').focus()
     },
 
-    openExport: function (elem, type) {
-      $(elem)
-        .parents('.action')
-        .find('a')
-        .each(function () {
-          $(this).addClass('disabled')
-        })
-      const text =
-        type === 'glossary'
-          ? 'We will send a link to download the exported Glossary to this email:'
-          : 'We will send a link to download the exported TM to this email:'
-      const className = type === 'glossary' ? 'export-glossary' : 'export-tmx'
-      const exportDiv =
-        '<td class="download-container ' +
-        className +
-        '" style="display: none">' +
-        '<div class="message-export">' +
-        text +
-        '</div>' +
-        '<div class="message-export-success"></div>' +
-        '<input type="email" required class="email-export mgmt-input" value="' +
-        config.userMail +
-        '"/>' +
-        '<span class="uploadloader"></span>' +
-        '<span class="email-export-email-sent">Request submitted</span>' +
-        '<a class="pull-right btn-grey canceladd-export">' +
-        '<span class="text"></span>' +
-        '</a>' +
-        '<a class="pull-right btn-ok export-button export-tmx-button">' +
-        '   <span class="text export-button-label">Confirm</span>' +
-        '</a>' +
-        '<span class="email-export-email-error">We got an error,</br> please contact support</span>' +
-        '</td>'
-
-      $(elem).parents('tr').append(exportDiv)
-      $(elem).parents('tr').find('.download-container').slideToggle()
-    },
+    // openExport: function (elem, type) {
+    //   $(elem)
+    //     .parents('.action')
+    //     .find('a')
+    //     .each(function () {
+    //       $(this).addClass('disabled')
+    //     })
+    //   const text =
+    //     type === 'glossary'
+    //       ? 'We will send a link to download the exported Glossary to this email:'
+    //       : 'We will send a link to download the exported TM to this email:'
+    //   const className = type === 'glossary' ? 'export-glossary' : 'export-tmx'
+    //   const exportDiv =
+    //     '<td class="download-container ' +
+    //     className +
+    //     '" style="display: none">' +
+    //     '<div class="message-export">' +
+    //     text +
+    //     '</div>' +
+    //     '<div class="message-export-success"></div>' +
+    //     '<input type="email" required class="email-export mgmt-input" value="' +
+    //     config.userMail +
+    //     '"/>' +
+    //     '<span class="uploadloader"></span>' +
+    //     '<span class="email-export-email-sent">Request submitted</span>' +
+    //     '<a class="pull-right btn-grey canceladd-export">' +
+    //     '<span class="text"></span>' +
+    //     '</a>' +
+    //     '<a class="pull-right btn-ok export-button export-tmx-button">' +
+    //     '   <span class="text export-button-label">Confirm</span>' +
+    //     '</a>' +
+    //     '<span class="email-export-email-error">We got an error,</br> please contact support</span>' +
+    //     '</td>'
+    //
+    //   $(elem).parents('tr').append(exportDiv)
+    //   $(elem).parents('tr').find('.download-container').slideToggle()
+    // },
     getUserSharedKey: function (keyValue) {
       const promise = getInfoTmKey({
         key: keyValue,
@@ -1817,159 +1817,159 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       return promise
     },
-    openShareResource: function (elem) {
-      var tr = $(elem).parents('tr')
-      if (tr.find('.share-tmx-container').length) {
-        tr.find('.share-tmx-container').slideToggle(function () {
-          $(this).remove()
-        })
-        tr.find('.action')
-          .find('a')
-          .each(function () {
-            $(this).removeClass('disabled')
-          })
-        return
-      }
-
-      var key = tr.find('.privatekey').text()
-      if (key.indexOf('*') > -1) return
-      this.getUserSharedKey(key).then((response) => {
-        if (response.success !== true) return
-
-        var users = response.data
-        //Remove the user from the list
-        var indexOfUser = users
-          .map(function (item) {
-            return item.email
-          })
-          .indexOf(config.userMail)
-        var user = users.splice(indexOfUser, 1)
-        user = user[0]
-
-        tr.find('.action')
-          .find('a')
-          .each(function () {
-            $(this).addClass('disabled')
-          })
-        //Create the container
-        var exportDiv = ''
-        if (users.length === 0) {
-          $('tr.mine[data-key=' + key + '] .icon-owner')
-            .removeClass('icon-users icon-owner-shared')
-            .addClass('icon-lock icon-owner-private')
-          exportDiv =
-            '<td class="share-tmx-container" style="display: none">' +
-            '<div class="message-share-tmx">Share ownership of the resource by sharing the key. This action cannot be undone.</div>' +
-            '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>' +
-            '<a class="pull-right btn-grey cancelsharetmx"><span class="text"></span>   </a>' +
-            '<div class="pull-right btn-ok share-button">Share</div>' +
-            '</td>'
-        } else if (users.length > 0) {
-          $('tr.mine[data-key=' + key + '] .icon-owner')
-            .removeClass('icon-lock icon-owner-private')
-            .addClass('icon-users icon-owner-shared')
-          var totalShareUsers =
-            users.length === 1
-              ? ''
-              : 'and <span class="message-share-tmx-openemailpopup">' +
-                (users.length - 1) +
-                ' others</span>'
-          exportDiv =
-            '<td class="share-tmx-container" style="display: none">' +
-            '<div class="message-share-tmx">Shared resource ' +
-            'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">' +
-            users[0].first_name +
-            ' ' +
-            users[0].last_name +
-            '</span>  ' +
-            totalShareUsers +
-            '</div>' +
-            '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma" type="email" multiple/>' +
-            '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
-            '<div class="pull-right btn-ok share-button">Share</div>' +
-            '</td>'
-        } else {
-          return false
-        }
-
-        tr.append(exportDiv)
-        tr.find('.share-tmx-container').slideToggle()
-
-        //If still not shared dont create the popup
-        if (users.length === 0) return
-
-        var description = tr.find('.edit-desc').data('descr')
-
-        tr.find('.message-share-tmx-openemailpopup').on('click', function () {
-          ModalsActions.showModalComponent(
-            ShareTmModal,
-            {
-              description,
-              tmKey: key,
-              user,
-              users,
-              callback: () => UI.shareTmCallbackFromPopup(key),
-            },
-            'Share resource',
-          )
-        })
-      })
-    },
-    startExport: function (elem, type) {
-      var line = $(elem).closest('tr')
-      var email = line.find('.email-export').val()
-      var successText = 'You should receive the link at ' + email
-
-      line.find('.uploadloader').show()
-      line.find('.export-button, .canceladd-export').addClass('disabled')
-      const tm_key = $('.privatekey', line).text().trim()
-      const tm_name = $('.description', line).text().trim()
-      const params = {
-        key: tm_key,
-        name: tm_name,
-        email,
-      }
-      const promise =
-        type === 'glossary' ? downloadGlossary(params) : downloadTMXApi(params)
-      promise
-        .then((response) => {
-          var time = Math.round(response.data.estimatedTime / 60)
-          time = time > 0 ? time : 1
-          successText = successText.replace('%XX%', time)
-          setTimeout(function () {
-            line.find('.message-export-success').html(successText)
-            line.find('.uploadloader').hide()
-            line.find('.export-button, .canceladd-export, .email-export').hide()
-            line.find('.message-export').hide()
-            line
-              .find('.message-export-success, .email-export-email-sent')
-              .show()
-            setTimeout(function () {
-              UI.closeExport(line)
-            }, 5000)
-          }, 3000)
-        })
-        .catch(() => {
-          setTimeout(function () {
-            line.find('.uploadloader').hide()
-            line.find('.export-button').hide()
-            line.find('.action a').removeClass('disabled')
-            line.find('.canceladd-export').removeClass('disabled')
-            line.find('.email-export-email-error').show()
-            UI.showErrorMessage(line, 'We got an error, please contact support')
-            line.find('.download-container').addClass('tm-error')
-          }, 2000)
-        })
-    },
-    closeExport: function (elem) {
-      $(elem)
-        .find('td.download-container')
-        .slideToggle(function () {
-          $(this).remove()
-        })
-      $(elem).find('.action a').removeClass('disabled')
-    },
-    addFormUpload: function (elem, type) {
+    // openShareResource: function (elem) {
+    //   var tr = $(elem).parents('tr')
+    //   if (tr.find('.share-tmx-container').length) {
+    //     tr.find('.share-tmx-container').slideToggle(function () {
+    //       $(this).remove()
+    //     })
+    //     tr.find('.action')
+    //       .find('a')
+    //       .each(function () {
+    //         $(this).removeClass('disabled')
+    //       })
+    //     return
+    //   }
+    //
+    //   var key = tr.find('.privatekey').text()
+    //   if (key.indexOf('*') > -1) return
+    //   this.getUserSharedKey(key).then((response) => {
+    //     if (response.success !== true) return
+    //
+    //     var users = response.data
+    //     //Remove the user from the list
+    //     var indexOfUser = users
+    //       .map(function (item) {
+    //         return item.email
+    //       })
+    //       .indexOf(config.userMail)
+    //     var user = users.splice(indexOfUser, 1)
+    //     user = user[0]
+    //
+    //     tr.find('.action')
+    //       .find('a')
+    //       .each(function () {
+    //         $(this).addClass('disabled')
+    //       })
+    //     //Create the container
+    //     var exportDiv = ''
+    //     if (users.length === 0) {
+    //       $('tr.mine[data-key=' + key + '] .icon-owner')
+    //         .removeClass('icon-users icon-owner-shared')
+    //         .addClass('icon-lock icon-owner-private')
+    //       exportDiv =
+    //         '<td class="share-tmx-container" style="display: none">' +
+    //         '<div class="message-share-tmx">Share ownership of the resource by sharing the key. This action cannot be undone.</div>' +
+    //         '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>' +
+    //         '<a class="pull-right btn-grey cancelsharetmx"><span class="text"></span>   </a>' +
+    //         '<div class="pull-right btn-ok share-button">Share</div>' +
+    //         '</td>'
+    //     } else if (users.length > 0) {
+    //       $('tr.mine[data-key=' + key + '] .icon-owner')
+    //         .removeClass('icon-lock icon-owner-private')
+    //         .addClass('icon-users icon-owner-shared')
+    //       var totalShareUsers =
+    //         users.length === 1
+    //           ? ''
+    //           : 'and <span class="message-share-tmx-openemailpopup">' +
+    //             (users.length - 1) +
+    //             ' others</span>'
+    //       exportDiv =
+    //         '<td class="share-tmx-container" style="display: none">' +
+    //         '<div class="message-share-tmx">Shared resource ' +
+    //         'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">' +
+    //         users[0].first_name +
+    //         ' ' +
+    //         users[0].last_name +
+    //         '</span>  ' +
+    //         totalShareUsers +
+    //         '</div>' +
+    //         '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma" type="email" multiple/>' +
+    //         '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
+    //         '<div class="pull-right btn-ok share-button">Share</div>' +
+    //         '</td>'
+    //     } else {
+    //       return false
+    //     }
+    //
+    //     tr.append(exportDiv)
+    //     tr.find('.share-tmx-container').slideToggle()
+    //
+    //     //If still not shared dont create the popup
+    //     if (users.length === 0) return
+    //
+    //     var description = tr.find('.edit-desc').data('descr')
+    //
+    //     tr.find('.message-share-tmx-openemailpopup').on('click', function () {
+    //       ModalsActions.showModalComponent(
+    //         ShareTmModal,
+    //         {
+    //           description,
+    //           tmKey: key,
+    //           user,
+    //           users,
+    //           callback: () => UI.shareTmCallbackFromPopup(key),
+    //         },
+    //         'Share resource',
+    //       )
+    //     })
+    //   })
+    // },
+    // startExport: function (elem, type) {
+    //   var line = $(elem).closest('tr')
+    //   var email = line.find('.email-export').val()
+    //   var successText = 'You should receive the link at ' + email
+    //
+    //   line.find('.uploadloader').show()
+    //   line.find('.export-button, .canceladd-export').addClass('disabled')
+    //   const tm_key = $('.privatekey', line).text().trim()
+    //   const tm_name = $('.description', line).text().trim()
+    //   const params = {
+    //     key: tm_key,
+    //     name: tm_name,
+    //     email,
+    //   }
+    //   const promise =
+    //     type === 'glossary' ? downloadGlossary(params) : downloadTMXApi(params)
+    //   promise
+    //     .then((response) => {
+    //       var time = Math.round(response.data.estimatedTime / 60)
+    //       time = time > 0 ? time : 1
+    //       successText = successText.replace('%XX%', time)
+    //       setTimeout(function () {
+    //         line.find('.message-export-success').html(successText)
+    //         line.find('.uploadloader').hide()
+    //         line.find('.export-button, .canceladd-export, .email-export').hide()
+    //         line.find('.message-export').hide()
+    //         line
+    //           .find('.message-export-success, .email-export-email-sent')
+    //           .show()
+    //         setTimeout(function () {
+    //           UI.closeExport(line)
+    //         }, 5000)
+    //       }, 3000)
+    //     })
+    //     .catch(() => {
+    //       setTimeout(function () {
+    //         line.find('.uploadloader').hide()
+    //         line.find('.export-button').hide()
+    //         line.find('.action a').removeClass('disabled')
+    //         line.find('.canceladd-export').removeClass('disabled')
+    //         line.find('.email-export-email-error').show()
+    //         UI.showErrorMessage(line, 'We got an error, please contact support')
+    //         line.find('.download-container').addClass('tm-error')
+    //       }, 2000)
+    //     })
+    // },
+    // closeExport: function (elem) {
+    //   $(elem)
+    //     .find('td.download-container')
+    //     .slideToggle(function () {
+    //       $(this).remove()
+    //     })
+    //   $(elem).find('.action a').removeClass('disabled')
+    // },
+    /*addFormUpload: function (elem, type) {
       var label, format
       if (type == 'tmx') {
         label =
@@ -2026,67 +2026,67 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       $(elem).parents('tr').append(nr)
       $(elem).parents('tr').find('.uploadfile').slideToggle()
-    },
-    showErrorOnActiveTMTable: function (message) {
-      setTimeout(function () {
-        $('.mgmt-container .active-tm-container .tm-error-message')
-          .html(message)
-          .fadeIn(100)
-      })
-    },
-    showErrorOnInactiveTMTable: function (message) {
-      setTimeout(function () {
-        $('.mgmt-container .inactive-tm-container .tm-error-message')
-          .html(message)
-          .fadeIn(100)
-      })
-    },
-    showWarningOnActiveTMTable: function (message) {
-      setTimeout(function () {
-        $('.mgmt-container .active-tm-container .tm-warning-message')
-          .html(message)
-          .fadeIn(100)
-      })
-    },
-    showWarningOnInactiveTMTable: function (message) {
-      setTimeout(function () {
-        $('.mgmt-container .inactive-tm-container .tm-warning-message')
-          .html(message)
-          .fadeIn(100)
-      })
-    },
-    showSuccessOnActiveTMTable: function (message) {
-      setTimeout(function () {
-        $('.mgmt-container .active-tm-container .tm-success-message')
-          .html(message)
-          .fadeIn(100)
-      })
-    },
-    showSuccessOnInactiveTMTable: function (message) {
-      setTimeout(function () {
-        $('.mgmt-container .inactive-tm-container .tm-success-message')
-          .html(message)
-          .fadeIn(100)
-      })
-    },
-
-    hideAllBoxOnTables: function () {
-      $(
-        '.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
-          '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
-          '.mgmt-table-mt .tm-error-message, .mgmt-table-mt .tm-warning-message, .mgmt-table-mt .tm-success-message',
-      ).fadeOut(0, function () {
-        $(this).html('')
-      })
-      $('.tm-error').removeClass('tm-error')
-    },
-    showErrorMessage: function (tr, message) {
-      if (tr.closest('table').attr('id') == 'inactivetm') {
-        UI.showErrorOnInactiveTMTable(message)
-      } else {
-        UI.showErrorOnActiveTMTable(message)
-      }
-    },
+    },*/
+    // showErrorOnActiveTMTable: function (message) {
+    //   setTimeout(function () {
+    //     $('.mgmt-container .active-tm-container .tm-error-message')
+    //       .html(message)
+    //       .fadeIn(100)
+    //   })
+    // },
+    // showErrorOnInactiveTMTable: function (message) {
+    //   setTimeout(function () {
+    //     $('.mgmt-container .inactive-tm-container .tm-error-message')
+    //       .html(message)
+    //       .fadeIn(100)
+    //   })
+    // },
+    // showWarningOnActiveTMTable: function (message) {
+    //   setTimeout(function () {
+    //     $('.mgmt-container .active-tm-container .tm-warning-message')
+    //       .html(message)
+    //       .fadeIn(100)
+    //   })
+    // },
+    // showWarningOnInactiveTMTable: function (message) {
+    //   setTimeout(function () {
+    //     $('.mgmt-container .inactive-tm-container .tm-warning-message')
+    //       .html(message)
+    //       .fadeIn(100)
+    //   })
+    // },
+    // showSuccessOnActiveTMTable: function (message) {
+    //   setTimeout(function () {
+    //     $('.mgmt-container .active-tm-container .tm-success-message')
+    //       .html(message)
+    //       .fadeIn(100)
+    //   })
+    // },
+    // showSuccessOnInactiveTMTable: function (message) {
+    //   setTimeout(function () {
+    //     $('.mgmt-container .inactive-tm-container .tm-success-message')
+    //       .html(message)
+    //       .fadeIn(100)
+    //   })
+    // },
+    //
+    // hideAllBoxOnTables: function () {
+    //   $(
+    //     '.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
+    //       '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
+    //       '.mgmt-table-mt .tm-error-message, .mgmt-table-mt .tm-warning-message, .mgmt-table-mt .tm-success-message',
+    //   ).fadeOut(0, function () {
+    //     $(this).html('')
+    //   })
+    //   $('.tm-error').removeClass('tm-error')
+    // },
+    // showErrorMessage: function (tr, message) {
+    //   if (tr.closest('table').attr('id') == 'inactivetm') {
+    //     UI.showErrorOnInactiveTMTable(message)
+    //   } else {
+    //     UI.showErrorOnActiveTMTable(message)
+    //   }
+    // },
     // initOptionsTip: function () {
     //   var acceptedLanguagesLXQ = config.lexiqa_languages.slice()
     //   var lexiqaText =
@@ -2312,17 +2312,17 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     //   }
     // },
 
-    checkCrossLanguageSettings: function () {
-      var settings = localStorage.getItem('multiMatchLangs')
-      if (settings) {
-        var selectPrimary = $('#multi-match-1')
-        var selectSecondary = $('#multi-match-2')
-        settings = JSON.parse(settings)
-        UI.crossLanguageSettings = settings
-        selectPrimary.val(settings.primary)
-        selectSecondary.val(settings.secondary)
-        if (settings.primary) selectSecondary.removeAttr('disabled')
-      }
-    },
+    // checkCrossLanguageSettings: function () {
+    //   var settings = localStorage.getItem('multiMatchLangs')
+    //   if (settings) {
+    //     var selectPrimary = $('#multi-match-1')
+    //     var selectSecondary = $('#multi-match-2')
+    //     settings = JSON.parse(settings)
+    //     UI.crossLanguageSettings = settings
+    //     selectPrimary.val(settings.primary)
+    //     selectSecondary.val(settings.secondary)
+    //     if (settings.primary) selectSecondary.removeAttr('disabled')
+    //   }
+    // },
   })
 })(jQuery)
