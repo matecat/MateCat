@@ -40,7 +40,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       // script per lo slide del pannello di manage tmx
       // UI.setDropDown()
       //UI.initOptionsTip()
-      UI.initTmxTooltips()
+      // UI.initTmxTooltips()
       //Fix: When you move to a page using the browser arrow the checkbox seems to be not checked
       // $('#activetm').find('tr:not(.new) input[checked]').prop('checked', true)
       // $('#inactivetm').find('tr.mine input').prop('checked', false)
@@ -97,74 +97,74 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       //     UI.activateMT(checkbox)
       //   }
       // })
-      $('#mt_engine_int').change(function () {
-        // $('#add-mt-provider-cancel').hide();
-        $('#mt-provider-details .error').empty()
-        $('#add-mt-provider-confirm').addClass('disabled')
-        $('.insert-tm').show()
-        var provider = $(this).val()
-        if (provider == 'none') {
-          $('.step2 .fields').html('')
-          $('.step2').hide()
-          $('.step3').hide()
-          $('#add-mt-provider-cancel').show()
-        } else {
-          $('.step2 .fields').html(
-            $('#mt-provider-' + provider + '-fields').html(),
-          )
-          $('.step3 .text-left').html(
-            $('#mt-provider-' + provider + '-msg').html(),
-          )
-          $('.step2').show()
-          $('.step3').show()
-          $('#add-mt-provider-confirm').removeClass('hide')
-        }
-        if (provider === 'mmt') {
-          $('.mgmt-container .tooltip-preimport').data(
-            'powertip',
-            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
-              'If the option is enabled, all the TMs linked to your Matecat account' +
-              '<br/> will be automatically imported to your ModernMT account for adaptation purposes.' +
-              '<br/>If the option is not enabled, the only TMs imported to your ModernMT account' +
-              '<br/> will be those used on projects that use ModernMT as their MT engine.</div>',
-          )
-          $('.mgmt-container .tooltip-preimport').powerTip({
-            placement: 's',
-          })
-
-          $('.mgmt-container .tooltip-context_analyzer').data(
-            'powertip',
-            "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
-              'If the option is enabled, ModernMT will adapt the suggestions provided for a job' +
-              '<br/> using mainly the content of the TMs that you activate for that job and your corrections during translation,' +
-              '<br/>but it will also scan all your other TMs for further adaptation based on the context of the document that you are translating.' +
-              '<br/> If the option is not enabled, ModernMT will only adapt based on the TMs that you activate for a job and on your corrections during translation.</div>',
-          )
-          $('.mgmt-container .tooltip-context_analyzer').powerTip({
-            placement: 's',
-          })
-
-          $('.mgmt-container .tooltip-pretranslate').data(
-            'powertip',
-            "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +
-              'If the option is enabled, ModernMT is used during the analysis phase.' +
-              '<br/> This makes downloading drafts from the translation interface quicker, ' +
-              '<br/>but may lead to additional charges for plans other than the "Professional" one.' +
-              '<br>If the option is not enabled, ModernMT is only used to provide adaptive ' +
-              '<br/>suggestions when opening segments.</div>',
-          )
-          $('.mgmt-container .tooltip-pretranslate').powerTip({
-            placement: 's',
-          })
-        }
-        // if (provider === 'letsmt') {
-        //   // Tilde MT (letsmt) uses a standalone web component
-        //   // we'll hide the button because it's easier to use the webcomponent's builtin buttons
-        //   $('#add-mt-provider-confirm').addClass('hide')
-        //   // when done, we'll want to simulate clicking the original button. for this it must be enabled
-        //   $('#add-mt-provider-confirm').removeClass('disabled')
-        // }
-      })
+      // $('#mt_engine_int').change(function () {
+      //   // $('#add-mt-provider-cancel').hide();
+      //   $('#mt-provider-details .error').empty()
+      //   $('#add-mt-provider-confirm').addClass('disabled')
+      //   $('.insert-tm').show()
+      //   var provider = $(this).val()
+      //   if (provider == 'none') {
+      //     $('.step2 .fields').html('')
+      //     $('.step2').hide()
+      //     $('.step3').hide()
+      //     $('#add-mt-provider-cancel').show()
+      //   } else {
+      //     $('.step2 .fields').html(
+      //       $('#mt-provider-' + provider + '-fields').html(),
+      //     )
+      //     $('.step3 .text-left').html(
+      //       $('#mt-provider-' + provider + '-msg').html(),
+      //     )
+      //     $('.step2').show()
+      //     $('.step3').show()
+      //     $('#add-mt-provider-confirm').removeClass('hide')
+      //   }
+      //   if (provider === 'mmt') {
+      //     $('.mgmt-container .tooltip-preimport').data(
+      //       'powertip',
+      //       "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+      //         'If the option is enabled, all the TMs linked to your Matecat account' +
+      //         '<br/> will be automatically imported to your ModernMT account for adaptation purposes.' +
+      //         '<br/>If the option is not enabled, the only TMs imported to your ModernMT account' +
+      //         '<br/> will be those used on projects that use ModernMT as their MT engine.</div>',
+      //     )
+      //     $('.mgmt-container .tooltip-preimport').powerTip({
+      //       placement: 's',
+      //     })
+      //
+      //     $('.mgmt-container .tooltip-context_analyzer').data(
+      //       'powertip',
+      //       "<div style='line-height: 20px;font-size: 15px;text-align: left;'>" +
+      //         'If the option is enabled, ModernMT will adapt the suggestions provided for a job' +
+      //         '<br/> using mainly the content of the TMs that you activate for that job and your corrections during translation,' +
+      //         '<br/>but it will also scan all your other TMs for further adaptation based on the context of the document that you are translating.' +
+      //         '<br/> If the option is not enabled, ModernMT will only adapt based on the TMs that you activate for a job and on your corrections during translation.</div>',
+      //     )
+      //     $('.mgmt-container .tooltip-context_analyzer').powerTip({
+      //       placement: 's',
+      //     })
+      //
+      //     $('.mgmt-container .tooltip-pretranslate').data(
+      //       'powertip',
+      //       "<div style='line-height: 20px;font-size: 15px; text-align: left;'>" +
+      //         'If the option is enabled, ModernMT is used during the analysis phase.' +
+      //         '<br/> This makes downloading drafts from the translation interface quicker, ' +
+      //         '<br/>but may lead to additional charges for plans other than the "Professional" one.' +
+      //         '<br>If the option is not enabled, ModernMT is only used to provide adaptive ' +
+      //         '<br/>suggestions when opening segments.</div>',
+      //     )
+      //     $('.mgmt-container .tooltip-pretranslate').powerTip({
+      //       placement: 's',
+      //     })
+      //   }
+      //   // if (provider === 'letsmt') {
+      //   //   // Tilde MT (letsmt) uses a standalone web component
+      //   //   // we'll hide the button because it's easier to use the webcomponent's builtin buttons
+      //   //   $('#add-mt-provider-confirm').addClass('hide')
+      //   //   // when done, we'll want to simulate clicking the original button. for this it must be enabled
+      //   //   $('#add-mt-provider-confirm').removeClass('disabled')
+      //   // }
+      // })
       // $('.add-mt-engine').click(function () {
       //   if ($(this).hasClass('disabled')) {
       //     var props = {
@@ -2113,13 +2113,13 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     //   })
     // },
 
-    initTmxTooltips: function () {
+    /*initTmxTooltips: function () {
       //Description input
       if (config.isLoggedIn) {
-        /*$('tr:not(.ownergroup) .edit-desc').data(
+        /!*$('tr:not(.ownergroup) .edit-desc').data(
           'powertip',
           "<div style='line-height: 18px;font-size: 15px;'>Rename</div>",
-        )*/
+        )*!/
         $('.edit-desc').powerTip({
           placement: 's',
         })
@@ -2164,7 +2164,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       mymemoryChecks.powerTip({
         placement: 's',
       })
-    },
+    },*/
 
     // setLanguageTooltipLXQ: function () {
     //   var lxTooltip = $('.tooltip-lexiqa').data('powertip')
