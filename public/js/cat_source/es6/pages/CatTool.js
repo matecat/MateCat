@@ -24,6 +24,7 @@ import {
 } from '../components/settingsPanel'
 import Speech2TextFeature from '../utils/speech2text'
 import SegmentUtils from '../utils/segmentUtils'
+import {getTmKeysJob} from '../api/getTmKeysJob'
 
 function CatTool() {
   const [options, setOptions] = useState({})
@@ -59,15 +60,24 @@ function CatTool() {
   const openTmPanel = () => setIsOpenSettings(true)
 
   const getTmKeys = () => {
-    if (config.isLoggedIn) {
-      getTmKeysUser().then(({tm_keys}) =>
-        setTmKeys(
-          tm_keys.map((key) => {
-            return {...key, id: key.key}
-          }),
-        ),
+    const promises = [
+      getTmKeysJob(),
+      ...(config.isLoggedIn ? [getTmKeysUser()] : []),
+    ]
+    Promise.all(promises).then((values) => {
+      const uniqueKeys = values
+        .flatMap((item) => [...item.tm_keys])
+        .reduce(
+          (acc, cur) =>
+            !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
+          [],
+        )
+      setTmKeys(
+        uniqueKeys.map((key) => {
+          return {...key, id: key.key, isActive: key.r && key.w}
+        }),
       )
-    }
+    })
   }
 
   const getMTEngines = () => {
