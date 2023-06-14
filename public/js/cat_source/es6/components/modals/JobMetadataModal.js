@@ -15,6 +15,10 @@ class JobMetadataModal extends React.Component {
     //     '**Note:** Link to file a query: http://t.uber.com/riderq Rider  \n' +
     //     '            Screen Search: https://docs.google.com/document/d/19Dk92t9NXdN.';
   }
+  componentDidMount() {
+    const element = document.querySelector('.title.current.active')
+    element.scrollIntoView({behavior: 'smooth'})
+  }
 
   createFileList() {
     const {currentFile, currentFilePart} = this.props
