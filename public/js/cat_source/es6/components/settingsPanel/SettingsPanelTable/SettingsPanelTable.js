@@ -142,9 +142,7 @@ export const SettingsPanelTable = ({
             (rows.length ? (
               rows.map(renderItems)
             ) : (
-              <div className="settings-panel-table-row-empty">
-                <span>No results</span>
-              </div>
+              <div className="settings-panel-table-row-empty"></div>
             ))}
         </div>
       </div>

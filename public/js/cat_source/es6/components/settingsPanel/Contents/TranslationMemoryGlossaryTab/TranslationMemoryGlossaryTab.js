@@ -31,6 +31,7 @@ export const SPECIAL_ROWS_ID = {
 
 const DEFAULT_TRANSLATION_MEMORY = {
   id: SPECIAL_ROWS_ID.defaultTranslationMemory,
+  key: '',
   name: 'MyMemory: Collaborative translation memory shared with all Matecat users.',
   isActive: true,
   isDraggable: false,
@@ -58,9 +59,11 @@ const NEW_RESOURCE = {
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
-  const {tmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys, openLoginModal} = useContext(SettingsPanelContext)
 
-  const [specialRows, setSpecialRows] = useState([DEFAULT_TRANSLATION_MEMORY])
+  const [specialRows, setSpecialRows] = useState([
+    {...DEFAULT_TRANSLATION_MEMORY, r: Boolean(config.get_public_matches)},
+  ])
   const [keyRows, setKeyRows] = useState([])
   const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
   const [notification, setNotification] = useState({})
@@ -93,8 +96,6 @@ export const TranslationMemoryGlossaryTab = () => {
   )
 
   useEffect(() => {
-    if (!tmKeys) return
-
     const onExpandRow = ({row, shouldExpand, content}) =>
       setKeyRows((prevState) =>
         prevState.map((item) =>
@@ -120,7 +121,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
       const allRows = [
         defaultTranslationMemoryRow,
-        ...tmKeys,
+        ...(tmKeys ?? []),
         ...(createResourceRow ? [createResourceRow] : []),
       ]
 
@@ -148,7 +149,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
       return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
-        const {id, name, isActive, isLocked} = row
+        const {id, key, name, isActive, isLocked} = row
         const {isExpanded, extraNode} = prevStateRow
 
         const isCreateResourceRow =
@@ -161,6 +162,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
         return {
           id,
+          key,
           name,
           isDraggable: isActive && !isSpecialRow,
           isActive,
@@ -204,6 +206,7 @@ export const TranslationMemoryGlossaryTab = () => {
   const isActiveResourceNotification = keyRows.some(
     (row) => row.key === rowKey && row.isActive,
   )
+
   const activeResourcersNotification = message &&
     isActiveResourceNotification && (
       <MessageNotification
@@ -227,16 +230,19 @@ export const TranslationMemoryGlossaryTab = () => {
           Pre-translate 100% matches from TM
         </div>
         <div className="translation-memory-glossary-tab-active-resources">
+          {activeResourcersNotification}
           <div className="translation-memory-glossary-tab-table-title">
-            {activeResourcersNotification}
             <h2>Active Resources</h2>
             <div className="translation-memory-glossary-tab-buttons-group">
-              <button
-                className="ui primary button settings-panel-button-icon"
-                onClick={onAddSharedResource}
-              >
-                <Users size={18} /> Add shared resource
-              </button>
+              {config.isLoggedIn && (
+                <button
+                  className="ui primary button settings-panel-button-icon"
+                  onClick={onAddSharedResource}
+                >
+                  <Users size={18} /> Add shared resource
+                </button>
+              )}
+
               <button
                 className="ui primary button settings-panel-button-icon"
                 onClick={onNewResource}
@@ -255,18 +261,26 @@ export const TranslationMemoryGlossaryTab = () => {
           {inactiveResourcersNotification}
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Inactive Resources</h2>
-            <input
-              className="translation-memory-glossary-tab-input-text"
-              placeholder="Search resources"
-              value={filterInactiveKeys}
-              onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
-            />
+            {inactiveKeys.length > 0 && (
+              <input
+                className="translation-memory-glossary-tab-input-text"
+                placeholder="Search resources"
+                value={filterInactiveKeys}
+                onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+              />
+            )}
           </div>
-          <SettingsPanelTable
-            className="translation-memory-glossary-tab-inactive-table"
-            columns={COLUMNS_TABLE}
-            rows={inactiveKeys}
-          />
+          {config.isLoggedIn ? (
+            <SettingsPanelTable
+              className="translation-memory-glossary-tab-inactive-table"
+              columns={COLUMNS_TABLE}
+              rows={inactiveKeys}
+            />
+          ) : (
+            <button className="ui primary button" onClick={openLoginModal}>
+              Login to see your TM
+            </button>
+          )}
         </div>
       </div>
     </TranslationMemoryGlossaryTabContext.Provider>

@@ -8,12 +8,13 @@ import {tmCreateRandUser} from '../../../../api/tmCreateRandUser'
 import {createNewTmKey} from '../../../../api/createNewTmKey'
 import {checkTMKey} from '../../../../api/checkTMKey'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
 export const TMCreateResourceRow = ({row}) => {
-  const {setTmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
@@ -46,6 +47,7 @@ export const TMCreateResourceRow = ({row}) => {
   const onChangeKeyCode = (e) => {
     setKeyCode(e.currentTarget.value)
     setSubmitCheckErrors(undefined)
+    setNotification({})
   }
 
   const updateRow = ({isLookup, isUpdating, name, keyCode}) => {
@@ -74,24 +76,29 @@ export const TMCreateResourceRow = ({row}) => {
     )
 
     setSubmitCheckErrors(undefined)
+    setNotification({})
   }
 
   const onSubmit = (e) => {
     e.preventDefault()
-
     const isValid = validateForm()
     if (!isValid) return
 
     if (row.id === SPECIAL_ROWS_ID.newResource) createNewResource()
+    else addSharedResource()
   }
 
   const validateForm = () => {
     setSubmitCheckErrors(Symbol())
     if (
       !name ||
-      (!name && !keyCode && row.id === SPECIAL_ROWS_ID.addSharedResource)
+      (row.id === SPECIAL_ROWS_ID.addSharedResource && (!name || !keyCode))
     )
       return false
+
+    if (row.id === SPECIAL_ROWS_ID.addSharedResource) {
+      if (!checkSharedKey()) return false
+    }
 
     return true
   }
@@ -101,7 +108,7 @@ export const TMCreateResourceRow = ({row}) => {
     w: isUpdating,
     tm: true,
     glos: true,
-    owner: null,
+    owner: true,
     name,
     key,
     is_shared: false,
@@ -113,29 +120,15 @@ export const TMCreateResourceRow = ({row}) => {
     tmCreateRandUser().then((response) => {
       const {key} = response.data
 
-      const checkTMKeyCallback = () =>
-        checkTMKey({
-          tmKey: key,
-        })
-          .then((data) => {
-            if (data.success === true) {
-              setTmKeys((prevState) => [...prevState, getNewItem(key)])
-              onReset()
-            }
-          })
-          .catch(() => {
-            setNotification({
-              type: 'error',
-              message: 'The key is not valid.',
-            })
-          })
-
       if (config.isLoggedIn) {
         createNewTmKey({
           key,
           description: name,
         })
-          .then(() => checkTMKeyCallback())
+          .then(() => {
+            setTmKeys((prevState) => [...prevState, getNewItem(key)])
+            onReset()
+          })
           .catch((errors) => {
             setNotification({
               type: 'error',
@@ -145,15 +138,86 @@ export const TMCreateResourceRow = ({row}) => {
                   : errors[0].message,
             })
           })
+      } else {
+        setTmKeys((prevState) => [...(prevState ?? []), getNewItem(key)])
+        onReset()
       }
     })
+  }
+
+  const addSharedResource = () => {
+    const key = keyCode
+
+    const createNewTmKeyCallback = () =>
+      createNewTmKey({
+        key,
+        description: name,
+      })
+        .then(() => {
+          setTmKeys((prevState) => [...prevState, getNewItem(key)])
+          onReset()
+          getInfoTmKeyCallback()
+        })
+        .catch((errors) => {
+          setNotification({
+            type: 'error',
+            message:
+              errors[0].code === '23000'
+                ? 'The key you entered is invalid.'
+                : errors[0].message,
+          })
+        })
+
+    const getInfoTmKeyCallback = () => {
+      getInfoTmKey({
+        key,
+      }).then((response) => {
+        const users = response.data
+        if (users.length > 1)
+          setTmKeys((prevState) =>
+            prevState.map((tm) =>
+              tm.key === key ? {...tm, is_shared: true} : tm,
+            ),
+          )
+      })
+    }
+
+    checkTMKey({
+      tmKey: key,
+    })
+      .then((data) => {
+        if (data.success === true) createNewTmKeyCallback()
+      })
+      .catch(() => {
+        setNotification({
+          type: 'error',
+          message: 'The key you entered is invalid.',
+        })
+      })
+  }
+
+  const checkSharedKey = (dispathNotification = true) => {
+    if (tmKeys.filter(({owner}) => owner).find(({key}) => key === keyCode)) {
+      if (dispathNotification) {
+        setNotification({
+          type: 'error',
+          message:
+            'The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link activate-key">Click here to activate it</a>',
+        })
+      }
+      return false
+    }
+    return true
   }
 
   const inputNameClasses = `tm-key-create-resource-row-input ${
     typeof submitCheckErrors === 'symbol' && !name ? ' error' : ''
   }`
   const inputKeyCodeClasses = `tm-key-create-resource-row-input ${
-    typeof submitCheckErrors === 'symbol' && !keyCode ? ' error' : ''
+    (typeof submitCheckErrors === 'symbol' && !keyCode) ||
+    (keyCode && !checkSharedKey(false))
+      ? ' error'
+      : ''
   }`
 
   return (

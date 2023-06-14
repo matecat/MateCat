@@ -109,6 +109,21 @@
       color: $grey6;
     }
   }
+
+  .just-button-import-tmx {
+    min-width: 170px;
+    border-radius: 2px;
+    font-size: 16px;
+    color: #000;
+    background: $grey4;
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid $grey7;
+
+    &:hover {
+      background-color: $grey5;
+    }
+  }
 }
 
 .tm-key-row-icons {

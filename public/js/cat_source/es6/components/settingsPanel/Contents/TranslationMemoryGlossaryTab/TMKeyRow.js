@@ -14,6 +14,8 @@ import {ExportGlossary} from './ExportGlossary'
 import {ShareResource} from './ShareResource'
 import {DeleteResource} from './DeleteResource'
 import {updateTmKey} from '../../../../api/updateTmKey'
+import ModalsActions from '../../../../actions/ModalsActions'
+import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 
 import Earth from '../../../../../../../img/icons/Earth'
 import Lock from '../../../../../../../img/icons/Lock'
@@ -39,14 +41,24 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
 
-    updateRow({isLookup, isUpdating})
+    const notUpdateRow = !config.isLoggedIn && !isLookup && !isUpdating
+    if (notUpdateRow) {
+      showModalLostPrivateTmKeyNotLoggedIn(setIsLookup)
+    } else {
+      updateRow({isLookup, isUpdating})
+    }
     setIsLookup(isLookup)
   }
 
   const onChangeIsUpdating = (e) => {
     const isUpdating = e.currentTarget.checked
 
-    updateRow({isLookup, isUpdating})
+    const notUpdateRow = !config.isLoggedIn && !isLookup && !isUpdating
+    if (notUpdateRow) {
+      showModalLostPrivateTmKeyNotLoggedIn(setIsUpdating)
+    } else {
+      updateRow({isLookup, isUpdating})
+    }
     setIsUpdating(isUpdating)
   }
 
@@ -104,7 +116,25 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     })
   }
 
-  const isMMSharedUpdateChecked = !tmKeys.some(({w}) => w)
+  const showModalLostPrivateTmKeyNotLoggedIn = (restoreState) => {
+    ModalsActions.showModalComponent(
+      ConfirmMessageModal,
+      {
+        text: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
+        successText: 'Continue',
+        cancelText: 'Cancel',
+        successCallback: () =>
+          setTmKeys((prevState) =>
+            prevState.filter(({key}) => row.key !== key),
+          ),
+        cancelCallback: () => restoreState(true),
+        closeOnSuccess: true,
+      },
+      'Confirmation required',
+    )
+  }
+
+  const isMMSharedUpdateChecked = !tmKeys || !tmKeys.some(({w}) => w)
 
   const iconDetails = isMMSharedKey
     ? {
@@ -162,7 +192,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {!isMMSharedKey && (
+      {!isMMSharedKey ? (
         <div className="align-center">
           <MenuButton
             label="Import TMX"
@@ -213,7 +243,16 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             </MenuButtonItem>
           </MenuButton>
         </div>
-      )}
+      ) : isMMSharedKey && !config.not_empty_default_tm_key ? (
+        <div className="tm-key-row-menu-button">
+          <button
+            className="just-button-import-tmx"
+            onClick={() => handleExpandeRow(ImportTMX)}
+          >
+            Import TMX
+          </button>
+        </div>
+      ) : undefined}
     </Fragment>
   )
 }

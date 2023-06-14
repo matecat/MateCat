@@ -60,6 +60,11 @@ export const SettingsPanel = ({
 
   useEffect(() => {
     setIsVisible(true)
+
+    const keyboardHandler = (e) => e.key === 'Escape' && setIsVisible(false)
+    document.addEventListener('keyup', keyboardHandler)
+
+    return () => document.removeEventListener('keyup', keyboardHandler)
   }, [])
 
   useEffect(() => {
