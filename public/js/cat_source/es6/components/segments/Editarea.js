@@ -24,7 +24,6 @@ import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
-import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
@@ -85,7 +84,7 @@ class Editarea extends React.Component {
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? TagUtils.removeAllTagsForGuessTags(translation)
       : translation
     // Inizializza Editor State con solo testo
     const plainEditorState = EditorState.createEmpty(decorator)

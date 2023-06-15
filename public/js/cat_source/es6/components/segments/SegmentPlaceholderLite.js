@@ -3,6 +3,7 @@ import {CompositeDecorator, Editor, EditorState} from 'draft-js'
 
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentUtils from '../../utils/segmentUtils'
+import TagUtils from '../../utils/tagUtils'
 
 class SegmentPlaceholderLite extends React.Component {
   constructor(props) {
@@ -24,7 +25,7 @@ class SegmentPlaceholderLite extends React.Component {
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(source)
+      ? TagUtils.removeAllTagsForGuessTags(source)
       : source
     const contentEncodedSource = DraftMatecatUtils.encodeContent(
       plainEditorStateSource,
@@ -40,7 +41,7 @@ class SegmentPlaceholderLite extends React.Component {
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? TagUtils.removeAllTagsForGuessTags(translation)
       : translation
     const contentEncodedTarget = DraftMatecatUtils.encodeContent(
       plainEditorStateTarget,

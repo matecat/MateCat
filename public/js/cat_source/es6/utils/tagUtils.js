@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import {Base64} from 'js-base64'
-
-// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils'
 import {
   tagSignatures,
   getXliffRegExpression,
+  getPhGuessTagsXliffRegExpression,
 } from '../components/segments/utils/DraftMatecatUtils/tagModel'
 
 const TAGS_UTILS = {
@@ -412,14 +411,20 @@ const TAGS_UTILS = {
 
   /**
    * Remove all xliff source tags from the string
+   * less the placeholder we want to show
    * @param currentString :  string to parse
    * @returns the decoded String
-   * TODO: Same of function cleanTextFromTag
    */
-  removeAllTags: function (currentString) {
+  removeAllTagsForGuessTags: function (currentString) {
     if (currentString) {
-      var regExp = getXliffRegExpression()
-      currentString = currentString.replace(regExp, '')
+      const regExp = getXliffRegExpression()
+      const regExpPh = getPhGuessTagsXliffRegExpression()
+      currentString = currentString.replace(regExp, (match, contents) => {
+        if (regExpPh.test(match)) {
+          return match
+        }
+        return ''
+      })
       return currentString
     } else {
       return ''
