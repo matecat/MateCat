@@ -120,7 +120,7 @@ const NewProject = ({
       getTmKeysUser().then(({tm_keys}) =>
         setTmKeys(
           tm_keys.map((key) => {
-            return {...key, id: key.key, owner: true}
+            return {...key, id: key.key}
           }),
         ),
       )

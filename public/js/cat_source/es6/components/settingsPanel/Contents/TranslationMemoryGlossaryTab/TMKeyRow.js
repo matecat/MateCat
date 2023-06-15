@@ -37,6 +37,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [name, setName] = useState(row.name)
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
+  const isOwner = Boolean(row.owner)
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
@@ -134,7 +135,18 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     )
   }
 
-  const isMMSharedUpdateChecked = !tmKeys || !tmKeys.some(({w}) => w)
+  const handleExpandeRow = (Component) => {
+    const onClose = () => onExpandRow({row, shouldExpand: false})
+
+    onExpandRow({
+      row,
+      shouldExpand: true,
+      content: <Component {...{row, onClose}} />,
+    })
+  }
+
+  const isMMSharedUpdateChecked =
+    !tmKeys || !tmKeys.filter(({owner}) => owner).some(({w}) => w)
 
   const iconDetails = isMMSharedKey
     ? {
@@ -152,20 +164,15 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         icon: <Users size={16} />,
       }
 
-  const handleExpandeRow = (Component) => {
-    const onClose = () => onExpandRow({row, shouldExpand: false})
-
-    onExpandRow({
-      row,
-      shouldExpand: true,
-      content: <Component {...{row, onClose}} />,
-    })
-  }
-
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
-        <input checked={isLookup} onChange={onChangeIsLookup} type="checkbox" />
+        <input
+          checked={isLookup}
+          onChange={onChangeIsLookup}
+          disabled={!isOwner}
+          type="checkbox"
+        />
       </div>
       <div className="tm-key-update align-center">
         {row.isActive && (
@@ -173,7 +180,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             checked={isMMSharedKey ? isMMSharedUpdateChecked : isUpdating}
             onChange={onChangeIsUpdating}
             type="checkbox"
-            disabled={isMMSharedKey}
+            disabled={isMMSharedKey || !isOwner}
           />
         )}
       </div>
@@ -184,7 +191,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           }`}
           value={name}
           onChange={onChangeName}
-          disabled={isMMSharedKey}
+          disabled={isMMSharedKey || !isOwner}
           onBlur={updateKeyName}
         ></input>
       </div>
@@ -192,7 +199,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {!isMMSharedKey ? (
+      {!isMMSharedKey && isOwner ? (
         <div className="align-center">
           <MenuButton
             label="Import TMX"

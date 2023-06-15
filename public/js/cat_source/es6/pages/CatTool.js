@@ -74,7 +74,12 @@ function CatTool() {
         )
       setTmKeys(
         uniqueKeys.map((key) => {
-          return {...key, id: key.key, isActive: key.r && key.w}
+          return {
+            ...key,
+            id: key.key,
+            isActive: key.r && key.w,
+            isLocked: !key.owner,
+          }
         }),
       )
     })

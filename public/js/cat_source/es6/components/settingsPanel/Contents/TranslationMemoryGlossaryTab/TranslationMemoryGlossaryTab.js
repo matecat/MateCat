@@ -149,7 +149,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
       return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
-        const {id, key, name, isActive, isLocked} = row
+        const {id, key, name, owner, isActive, isLocked} = row
         const {isExpanded, extraNode} = prevStateRow
 
         const isCreateResourceRow =
@@ -164,7 +164,7 @@ export const TranslationMemoryGlossaryTab = () => {
           id,
           key,
           name,
-          isDraggable: isActive && !isSpecialRow,
+          isDraggable: isActive && !isSpecialRow && owner,
           isActive,
           isLocked,
           isExpanded,
