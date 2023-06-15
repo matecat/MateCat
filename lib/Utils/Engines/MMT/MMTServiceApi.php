@@ -207,10 +207,6 @@ class MMTServiceApi {
      */
     public function addToMemoryContent( $id, $source, $target, $sentence, $translation, $session ) {
 
-        \Log::doJsonLog(
-            'PIPPO ------->' . $session
-        );
-
         if ( is_array( $id ) ) {
             return $this->send( 'POST', "$this->baseUrl/memories/content", [
                 'memories' => empty( $id ) ? null : implode( ',', $id ),
