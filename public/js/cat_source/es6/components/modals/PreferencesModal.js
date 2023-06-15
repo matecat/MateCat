@@ -1,6 +1,5 @@
 import React from 'react'
 
-import DQFCredentials from './DQFCredentials'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {getUserApiKey} from '../../api/getUserApiKey'
@@ -8,6 +7,7 @@ import {createUserApiKey} from '../../api/createUserApiKey'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
 import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
 import {logoutUser as logoutUserApi} from '../../api/logoutUser'
+import Switch from '../common/Switch'
 
 class PreferencesModal extends React.Component {
   constructor(props) {
@@ -16,6 +16,9 @@ class PreferencesModal extends React.Component {
     this.state = {
       service: this.props.service,
       credentials: null,
+      driveActive:
+        this.props.service &&
+        (!this.props.service.disabled_at || !this.props.service.expired_at),
     }
 
     getUserApiKey()
@@ -39,36 +42,43 @@ class PreferencesModal extends React.Component {
     $('#modal').trigger('openresetpassword')
   }
 
-  checkboxChange() {
-    var self = this
-    var selected = $(this.checkDrive).is(':checked')
+  checkboxChange(selected) {
     if (selected) {
-      var url = config.gdriveAuthURL
-      var newWindow = window.open(url, 'name', 'height=600,width=900')
+      this.setState({
+        driveActive: true,
+      })
+      const url = config.gdriveAuthURL
+      const newWindow = window.open(url, 'name', 'height=600,width=900')
 
       if (window.focus) {
         newWindow.focus()
       }
-      var interval = setInterval(function () {
+      let interval = setInterval(() => {
         if (newWindow.closed) {
-          APP.USER.loadUserData().then(function () {
-            var service = APP.USER.getDefaultConnectedService()
+          APP.USER.loadUserData().then(() => {
+            const service = APP.USER.getDefaultConnectedService()
             if (service) {
-              self.setState({
+              this.setState({
                 service: service,
+                driveActive: true,
               })
             } else {
-              $(self.checkDrive).attr('checked', false)
+              this.setState({
+                driveActive: false,
+              })
             }
           })
           clearInterval(interval)
         }
       }, 600)
     } else {
+      this.setState({
+        driveActive: false,
+      })
       if (APP.USER.STORE.connected_services.length) {
         this.disableGDrive().then((data) => {
           APP.USER.upsertConnectedService(data.connected_service)
-          self.setState({
+          this.setState({
             service: APP.USER.getDefaultConnectedService(),
           })
         })
@@ -88,17 +98,6 @@ class PreferencesModal extends React.Component {
         window.location.reload()
       }
     })
-  }
-
-  getDqfHtml() {
-    if (config.dqf_enabled === 1) {
-      return (
-        <div className="dqf-container">
-          <h2>DQF Credentials</h2>
-          <DQFCredentials metadata={this.props.metadata} />
-        </div>
-      )
-    }
   }
 
   generateKey() {
@@ -289,7 +288,7 @@ class PreferencesModal extends React.Component {
   }
 
   render() {
-    var gdriveMessage = ''
+    let gdriveMessage = ''
     if (this.props.showGDriveMessage) {
       gdriveMessage = (
         <div className="preference-modal-message">
@@ -298,7 +297,7 @@ class PreferencesModal extends React.Component {
       )
     }
 
-    var services_label = 'Allow Matecat to access your files on Google Drive'
+    let services_label = 'Allow Matecat to access your files on Google Drive'
     if (
       this.state.service &&
       (!this.state.service.disabled_at || !this.state.service.expired_at)
@@ -306,7 +305,7 @@ class PreferencesModal extends React.Component {
       services_label =
         'Connected to Google Drive (' + this.state.service.email + ')'
     }
-    var resetPasswordHtml = ''
+    let resetPasswordHtml = ''
     if (this.props.user.has_password) {
       resetPasswordHtml = (
         <a
@@ -339,30 +338,15 @@ class PreferencesModal extends React.Component {
         <div>
           <h2>Google Drive</h2>
           <div className="user-gdrive">
-            <div className="onoffswitch-drive">
-              <input
-                type="checkbox"
-                name="onoffswitch"
-                defaultChecked={
-                  this.state.service &&
-                  (!this.state.service.disabled_at ||
-                    !this.state.service.expired_at)
-                }
-                onChange={this.checkboxChange.bind(this)}
-                ref={(input) => (this.checkDrive = input)}
-                className="onoffswitch-checkbox"
-                id="gdrive_check"
-              />
-              <label className="onoffswitch-label" htmlFor="gdrive_check">
-                <span className="onoffswitch-inner" />
-                <span className="onoffswitch-switch" />
-                <span className="onoffswitch-label-status-active">ON</span>
-                <span className="onoffswitch-label-status-inactive">OFF</span>
-                <span className="onoffswitch-label-status-unavailable">
-                  Unavailable
-                </span>
-              </label>
-            </div>
+            <Switch
+              name="onoffswitch"
+              activeText="ON"
+              inactiveText="OFF"
+              onChange={(selected) => {
+                this.checkboxChange(selected)
+              }}
+              active={this.state.driveActive}
+            />
             <label>{services_label}</label>
           </div>
         </div>
@@ -397,21 +381,10 @@ class PreferencesModal extends React.Component {
           <div className="user-reset-password">{gdriveMessage}</div>
           {this.getApiKeyHtml()}
           {googleDrive}
-          {this.getDqfHtml()}
         </div>
       </div>
     )
   }
 }
-
-const fieldValidations = [
-  RuleRunner.ruleRunner('dqfUsername', 'Username', FormRules.requiredRule),
-  RuleRunner.ruleRunner(
-    'dqfPassword',
-    'Password',
-    FormRules.requiredRule,
-    FormRules.minLength(8),
-  ),
-]
 
 export default PreferencesModal

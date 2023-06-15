@@ -101,36 +101,6 @@ $.extend(APP, {
       APP.openManagePage(e)
     })
 
-    //Link footer
-    // $('.user-menu-preferences').on('click', function (e) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //     $('#modal').trigger('openpreferences');
-    //     return false;
-    // });
-
-    $('.open-login-modal').click(function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      $('#modal').trigger('openlogin')
-      return false
-    })
-
-    $('#sign-in').click(function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      $('#modal').trigger('openlogin')
-      return false
-    })
-
-    $('#sign-in-o, #sign-in-o-mt').click(function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      UI.closeTMPanel()
-      APP.openLoginModal()
-      return false
-    })
-
     if (config.showModalBoxLogin == 1) {
       $('#modal').trigger('openlogin')
     }

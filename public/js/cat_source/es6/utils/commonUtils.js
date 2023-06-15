@@ -417,7 +417,7 @@ const CommonUtils = {
     try {
       return config.languages_array.find((e) => e.code === code).name
     } catch (e) {
-      console.error('Unknown Language', e)
+      //console.error('Unknown Language', e)
       return ''
     }
   },

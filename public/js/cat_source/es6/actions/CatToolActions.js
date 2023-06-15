@@ -325,14 +325,6 @@ let CatToolActions = {
   },
   onRender: (props = {}) => {
     UI.nextUntranslatedSegmentIdByServer = null
-    UI.tagModesEnabled =
-      typeof props.tagModesEnabled != 'undefined' ? props.tagModesEnabled : true
-
-    if (UI.tagModesEnabled && !SegmentUtils.checkTPEnabled())
-      UI.body.addClass('tagModes')
-    else UI.body.removeClass('tagModes')
-
-    UI.setTagLockCustomizeCookie(true)
 
     const segmentToOpen = props.segmentToOpen || false
 

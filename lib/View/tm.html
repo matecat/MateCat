@@ -99,7 +99,7 @@
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                             <td class="dragrow"><div class="status"></div></td>
-                                            <td class="activate text-center check"><input type="checkbox" checked="checked" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>
+<!--                                            <td class="activate text-center check"><input type="checkbox" checked="checked" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>-->
                                             <td class="lookup text-center check">
                                                 <input tal:condition="php:  key.edit  || ( key.owner && jobOwnerIsMe )" type="checkbox"
                                                        tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/>
@@ -136,33 +136,33 @@
                                         </tr>
                                     </tal:block>
 
-                                    <tr class="new hide">
-                                        <td class="dragrow"></td>
-                                        <td class="activate"></td>
-                                        <td class="lookup text-center check">
-                                            <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                        </td>
-                                        <td class="update text-center check">
-                                            <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-                                        </td>
-                                        <td class="description">
-                                            <input class="mgmt-input" id="new-tm-description" placeholder="Please insert a name for the resource" ></input>
-                                        </td>
-                                        <td class="privatekey">
-                                            <input class="mgmt-input pull-left hide" type="text" id="shared-tm-key" placeholder="Add the shared key here" />
-                                        </td>
-                                        <td class="action">
-                                             <a class="pull-left btn-ok uploadtm">
-                                                <span class="text uploadkey">Confirm</span>
-                                            </a>
-                                            <a class="pull-left btn-grey canceladdtmx">
-                                                <span class="text"></span>
-                                            </a>
+<!--                                    <tr class="new hide">-->
+<!--                                        <td class="dragrow"></td>-->
+<!--                                        <td class="activate"></td>-->
+<!--                                        <td class="lookup text-center check">-->
+<!--                                            <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />-->
+<!--                                        </td>-->
+<!--                                        <td class="update text-center check">-->
+<!--                                            <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />-->
+<!--                                        </td>-->
+<!--                                        <td class="description">-->
+<!--                                            <input class="mgmt-input" id="new-tm-description" placeholder="Please insert a name for the resource" ></input>-->
+<!--                                        </td>-->
+<!--                                        <td class="privatekey">-->
+<!--                                            <input class="mgmt-input pull-left hide" type="text" id="shared-tm-key" placeholder="Add the shared key here" />-->
+<!--                                        </td>-->
+<!--                                        <td class="action">-->
+<!--                                             <a class="pull-left btn-ok uploadtm">-->
+<!--                                                <span class="text uploadkey">Confirm</span>-->
+<!--                                            </a>-->
+<!--                                            <a class="pull-left btn-grey canceladdtmx">-->
+<!--                                                <span class="text"></span>-->
+<!--                                            </a>-->
 
 
-                                            <div id="uploadCallback"></div>
-                                        </td>
-                                    </tr>
+<!--                                            <div id="uploadCallback"></div>-->
+<!--                                        </td>-->
+<!--                                    </tr>-->
 
 
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
@@ -195,9 +195,9 @@
                                         <input id="filterInactive" onfocus="if(this.value == 'Filter resources') { this.value = ''; }" value="Filter resources" type="text"/>
                                         <span class="icon-search"></span>
                                     </div>
-                                    <div class="tm-warning-message notification-message" style="display: none;"> </div>
-                                    <div class="tm-error-message notification-message" style="display: none;">  </div>
-                                    <div class="tm-success-message activetm notification-message" style="display: none;">  </div>
+<!--                                    <div class="tm-warning-message notification-message" style="display: none;"> </div>-->
+<!--                                    <div class="tm-error-message notification-message" style="display: none;">  </div>-->
+<!--                                    <div class="tm-success-message activetm notification-message" style="display: none;">  </div>-->
                                     <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                         <!--<thead>
                                         <tr>
@@ -280,249 +280,244 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mgmt-table-mt hide">
-                        <div class="mgmt-container">
-                                <div class="insert-tm hide">
-                                 <h3 class="pull-left">Add MT engine</h3>
-                                  <div class="step1 pull-left">
+<!--                    <div class="mgmt-table-mt hide">-->
+<!--                        <div class="mgmt-container">-->
+<!--                                <div class="insert-tm hide">-->
+<!--                                 <h3 class="pull-left">Add MT engine</h3>-->
+<!--                                  <div class="step1 pull-left">-->
 
-                                        <select name="mt_engine" id="mt_engine_int">
-                                                <option value="none" selected="">Choose provider...</option>
-                                                <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">ModernMT</option>
-                                                <option value="altlang">AltLang</option>
-                                                <option value="apertium">Apertium</option>
-                                                <option value="googletranslate">Google Translate</option>
-                                                <option value="intento">Intento</option>
-                                                <option value="iptranslator" >IPTranslator from Iconic</option>
-                                                <option value="microsofthub">Microsoft Translator Hub</option>
-                                                <option value="moses" >Moses</option>
-                                                <option value="mthub">MT-HUB</option>
-                                                <option value="smartmate" >SmartMATE</option>
-                                                <option value="tauyou" >Tauyou</option>
-                                                <option value="letsmt" >Tilde MT</option>
-                                                <option value="yandextranslate">Yandex.Translate</option>
-                                        </select>
-                                      <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
-                                          <div class="text"></div>
-                                      </a>
+<!--                                        <select name="mt_engine" id="mt_engine_int">-->
+<!--                                                <option value="none" selected="">Choose provider...</option>-->
+<!--                                                <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">ModernMT</option>-->
+<!--                                                <option value="altlang">AltLang</option>-->
+<!--                                                <option value="apertium">Apertium</option>-->
+<!--                                                <option value="googletranslate">Google Translate</option>-->
+<!--                                                <option value="intento">Intento</option>-->
+<!--                                                <option value="microsofthub">Microsoft Translator Hub</option>-->
+<!--                                                <option value="smartmate" >SmartMATE</option>-->
+<!--                                                <option value="yandextranslate">Yandex.Translate</option>-->
+<!--                                        </select>-->
+<!--                                      <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">-->
+<!--                                          <div class="text"></div>-->
+<!--                                      </a>-->
 
-                                    </div>
-                                    <div class="step2 pull-left hide" style="display: none;">
+<!--                                    </div>-->
+<!--                                    <div class="step2 pull-left hide" style="display: none;">-->
 
-                                        <form id="mt-provider-details">
-                                            <span class="fields"></span>
-                                            <a id="add-mt-provider-confirm" class="pull-right btn-ok uploadtm disabled">
-                                                <span class="text uploadkey">Confirm</span>
-                                            </a>
+<!--                                        <form id="mt-provider-details">-->
+<!--                                            <span class="fields"></span>-->
+<!--                                            <a id="add-mt-provider-confirm" class="pull-right btn-ok uploadtm disabled">-->
+<!--                                                <span class="text uploadkey">Confirm</span>-->
+<!--                                            </a>-->
 
-                                            <!--<a id="add-mt-provider-cancel-int"-->
-                                               <!--class="pull-right btn-grey canceladdtmx">-->
-                                                <!--<span class="text">Cancel</span>-->
-                                            <!--</a>-->
-                                        </form>
-                                    </div>
-                                    <div class="step3 pull-left hide" style="display: none;">
-                                        <div class="text-left"></div>
+<!--                                            &lt;!&ndash;<a id="add-mt-provider-cancel-int"&ndash;&gt;-->
+<!--                                               &lt;!&ndash;class="pull-right btn-grey canceladdtmx">&ndash;&gt;-->
+<!--                                                &lt;!&ndash;<span class="text">Cancel</span>&ndash;&gt;-->
+<!--                                            &lt;!&ndash;</a>&ndash;&gt;-->
+<!--                                        </form>-->
+<!--                                    </div>-->
+<!--                                    <div class="step3 pull-left hide" style="display: none;">-->
+<!--                                        <div class="text-left"></div>-->
 
-                                    </div>
-                                </div>
-                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                            <p class="tm-warning-message" style="display: none;"><span></span></p>
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>-->
+<!--                            <p class="tm-warning-message" style="display: none;"><span></span></p>-->
 
-                            <div class="block pull-right ">
-                                <tal:block tal:condition="php: empty(logged_user)">
-                                    <button class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</button>
-                                </tal:block>
-                                <tal:block tal:condition="php: !empty(logged_user)">
-                                    <button class="btn-ok clear add-tm add-mt-engine">Add MT engine</button>
-                                </tal:block>
-                            </div>
-                            <div class="block pull-right ">
-                                    <h3 class="pull-left">Active MT</h3>
-                            </div>
-                            <table class="mgmt-mt active-mt">
-                                <thead>
-                                <tr>
-                                    <th class="privatekey">Engine Name</th>
-                                    <th class="description">Description</th>
-                                    <tal:block tal:condition="php: page == 'home'">
-                                        <th class="enable-mt text-center">Use in this project</th>
-                                    </tal:block>
-                                    <tal:block tal:condition="php: page == 'cattool'">
-                                        <th class="enable-mt text-center"></th>
-                                    </tal:block>
-                                    <th class="action">Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    <tal:block tal:condition="php: page == 'home'">
-                                        <tal:block tal:condition="php:false === isMMTEnabled">
-                                            <tr class="activemt" data-id="1">
-                                                <td class="mt-provider">MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)</td>
-                                                <td class="engine-name">
-                                                    <div>Machine translation by the MT engine best suited to your project</div>
-                                                </td>
-                                                <td class="enable-mt text-center">
-                                                    <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
-                                                </td>
-                                                <td class="action">
-                                                    &nbsp;
-                                                </td>
-                                            </tr>
-                                        </tal:block>
-                                        <tal:block tal:condition="php:true === isMMTEnabled">
-                                            <tr class="activemt" data-id="${MMTId}">
-                                                <td class="mt-provider">ModernMT (<a href="https://guides.matecat.com/modernmt-mmt-plug-in" target="_blank">Details</a>)</td>
-                                                <td class="engine-name">
-                                                    <div>ModernMT - Adaptive Neural Machine Translation.</div>
-                                                </td>
-                                                <td class="enable-mt text-center">
-                                                    <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
-                                                </td>
-                                                <td class="action">
-                                                    <a tal:condition="php: MMTId != 1" class="deleteMT btn pull-left">
-                                                        <span class="text">Delete</span>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </tal:block>
-                                    </tal:block>
-                                    <tal:block tal:condition="php: page == 'cattool'">
-                                        <tal:block tal:repeat="engine mt_engines">
-                                            <tal:block tal:condition="php: mt_id == engine.id">
-                                                <tr class="activemt" data-id="${engine/id}">
-                                                    <td class="mt-provider" tal:content="structure engine/name"></td>
-                                                    <td class="engine-name">
-                                                        <div>${engine/description}</div>
-                                                    </td>
-                                                    <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">
-                                                        <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>
-                                                    </td>
-                                                    <td class="action">
-                                                        <a tal:condition="php: engine.id != 1 && jobOwnerIsMe" class="deleteMT btn pull-left">
-                                                            <span class="text">Delete</span>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            </tal:block>
-                                        </tal:block>
-                                    </tal:block>
-                                </tbody>
-                            </table>
-                            <tal:block tal:condition="php: !empty(logged_user)">
-                                <div class="block pull-right ">
-                                    <h3 class="pull-left">Inactive MT</h3>
-                                </div>
-                                <table class="mgmt-mt inactive-mt">
-                                    <tbody>
-                                        <tal:block tal:condition="php: page == 'home'">
-                                            <tal:block tal:condition="php:true === isMMTEnabled">
-                                                <tr class="inactivemt" data-id="1">
-                                                    <td class="engine-name">
-                                                        MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)
-                                                    </td>
-                                                    <td class="engine-name">
-                                                        <div>Machine translation by the MT engine best suited to your project</div>
-                                                    </td>
-                                                    <td class="enable-mt text-center">
-                                                        <input tal:condition="php: page == 'home'" type="checkbox" />
-                                                    </td>
-                                                    <td class="action">
-                                                        &nbsp;
-                                                    </td>
-                                                </tr>
-                                            </tal:block>
-                                            <tal:block tal:repeat="engine mt_engines">
-                                                <tr class="inactivemt" data-id="${engine/id}">
-                                                    <td class="mt-provider" tal:content="structure engine/name"></td>
-                                                    <td class="engine-name">
-                                                        <div class="">${engine/description}</div>
-                                                    </td>
-                                                    <td class="enable-mt text-center">
-                                                        <input tal:condition="php: page == 'home'" type="checkbox" />
-                                                    </td>
-                                                    <td class="action">
-                                                        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
-                                                    </td>
-                                                </tr>
-                                            </tal:block>
-                                        </tal:block>
-                                        <tal:block tal:condition="php: page == 'cattool'">
-                                            <tal:block tal:repeat="engine mt_engines">
-                                                <tal:block tal:condition="php: mt_id != engine.id">
-                                                    <tr class="" data-id="${engine/id}">
-                                                        <td class="mt-provider" tal:content="structure engine/name"></td>
-                                                        <td class="engine-name">
-                                                            <div class="">${engine/description}</div>
-                                                        </td>
-                                                        <td class="enable-mt text-center">
-                                                        </td>
-                                                        <td class="action">
-                                                            <a tal:condition="php: engine.id != 1" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
-                                                        </td>
-                                                    </tr>
-                                                </tal:block>
-                                            </tal:block>
-                                        </tal:block>
-                                    </tbody>
-                                </table>
-                            </tal:block>
-                            <tal:block tal:condition="php: empty(logged_user)">
-                                <tal:block tal:condition="php: page == 'home'">
-                                <p style="margin-top: 138px;"><a id='sign-in-o-mt' href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>
-                                </tal:block>
-                            </tal:block>
-                        </div>
-                    </div>
+<!--                            <div class="block pull-right ">-->
+<!--                                <tal:block tal:condition="php: empty(logged_user)">-->
+<!--                                    <button class="btn-ok clear add-tm add-mt-engine disabled">Add MT engine</button>-->
+<!--                                </tal:block>-->
+<!--                                <tal:block tal:condition="php: !empty(logged_user)">-->
+<!--                                    <button class="btn-ok clear add-tm add-mt-engine">Add MT engine</button>-->
+<!--                                </tal:block>-->
+<!--                            </div>-->
+<!--                            <div class="block pull-right ">-->
+<!--                                    <h3 class="pull-left">Active MT</h3>-->
+<!--                            </div>-->
+<!--                            <table class="mgmt-mt active-mt">-->
+<!--                                <thead>-->
+<!--                                <tr>-->
+<!--                                    <th class="privatekey">Engine Name</th>-->
+<!--                                    <th class="description">Description</th>-->
+<!--                                    <tal:block tal:condition="php: page == 'home'">-->
+<!--                                        <th class="enable-mt text-center">Use in this project</th>-->
+<!--                                    </tal:block>-->
+<!--                                    <tal:block tal:condition="php: page == 'cattool'">-->
+<!--                                        <th class="enable-mt text-center"></th>-->
+<!--                                    </tal:block>-->
+<!--                                    <th class="action">Action</th>-->
+<!--                                </tr>-->
+<!--                                </thead>-->
+<!--                                <tbody>-->
+<!--                                    <tal:block tal:condition="php: page == 'home'">-->
+<!--                                        <tal:block tal:condition="php:false === isMMTEnabled">-->
+<!--                                            <tr class="activemt" data-id="1">-->
+<!--                                                <td class="mt-provider">MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)</td>-->
+<!--                                                <td class="engine-name">-->
+<!--                                                    <div>Machine translation by the MT engine best suited to your project</div>-->
+<!--                                                </td>-->
+<!--                                                <td class="enable-mt text-center">-->
+<!--                                                    <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />-->
+<!--                                                </td>-->
+<!--                                                <td class="action">-->
+<!--                                                    &nbsp;-->
+<!--                                                </td>-->
+<!--                                            </tr>-->
+<!--                                        </tal:block>-->
+<!--                                        <tal:block tal:condition="php:true === isMMTEnabled">-->
+<!--                                            <tr class="activemt" data-id="${MMTId}">-->
+<!--                                                <td class="mt-provider">ModernMT (<a href="https://guides.matecat.com/modernmt-mmt-plug-in" target="_blank">Details</a>)</td>-->
+<!--                                                <td class="engine-name">-->
+<!--                                                    <div>ModernMT - Adaptive Neural Machine Translation.</div>-->
+<!--                                                </td>-->
+<!--                                                <td class="enable-mt text-center">-->
+<!--                                                    <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />-->
+<!--                                                </td>-->
+<!--                                                <td class="action">-->
+<!--                                                    <a tal:condition="php: MMTId != 1" class="deleteMT btn pull-left">-->
+<!--                                                        <span class="text">Delete</span>-->
+<!--                                                    </a>-->
+<!--                                                </td>-->
+<!--                                            </tr>-->
+<!--                                        </tal:block>-->
+<!--                                    </tal:block>-->
+<!--                                    <tal:block tal:condition="php: page == 'cattool'">-->
+<!--                                        <tal:block tal:repeat="engine mt_engines">-->
+<!--                                            <tal:block tal:condition="php: mt_id == engine.id">-->
+<!--                                                <tr class="activemt" data-id="${engine/id}">-->
+<!--                                                    <td class="mt-provider" tal:content="structure engine/name"></td>-->
+<!--                                                    <td class="engine-name">-->
+<!--                                                        <div>${engine/description}</div>-->
+<!--                                                    </td>-->
+<!--                                                    <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">-->
+<!--                                                        <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>-->
+<!--                                                    </td>-->
+<!--                                                    <td class="action">-->
+<!--                                                        <a tal:condition="php: engine.id != 1 && jobOwnerIsMe" class="deleteMT btn pull-left">-->
+<!--                                                            <span class="text">Delete</span>-->
+<!--                                                        </a>-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                            </tal:block>-->
+<!--                                        </tal:block>-->
+<!--                                    </tal:block>-->
+<!--                                </tbody>-->
+<!--                            </table>-->
+<!--                            <tal:block tal:condition="php: !empty(logged_user)">-->
+<!--                                <div class="block pull-right ">-->
+<!--                                    <h3 class="pull-left">Inactive MT</h3>-->
+<!--                                </div>-->
+<!--                                <table class="mgmt-mt inactive-mt">-->
+<!--                                    <tbody>-->
+<!--                                        <tal:block tal:condition="php: page == 'home'">-->
+<!--                                            <tal:block tal:condition="php:true === isMMTEnabled">-->
+<!--                                                <tr class="inactivemt" data-id="1">-->
+<!--                                                    <td class="engine-name">-->
+<!--                                                        MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)-->
+<!--                                                    </td>-->
+<!--                                                    <td class="engine-name">-->
+<!--                                                        <div>Machine translation by the MT engine best suited to your project</div>-->
+<!--                                                    </td>-->
+<!--                                                    <td class="enable-mt text-center">-->
+<!--                                                        <input tal:condition="php: page == 'home'" type="checkbox" />-->
+<!--                                                    </td>-->
+<!--                                                    <td class="action">-->
+<!--                                                        &nbsp;-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                            </tal:block>-->
+<!--                                            <tal:block tal:repeat="engine mt_engines">-->
+<!--                                                <tr class="inactivemt" data-id="${engine/id}">-->
+<!--                                                    <td class="mt-provider" tal:content="structure engine/name"></td>-->
+<!--                                                    <td class="engine-name">-->
+<!--                                                        <div class="">${engine/description}</div>-->
+<!--                                                    </td>-->
+<!--                                                    <td class="enable-mt text-center">-->
+<!--                                                        <input tal:condition="php: page == 'home'" type="checkbox" />-->
+<!--                                                    </td>-->
+<!--                                                    <td class="action">-->
+<!--                                                        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                            </tal:block>-->
+<!--                                        </tal:block>-->
+<!--                                        <tal:block tal:condition="php: page == 'cattool'">-->
+<!--                                            <tal:block tal:repeat="engine mt_engines">-->
+<!--                                                <tal:block tal:condition="php: mt_id != engine.id">-->
+<!--                                                    <tr class="" data-id="${engine/id}">-->
+<!--                                                        <td class="mt-provider" tal:content="structure engine/name"></td>-->
+<!--                                                        <td class="engine-name">-->
+<!--                                                            <div class="">${engine/description}</div>-->
+<!--                                                        </td>-->
+<!--                                                        <td class="enable-mt text-center">-->
+<!--                                                        </td>-->
+<!--                                                        <td class="action">-->
+<!--                                                            <a tal:condition="php: engine.id != 1" class="deleteMT btn pull-left"><span class="text">Delete</span></a>-->
+<!--                                                        </td>-->
+<!--                                                    </tr>-->
+<!--                                                </tal:block>-->
+<!--                                            </tal:block>-->
+<!--                                        </tal:block>-->
+<!--                                    </tbody>-->
+<!--                                </table>-->
+<!--                            </tal:block>-->
+<!--                            <tal:block tal:condition="php: empty(logged_user)">-->
+<!--                                <tal:block tal:condition="php: page == 'home'">-->
+<!--                                <p style="margin-top: 138px;"><a id='sign-in-o-mt' href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>-->
+<!--                                </tal:block>-->
+<!--                            </tal:block>-->
+<!--                        </div>-->
+<!--                    </div>-->
                     <div class="mgmt-panel mgmt-table-options">
                         <div class="advanced-options-box">
                            <h2>Advanced Options</h2>
 
-                            <div class="options-box s2t-box">
-                                <h3>Dictation</h3>
-                                <p><span class="option-s2t-box-chrome-label">Available on Chrome. </span>Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.</p>
-                                <div class="onoffswitch">
-                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="s2t_check" />
-                                    <label class="onoffswitch-label" for="s2t_check">
-                                        <span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
-                                        <span class="onoffswitch-label-status-active">Active</span>
-                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
-                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+<!--                            <div class="options-box s2t-box">-->
+<!--                                <h3>Dictation</h3>-->
+<!--                                <p><span class="option-s2t-box-chrome-label">Available on Chrome. </span>Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.</p>-->
+<!--                                <div class="onoffswitch">-->
+<!--                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="s2t_check" />-->
+<!--                                    <label class="onoffswitch-label" for="s2t_check">-->
+<!--                                        <span class="onoffswitch-inner"></span>-->
+<!--                                        <span class="onoffswitch-switch"></span>-->
+<!--                                        <span class="onoffswitch-label-status-active">Active</span>-->
+<!--                                        <span class="onoffswitch-label-status-inactive">Inactive</span>-->
+<!--                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>-->
 
-                                    </label>
+<!--                                    </label>-->
 
-                                </div>
-                            </div>
+<!--                                </div>-->
+<!--                            </div>-->
 
-                            <div tal:condition="php: show_tag_projection" class="options-box tagp">
-                                <h3>Guess tag position</h3>
-                                <p>
-                                    <span class="option-tagp-languages">Not available for:
-                                        <span class="option-notsupported-languages"></span>.
-                                        <br/>
-                                    </span>
-                                    <span class="option-tagp-revise">Not available in revise mode.<br/></span>
-                                    Enable this functionality to let Matecat automatically place the tags where they belong.
-                                        <a class="tooltip-guess-tags" href="https://site.matecat.com/support/translating-projects/guess-tag-position/#gtp_lang" target="_blank">Supported languages</a>
-                                </p>
-                                <div class="onoffswitch-container">
-                                    <div class="onoffswitch">
-                                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />
-                                        <label class="onoffswitch-label" for="tagp_check">
-                                            <span class="onoffswitch-inner"></span>
-                                            <span class="onoffswitch-switch"></span>
-                                            <span class="onoffswitch-label-status-active">Active</span>
-                                            <span class="onoffswitch-label-status-inactive">Inactive</span>
-                                            <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+<!--                            <div tal:condition="php: show_tag_projection" class="options-box tagp">-->
+<!--                                <h3>Guess tag position</h3>-->
+<!--                                <p>-->
+<!--                                    <span class="option-tagp-languages">Not available for:-->
+<!--                                        <span class="option-notsupported-languages"></span>.-->
+<!--                                        <br/>-->
+<!--                                    </span>-->
+<!--                                    <span class="option-tagp-revise">Not available in revise mode.<br/></span>-->
+<!--                                    Enable this functionality to let Matecat automatically place the tags where they belong.-->
+<!--                                        <a class="tooltip-guess-tags" href="https://site.matecat.com/support/translating-projects/guess-tag-position/#gtp_lang" target="_blank">Supported languages</a>-->
+<!--                                </p>-->
+<!--                                <div class="onoffswitch-container">-->
+<!--                                    <div class="onoffswitch">-->
+<!--                                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />-->
+<!--                                        <label class="onoffswitch-label" for="tagp_check">-->
+<!--                                            <span class="onoffswitch-inner"></span>-->
+<!--                                            <span class="onoffswitch-switch"></span>-->
+<!--                                            <span class="onoffswitch-label-status-active">Active</span>-->
+<!--                                            <span class="onoffswitch-label-status-inactive">Inactive</span>-->
+<!--                                            <span class="onoffswitch-label-status-unavailable">Unavailable</span>-->
 
-                                        </label>
+<!--                                        </label>-->
 
-                                    </div>
-                                </div>
-                            </div>
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
 
-                            <div class="options-box qa-box">
+                            <!--<div class="options-box qa-box">
                                 <h3>QA by <img src="/public/img/lexiqa-new-2.png" /> </h3>
                                 <p tal:condition="php: INIT::$LXQ_LICENSE">
                                     <span class="option-qa-box-languages">Not available for:
@@ -547,9 +542,9 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
 
-                            <tal:block tal:condition="php: page == 'cattool'">
+                            <!--<tal:block tal:condition="php: page == 'cattool'">
                                 <div class="options-box charscounter">
                                     <h3>Character counter</h3>
                                     <p>
@@ -568,9 +563,9 @@
                                         </div>
                                     </div>
                                 </div>
-                            </tal:block>
+                            </tal:block>-->
 
-                            <tal:block tal:condition="php: page == 'cattool' && isOpenAiEnabled == true">
+                            <!--<tal:block tal:condition="php: page == 'cattool' && isOpenAiEnabled == true">
                                 <div class="options-box ai-assistant">
                                     <h3>Automatic AI assistant</h3>
                                     <p>
@@ -589,20 +584,20 @@
                                         </div>
                                     </div>
                                 </div>
-                            </tal:block>
+                            </tal:block>-->
 
-                            <div class="options-box multi-match">
-                                <h3>Cross-language Matches</h3>
-                                <p>Get translation suggestions in other target languages you know as reference.</p>
-                                <select name="multi-match-1" id="multi-match-1" title="Primary language suggestion">
-                                    <option value="">Primary language suggestion</option>
-                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code"/>
-                                </select>
-                                <select name="multi-match-2" id="multi-match-2" disabled="true" title="Secondary language suggestion">
-                                    <option value="">Secondary language suggestion</option>
-                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code">Patent</option>
-                                </select>
-                            </div>
+<!--                            <div class="options-box multi-match">-->
+<!--                                <h3>Cross-language Matches</h3>-->
+<!--                                <p>Get translation suggestions in other target languages you know as reference.</p>-->
+<!--                                <select name="multi-match-1" id="multi-match-1" title="Primary language suggestion">-->
+<!--                                    <option value="">Primary language suggestion</option>-->
+<!--                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code"/>-->
+<!--                                </select>-->
+<!--                                <select name="multi-match-2" id="multi-match-2" disabled="true" title="Secondary language suggestion">-->
+<!--                                    <option value="">Secondary language suggestion</option>-->
+<!--                                    <option tal:repeat="lang languages_array_obj" tal:content="lang/name" tal:attributes="value lang/code">Patent</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
 
                             <div class="options-box seg_rule">
                                 <h3>Segmentation Rules</h3>
@@ -614,7 +609,7 @@
                                 </select>
                             </div>
 
-                            <div tal:condition="dqf_enabled" class="options-box dqf-box">
+                            <!--<div tal:condition="dqf_enabled" class="options-box dqf-box">
                                 <h3>DQF  </h3>
                                 <p tal:condition="php: !empty(logged_user)">
                                     Enable this option to use DQF in Matecat.
@@ -636,7 +631,7 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
 
                         </div>
                     </div>
@@ -649,22 +644,15 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
-    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-mmt" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-microsofthub" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-iptranslator" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-moses" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-tauyou" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-letsmt" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-apertium" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-altlang" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-smartmate" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-yandextranslate" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-googletranslate" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-mthub" />
-    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-intento" />
+<!--    <div tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-mmt" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-microsofthub" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-apertium" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-altlang" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-smartmate" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-yandextranslate" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-googletranslate" />-->
+<!--    <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/mt_engines.html/template-intento" />-->
 
 </div>
-
-<script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>
 </html>

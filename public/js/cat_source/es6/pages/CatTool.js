@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
@@ -15,11 +15,35 @@ import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import CommonUtils from '../utils/commonUtils'
+import {getTmKeysUser} from '../api/getTmKeysUser'
+import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  MMT_NAME,
+  SettingsPanel,
+} from '../components/settingsPanel'
+import Speech2TextFeature from '../utils/speech2text'
+import SegmentUtils from '../utils/segmentUtils'
+import {getTmKeysJob} from '../api/getTmKeysJob'
 
 function CatTool() {
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
+  const [isOpenSettings, setIsOpenSettings] = useState(false)
+  const [tmKeys, setTmKeys] = useState()
+  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
+  const [guessTagActive, setGuessTagActive] = useState(
+    SegmentUtils.checkTPEnabled(),
+  )
+  const [lexiqaActive, setLexiqaActive] = useState(LXQ.checkCanActivate())
+  const [speechToTextActive, setSpeechToTextActive] = useState(
+    Speech2TextFeature.enabled(),
+  )
+  const [multiMatchLangs, setMultiMatchLangs] = useState(
+    SegmentUtils.checkCrossLanguageSettings(),
+  )
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -32,9 +56,54 @@ function CatTool() {
       where: options?.where,
     })
 
+  const closeSettings = useCallback(() => setIsOpenSettings(false), [])
+  const openTmPanel = () => setIsOpenSettings(true)
+
+  const getTmKeys = () => {
+    const promises = [
+      getTmKeysJob(),
+      ...(config.isLoggedIn ? [getTmKeysUser()] : []),
+    ]
+    Promise.all(promises).then((values) => {
+      const uniqueKeys = values
+        .flatMap((item) => [...item.tm_keys])
+        .reduce(
+          (acc, cur) =>
+            !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
+          [],
+        )
+      setTmKeys(
+        uniqueKeys.map((key) => {
+          return {...key, id: key.key, isActive: key.r && key.w}
+        }),
+      )
+    })
+  }
+
+  const getMTEngines = () => {
+    if (config.isLoggedIn) {
+      getMtEnginesApi().then((mtEngines) => {
+        mtEngines.push(DEFAULT_ENGINE_MEMORY)
+        setMtEngines(mtEngines)
+        if (config.isAnInternalUser) {
+          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          if (mmt) {
+            setActiveMTEngine(mmt)
+          }
+        }
+        if (config.mt_id) {
+          const activeMT = mtEngines.find((mt) => mt.id === config.mt_id)
+          activeMT && setActiveMTEngine(activeMT)
+        }
+      })
+    }
+  }
+
   // actions listener
   useEffect(() => {
     // CatTool onRender action
+    getTmKeys()
+    getMTEngines()
     const onRenderHandler = (options) => {
       const {
         actionType, // eslint-disable-line
@@ -215,6 +284,7 @@ function CatTool() {
         analysisEnabled={config.analysis_enabled}
         isGDriveProject={config.isGDriveProject}
         showReviseLink={config.footer_show_revise_link}
+        openTmPanel={openTmPanel}
       />
 
       <div className="main-container">
@@ -238,9 +308,11 @@ function CatTool() {
                 isReviewExtended={ReviewExtended.enabled()}
                 reviewType={Review.type}
                 enableTagProjection={UI.enableTagProjection}
-                tagModesEnabled={UI.tagModesEnabled}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
+                guessTagActive={guessTagActive}
+                speechToTextActive={speechToTextActive}
+                multiMatchLangs={multiMatchLangs}
               />
             </div>
           </article>
@@ -253,7 +325,34 @@ function CatTool() {
       <div className="notifications-wrapper">
         <NotificationBox />
       </div>
-
+      {isOpenSettings && (
+        <SettingsPanel
+          tmKeys={tmKeys}
+          onClose={closeSettings}
+          setTmKeys={setTmKeys}
+          mtEngines={mtEngines}
+          setMtEngines={setMtEngines}
+          activeMTEngine={activeMTEngine}
+          setActiveMTEngine={setActiveMTEngine}
+          guessTagActive={guessTagActive}
+          setGuessTagActive={setGuessTagActive}
+          setSpeechToTextActive={setSpeechToTextActive}
+          sourceLang={{
+            name: CommonUtils.getLanguageNameFromLocale(config.source_rfc),
+            code: config.source_rfc,
+          }}
+          targetLangs={[
+            {
+              name: CommonUtils.getLanguageNameFromLocale(config.target_rfc),
+              code: config.target_rfc,
+            },
+          ]}
+          lexiqaActive={lexiqaActive}
+          setLexiqaActive={setLexiqaActive}
+          multiMatchLangs={multiMatchLangs}
+          setMultiMatchLangs={setMultiMatchLangs}
+        />
+      )}
       <CattolFooter
         idProject={config.id_project}
         idJob={config.id_job}

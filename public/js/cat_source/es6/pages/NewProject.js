@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState, useCallback} from 'react'
+import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
@@ -21,6 +22,14 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  MMT_NAME,
+  SettingsPanel,
+} from '../components/settingsPanel'
+import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
+import SegmentUtils from '../utils/segmentUtils'
+import LXQ from '../utils/lxq.main'
 
 const SELECT_HEIGHT = 324
 
@@ -42,7 +51,8 @@ const NewProject = ({
   const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [tmKeySelected, setTmKeySelected] = useState([])
+  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState(
     sourceLanguageSelected
@@ -62,6 +72,23 @@ const NewProject = ({
   const [warnings, setWarnings] = useState()
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
+  const [isOpenSettings, setIsOpenSettings] = useState(false)
+  const [speechToTextActive, setSpeechToTextActive] = useState(
+    config.defaults.speech2text,
+  )
+  const [guessTagActive, setGuessTagActive] = useState(
+    !!config.defaults.tag_projection,
+  )
+  const [lexiqaActive, setLexiqaActive] = useState(!!config.defaults.lexiqa)
+  const [multiMatchLangs, setMultiMatchLangs] = useState(
+    SegmentUtils.checkCrossLanguageSettings(),
+  )
+  const [segmentationRule, setSegmentationRule] = useState({
+    name: 'General',
+    id: '',
+  })
+
+  const closeSettings = useCallback(() => setIsOpenSettings(false), [])
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -81,14 +108,11 @@ const NewProject = ({
     }
   }
 
-  const openTmPanel = () => {
-    APP.openOptionsPanel('tm')
-  }
+  const openTmPanel = () => setIsOpenSettings(true)
 
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
     APP.sourceLangChangedCallback()
-    APP.checkForTagProjectionLangs(sourceLang)
   }
 
   const getTmKeys = () => {
@@ -96,18 +120,33 @@ const NewProject = ({
       getTmKeysUser().then(({tm_keys}) =>
         setTmKeys(
           tm_keys.map((key) => {
-            return {...key, id: key.key}
+            return {...key, id: key.key, owner: true}
           }),
         ),
       )
     }
   }
 
+  const getMTEngines = () => {
+    if (config.isLoggedIn) {
+      getMtEnginesApi().then((mtEngines) => {
+        mtEngines.push(DEFAULT_ENGINE_MEMORY)
+        setMtEngines(mtEngines)
+        if (config.isAnInternalUser) {
+          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          if (mmt) {
+            setActiveMTEngine(mmt)
+          }
+        }
+      })
+    }
+  }
+
   const createProject = () => {
     if (!projectSent) {
-      if (!UI.allTMUploadsCompleted()) {
+      /*if (!UI.allTMUploadsCompleted()) {
         return false
-      }
+      }*/
       setErrors()
       setWarnings()
       setProjectSent(true)
@@ -118,6 +157,10 @@ const NewProject = ({
           targetLang: targetLangs.map((lang) => lang.id).join(),
           jobSubject: subject.id,
           selectedTeam: selectedTeam ? selectedTeam.id : undefined,
+          activeMT: activeMTEngine.id,
+          speech2text: speechToTextActive,
+          guessTags: guessTagActive,
+          segmentationRule,
         }),
       )
         .then(({data}) => {
@@ -159,21 +202,28 @@ const NewProject = ({
 
   useEffect(() => {
     if (sourceLang) {
-      APP.changeSourceLang(sourceLang.id)
+      const lang = sourceLang.id
+      if (localStorage.getItem('currentSourceLang') != lang) {
+        localStorage.setItem('currentSourceLang', lang)
+      }
     }
     if (targetLangs) {
-      APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
+      const lang = targetLangs.map((lang) => lang.id).join()
+      if (localStorage.getItem('currentTargetLang') != lang) {
+        localStorage.setItem('currentTargetLang', lang)
+      }
     }
-    APP.checkForLexiQALangs(sourceLang)
-    APP.checkForTagProjectionLangs(sourceLang)
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
-    APP.checkForSpeechToText()
-    APP.checkForDqf()
     APP.checkGDriveEvents()
     UI.addEvents()
-
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
     const updateUser = (user) => {
       setUser(user)
       setSelectedTeam(
@@ -196,6 +246,7 @@ const NewProject = ({
     }
 
     getTmKeys()
+    getMTEngines()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
@@ -231,18 +282,14 @@ const NewProject = ({
   }, [])
   useEffect(() => {
     const activateKey = (event, desc, key) => {
-      const prevTmKeys = tmKeys ?? []
-      let tmSelected = prevTmKeys.find((item) => item.id === key)
-      if (!tmSelected) {
-        tmSelected = {id: key, name: desc, key}
-        setTmKeys(prevTmKeys.concat(tmSelected))
-      }
-      if (!tmKeySelected.find((item) => item.id === key)) {
-        setTmKeySelected(tmKeySelected.concat([tmSelected]))
-      }
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === key ? {...tm, isActive: true} : tm)),
+      )
     }
     const deactivateKey = (event, key) => {
-      setTmKeySelected(tmKeySelected.filter((item) => item.id !== key))
+      setTmKeys((prevState) =>
+        prevState.map((tm) => (tm.id === key ? {...tm, isActive: false} : tm)),
+      )
     }
     const removeKey = () => {
       getTmKeys()
@@ -256,7 +303,7 @@ const NewProject = ({
       $('#activetm').off('removeTm')
       $('#activetm').off('deleteTm')
     }
-  }, [tmKeys, tmKeySelected])
+  }, [tmKeys])
 
   useEffect(
     () =>
@@ -272,13 +319,12 @@ const NewProject = ({
     <CreateProjectContext.Provider
       value={{
         SELECT_HEIGHT,
+        tmKeys,
+        setTmKeys,
         languages,
         targetLangs,
         setTargetLangs,
         setIsOpenMultiselectLanguages,
-        tmKeys,
-        tmKeySelected,
-        setTmKeySelected,
         sourceLang,
         changeSourceLanguage,
       }}
@@ -474,9 +520,40 @@ const NewProject = ({
           }}
         />
       )}
+      {isOpenSettings && (
+        <SettingsPanel
+          tmKeys={tmKeys}
+          onClose={closeSettings}
+          setTmKeys={setTmKeys}
+          mtEngines={mtEngines}
+          setMtEngines={setMtEngines}
+          activeMTEngine={activeMTEngine}
+          setActiveMTEngine={setActiveMTEngine}
+          setSpeechToTextActive={setSpeechToTextActive}
+          guessTagActive={guessTagActive}
+          setGuessTagActive={setGuessTagActive}
+          sourceLang={sourceLang}
+          targetLangs={targetLangs}
+          lexiqaActive={lexiqaActive}
+          setLexiqaActive={setLexiqaActive}
+          multiMatchLangs={multiMatchLangs}
+          setMultiMatchLangs={setMultiMatchLangs}
+          segmentationRule={segmentationRule}
+          setSegmentationRule={setSegmentationRule}
+        />
+      )}
       <Footer />
     </CreateProjectContext.Provider>
   )
 }
-
+NewProject.propTypes = {
+  isLoggedIn: PropTypes.bool,
+  languages: PropTypes.array,
+  sourceLanguageSelected: PropTypes.string,
+  targetLanguagesSelected: PropTypes.string,
+  subjectsArray: PropTypes.array,
+  conversionEnabled: PropTypes.bool,
+  formatsNumber: PropTypes.number,
+  googleDriveEnabled: PropTypes.bool,
+}
 export default NewProject
