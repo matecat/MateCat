@@ -30,6 +30,11 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
     /**
      * @var int
      */
+    public $id_file = null;
+
+    /**
+     * @var int
+     */
     public $id_segment = null;
 
     /**
@@ -202,6 +207,14 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
         return $this->cachable( '_segmentNote', $this, function () {
             return \Segments_SegmentNoteDao::getBySegmentId( $this->id_segment );
         } );
+    }
+
+    /**
+     * @return string
+     */
+    public function getSessionId()
+    {
+        return md5($this->id_file. '-' . $this->id_job . '-' . $this->job_password);
     }
 
     /**
