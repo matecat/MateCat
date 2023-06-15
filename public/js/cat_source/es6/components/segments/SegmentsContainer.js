@@ -742,8 +742,8 @@ const getSegmentStructure = (segment, sideOpen) => {
   let source = segment.segment
   let target = segment.translation
   if (SegmentUtils.checkCurrentSegmentTPEnabled(segment)) {
-    source = TagUtils.removeAllTags(source)
-    target = TagUtils.removeAllTags(target)
+    source = TagUtils.removeAllTagsForGuessTags(source)
+    target = TagUtils.removeAllTagsForGuessTags(target)
   }
 
   source = TagUtils.matchTag(

@@ -18,7 +18,7 @@ class SimpleEditor extends React.Component {
     const sid = segment.sid
 
     let htmlText = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
-      ? TagUtils.removeAllTags(text)
+      ? TagUtils.removeAllTagsForGuessTags(text)
       : text
 
     htmlText = TagUtils.matchTag(

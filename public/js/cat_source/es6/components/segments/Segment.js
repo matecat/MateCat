@@ -61,7 +61,7 @@ class Segment extends React.Component {
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
         !TagUtils.checkXliffTagsInText(this.props.segment.translation) &&
-        TagUtils.removeAllTags(this.props.segment.segment) !== '',
+        TagUtils.removeAllTagsForGuessTags(this.props.segment.segment) !== '',
       selectedTextObj: null,
       showActions: false,
     }
