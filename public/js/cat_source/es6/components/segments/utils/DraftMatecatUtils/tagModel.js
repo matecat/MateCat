@@ -334,7 +334,9 @@ const isToReplaceForLexiqa = (tagType, isClosure = false) => {
 const getXliffRegExpression = () => {
   return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?&gt;)/gim
 }
-
+const getPhGuessTagsXliffRegExpression = () => {
+  return /(&lt;\s*\/*\s*(ph.+?ctype=["'](?:x-twig|x-ruby-on-rails|x-snails|x-percent-snails|x-percent-number-snails|x-percentages|x-sprintf|x-smart-count|x-double-square-brackets|x-dollar-curly-brackets|x-percent-variable)["'])\s*((?!&lt;|<).)*?&gt;)/gim
+}
 const getTagSignature = (tagType) => {
   return tagSignatures[tagType]
 }
@@ -353,6 +355,7 @@ export {
   getCorrectTag,
   getSplitPointTag,
   getXliffRegExpression,
+  getPhGuessTagsXliffRegExpression,
   isToReplaceForLexiqa,
   getTagSignature,
 }

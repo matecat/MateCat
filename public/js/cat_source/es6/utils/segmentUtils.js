@@ -44,7 +44,9 @@ const SegmentUtils = {
       : SegmentStore.getCurrentSegment()
     if (currentSegment && this.checkTPEnabled()) {
       // If the segment has tag projection enabled (has tags and has the enableTP class)
-      var segmentNoTags = TagUtils.removeAllTags(currentSegment.segment)
+      var segmentNoTags = TagUtils.removeAllTagsForGuessTags(
+        currentSegment.segment,
+      )
       var tagProjectionEnabled =
         TagUtils.hasDataOriginalTags(currentSegment.segment) &&
         !currentSegment.tagged &&
