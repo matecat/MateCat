@@ -2677,23 +2677,29 @@ class ProjectManager {
      */
     private function preTranslationStatus($trans_unit, $position = null){
 
-        if($position === null){
-            return Constants_TranslationStatus::STATUS_TRANSLATED;
+        // state handling
+        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
+            $state = $trans_unit['seg-target'][$position]['attr']['state'];
+
+            switch ($state){
+
+                case 'new':
+                case 'needs-translation':
+                case 'initial':
+                    return Constants_TranslationStatus::STATUS_NEW;
+
+                case 'translated':
+                    return Constants_TranslationStatus::STATUS_TRANSLATED;
+
+                default:
+                case 'reviewed':
+                case 'final':
+                    return Constants_TranslationStatus::STATUS_APPROVED;
+            }
         }
 
-        if(!isset($trans_unit[ 'seg-target' ])){
-            return Constants_TranslationStatus::STATUS_TRANSLATED;
-        }
-
-        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state']) and $trans_unit['seg-target'][$position]['attr']['state'] === 'final'){
-            return Constants_TranslationStatus::STATUS_APPROVED;
-        }
-
-        if(isset($trans_unit[ 'attr' ][ 'approved' ]) and $trans_unit[ 'attr' ][ 'approved' ] == true){
-            return Constants_TranslationStatus::STATUS_APPROVED;
-        }
-
-        return Constants_TranslationStatus::STATUS_TRANSLATED;
+        // retro-compatibility
+        return Constants_TranslationStatus::STATUS_APPROVED;
     }
 
     /**
