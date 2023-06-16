@@ -6,21 +6,31 @@ import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 
-const DEFAULT_CONTENTS = [
-  {
-    label: 'Translation Memory and Glossary',
-    component: <TranslationMemoryGlossaryTab />,
-    isOpened: true,
-  },
-  {
-    label: 'Machine Translation',
-    component: <MachineTranslationTab />,
-  },
-  {
-    label: 'Advanced Options',
-    component: <AdvancedOptionsTab />,
-  },
-]
+let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
+  'openTab',
+)
+
+const getDefaultContents = () => {
+  const definitions = [
+    {
+      label: 'Translation Memory and Glossary',
+      component: <TranslationMemoryGlossaryTab />,
+      isOpened: !tabOpenFromQueryString || tabOpenFromQueryString === 'tm',
+    },
+    {
+      label: 'Machine Translation',
+      component: <MachineTranslationTab />,
+    },
+    {
+      label: 'Advanced Options',
+      component: <AdvancedOptionsTab />,
+      isOpened: tabOpenFromQueryString === 'options',
+    },
+  ]
+
+  tabOpenFromQueryString = false
+  return definitions
+}
 
 export const DEFAULT_ENGINE_MEMORY = {
   id: '1',
@@ -52,8 +62,8 @@ export const SettingsPanel = ({
   setSegmentationRule,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
-  const [tabs, setTabs] = useState(
-    DEFAULT_CONTENTS.map((tab, index) => ({...tab, id: index})),
+  const [tabs, setTabs] = useState(() =>
+    getDefaultContents().map((tab, index) => ({...tab, id: index})),
   )
 
   const wrapperRef = useRef()

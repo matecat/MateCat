@@ -29,7 +29,6 @@ import {
 } from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
-import LXQ from '../utils/lxq.main'
 
 const SELECT_HEIGHT = 324
 
@@ -37,6 +36,10 @@ const historySourceTargets = {
   // source: 'es-ES',
   // targets: 'it-IT,es-ES,es-MX||',
 }
+
+const urlParams = new URLSearchParams(window.location.search)
+const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
+const tmKeyFromQueryString = urlParams.get('private_tm_key')
 
 const NewProject = ({
   isLoggedIn = false,
@@ -72,7 +75,9 @@ const NewProject = ({
   const [warnings, setWarnings] = useState()
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
-  const [isOpenSettings, setIsOpenSettings] = useState(false)
+  const [isOpenSettings, setIsOpenSettings] = useState(
+    initialStateIsOpenSettings,
+  )
   const [speechToTextActive, setSpeechToTextActive] = useState(
     config.defaults.speech2text,
   )
@@ -116,14 +121,27 @@ const NewProject = ({
   }
 
   const getTmKeys = () => {
+    // Create key from query string
+    const keyFromQueryString = {
+      r: true,
+      w: true,
+      owner: true,
+      name: 'No Description',
+      key: tmKeyFromQueryString,
+      is_shared: false,
+      id: tmKeyFromQueryString,
+      isActive: true,
+    }
+
     if (config.isLoggedIn) {
       getTmKeysUser().then(({tm_keys}) =>
-        setTmKeys(
-          tm_keys.map((key) => {
-            return {...key, id: key.key}
-          }),
-        ),
+        setTmKeys([
+          ...tm_keys.map((key) => ({...key, id: key.key})),
+          ...(tmKeyFromQueryString ? [keyFromQueryString] : []),
+        ]),
       )
+    } else {
+      if (tmKeyFromQueryString) setTmKeys([keyFromQueryString])
     }
   }
 
