@@ -48,7 +48,7 @@ const SegmentUtils = {
         currentSegment.segment,
       )
       var tagProjectionEnabled =
-        TagUtils.hasDataOriginalTags(currentSegment.segment) &&
+        TagUtils.hasTagsToHide(currentSegment.segment) &&
         !currentSegment.tagged &&
         segmentNoTags !== ''
       // If the segment has already be tagged
