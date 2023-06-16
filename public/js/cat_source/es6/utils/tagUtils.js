@@ -398,15 +398,16 @@ const TAGS_UTILS = {
   },
 
   /**
-   * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>)
-   * (Note that in the data-original attribute there are the &amp;lt instead of &lt)
+   * Check the string has tags to hide by the guess tags
    * @param segmentSource
    * @returns {boolean}
    */
-  hasDataOriginalTags: function (segmentSource) {
-    var originalText = segmentSource
-    const reg = getXliffRegExpression()
-    return !_.isUndefined(originalText) && reg.test(originalText)
+  hasTagsToHide: function (originalText) {
+    if (originalText) {
+      const stringWithGuessTag = this.removeAllTagsForGuessTags(originalText)
+      return originalText !== stringWithGuessTag
+    }
+    return false
   },
 
   /**
