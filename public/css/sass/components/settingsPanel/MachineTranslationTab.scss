@@ -132,4 +132,26 @@
   .settings-panel-table-rowHeading-column:nth-child(4) {
     text-align: center;
   }
+  .select-with-label__wrapper {
+    .select {
+      font-size: 16px;
+      padding: 9px 46px 9px 12px;
+      border-radius: 2px;
+      border: 1px solid rgba(34, 36, 38, 0.15);
+      box-shadow: inset 0 1px 3px #ddd;
+      color: black;
+      &:hover {
+        border-color: rgba(34, 36, 38, 0.35);
+        box-shadow: none;
+      }
+    }
+
+    .select__dropdown-wrapper {
+      min-width: 280px;
+      border: solid 1px #96c8da;
+      border-top: unset;
+      z-index: 1;
+      margin-top: 1px;
+    }
+  }
 }
