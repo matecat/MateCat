@@ -10,27 +10,29 @@ let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
 )
 
-const getDefaultContents = () => {
-  const definitions = [
-    {
-      label: 'Translation Memory and Glossary',
-      component: <TranslationMemoryGlossaryTab />,
-      isOpened: !tabOpenFromQueryString || tabOpenFromQueryString === 'tm',
-    },
-    {
-      label: 'Machine Translation',
-      component: <MachineTranslationTab />,
-    },
-    {
-      label: 'Advanced Options',
-      component: <AdvancedOptionsTab />,
-      isOpened: tabOpenFromQueryString === 'options',
-    },
-  ]
-
-  tabOpenFromQueryString = false
-  return definitions
+export const SETTINGS_PANEL_TABS = {
+  translationMemoryGlossary: 'tm',
+  machineTranslation: 'mt',
+  advancedOptions: 'options',
 }
+
+const DEFAULT_CONTENTS = [
+  {
+    id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
+    label: 'Translation Memory and Glossary',
+    component: <TranslationMemoryGlossaryTab />,
+  },
+  {
+    id: SETTINGS_PANEL_TABS.machineTranslation,
+    label: 'Machine Translation',
+    component: <MachineTranslationTab />,
+  },
+  {
+    id: SETTINGS_PANEL_TABS.advancedOptions,
+    label: 'Advanced Options',
+    component: <AdvancedOptionsTab />,
+  },
+]
 
 export const DEFAULT_ENGINE_MEMORY = {
   id: '1',
@@ -43,6 +45,7 @@ export const MMT_NAME = 'ModernMT'
 
 export const SettingsPanel = ({
   onClose,
+  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
   tmKeys,
   setTmKeys,
   mtEngines,
@@ -62,9 +65,19 @@ export const SettingsPanel = ({
   setSegmentationRule,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
-  const [tabs, setTabs] = useState(() =>
-    getDefaultContents().map((tab, index) => ({...tab, id: index})),
-  )
+  const [tabs, setTabs] = useState(() => {
+    const initialState = DEFAULT_CONTENTS.map((tab) => ({
+      ...tab,
+      isOpened: Object.values(SETTINGS_PANEL_TABS).some(
+        (value) => value === tabOpenFromQueryString,
+      )
+        ? tabOpenFromQueryString === tab.id
+        : tabOpen === tab.id,
+    }))
+
+    tabOpenFromQueryString = false
+    return initialState
+  })
 
   const wrapperRef = useRef()
 
@@ -150,6 +163,7 @@ export const SettingsPanel = ({
 
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
+  tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
   tmKeys: PropTypes.array,
   setTmKeys: PropTypes.func,
   mtEngines: PropTypes.array,

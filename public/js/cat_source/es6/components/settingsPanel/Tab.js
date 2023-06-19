@@ -25,6 +25,6 @@ export const Tab = ({id, label}) => {
 }
 
 Tab.propTypes = {
-  id: PropTypes.number.isRequired,
+  id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
 }

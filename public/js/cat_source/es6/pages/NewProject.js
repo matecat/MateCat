@@ -29,6 +29,7 @@ import {
 } from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
+import {tmCreateRandUser} from '../api/tmCreateRandUser'
 
 const SELECT_HEIGHT = 324
 
@@ -75,9 +76,9 @@ const NewProject = ({
   const [warnings, setWarnings] = useState()
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
-  const [isOpenSettings, setIsOpenSettings] = useState(
-    initialStateIsOpenSettings,
-  )
+  const [openSettings, setOpenSettings] = useState({
+    isOpen: initialStateIsOpenSettings,
+  })
   const [speechToTextActive, setSpeechToTextActive] = useState(
     config.defaults.speech2text,
   )
@@ -93,7 +94,7 @@ const NewProject = ({
     id: '',
   })
 
-  const closeSettings = useCallback(() => setIsOpenSettings(false), [])
+  const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -113,7 +114,7 @@ const NewProject = ({
     }
   }
 
-  const openTmPanel = () => setIsOpenSettings(true)
+  const openTmPanel = () => setOpenSettings({isOpen: true})
 
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
@@ -259,10 +260,6 @@ const NewProject = ({
       setProjectSent(false)
     }
 
-    const showWarning = (message) => {
-      setWarnings(message)
-    }
-
     getTmKeys()
     getMTEngines()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
@@ -271,10 +268,6 @@ const NewProject = ({
       hideAllErrors,
     )
     CreateProjectStore.addListener(NewProjectConstants.SHOW_ERROR, showError)
-    CreateProjectStore.addListener(
-      NewProjectConstants.SHOW_WARNING,
-      showWarning,
-    )
 
     // check query string project name
     const projectNameFromQuerystring =
@@ -292,34 +285,63 @@ const NewProject = ({
         NewProjectConstants.SHOW_ERROR,
         showError,
       )
-      CreateProjectStore.removeListener(
-        NewProjectConstants.SHOW_WARNING,
-        showWarning,
-      )
     }
   }, [])
   useEffect(() => {
-    const activateKey = (event, desc, key) => {
-      setTmKeys((prevState) =>
-        prevState.map((tm) => (tm.id === key ? {...tm, isActive: true} : tm)),
-      )
-    }
-    const deactivateKey = (event, key) => {
-      setTmKeys((prevState) =>
-        prevState.map((tm) => (tm.id === key ? {...tm, isActive: false} : tm)),
-      )
-    }
-    const removeKey = () => {
-      getTmKeys()
-    }
+    const createKeyFromTMXFile = ({extension, filename}) => {
+      if (tmKeys.every(({isActive}) => !isActive)) {
+        tmCreateRandUser().then((response) => {
+          const {key} = response.data
+          setTmKeys((prevState) => [
+            ...(prevState ?? []),
+            {
+              r: true,
+              w: true,
+              tm: true,
+              glos: true,
+              owner: true,
+              name: filename,
+              key,
+              is_shared: false,
+              id: key,
+              isActive: true,
+            },
+          ])
+        })
+      }
 
-    $('#activetm').on('update', activateKey)
-    $('#activetm').on('removeTm', deactivateKey)
-    $('#activetm').on('deleteTm', removeKey)
+      const message =
+        extension === 'g' ? (
+          <span>
+            A new resource has been generated for the glossary you uploaded. You
+            can manage your resources in the{' '}
+            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+              Settings panel
+            </a>
+            .
+          </span>
+        ) : (
+          <span>
+            A new resource has been generated for the TMX you uploaded. You can
+            manage your resources in the{' '}
+            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+              {' '}
+              Settings panel
+            </a>
+            .
+          </span>
+        )
+      setWarnings(message)
+    }
+    CreateProjectStore.addListener(
+      NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
+      createKeyFromTMXFile,
+    )
     return () => {
-      $('#activetm').off('update')
-      $('#activetm').off('removeTm')
-      $('#activetm').off('deleteTm')
+      CreateProjectStore.removeListener(
+        NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
+        createKeyFromTMXFile,
+      )
     }
   }, [tmKeys])
 
@@ -538,10 +560,11 @@ const NewProject = ({
           }}
         />
       )}
-      {isOpenSettings && (
+      {openSettings.isOpen && (
         <SettingsPanel
           tmKeys={tmKeys}
           onClose={closeSettings}
+          tabOpen={openSettings.tab}
           setTmKeys={setTmKeys}
           mtEngines={mtEngines}
           setMtEngines={setMtEngines}

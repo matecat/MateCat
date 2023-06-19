@@ -60,7 +60,7 @@ AppDispatcher.register(function (action) {
       CreateProjectStore.emitChange(action.actionType)
       break
     case NewProjectConstants.SHOW_ERROR:
-    case NewProjectConstants.SHOW_WARNING:
+    case NewProjectConstants.CREATE_KEY_FROM_TMX_FILE:
       CreateProjectStore.updateProject(action.data)
       CreateProjectStore.emitChange(action.actionType, action.message)
       break

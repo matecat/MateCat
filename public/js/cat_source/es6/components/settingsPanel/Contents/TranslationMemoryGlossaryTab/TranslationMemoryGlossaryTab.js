@@ -261,14 +261,12 @@ export const TranslationMemoryGlossaryTab = () => {
           {inactiveResourcersNotification}
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Inactive Resources</h2>
-            {inactiveKeys.length > 0 && (
-              <input
-                className="translation-memory-glossary-tab-input-text"
-                placeholder="Search resources"
-                value={filterInactiveKeys}
-                onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
-              />
-            )}
+            <input
+              className="translation-memory-glossary-tab-input-text"
+              placeholder="Search resources"
+              value={filterInactiveKeys}
+              onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+            />
           </div>
           {config.isLoggedIn ? (
             <SettingsPanelTable

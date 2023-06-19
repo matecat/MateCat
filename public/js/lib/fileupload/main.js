@@ -144,19 +144,21 @@ window.UI = {
         this.createKeyByTMX();
     },
 
-    createKeyByTMX: function (extension) {
-        if ( !isTMXAllowed() ) return false;
-        if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
-        if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
+    createKeyByTMX: function (extension, filename) {
+        // if ( !isTMXAllowed() ) return false;
+        // if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
+        // if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
 
-        APP.createTMKey().then(function (  ) {
-            UI.checkTMKeysUpdateChecks();
-        });
-        var textToDisplay = <span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}> Settings panel</a>.</span>;
-        if (extension && extension === "g") {
-            textToDisplay = <span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}>Settings panel</a>.</span>;
-        }
-        CreateProjectActions.showWarning(textToDisplay)
+        // APP.createTMKey().then(function (  ) {
+        //     UI.checkTMKeysUpdateChecks();
+        // });
+        // var textToDisplay = <span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}> Settings panel</a>.</span>;
+        // if (extension && extension === "g") {
+        //     textToDisplay = <span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}>Settings panel</a>.</span>;
+        // }
+        // CreateProjectActions.showWarning(textToDisplay)
+
+        CreateProjectActions.createKeyFromTMXFile({extension, filename})
 
 
     },
@@ -426,7 +428,7 @@ window.UI = {
                  */
                 var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
                 if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
-                    UI.createKeyByTMX(extension);
+                    UI.createKeyByTMX(extension, data.files[0].name);
                 }
 
             } else if ( fileSpecs.error ) {
