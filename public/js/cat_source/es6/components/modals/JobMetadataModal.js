@@ -92,9 +92,11 @@ class JobMetadataModal extends React.Component {
   }
 
   componentDidMount() {
-    const element = document.querySelector('.title.current.active')
-    element.scrollIntoView({behavior: 'smooth'})
     $(this.accordion).accordion()
+    setTimeout(() => {
+      const element = document.querySelector('.title.current.active')
+      element.scrollIntoView({behavior: 'smooth'})
+    }, 200)
   }
 
   render() {
