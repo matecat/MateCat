@@ -367,6 +367,7 @@ const NewProject = ({
         setIsOpenMultiselectLanguages,
         sourceLang,
         changeSourceLanguage,
+        setOpenSettings,
       }}
     >
       <HeaderPortal>
@@ -562,9 +563,9 @@ const NewProject = ({
       )}
       {openSettings.isOpen && (
         <SettingsPanel
-          tmKeys={tmKeys}
           onClose={closeSettings}
           tabOpen={openSettings.tab}
+          tmKeys={tmKeys}
           setTmKeys={setTmKeys}
           mtEngines={mtEngines}
           setMtEngines={setMtEngines}

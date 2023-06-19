@@ -358,6 +358,12 @@ let CatToolActions = {
       value,
     })
   },
+  openSettingsPanel: (value) => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.OPEN_SETTINGS_PANEL,
+      value,
+    })
+  },
 }
 
 export default CatToolActions

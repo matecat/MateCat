@@ -30,7 +30,6 @@ window.UI = {
 
         base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
-        if ( Cookies.get( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {
 
@@ -145,22 +144,7 @@ window.UI = {
     },
 
     createKeyByTMX: function (extension, filename) {
-        // if ( !isTMXAllowed() ) return false;
-        // if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
-        // if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
-
-        // APP.createTMKey().then(function (  ) {
-        //     UI.checkTMKeysUpdateChecks();
-        // });
-        // var textToDisplay = <span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}> Settings panel</a>.</span>;
-        // if (extension && extension === "g") {
-        //     textToDisplay = <span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}>Settings panel</a>.</span>;
-        // }
-        // CreateProjectActions.showWarning(textToDisplay)
-
         CreateProjectActions.createKeyFromTMXFile({extension, filename})
-
-
     },
 
     checkFailedConversionsNumber: function () {

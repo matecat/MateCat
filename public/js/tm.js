@@ -523,8 +523,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
 
       $(document).ready(function () {
         // UI.setTMsortable()
-        UI.checkCreateTmKeyFromQueryString()
-        UI.checkOpenTabFromParameters()
       })
 
       // $('.mgmt-table-tm .add-tm').click(function () {
@@ -584,24 +582,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     // disableAllTM: function () {
     //   $('#activetm tr.mine .activate input').trigger('click')
     // },
-    checkOpenTabFromParameters: function () {
-      var keyParam = CommonUtils.getParameterByName('openTab')
-      if (keyParam) {
-        window.history.pushState(
-          '',
-          document.title,
-          document.location.href.split('?')[0],
-        )
-        switch (keyParam) {
-          case 'options':
-            this.openLanguageResourcesPanel('opt')
-            break
-          case 'tm':
-            this.openLanguageResourcesPanel('tm')
-            break
-        }
-      }
-    },
+
     createNewTmKey: function () {
       if ($('#shared-tm-key').is(':visible')) {
         UI.addSharedTmKey()
@@ -633,33 +614,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
             })
         }
       })
-    },
-    checkCreateTmKeyFromQueryString: function () {
-      var keyParam = CommonUtils.getParameterByName('private_tm_key')
-      if (keyParam) {
-        //Check if present and enable it
-        var keyActive = UI.checkTMKeyIsActive(keyParam)
-        if (keyActive) {
-          return false
-        }
-        var keyInactive = UI.checkTMKeyIsInactive(keyParam)
-        if (keyInactive) {
-          UI.selectTm(keyParam)
-          return false
-        }
-        //Create the TM Key
-        var keyParams = {
-          r: true,
-          w: true,
-          desc: 'No Description',
-          TMKey: keyParam,
-        }
-        this.appendNewTmKeyToPanel(keyParams)
-        new UI.DropDown(
-          $('#activetm tr.mine').last().find('.wrapper-dropdown-5'),
-        )
-        UI.checkTMKeysUpdateChecks()
-      }
     },
     // activateInactiveKey: function (keyParam) {
     //   var objectsArray = $('#inactivetm tr:not(".new") .privatekey')

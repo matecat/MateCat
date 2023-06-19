@@ -4,7 +4,8 @@ import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 
 export const TmGlossarySelect = () => {
-  const {SELECT_HEIGHT, tmKeys, setTmKeys} = useContext(CreateProjectContext)
+  const {SELECT_HEIGHT, tmKeys, setTmKeys, setOpenSettings} =
+    useContext(CreateProjectContext)
 
   const tmKeyActive = Array.isArray(tmKeys)
     ? tmKeys.filter(({isActive}) => isActive)
@@ -57,7 +58,7 @@ export const TmGlossarySelect = () => {
             <button
               className="button-top-of-list"
               onClick={() => {
-                UI.openLanguageResourcesPanel('tm')
+                setOpenSettings({isOpen: true})
                 onClose()
               }}
             >

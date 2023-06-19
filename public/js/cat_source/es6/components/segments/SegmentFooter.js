@@ -20,6 +20,7 @@ import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
+import CatToolActions from '../../actions/CatToolActions'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -538,7 +539,7 @@ function SegmentFooter() {
       <div className="addtmx-tr white-tx">
         <a
           className="open-popup-addtm-tr"
-          onClick={() => UI.openLanguageResourcesPanel()}
+          onClick={() => CatToolActions.openSettingsPanel()}
         >
           Add private resources
         </a>

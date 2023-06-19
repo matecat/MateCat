@@ -30,7 +30,7 @@ function CatTool() {
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
-  const [isOpenSettings, setIsOpenSettings] = useState(false)
+  const [openSettings, setOpenSettings] = useState({isOpen: false})
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
@@ -56,8 +56,8 @@ function CatTool() {
       where: options?.where,
     })
 
-  const closeSettings = useCallback(() => setIsOpenSettings(false), [])
-  const openTmPanel = () => setIsOpenSettings(true)
+  const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
+  const openTmPanel = () => setOpenSettings({isOpen: true})
 
   const getTmKeys = () => {
     const promises = [
@@ -127,7 +127,13 @@ function CatTool() {
       if (callbackAfterSegmentsResponse)
         callbackAfterSegmentsResponseRef.current = callbackAfterSegmentsResponse
     }
+    const openSettingsPanel = ({value}) =>
+      setOpenSettings({isOpen: true, tab: value})
     CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
+    CatToolStore.addListener(
+      CatToolConstants.OPEN_SETTINGS_PANEL,
+      openSettingsPanel,
+    )
 
     // segments action
     const freezingSegments = (isFreezing) => setIsFreezingSegments(isFreezing)
@@ -152,6 +158,10 @@ function CatTool() {
 
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
+      CatToolStore.removeListener(
+        CatToolConstants.OPEN_SETTINGS_PANEL,
+        openSettingsPanel,
+      )
       SegmentStore.removeListener(
         SegmentConstants.FREEZING_SEGMENTS,
         freezingSegments,
@@ -196,7 +206,6 @@ function CatTool() {
       // Init segments
       // TODO: da verificare se serve: $(document).trigger('segments:load', data)
       $(document).trigger('segments:load', data)
-      if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel()
 
       if (
         !Object.entries(data.files)
@@ -330,10 +339,11 @@ function CatTool() {
       <div className="notifications-wrapper">
         <NotificationBox />
       </div>
-      {isOpenSettings && (
+      {openSettings.isOpen && (
         <SettingsPanel
-          tmKeys={tmKeys}
           onClose={closeSettings}
+          tabOpen={openSettings.tab}
+          tmKeys={tmKeys}
           setTmKeys={setTmKeys}
           mtEngines={mtEngines}
           setMtEngines={setMtEngines}

@@ -13,11 +13,6 @@ import NewProject from './cat_source/es6/pages/NewProject'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
-APP.openOptionsPanel = function (tab, elem) {
-  var elToClick = $(elem).attr('data-el-to-click') || null
-  UI.openLanguageResourcesPanel(tab, elToClick)
-}
-
 APP.createTMKey = function () {
   if (
     $('.mgmt-tm .new .privatekey .btn-ok').hasClass('disabled') ||
