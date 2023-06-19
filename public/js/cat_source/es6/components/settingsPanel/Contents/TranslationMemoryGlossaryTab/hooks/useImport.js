@@ -7,6 +7,8 @@ import {loadTMX} from '../../../../../api/loadTMX'
 import {loadGlossaryFile} from '../../../../../api/loadGlossaryFile'
 import {uploadGlossary} from '../../../../../api/uploadGlossary/uploadGlossary'
 import {uploadTm} from '../../../../../api/uploadTm'
+import {checkGlossaryImport} from '../../../../../api/checkGlossaryImport'
+import ConfirmMessageModal from '../../../../modals/ConfirmMessageModal'
 
 export const IMPORT_TYPE = {
   tmx: 'tmx',
@@ -93,19 +95,65 @@ function useImport({type, row, onClose}) {
     }
   }
 
-  const onSubmit = (event) => {
-    const promise = type === IMPORT_TYPE.tmx ? uploadTm : uploadGlossary
-    promise({filesToUpload: files, tmKey: row.key, keyName: row.name})
+  const uploadGlossaryFn = () => {
+    const upload = () => {
+      uploadGlossary({filesToUpload: files, tmKey: row.key, keyName: row.name})
+        .then(({data}) =>
+          setUuids(
+            data.uuids.map((item) => ({
+              ...item,
+              filename: files[0].name,
+            })),
+          ),
+        )
+        .catch((errors) => onErrorUpload(errors))
+    }
+    checkGlossaryImport({
+      filesToUpload: files,
+      tmKey: row.key,
+      keyName: row.name,
+    })
+      .then((response) => {
+        if (
+          response.results?.length &&
+          response.results[0].numberOfLanguages > 10
+        ) {
+          //show Modal
+          ModalsActions.showModalComponent(ConfirmMessageModal, {
+            cancelText: 'Cancel',
+            successCallback: () => upload(),
+            successText: 'Upload glossary',
+            text:
+              'You are uploading a glossary file containing more than 10 locale columns.<br/> Please note that locale ' +
+              'permutations are turned off for glossaries containing more than 10 locales.<br/><br/>You can find additional ' +
+              "details on permutations inside <a href='https://guides.matecat.com/glossary-file-format' target='_blank'>Matecat's user guide</a>.",
+          })
+        } else {
+          upload()
+        }
+      })
+      .catch((errors) => onErrorUpload(errors))
+  }
+
+  const uploadTmxFn = () => {
+    uploadTm({filesToUpload: files, tmKey: row.key, keyName: row.name})
       .then(({data}) =>
         setUuids(
           data.uuids.map((item) => ({
             ...item,
-            filename: type === IMPORT_TYPE.tmx ? item.name : files[0].name,
+            filename: item.name,
           })),
         ),
       )
       .catch((errors) => onErrorUpload(errors))
+  }
 
+  const onSubmit = (event) => {
+    if (type === IMPORT_TYPE.tmx) {
+      uploadTmxFn()
+    } else {
+      uploadGlossaryFn()
+    }
     setUuids([])
     event.preventDefault()
   }
