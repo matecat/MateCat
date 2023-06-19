@@ -28,7 +28,7 @@ import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
-  const {setSpecialRows, setNotification, ref} = useContext(
+  const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
 
@@ -206,7 +206,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
-            itemsTarget={ref.current}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"
