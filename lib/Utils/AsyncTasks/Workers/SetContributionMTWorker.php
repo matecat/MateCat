@@ -65,7 +65,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $config[ 'segment' ]     = $contributionStruct->segment;
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
-        $config[ 'session' ]     = md5($contributionStruct->id_segment. '-' . $contributionStruct->id_job . '-' . $contributionStruct->job_password);
+        $config[ 'session' ]     = $contributionStruct->getSessionId();
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );
