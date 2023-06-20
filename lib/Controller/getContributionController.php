@@ -2,6 +2,7 @@
 
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
+use Files\FilesPartsDao;
 use Matecat\SubFiltering\MateCatFilter;
 
 class getContributionController extends ajaxController {
@@ -118,7 +119,12 @@ class getContributionController extends ajaxController {
             $this->_getContexts( $jobStruct->source, $jobStruct->target );
         }
 
+        $file = (new FilesPartsDao())->getBySegmentId($this->id_segment);
+
         $contributionRequest                    = new ContributionRequestStruct();
+        $contributionRequest->id_file           = $file->id;
+        $contributionRequest->id_job            = $this->id_job;
+        $contributionRequest->password          = $this->received_password;
         $contributionRequest->user              = $this->user;
         $contributionRequest->dataRefMap        = $dataRefMap;
         $contributionRequest->contexts          = [
