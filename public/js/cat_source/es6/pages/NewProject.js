@@ -182,6 +182,7 @@ const NewProject = ({
           speech2text: speechToTextActive,
           guessTags: guessTagActive,
           segmentationRule,
+          lexiqaActive,
         }),
       )
         .then(({data}) => {

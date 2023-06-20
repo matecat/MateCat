@@ -71,6 +71,7 @@ APP.getCreateProjectParams = function ({
   speech2text,
   guessTags,
   segmentationRule,
+  lexiqaActive,
 }) {
   return {
     action: 'createProject',
@@ -83,9 +84,7 @@ APP.getCreateProjectParams = function ({
     private_keys_list: UI.extractTMdataFromTable(),
     lang_detect_files: UI.skipLangDetectArr,
     pretranslate_100: $('#pretranslate100').is(':checked') ? 1 : 0,
-    lexiqa: !!(
-      $('#lexi_qa').prop('checked') && !$('#lexi_qa').prop('disabled')
-    ),
+    lexiqa: lexiqaActive,
     speech2text,
     tag_projection: guessTags,
     segmentation_rule: segmentationRule.id,
