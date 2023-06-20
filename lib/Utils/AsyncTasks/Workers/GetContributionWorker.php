@@ -486,7 +486,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'segid' ]        = $contributionStruct->segmentId;
                 $config[ 'job_id' ]       = $jobStruct->id;
                 $config[ 'job_password' ] = $jobStruct->password;
-                $config[ 'session' ]      = md5($config[ 'segid' ]. '-' . $config[ 'job_id' ] . '-' . $config[ 'job_password' ]);
+                $config[ 'session' ]      = $contributionStruct->getSessionId();
 
                 $mt_result = $mt_engine->get( $config );
             }
