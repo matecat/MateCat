@@ -5,4 +5,5 @@ export default keyMirror({
   HIDE_ERROR_WARNING: null,
   SHOW_ERROR: null,
   CREATE_KEY_FROM_TMX_FILE: null,
+  ENABLE_ANALYZE_BUTTON: null,
 })

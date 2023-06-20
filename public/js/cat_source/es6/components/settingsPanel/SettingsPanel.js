@@ -45,6 +45,7 @@ export const MMT_NAME = 'ModernMT'
 
 export const SettingsPanel = ({
   onClose,
+  isOpened,
   tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
   tmKeys,
   setTmKeys,
@@ -82,13 +83,13 @@ export const SettingsPanel = ({
   const wrapperRef = useRef()
 
   useEffect(() => {
-    setIsVisible(true)
+    setIsVisible(typeof isOpened !== 'undefined' ? isOpened : true)
 
     const keyboardHandler = (e) => e.key === 'Escape' && setIsVisible(false)
     document.addEventListener('keyup', keyboardHandler)
 
     return () => document.removeEventListener('keyup', keyboardHandler)
-  }, [])
+  }, [isOpened])
 
   useEffect(() => {
     const onTransitionEnd = () => !isVisible && onClose()
@@ -132,7 +133,11 @@ export const SettingsPanel = ({
         setSegmentationRule,
       }}
     >
-      <div className="settings-panel">
+      <div
+        className={`settings-panel${
+          isOpened || typeof isOpened === 'undefined' ? ' visible' : ''
+        }`}
+      >
         <div
           className={`settings-panel-overlay${
             isVisible
@@ -163,6 +168,7 @@ export const SettingsPanel = ({
 
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
+  isOpened: PropTypes.bool,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
   tmKeys: PropTypes.array,
   setTmKeys: PropTypes.func,

@@ -40,13 +40,17 @@ export const TmGlossarySelect = () => {
         if (tmKeyActive?.some((item) => item.id === option.id)) {
           setTmKeys((prevState) =>
             prevState.map((tm) =>
-              tm.id === option.id ? {...tm, isActive: false} : tm,
+              tm.id === option.id
+                ? {...tm, isActive: false, r: false, w: false}
+                : tm,
             ),
           )
         } else {
           setTmKeys((prevState) =>
             prevState.map((tm) =>
-              tm.id === option.id ? {...tm, isActive: true} : tm,
+              tm.id === option.id
+                ? {...tm, isActive: true, r: true, w: true}
+                : tm,
             ),
           )
         }

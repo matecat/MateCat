@@ -25,6 +25,12 @@ const CreateProjectActions = {
       message,
     })
   },
+  enableAnalyzeButton: (value) => {
+    AppDispatcher.dispatch({
+      actionType: NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+      value,
+    })
+  },
 }
 
 export default CreateProjectActions

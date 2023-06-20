@@ -11,6 +11,7 @@ export const MenuButton = ({
   className = '',
   itemsTarget,
   children,
+  disabled,
 }) => {
   const ItemsPortal = usePortal(itemsTarget ? itemsTarget : document.body)
   const [itemsCoords, setItemsCoords] = useState()
@@ -46,8 +47,12 @@ export const MenuButton = ({
   return (
     <div className={`menu-button ${className}`}>
       <div ref={ref} className="menu-button-wrapper">
-        <button onClick={onClick}>{label}</button>
-        <button onMouseUp={onShowingItems}>{icon}</button>
+        <button disabled={disabled} onClick={onClick}>
+          {label}
+        </button>
+        <button disabled={disabled} onMouseUp={onShowingItems}>
+          {icon}
+        </button>
       </div>
       {itemsCoords && (
         <ItemsPortal>
@@ -78,4 +83,5 @@ MenuButton.propTypes = {
   className: PropTypes.string,
   itemsTarget: PropTypes.object,
   children: PropTypes.arrayOf(MenuButtonItemType),
+  disabled: PropTypes.bool,
 }

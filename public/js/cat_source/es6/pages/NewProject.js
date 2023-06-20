@@ -93,6 +93,8 @@ const NewProject = ({
     name: 'General',
     id: '',
   })
+  const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
+  const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
@@ -259,6 +261,7 @@ const NewProject = ({
       setErrors(message)
       setProjectSent(false)
     }
+    const enableAnalizeButton = (value) => setIsFormReadyToSubmit(value)
 
     getTmKeys()
     getMTEngines()
@@ -268,6 +271,10 @@ const NewProject = ({
       hideAllErrors,
     )
     CreateProjectStore.addListener(NewProjectConstants.SHOW_ERROR, showError)
+    CreateProjectStore.addListener(
+      NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+      enableAnalizeButton,
+    )
 
     // check query string project name
     const projectNameFromQuerystring =
@@ -284,6 +291,10 @@ const NewProject = ({
       CreateProjectStore.removeListener(
         NewProjectConstants.SHOW_ERROR,
         showError,
+      )
+      CreateProjectStore.removeListener(
+        NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+        enableAnalizeButton,
       )
     }
   }, [])
@@ -368,6 +379,8 @@ const NewProject = ({
         sourceLang,
         changeSourceLanguage,
         setOpenSettings,
+        isImportTMXInProgress,
+        setIsImportTMXInProgress,
       }}
     >
       <HeaderPortal>
@@ -525,9 +538,12 @@ const NewProject = ({
         <div className="uploadbtn-box">
           {!projectSent ? (
             <input
+              disabled={!isFormReadyToSubmit || isImportTMXInProgress}
               name=""
               type="button"
-              className="uploadbtn disabled"
+              className={`uploadbtn${
+                !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
+              }`}
               value="Analyze"
               onClick={createProject}
             />
@@ -561,29 +577,28 @@ const NewProject = ({
           }}
         />
       )}
-      {openSettings.isOpen && (
-        <SettingsPanel
-          onClose={closeSettings}
-          tabOpen={openSettings.tab}
-          tmKeys={tmKeys}
-          setTmKeys={setTmKeys}
-          mtEngines={mtEngines}
-          setMtEngines={setMtEngines}
-          activeMTEngine={activeMTEngine}
-          setActiveMTEngine={setActiveMTEngine}
-          setSpeechToTextActive={setSpeechToTextActive}
-          guessTagActive={guessTagActive}
-          setGuessTagActive={setGuessTagActive}
-          sourceLang={sourceLang}
-          targetLangs={targetLangs}
-          lexiqaActive={lexiqaActive}
-          setLexiqaActive={setLexiqaActive}
-          multiMatchLangs={multiMatchLangs}
-          setMultiMatchLangs={setMultiMatchLangs}
-          segmentationRule={segmentationRule}
-          setSegmentationRule={setSegmentationRule}
-        />
-      )}
+      <SettingsPanel
+        onClose={closeSettings}
+        isOpened={openSettings.isOpen}
+        tabOpen={openSettings.tab}
+        tmKeys={tmKeys}
+        setTmKeys={setTmKeys}
+        mtEngines={mtEngines}
+        setMtEngines={setMtEngines}
+        activeMTEngine={activeMTEngine}
+        setActiveMTEngine={setActiveMTEngine}
+        setSpeechToTextActive={setSpeechToTextActive}
+        guessTagActive={guessTagActive}
+        setGuessTagActive={setGuessTagActive}
+        sourceLang={sourceLang}
+        targetLangs={targetLangs}
+        lexiqaActive={lexiqaActive}
+        setLexiqaActive={setLexiqaActive}
+        multiMatchLangs={multiMatchLangs}
+        setMultiMatchLangs={setMultiMatchLangs}
+        segmentationRule={segmentationRule}
+        setSegmentationRule={setSegmentationRule}
+      />
       <Footer />
     </CreateProjectContext.Provider>
   )

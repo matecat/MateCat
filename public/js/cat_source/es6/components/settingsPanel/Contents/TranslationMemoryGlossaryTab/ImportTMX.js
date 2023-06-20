@@ -1,11 +1,14 @@
-import React, {useRef} from 'react'
+import React, {useRef, useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import useImport, {IMPORT_TYPE} from './hooks/useImport'
+import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
 export const ImportTMX = ({row, onClose}) => {
+  const {setIsImportTMXInProgress} = useContext(CreateProjectContext)
+
   const {files, uuids, status, onSubmit, onReset, onChangeFiles} = useImport({
     type: IMPORT_TYPE.tmx,
     row,
@@ -16,6 +19,14 @@ export const ImportTMX = ({row, onClose}) => {
 
   const isFormDisabled = files.length && Array.isArray(uuids)
   const isErrorUpload = status.length && status.some(({uuid}) => !uuid)
+
+  const isCompletedAll = status
+    .filter(({errors}) => !errors)
+    .every(({isCompleted}) => isCompleted)
+
+  useEffect(() => {
+    if (row.isActive) setIsImportTMXInProgress(!isCompletedAll)
+  }, [isCompletedAll, setIsImportTMXInProgress, row.isActive])
 
   const getFileRow = ({uuid, filename}) => {
     const {

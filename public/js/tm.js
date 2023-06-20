@@ -471,20 +471,20 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         //   e.preventDefault()
         //   UI.showDeleteTmMessage(this)
         // })
-        .on('keydown', function (e) {
-          var esc = 27
+        // .on('keydown', function (e) {
+        //   var esc = 27
 
-          var handleEscPressed = function () {
-            if ($('.popup-tm.open').length) {
-              e.stopPropagation()
-              UI.closeTMPanel()
-              UI.clearTMPanel()
-              return
-            }
-          }
+        //   var handleEscPressed = function () {
+        //     if ($('.popup-tm.open').length) {
+        //       e.stopPropagation()
+        //       UI.closeTMPanel()
+        //       UI.clearTMPanel()
+        //       return
+        //     }
+        //   }
 
-          if (e.which == esc) handleEscPressed()
-        })
+        //   if (e.which == esc) handleEscPressed()
+        // })
         .on('click', '.share-button', function (e) {
           e.preventDefault()
           UI.clickOnShareButton($(this))
@@ -1245,33 +1245,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     //     w: tr.find('.update input').is(':checked') ? 1 : 0,
     //   }
     // },
-
-    saveTMdata: function (closeAfter) {
-      if (closeAfter) {
-        UI.closeTMPanel()
-        UI.clearTMPanel()
-      }
-      if (!APP.isCattool) return
-      var data = this.extractTMdataFromTable()
-      var getPublicMatches = $('#activetm')
-        .find('tr.mymemory .lookup input')
-        .is(':checked')
-
-      updateJobKeys({
-        getPublicMatches,
-        dataTm: data,
-      })
-        .then(() => {
-          UI.hideAllBoxOnTables()
-          // TODO: update keys for glossary
-          CatToolActions.onTMKeysChangeStatus()
-        })
-        .catch(() => {
-          UI.showErrorOnActiveTMTable(
-            'There was an error saving your data. Please retry!',
-          )
-        })
-    },
     saveTMdescription: function (field) {
       if (!config.isLoggedIn) return
       var tr = field.parents('tr').first()
@@ -1330,22 +1303,6 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
     //       })
     //   })
     // },
-
-    closeTMPanel: function () {
-      $('.popup-tm').removeClass('open').animate({right: '-1100px'}, 400)
-      $('.outer-tm').hide()
-      $('body').removeClass('side-popup')
-      if (!APP.isCattool && !UI.checkAnalyzability('closing tmx panel')) {
-        UI.disableAnalyze()
-        if (!checkAnalyzabilityTimer)
-          checkAnalyzabilityTimer = window.setInterval(function () {
-            if (UI.checkAnalyzability('set interval')) {
-              UI.enableAnalyze()
-              window.clearInterval(checkAnalyzabilityTimer)
-            }
-          }, 500)
-      }
-    },
     // filterInactiveTM: function (txt) {
     //   const inactiveItems = Array.from(
     //     document.getElementById('inactivetm')?.getElementsByClassName('list')[0]

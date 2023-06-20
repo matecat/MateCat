@@ -64,6 +64,9 @@ AppDispatcher.register(function (action) {
       CreateProjectStore.updateProject(action.data)
       CreateProjectStore.emitChange(action.actionType, action.message)
       break
+    case NewProjectConstants.ENABLE_ANALYZE_BUTTON:
+      CreateProjectStore.emitChange(action.actionType, action.value)
+      break
   }
 })
 module.exports = CreateProjectStore

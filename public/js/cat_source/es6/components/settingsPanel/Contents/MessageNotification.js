@@ -19,7 +19,10 @@ export const MessageNotification = ({
             Confirm
           </button>
         )}
-        <button className="ui button orange" onClick={() => closeCallback()}>
+        <button
+          className="ui button orange button-close"
+          onClick={() => closeCallback()}
+        >
           <Close />
         </button>
       </div>

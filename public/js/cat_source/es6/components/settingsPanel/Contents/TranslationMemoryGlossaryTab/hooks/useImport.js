@@ -56,6 +56,7 @@ function useImport({type, row, onClose}) {
             const isCompletedAll = statusFiles.every(
               ({isCompleted}) => isCompleted,
             )
+
             if (!isCompletedAll) {
               tmOut = setTimeout(getStatus, DELAY_GET_STATUS)
             } else {

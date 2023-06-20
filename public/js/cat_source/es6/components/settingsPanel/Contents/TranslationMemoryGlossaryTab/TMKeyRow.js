@@ -16,6 +16,7 @@ import {DeleteResource} from './DeleteResource'
 import {updateTmKey} from '../../../../api/updateTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
 import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
+import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 import Earth from '../../../../../../../img/icons/Earth'
 import Lock from '../../../../../../../img/icons/Lock'
@@ -27,6 +28,7 @@ import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
+  const {isImportTMXInProgress} = useContext(CreateProjectContext)
   const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
@@ -206,6 +208,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
+            disabled={isImportTMXInProgress}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"
