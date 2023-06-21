@@ -63,6 +63,22 @@ export const SegmentFooterTabAiAssistant = ({
 
   useEffect(() => {
     let isCachedLastRequest = false
+    let requestConcordanceCallback
+
+    const getRequestConcordance = () => {
+      let hasAlreadyRequested = false
+
+      return () => {
+        if (!hasAlreadyRequested) {
+          // request tm matches
+          getConcordance(requestedWord.current, 0).catch(() => {
+            OfflineUtils.failedConnection(this, 'getConcordance')
+          })
+          hasAlreadyRequested = true
+          setIsLoadingTmMatches(true)
+        }
+      }
+    }
 
     const aiAssistantHandler = ({sid, value}) => {
       if (sid === segment.sid) {
@@ -80,17 +96,15 @@ export const SegmentFooterTabAiAssistant = ({
           ({key}) => key === cacheNameKey,
         )
 
-        // request tm matches
-        getConcordance(requestedWord.current, 0).catch(() => {
-          OfflineUtils.failedConnection(this, 'getConcordance')
-        })
-        setIsLoadingTmMatches(true)
+        // reset concordance request
+        requestConcordanceCallback = getRequestConcordance()
         resultsRef?.current?.reset()
 
         // check suggestions cache
         if (cacheSuggestion?.suggestion) {
           setSuggestion({value: cacheSuggestion.suggestion, isCompleted: true})
           isCachedLastRequest = true
+          requestConcordanceCallback()
           return
         } else {
           isCachedLastRequest = false
@@ -107,6 +121,7 @@ export const SegmentFooterTabAiAssistant = ({
     }
     const aiSuggestionHandler = ({sid, suggestion, isCompleted, hasError}) => {
       if (sid === segment.sid && !isCachedLastRequest) {
+        if (requestConcordanceCallback) requestConcordanceCallback()
         if (!hasError) {
           setHasError(false)
           setSuggestion({value: suggestion, isCompleted})
