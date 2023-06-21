@@ -61,40 +61,6 @@ window.clearNotCompletedUploads = function () {
   clearNotCompletedUploadsApi()
 }
 
-APP.getCreateProjectParams = function ({
-  projectName,
-  sourceLang,
-  targetLang,
-  jobSubject,
-  selectedTeam,
-  activeMT,
-  speech2text,
-  guessTags,
-  segmentationRule,
-  lexiqaActive,
-}) {
-  return {
-    action: 'createProject',
-    file_name: APP.getFilenameFromUploadedFiles(),
-    project_name: projectName,
-    source_lang: sourceLang,
-    target_lang: targetLang,
-    job_subject: jobSubject,
-    mt_engine: activeMT,
-    private_keys_list: UI.extractTMdataFromTable(),
-    lang_detect_files: UI.skipLangDetectArr,
-    pretranslate_100: $('#pretranslate100').is(':checked') ? 1 : 0,
-    lexiqa: lexiqaActive,
-    speech2text,
-    tag_projection: guessTags,
-    segmentation_rule: segmentationRule.id,
-    id_team: selectedTeam,
-    get_public_matches: $('#activetm')
-      .find('tr.mymemory .lookup input')
-      .is(':checked'),
-  }
-}
-
 APP.getFilenameFromUploadedFiles = function () {
   var files = ''
   $(

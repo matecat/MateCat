@@ -5,7 +5,6 @@ import NotificationBox from '../components/notificationsComponent/NotificationBo
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
 import CatToolConstants from '../constants/CatToolConstants'
-import Cookies from 'js-cookie'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
 import CatToolActions from '../actions/CatToolActions'
@@ -44,6 +43,9 @@ function CatTool() {
   const [multiMatchLangs, setMultiMatchLangs] = useState(
     SegmentUtils.checkCrossLanguageSettings(),
   )
+  const [getPublicMatches, setGetPublicMatches] = useState(
+    Boolean(config.get_public_matches),
+  )
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -77,7 +79,7 @@ function CatTool() {
           return {
             ...key,
             id: key.key,
-            isActive: key.r && key.w,
+            isActive: Boolean(key.r || key.w),
             isLocked: !key.owner,
           }
         }),
@@ -341,31 +343,35 @@ function CatTool() {
       </div>
       {openSettings.isOpen && (
         <SettingsPanel
-          onClose={closeSettings}
-          tabOpen={openSettings.tab}
-          tmKeys={tmKeys}
-          setTmKeys={setTmKeys}
-          mtEngines={mtEngines}
-          setMtEngines={setMtEngines}
-          activeMTEngine={activeMTEngine}
-          setActiveMTEngine={setActiveMTEngine}
-          guessTagActive={guessTagActive}
-          setGuessTagActive={setGuessTagActive}
-          setSpeechToTextActive={setSpeechToTextActive}
-          sourceLang={{
-            name: CommonUtils.getLanguageNameFromLocale(config.source_rfc),
-            code: config.source_rfc,
-          }}
-          targetLangs={[
-            {
-              name: CommonUtils.getLanguageNameFromLocale(config.target_rfc),
-              code: config.target_rfc,
+          {...{
+            onClose: closeSettings,
+            tabOpen: openSettings.tab,
+            tmKeys,
+            setTmKeys,
+            mtEngines,
+            setMtEngines,
+            activeMTEngine,
+            setActiveMTEngine,
+            guessTagActive,
+            setGuessTagActive,
+            setSpeechToTextActive,
+            sourceLang: {
+              name: CommonUtils.getLanguageNameFromLocale(config.source_rfc),
+              code: config.source_rfc,
             },
-          ]}
-          lexiqaActive={lexiqaActive}
-          setLexiqaActive={setLexiqaActive}
-          multiMatchLangs={multiMatchLangs}
-          setMultiMatchLangs={setMultiMatchLangs}
+            targetLangs: [
+              {
+                name: CommonUtils.getLanguageNameFromLocale(config.target_rfc),
+                code: config.target_rfc,
+              },
+            ],
+            lexiqaActive,
+            setLexiqaActive,
+            multiMatchLangs,
+            setMultiMatchLangs,
+            getPublicMatches,
+            setGetPublicMatches,
+          }}
         />
       )}
       <CattolFooter

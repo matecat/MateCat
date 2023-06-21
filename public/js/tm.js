@@ -1203,37 +1203,37 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
       }
     },
 
-    // extractTMdataFromTable: function () {
-    //   var categories = ['ownergroup', 'mine', 'anonymous']
-    //   var newArray = {}
-    //   $.each(categories, function (index, value) {
-    //     newArray[value] = UI.extractTMDataFromRowCategory(this)
-    //   })
-    //   return JSON.stringify(newArray)
-    // },
-    // extractTMDataFromRowCategory: function (cat) {
-    //   var tt = $('#activetm tbody tr.' + cat)
-    //   var dataOb = []
-    //   $(tt).each(function () {
-    //     var r = $(this).find('.lookup input').is(':checked') ? 1 : 0
-    //     var w = $(this).find('.update input').is(':checked') ? 1 : 0
-    //     var isMymemory = $(this).hasClass('mymemory')
-    //     if ((!r && !w) || isMymemory) {
-    //       return true
-    //     }
-    //     var dd = {
-    //       tm: $(this).attr('data-tm'),
-    //       glos: $(this).attr('data-glos'),
-    //       owner: $(this).attr('data-owner'),
-    //       key: $(this).find('.privatekey').text().trim(), // remove spaces and unwanted chars from string
-    //       name: $(this).find('.description').text().trim(),
-    //       r: r,
-    //       w: w,
-    //     }
-    //     dataOb.push(dd)
-    //   })
-    //   return dataOb
-    // },
+    extractTMdataFromTable: function () {
+      var categories = ['ownergroup', 'mine', 'anonymous']
+      var newArray = {}
+      $.each(categories, function (index, value) {
+        newArray[value] = UI.extractTMDataFromRowCategory(this)
+      })
+      return JSON.stringify(newArray)
+    },
+    extractTMDataFromRowCategory: function (cat) {
+      var tt = $('#activetm tbody tr.' + cat)
+      var dataOb = []
+      $(tt).each(function () {
+        var r = $(this).find('.lookup input').is(':checked') ? 1 : 0
+        var w = $(this).find('.update input').is(':checked') ? 1 : 0
+        var isMymemory = $(this).hasClass('mymemory')
+        if ((!r && !w) || isMymemory) {
+          return true
+        }
+        var dd = {
+          tm: $(this).attr('data-tm'),
+          glos: $(this).attr('data-glos'),
+          owner: $(this).attr('data-owner'),
+          key: $(this).find('.privatekey').text().trim(), // remove spaces and unwanted chars from string
+          name: $(this).find('.description').text().trim(),
+          r: r,
+          w: w,
+        }
+        dataOb.push(dd)
+      })
+      return dataOb
+    },
 
     // extractTMdataFromRow: function (tr) {
     //   return {

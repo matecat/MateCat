@@ -64,6 +64,8 @@ export const SettingsPanel = ({
   setMultiMatchLangs,
   segmentationRule,
   setSegmentationRule,
+  getPublicMatches,
+  setGetPublicMatches,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -131,6 +133,8 @@ export const SettingsPanel = ({
         setMultiMatchLangs,
         segmentationRule,
         setSegmentationRule,
+        getPublicMatches,
+        setGetPublicMatches,
       }}
     >
       <div
@@ -180,4 +184,6 @@ SettingsPanel.propTypes = {
   setGuessTagActive: PropTypes.func,
   sourceLang: PropTypes.object,
   targetLangs: PropTypes.array,
+  getPublicMatches: PropTypes.bool,
+  setGetPublicMatches: PropTypes.func,
 }

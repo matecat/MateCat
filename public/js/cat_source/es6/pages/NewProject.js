@@ -93,6 +93,10 @@ const NewProject = ({
     name: 'General',
     id: '',
   })
+  const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
+  const [getPublicMatches, setGetPublicMatches] = useState(
+    Boolean(config.get_public_matches),
+  )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
 
@@ -164,27 +168,44 @@ const NewProject = ({
   }
 
   const createProject = () => {
+    const getParams = () => ({
+      action: 'createProject',
+      file_name: APP.getFilenameFromUploadedFiles(),
+      project_name: projectNameRef.current.value,
+      source_lang: sourceLang.id,
+      target_lang: targetLangs.map((lang) => lang.id).join(),
+      job_subject: subject.id,
+      mt_engine: activeMTEngine.id,
+      private_keys_list: JSON.stringify({
+        ownergroup: [],
+        mine: tmKeys
+          .filter(({owner, isActive}) => owner && isActive)
+          .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w})),
+        anonymous: [],
+      }),
+      lang_detect_files: '',
+      pretranslate_100: isPretranslate100Active ? 1 : 0,
+      lexiqa: lexiqaActive,
+      speech2text: speechToTextActive,
+      tag_projection: guessTagActive,
+      segmentation_rule: segmentationRule.id,
+      id_team: selectedTeam ? selectedTeam.id : undefined,
+      get_public_matches: getPublicMatches,
+    })
+
+    console.log({
+      ownergroup: [],
+      mine: tmKeys
+        .filter(({owner, isActive}) => owner && isActive)
+        .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w})),
+      anonymous: [],
+    })
+    return
     if (!projectSent) {
-      /*if (!UI.allTMUploadsCompleted()) {
-        return false
-      }*/
       setErrors()
       setWarnings()
       setProjectSent(true)
-      createProjectApi(
-        APP.getCreateProjectParams({
-          projectName: projectNameRef.current.value,
-          sourceLang: sourceLang.id,
-          targetLang: targetLangs.map((lang) => lang.id).join(),
-          jobSubject: subject.id,
-          selectedTeam: selectedTeam ? selectedTeam.id : undefined,
-          activeMT: activeMTEngine.id,
-          speech2text: speechToTextActive,
-          guessTags: guessTagActive,
-          segmentationRule,
-          lexiqaActive,
-        }),
-      )
+      createProjectApi(getParams())
         .then(({data}) => {
           APP.handleCreationStatus(data.id_project, data.password)
         })
@@ -382,6 +403,8 @@ const NewProject = ({
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
+        isPretranslate100Active,
+        setIsPretranslate100Active,
       }}
     >
       <HeaderPortal>
@@ -579,26 +602,29 @@ const NewProject = ({
         />
       )}
       <SettingsPanel
-        onClose={closeSettings}
-        isOpened={openSettings.isOpen}
-        tabOpen={openSettings.tab}
-        tmKeys={tmKeys}
-        setTmKeys={setTmKeys}
-        mtEngines={mtEngines}
-        setMtEngines={setMtEngines}
-        activeMTEngine={activeMTEngine}
-        setActiveMTEngine={setActiveMTEngine}
-        setSpeechToTextActive={setSpeechToTextActive}
-        guessTagActive={guessTagActive}
-        setGuessTagActive={setGuessTagActive}
-        sourceLang={sourceLang}
-        targetLangs={targetLangs}
-        lexiqaActive={lexiqaActive}
-        setLexiqaActive={setLexiqaActive}
-        multiMatchLangs={multiMatchLangs}
-        setMultiMatchLangs={setMultiMatchLangs}
-        segmentationRule={segmentationRule}
-        setSegmentationRule={setSegmentationRule}
+        {...{
+          onClose: closeSettings,
+          isOpened: openSettings.isOpen,
+          tabOpen: openSettings.tab,
+          tmKeys,
+          setTmKeys,
+          mtEngines,
+          setMtEngines,
+          activeMTEngine,
+          setActiveMTEngine,
+          setSpeechToTextActive,
+          guessTagActive,
+          setGuessTagActive,
+          sourceLang,
+          targetLangs,
+          lexiqaActive,
+          setLexiqaActive,
+          multiMatchLangs,
+          setMultiMatchLangs,
+          segmentationRule,
+          setSegmentationRule,
+          setGetPublicMatches,
+        }}
       />
       <Footer />
     </CreateProjectContext.Provider>

@@ -25,7 +25,8 @@ export const ImportTMX = ({row, onClose}) => {
     .every(({isCompleted}) => isCompleted)
 
   useEffect(() => {
-    if (row.isActive) setIsImportTMXInProgress(!isCompletedAll)
+    if (row.isActive && setIsImportTMXInProgress)
+      setIsImportTMXInProgress(!isCompletedAll)
   }, [isCompletedAll, setIsImportTMXInProgress, row.isActive])
 
   const getFileRow = ({uuid, filename}) => {

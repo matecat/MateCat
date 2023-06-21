@@ -29,7 +29,8 @@ import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys, setGetPublicMatches} =
+    useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
@@ -49,6 +50,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       showModalLostPrivateTmKeyNotLoggedIn(setIsLookup)
     } else {
       updateRow({isLookup, isUpdating})
+      if (isMMSharedKey) setGetPublicMatches(isLookup)
     }
     setIsLookup(isLookup)
   }
@@ -172,7 +174,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         <input
           checked={isLookup}
           onChange={onChangeIsLookup}
-          disabled={!isOwner}
+          disabled={
+            (!isOwner && !isMMSharedKey) || (isMMSharedKey && !config.ownerIsMe)
+          }
           type="checkbox"
         />
       </div>
@@ -183,6 +187,10 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onChange={onChangeIsUpdating}
             type="checkbox"
             disabled={isMMSharedKey || !isOwner}
+            {...(isMMSharedKey &&
+              isMMSharedUpdateChecked && {
+                title: 'Add a private resource to disable updating',
+              })}
           />
         )}
       </div>
