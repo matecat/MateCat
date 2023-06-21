@@ -170,7 +170,7 @@ class ProjectManagerModel {
                         $metaKey = strip_tags( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
 
                         // check for metaKey is `notes`
-                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                        if(!self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
                         }
 
@@ -186,7 +186,7 @@ class ProjectManagerModel {
                     if(isset($attributes['json'][$index])) {
                         $metaKey = $attributes['json'][$index];
 
-                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                        if(!self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $internal_id, null, $json ];
                         }
 
@@ -253,7 +253,7 @@ class ProjectManagerModel {
                         $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
                         $metaValue = strip_tags(html_entity_decode($note));
 
-                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                        if(self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
@@ -267,7 +267,7 @@ class ProjectManagerModel {
                         $metaKey = $attributes['json'][$index];
                         $metaValue = $json;
 
-                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                        if(self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
@@ -299,6 +299,23 @@ class ProjectManagerModel {
             Log::doJsonLog( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes attributes import - DB Error: " . $e->getMessage(), 0, $e );
         }
+    }
+
+    /**
+     * @param $metaKey
+     * @return bool
+     */
+    private static function isAMetadata($metaKey)
+    {
+        $metaDataKeys = [
+            'id_request',
+            'id_content',
+            'id_order',
+            'id_order_group',
+            'screenshot'
+        ];
+
+        return in_array($metaKey, $metaDataKeys);
     }
 
     /**
