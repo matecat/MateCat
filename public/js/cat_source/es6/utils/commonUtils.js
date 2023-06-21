@@ -274,6 +274,9 @@ const CommonUtils = {
       case 'xtg':
         return 'extqxp'
       case 'xml':
+      case 'x-jsont2':
+      case 'json':
+      case 'jsont':
         return 'extxml'
       case 'rc':
         return 'extrcc'
