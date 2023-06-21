@@ -122,7 +122,7 @@ class getContributionController extends ajaxController {
         $file = (new FilesPartsDao())->getBySegmentId($this->id_segment);
 
         $contributionRequest                    = new ContributionRequestStruct();
-        $contributionRequest->id_file           = $file->id;
+        $contributionRequest->id_file           = $file->id_file;
         $contributionRequest->id_job            = $this->id_job;
         $contributionRequest->password          = $this->received_password;
         $contributionRequest->user              = $this->user;
