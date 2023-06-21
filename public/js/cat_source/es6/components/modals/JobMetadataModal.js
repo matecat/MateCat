@@ -15,7 +15,6 @@ class JobMetadataModal extends React.Component {
     //     '**Note:** Link to file a query: http://t.uber.com/riderq Rider  \n' +
     //     '            Screen Search: https://docs.google.com/document/d/19Dk92t9NXdN.';
   }
-
   createFileList() {
     const {currentFile, currentFilePart} = this.props
     return this.props.files.map((file) => {
@@ -94,6 +93,10 @@ class JobMetadataModal extends React.Component {
 
   componentDidMount() {
     $(this.accordion).accordion()
+    setTimeout(() => {
+      const element = document.querySelector('.title.current.active')
+      element.scrollIntoView({behavior: 'smooth'})
+    }, 200)
   }
 
   render() {

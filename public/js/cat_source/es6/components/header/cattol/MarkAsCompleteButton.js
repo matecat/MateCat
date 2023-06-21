@@ -36,7 +36,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
       {
         text:
           'Unresolved issues may prevent completing your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration:' +
-          ' underline;" href="https://site.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in Matecat </a> ',
+          ' underline;" href="https://guides.matecat.com/fixing-tags" target="_blank">How to fix tags in Matecat </a> ',
         successText: 'Mark as complete',
         cancelText: 'Fix errors',
         successCallback: () => clickMarkAsCompleteModal(),

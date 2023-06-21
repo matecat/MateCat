@@ -125,7 +125,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
                     date( "Y-m-d" )
-            ) )->getMatches();
+            ) )->getMatches(2, [], $_config[ 'source' ], $_config[ 'target' ]);
         } catch ( Exception $e ) {
             return $this->fallback( $_config );
         }
