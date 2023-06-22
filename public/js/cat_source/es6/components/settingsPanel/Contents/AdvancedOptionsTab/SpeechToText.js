@@ -7,13 +7,16 @@ import AlertModal from '../../../modals/AlertModal'
 import PropTypes from 'prop-types'
 import {toggleSpeechToText} from '../../../../api/toggleSpeechToText'
 
-export const SpeechToText = ({setSpeechToTextActive = () => {}}) => {
+export const SpeechToText = ({
+  speechToTextActive,
+  setSpeechToTextActive = () => {},
+}) => {
   const isCattool = config.is_cattool
   const [dictationOption, setDictationOption] = useState(() => {
     if (isCattool) {
       return Speech2TextFeature.enabled()
     } else {
-      return config.defaults.speech2text
+      return speechToTextActive
     }
   })
   // const disabled = !('webkitSpeechRecognition' in window)
@@ -34,18 +37,25 @@ export const SpeechToText = ({setSpeechToTextActive = () => {}}) => {
   const onChange = (selected) => {
     if (selected) {
       setDictationOption(true)
-      toggleSpeechToText({enabled: true}).then(() => {
+      if (isCattool) {
+        toggleSpeechToText({enabled: true}).then(() => {
+          setSpeechToTextActive(true)
+          Speech2TextFeature.enable()
+          Speech2TextFeature.init()
+          Speech2TextFeature.loadRecognition()
+        })
+      } else {
         setSpeechToTextActive(true)
-        isCattool && Speech2TextFeature.enable()
-        Speech2TextFeature.init()
-        Speech2TextFeature.loadRecognition()
-      })
+      }
     } else {
       setDictationOption(false)
-      toggleSpeechToText({enabled: false}).then(() => {
+      if (isCattool) {
+        toggleSpeechToText({enabled: false}).then(() => {
+          Speech2TextFeature.disable()
+        })
+      } else {
         setSpeechToTextActive(false)
-        isCattool && Speech2TextFeature.disable()
-      })
+      }
     }
   }
   return (

@@ -6,7 +6,7 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   const [active, setActive] = useState(segmentationRule)
 
   const options = [
-    {name: 'General', id: ''},
+    {name: 'General', id: '1'},
     {name: 'Patent', id: 'patent'},
     {name: 'Paragraph (beta)', id: 'paragraph'},
   ]
@@ -28,8 +28,6 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
         (option) => option.id === config.segmentation_rule,
       )
       activeRule && setActive(activeRule)
-    } else {
-      setActive(options[0])
     }
   }, [])
   useEffect(() => {

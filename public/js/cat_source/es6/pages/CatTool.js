@@ -36,7 +36,7 @@ function CatTool() {
   const [guessTagActive, setGuessTagActive] = useState(
     SegmentUtils.checkTPEnabled(),
   )
-  const [lexiqaActive, setLexiqaActive] = useState(LXQ.checkCanActivate())
+  const [lexiqaActive, setLexiqaActive] = useState(!!config.lxq_enabled)
   const [speechToTextActive, setSpeechToTextActive] = useState(
     Speech2TextFeature.enabled(),
   )

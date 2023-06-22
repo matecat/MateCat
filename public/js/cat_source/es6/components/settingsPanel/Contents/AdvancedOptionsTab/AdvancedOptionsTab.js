@@ -12,6 +12,7 @@ import {SegmentationRule} from './SegmentationRule'
 
 export const AdvancedOptionsTab = () => {
   const {
+    speechToTextActive,
     setSpeechToTextActive,
     guessTagActive,
     setGuessTagActive,
@@ -28,7 +29,10 @@ export const AdvancedOptionsTab = () => {
     <div className="advanced-options-box">
       {/*<h2>Advanced Options</h2>*/}
 
-      <SpeechToText setSpeechToTextActive={setSpeechToTextActive} />
+      <SpeechToText
+        setSpeechToTextActive={setSpeechToTextActive}
+        speechToTextActive={speechToTextActive}
+      />
 
       {config.show_tag_projection && (
         <GuessTag

@@ -188,19 +188,19 @@ const NewProject = ({
       lexiqa: lexiqaActive,
       speech2text: speechToTextActive,
       tag_projection: guessTagActive,
-      segmentation_rule: segmentationRule.id,
+      segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
       get_public_matches: getPublicMatches,
     })
 
-    console.log({
+    /*console.log({
       ownergroup: [],
       mine: tmKeys
         .filter(({owner, isActive}) => owner && isActive)
         .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w})),
       anonymous: [],
     })
-    return
+    return*/
     if (!projectSent) {
       setErrors()
       setWarnings()
@@ -612,6 +612,7 @@ const NewProject = ({
           setMtEngines,
           activeMTEngine,
           setActiveMTEngine,
+          speechToTextActive,
           setSpeechToTextActive,
           guessTagActive,
           setGuessTagActive,
