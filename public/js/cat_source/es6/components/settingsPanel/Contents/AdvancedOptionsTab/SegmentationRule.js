@@ -23,10 +23,15 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
     }
   }
   useEffect(() => {
-    if (config.is_cattool && config.segmentation_rule) {
-      const activeRule = options.find(
-        (option) => option.id === config.segmentation_rule,
-      )
+    if (config.is_cattool) {
+      let activeRule
+      if (config.segmentation_rule === '') {
+        activeRule = options[0]
+      } else {
+        activeRule = options.find(
+          (option) => option.id === config.segmentation_rule,
+        )
+      }
       activeRule && setActive(activeRule)
     }
   }, [])
