@@ -172,18 +172,17 @@ class catController extends viewController {
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
+        $active_mt_engine_array = [];
         if(!empty($active_mt_engine)){
-            $this->template->active_engine = [
+            $active_mt_engine_array = [
                 "id" => $active_mt_engine[0]->id,
                 "name" => $active_mt_engine[0]->name,
                 "type" => $active_mt_engine[0]->type,
                 "description" => $active_mt_engine[0]->description,
             ];
-        } else {
-            $this->template->active_engine = [];
         }
 
-
+        $this->template->active_engine = Utils::escapeJsonEncode($active_mt_engine_array);
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -362,7 +361,7 @@ class catController extends viewController {
         $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = str_replace("\\\"","\\\\\\\"", json_encode(Intento::getProviderList())); // needed by JSON.parse() function
+        $this->template->translation_engines_intento_prov_json = Utils::escapeJsonEncode(Intento::getProviderList());
 
         $this->template->owner_email         = $this->job_owner;
 

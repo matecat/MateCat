@@ -89,7 +89,7 @@
                 mark_as_complete_button_enabled : ${mark_as_complete_button_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-                active_engine: JSON.parse( '${ php: json_encode(active_engine)}'),
+                active_engine: JSON.parse('${active_engine}'),
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
