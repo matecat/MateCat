@@ -147,9 +147,6 @@ class catController extends viewController {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
-        $this->template->user_keys = $userKeys->getKeys( $this->chunk->tm_keys ) ;
-
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
 
         //this gets all engines of the user
@@ -174,6 +171,19 @@ class catController extends viewController {
         $engineQuery->id     = $this->chunk->id_mt_engine ;
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
+
+        if(!empty($active_mt_engine)){
+            $this->template->active_engine = [
+                "id" => $active_mt_engine[0]->id,
+                "name" => $active_mt_engine[0]->name,
+                "type" => $active_mt_engine[0]->type,
+                "description" => $active_mt_engine[0]->description,
+            ];
+        } else {
+            $this->template->active_engine = [];
+        }
+
+
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -349,7 +359,6 @@ class catController extends viewController {
         $this->template->pname       = $this->project->name;
 
         $this->template->mt_engines = $this->translation_engines;
-        $this->template->mt_id      = $this->chunk->id_mt_engine ;
         $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
