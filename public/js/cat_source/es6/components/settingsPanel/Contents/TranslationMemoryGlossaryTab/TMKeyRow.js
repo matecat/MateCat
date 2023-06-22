@@ -4,6 +4,7 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
   SPECIAL_ROWS_ID,
   TranslationMemoryGlossaryTabContext,
+  getTmDataStructureToSendServer,
 } from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
@@ -26,10 +27,12 @@ import Download from '../../../../../../../img/icons/Download'
 import Share from '../../../../../../../img/icons/Share'
 import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
+import {updateJobKeys} from '../../../../api/updateJobKeys'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys, setGetPublicMatches} =
+  const {tmKeys, setTmKeys, getPublicMatches, setGetPublicMatches} =
     useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
@@ -119,6 +122,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         message: errors[0].message,
       })
     })
+
+    if (config.is_cattool) {
+      updateJobKeys({
+        getPublicMatches,
+        dataTm: getTmDataStructureToSendServer({tmKeys}),
+      }).then(() => CatToolActions.onTMKeysChangeStatus())
+    }
   }
 
   const showModalLostPrivateTmKeyNotLoggedIn = (restoreState) => {
