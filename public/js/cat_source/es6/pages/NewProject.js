@@ -30,6 +30,7 @@ import {
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
+import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
 
 const SELECT_HEIGHT = 324
 
@@ -55,6 +56,7 @@ const NewProject = ({
   const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
+  const [keysOrdered, setKeysOrdered] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
@@ -141,12 +143,27 @@ const NewProject = ({
     }
 
     if (config.isLoggedIn) {
-      getTmKeysUser().then(({tm_keys}) =>
+      getTmKeysUser().then(({tm_keys}) => {
+        const isMatchingKeyFromQuery = tm_keys.some(
+          ({key}) => tmKeyFromQueryString === key,
+        )
+
         setTmKeys([
-          ...tm_keys.map((key) => ({...key, id: key.key})),
-          ...(tmKeyFromQueryString ? [keyFromQueryString] : []),
-        ]),
-      )
+          ...tm_keys.map((key) => ({
+            ...key,
+            id: key.key,
+            ...(isMatchingKeyFromQuery &&
+              key.key === tmKeyFromQueryString && {
+                isActive: true,
+                r: true,
+                w: true,
+              }),
+          })),
+          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+            ? [keyFromQueryString]
+            : []),
+        ])
+      })
     } else {
       if (tmKeyFromQueryString) setTmKeys([keyFromQueryString])
     }
@@ -176,13 +193,7 @@ const NewProject = ({
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
       mt_engine: activeMTEngine.id,
-      private_keys_list: JSON.stringify({
-        ownergroup: [],
-        mine: tmKeys
-          .filter(({owner, isActive}) => owner && isActive)
-          .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w})),
-        anonymous: [],
-      }),
+      private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       pretranslate_100: isPretranslate100Active ? 1 : 0,
       lexiqa: lexiqaActive,
@@ -193,14 +204,6 @@ const NewProject = ({
       get_public_matches: getPublicMatches,
     })
 
-    /*console.log({
-      ownergroup: [],
-      mine: tmKeys
-        .filter(({owner, isActive}) => owner && isActive)
-        .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w})),
-      anonymous: [],
-    })
-    return*/
     if (!projectSent) {
       setErrors()
       setWarnings()
@@ -625,6 +628,7 @@ const NewProject = ({
           segmentationRule,
           setSegmentationRule,
           setGetPublicMatches,
+          setKeysOrdered,
         }}
       />
       <Footer />

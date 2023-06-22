@@ -67,6 +67,7 @@ export const SettingsPanel = ({
   setSegmentationRule,
   getPublicMatches,
   setGetPublicMatches,
+  setKeysOrdered,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -137,6 +138,7 @@ export const SettingsPanel = ({
         setSegmentationRule,
         getPublicMatches,
         setGetPublicMatches,
+        setKeysOrdered,
       }}
     >
       <div
@@ -188,4 +190,5 @@ SettingsPanel.propTypes = {
   targetLangs: PropTypes.array,
   getPublicMatches: PropTypes.bool,
   setGetPublicMatches: PropTypes.func,
+  setKeysOrdered: PropTypes.func,
 }

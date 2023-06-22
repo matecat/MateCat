@@ -1,6 +1,5 @@
 import React, {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -12,10 +11,11 @@ import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
 import {MessageNotification} from '../MessageNotification'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
+import {updateJobKeys} from '../../../../api/updateJobKeys'
 
 import Users from '../../../../../../../img/icons/Users'
 import AddWide from '../../../../../../../img/icons/AddWide'
-import {updateJobKeys} from '../../../../api/updateJobKeys'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 const COLUMNS_TABLE = [
   {name: 'Lookup'},
@@ -58,12 +58,40 @@ const NEW_RESOURCE = {
   w: true,
 }
 
+export const getTmDataStructureToSendServer = ({tmKeys, keysOrdered}) => {
+  const mine = tmKeys
+    .filter(({owner, isActive}) => owner && isActive)
+    .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
+
+  const order = (acc, cur) => {
+    const copyAcc = [...acc]
+    const index = keysOrdered.findIndex((key) => key === cur.key)
+
+    if (index >= 0) {
+      const previousItem = copyAcc[index]
+      copyAcc[index] = cur
+      if (previousItem) copyAcc.push(previousItem)
+    } else {
+      copyAcc.push(cur)
+    }
+    return copyAcc
+  }
+
+  return JSON.stringify({
+    ownergroup: [],
+    mine: Array.isArray(keysOrdered)
+      ? mine.reduce(order, []).filter((row) => row)
+      : mine,
+    anonymous: [],
+  })
+}
+
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
   const {isPretranslate100Active, setIsPretranslate100Active} =
     useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys, openLoginModal, getPublicMatches} =
+  const {tmKeys, openLoginModal, getPublicMatches, setKeysOrdered} =
     useContext(SettingsPanelContext)
 
   const [specialRows, setSpecialRows] = useState([
@@ -79,51 +107,35 @@ export const TranslationMemoryGlossaryTab = () => {
     getPublicMatches: undefined,
   })
 
-  const onOrderActiveRows = useCallback(
-    ({index, indexToMove}) => {
-      const activeRows = keyRows.filter(({isActive}) => isActive)
-      const rowSelected = activeRows.find((row, indexRow) => indexRow === index)
+  const onOrderActiveRows = ({index, indexToMove}) => {
+    const activeRows = keyRows.filter(({isActive}) => isActive)
+    const rowSelected = activeRows.find((row, indexRow) => indexRow === index)
 
-      const isLastIndexToMove = indexToMove === activeRows.length
+    const isLastIndexToMove = indexToMove === activeRows.length
 
-      const orderedRows = activeRows.flatMap((row, indexRow) =>
-        indexRow === indexToMove
-          ? [rowSelected, row]
-          : indexRow === index
-          ? []
-          : indexRow === activeRows.length - 1 && isLastIndexToMove
-          ? [row, rowSelected]
-          : row,
-      )
+    const orderedRows = activeRows.flatMap((row, indexRow) =>
+      indexRow === indexToMove
+        ? [rowSelected, row]
+        : indexRow === index
+        ? []
+        : indexRow === activeRows.length - 1 && isLastIndexToMove
+        ? [row, rowSelected]
+        : row,
+    )
 
-      // setKeyRows((prevState) => [
-      //   ...prevState.filter(({isActive}) => !isActive),
-      //   ...orderedRows,
-      // ])
-      // console.log(
-      //   tmKeys.map((tm) => {
-      //     const indexOrder = orderedRows.findIndex(({key}) => key === tm.key)
-      //     console.log('indexOrder', indexOrder)
-      //     return {
-      //       ...tm,
-      //       ...(indexOrder > 0 && {indexOrder}),
-      //     }
-      //   }),
-      // )
+    setKeyRows([...keyRows.filter(({isActive}) => !isActive), ...orderedRows])
+    const keysOrdered = orderedRows.map(({key}) => key).filter((key) => key)
 
-      setTmKeys((prevState) =>
-        prevState.map((tm) => {
-          const indexOrder = orderedRows.findIndex(({key}) => key === tm.key)
+    if (setKeysOrdered) setKeysOrdered(keysOrdered)
 
-          return {
-            ...tm,
-            ...(indexOrder > 0 && {indexOrder}),
-          }
-        }),
-      )
-    },
-    [keyRows, setTmKeys],
-  )
+    // Cattol page updateJobKeys
+    if (config.is_cattool) {
+      updateJobKeys({
+        getPublicMatches,
+        dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+      }).then(() => CatToolActions.onTMKeysChangeStatus())
+    }
+  }
 
   useEffect(() => {
     const onExpandRow = ({row, shouldExpand, content}) =>
@@ -151,35 +163,29 @@ export const TranslationMemoryGlossaryTab = () => {
 
       const allRows = [
         defaultTranslationMemoryRow,
-        ...(tmKeys ?? []).sort((a, b) =>
-          typeof a.indexOrder === 'undefined'
-            ? 0
-            : a.indexOrder > b.indexOrder
-            ? 1
-            : -1,
-        ),
+        ...(tmKeys ?? []),
         ...(createResourceRow ? [createResourceRow] : []),
       ]
 
       // preserve rows order
-      const rowsActive = allRows.filter(({isActive}) => isActive)
+      const rowsActive = allRows
+        .filter(({isActive}) => isActive)
+        .reduce((acc, cur) => {
+          const copyAcc = [...acc]
+          const index = prevState
+            .filter(({isActive}) => isActive)
+            .findIndex(({id}) => id === cur.id)
 
-      // .reduce((acc, cur) => {
-      //   const copyAcc = [...acc]
-      //   const index = prevState
-      //     .filter(({isActive}) => isActive)
-      //     .findIndex(({id}) => id === cur.id)
-
-      //   if (index >= 0) {
-      //     const previousItem = copyAcc[index]
-      //     copyAcc[index] = cur
-      //     if (previousItem) copyAcc.push(previousItem)
-      //   } else {
-      //     copyAcc.push(cur)
-      //   }
-      //   return copyAcc
-      // }, [])
-      // .filter((row) => row)
+          if (index >= 0) {
+            const previousItem = copyAcc[index]
+            copyAcc[index] = cur
+            if (previousItem) copyAcc.push(previousItem)
+          } else {
+            copyAcc.push(cur)
+          }
+          return copyAcc
+        }, [])
+        .filter((row) => row)
 
       const rowsNotActive = allRows.filter(({isActive}) => !isActive)
 
@@ -237,32 +243,16 @@ export const TranslationMemoryGlossaryTab = () => {
         tmKeysActive.length !== prevTmKeysActive.length ||
         tmKeysActive
           .filter(({owner}) => owner)
-          .some(({key, name, r, w}) => {
+          .some(({key, r, w}) => {
             const prevTm = prevTmKeysActive.find((prev) => prev.key === key)
-            return (
-              prevTm &&
-              (name !== prevTm.name || r !== prevTm.r || w !== prevTm.w)
-            )
+            return prevTm && (r !== prevTm.r || w !== prevTm.w)
           })
 
       if (shouldUpdateTmKeysJob) {
         updateJobKeys({
           getPublicMatches,
-          dataTm: JSON.stringify({
-            ownergroup: [],
-            mine: tmKeys
-              .filter(({owner, isActive}) => owner && isActive)
-              .map(({tm, glos, key, name, r, w}) => ({
-                tm,
-                glos,
-                key,
-                name,
-                r,
-                w,
-              })),
-            anonymous: [],
-          }),
-        })
+          dataTm: getTmDataStructureToSendServer({tmKeys}),
+        }).then(() => CatToolActions.onTMKeysChangeStatus())
       }
     }
 

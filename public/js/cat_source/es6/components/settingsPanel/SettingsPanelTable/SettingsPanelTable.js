@@ -18,6 +18,9 @@ export const SettingsPanelTable = ({
 }) => {
   const [dragOverIndex, setDragOverIndex] = useState()
 
+  const onChangeRowsOrderRef = useRef()
+  onChangeRowsOrderRef.current = onChangeRowsOrder
+
   const rowsContainerRef = useRef()
   const rowsRef = useRef([])
   const dragStartInfoRef = useRef()
@@ -81,7 +84,7 @@ export const SettingsPanelTable = ({
           halfPoint === 'bottom' ? dragOverIndex + 1 : dragOverIndex
 
         if (startIndex !== indexToMove)
-          onChangeRowsOrder({
+          onChangeRowsOrderRef.current({
             index: startIndex,
             indexToMove,
           })
@@ -90,7 +93,7 @@ export const SettingsPanelTable = ({
       setDragOverIndex(undefined)
       dragEndRow.current = row
     },
-    [dragOverIndex, onChangeRowsOrder],
+    [dragOverIndex],
   )
 
   const renderColumns = (column, index) => (
