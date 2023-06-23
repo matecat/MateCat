@@ -1,57 +1,15 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
 import {createRoot} from 'react-dom/client'
 import React from 'react'
 
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from './cat_source/es6/api/clearNotCompletedUploads'
 import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
-import {tmCreateRandUser} from './cat_source/es6/api/tmCreateRandUser'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import NewProject from './cat_source/es6/pages/NewProject'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
-
-APP.createTMKey = function () {
-  if (
-    $('.mgmt-tm .new .privatekey .btn-ok').hasClass('disabled') ||
-    APP.pendingCreateTMkey
-  ) {
-    return false
-  }
-  APP.pendingCreateTMkey = true
-
-  //call API
-  const promise = tmCreateRandUser()
-  promise.then(({data}) => {
-    APP.pendingCreateTMkey = false
-    $('tr.template-download.fade.ready ').each(function (key, fileUploadedRow) {
-      if (
-        $('.mgmt-panel #activetm tbody tr.mine').length &&
-        $('.mgmt-panel #activetm tbody tr.mine .update input').is(':checked')
-      )
-        return false
-      var _fileName = $(fileUploadedRow).find('.name').text()
-      if (
-        _fileName.split('.').pop().toLowerCase() == 'tmx' ||
-        _fileName.split('.').pop().toLowerCase() == 'g'
-      ) {
-        UI.appendNewTmKeyToPanel({
-          r: 1,
-          w: 1,
-          desc: _fileName,
-          TMKey: data.key,
-        })
-        UI.setDropDown()
-        return true
-      }
-    })
-
-    return false
-  })
-  return promise
-}
 
 /**
  * ajax call to clear the uploaded files when an user refresh the home page

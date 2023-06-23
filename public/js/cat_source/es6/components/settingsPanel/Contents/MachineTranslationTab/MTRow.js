@@ -10,7 +10,32 @@ export const MTRow = ({row, deleteMT}) => {
 
   return (
     <>
-      <div>{row.name}</div>
+      <div>
+        {row.name}
+        {row.name === 'MyMemory' && (
+          <>
+            {' '}
+            (
+            <a href="https://guides.matecat.com/my" target="_blank">
+              Details
+            </a>
+            )
+          </>
+        )}
+        {row.name === 'ModernMT' && (
+          <>
+            {' '}
+            (
+            <a
+              href="https://guides.matecat.com/modernmt-mmt-plug-in"
+              target="_blank"
+            >
+              Details
+            </a>
+            )
+          </>
+        )}
+      </div>
       <div>{row.description}</div>
       {!config.is_cattool && (
         <div className="settings-panel-cell-center">
