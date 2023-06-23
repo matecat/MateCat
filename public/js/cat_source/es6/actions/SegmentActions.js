@@ -1377,11 +1377,14 @@ const SegmentActions = {
   helpAiAssistant: ({sid, value}) => {
     SegmentActions.modifyTabVisibility('AiAssistant', true)
     SegmentActions.activateTab(sid, 'AiAssistant')
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.HELP_AI_ASSISTANT,
-      sid,
-      value,
-    })
+
+    setTimeout(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.HELP_AI_ASSISTANT,
+        sid,
+        value,
+      })
+    }, 100)
   },
   aiSuggestion: ({sid, suggestion, isCompleted, hasError}) => {
     AppDispatcher.dispatch({
