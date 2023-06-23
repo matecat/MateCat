@@ -4,8 +4,12 @@ import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 
 export const TmGlossarySelect = () => {
-  const {SELECT_HEIGHT, tmKeys, tmKeySelected, setTmKeySelected} =
+  const {SELECT_HEIGHT, tmKeys, setTmKeys, setOpenSettings} =
     useContext(CreateProjectContext)
+
+  const tmKeyActive = Array.isArray(tmKeys)
+    ? tmKeys.filter(({isActive}) => isActive)
+    : []
 
   return (
     <Select
@@ -29,18 +33,26 @@ export const TmGlossarySelect = () => {
       isDisabled={!tmKeys}
       options={tmKeys}
       multipleSelect={'dropdown'}
-      activeOptions={tmKeySelected}
+      activeOptions={tmKeyActive}
       placeholder={'MyMemory Collaborative TM'}
       checkSpaceToReverse={false}
       onToggleOption={(option) => {
-        if (tmKeySelected?.some((item) => item.id === option.id)) {
-          setTmKeySelected(
-            tmKeySelected.filter((item) => item.id !== option.id),
+        if (tmKeyActive?.some((item) => item.id === option.id)) {
+          setTmKeys((prevState) =>
+            prevState.map((tm) =>
+              tm.id === option.id
+                ? {...tm, isActive: false, r: false, w: false}
+                : tm,
+            ),
           )
-          UI.disableTm(option.id)
         } else {
-          setTmKeySelected(tmKeySelected.concat([option]))
-          UI.selectTm(option.id)
+          setTmKeys((prevState) =>
+            prevState.map((tm) =>
+              tm.id === option.id
+                ? {...tm, isActive: true, r: true, w: true}
+                : tm,
+            ),
+          )
         }
       }}
     >
@@ -50,7 +62,7 @@ export const TmGlossarySelect = () => {
             <button
               className="button-top-of-list"
               onClick={() => {
-                UI.openLanguageResourcesPanel('tm')
+                setOpenSettings({isOpen: true})
                 onClose()
               }}
             >

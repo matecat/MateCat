@@ -23,63 +23,6 @@ window.APP = {
     this.isCattool = $('body').hasClass('cattool')
     setTimeout(() => this.checkGlobalMassages(), 1000)
   },
-
-  fitText: function (
-    container,
-    child,
-    limitHeight,
-    escapeTextLen,
-    actualTextLow,
-    actualTextHi,
-  ) {
-    if (typeof escapeTextLen == 'undefined') escapeTextLen = 4
-    if (typeof $(child).attr('data-originalText') == 'undefined') {
-      $(child).attr('data-originalText', $(child).text())
-    }
-
-    var originalText = $(child).text()
-
-    //tail recursion exit control
-    if (
-      originalText.length < escapeTextLen ||
-      (actualTextLow + actualTextHi).length < escapeTextLen
-    ) {
-      return false
-    }
-
-    if (
-      typeof actualTextHi == 'undefined' &&
-      typeof actualTextLow == 'undefined'
-    ) {
-      //we are in window.resize
-      if (originalText.match(/\[\.\.\.]/)) {
-        originalText = $(child).attr('data-originalText')
-      }
-
-      actualTextLow = originalText.substr(0, Math.ceil(originalText.length / 2))
-      actualTextHi = originalText.replace(actualTextLow, '')
-    }
-
-    actualTextHi = actualTextHi.substr(1)
-    actualTextLow = actualTextLow.substr(0, actualTextLow.length - 1)
-
-    child.text(actualTextLow + '[...]' + actualTextHi)
-
-    var loop = true
-    // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
-    while (container.height() >= limitHeight && loop == true) {
-      loop = this.fitText(
-        container,
-        child,
-        limitHeight,
-        escapeTextLen,
-        actualTextLow,
-        actualTextHi,
-      )
-    }
-    return false
-  },
-
   /*************************************************************************************************************/
 
   lookupFlashServiceParam: function (name) {

@@ -53,7 +53,9 @@
                 id_project: '${pid}',
                 allow_link_to_analysis: '${allow_link_to_analysis}',
                 analysis_enabled: '${analysis_enabled}',
+                not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
                 footer_show_revise_link: ${footer_show_revise_link || string: false},
+                intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
                 get job_id() {
                   console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
@@ -87,6 +89,7 @@
                 mark_as_complete_button_enabled : ${mark_as_complete_button_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
+                active_engine: JSON.parse('${active_engine}'),
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
@@ -122,7 +125,9 @@
                 revisionNumber : ${revisionNumber | string:null},
                 secondRevisionsCount : ${ secondRevisionsCount | string: 0},
                 project_name: '${pname | string: 0}',
-                review_password: '${review_password}'
+                review_password: '${review_password}',
+                show_tag_projection: ${show_tag_projection | string: false},
+                get_public_matches: ${get_public_matches | string: false}
             };
 
             var renderStart = new Date();
@@ -204,8 +209,6 @@
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
         <div class="page-content"></div>
-        <div metal:use-macro="tm.html/tm_panel"></div>
-        <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
     </body>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>

@@ -30,11 +30,6 @@ window.UI = {
 
         base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
-
-        if (this.initTM) {
-            this.initTM();
-        }
-        if ( Cookies.get( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
     getPrintableFileSize: function ( filesizeInBytes ) {
 
@@ -48,12 +43,6 @@ window.UI = {
 
         return Math.round( filesizeInBytes * 100, 2 ) / 100 + ext;
 
-    },
-    enableAnalyze: function () {
-        enableAnalyze();
-    },
-    disableAnalyze: function () {
-        disableAnalyze();
     },
     conversionsAreToRestart: function () {
         var num = 0;
@@ -148,21 +137,8 @@ window.UI = {
         this.createKeyByTMX();
     },
 
-    createKeyByTMX: function (extension) {
-        if ( !isTMXAllowed() ) return false;
-        if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
-        if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
-
-        APP.createTMKey().then(function (  ) {
-            UI.checkTMKeysUpdateChecks();
-        });
-        var textToDisplay = <span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}> Settings panel</a>.</span>;
-        if (extension && extension === "g") {
-            textToDisplay = <span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a href="#" onClick={()=>APP.openOptionsPanel("tm")}>Settings panel</a>.</span>;
-        }
-        CreateProjectActions.showWarning(textToDisplay)
-
-
+    createKeyByTMX: function (extension, filename) {
+        CreateProjectActions.createKeyFromTMXFile({extension, filename})
     },
 
     checkFailedConversionsNumber: function () {
@@ -252,7 +228,7 @@ window.UI = {
                 jqXHR.abort();
             }
 
-            disableAnalyze();
+            CreateProjectActions.enableAnalyzeButton(false)
             $( '#fileupload table.upload-table tr' ).addClass( 'current' );
 
         } ).bind( 'fileuploadsend', function ( e, data ) {
@@ -316,11 +292,11 @@ window.UI = {
             if ( $( '.upload-table tr:not(.failed)' ).length ) {
 
                 if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
-                    enableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(true)
                 }
 
             } else {
-                disableAnalyze();
+                CreateProjectActions.enableAnalyzeButton(false)
             }
 
         } ).on( 'click', '.template-upload .cancel button, .template-download .delete button', function ( e, data ) {
@@ -343,11 +319,11 @@ window.UI = {
             if ( $( '.upload-table tr:not(.failed)' ).length ) {
 
                 if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
-                    enableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(true)
                 }
 
             } else {
-                disableAnalyze();
+                CreateProjectActions.enableAnalyzeButton(false)
             }
 
         } ).bind( 'fileuploadcompleted', function ( e, data ) {
@@ -394,14 +370,14 @@ window.UI = {
 
             if ( !fileSpecs.enforceConversion ) {
                 if ( checkAnalyzability( 'file upload completed' ) ) {
-                    enableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(true)
                 }
             }
 
             if ( $( 'body' ).hasClass( 'started' ) ) {
                 setFileReadiness();
                 if ( checkAnalyzability( 'primo caricamento' ) ) {
-                    enableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(true)
                 }
             }
             $( 'body' ).removeClass( 'started' );
@@ -422,7 +398,7 @@ window.UI = {
                     }
 
                 } else {
-                    enableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(true)
                 }
 
                 /**
@@ -430,11 +406,11 @@ window.UI = {
                  */
                 var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
                 if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
-                    UI.createKeyByTMX(extension);
+                    UI.createKeyByTMX(extension, data.files[0].name);
                 }
 
             } else if ( fileSpecs.error ) {
-                disableAnalyze();
+                CreateProjectActions.enableAnalyzeButton(false)
                 $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
                 $( '#add-files' ).addClass( 'disabled' );
                 $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -534,13 +510,13 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
     if ( enforceConversion === false ) {
         filerow.addClass( 'ready' );
         if ( checkAnalyzability( 'convert file' ) ) {
-            enableAnalyze();
+            CreateProjectActions.enableAnalyzeButton(true)
         }
 
         return;
     }
     else {
-        disableAnalyze();
+        CreateProjectActions.enableAnalyzeButton(false)
     }
 
     var ses = new Date();
@@ -566,7 +542,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
             $( '.ui-progressbar-value', filerow ).addClass( 'completed' ).css( 'width', '100%' );
 
             if ( checkAnalyzability( 'convertfile on success' ) ) {
-                enableAnalyze();
+                CreateProjectActions.enableAnalyzeButton(true)
             }
             $( '.operation', filerow ).fadeOut( 'slow', function () {
                 // Animation complete.
@@ -659,7 +635,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                 if ( errors.length > 0 ) {
                     UI.checkFailedConversionsNumber();
-                    disableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(false)
                     return false;
                 }
                 //END editing by Roberto Tucci <roberto@translated.net>
@@ -676,7 +652,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     }
                 } );
                 if ( notTranslationFileCount == $( ".name" ).length ) {
-                    disableAnalyze();
+                    CreateProjectActions.enableAnalyzeButton(false)
                 }
             }
 
@@ -694,7 +670,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
             //filters ocr warning
             if ( data.code == -20 ){
-                enableAnalyze();
+                CreateProjectActions.enableAnalyzeButton(true)
             }
 
         }
@@ -789,33 +765,6 @@ var checkAnalyzability = function ( who ) {
         return false;
     }
     ;
-}
-
-var isValidFileExtension = function ( filename ) {
-
-    console.log( 'filename: ' + filename );
-    var ext = filename.split( '.' )[filename.split( '.' ).length - 1];
-    var res = (!filename.match( config.allowedFileTypes )) ? false : true;
-
-    console.log( res );
-    return res;
-}
-
-var isTMXAllowed = function () {
-    var filename = "test.tmx";
-    var res = (!filename.match( config.allowedFileTypes )) ? false : true;
-
-    console.log( "function isTMXAllowed return value: " + res );
-    return res;
-}
-
-var enableAnalyze = function () {
-    $( '.uploadbtn' ).removeAttr( 'disabled' ).removeClass( 'disabled' );
-    if(document.activeElement.nodeName.toLowerCase() !== 'input') $( '.uploadbtn' ).focus();
-}
-
-var disableAnalyze = function () {
-    $( '.uploadbtn' ).attr( 'disabled', 'disabled' ).addClass( 'disabled' );
 }
 
 var setFileReadiness = function () {

@@ -69,10 +69,9 @@ const TAGS_UTILS = {
 
   transformPlaceholdersAndTagsNew: function (text) {
     text = this.decodePlaceholdersToTextSimple(text || '')
-    if (!(config.tagLockCustomizable && !UI.tagLockEnabled)) {
-      // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
-      text = this.matchTag(this.decodeHtmlInTag(text))
-    }
+    // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
+    text = this.matchTag(this.decodeHtmlInTag(text))
+
     return text
   },
 
@@ -388,11 +387,7 @@ const TAGS_UTILS = {
 
     //add tags into the target segment
     for (let i = 0; i < missingTags.length; i++) {
-      if (!(config.tagLockCustomizable && !UI.tagLockEnabled)) {
-        newhtml = newhtml + missingTags[i]
-      } else {
-        newhtml = newhtml + missingTags[i]
-      }
+      newhtml = newhtml + missingTags[i]
     }
     return newhtml
   },

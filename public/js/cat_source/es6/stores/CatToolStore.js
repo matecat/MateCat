@@ -218,6 +218,11 @@ AppDispatcher.register(function (action) {
         wasAlreadyVerified: action.wasAlreadyVerified,
       })
       break
+    case CatToolConstants.OPEN_SETTINGS_PANEL:
+      CatToolStore.emitChange(CatToolConstants.OPEN_SETTINGS_PANEL, {
+        ...action,
+      })
+      break
   }
 })
 

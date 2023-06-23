@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState, useCallback} from 'react'
+import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import TeamsStore from '../stores/TeamsStore'
@@ -21,6 +22,15 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  MMT_NAME,
+  SettingsPanel,
+} from '../components/settingsPanel'
+import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
+import SegmentUtils from '../utils/segmentUtils'
+import {tmCreateRandUser} from '../api/tmCreateRandUser'
+import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
 
 const SELECT_HEIGHT = 324
 
@@ -28,6 +38,10 @@ const historySourceTargets = {
   // source: 'es-ES',
   // targets: 'it-IT,es-ES,es-MX||',
 }
+
+const urlParams = new URLSearchParams(window.location.search)
+const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
+const tmKeyFromQueryString = urlParams.get('private_tm_key')
 
 const NewProject = ({
   isLoggedIn = false,
@@ -42,7 +56,9 @@ const NewProject = ({
   const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [tmKeySelected, setTmKeySelected] = useState([])
+  const [keysOrdered, setKeysOrdered] = useState()
+  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState(
     sourceLanguageSelected
@@ -62,6 +78,31 @@ const NewProject = ({
   const [warnings, setWarnings] = useState()
   const [isOpenMultiselectLanguages, setIsOpenMultiselectLanguages] =
     useState(false)
+  const [openSettings, setOpenSettings] = useState({
+    isOpen: initialStateIsOpenSettings,
+  })
+  const [speechToTextActive, setSpeechToTextActive] = useState(
+    config.defaults.speech2text,
+  )
+  const [guessTagActive, setGuessTagActive] = useState(
+    !!config.defaults.tag_projection,
+  )
+  const [lexiqaActive, setLexiqaActive] = useState(!!config.defaults.lexiqa)
+  const [multiMatchLangs, setMultiMatchLangs] = useState(
+    SegmentUtils.checkCrossLanguageSettings(),
+  )
+  const [segmentationRule, setSegmentationRule] = useState({
+    name: 'General',
+    id: '',
+  })
+  const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
+  const [getPublicMatches, setGetPublicMatches] = useState(
+    Boolean(config.get_public_matches),
+  )
+  const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
+  const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
+
+  const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -81,45 +122,93 @@ const NewProject = ({
     }
   }
 
-  const openTmPanel = () => {
-    APP.openOptionsPanel('tm')
-  }
+  const openTmPanel = () => setOpenSettings({isOpen: true})
 
   const changeSourceLanguage = (option) => {
     setSourceLang(option)
     APP.sourceLangChangedCallback()
-    APP.checkForTagProjectionLangs(sourceLang)
   }
 
   const getTmKeys = () => {
+    // Create key from query string
+    const keyFromQueryString = {
+      r: true,
+      w: true,
+      owner: true,
+      name: 'No Description',
+      key: tmKeyFromQueryString,
+      is_shared: false,
+      id: tmKeyFromQueryString,
+      isActive: true,
+    }
+
     if (config.isLoggedIn) {
-      getTmKeysUser().then(({tm_keys}) =>
-        setTmKeys(
-          tm_keys.map((key) => {
-            return {...key, id: key.key}
-          }),
-        ),
-      )
+      getTmKeysUser().then(({tm_keys}) => {
+        const isMatchingKeyFromQuery = tm_keys.some(
+          ({key}) => tmKeyFromQueryString === key,
+        )
+
+        setTmKeys([
+          ...tm_keys.map((key) => ({
+            ...key,
+            id: key.key,
+            ...(isMatchingKeyFromQuery &&
+              key.key === tmKeyFromQueryString && {
+                isActive: true,
+                r: true,
+                w: true,
+              }),
+          })),
+          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+            ? [keyFromQueryString]
+            : []),
+        ])
+      })
+    } else {
+      if (tmKeyFromQueryString) setTmKeys([keyFromQueryString])
+    }
+  }
+
+  const getMTEngines = () => {
+    if (config.isLoggedIn) {
+      getMtEnginesApi().then((mtEngines) => {
+        mtEngines.push(DEFAULT_ENGINE_MEMORY)
+        setMtEngines(mtEngines)
+        if (config.isAnInternalUser) {
+          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          if (mmt) {
+            setActiveMTEngine(mmt)
+          }
+        }
+      })
     }
   }
 
   const createProject = () => {
+    const getParams = () => ({
+      action: 'createProject',
+      file_name: APP.getFilenameFromUploadedFiles(),
+      project_name: projectNameRef.current.value,
+      source_lang: sourceLang.id,
+      target_lang: targetLangs.map((lang) => lang.id).join(),
+      job_subject: subject.id,
+      mt_engine: activeMTEngine.id,
+      private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+      lang_detect_files: '',
+      pretranslate_100: isPretranslate100Active ? 1 : 0,
+      lexiqa: lexiqaActive,
+      speech2text: speechToTextActive,
+      tag_projection: guessTagActive,
+      segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
+      id_team: selectedTeam ? selectedTeam.id : undefined,
+      get_public_matches: getPublicMatches,
+    })
+
     if (!projectSent) {
-      if (!UI.allTMUploadsCompleted()) {
-        return false
-      }
       setErrors()
       setWarnings()
       setProjectSent(true)
-      createProjectApi(
-        APP.getCreateProjectParams({
-          projectName: projectNameRef.current.value,
-          sourceLang: sourceLang.id,
-          targetLang: targetLangs.map((lang) => lang.id).join(),
-          jobSubject: subject.id,
-          selectedTeam: selectedTeam ? selectedTeam.id : undefined,
-        }),
-      )
+      createProjectApi(getParams())
         .then(({data}) => {
           APP.handleCreationStatus(data.id_project, data.password)
         })
@@ -159,21 +248,28 @@ const NewProject = ({
 
   useEffect(() => {
     if (sourceLang) {
-      APP.changeSourceLang(sourceLang.id)
+      const lang = sourceLang.id
+      if (localStorage.getItem('currentSourceLang') != lang) {
+        localStorage.setItem('currentSourceLang', lang)
+      }
     }
     if (targetLangs) {
-      APP.changeTargetLang(targetLangs.map((lang) => lang.id).join())
+      const lang = targetLangs.map((lang) => lang.id).join()
+      if (localStorage.getItem('currentTargetLang') != lang) {
+        localStorage.setItem('currentTargetLang', lang)
+      }
     }
-    APP.checkForLexiQALangs(sourceLang)
-    APP.checkForTagProjectionLangs(sourceLang)
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
   }, [sourceLang, targetLangs])
 
   useEffect(() => {
-    APP.checkForSpeechToText()
-    APP.checkForDqf()
     APP.checkGDriveEvents()
     UI.addEvents()
-
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
     const updateUser = (user) => {
       setUser(user)
       setSelectedTeam(
@@ -190,12 +286,10 @@ const NewProject = ({
       setErrors(message)
       setProjectSent(false)
     }
-
-    const showWarning = (message) => {
-      setWarnings(message)
-    }
+    const enableAnalizeButton = (value) => setIsFormReadyToSubmit(value)
 
     getTmKeys()
+    getMTEngines()
     TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
@@ -203,8 +297,8 @@ const NewProject = ({
     )
     CreateProjectStore.addListener(NewProjectConstants.SHOW_ERROR, showError)
     CreateProjectStore.addListener(
-      NewProjectConstants.SHOW_WARNING,
-      showWarning,
+      NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+      enableAnalizeButton,
     )
 
     // check query string project name
@@ -224,39 +318,68 @@ const NewProject = ({
         showError,
       )
       CreateProjectStore.removeListener(
-        NewProjectConstants.SHOW_WARNING,
-        showWarning,
+        NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+        enableAnalizeButton,
       )
     }
   }, [])
   useEffect(() => {
-    const activateKey = (event, desc, key) => {
-      const prevTmKeys = tmKeys ?? []
-      let tmSelected = prevTmKeys.find((item) => item.id === key)
-      if (!tmSelected) {
-        tmSelected = {id: key, name: desc, key}
-        setTmKeys(prevTmKeys.concat(tmSelected))
+    const createKeyFromTMXFile = ({extension, filename}) => {
+      if (tmKeys.every(({isActive}) => !isActive)) {
+        tmCreateRandUser().then((response) => {
+          const {key} = response.data
+          setTmKeys((prevState) => [
+            ...(prevState ?? []),
+            {
+              r: true,
+              w: true,
+              tm: true,
+              glos: true,
+              owner: true,
+              name: filename,
+              key,
+              is_shared: false,
+              id: key,
+              isActive: true,
+            },
+          ])
+        })
       }
-      if (!tmKeySelected.find((item) => item.id === key)) {
-        setTmKeySelected(tmKeySelected.concat([tmSelected]))
-      }
-    }
-    const deactivateKey = (event, key) => {
-      setTmKeySelected(tmKeySelected.filter((item) => item.id !== key))
-    }
-    const removeKey = () => {
-      getTmKeys()
-    }
 
-    $('#activetm').on('update', activateKey)
-    $('#activetm').on('removeTm', deactivateKey)
-    $('#activetm').on('deleteTm', removeKey)
-    return () => {
-      $('#activetm').off('update')
-      $('#activetm').off('removeTm')
-      $('#activetm').off('deleteTm')
+      const message =
+        extension === 'g' ? (
+          <span>
+            A new resource has been generated for the glossary you uploaded. You
+            can manage your resources in the{' '}
+            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+              Settings panel
+            </a>
+            .
+          </span>
+        ) : (
+          <span>
+            A new resource has been generated for the TMX you uploaded. You can
+            manage your resources in the{' '}
+            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+              {' '}
+              Settings panel
+            </a>
+            .
+          </span>
+        )
+      setWarnings(message)
     }
-  }, [tmKeys, tmKeySelected])
+    CreateProjectStore.addListener(
+      NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
+      createKeyFromTMXFile,
+    )
+    return () => {
+      CreateProjectStore.removeListener(
+        NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
+        createKeyFromTMXFile,
+      )
+    }
+  }, [tmKeys])
 
   useEffect(
     () =>
@@ -272,15 +395,19 @@ const NewProject = ({
     <CreateProjectContext.Provider
       value={{
         SELECT_HEIGHT,
+        tmKeys,
+        setTmKeys,
         languages,
         targetLangs,
         setTargetLangs,
         setIsOpenMultiselectLanguages,
-        tmKeys,
-        tmKeySelected,
-        setTmKeySelected,
         sourceLang,
         changeSourceLanguage,
+        setOpenSettings,
+        isImportTMXInProgress,
+        setIsImportTMXInProgress,
+        isPretranslate100Active,
+        setIsPretranslate100Active,
       }}
     >
       <HeaderPortal>
@@ -438,9 +565,12 @@ const NewProject = ({
         <div className="uploadbtn-box">
           {!projectSent ? (
             <input
+              disabled={!isFormReadyToSubmit || isImportTMXInProgress}
               name=""
               type="button"
-              className="uploadbtn disabled"
+              className={`uploadbtn${
+                !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
+              }`}
               value="Analyze"
               onClick={createProject}
             />
@@ -474,9 +604,45 @@ const NewProject = ({
           }}
         />
       )}
+      <SettingsPanel
+        {...{
+          onClose: closeSettings,
+          isOpened: openSettings.isOpen,
+          tabOpen: openSettings.tab,
+          tmKeys,
+          setTmKeys,
+          mtEngines,
+          setMtEngines,
+          activeMTEngine,
+          setActiveMTEngine,
+          speechToTextActive,
+          setSpeechToTextActive,
+          guessTagActive,
+          setGuessTagActive,
+          sourceLang,
+          targetLangs,
+          lexiqaActive,
+          setLexiqaActive,
+          multiMatchLangs,
+          setMultiMatchLangs,
+          segmentationRule,
+          setSegmentationRule,
+          setGetPublicMatches,
+          setKeysOrdered,
+        }}
+      />
       <Footer />
     </CreateProjectContext.Provider>
   )
 }
-
+NewProject.propTypes = {
+  isLoggedIn: PropTypes.bool,
+  languages: PropTypes.array,
+  sourceLanguageSelected: PropTypes.string,
+  targetLanguagesSelected: PropTypes.string,
+  subjectsArray: PropTypes.array,
+  conversionEnabled: PropTypes.bool,
+  formatsNumber: PropTypes.number,
+  googleDriveEnabled: PropTypes.bool,
+}
 export default NewProject

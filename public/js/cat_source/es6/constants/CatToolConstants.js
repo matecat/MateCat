@@ -22,4 +22,5 @@ module.exports = keyMirror({
   UPDATE_DOMAINS: null,
   ON_TM_KEYS_CHANGE_STATUS: null,
   HAVE_KEYS_GLOSSARY: null,
+  OPEN_SETTINGS_PANEL: null,
 })

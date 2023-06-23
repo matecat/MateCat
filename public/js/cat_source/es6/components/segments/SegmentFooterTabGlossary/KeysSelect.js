@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import SegmentUtils from '../../../utils/segmentUtils'
+import CatToolActions from '../../../actions/CatToolActions'
 
 export const KeysSelect = ({className = '', onToggleOption = () => false}) => {
   const {keys, selectsActive, setSelectsActive, modifyElement} =
@@ -48,7 +49,7 @@ export const KeysSelect = ({className = '', onToggleOption = () => false}) => {
             <button
               className="button-create-glossary-key"
               onClick={() => {
-                UI.openLanguageResourcesPanel('tm')
+                CatToolActions.openSettingsPanel()
                 onToggleOption()
               }}
             >

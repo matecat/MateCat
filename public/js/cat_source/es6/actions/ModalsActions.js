@@ -1,5 +1,4 @@
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
-import DQFModal from '../components/modals/DQFModal'
 import SplitJobModal from '../components/modals/SplitJob'
 import CreateTeamModal from '../components/modals/CreateTeam'
 import ModifyTeamModal from '../components/modals/ModifyTeam'
@@ -65,13 +64,6 @@ let ModalsActions = {
     this.showModalComponent(ConfirmMessageModal, props, 'Confirmation required')
   },
 
-  openDQFModal: function () {
-    var props = {
-      metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
-    }
-    var style = {width: '670px', maxWidth: '670px'}
-    this.showModalComponent(DQFModal, props, 'DQF Preferences', style)
-  },
   showDownloadWarningsModal: function (successCallback, cancelCallback) {
     ModalsActions.showModalComponent(
       ConfirmMessageModal,
