@@ -90,9 +90,9 @@ export const SettingsPanel = ({
     setIsVisible(typeof isOpened !== 'undefined' ? isOpened : true)
 
     const keyboardHandler = (e) => e.key === 'Escape' && setIsVisible(false)
-    document.addEventListener('keyup', keyboardHandler)
+    document.addEventListener('keydown', keyboardHandler)
 
-    return () => document.removeEventListener('keyup', keyboardHandler)
+    return () => document.removeEventListener('keydown', keyboardHandler)
   }, [isOpened])
 
   useEffect(() => {
