@@ -98,8 +98,8 @@ function CatTool() {
             setActiveMTEngine(mmt)
           }
         }
-        if (config.mt_id) {
-          const activeMT = mtEngines.find((mt) => mt.id === config.mt_id)
+        if (config.active_engine && config.active_engine.id) {
+          const activeMT = config.active_engine
           activeMT && setActiveMTEngine(activeMT)
         }
       })
