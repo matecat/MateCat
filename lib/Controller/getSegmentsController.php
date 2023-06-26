@@ -162,23 +162,29 @@ class getSegmentsController extends ajaxController {
         $segment[ 'notes' ] = @$this->segment_notes[ (int)$segment[ 'sid' ] ];
     }
 
+    /**
+     * @param $segments
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
     private function prepareNotes( $segments ) {
         if ( !empty( $segments[ 0 ] ) ) {
             $start = $segments[ 0 ][ 'sid' ];
             $last  = end( $segments );
             $stop  = $last[ 'sid' ];
             if ( $this->featureSet->filter( 'prepareAllNotes', false ) ) {
-                $this->segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval( $start, $stop );
+                $this->segment_notes = $this->featureSet->filter( 'prepareNotesForRendering', Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval( $start, $stop ) );
                 foreach ( $this->segment_notes as $k => $noteObj ) {
                     $this->segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
                 }
                 $this->segment_notes = $this->featureSet->filter( 'processExtractedJsonNotes', $this->segment_notes );
             } else {
-                $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
+                $this->segment_notes = $this->featureSet->filter( 'prepareNotesForRendering', Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop ) );
             }
-
         }
-
     }
 
     private function getContextGroups( $segments ) {
