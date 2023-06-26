@@ -61,7 +61,7 @@ export const MenuButton = ({
             style={{
               left: itemsCoords.left,
               top: itemsCoords.top,
-              minWidth: ref.current.firstChild.offsetWidth,
+              minWidth: ref.current.firstChild.offsetWidth + 20,
             }}
           >
             {children.map((item) => item)}

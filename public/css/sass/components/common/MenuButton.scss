@@ -52,9 +52,21 @@
     0 2px 4px rgba(0, 0, 0, 0.24);
   padding: 8px;
   background-color: $white;
+  margin-top: 10px;
 
   > :not(:last-child) {
     border-bottom: solid 1px $grey4;
+  }
+
+  &::before {
+    content: '';
+    border-left: 8px solid transparent;
+    border-right: 0px solid transparent;
+    border-bottom: 8px solid #ffffff;
+    bottom: 100%;
+    left: auto;
+    right: 0;
+    position: absolute;
   }
 }
 
