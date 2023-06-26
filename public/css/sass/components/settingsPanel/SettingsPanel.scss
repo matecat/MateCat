@@ -98,6 +98,9 @@
 .settings-panel-contentwrapper-container {
   font-size: 14px;
   padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+
   h2 {
     text-align: left;
     padding: 15px 10px;
