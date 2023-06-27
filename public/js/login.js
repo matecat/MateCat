@@ -39,7 +39,6 @@ $.extend(APP, {
       var props = {
         user: APP.USER.STORE.user,
         metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
-        closeOnOutsideClick: false,
       }
       if (
         APP.USER.STORE.connected_services &&
