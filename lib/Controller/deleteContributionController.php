@@ -135,6 +135,9 @@ class deleteContributionController extends ajaxController {
             $set_successful = false;
         }
 
+        // @TODO update suggestions_array
+        // update suggestions_array by $this->id_match
+
         $this->result[ 'data' ] = ( $set_successful ? "OK" : null );
         $this->result[ 'code' ] = $set_successful;
 
