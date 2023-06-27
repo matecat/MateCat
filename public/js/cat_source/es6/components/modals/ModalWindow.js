@@ -112,6 +112,9 @@ export class ModalWindow extends React.Component {
                 title,
                 styleContainer,
                 onClose: this.onCloseModal,
+                closeOnOutsideClick: compProps.closeOnOutsideClick
+                  ? compProps.closeOnOutsideClick
+                  : true,
               },
               <InjectedComponent {...compProps} />,
             )}
