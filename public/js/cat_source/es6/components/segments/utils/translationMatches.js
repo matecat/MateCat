@@ -202,11 +202,12 @@ let TranslationMatches = {
     SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
-  setDeleteSuggestion: function (source, target, id) {
+  setDeleteSuggestion: function (source, target, id, sid) {
     return deleteContribution({
       source,
       target,
       id,
+      sid,
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'deleteContribution')
     })

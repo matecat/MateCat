@@ -25,6 +25,7 @@ export const deleteContribution = async ({
   password = config.password,
   currentPassword = config.currentPassword,
   idTranslator = config.id_translator,
+  sid,
 }) => {
   const dataParams = {
     action: 'deleteContribution',
@@ -37,6 +38,7 @@ export const deleteContribution = async ({
     id_translator: idTranslator,
     id_match: id,
     current_password: currentPassword,
+    id_segment: sid,
   }
   const formData = new FormData()
 
