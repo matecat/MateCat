@@ -376,6 +376,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 'status',
                 'translation',
                 'serialized_errors_list',
+                'suggestion',
                 'suggestion_position',
                 'warning',
                 'translation_date',
@@ -414,6 +415,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 VALUES (" . implode( ", ", $bind_keys ) . ")
 				ON DUPLICATE KEY UPDATE
 				status = :status,
+				suggestion = :suggestion,
                 suggestion_position = :suggestion_position,
                 serialized_errors_list = :serialized_errors_list,
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
@@ -962,5 +964,24 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $conn->commit();
 
         return $affected_rows;
+    }
+
+    /**
+     * @param $id_segment
+     * @param $suggestions
+     */
+    public static function updateSuggestionsArray($id_segment, $suggestions) {
+
+        $conn  = Database::obtain()->getConnection();
+        $query = "UPDATE segment_translations SET suggestions_array = :suggestions_array WHERE id_segment=:id_segment";
+        $stmt  = $conn->prepare( $query );
+        $suggestions_array = (!empty($suggestions)) ? json_encode($suggestions) : null;
+
+        $params = [
+            'id_segment'        => $id_segment,
+            'suggestions_array' => $suggestions_array,
+        ];
+
+        $stmt->execute( $params );
     }
 }

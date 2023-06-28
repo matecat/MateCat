@@ -23,6 +23,7 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
+use Translations_SegmentTranslationDao;
 use Utils;
 
 class GetContributionWorker extends AbstractWorker {
@@ -75,6 +76,7 @@ class GetContributionWorker extends AbstractWorker {
 
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
         $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $jobStruct->target );
+        $this->_updateSuggestionArray($contributionStruct->segmentId, $matches);
 
         $this->_publishPayload( $matches, $contributionStruct );
 
@@ -103,9 +105,24 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             if(false === $contributionStruct->concordanceSearch){
+
+                if(!empty($crossLangMatches)){
+                    $this->_updateSuggestionArray($contributionStruct->segmentId, $crossLangMatches);
+                }
+
                 $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
             }
         }
+    }
+
+    /**
+     * Suggestion array must be updated every time we receive the matches
+     *
+     * @param $id_segment
+     * @param $matches
+     */
+    protected function _updateSuggestionArray($id_segment, $matches) {
+        Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $matches );
     }
 
     /**

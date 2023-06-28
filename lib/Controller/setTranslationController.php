@@ -373,6 +373,9 @@ class setTranslationController extends ajaxController {
 
         $old_translation = $this->_getOldTranslation();
 
+        $old_suggestion_array = json_decode($old_translation->suggestions_array);
+        $old_suggestion = @$old_suggestion_array[$this->chosen_suggestion_index-1];
+
         $new_translation                         = new Translations_SegmentTranslationStruct();
         $new_translation->id_segment             = $this->id_segment;
         $new_translation->id_job                 = $this->id_job;
@@ -383,6 +386,7 @@ class setTranslationController extends ajaxController {
         $new_translation->suggestion_position    = $this->chosen_suggestion_index;
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : null);
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
