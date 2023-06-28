@@ -122,7 +122,7 @@ class GetContributionWorker extends AbstractWorker {
      * @param $matches
      */
     protected function _updateSuggestionArray($id_segment, $matches) {
-        Translations_SegmentTranslationDao::updateSuggestionArray( $id_segment, $matches );
+        Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $matches );
     }
 
     /**
