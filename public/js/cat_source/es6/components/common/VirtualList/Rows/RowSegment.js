@@ -71,11 +71,14 @@ function RowSegment({
       const file = files
         ? files.find((file) => file.id == idFileSegment)
         : false
-      let fileType = file.file_name ? file.file_name.split('.').slice(-1) : ''
-      //check metadata for jsont2 files
-      fileType = file.metadata?.['data-type']
-        ? file.metadata?.['data-type']
-        : fileType
+      let fileType = ''
+      if (file) {
+        fileType = file.file_name ? file.file_name.split('.').slice(-1) : ''
+        //check metadata for jsont2 files
+        fileType = file.metadata?.['data-type']
+          ? file.metadata?.['data-type']
+          : fileType
+      }
       let classes = sideOpen ? 'slide-right' : ''
       const isFirstSegment =
         files?.length &&
