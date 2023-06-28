@@ -14,6 +14,9 @@ class ProjectAnalyze extends React.Component {
       if (
         idArray.indexOf(job.get('id')) < 0 &&
         !_.isUndefined(this.props.jobsInfo[job.get('id').toString()]) &&
+        !_.isUndefined(
+          this.props.volumeAnalysis.get(job.get('id').toString()),
+        ) &&
         this.props.volumeAnalysis
       ) {
         let jobVolumeAnalysisChunk = this.props.volumeAnalysis
