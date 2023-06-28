@@ -6,7 +6,7 @@ import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
 
-const AnalyzeMain = ({volumeAnalysis, project}) => {
+const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   const [showAnalysis, setShowAnalysis] = useState(false)
   const [intervalId, setIntervalId] = useState()
   const [scrollTop, setScrollTop] = useState()
@@ -19,7 +19,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     height: '100%',
     width: '100%',
     backgroundColor: 'rgba(76, 69, 69, 0.3)',
-    top: $('#analyze-container').scrollTop(),
+    top: $(parentRef.current).scrollTop(),
     left: 0,
     zIndex: 3,
   }
@@ -50,16 +50,12 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
   }
 
   const handleScroll = () => {
-    setScrollTop($('#analyze-container').scrollTop())
+    setScrollTop($(parentRef.current).scrollTop())
   }
   useEffect(() => {
-    document
-      .getElementById('analyze-container')
-      .addEventListener('scroll', _.debounce(handleScroll, 200))
+    parentRef.current.addEventListener('scroll', _.debounce(handleScroll, 200))
     return () => {
-      document
-        .getElementById('analyze-container')
-        .removeEventListener('scroll', handleScroll)
+      parentRef.current.removeEventListener('scroll', handleScroll)
     }
   })
 
