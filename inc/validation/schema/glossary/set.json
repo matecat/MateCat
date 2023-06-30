@@ -67,7 +67,7 @@
           "additionalProperties": false,
           "properties": {
             "definition": {
-              "type": "string"
+              "type": ["null","string"]
             },
             "keys": {
               "type": "array",
