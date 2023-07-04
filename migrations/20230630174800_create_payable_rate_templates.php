@@ -4,7 +4,7 @@ class CreatePayableRateTemplatesTable extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         CREATE TABLE `payable_rate_templates` (
-          `id` INT UNSIGNED NOT NULL,
+          `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
           `uid` BIGINT(20) UNSIGNED NOT NULL,
           `version` INT(11) UNSIGNED NOT NULL DEFAULT 1,
           `name` VARCHAR(255) NOT NULL,

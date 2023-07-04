@@ -4,6 +4,9 @@
     "payable_rate_template_name": {
       "type": "string"
     },
+    "version": {
+      "type": "integer"
+    },
     "breakdowns": {
       "type": "object",
       "$ref": "#/definitions/breakdowns"
