@@ -8,6 +8,8 @@ use LQA\ModelDao;
 use LQA\ModelStruct;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use PayableRates\CustomPayableRateDao;
+use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
@@ -79,6 +81,11 @@ class NewController extends ajaxController {
      * @var QAModelTemplateStruct
      */
     protected $qaModelTemplate;
+
+    /**
+     * @var CustomPayableRateStruct
+     */
+    protected $payableRateModelTemplate;
 
     /**
      * @var ProjectManager
@@ -155,15 +162,17 @@ class NewController extends ajaxController {
                 'pretranslate_100'   => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
-                'id_team'              => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_qa_model'          => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_qa_model_template' => [ 'filter' => FILTER_VALIDATE_INT ],
-                'lexiqa'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'speech2text'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'tag_projection'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'project_completion'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'get_public_matches'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'instructions'         => [
+                'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_name' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'lexiqa'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'                => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'instructions'               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
@@ -211,6 +220,7 @@ class NewController extends ajaxController {
             $this->__validateTmAndKeys();
             $this->__validateTeam();
             $this->__validateQaModelTemplate();
+            $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
@@ -629,6 +639,10 @@ class NewController extends ajaxController {
             $projectStructure[ 'qa_model' ] = $this->qaModel->getDecodedModel();
         }
 
+        if( $this->payableRateModelTemplate ) {
+            $projectStructure[ 'payable_rate_model_id' ] = $this->payableRateModelTemplate->id;
+        }
+
         //set features override
         $projectStructure[ 'project_features' ] = $this->projectFeatures;
 
@@ -1042,6 +1056,9 @@ class NewController extends ajaxController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function __validateQaModelTemplate()
     {
         if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
@@ -1057,6 +1074,29 @@ class NewController extends ajaxController {
 
             $this->qaModelTemplate = $qaModelTemplate;
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validatePayableRateTemplate()
+    {
+        $payableRateModelTemplate = null;
+
+        if ( !empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
+            $payableRateModelTemplate = CustomPayableRateDao::getById($this->postInput[ 'payable_rate_template_id' ]);
+        }
+
+        if ( !empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
+            $payableRateModelTemplate = CustomPayableRateDao::getByUidAndName($this->getUser()->uid, $this->postInput[ 'payable_rate_template_name' ]);
+        }
+
+        // check if qa_model template exists
+        if(null === $payableRateModelTemplate){
+            throw new \Exception('This Payable Rate Model template does not exists or does not belongs to the logged in user');
+        }
+
+        $this->payableRateModelTemplate = $payableRateModelTemplate;
     }
 
     /**

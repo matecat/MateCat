@@ -28,6 +28,13 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         return self::$instance;
     }
 
+    /**
+     * @param $uid
+     * @param int $current
+     * @param int $pagination
+     *
+     * @return array
+     */
     public static function getAllPaginated($uid, $current = 1, $pagination = 20)
     {
         $conn = \Database::obtain()->getConnection();
