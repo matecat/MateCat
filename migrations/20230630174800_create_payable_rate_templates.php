@@ -1,6 +1,6 @@
 <?php
 
-class CreatePayableRateTemplatesTable extends AbstractMatecatMigration {
+class CreatePayableRateTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         CREATE TABLE `payable_rate_templates` (
