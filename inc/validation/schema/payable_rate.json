@@ -24,37 +24,59 @@
           "type": "object",
           "properties": {
             "NO_MATCH": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "50%-74%": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "75%-84%": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "85%-94%": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "95%-99%": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "100%": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "100%_PUBLIC": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "REPETITIONS": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "INTERNAL": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "MT": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             },
             "ICE_MT": {
-              "type": "integer"
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
             }
           },
           "additionalProperties": false,
@@ -80,37 +102,59 @@
               "type": "object",
               "properties": {
                 "NO_MATCH": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "50%-74%": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "75%-84%": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "85%-94%": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "95%-99%": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "100%": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "100%_PUBLIC": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "REPETITIONS": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "INTERNAL": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "MT": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 },
                 "ICE_MT": {
-                  "type": "integer"
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
                 }
               },
               "additionalProperties": false,
