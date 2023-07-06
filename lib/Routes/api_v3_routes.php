@@ -57,6 +57,16 @@ $klein->with( '/api/v3/qa_model_template', function () {
     route( '/[:id]', 'PUT', '\API\V3\QAModelTemplateController', 'edit' );
 } );
 
+$klein->with( '/api/v3/payable_rate', function () {
+    route( '/schema', 'GET', '\API\V3\PayableRateController', 'schema' );
+    route( '/validate', 'POST', '\API\V3\PayableRateController', 'validate' );
+    route( '', 'GET', '\API\V3\PayableRateController', 'index' );
+    route( '', 'POST', '\API\V3\PayableRateController', 'create' );
+    route( '/[:id]', 'GET', '\API\V3\PayableRateController', 'view' );
+    route( '/[:id]', 'DELETE', '\API\V3\PayableRateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\PayableRateController', 'edit' );
+} );
+
 // TM Keys
 $klein->with( '/api/v3/tm-keys', function () {
     route( '/list', 'GET', '\API\V3\TmKeyManagementController', 'getByUser' );

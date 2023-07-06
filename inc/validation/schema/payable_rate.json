@@ -1,0 +1,140 @@
+{
+  "type": "object",
+  "properties": {
+    "payable_rate_template_name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "breakdowns": {
+      "type": "object",
+      "$ref": "#/definitions/breakdowns"
+    }
+  },
+  "required": [
+    "payable_rate_template_name",
+    "breakdowns"
+  ],
+  "definitions": {
+    "breakdowns": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "object",
+          "properties": {
+            "NO_MATCH": {
+              "type": "integer"
+            },
+            "50%-74%": {
+              "type": "integer"
+            },
+            "75%-84%": {
+              "type": "integer"
+            },
+            "85%-94%": {
+              "type": "integer"
+            },
+            "95%-99%": {
+              "type": "integer"
+            },
+            "100%": {
+              "type": "integer"
+            },
+            "100%_PUBLIC": {
+              "type": "integer"
+            },
+            "REPETITIONS": {
+              "type": "integer"
+            },
+            "INTERNAL": {
+              "type": "integer"
+            },
+            "MT": {
+              "type": "integer"
+            },
+            "ICE_MT": {
+              "type": "integer"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "50%-74%",
+            "75%-84%",
+            "85%-94%",
+            "95%-99%",
+            "100%",
+            "100%_PUBLIC",
+            "REPETITIONS",
+            "INTERNAL",
+            "MT",
+            "ICE_MT"
+          ]
+        }
+      },
+      "patternProperties": {
+        "^[a-z]{2}$": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z]{2}$": {
+              "type": "object",
+              "properties": {
+                "NO_MATCH": {
+                  "type": "integer"
+                },
+                "50%-74%": {
+                  "type": "integer"
+                },
+                "75%-84%": {
+                  "type": "integer"
+                },
+                "85%-94%": {
+                  "type": "integer"
+                },
+                "95%-99%": {
+                  "type": "integer"
+                },
+                "100%": {
+                  "type": "integer"
+                },
+                "100%_PUBLIC": {
+                  "type": "integer"
+                },
+                "REPETITIONS": {
+                  "type": "integer"
+                },
+                "INTERNAL": {
+                  "type": "integer"
+                },
+                "MT": {
+                  "type": "integer"
+                },
+                "ICE_MT": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "50%-74%",
+                "75%-84%",
+                "85%-94%",
+                "95%-99%",
+                "100%",
+                "100%_PUBLIC",
+                "REPETITIONS",
+                "INTERNAL",
+                "MT",
+                "ICE_MT"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "default"
+      ]
+    }
+  }
+}
