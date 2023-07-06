@@ -3,7 +3,7 @@
 class CreatePayableRateTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [ '
-        CREATE TABLE `payable_rate_templates` (
+        CREATE TABLE IF NOT EXISTS `payable_rate_templates` (
           `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
           `uid` BIGINT(20) UNSIGNED NOT NULL,
           `version` INT(11) UNSIGNED NOT NULL DEFAULT 1,
