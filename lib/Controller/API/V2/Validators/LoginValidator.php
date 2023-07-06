@@ -33,8 +33,5 @@ class LoginValidator extends Base {
         if( empty( $user ) ){
             throw new AuthenticationError( "Invalid Login.", 401 );
         }
-
     }
-
-
 }
