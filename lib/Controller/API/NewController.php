@@ -1085,16 +1085,22 @@ class NewController extends ajaxController {
 
         if ( !empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
             $payableRateModelTemplate = CustomPayableRateDao::getById($this->postInput[ 'payable_rate_template_id' ]);
+
+            if(null === $payableRateModelTemplate){
+                throw new \Exception('This Payable rate model template id does not exists or does not belongs to the logged in user');
+            }
         }
 
         if ( !empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
             $payableRateModelTemplate = CustomPayableRateDao::getByUidAndName($this->getUser()->uid, $this->postInput[ 'payable_rate_template_name' ]);
+
+            if(null === $payableRateModelTemplate){
+                throw new \Exception('This Payable rate model template name does not exists or does not belongs to the logged in user');
+            }
         }
 
         // check if qa_model template exists
-        if(null === $payableRateModelTemplate){
-            throw new \Exception('This Payable Rate Model template does not exists or does not belongs to the logged in user');
-        }
+
 
         $this->payableRateModelTemplate = $payableRateModelTemplate;
     }
