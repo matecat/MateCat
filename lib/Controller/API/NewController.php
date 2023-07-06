@@ -1099,9 +1099,6 @@ class NewController extends ajaxController {
             }
         }
 
-        // check if qa_model template exists
-
-
         $this->payableRateModelTemplate = $payableRateModelTemplate;
     }
 
