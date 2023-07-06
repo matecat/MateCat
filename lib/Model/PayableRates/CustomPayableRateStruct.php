@@ -4,6 +4,7 @@ namespace PayableRates;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
+use Utils;
 
 class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
 {
@@ -37,6 +38,14 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      */
     public function getPayableRates($source, $target)
     {
+        if(!Utils::isValidLanguage($source, 'isocode')){
+            throw new \DomainException($source . ' is not a supported language');
+        }
+
+        if(!Utils::isValidLanguage($target, 'isocode')){
+            throw new \DomainException($target . ' is not a supported language');
+        }
+
         $breakdowns = $this->getBreakdownsArray();
 
         if ( isset( $breakdowns[ $source ][ $target ] ) ) {
@@ -68,11 +77,38 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
             throw new \Exception("Cannot instantiate a new CustomPayableRateStruct. Invalid JSON provided.");
         }
 
+        $this->validateBreakdowns($json['breakdowns']);
+
         $this->version = $json['version'];
         $this->name = $json['payable_rate_template_name'];
         $this->breakdowns = $json['breakdowns'];
 
         return $this;
+    }
+
+    /**
+     * @param $breakdowns
+     */
+    private function validateBreakdowns($breakdowns)
+    {
+        if(!isset($breakdowns['default'])){
+            throw new \DomainException('`default` node is MANDATORY in the breakdowns array.');
+        }
+
+        unset($breakdowns['default']);
+
+        foreach ($breakdowns as $language => $breakdown){
+
+            if(!Utils::isValidLanguage($language, 'isocode')){
+                throw new \DomainException($language . ' is not a supported language');
+            }
+
+            foreach ($breakdown as $targetLanguage => $rates){
+                if(!Utils::isValidLanguage($targetLanguage, 'isocode')){
+                    throw new \DomainException($targetLanguage . ' is not a supported language');
+                }
+            }
+        }
     }
 
     /**
