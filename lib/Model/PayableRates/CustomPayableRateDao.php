@@ -126,7 +126,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @return CustomPayableRateStruct
+     * @return int
      */
     public static function update( CustomPayableRateStruct $customPayableRateStruct ) {
 
@@ -148,7 +148,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         $stmt = $conn->prepare( self::query_by_uid_name );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $customPayableRateStruct->uid, 'name' => $customPayableRateStruct->name,  ] );
 
-        return self::getInstance()->getByUidAndName( $customPayableRateStruct->uid, $customPayableRateStruct->name );
+        return $customPayableRateStruct->id;
 
     }
 
