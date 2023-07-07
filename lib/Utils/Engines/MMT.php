@@ -348,12 +348,14 @@ class Engines_MMT extends Engines_AbstractEngine {
     public function connectKeys( array $keyList ) {
 
         $keyList = $this->_reMapKeyStructsList( $keyList );
+        $client = $this->_getClient();
 
-        $client       = $this->_getClient();
-        $this->result = $client->connectMemories( $keyList );
+        // Avoid calling MMT if $keyList is empty
+        if(!empty($keyList)){
+            $this->result = $client->connectMemories( $keyList );
+        }
 
         return $this->result;
-
     }
 
     /**
