@@ -1067,7 +1067,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         AND id_segment BETWEEN j.job_first_segment AND j.job_last_segment
                             GROUP BY id_segment
                         ) AS X ON _m_id = segment_translation_events.id
-                    LIMIT ".$limit." OFFSET " .$offset. " 
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE
                 j.id = :id_job
@@ -1159,7 +1158,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         AND id_segment BETWEEN j.job_first_segment AND j.job_last_segment
                             GROUP BY id_segment
                         ) AS X ON _m_id = segment_translation_events.id
-                    LIMIT ".$limit." OFFSET " .$offset. " 
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE
                 p.id = :id_project
