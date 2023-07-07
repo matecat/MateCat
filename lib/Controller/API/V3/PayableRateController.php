@@ -5,6 +5,7 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use PayableRates\CustomPayableRateDao;
+use PayableRates\CustomPayableRateStruct;
 use Validator\Errors\JSONValidatorError;
 
 class PayableRateController extends KleinController
@@ -169,9 +170,16 @@ class PayableRateController extends KleinController
             $validator->validate($validatorObject);
 
             $errors = $validator->getErrors();
+
+            if($validator->isValid()){
+                $customPayableRateStruct = new CustomPayableRateStruct();
+                $customPayableRateStruct->hydrateFromJSON($json);
+            }
+
             $code = ($validator->isValid()) ? 200 : 500;
 
             $this->response->code($code);
+
             return $this->response->json([
                 'errors' => $errors
             ]);
