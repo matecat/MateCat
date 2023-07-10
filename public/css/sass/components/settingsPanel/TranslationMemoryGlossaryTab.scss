@@ -70,6 +70,10 @@
   }
 }
 
+.tm-key-row-key {
+  text-align: center !important;
+}
+
 .tm-key-row-name-disabled {
   border: unset;
   &:focus,

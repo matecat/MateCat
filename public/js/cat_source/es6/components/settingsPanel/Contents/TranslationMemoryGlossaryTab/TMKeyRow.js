@@ -215,7 +215,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           onBlur={updateKeyName}
         ></input>
       </div>
-      <div>{row.key}</div>
+      <div className="tm-key-row-key">{row.key}</div>
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
