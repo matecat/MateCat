@@ -17,9 +17,17 @@ import Users from '../../../../../../../img/icons/Users'
 import AddWide from '../../../../../../../img/icons/AddWide'
 import CatToolActions from '../../../../actions/CatToolActions'
 
-const COLUMNS_TABLE = [
+const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
   {name: 'Update'},
+  {name: ''},
+  {name: ''},
+  {name: ''},
+]
+
+const COLUMNS_TABLE_INACTIVE = [
+  {name: 'Activate'},
+  {name: ''},
   {name: ''},
   {name: ''},
   {name: ''},
@@ -335,7 +343,7 @@ export const TranslationMemoryGlossaryTab = () => {
             </div>
           </div>
           <SettingsPanelTable
-            columns={COLUMNS_TABLE}
+            columns={COLUMNS_TABLE_ACTIVE}
             rows={keyRows.filter(({isActive}) => isActive)}
             onChangeRowsOrder={onOrderActiveRows}
           />
@@ -354,7 +362,7 @@ export const TranslationMemoryGlossaryTab = () => {
           {config.isLoggedIn ? (
             <SettingsPanelTable
               className="translation-memory-glossary-tab-inactive-table"
-              columns={COLUMNS_TABLE}
+              columns={COLUMNS_TABLE_INACTIVE}
               rows={inactiveKeys}
             />
           ) : (

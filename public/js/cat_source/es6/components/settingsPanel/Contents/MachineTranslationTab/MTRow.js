@@ -1,12 +1,8 @@
 import React, {useContext} from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 
-export const MTRow = ({row, deleteMT}) => {
-  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
-
-  const activateMT = () => {
-    setActiveMTEngine(row)
-  }
+export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
+  const {activeMTEngine} = useContext(SettingsPanelContext)
 
   return (
     <>
@@ -41,8 +37,10 @@ export const MTRow = ({row, deleteMT}) => {
         <div className="settings-panel-cell-center">
           <input
             type="checkbox"
-            checked={row.id === activeMTEngine.id ? true : false}
-            onChange={activateMT}
+            checked={
+              activeMTEngine && row.id === activeMTEngine.id ? true : false
+            }
+            onChange={() => onCheckboxClick(row)}
           ></input>
         </div>
       )}
@@ -53,7 +51,7 @@ export const MTRow = ({row, deleteMT}) => {
           </button>
         </div>
       )}
-      {config.is_cattool && row.id === activeMTEngine.id && (
+      {config.is_cattool && activeMTEngine && row.id === activeMTEngine.id && (
         <>
           <div></div>
           <div className="settings-panel-cell-center">Enabled</div>
