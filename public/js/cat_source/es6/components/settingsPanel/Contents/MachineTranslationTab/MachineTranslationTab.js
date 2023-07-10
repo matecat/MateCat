@@ -20,8 +20,13 @@ import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
 
 export const MachineTranslationTab = () => {
-  const {mtEngines, setMtEngines, activeMTEngine, openLoginModal} =
-    useContext(SettingsPanelContext)
+  const {
+    mtEngines,
+    setMtEngines,
+    activeMTEngine,
+    openLoginModal,
+    setActiveMTEngine,
+  } = useContext(SettingsPanelContext)
 
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeAddEngine, setActiveAddEngine] = useState()
@@ -104,10 +109,18 @@ export const MachineTranslationTab = () => {
       })
   }
 
+  const activateMT = (row) => {
+    setActiveMTEngine(row)
+  }
+
+  const disableMT = () => {
+    setActiveMTEngine()
+  }
+
   useEffect(() => {
     setMTRows(
       mtEngines
-        .filter((row) => row.id !== activeMTEngine.id)
+        .filter((row) => !activeMTEngine || row.id !== activeMTEngine.id)
         .map((row, index) => {
           return {
             node: (
@@ -115,6 +128,7 @@ export const MachineTranslationTab = () => {
                 key={index}
                 {...{row}}
                 deleteMT={() => deleteMTConfirm(row)}
+                onCheckboxClick={activateMT}
               />
             ),
             isDraggable: false,
@@ -187,19 +201,24 @@ export const MachineTranslationTab = () => {
         <h2>Active MT</h2>
         <SettingsPanelTable
           columns={COLUMNS_TABLE}
-          rows={[
-            {
-              node: (
-                <MTRow
-                  key={'active'}
-                  row={{...activeMTEngine}}
-                  deleteMT={() => deleteMTConfirm(activeMTEngine)}
-                />
-              ),
-              isDraggable: false,
-              isActive: true,
-            },
-          ]}
+          rows={
+            activeMTEngine
+              ? [
+                  {
+                    node: (
+                      <MTRow
+                        key={'active'}
+                        row={{...activeMTEngine}}
+                        deleteMT={() => deleteMTConfirm(activeMTEngine)}
+                        onCheckboxClick={disableMT}
+                      />
+                    ),
+                    isDraggable: false,
+                    isActive: true,
+                  },
+                ]
+              : []
+          }
         />
       </div>
       {config.isLoggedIn ? (
