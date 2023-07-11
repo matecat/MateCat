@@ -95,9 +95,11 @@ class SegmentTarget extends React.Component {
     var textAreaContainer = ''
     let issues = this.getAllIssues()
     if (this.props.segment.edit_area_locked) {
-      const text = this.props.segment.versions
-        ? this.props.segment.versions[0].translation
-        : translation
+      const text =
+        this.props.segment.versions &&
+        this.props.segment.versions[0].translation
+          ? this.props.segment.versions[0].translation
+          : translation
       let currentTranslationVersion = TagUtils.matchTag(
         TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
       )
