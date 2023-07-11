@@ -28,7 +28,7 @@ const COLUMNS_TABLE_ACTIVE = [
 const COLUMNS_TABLE_INACTIVE = [
   {name: 'Activate'},
   {name: ''},
-  {name: 'Resource name'},
+  {name: 'Name'},
   {name: 'Key'},
   {name: ''},
 ]
