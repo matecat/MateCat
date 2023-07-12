@@ -131,4 +131,28 @@ class FilesPartsDao extends  DataAccess_AbstractDao {
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'fileId' => $fileId ] );
     }
+
+    /**
+     * @param $segmentId
+     * @param int $ttl
+     * @return \DataAccess_IDaoStruct
+     */
+    public function getBySegmentId($segmentId, $ttl = 86400)
+    {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $sql     = "
+            SELECT 
+                fp.id,
+                fp.id_file,
+                fp.tag_key,
+                fp.tag_value 
+            FROM segments s
+                LEFT JOIN files_parts fp ON fp.id = s.id_file_part
+             WHERE s.id = :segmentId; ";
+
+        $stmt = $conn->prepare( $sql );
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'segmentId' => $segmentId ] )[ 0 ];
+    }
 }
