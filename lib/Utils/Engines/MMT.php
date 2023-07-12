@@ -108,7 +108,6 @@ class Engines_MMT extends Engines_AbstractEngine {
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
         try {
-
             $translation = $client->translate(
                     $_config[ 'source' ],
                     $_config[ 'target' ],
@@ -116,7 +115,8 @@ class Engines_MMT extends Engines_AbstractEngine {
                     @$_config[ 'mt_context' ],
                     $_keys, @$_config[ 'job_id' ],
                     static::GET_REQUEST_TIMEOUT,
-                    @$_config[ 'priority' ]
+                    @$_config[ 'priority' ],
+                    $_config[ 'session' ]
             );
 
             return ( new Engines_Results_MyMemory_Matches(
@@ -196,7 +196,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $_keys  = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
         try {
-            $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ] );
+            $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ], $_config['session'] );
         } catch ( MMTServiceApiRequestException $e ) {
             // MMT license expired/changed (401) or account deleted (403) or whatever HTTP exception
             Log::doJsonLog( $e->getMessage() );
@@ -222,12 +222,13 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         try {
             $client->updateMemoryContent(
-                    $_config[ 'tuid' ],
-                    $_keys,
-                    $_config[ 'source' ],
-                    $_config[ 'target' ],
-                    $_config[ 'segment' ],
-                    $_config[ 'translation' ]
+                $_config[ 'tuid' ],
+                $_keys,
+                $_config[ 'source' ],
+                $_config[ 'target' ],
+                $_config[ 'segment' ],
+                $_config[ 'translation' ],
+                $_config[ 'session' ]
             );
         } catch ( Exception $e ) {
             return false;
