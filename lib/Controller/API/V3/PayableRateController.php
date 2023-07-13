@@ -76,6 +76,10 @@ class PayableRateController extends KleinController
             ]);
         }
 
+        if($this->getUser()->uid !== $model->uid){
+            $this->response->code(401);
+        }
+
         try {
             CustomPayableRateDao::remove($id);
 
@@ -102,6 +106,10 @@ class PayableRateController extends KleinController
             return $this->response->json([
                 'error' => 'Model not found'
             ]);
+        }
+
+        if($this->getUser()->uid !== $model->uid){
+            $this->response->code(401);
         }
 
         try {
@@ -135,6 +143,10 @@ class PayableRateController extends KleinController
 
         if(!empty($model)){
             return $this->response->json($model);
+        }
+
+        if($this->getUser()->uid !== $model->uid){
+            $this->response->code(401);
         }
 
         $this->response->code(404);

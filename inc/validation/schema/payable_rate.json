@@ -14,6 +14,7 @@
   },
   "required": [
     "payable_rate_template_name",
+    "version",
     "breakdowns"
   ],
   "definitions": {
@@ -81,6 +82,7 @@
           },
           "additionalProperties": false,
           "required": [
+            "NO_MATCH",
             "50%-74%",
             "75%-84%",
             "85%-94%",
@@ -159,6 +161,7 @@
               },
               "additionalProperties": false,
               "required": [
+                "NO_MATCH",
                 "50%-74%",
                 "75%-84%",
                 "85%-94%",
