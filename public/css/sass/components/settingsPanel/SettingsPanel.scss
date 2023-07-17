@@ -65,6 +65,9 @@
     font-weight: bold;
   }
 }
+.settings-panel-contentwrapper {
+  height: 100%;
+}
 
 .settings-panel-header-logo {
   background: url(../../img/logo_matecat_small_white.svg) no-repeat;
@@ -101,7 +104,7 @@
   padding: 20px;
   overflow-y: auto;
   max-height: calc(100vh - 100px);
-
+  height: 100%;
   h2 {
     text-align: left;
     padding: 15px 10px;
