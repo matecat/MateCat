@@ -9,6 +9,8 @@ class CreatePayableRateTemplates extends AbstractMatecatMigration {
           `version` INT(11) UNSIGNED NOT NULL DEFAULT 1,
           `name` VARCHAR(255) NOT NULL,
           `breakdowns` TEXT NOT NULL,
+          `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+          `modified_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY (`id`),
           UNIQUE INDEX `uid_name_idx` (`uid` ASC, `name` ASC));
     ' ];
@@ -17,3 +19,5 @@ class CreatePayableRateTemplates extends AbstractMatecatMigration {
         DROP TABLE `payable_rate_templates`;
     ' ];
 }
+
+
