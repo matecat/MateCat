@@ -44,6 +44,7 @@ class PayableRateController extends KleinController
             $id = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
+
             return $this->response->json([
                 'id' => $id
             ]);
@@ -78,6 +79,10 @@ class PayableRateController extends KleinController
 
         if($this->getUser()->uid !== $model->uid){
             $this->response->code(401);
+
+            return $this->response->json([
+                'error' => 'User not allowed'
+            ]);
         }
 
         try {
@@ -110,6 +115,10 @@ class PayableRateController extends KleinController
 
         if($this->getUser()->uid !== $model->uid){
             $this->response->code(401);
+
+            return $this->response->json([
+                'error' => 'User not allowed'
+            ]);
         }
 
         try {
@@ -141,19 +150,23 @@ class PayableRateController extends KleinController
         $id = $this->request->param( 'id' );
         $model = CustomPayableRateDao::getById($id);
 
-        if(!empty($model)){
-            return $this->response->json($model);
+        if(empty($model)){
+            $this->response->code(404);
+
+            return $this->response->json([
+                'error' => 'Model not found'
+            ]);
         }
 
         if($this->getUser()->uid !== $model->uid){
             $this->response->code(401);
+
+            return $this->response->json([
+                'error' => 'User not allowed'
+            ]);
         }
 
-        $this->response->code(404);
-
-        return $this->response->json([
-            'error' => 'Model not found'
-        ]);
+        return $this->response->json($model);
     }
 
     /**

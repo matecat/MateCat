@@ -4,6 +4,8 @@ namespace PayableRates;
 
 use DataAccess_AbstractDao;
 use Database;
+use DateTime;
+use PDO;
 
 class CustomPayableRateDao extends DataAccess_AbstractDao
 {
@@ -104,21 +106,23 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
      * @return int
+     * @throws \Exception
      */
     public static function save( CustomPayableRateStruct $customPayableRateStruct ) {
 
         $sql = "INSERT INTO " . self::TABLE .
-            " ( `uid`, `version`, `name`, `breakdowns` ) " .
+            " ( `uid`, `version`, `name`, `breakdowns`, `created_at`, `modified_at` ) " .
             " VALUES " .
-            " ( :uid, :version, :name, :breakdowns ); ";
+            " ( :uid, :version, :name, :breakdowns, :now, :now ); ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
             'uid'        => $customPayableRateStruct->uid,
-            'version'    => $customPayableRateStruct->version,
+            'version'    => 1,
             'name'       => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
+            'now'        => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
         return $conn->lastInsertId();
@@ -127,26 +131,25 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
      * @return int
+     * @throws \Exception
      */
     public static function update( CustomPayableRateStruct $customPayableRateStruct ) {
 
-        $sql = "UPDATE " . self::TABLE . " SET `uid` = :uid, `version` = :version, `name` = :name, `breakdowns` = :breakdowns WHERE id = :id ";
+        $sql = "UPDATE " . self::TABLE . " SET `uid` = :uid, `version` = :version, `name` = :name, `breakdowns` = :breakdowns, `modified_at` = :now WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
             'id'         => $customPayableRateStruct->id,
             'uid'        => $customPayableRateStruct->uid,
-            'version'    => $customPayableRateStruct->version,
+            'version'    => ($customPayableRateStruct->version + 1),
             'name'       => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
+            'now'        => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
-        $stmt = $conn->prepare( self::query_by_id );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $customPayableRateStruct->id, ] );
-
-        $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $customPayableRateStruct->uid, 'name' => $customPayableRateStruct->name,  ] );
+        self::destroyQueryByIdCache($conn, $customPayableRateStruct->id);
+        self::destroyQueryByUidAndNameCache($conn, $customPayableRateStruct->uid, $customPayableRateStruct->name);
 
         return $customPayableRateStruct->id;
 
@@ -160,6 +163,8 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "DELETE FROM ".self::TABLE." WHERE id = :id " );
         $stmt->execute( [ 'id' => $id ] );
+
+        self::destroyQueryByIdCache($conn, $id);
 
         return $stmt->rowCount();
     }
@@ -221,5 +226,26 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         $customPayableRateStruct->hydrateFromJSON($json);
 
         return self::update($customPayableRateStruct);
+    }
+
+    /**
+     * @param PDO $conn
+     * @param string $id
+     */
+    private static function destroyQueryByIdCache(PDO $conn, $id)
+    {
+        $stmt = $conn->prepare( self::query_by_id );
+        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
+    }
+
+    /**
+     * @param PDO $conn
+     * @param string $uid
+     * @param string $name
+     */
+    private static function destroyQueryByUidAndNameCache(PDO $conn, $uid, $name)
+    {
+        $stmt = $conn->prepare( self::query_by_uid_name );
+        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name,  ] );
     }
 }

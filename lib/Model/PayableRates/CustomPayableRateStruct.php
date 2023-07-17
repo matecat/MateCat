@@ -4,6 +4,8 @@ namespace PayableRates;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
+use Date\DateTimeUtil;
+use DateTime;
 use Utils;
 
 class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
@@ -13,6 +15,8 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     public $version;
     public $name;
     public $breakdowns;
+    public $created_at;
+    public $modified_at;
 
     /**
      * @return string
@@ -70,7 +74,6 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         $json = json_decode($json, true);
 
         if(
-            !isset($json['version']) and
             !isset($json['payable_rate_template_name']) and
             !isset($json['breakdowns'])
         ){
@@ -79,7 +82,10 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
 
         $this->validateBreakdowns($json['breakdowns']);
 
-        $this->version = $json['version'];
+        if(isset($json['version'])){
+            $this->version = $json['version'];
+        }
+
         $this->name = $json['payable_rate_template_name'];
         $this->breakdowns = $json['breakdowns'];
 
@@ -112,7 +118,8 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     }
 
     /**
-     * @inheritDoc
+     * @return array
+     * @throws \Exception
      */
     public function jsonSerialize()
     {
@@ -122,6 +129,8 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
             'version' => (int)$this->version,
             'name' => $this->name,
             'breakdowns' => $this->getBreakdownsArray(),
+            'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
+            'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
         ];
     }
 }
