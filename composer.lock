@@ -918,16 +918,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.2.3",
+            "version": "v1.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d1bfeebd4c8e958ba084065b84d2ec6bd57a53fc"
+                "reference": "854143f7e718aa4750de25135d6e3bc56a767468"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d1bfeebd4c8e958ba084065b84d2ec6bd57a53fc",
-                "reference": "d1bfeebd4c8e958ba084065b84d2ec6bd57a53fc",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/854143f7e718aa4750de25135d6e3bc56a767468",
+                "reference": "854143f7e718aa4750de25135d6e3bc56a767468",
                 "shasum": ""
             },
             "require": {
@@ -968,9 +968,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.2.3"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.2.7"
             },
-            "time": "2023-06-06T14:06:39+00:00"
+            "time": "2023-07-14T07:23:29+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
