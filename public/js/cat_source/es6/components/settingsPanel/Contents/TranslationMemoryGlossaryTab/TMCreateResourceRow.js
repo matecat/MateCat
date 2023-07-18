@@ -126,7 +126,7 @@ export const TMCreateResourceRow = ({row}) => {
           description: name,
         })
           .then(() => {
-            setTmKeys((prevState) => [...prevState, getNewItem(key)])
+            setTmKeys((prevState) => [getNewItem(key), ...prevState])
             onReset()
           })
           .catch((errors) => {
@@ -154,7 +154,7 @@ export const TMCreateResourceRow = ({row}) => {
         description: name,
       })
         .then(() => {
-          setTmKeys((prevState) => [...prevState, getNewItem(key)])
+          setTmKeys((prevState) => [getNewItem(key), ...prevState])
           onReset()
           getInfoTmKeyCallback()
         })

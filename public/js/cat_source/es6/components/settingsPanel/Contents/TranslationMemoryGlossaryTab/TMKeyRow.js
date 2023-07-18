@@ -1,4 +1,4 @@
-import React, {Fragment, useContext, useState} from 'react'
+import React, {Fragment, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
@@ -41,6 +41,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name)
+
+  const valueChange = useRef(false)
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = Boolean(row.owner)
@@ -104,30 +106,35 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const onChangeName = (e) => {
-    const {value: name} = e.currentTarget ?? {}
-    setName(name)
-    if (name)
+    const {value} = e.currentTarget ?? {}
+    if (value !== name) valueChange.current = true
+    setName(value)
+    if (value)
       setTmKeys((prevState) =>
-        prevState.map((tm) => (tm.id === row.id ? {...tm, name} : tm)),
+        prevState.map((tm) => (tm.id === row.id ? {...tm, value} : tm)),
       )
   }
 
   const updateKeyName = () => {
-    updateTmKey({
-      key: row.key,
-      description: name,
-    }).catch((errors) => {
-      setNotification({
-        type: 'error',
-        message: errors[0].message,
+    if (valueChange.current) {
+      updateTmKey({
+        key: row.key,
+        description: name,
+      }).catch((errors) => {
+        setNotification({
+          type: 'error',
+          message: errors[0].message,
+        })
       })
-    })
 
-    if (config.is_cattool) {
-      updateJobKeys({
-        getPublicMatches,
-        dataTm: getTmDataStructureToSendServer({tmKeys}),
-      }).then(() => CatToolActions.onTMKeysChangeStatus())
+      if (config.is_cattool) {
+        updateJobKeys({
+          getPublicMatches,
+          dataTm: getTmDataStructureToSendServer({tmKeys}),
+        }).then(() => CatToolActions.onTMKeysChangeStatus())
+      }
+
+      valueChange.current = false
     }
   }
 
