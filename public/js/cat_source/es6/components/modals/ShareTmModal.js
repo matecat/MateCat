@@ -105,21 +105,22 @@ class ShareTmModal extends React.Component {
                 <div className="share-popup-container-bottom">
                   <p>This action cannot be undone.</p>
                   <div className="share-popup-copy-result" />
-                  <input
-                    className={`share-popup-container-input-email ${
-                      errorEmailsResult || errorApiCallResult ? 'error' : ''
-                    }`}
-                    placeholder="Enter email addresses separated by comma"
-                    ref={(input) => (this.emails = input)}
-                    onKeyUp={(e) => this.onKeyUp(e)}
-                  />
-                  <button
-                    className="ui primary button right floated"
-                    onClick={() => this.shareTmKeyByEmail()}
-                  >
-                    Share
-                  </button>
-
+                  <div className="share-popup-container-top">
+                    <input
+                      className={`share-popup-container-input-email ${
+                        errorEmailsResult || errorApiCallResult ? 'error' : ''
+                      }`}
+                      placeholder="Enter email addresses separated by comma"
+                      ref={(input) => (this.emails = input)}
+                      onKeyUp={(e) => this.onKeyUp(e)}
+                    />
+                    <button
+                      className="ui primary button right floated"
+                      onClick={() => this.shareTmKeyByEmail()}
+                    >
+                      Share
+                    </button>
+                  </div>
                   <div className="share-popup-input-result">
                     {errorEmailsResult && (
                       <p>

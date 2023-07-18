@@ -1,17 +1,20 @@
-import React, {useRef, useState, useContext} from 'react'
+import React, {useRef, useState, useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTab'
 import {shareTmKey} from '../../../../api/shareTmKey'
 import CommonUtils from '../../../../utils/commonUtils'
 
-import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
+import {getInfoTmKey} from '../../../../api/getInfoTmKey'
+import ModalsActions from '../../../../actions/ModalsActions'
+import ShareTmModal from '../../../modals/ShareTmModal'
 
 export const ShareResource = ({row, onClose}) => {
   const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [emails, setEmails] = useState('')
   const [status, setStatus] = useState()
+  const [sharedUsers, setSharedUsers] = useState()
 
   const formRef = useRef()
 
@@ -81,6 +84,29 @@ export const ShareResource = ({row, onClose}) => {
   const isFormDisabled = false
   const isErrorExport = status && status.errors
 
+  const openShareTmModal = () => {
+    const props = {
+      description: row.description,
+      tmKey: row.key,
+      user: APP.USER.STORE.user,
+      users: sharedUsers,
+      callback: onClose,
+    }
+    ModalsActions.showModalComponent(ShareTmModal, props, 'Share resource')
+  }
+
+  useEffect(() => {
+    getInfoTmKey({key: row.key}).then((response) => {
+      const users = response.data
+      if (users.length > 1)
+        setSharedUsers(
+          users.filter(
+            (user) => parseInt(user.uid) !== APP.USER.STORE.user.uid,
+          ),
+        )
+    })
+  }, [])
+
   return (
     <div className="translation-memory-glossary-tab-export">
       <form
@@ -90,10 +116,26 @@ export const ShareResource = ({row, onClose}) => {
         onReset={onReset}
       >
         <div>
-          <span>
-            Share ownership of the resource by sharing the key. This action
-            cannot be undone.
-          </span>
+          {!sharedUsers ? (
+            <span>
+              Share ownership of the resource by sharing the key. This action
+              cannot be undone.
+            </span>
+          ) : (
+            <div>
+              <span>Shared resource is co-owned by you, </span>
+              <span
+                className="message-share-tmx-email"
+                onClick={() => openShareTmModal()}
+              >
+                {sharedUsers[0].first_name} {sharedUsers[0].last_name}{' '}
+                {sharedUsers.length > 1
+                  ? `and ${sharedUsers.length - 1} others`
+                  : ''}
+              </span>
+            </div>
+          )}
+
           <input
             type="text"
             className="translation-memory-glossary-tab-input-text"
