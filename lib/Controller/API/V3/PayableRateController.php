@@ -46,7 +46,7 @@ class PayableRateController extends KleinController
             $this->response->code(201);
 
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
@@ -89,7 +89,7 @@ class PayableRateController extends KleinController
             CustomPayableRateDao::remove($id);
 
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (\Exception $exception){
             $this->response->code(500);
@@ -100,6 +100,9 @@ class PayableRateController extends KleinController
         }
     }
 
+    /**
+     * @return \Klein\Response
+     */
     public function edit()
     {
         $id = $this->request->param( 'id' );
@@ -127,7 +130,7 @@ class PayableRateController extends KleinController
 
             $this->response->code(200);
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
