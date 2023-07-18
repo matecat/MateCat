@@ -124,8 +124,8 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'uid' => $this->uid,
+            'id' => (int)$this->id,
+            'uid' => (int)$this->uid,
             'version' => (int)$this->version,
             'name' => $this->name,
             'breakdowns' => $this->getBreakdownsArray(),
