@@ -870,4 +870,40 @@ class Utils {
 
         return $phrase;
     }
+
+    /**
+     * This function strips html tag, but preserves hrefs.
+     *
+     * Example:
+     *
+     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: https://matecat.com
+     *
+     * @param string $html
+     * @return string
+     */
+    public static function stripTagsPreservingHrefs($html)
+    {
+        //Instantiate the DOMDocument class.
+        $htmlDom = new DOMDocument();
+
+        //Parse the HTML of the page using DOMDocument::loadHTML
+        @$htmlDom->loadHTML($html);
+
+        //Extract the links from the HTML.
+        $links = $htmlDom->getElementsByTagName('a');
+
+        //Array that will contain our extracted links.
+        $extractedLinks = array();
+
+        //Loop through the DOMNodeList.
+        //We can do this because the DOMNodeList object is traversable.
+        foreach($links as $link){
+            $linkHref = $link->getAttribute('href');
+            $link->nodeValue = $linkHref;
+        }
+
+        $html = $htmlDom->saveHtml();
+
+        return strip_tags($html);
+    }
 }
