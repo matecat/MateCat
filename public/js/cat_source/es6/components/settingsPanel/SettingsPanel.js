@@ -35,7 +35,7 @@ const DEFAULT_CONTENTS = [
 ]
 
 export const DEFAULT_ENGINE_MEMORY = {
-  id: '1',
+  id: 1,
   name: 'MyMemory',
   description:
     'Machine translation by the MT engine best suited to your project.',
