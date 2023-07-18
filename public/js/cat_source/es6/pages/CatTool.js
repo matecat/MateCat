@@ -25,11 +25,16 @@ import Speech2TextFeature from '../utils/speech2text'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 
+const urlParams = new URLSearchParams(window.location.search)
+const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
+
 function CatTool() {
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
-  const [openSettings, setOpenSettings] = useState({isOpen: false})
+  const [openSettings, setOpenSettings] = useState({
+    isOpen: initialStateIsOpenSettings,
+  })
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
