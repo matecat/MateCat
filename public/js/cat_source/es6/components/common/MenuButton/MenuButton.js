@@ -15,6 +15,7 @@ export const MenuButton = ({
 }) => {
   const ItemsPortal = usePortal(itemsTarget ? itemsTarget : document.body)
   const [itemsCoords, setItemsCoords] = useState()
+  const [isReversed, setIsReversed] = useState(false)
 
   const ref = useRef()
 
@@ -32,15 +33,26 @@ export const MenuButton = ({
     const difference = itemsTarget
       ? itemsTarget.getBoundingClientRect().left - itemsTarget.offsetLeft
       : 0
-
-    setItemsCoords((prevState) =>
-      !prevState
-        ? {
-            left: rect.left - difference,
-            top: rect.y + rect.height,
-          }
-        : undefined,
+    const bottom = rect.y + rect.height + window.scrollY
+    const availableHeightDelta = Math.max(
+      0,
+      bottom +
+        200 +
+        16 -
+        (itemsTarget?.offsetParent?.clientHeight || document.body.clientHeight),
     )
+    let result = {
+      left: rect.left - difference,
+      top: rect.y + rect.height,
+    }
+    if (availableHeightDelta > 0) {
+      if (!isReversed) setIsReversed(true)
+      result.top = rect.y + window.scrollY
+    } else {
+      if (isReversed) setIsReversed(false)
+      result.top = bottom
+    }
+    setItemsCoords((prevState) => (!prevState ? result : undefined))
     e.stopPropagation()
   }
 
@@ -57,7 +69,9 @@ export const MenuButton = ({
       {itemsCoords && (
         <ItemsPortal>
           <div
-            className="menu-button-items"
+            className={`menu-button-items ${
+              isReversed ? 'menu-button-items-reversed' : ''
+            }`}
             style={{
               left: itemsCoords.left,
               top: itemsCoords.top,
