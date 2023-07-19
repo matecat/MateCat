@@ -61,7 +61,7 @@ vendor
 .env
 
 phinx.yml
-plugins/*
+
 .lastjobprocessed_jpeer
 .maxJobToProcess_jpeer
 
