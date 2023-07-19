@@ -176,12 +176,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       }
     : !row.is_shared
     ? {
-        title: 'Private resource. Share it from the dropdown menu',
+        title: 'Private resource. \n' + 'Share it from the dropdown menu',
         icon: <Lock size={16} />,
       }
     : {
         title:
-          'Shared resource. Select Share resource from the dropdown menu to see owners',
+          'Shared resource.\n' +
+          'Select Share resource from the dropdown menu to see owners',
         icon: <Users size={16} />,
       }
 
