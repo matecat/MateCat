@@ -876,27 +876,23 @@ class Utils {
      *
      * Example:
      *
-     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: https://matecat.com
+     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: click here(https://matecat.com)
      *
      * @param string $html
      * @return string
      */
     public static function stripTagsPreservingHrefs($html)
     {
-        //Instantiate the DOMDocument class.
         $htmlDom = new DOMDocument();
-
-        //Parse the HTML of the page using DOMDocument::loadHTML
         @$htmlDom->loadHTML($html);
 
-        //Extract the links from the HTML.
         $links = $htmlDom->getElementsByTagName('a');
 
-        //Loop through the DOMNodeList.
-        //We can do this because the DOMNodeList object is traversable.
+        /** @var DOMElement $link */
         foreach($links as $link){
+            $linkLabel = $link->nodeValue;
             $linkHref = $link->getAttribute('href');
-            $link->nodeValue = str_replace("\\\"","", $linkHref);
+            $link->nodeValue = $linkLabel . "(".str_replace("\\\"","", $linkHref).")";
         }
 
         $html = $htmlDom->saveHtml();
