@@ -1064,8 +1064,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             j.id = :id_job 
                         AND
                             j.password = :password
-                        AND id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+                        AND id_segment BETWEEN j.job_first_segment AND ( j.job_first_segment + ".$offset." )
                             GROUP BY id_segment
+                            LIMIT ".$limit."
                         ) AS X ON _m_id = segment_translation_events.id
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE
