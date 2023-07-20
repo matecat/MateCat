@@ -2,6 +2,15 @@
 
 class StripTagsPreservingHrefsTest extends PHPUnit_Framework_TestCase
 {
+    public function testCanStripTagsFromMdaString()
+    {
+        $string = 'mda:key|¶|172f7f84-0245-485c-b2c6-aaef19bcf0f9';
+        $stripTags = Utils::stripTagsPreservingHrefs($string);
+        $expected = $string;
+
+        $this->assertEquals($expected, $stripTags);
+    }
+
     public function testCanStripTagsFromString()
     {
         $string = 'This is a simple test.';

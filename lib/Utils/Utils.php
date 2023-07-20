@@ -911,7 +911,9 @@ class Utils {
      */
     public static function stripTagsPreservingHrefs($html)
     {
-        $htmlDom = new DOMDocument();
+        $htmlDom = new DOMDocument('1.0', 'UTF-8');
+        $htmlDom->formatOutput = false;
+
         @$htmlDom->loadHTML($html);
 
         $links = $htmlDom->getElementsByTagName('a');
@@ -923,7 +925,8 @@ class Utils {
             $link->nodeValue = $linkLabel . "(".str_replace("\\\"","", $linkHref).")";
         }
 
-        $html = $htmlDom->saveHtml();
+        $html = $htmlDom->saveHtml($htmlDom->documentElement);
+        $html = utf8_decode($html);
 
         $strippedHtml = strip_tags($html);
         $strippedHtml = ltrim($strippedHtml);
