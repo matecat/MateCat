@@ -892,18 +892,19 @@ class Utils {
         //Extract the links from the HTML.
         $links = $htmlDom->getElementsByTagName('a');
 
-        //Array that will contain our extracted links.
-        $extractedLinks = array();
-
         //Loop through the DOMNodeList.
         //We can do this because the DOMNodeList object is traversable.
         foreach($links as $link){
             $linkHref = $link->getAttribute('href');
-            $link->nodeValue = $linkHref;
+            $link->nodeValue = str_replace("\\\"","", $linkHref);
         }
 
         $html = $htmlDom->saveHtml();
 
-        return strip_tags($html);
+        $strippedHtml = strip_tags($html);
+        $strippedHtml = ltrim($strippedHtml);
+        $strippedHtml = rtrim($strippedHtml);
+
+        return $strippedHtml;
     }
 }
