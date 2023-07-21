@@ -101,8 +101,19 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
-        try {
+        $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
 
+        // Check account
+        try {
+            $engineMmt->checkAccount();
+        } catch ( Exception $e ){
+            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+
+            throw new Exception("Wrong license provided.", $e->getCode());
+        }
+
+        // Connect keys
+        try {
             $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
             $preImport   = $extraParams[ 'MMT-preimport' ];
 
@@ -110,7 +121,6 @@ class Mmt extends BaseFeature {
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
             if ( $preImport === true ) {
-                $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
                 $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
             }
 
@@ -124,6 +134,14 @@ class Mmt extends BaseFeature {
 
         return $newCreatedDbRowStruct;
 
+    }
+
+    /**
+     * @param EnginesModel_MMTStruct $newCreatedDbRowStruct
+     */
+    private function rollback(EnginesModel_MMTStruct $newCreatedDbRowStruct)
+    {
+        ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
     }
 
     /**
