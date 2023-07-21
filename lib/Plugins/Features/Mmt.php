@@ -109,7 +109,7 @@ class Mmt extends BaseFeature {
         } catch ( Exception $e ){
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
 
-            throw new Exception("Wrong license provided.", $e->getCode());
+            throw new Exception("MMT license not valid.", $e->getCode());
         }
 
         // Connect keys
