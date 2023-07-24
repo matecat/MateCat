@@ -158,7 +158,7 @@ class QAModelTemplateController extends KleinController
      */
     public function schema()
     {
-        return $this->response->json(json_decode($this->getPayableRateModelSchema()));
+        return $this->response->json(json_decode($this->getQAModelSchema()));
     }
 
     /**
@@ -173,7 +173,7 @@ class QAModelTemplateController extends KleinController
 
             $validatorObject = new \Validator\JSONValidatorObject();
             $validatorObject->json = $json;
-            $validator = new \Validator\JSONValidator($this->getPayableRateModelSchema());
+            $validator = new \Validator\JSONValidator($this->getQAModelSchema());
             $validator->validate($validatorObject);
 
             $errors = $validator->getErrors();
@@ -195,8 +195,8 @@ class QAModelTemplateController extends KleinController
     /**
      * @return false|string
      */
-    private function getPayableRateModelSchema()
+    private function getQAModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
 }
