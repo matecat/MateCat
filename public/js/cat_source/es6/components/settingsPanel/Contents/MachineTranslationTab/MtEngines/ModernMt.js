@@ -51,7 +51,6 @@ export const ModernMt = ({addMTEngine, error}) => {
               <input
                 className="required"
                 type="checkbox"
-                checked="checked"
                 {...register('preimport')}
               />
             )}
@@ -90,7 +89,6 @@ export const ModernMt = ({addMTEngine, error}) => {
               <input
                 className="required"
                 type="checkbox"
-                checked="checked"
                 {...register('context_analyzer')}
               />
             )}
