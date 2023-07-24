@@ -4,30 +4,38 @@ namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
-use PayableRates\CustomPayableRateDao;
+use QAModelTemplate\QAModelTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
-class QAModelTemplateController extends KleinController
-{
+
+class QAModelTemplateController extends KleinController {
+
     protected function afterConstruct() {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * fetch all
+     *
+     * @return \Klein\Response
+     */
     public function index()
     {
         $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
         $pagination = 20;
         $uid = $this->getUser()->uid;
 
-        return $this->response->json(CustomPayableRateDao::getAllPaginated($uid, $currentPage, $pagination));
+        return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, $currentPage, $pagination));
     }
 
     /**
+     * create new template
+     *
      * @return \Klein\Response
      */
-    public function create()
-    {
+    public function create() {
+
         // accept only JSON
         if($this->request->headers()->get('Content-Type') !== 'application/json'){
             $this->response->json([
@@ -40,7 +48,7 @@ class QAModelTemplateController extends KleinController
         // try to create the template
         try {
             $json = $this->request->body();
-            $id = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
+            $id = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
             return $this->response->json([
@@ -60,26 +68,31 @@ class QAModelTemplateController extends KleinController
     }
 
     /**
+     * @param $id
+     *
      * @return \Klein\Response
      */
     public function delete()
     {
         $id = $this->request->param( 'id' );
-        $model = CustomPayableRateDao::getById($id);
+        $model = QAModelTemplateDao::get([
+            'id' => $id,
+            'uid' => $this->getUser()->uid
+        ]);
 
         if(empty($model)){
             $this->response->code(404);
 
             return $this->response->json([
-                'error' => 'Model not found'
+                    'error' => 'Model not found'
             ]);
         }
 
         try {
-            CustomPayableRateDao::remove($id);
+            QAModelTemplateDao::remove($id);
 
             return $this->response->json([
-                'id' => $id
+                    'id' => $id
             ]);
         } catch (\Exception $exception){
             $this->response->code(500);
@@ -90,22 +103,30 @@ class QAModelTemplateController extends KleinController
         }
     }
 
+    /**
+     * edit model
+     *
+     * @return \Klein\Response
+     */
     public function edit()
     {
         $id = $this->request->param( 'id' );
-        $model = CustomPayableRateDao::getById($id);
+        $model = QAModelTemplateDao::get([
+            'id' => $id,
+            'uid' => $this->getUser()->uid
+        ]);
 
         if(empty($model)){
             $this->response->code(404);
 
             return $this->response->json([
-                'error' => 'Model not found'
+                    'error' => 'Model not found'
             ]);
         }
 
         try {
             $json = $this->request->body();
-            $id = CustomPayableRateDao::editFromJSON($model, $json);
+            $id = QAModelTemplateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
             return $this->response->json([
@@ -119,26 +140,23 @@ class QAModelTemplateController extends KleinController
             $this->response->code(500);
 
             return $this->response->json([
-                'error' => $exception->getMessage()
+                    'error' => $exception->getMessage()
             ]);
         }
     }
 
     /**
+     * fetch single
+     *
      * @return \Klein\Response
      */
     public function view()
     {
         $id = $this->request->param( 'id' );
-        $model = CustomPayableRateDao::getById($id);
-
-        if($model->uid !== $this->getUser()->uid){
-            $this->response->code(404);
-
-            return $this->response->json([
-                'error' => 'Model not found'
-            ]);
-        }
+        $model = QAModelTemplateDao::get([
+            'id' => $id,
+            'uid' => $this->getUser()->uid
+        ]);
 
         if(!empty($model)){
             return $this->response->json($model);
@@ -147,22 +165,22 @@ class QAModelTemplateController extends KleinController
         $this->response->code(404);
 
         return $this->response->json([
-            'error' => 'Model not found'
+                'error' => 'Model not found'
         ]);
     }
 
     /**
-     * This is the Payable Rate Model JSON schema
+     * This is the QA Model JSON schema
      *
      * @return \Klein\Response
      */
     public function schema()
     {
-        return $this->response->json(json_decode($this->getQAModelSchema()));
+        return $this->response->json(json_decode($this->getQaModelSchema()));
     }
 
     /**
-     * Validate a Payable Rate Model template
+     * Validate a QA Model template
      *
      * @return \Klein\Response
      */
@@ -173,7 +191,7 @@ class QAModelTemplateController extends KleinController
 
             $validatorObject = new \Validator\JSONValidatorObject();
             $validatorObject->json = $json;
-            $validator = new \Validator\JSONValidator($this->getQAModelSchema());
+            $validator = new \Validator\JSONValidator($this->getQaModelSchema());
             $validator->validate($validatorObject);
 
             $errors = $validator->getErrors();
@@ -187,7 +205,7 @@ class QAModelTemplateController extends KleinController
             $this->response->code(500);
 
             return $this->response->json([
-                'error' => $exception->getMessage()
+                    'error' => $exception->getMessage()
             ]);
         }
     }
@@ -195,7 +213,7 @@ class QAModelTemplateController extends KleinController
     /**
      * @return false|string
      */
-    private function getQAModelSchema()
+    private function getQaModelSchema()
     {
         return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
