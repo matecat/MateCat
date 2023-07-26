@@ -83,33 +83,33 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
     /**
      * @param $_config
-     * @return array|Engines_Results_AbstractResponse
+     * @return array|Engines_Results_AbstractResponse|void
      * @throws \Exception
      */
     public function get( $_config ) {
 
-        $_config[ 'source' ] = $this->convertLanguageCode($_config[ 'source' ]);
-        $_config[ 'target' ] = $this->convertLanguageCode($_config[ 'target' ]);
-
         // Fallback on MyMemory in case of not supported source/target combination
         if(!$this->checkLanguageCombination($_config[ 'source' ], $_config[ 'target' ])){
 
-            /** @var Engines_MyMemory $engine */
-            $engine = Engine::getInstance(1);
+            /** @var Engines_MyMemory $myMemory */
+            $myMemory = Engine::getInstance(1);
 
-            return $engine->get($_config);
+            $result = $myMemory->get($_config);
+            $this->result = $result->get_as_array();
+
+            return $this->result;
         }
 
         $parameters = [
             'func' => 'translate',
             "mtsystem" => "apertium",
             "context" => "altlang",
-            "src" => $_config[ 'source' ],
-            "trg" => $_config[ 'target' ],
+            "src" => $this->convertLanguageCode($_config[ 'source' ]),
+            "trg" => $this->convertLanguageCode($_config[ 'target' ]),
             "text" => $this->_preserveSpecialStrings( $_config[ 'segment' ] )
         ];
 
-        if (  $this->client_secret != '' && $this->client_secret != null ) {
+        if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
         }
 
@@ -177,7 +177,9 @@ class Engines_Altlang extends Engines_AbstractEngine {
             ['es_ES' => 'es_LA'],
         ];
 
-        $combination = [$source => $target];
+        $combination = [
+            $this->convertLanguageCode($source) => $this->convertLanguageCode($target)
+        ];
 
         return in_array($combination, $supportedCombinations);
     }

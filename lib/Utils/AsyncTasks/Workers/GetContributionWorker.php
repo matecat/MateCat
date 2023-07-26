@@ -486,11 +486,7 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 
-                /**
-                 * @var $mt_engine \Engines_MMT
-                 */
                 $mt_engine = $contributionStruct->getMTEngine( $featureSet );
-
                 $config = $mt_engine->getConfigStruct();
 
                 //if a callback is not set only the first argument is returned, get the config params from the callback
@@ -561,7 +557,7 @@ class GetContributionWorker extends AbstractWorker {
      */
     private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
-        if ( count( $matches ) > 0 ) {
+        if ( is_array($matches) and count( $matches ) > 0 ) {
 
             $segmentTranslation =  \Translations_SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
