@@ -197,22 +197,6 @@ module.exports = function (grunt) {
         ],
         dest: buildPath + 'xliffToTarget.js',
       },
-      pee: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [
-          basePath + 'lib/jquery.tablesorter.js',
-          basePath + 'lib/jquery.tablesorter.widgets.js',
-          basePath + 'lib/semantic.min.js',
-          basePath + 'pee.js',
-        ],
-        dest: buildPath + 'pee.js',
-      },
       components: {
         options: {
           transform: [babelifyTransform],
@@ -467,7 +451,6 @@ module.exports = function (grunt) {
     'browserify:upload',
     'browserify:analyze',
     'browserify:xliffToTarget',
-    'browserify:pee',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
@@ -488,7 +471,6 @@ module.exports = function (grunt) {
     'browserify:upload',
     'browserify:analyze',
     'browserify:xliffToTarget',
-    'browserify:pee',
     'browserify:components',
     'concat:libs',
     'concat:libs_upload',
