@@ -504,7 +504,6 @@ var progressBar = function ( filerow, start, filesize ) {
 var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
-    var firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
     if ( enforceConversion === false ) {
@@ -531,7 +530,7 @@ var convertFile = function ( fname, filerow, filesize, enforceConversion ) {
         file_name: fname,
         source_lang: CreateProjectStore.getSourceLang(),
         target_lang: CreateProjectStore.getTargetLangs(),
-        segmentation_rule: $( '#segm_rule' ).val(),
+        segmentation_rule: UI.segmentationRule,
         signal
     }).then(function ( {data, errors} ) {
 
