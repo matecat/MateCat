@@ -105,7 +105,6 @@ module.exports = function (grunt) {
           basePath + 'user_store.js',
           basePath + 'login.js',
           basePath + 'cat_source/es6/components/projects/Dashboard.js',
-          basePath + 'outsource.js',
         ],
         dest: buildPath + 'manage.js',
       },
