@@ -8,7 +8,7 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   const options = [
     {name: 'General', id: '1'},
     {name: 'Patent', id: 'patent'},
-    {name: 'Paragraph (beta)', id: 'paragraph'},
+    {name: 'Paragraph', id: 'paragraph'},
   ]
   const onClick = () => {
     if (!!config.is_cattool) {

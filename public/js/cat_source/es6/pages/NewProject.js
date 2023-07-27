@@ -391,6 +391,12 @@ const NewProject = ({
     [sourceLang, targetLangs, selectedTeam],
   )
 
+  useEffect(() => {
+    //TODO: used in main.js, remove
+    UI.segmentationRule = segmentationRule.id
+    UI.UPLOAD_PAGE.restartConversions()
+  }, [segmentationRule])
+
   return (
     <CreateProjectContext.Provider
       value={{
