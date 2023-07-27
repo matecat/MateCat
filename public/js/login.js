@@ -95,10 +95,6 @@ $.extend(APP, {
       ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
     })
 
-    $('.link-manage-page').on('click', function (e) {
-      APP.openManagePage(e)
-    })
-
     if (config.showModalBoxLogin == 1) {
       APP.openLoginModal()
     }

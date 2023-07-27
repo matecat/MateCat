@@ -105,7 +105,6 @@ module.exports = function (grunt) {
           basePath + 'user_store.js',
           basePath + 'login.js',
           basePath + 'cat_source/es6/components/projects/Dashboard.js',
-          basePath + 'outsource.js',
         ],
         dest: buildPath + 'manage.js',
       },
@@ -197,22 +196,6 @@ module.exports = function (grunt) {
           basePath + 'login.js',
         ],
         dest: buildPath + 'xliffToTarget.js',
-      },
-      pee: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [
-          basePath + 'lib/jquery.tablesorter.js',
-          basePath + 'lib/jquery.tablesorter.widgets.js',
-          basePath + 'lib/semantic.min.js',
-          basePath + 'pee.js',
-        ],
-        dest: buildPath + 'pee.js',
       },
       components: {
         options: {
@@ -468,7 +451,6 @@ module.exports = function (grunt) {
     'browserify:upload',
     'browserify:analyze',
     'browserify:xliffToTarget',
-    'browserify:pee',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
@@ -489,7 +471,6 @@ module.exports = function (grunt) {
     'browserify:upload',
     'browserify:analyze',
     'browserify:xliffToTarget',
-    'browserify:pee',
     'browserify:components',
     'concat:libs',
     'concat:libs_upload',
