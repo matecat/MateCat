@@ -38,6 +38,12 @@ export const CrossLanguagesMatches = ({
       }
     }
   }, [activeLang1, activeLang2])
+
+  useEffect(() => {
+    if (!activeLang1) {
+      setActiveLang2()
+    }
+  }, activeLang1)
   return (
     <div className="options-box multi-match">
       <h3>Cross-language Matches</h3>
