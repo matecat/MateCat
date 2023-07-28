@@ -1,19 +1,34 @@
+os: linux
 dist: focal
-language: node_js
-
-node_js:
-  - 14
-
-cache: yarn
+language: php
+php:
+  - 7.4
 
 branches:
   only:
     - develop
-addons:
-  apt:
-    update: true
+    - develop-submodule
+
+git:
+  # Tell Travis not to try to load submodules
+  # We'll do that further down
+  submodules: false
+
+env:
+  - NODE_RELEASE=14.x
+
+before_install:
+  # Change ssh to https in the submodule file because travis make calls on https with its own token
+  - sed -i "s/git@github.com:/https:\/\/${CI_USER_TOKEN_MATECATBOT}@github.com\//" .gitmodules
+  # Update plugins files submodule
+  - git submodule update --init --recursive
+  - sudo rm -rf ~/.nvm - curl -sL "https://deb.nodesource.com/setup_${NODE_RELEASE}" | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - npm install -g yarn
+#  - curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 
 install:
+  - composer install
   - yarn install
 
 script:
