@@ -22,3 +22,6 @@
 [submodule "plugins/uber"]
 	path = plugins/uber
 	url = git@github.com:matecat/uber_plugin.git
+[submodule "docker"]
+	path = docker
+	url = git@github.com:matecat/matecat_docker_build.git
