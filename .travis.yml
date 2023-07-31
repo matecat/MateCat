@@ -26,14 +26,14 @@ script:
 
     docker-compose -f docker/docker-compose.yml build || exit 1
 
-    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat-web-node:latest
-    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}
+    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}
 
     # AWS CLI V1
     $( aws ecr get-login --no-include-email --region eu-west-1 )
 
-    docker push 449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat-web-node:latest
-    docker push 449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}
+    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}
 
 notifications:
   slack:
