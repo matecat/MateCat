@@ -39,10 +39,10 @@ $.extend(UI.UPLOAD_PAGE, {
   restartConversions: function () {
     if ($('.template-download').length) {
       if (UI.conversionsAreToRestart()) {
-        UI.confirmRestartConversions()
+        UI.restartConversions()
       }
     } else if ($('.template-gdrive').length) {
-      UI.confirmGDriveRestartConversions()
+      APP.restartGDriveConversions()
     }
   },
 
@@ -63,7 +63,7 @@ $.extend(UI.UPLOAD_PAGE, {
   },
 })
 
-APP.sourceLangChangedCallback = function () {
+APP.restartConversion = function () {
   UI.UPLOAD_PAGE.restartConversions()
 }
 
