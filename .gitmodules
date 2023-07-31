@@ -28,3 +28,4 @@
 [submodule "internal_scripts"]
 	path = internal_scripts
 	url = git@github.com:matecat/internal_scripts.git
+	ignore = untracked
