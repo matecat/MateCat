@@ -43,7 +43,6 @@ package-lock.json
 Test_Local/*
 unitTest/xhGui/
 unitTest/coverage/*
-internal_scripts
 local_storage
 test_storage
 lib/Utils/fileupload/thumbnails/*
