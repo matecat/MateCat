@@ -365,8 +365,6 @@ const NewProject = ({
     }
   }, [tmKeys])
 
-  useEffect(() => {}, [sourceLang, targetLangs])
-
   useEffect(() => {
     if (sourceLang) {
       const lang = sourceLang.id
@@ -396,7 +394,7 @@ const NewProject = ({
   useEffect(() => {
     //TODO: used in main.js, remove
     UI.segmentationRule = segmentationRule.id
-    UI.UPLOAD_PAGE.restartConversions()
+    //UI.UPLOAD_PAGE.restartConversions()
   }, [segmentationRule])
 
   return (
