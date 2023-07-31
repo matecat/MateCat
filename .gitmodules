@@ -25,6 +25,3 @@
 [submodule "docker"]
 	path = docker
 	url = git@github.com:matecat/matecat_docker_build.git
-[submodule "internal_scripts"]
-	path = internal_scripts
-	url = git@github.com:matecat/internal_scripts.git
