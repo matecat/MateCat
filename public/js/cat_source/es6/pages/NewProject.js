@@ -53,7 +53,6 @@ const NewProject = ({
   formatsNumber,
   googleDriveEnabled,
 }) => {
-  const projectNameRef = useRef()
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
   const [keysOrdered, setKeysOrdered] = useState()
@@ -102,6 +101,9 @@ const NewProject = ({
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
 
+  const projectNameRef = useRef()
+  const prevSourceLang = useRef(sourceLang)
+
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
@@ -116,17 +118,17 @@ const NewProject = ({
         'Warning',
       )
     } else {
+      prevSourceLang.current = sourceLang
       setSourceLang(targetLangs[0])
       setTargetLangs([sourceLang])
-      UI.UPLOAD_PAGE.restartConversions()
     }
   }
 
   const openTmPanel = () => setOpenSettings({isOpen: true})
 
   const changeSourceLanguage = (option) => {
+    prevSourceLang.current = sourceLang
     setSourceLang(option)
-    APP.sourceLangChangedCallback()
   }
 
   const getTmKeys = () => {
@@ -247,24 +249,6 @@ const NewProject = ({
   }, [selectedTeam])
 
   useEffect(() => {
-    if (sourceLang) {
-      const lang = sourceLang.id
-      if (localStorage.getItem('currentSourceLang') != lang) {
-        localStorage.setItem('currentSourceLang', lang)
-      }
-    }
-    if (targetLangs) {
-      const lang = targetLangs.map((lang) => lang.id).join()
-      if (localStorage.getItem('currentTargetLang') != lang) {
-        localStorage.setItem('currentTargetLang', lang)
-      }
-    }
-    setGuessTagActive(
-      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-    )
-  }, [sourceLang, targetLangs])
-
-  useEffect(() => {
     APP.checkGDriveEvents()
     UI.addEvents()
     setGuessTagActive(
@@ -381,15 +365,33 @@ const NewProject = ({
     }
   }, [tmKeys])
 
-  useEffect(
-    () =>
-      CreateProjectActions.updateProjectParams({
-        sourceLang,
-        targetLangs,
-        selectedTeam,
-      }),
-    [sourceLang, targetLangs, selectedTeam],
-  )
+  useEffect(() => {}, [sourceLang, targetLangs])
+
+  useEffect(() => {
+    if (sourceLang) {
+      const lang = sourceLang.id
+      if (localStorage.getItem('currentSourceLang') != lang) {
+        localStorage.setItem('currentSourceLang', lang)
+      }
+    }
+    if (targetLangs) {
+      const lang = targetLangs.map((lang) => lang.id).join()
+      if (localStorage.getItem('currentTargetLang') != lang) {
+        localStorage.setItem('currentTargetLang', lang)
+      }
+    }
+    setGuessTagActive(
+      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    )
+    CreateProjectActions.updateProjectParams({
+      sourceLang,
+      targetLangs,
+      selectedTeam,
+    })
+    if (prevSourceLang !== sourceLang) {
+      UI.UPLOAD_PAGE.restartConversions()
+    }
+  }, [sourceLang, targetLangs, selectedTeam])
 
   useEffect(() => {
     //TODO: used in main.js, remove
