@@ -1,12 +1,10 @@
 os: linux
 dist: focal
-language: php
-php:
-  - 7.4
+language: minimal
 
 branches:
   only:
-    - develop
+    #    - develop
     - develop-submodule
 
 git:
@@ -14,24 +12,28 @@ git:
   # We'll do that further down
   submodules: false
 
-env:
-  - NODE_RELEASE=14.x
-
 before_install:
+  - export BUILD=$(awk 'NF>1 {print $3}' inc/version.ini)
+  - pip install -U pip
+  - pip install awscli
   # Change ssh to https in the submodule file because travis make calls on https with its own token
   - sed -i "s/git@github.com:/https:\/\/${CI_USER_TOKEN_MATECATBOT}@github.com\//" .gitmodules
   # Update plugins files submodule
   - git submodule update --init --recursive
-  - sudo rm -rf ~/.nvm - curl -sL "https://deb.nodesource.com/setup_${NODE_RELEASE}" | sudo -E bash -
-  - sudo apt-get install -y nodejs
-  - npm install -g yarn
-
-install:
-  - composer install
-  - yarn install
 
 script:
-  - yarn coverage
+  - |
+
+    docker-compose -f docker/docker-compose.yml build || exit 1
+
+    docker tag matecat/matecat/matecat-web-node  449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat:latest
+    docker tag matecat/matecat/matecat-web-node  449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat:build-${BUILD}
+
+    # AWS CLI V1
+    $( aws ecr get-login --no-include-email --region eu-west-1 )
+
+    docker push 449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat:latest
+    docker push 449641877310.dkr.ecr.eu-west-1.amazonaws.com/matecat/matecat:build-${BUILD}
 
 notifications:
   slack:
