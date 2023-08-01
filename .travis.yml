@@ -5,8 +5,7 @@ language: minimal
 branches:
   only:
     #    - develop
-    #    - develop-submodule
-    - master
+    - develop-submodule
 
 git:
   # Tell Travis not to try to load submodules
@@ -34,7 +33,7 @@ script:
     $( aws ecr get-login --no-include-email --region eu-central-1 )
 
     docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
-    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}
+    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
 notifications:
   slack:
