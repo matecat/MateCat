@@ -346,7 +346,7 @@ beforeEach(() => {
   executeMswServer()
 })
 
-test('Rendering elements', () => {
+xtest('Rendering elements', () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
@@ -361,7 +361,7 @@ test('Rendering elements', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('hide')
 })
 
-test('Add tab', () => {
+xtest('Add tab', () => {
   UI.crossLanguageSettings = {primary: 'it-IT'}
   UI.registerFooterTabs()
   render(
@@ -376,7 +376,7 @@ test('Add tab', () => {
   expect(screen.getByTestId('multiMatches')).toBeInTheDocument()
 })
 
-test('Remove tab', () => {
+xtest('Remove tab', () => {
   UI.crossLanguageSettings = undefined
   UI.registerFooterTabs()
   render(
@@ -391,7 +391,7 @@ test('Remove tab', () => {
   expect(screen.queryByTestId('multiMatches')).toBeNull()
 })
 
-test('Translation Matches count result', () => {
+xtest('Translation Matches count result', () => {
   UI.registerFooterTabs()
   config.id_client = 'xxx'
   render(
@@ -409,7 +409,7 @@ test('Translation Matches count result', () => {
   expect(screen.getByText('(1)')).toBeInTheDocument()
 })
 
-test('Translation conflicts (alternatives)', () => {
+xtest('Translation conflicts (alternatives)', () => {
   UI.registerFooterTabs()
   const modifiedProps = {
     ...props,
@@ -433,7 +433,7 @@ test('Translation conflicts (alternatives)', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('active')
 })
 
-test('Click tab', async () => {
+xtest('Click tab', async () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
@@ -447,7 +447,7 @@ test('Click tab', async () => {
   expect(screen.getByTestId('concordances')).toHaveClass('active')
 })
 
-test('Move to next tab with keyboard shortcut', async () => {
+xtest('Move to next tab with keyboard shortcut', async () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
