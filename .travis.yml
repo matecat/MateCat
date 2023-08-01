@@ -27,7 +27,7 @@ script:
     docker-compose -f docker/docker-compose.yml build || exit 1
 
     docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
-    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}
+    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
     # AWS CLI V1
     $( aws ecr get-login --no-include-email --region eu-central-1 )
