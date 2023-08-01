@@ -5,7 +5,8 @@ language: minimal
 branches:
   only:
     #    - develop
-    - develop-submodule
+    #- develop-submodule
+    - master
 
 git:
   # Tell Travis not to try to load submodules
@@ -24,7 +25,7 @@ before_install:
 script:
   - |
 
-    docker-compose -f docker/docker-compose.yml build || exit 1
+    docker-compose -f docker/docker-compose.yml build web-node || exit 1
 
     docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
     docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
