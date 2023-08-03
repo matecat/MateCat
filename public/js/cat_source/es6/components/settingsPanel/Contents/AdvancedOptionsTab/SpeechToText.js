@@ -61,19 +61,23 @@ export const SpeechToText = ({
   return (
     <div className="options-box s2t-box">
       <h3>Dictation</h3>
-      <p>
-        <span className="option-s2t-box-chrome-label">
-          Available on Chrome.{' '}
-        </span>
-        Improved accessibility thanks to a speech-to-text component to dictate
-        your translations instead of typing them.
-      </p>
-      <Switch
-        active={dictationOption}
-        onChange={onChange}
-        disabled={disabled}
-        onClick={clickOnDisabled}
-      />
+      <div className="option-description">
+        <p>
+          <span className="option-s2t-box-chrome-label">
+            Available on Chrome.{' '}
+          </span>
+          Improved accessibility thanks to a speech-to-text component to dictate
+          your translations instead of typing them.
+        </p>
+      </div>
+      <div className="options-box-value">
+        <Switch
+          active={dictationOption}
+          onChange={onChange}
+          disabled={disabled}
+          onClick={clickOnDisabled}
+        />
+      </div>
     </div>
   )
 }
