@@ -43,9 +43,27 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   return (
     <div className="options-box seg_rule" onClick={onClick}>
       <h3>Segmentation Rules</h3>
-      <p>
-        Select how sentences are split according to specific types of content.
-      </p>
+      <div className="option-description">
+        <p>
+          Select how sentences are split according to specific types of content.
+        </p>
+        <div>
+          <p>
+            <b>General</b> - Generates a new segment at the end of each layout
+            element (e.g. a paragraph, a table cell etc.) and every time a
+            strong punctuation mark is detected (e.g. full stop, exclamation
+            mark).
+          </p>
+          <p>
+            <b>Patent</b> - Works like the general rule, but includes a series
+            of exceptions for abbreviations used commonly in patents.
+          </p>
+          <p>
+            <b>Paragraph</b> - Only generates a new segment at the end of each
+            layout element (e.g. a paragraph, a table cell etc.).
+          </p>
+        </div>
+      </div>
       <div className="options-select-container">
         <Select
           options={options}

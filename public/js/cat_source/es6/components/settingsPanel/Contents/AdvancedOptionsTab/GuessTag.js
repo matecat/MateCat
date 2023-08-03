@@ -64,34 +64,42 @@ export const GuessTag = ({
     <div className="options-box tagp">
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
       <h3>Guess tag position</h3>
-      <p>
-        {notSupportedLangs.length > 0 && (
-          <span className="option-tagp-languages">
-            Not available for:
-            <span className="option-notsupported-languages">
-              {notSupportedLangs.join(', ')}
+      <div className="option-description">
+        <p>
+          {notSupportedLangs.length > 0 && (
+            <span className="option-tagp-languages">
+              Not available for:
+              <span className="option-notsupported-languages">
+                {notSupportedLangs.join(', ')}
+              </span>
+              .
+              <br />
             </span>
-            .
-            <br />
-          </span>
-        )}
-        {config.isReview && (
-          <span className="option-tagp-revise">
-            Not available in revise mode.
-            <br />
-          </span>
-        )}
-        Enable this functionality to let Matecat automatically place the tags
-        where they belong.
-        <a
-          className="tooltip-options"
-          href="https://guides.matecat.com/guess-tag-position"
-          target="_blank"
-        >
-          Supported languages
-        </a>
-      </p>
-      <Switch onChange={onChange} active={guessTagActive} disabled={disabled} />
+          )}
+          {config.isReview && (
+            <span className="option-tagp-revise">
+              Not available in revise mode.
+              <br />
+            </span>
+          )}
+          Enable this functionality to let Matecat automatically place the tags
+          where they belong.
+          <a
+            className="tooltip-options"
+            href="https://guides.matecat.com/guess-tag-position"
+            target="_blank"
+          >
+            Supported languages
+          </a>
+        </p>
+      </div>
+      <div className="options-box-value">
+        <Switch
+          onChange={onChange}
+          active={guessTagActive}
+          disabled={disabled}
+        />
+      </div>
     </div>
   )
 }

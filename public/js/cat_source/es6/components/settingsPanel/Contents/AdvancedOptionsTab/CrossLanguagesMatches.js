@@ -47,10 +47,12 @@ export const CrossLanguagesMatches = ({
   return (
     <div className="options-box multi-match">
       <h3>Cross-language Matches</h3>
-      <p>
-        Get translation suggestions in other target languages you know as
-        reference.
-      </p>
+      <div className="option-description">
+        <p>
+          Get translation suggestions in other target languages you know as
+          reference.
+        </p>
+      </div>
       <div className="options-select-container">
         <Select
           name="multi-match-1"

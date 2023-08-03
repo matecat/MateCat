@@ -64,36 +64,39 @@ export const Lexiqa = ({
       <h3>
         QA by <img src="/public/img/lexiqa-new-2.png" />
       </h3>
-      <p>
-        {!lexiqaLicense && (
-          <span className="option-qa-box-languages">
-            Request your license key at{' '}
-            <a href="https://www.lexiqa.net">https://www.lexiqa.net</a>
-            <br />
-          </span>
-        )}
-        {notSupportedLangs.length > 0 && lexiqaLicense && (
-          <span className="option-qa-box-languages">
-            Not available for:
-            <span className="option-notsupported-languages">
-              {notSupportedLangs.join(', ')}
+      <div className="option-description">
+        <p>
+          {!lexiqaLicense && (
+            <span className="option-qa-box-languages">
+              Request your license key at{' '}
+              <a href="https://www.lexiqa.net">https://www.lexiqa.net</a>
+              <br />
             </span>
-            .
-            <br />
-          </span>
-        )}
-        Linguistic QA with automated checks for punctuation, numerals, links,
-        symbols, etc.
-        <a
-          className="tooltip-options"
-          href="https://guides.matecat.com/matecat-qa-with-lexiqa?hs_preview=ZjhRGTNW-10067295048"
-          target="_blank"
-        >
-          Supported languages
-        </a>
-      </p>
-
-      <Switch active={lexiqaActive} onChange={onChange} disabled={disabled} />
+          )}
+          {notSupportedLangs.length > 0 && lexiqaLicense && (
+            <span className="option-qa-box-languages">
+              Not available for:
+              <span className="option-notsupported-languages">
+                {notSupportedLangs.join(', ')}
+              </span>
+              .
+              <br />
+            </span>
+          )}
+          Linguistic QA with automated checks for punctuation, numerals, links,
+          symbols, etc.
+          <a
+            className="tooltip-options"
+            href="https://guides.matecat.com/matecat-qa-with-lexiqa?hs_preview=ZjhRGTNW-10067295048"
+            target="_blank"
+          >
+            Supported languages
+          </a>
+        </p>
+      </div>
+      <div className="options-box-value">
+        <Switch active={lexiqaActive} onChange={onChange} disabled={disabled} />
+      </div>
     </div>
   )
 }
