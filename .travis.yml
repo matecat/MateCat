@@ -6,7 +6,7 @@ branches:
   only:
     #    - develop
     - develop-submodule
-    #  - master
+    # - master
 
 git:
   # Tell Travis not to try to load submodules
