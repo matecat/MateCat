@@ -25,16 +25,22 @@ before_install:
 script:
   - |
 
-    docker-compose -f docker/docker-compose.yml build web-node || exit 1
+    docker-compose -f docker/docker-compose.yml build || exit 1
 
     docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
     docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+    docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+    docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
     # AWS CLI V1
     $( aws ecr get-login --no-include-email --region eu-central-1 )
 
     docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
     docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
 notifications:
   slack:
