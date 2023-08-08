@@ -283,6 +283,10 @@ window.config = {
 const superClassnamesFunction = window.classnames
 const superScrollToElementFunction = window.HTMLElement.prototype.scrollTo
 
+jest.mock('../../actions/CatToolActions', () => ({
+  retrieveJobKeys: jest.fn(() => false),
+}))
+
 beforeAll(() => {
   window.classnames = () => {}
   window.HTMLElement.prototype.scrollTo = () => {}
