@@ -80,7 +80,7 @@ let TranslationMatches = {
         translation = currentContribution.translation
         if (SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj)) {
           if (parseInt(match) !== 100) {
-            translation = DraftMatecatUtils.cleanSegmentString(translation)
+            translation = TagUtils.removeAllTagsForGuessTags(translation)
           } else {
             SegmentActions.disableTPOnSegment(segmentObj)
           }
@@ -105,7 +105,7 @@ let TranslationMatches = {
       }
     }
   },
-  getContribution: function (segmentSid, next, force) {
+  getContribution: function (segmentSid, next, crossLanguageSettings, force) {
     const segment = SegmentStore.getSegmentByIdToJS(segmentSid)
     if (!config.translation_matches_enabled) {
       SegmentActions.addClassToSegment(segment.sid, 'loaded')
@@ -178,8 +178,8 @@ let TranslationMatches = {
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,
-      crossLanguages: UI.crossLanguageSettings
-        ? [UI.crossLanguageSettings.primary, UI.crossLanguageSettings.secondary]
+      crossLanguages: crossLanguageSettings
+        ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
         : [],
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
@@ -202,11 +202,12 @@ let TranslationMatches = {
     SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
-  setDeleteSuggestion: function (source, target, id) {
+  setDeleteSuggestion: function (source, target, id, sid) {
     return deleteContribution({
       source,
       target,
       id,
+      sid,
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'deleteContribution')
     })

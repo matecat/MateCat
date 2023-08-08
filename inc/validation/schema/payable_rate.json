@@ -1,0 +1,196 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "payable_rate_template_name": {
+      "type": "string"
+    },
+    "breakdowns": {
+      "type": "object",
+      "$ref": "#/definitions/breakdowns"
+    }
+  },
+  "required": [
+    "payable_rate_template_name",
+    "breakdowns"
+  ],
+  "definitions": {
+    "breakdowns": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "object",
+          "properties": {
+            "NO_MATCH": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "50%-74%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "75%-84%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "85%-94%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "95%-99%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "100%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "100%_PUBLIC": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "REPETITIONS": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "INTERNAL": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "MT": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "ICE": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "ICE_MT": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "NO_MATCH",
+            "50%-74%",
+            "75%-84%",
+            "85%-94%",
+            "95%-99%",
+            "100%",
+            "100%_PUBLIC",
+            "REPETITIONS",
+            "INTERNAL",
+            "MT",
+            "ICE",
+            "ICE_MT"
+          ]
+        }
+      },
+      "patternProperties": {
+        "^[a-z]{2}$": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z]{2}$": {
+              "type": "object",
+              "properties": {
+                "NO_MATCH": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "50%-74%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "75%-84%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "85%-94%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "95%-99%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "100%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "100%_PUBLIC": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "REPETITIONS": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "INTERNAL": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "MT": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "ICE": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "ICE_MT": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "NO_MATCH",
+                "50%-74%",
+                "75%-84%",
+                "85%-94%",
+                "95%-99%",
+                "100%",
+                "100%_PUBLIC",
+                "REPETITIONS",
+                "INTERNAL",
+                "MT",
+                "ICE",
+                "ICE_MT"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "default"
+      ]
+    }
+  }
+}

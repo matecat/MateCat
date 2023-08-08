@@ -525,6 +525,25 @@ class ModifyTeam extends React.Component {
                     </div>
                   </div>
                   <div className="ui divided list">
+                    <div className="search-member-container">
+                      <IconSearch />
+                      <input
+                        name="search_member"
+                        placeholder="Search Member"
+                        value={this.state.searchMember}
+                        onChange={this.onChangeSearchMember.bind(this)}
+                      />
+                      <div
+                        className={`reset_button ${
+                          this.state.searchMember
+                            ? 'reset_button--visible'
+                            : 'reset_button--hidden'
+                        }`}
+                        onClick={() => this.setState({searchMember: ''})}
+                      >
+                        <IconClose />
+                      </div>
+                    </div>
                     {pendingUsers}
                     {userlist}
                   </div>

@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import {Base64} from 'js-base64'
-
-// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils'
 import {
   tagSignatures,
   getXliffRegExpression,
+  getPhGuessTagsXliffRegExpression,
 } from '../components/segments/utils/DraftMatecatUtils/tagModel'
 
 const TAGS_UTILS = {
@@ -70,10 +69,9 @@ const TAGS_UTILS = {
 
   transformPlaceholdersAndTagsNew: function (text) {
     text = this.decodePlaceholdersToTextSimple(text || '')
-    if (!(config.tagLockCustomizable && !UI.tagLockEnabled)) {
-      // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
-      text = this.matchTag(this.decodeHtmlInTag(text))
-    }
+    // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
+    text = this.matchTag(this.decodeHtmlInTag(text))
+
     return text
   },
 
@@ -389,37 +387,40 @@ const TAGS_UTILS = {
 
     //add tags into the target segment
     for (let i = 0; i < missingTags.length; i++) {
-      if (!(config.tagLockCustomizable && !UI.tagLockEnabled)) {
-        newhtml = newhtml + missingTags[i]
-      } else {
-        newhtml = newhtml + missingTags[i]
-      }
+      newhtml = newhtml + missingTags[i]
     }
     return newhtml
   },
 
   /**
-   * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>)
-   * (Note that in the data-original attribute there are the &amp;lt instead of &lt)
+   * Check the string has tags to hide by the guess tags
    * @param segmentSource
    * @returns {boolean}
    */
-  hasDataOriginalTags: function (segmentSource) {
-    var originalText = segmentSource
-    const reg = getXliffRegExpression()
-    return !_.isUndefined(originalText) && reg.test(originalText)
+  hasTagsToHide: function (originalText) {
+    if (originalText) {
+      const stringWithGuessTag = this.removeAllTagsForGuessTags(originalText)
+      return originalText !== stringWithGuessTag
+    }
+    return false
   },
 
   /**
    * Remove all xliff source tags from the string
+   * less the placeholder we want to show
    * @param currentString :  string to parse
    * @returns the decoded String
-   * TODO: Same of function cleanTextFromTag
    */
-  removeAllTags: function (currentString) {
+  removeAllTagsForGuessTags: function (currentString) {
     if (currentString) {
-      var regExp = getXliffRegExpression()
-      currentString = currentString.replace(regExp, '')
+      const regExp = getXliffRegExpression()
+      const regExpPh = getPhGuessTagsXliffRegExpression()
+      currentString = currentString.replace(regExp, (match, contents) => {
+        if (regExpPh.test(match)) {
+          return match
+        }
+        return ''
+      })
       return currentString
     } else {
       return ''

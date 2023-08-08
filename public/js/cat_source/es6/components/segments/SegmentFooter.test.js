@@ -296,7 +296,6 @@ afterAll(() => {
 require('../../../ui.core')
 require('../../../ui.segment')
 UI.start = () => {}
-UI.checkCrossLanguageSettings = () => {}
 
 const props = {
   segment: JSON.parse(
@@ -346,7 +345,7 @@ beforeEach(() => {
   executeMswServer()
 })
 
-xtest('Rendering elements', () => {
+test('Rendering elements', () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
@@ -361,11 +360,11 @@ xtest('Rendering elements', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('hide')
 })
 
-xtest('Add tab', () => {
-  UI.crossLanguageSettings = {primary: 'it-IT'}
+test('Add tab', () => {
+  const multiMatchLangs = {primary: 'it-IT'}
   UI.registerFooterTabs()
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
     </SegmentContext.Provider>,
   )
@@ -376,11 +375,11 @@ xtest('Add tab', () => {
   expect(screen.getByTestId('multiMatches')).toBeInTheDocument()
 })
 
-xtest('Remove tab', () => {
-  UI.crossLanguageSettings = undefined
+test('Remove tab', () => {
+  const multiMatchLangs = undefined
   UI.registerFooterTabs()
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
     </SegmentContext.Provider>,
   )
@@ -391,7 +390,7 @@ xtest('Remove tab', () => {
   expect(screen.queryByTestId('multiMatches')).toBeNull()
 })
 
-xtest('Translation Matches count result', () => {
+test('Translation Matches count result', () => {
   UI.registerFooterTabs()
   config.id_client = 'xxx'
   render(
@@ -409,7 +408,7 @@ xtest('Translation Matches count result', () => {
   expect(screen.getByText('(1)')).toBeInTheDocument()
 })
 
-xtest('Translation conflicts (alternatives)', () => {
+test('Translation conflicts (alternatives)', () => {
   UI.registerFooterTabs()
   const modifiedProps = {
     ...props,
@@ -433,7 +432,7 @@ xtest('Translation conflicts (alternatives)', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('active')
 })
 
-xtest('Click tab', async () => {
+test('Click tab', async () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
@@ -447,7 +446,7 @@ xtest('Click tab', async () => {
   expect(screen.getByTestId('concordances')).toHaveClass('active')
 })
 
-xtest('Move to next tab with keyboard shortcut', async () => {
+test('Move to next tab with keyboard shortcut', async () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>

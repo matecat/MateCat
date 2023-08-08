@@ -8,6 +8,7 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   CompositeDecorator,
+  SelectionState,
 } from 'draft-js'
 
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -24,7 +25,6 @@ import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
-import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
@@ -85,7 +85,7 @@ class Editarea extends React.Component {
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? TagUtils.removeAllTagsForGuessTags(translation)
       : translation
     // Inizializza Editor State con solo testo
     const plainEditorState = EditorState.createEmpty(decorator)
@@ -205,6 +205,7 @@ class Editarea extends React.Component {
         sid,
         false,
         this.getUpdatedSegmentInfo,
+        this.replaceWordAt,
       )
       _.remove(
         this.decoratorsStructure,
@@ -520,6 +521,27 @@ class Editarea extends React.Component {
       this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
       this.setNewTranslation(this.props.segment.sid, this.props.translation)
     }
+  }
+
+  replaceWordAt = ({newWord, start, end}) => {
+    const startIndex = start
+    const endIndex = end
+    const selection = this.state.editorState.getSelection().merge({
+      anchorOffset: startIndex,
+      focusOffset: endIndex,
+    })
+    const contentState = Modifier.replaceText(
+      this.state.editorState.getCurrentContent(),
+      selection,
+      newWord,
+    )
+    const updatedState = EditorState.push(this.state.editorState, contentState)
+    this.setState({editorState: updatedState}, () => {
+      // Reactivate decorators
+      this.updateTranslationDebounced()
+      // Stop composition mode
+      this.onCompositionStopDebounced()
+    })
   }
 
   render() {

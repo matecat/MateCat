@@ -1,0 +1,102 @@
+@import '../../commons/colors';
+
+.menu-button {
+  display: flex;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.menu-button-wrapper {
+  display: flex;
+  cursor: pointer;
+
+  button {
+    cursor: pointer;
+  }
+
+  > * {
+    color: $black;
+    background: $grey4;
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid $grey7;
+  }
+
+  > :first-child {
+    border-radius: 2px 0 0 2px;
+
+    &:hover {
+      background-color: $grey5;
+    }
+  }
+
+  :last-child {
+    display: flex;
+    align-items: center;
+    border-radius: 0 2px 2px 0;
+    border-left: 0;
+    padding: 0 2px;
+
+    &:hover {
+      color: $grey7;
+    }
+  }
+}
+
+.menu-button-items {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24);
+  padding: 8px;
+  background-color: $white;
+  margin-top: 10px;
+
+  > :not(:last-child) {
+    border-bottom: solid 1px $grey4;
+  }
+
+  &::before {
+    content: '';
+    border-left: 8px solid transparent;
+    border-right: 0px solid transparent;
+    border-bottom: 8px solid #ffffff;
+    bottom: 100%;
+    left: auto;
+    right: 0;
+    position: absolute;
+  }
+  &.menu-button-items-reversed {
+    transform: translateY(calc((100% + 4px) * -1));
+    margin-top: 0px;
+    &::after {
+      content: '';
+      border-left: 8px solid transparent;
+      border-right: 0px solid transparent;
+      border-top: 8px solid #ffffff;
+      top: 100%;
+      right: 0;
+      left: auto;
+      position: absolute;
+    }
+    &::before {
+      visibility: hidden;
+    }
+  }
+}
+
+.menu-button-item {
+  border: none;
+  padding: 8px;
+  text-align: left;
+  font-size: 16px;
+  background-color: unset;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $grey9;
+    color: $translatedBlue;
+  }
+}

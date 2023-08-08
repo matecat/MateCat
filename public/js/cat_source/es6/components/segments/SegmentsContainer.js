@@ -40,9 +40,11 @@ function SegmentsContainer({
   isReviewExtended,
   reviewType,
   enableTagProjection,
-  tagModesEnabled,
   startSegmentId,
   firstJobSegment,
+  guessTagActive,
+  speechToTextActive,
+  multiMatchLangs,
 }) {
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
@@ -662,7 +664,6 @@ function SegmentsContainer({
       isReviewExtended: !!isReviewExtended,
       reviewType,
       enableTagProjection,
-      tagModesEnabled,
       speech2textEnabledFn: Speech2Text.enabled,
       setLastSelectedSegment: (sid) => setLastSelectedSegment({sid}),
       setBulkSelection,
@@ -670,6 +671,9 @@ function SegmentsContainer({
       files: files,
       currentFileId: currentFileId.toString(),
       collectionTypeSeparator,
+      guessTagActive,
+      speechToTextActive,
+      multiMatchLangs,
     }
   }
 
@@ -730,7 +734,6 @@ SegmentsContainer.propTypes = {
   isReviewExtended: PropTypes.bool,
   reviewType: PropTypes.string,
   enableTagProjection: PropTypes.any,
-  tagModesEnabled: PropTypes.bool,
   startSegmentId: PropTypes.string,
   firstJobSegment: PropTypes.string,
 }
@@ -742,8 +745,8 @@ const getSegmentStructure = (segment, sideOpen) => {
   let source = segment.segment
   let target = segment.translation
   if (SegmentUtils.checkCurrentSegmentTPEnabled(segment)) {
-    source = TagUtils.removeAllTags(source)
-    target = TagUtils.removeAllTags(target)
+    source = TagUtils.removeAllTagsForGuessTags(source)
+    target = TagUtils.removeAllTagsForGuessTags(target)
   }
 
   source = TagUtils.matchTag(
@@ -778,7 +781,7 @@ const getSegmentStructure = (segment, sideOpen) => {
       </div>
 
       <div className="body">
-        <div className="header toggle"> </div>
+        <div className="header toggle"></div>
         <div
           className="text segment-body-content"
           style={{boxSizing: 'content-box'}}
@@ -839,7 +842,7 @@ const getSegmentStructure = (segment, sideOpen) => {
                     </ul>
                   </div>
                 </div>
-                <p className="warnings"> </p>
+                <p className="warnings"></p>
                 <ul className="buttons toggle">
                   <li>
                     <a href="#" className="translated">
@@ -871,7 +874,7 @@ const getSegmentStructure = (segment, sideOpen) => {
           {' '}
         </div>
       </div>
-      <div className="segment-side-container"> </div>
+      <div className="segment-side-container"></div>
     </section>
   )
 }

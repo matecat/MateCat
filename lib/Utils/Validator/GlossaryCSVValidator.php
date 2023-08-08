@@ -55,6 +55,31 @@ class GlossaryCSVValidator extends AbstractValidator {
     }
 
     /**
+     * @param $filePath
+     * @return int
+     */
+    public function getNumberOfLanguage( $filePath ){
+
+        $headers = $this->getHeaders($filePath);
+        $skipKeys = [
+            "forbidden",
+            "domain",
+            "subdomain",
+            "definition",
+            "notes",
+            "example of use"
+        ];
+
+        $languages = array_diff( $headers, $skipKeys );
+
+        if(empty($languages)){
+            return 0;
+        }
+
+        return count($languages);
+    }
+
+    /**
      * @return array
      */
     private function allowedLanguages() {

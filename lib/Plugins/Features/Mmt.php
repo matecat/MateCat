@@ -455,10 +455,10 @@ class Mmt extends BaseFeature {
 
                             foreach ( $jobKeyList as $memKey ) {
                                 $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
-                                        [
-                                                'uid'    => $user->uid,
-                                                'tm_key' => $memKey
-                                        ]
+                                    [
+                                        'uid'    => $user->uid,
+                                        'tm_key' => $memKey
+                                    ]
                                 );
                             }
                             /**
@@ -627,8 +627,8 @@ class Mmt extends BaseFeature {
             $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = $data->engineData[ 'context_analyzer' ];
 
             $newEngineStruct = $featureSet->filter( 'disableMMTPreimport', (object)[
-                    'logged_user'     => $logged_user,
-                    'newEngineStruct' => $newEngineStruct
+                'logged_user'     => $logged_user,
+                'newEngineStruct' => $newEngineStruct
             ] );
 
             return $newEngineStruct;

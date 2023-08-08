@@ -105,7 +105,6 @@ module.exports = function (grunt) {
           basePath + 'user_store.js',
           basePath + 'login.js',
           basePath + 'cat_source/es6/components/projects/Dashboard.js',
-          basePath + 'outsource.js',
         ],
         dest: buildPath + 'manage.js',
       },
@@ -137,9 +136,7 @@ module.exports = function (grunt) {
           basePath +
             'cat_source/review_extended/review_extended.common_events.js',
           basePath + 'cat_source/segment_filter.common_extension.js',
-          basePath + 'cat_source/speech2text.js',
-          basePath + 'tm.js',
-          basePath + 'advancedOptionsTab.js',
+          //basePath + 'cat_source/speech2text.js',
         ],
         dest: `${buildPath}app.js`,
       },
@@ -179,7 +176,6 @@ module.exports = function (grunt) {
           basePath + 'gdrive.upload.js',
           basePath + 'gdrive.picker.js',
           basePath + 'new-project.js',
-          basePath + 'tm.js',
         ],
         dest: buildPath + 'upload.js',
       },
@@ -200,22 +196,6 @@ module.exports = function (grunt) {
           basePath + 'login.js',
         ],
         dest: buildPath + 'xliffToTarget.js',
-      },
-      pee: {
-        options: {
-          transform: [babelifyTransform],
-          browserifyOptions: {
-            paths: [__dirname + '/node_modules'],
-          },
-          watch: true,
-        },
-        src: [
-          basePath + 'lib/jquery.tablesorter.js',
-          basePath + 'lib/jquery.tablesorter.widgets.js',
-          basePath + 'lib/semantic.min.js',
-          basePath + 'pee.js',
-        ],
-        dest: buildPath + 'pee.js',
       },
       components: {
         options: {
@@ -471,7 +451,6 @@ module.exports = function (grunt) {
     'browserify:upload',
     'browserify:analyze',
     'browserify:xliffToTarget',
-    'browserify:pee',
     'concat:libs',
     'concat:libs_upload',
     'replace:version',
@@ -492,7 +471,6 @@ module.exports = function (grunt) {
     'browserify:upload',
     'browserify:analyze',
     'browserify:xliffToTarget',
-    'browserify:pee',
     'browserify:components',
     'concat:libs',
     'concat:libs_upload',

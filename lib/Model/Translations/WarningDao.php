@@ -132,6 +132,11 @@ class WarningDao extends \DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
+    /**
+     * @param WarningStruct $warning
+     * @return bool
+     * @throws \ReflectionException
+     */
     public static function insertWarning( WarningStruct $warning ) {
         $options = [];
         $sql = self::buildInsertStatement( $warning->toArray(), $options ) ;
@@ -141,11 +146,19 @@ class WarningDao extends \DataAccess_AbstractDao {
         return $stmt->execute( $warning->toArray() )  ;
     }
 
-
+    /**
+     * @param array $array_result
+     * @return \DataAccess_IDaoStruct|\DataAccess_IDaoStruct[]|void
+     */
     protected function _buildResult( $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 
+    /**
+     * @param $jid
+     * @param $jpassword
+     * @return \DataAccess_IDaoStruct[]
+     */
     public static function getWarningsByJobIdAndPassword( $jid, $jpassword ) {
 
         $thisDao = new self();
@@ -155,20 +168,14 @@ class WarningDao extends \DataAccess_AbstractDao {
 		FROM segment_translations
 		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		WHERE jobs.id = :id_job
-		  AND jobs.password = :password
-		  AND segment_translations.status != :segment_status 
-		-- following is a condition on bitmask to filter by severity ERROR
-		  AND warning & 1 = 1 ";
+        AND jobs.password = :password
+        AND warning & 1 = 1 ";
 
         $stmt = $db->getConnection()->prepare( $query );
 
         return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job'             => $jid,
                 'password'           => $jpassword,
-                'segment_status'     => Constants_TranslationStatus::STATUS_NEW
         ] );
-
     }
-
-
 }

@@ -51,7 +51,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="footer-logo">
-          <a href="https://www.translated.com" target="_blank">
+          <a href="https://www.translated.net" target="_blank">
             <img src="public/img/matecat-logo-translated.svg" width="130" />
           </a>
         </div>

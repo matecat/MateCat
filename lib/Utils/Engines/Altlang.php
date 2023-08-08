@@ -37,8 +37,8 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
-     * @return array
+     * @return array|Engines_Results_MT
+     * @throws Exception
      */
     protected function _decode( $rawValue ){
 
@@ -81,31 +81,44 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @param $_config
+     * @return array|Engines_Results_AbstractResponse|void
+     * @throws \Exception
+     */
     public function get( $_config ) {
 
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        // Fallback on MyMemory in case of not supported source/target combination
+        if(!$this->checkLanguageCombination($_config[ 'source' ], $_config[ 'target' ])){
 
-        $param_data = json_encode(array(
-                "mtsystem" => "apertium",
-                "context" => "altlang",
-                "src" => $_config[ 'source' ],
-                "trg" => $_config[ 'target' ],
-                "text" => $_config[ 'segment' ]
-        ));
+            /** @var Engines_MyMemory $myMemory */
+            $myMemory = Engine::getInstance(1);
 
-        $parameters = array();
-        if (  $this->client_secret != '' && $this->client_secret != null ) {
+            $result = $myMemory->get($_config);
+            $this->result = $result->get_as_array();
+
+            return $this->result;
+        }
+
+        $parameters = [
+            'func' => 'translate',
+            "mtsystem" => "apertium",
+            "context" => "altlang",
+            "src" => $this->convertLanguageCode($_config[ 'source' ]),
+            "trg" => $this->convertLanguageCode($_config[ 'target' ]),
+            "text" => $this->_preserveSpecialStrings( $_config[ 'segment' ] )
+        ];
+
+        if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
         }
-        $parameters['func'] = "translate";
-        $parameters['data'] = $param_data;
 
-        $this->_setAdditionalCurlParams( array(
-                        CURLOPT_POST       => true,
-                        CURLOPT_RETURNTRANSFER => true
-                )
-        );
-        $this->call( "translate_relative_url", $parameters, false);
+        $this->_setAdditionalCurlParams([
+            CURLOPT_POST       => true,
+            CURLOPT_RETURNTRANSFER => true
+        ]);
+
+        $this->call( "translate_relative_url", $parameters, true, true);
 
         return $this->result;
 
@@ -128,6 +141,47 @@ class Engines_Altlang extends Engines_AbstractEngine {
         //if engine does not implement DELETE method, exit
         return true;
 
+    }
+
+    /**
+     * @param string $code
+     * @return mixed
+     */
+    private function convertLanguageCode($code){
+
+        $code = str_replace("-","_", $code);
+        $code = str_replace("es_AR","es_LA", $code);
+        $code = str_replace("es_CO","es_LA", $code);
+        $code = str_replace("es_419","es_LA", $code);
+        $code = str_replace("es_MX","es_LA", $code);
+        $code = str_replace("es_US","es_LA", $code);
+
+        return $code;
+    }
+
+    /**
+     * @param string $source
+     * @param string $target
+     * @return bool
+     */
+    private function checkLanguageCombination($source, $target){
+
+        $supportedCombinations = [
+            ['pt_BR' => 'pt_PT'],
+            ['pt_PT' => 'pt_BR'],
+            ['fr_CA' => 'fr_FR'],
+            ['fr_FR' => 'fr_CA'],
+            ['en_US' => 'en_GB'],
+            ['en_GB' => 'en_US'],
+            ['es_LA' => 'es_ES'],
+            ['es_ES' => 'es_LA'],
+        ];
+
+        $combination = [
+            $this->convertLanguageCode($source) => $this->convertLanguageCode($target)
+        ];
+
+        return in_array($combination, $supportedCombinations);
     }
 
 }

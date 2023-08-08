@@ -3,14 +3,14 @@
 // General dropdown
 .custom-dropdown {
   position: relative;
-  margin-top: 16px;
+  margin-top: 0px;
   border-radius: 4px;
   box-shadow: 0 0 16px rgba($grey6, 0.4);
   width: 100%;
   height: auto;
   background-color: $grey5;
 }
-.custom-dropdown::before {
+/*.custom-dropdown::before {
   content: '';
   display: block;
   position: absolute;
@@ -19,7 +19,7 @@
   margin-left: -8px;
   width: 0;
   height: 0;
-}
+}*/
 .custom-dropdown::before {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
@@ -46,12 +46,12 @@
   border-bottom: none;
 }
 
-// Serach bar
+// Search bar
 .dropdown__search-bar {
   position: relative;
-  padding-right: 48px;
   background-color: $grey5;
-  box-shadow: 0 1px 0 0 $grey2;
+  box-shadow: none;
+  padding: 0;
   input + svg {
     position: absolute;
     right: 12px;
@@ -166,7 +166,7 @@
   padding: 4px 8px;
   background-color: transparent;
   cursor: pointer;
-  color: $grey6;
+  color: $black;
   & span {
     white-space: nowrap;
     overflow: hidden;

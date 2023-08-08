@@ -92,7 +92,6 @@ class SizeRestriction {
     /**
      * @return int
      */
-
     public function getCleanedStringLength() {
 
         try {
@@ -107,7 +106,6 @@ class SizeRestriction {
                 "baseLength"   => mb_strlen( $this->cleanedString ),
                 "cjkMatches"   => CJKLangUtils::getMatches($this->cleanedString),
                 "emojiMatches" => EmojiUtils::getMatches($this->cleanedString),
-
             ]);
         } catch ( Exception $e ) {
         }
