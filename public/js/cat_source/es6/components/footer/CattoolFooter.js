@@ -181,14 +181,14 @@ export const CattolFooter = ({
             ) : !stats?.ANALYSIS_COMPLETE ? null : (
               <>
                 <a
-                  className="approved-bar"
-                  style={{width: stats.a_perc + '%'}}
-                  title={'Approved ' + stats.a_perc_formatted}
-                />
-                <a
                   className="approved-bar-2nd-pass"
                   style={{width: stats.a_perc_2nd + '%'}}
                   title={'2nd Approved ' + stats.a_perc_2nd_formatted}
+                />
+                <a
+                  className="approved-bar"
+                  style={{width: stats.a_perc + '%'}}
+                  title={'Approved ' + stats.a_perc_formatted}
                 />
                 <a
                   className="translated-bar"
