@@ -6,6 +6,7 @@ branches:
   only:
     #    - develop
     - develop-submodule
+    - develop-submodule-freddy
     # - master
 
 git:
@@ -25,22 +26,48 @@ before_install:
 script:
   - |
 
-    docker-compose -f docker/docker-compose-ci.yml build || exit 1
+    if [[ "${TRAVIS_BRANCH}" == "develop-submodule" || ! -z "${TRAVIS_TAG}" ]] ; then
 
-    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
-    docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+      docker-compose -f docker/docker-compose-ci.yml build || exit 1
 
-    docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
-    docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+      docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
-    # AWS CLI V1
-    $( aws ecr get-login --no-include-email --region eu-central-1 )
+      docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
-    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
-    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+      # AWS CLI V1
+      $( aws ecr get-login --no-include-email --region eu-central-1 )
 
-    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
-    docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+    elif [[ "${TRAVIS_BRANCH}" == "develop-submodule-freddy" ]] ; then
+
+      export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
+
+      docker-compose -f docker/docker-compose-ci.yml build || exit 1
+
+      docker tag matecat/matecat-web-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker tag matecat/matecat-web-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker tag matecat/matecat-daemons-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker tag matecat/matecat-daemons-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      # AWS CLI V1
+      $( aws ecr get-login --no-include-email --region eu-central-1 )
+
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+    fi
 
 notifications:
   slack:
