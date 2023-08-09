@@ -45,7 +45,7 @@ script:
       docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
       docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
 
-    elif [[ "${TRAVIS_BRANCH}" == "develop-submodule-freddy" ]] ; then
+    elif [[ "${TRAVIS_BRANCH}" == "freddy" ]] ; then
 
       export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
       export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
