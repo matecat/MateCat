@@ -6,7 +6,7 @@ branches:
   only:
     #    - develop
     - develop-submodule
-    - develop-submodule-freddy
+    - freddy
     #  - master
 
 git:
