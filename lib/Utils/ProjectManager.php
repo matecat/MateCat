@@ -1196,7 +1196,6 @@ class ProjectManager {
                 $payableRatesTemplate = CustomPayableRateDao::getById($projectStructure['payable_rate_model_id']);
                 $payableRates = $payableRatesTemplate->getPayableRates( $shortSourceLang, $shortTargetLang );
                 $payableRates = json_encode($payableRates);
-
             } else {
                 $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
                 $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $shortSourceLang, $shortTargetLang ) );
@@ -1267,6 +1266,10 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             try {
+                if(isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id'])) {
+                    CustomPayableRateDao::assocModelToJob($projectStructure['payable_rate_model_id'], $newJob->id);
+                }
+
                 //prepare pre-translated segments queries
                 if ( !empty( $projectStructure[ 'translations' ] ) ) {
                     $this->_insertPreTranslations( $newJob->id );

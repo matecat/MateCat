@@ -173,7 +173,7 @@ class Job {
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
 
         // is outsource available?
-        $outsourceAvailable = $featureSet->filter( 'outsourceAvailable', $chunk->target, $chunk->getProject()->id_customer );
+        $outsourceAvailable = $featureSet->filter( 'outsourceAvailable', $chunk->target, $chunk->getProject()->id_customer, $chunk->id );
         if(!is_bool($outsourceAvailable)){
             $outsourceAvailable = true;
         }
