@@ -4,7 +4,7 @@ language: minimal
 
 branches:
   only:
-    #    - develop
+    #   - develop
     - develop-submodule
     - freddy
     #  - master
