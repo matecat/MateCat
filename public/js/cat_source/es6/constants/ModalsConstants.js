@@ -1,6 +1,8 @@
 import keyMirror from 'keymirror'
 
-module.exports = keyMirror({
+const ModalConstants = keyMirror({
   SHOW_MODAL: null,
   CLOSE_MODAL: null,
 })
+
+export default ModalConstants

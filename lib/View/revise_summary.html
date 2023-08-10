@@ -9,9 +9,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
-    <link href="../../public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link href="../../public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link href="../../public/css/build/quality_report.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+<!--    <link href="../../public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>-->
+<!--    <link href="../../public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>-->
+    <link href="../../public/build/qa-report.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         /*<![CDATA[*/
@@ -83,7 +83,7 @@
 
 <footer class="normal-foo"/>
 <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>
+<script src="${basepath}public/build/qa-report.js?build=${build_number}"></script>
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="common.html/footer_includes" />

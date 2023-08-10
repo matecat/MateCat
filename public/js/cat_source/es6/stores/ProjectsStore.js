@@ -10,7 +10,7 @@ import Immutable from 'immutable'
 
 EventEmitter.prototype.setMaxListeners(0)
 
-let ProjectsStore = assign({}, EventEmitter.prototype, {
+const ProjectsStore = assign({}, EventEmitter.prototype, {
   projects: null,
 
   setProjects: function (projects) {
@@ -350,4 +350,4 @@ AppDispatcher.register(function (action) {
   }
 })
 
-module.exports = ProjectsStore
+export default ProjectsStore

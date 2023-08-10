@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import _ from 'lodash'
 
 import CatToolStore from '../../stores/CatToolStore'
-import CattoolConstants from '../../constants/CatToolConstants'
+import CatToolConstants from '../../constants/CatToolConstants'
 import TooltipInfo from '../segments/TooltipInfo/TooltipInfo.component'
 import SegmentActions from '../../actions/SegmentActions'
 import {CookieConsent} from '../common/CookieConsent'
@@ -108,10 +108,10 @@ export const CattolFooter = ({
       setStats(transformStats(stats))
     }
 
-    CatToolStore.addListener(CattoolConstants.SET_PROGRESS, listener)
+    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, listener)
 
     return () => {
-      CatToolStore.removeListener(CattoolConstants.SET_PROGRESS, listener)
+      CatToolStore.removeListener(CatToolConstants.SET_PROGRESS, listener)
     }
   }, [])
 

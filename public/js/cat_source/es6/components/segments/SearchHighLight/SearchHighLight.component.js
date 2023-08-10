@@ -14,4 +14,4 @@ const SearchHighlight = (props) => {
   )
 }
 
-module.exports = SearchHighlight
+export default SearchHighlight

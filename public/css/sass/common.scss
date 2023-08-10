@@ -3726,11 +3726,12 @@ p.tm-warning-message {
 
 @font-face {
   font-family: 'icomoon';
-  src: url('../fonts/icomoon.eot?7sjwen');
-  src: url('../fonts/icomoon.eot?7sjwen#iefix') format('embedded-opentype'),
-    url('../fonts/icomoon.ttf?7sjwen') format('truetype'),
-    url('../fonts/icomoon.woff?7sjwen') format('woff'),
-    url('../fonts/icomoon.svg?7sjwen#icomoon') format('svg');
+  src: url('/public/css/fonts/icomoon.eot?7sjwen');
+  src: url('/public/css/fonts/icomoon.eot?7sjwen#iefix')
+      format('embedded-opentype'),
+    url('/public/css/fonts/icomoon.ttf?7sjwen') format('truetype'),
+    url('/public/css/fonts/icomoon.woff?7sjwen') format('woff'),
+    url('/public/css/fonts/icomoon.svg?7sjwen#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }

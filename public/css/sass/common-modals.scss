@@ -506,18 +506,16 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .google-login-button {
-  background: url(../img/btn_gg_sprite.png) no-repeat;
+  background: url('../../img/btn_gg_sprite.png') no-repeat;
   background-position: 0 0;
 }
 
 .google-login-button:hover {
-  background: url(../img/btn_gg_sprite.png) no-repeat;
   background-position: 0 -101px;
   box-shadow: none !important;
 }
 
 .google-login-button:focus {
-  background: url(../img/btn_gg_sprite.png) no-repeat;
   background-position: 0 -50px;
 }
 
@@ -615,7 +613,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .forgot-password-modal {
-  background: url(../img/matecat_watch-left-border.png) no-repeat -34px 136px;
+  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px 136px;
   background-size: 23%;
   /*width: 385px;*/
   padding: 25px 96px;
@@ -656,7 +654,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .button-loader {
-  background: url(../img/loader.gif) center center no-repeat;
+  background: url(../../img/loader.gif) center center no-repeat;
   width: 20px;
   height: 20px;
   visibility: hidden;

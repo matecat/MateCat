@@ -9,7 +9,7 @@ import assign from 'object-assign'
 
 EventEmitter.prototype.setMaxListeners(0)
 
-let CreateProjectStore = assign({}, EventEmitter.prototype, {
+const CreateProjectStore = assign({}, EventEmitter.prototype, {
   projectData: {
     sourceLang: undefined,
     targetLang: undefined,
@@ -66,4 +66,4 @@ AppDispatcher.register(function (action) {
       break
   }
 })
-module.exports = CreateProjectStore
+export default CreateProjectStore

@@ -242,4 +242,4 @@ let TranslationMatches = {
   },
 }
 
-module.exports = TranslationMatches
+export default TranslationMatches

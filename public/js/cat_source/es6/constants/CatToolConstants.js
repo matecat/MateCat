@@ -1,6 +1,6 @@
 import keyMirror from 'keymirror'
 
-module.exports = keyMirror({
+const CatToolConstants = keyMirror({
   SHOW_CONTAINER: null,
   TOGGLE_CONTAINER: null,
   CLOSE_SUBHEADER: null,
@@ -23,3 +23,5 @@ module.exports = keyMirror({
   ON_TM_KEYS_CHANGE_STATUS: null,
   HAVE_KEYS_GLOSSARY: null,
 })
+
+export default CatToolConstants
