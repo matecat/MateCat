@@ -82,6 +82,7 @@ class engineController extends ajaxController {
      * When Called it perform the controller action to retrieve/manipulate data
      *
      * @return mixed
+     * @throws Exception
      */
     public function doAction() {
         if ( count( $this->result[ 'errors' ] ) > 0 ) {
@@ -106,6 +107,7 @@ class engineController extends ajaxController {
 
     /**
      * This method adds an engine in a user's keyring
+     * @throws Exception
      */
     private function add() {
 
@@ -125,49 +127,6 @@ class engineController extends ajaxController {
                 $newEngineStruct->type                                = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
                 $newEngineStruct->extra_parameters[ 'category' ]      = $this->engineData[ 'category' ];
-                break;
-            case strtolower( Constants_Engines::MOSES ):
-
-                /**
-                 * Create a record of type Moses
-                 */
-                $newEngineStruct = EnginesModel_MosesStruct::getStruct();
-
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
-
-                break;
-
-            case strtolower( Constants_Engines::TAUYOU ):
-
-                /**
-                 * Create a record of type Moses
-                 */
-                $newEngineStruct = EnginesModel_TauyouStruct::getStruct();
-
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->base_url                            = $this->engineData[ 'url' ];
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
-
-                break;
-
-            case strtolower( Constants_Engines::IP_TRANSLATOR ):
-
-                /**
-                 * Create a record of type IPTranslator
-                 */
-                $newEngineStruct = EnginesModel_IPTranslatorStruct::getStruct();
-
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
-
                 break;
 
             case strtolower( Constants_Engines::APERTIUM ):
@@ -198,24 +157,10 @@ class engineController extends ajaxController {
 
                 break;
 
-            case strtolower( Constants_Engines::LETSMT ):
-
-                /**
-                 * Create a record of type LetsMT
-                 */
-                $newEngineStruct = EnginesModel_LetsMTStruct::getStruct();
-
-                $newEngineStruct->name                            = $this->name;
-                $newEngineStruct->uid                             = $this->user->uid;
-                $newEngineStruct->type                            = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'config_json' ] = $this->engineData[ 'tildemt_config' ];
-
-                break;
-
             case strtolower( Constants_Engines::SMART_MATE ):
 
                 /**
-                 * Create a record of type IPTranslator
+                 * Create a record of type SmartMate
                  */
                 $newEngineStruct = EnginesModel_SmartMATEStruct::getStruct();
 
@@ -247,20 +192,6 @@ class engineController extends ajaxController {
                  * Create a record of type GoogleTranslate
                  */
                 $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
-
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
-
-                break;
-                
-            case strtolower( Constants_Engines::MTHUB ):
-
-                /**
-                 * Create a record of type MTHUB
-                 */
-                $newEngineStruct = EnginesModel_MTHUBStruct::getStruct();
 
                 $newEngineStruct->name                                = $this->name;
                 $newEngineStruct->uid                                 = $this->user->uid;
@@ -310,6 +241,11 @@ class engineController extends ajaxController {
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
+
+            $engineStruct     = EnginesModel_EngineStruct::getStruct();
+            $engineStruct->uid = $this->user->uid;
+            $engineStruct->active = true;
+            $this->destroyUserEnginesCache();
         }
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
@@ -336,35 +272,11 @@ class engineController extends ajaxController {
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
                 $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
+                $this->destroyUserEnginesCache();
 
                 return;
             }
 
-        } elseif ( $newEngineStruct instanceof EnginesModel_IPTranslatorStruct ) {
-
-            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-
-            /**
-             * @var $newTestCreatedMT Engines_IPTranslator
-             */
-            $config             = $newTestCreatedMT->getConfigStruct();
-            $config[ 'source' ] = "en-US";
-            $config[ 'target' ] = "fr-FR";
-
-            $mt_result = $newTestCreatedMT->ping( $config );
-
-            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
-                $engineDAO->delete( $newCreatedDbRowStruct );
-
-                return;
-            }
-            
-        } elseif ( $newEngineStruct instanceof EnginesModel_LetsMTStruct ) {
-            // TODO: Do a simple translation request so that the system wakes up by the time the user needs it for translating
-            // TODO: Tilde MT engine allows to select multiple translation systems. Should we wake up all of them?
-            //$newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
-            //$newTestCreatedMT->wakeUp(); // ????
         } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
 
             $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );
@@ -378,6 +290,7 @@ class engineController extends ajaxController {
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
                 $this->result[ 'errors' ][] = $mt_result[ 'error' ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
+                $this->destroyUserEnginesCache();
 
                 return;
             }
@@ -400,6 +313,8 @@ class engineController extends ajaxController {
 
     /**
      * This method deletes an engine from a user's keyring
+     *
+     * @throws Exception
      */
     private function disable() {
 
@@ -415,6 +330,7 @@ class engineController extends ajaxController {
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result    = $engineDAO->disable( $engineToBeDeleted );
+        $this->destroyUserEnginesCache();
 
         if ( !$result instanceof EnginesModel_EngineStruct ) {
             $this->result[ 'errors' ][] = [ 'code' => -9, 'message' => "Deletion failed. Generic error" ];
@@ -434,27 +350,7 @@ class engineController extends ajaxController {
     private function execute() {
 
         $tempEngine  = null;
-        $validEngine = true;
-
-        switch ( strtolower( $this->provider ) ) {
-            case strtolower( Constants_Engines::LETSMT ):
-
-                /**
-                 * Create a record of type LetsMT
-                 */
-                $tempEngineRecord = EnginesModel_LetsMTStruct::getStruct();
-
-                $tempEngineRecord->name                            = $this->name;
-                $tempEngineRecord->uid                             = $this->user->uid;
-                $tempEngineRecord->type                            = Constants_Engines::MT;
-                $tempEngineRecord->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
-                $tempEngineRecord->extra_parameters[ 'system_id' ] = $this->engineData[ 'system_id' ];
-                //$tempEngineRecord->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
-
-                break;
-            default:
-                $validEngine = false;
-        }
+        $validEngine = false;
 
         if ( !$validEngine ) {
             $this->result[ 'errors' ][] = [ 'code' => -4, 'message' => "Engine not allowed" ];
@@ -462,33 +358,49 @@ class engineController extends ajaxController {
             return;
         }
 
-        $tempEngine = Engine::createTempInstance( $tempEngineRecord );
-        if ( !$tempEngine instanceof Engines_AbstractEngine ) {
-            $this->result[ 'errors' ][] = [ 'code' => -12, 'message' => "Creating engine failed. Generic error" ];
+        // this code is commented because EnginesModel_LetsMTStruct was removed
 
-            return;
-        }
-        $functionParams = $this->engineData[ 'functionParams' ];
-
-        $function = $this->engineData[ 'function' ];
-        if ( empty( $function ) ) {
-            $this->result[ 'errors' ][] = [ 'code' => -10, 'message' => "No function specified" ];
-
-            return;
-        } elseif ( empty( self::$allowed_execute_functions[ strtolower( $this->provider ) ] )
-                || !in_array( $function, self::$allowed_execute_functions[ strtolower( $this->provider ) ] ) ) {
-            $this->result[ 'errors' ][] = [ 'code' => -11, 'message' => "Function not allowed" ];
-
-            return;
-        }
-
-        $executeResult = $tempEngine->$function( $functionParams );
-        if ( isset( $executeResult[ 'error' ][ 'code' ] ) ) {
-            $this->result[ 'errors' ][] = $executeResult[ 'error' ];
-
-            return;
-        }
-        $this->result[ 'data' ][ 'result' ] = $executeResult;
+//        $tempEngine = Engine::createTempInstance( $tempEngineRecord );
+//        if ( !$tempEngine instanceof Engines_AbstractEngine ) {
+//            $this->result[ 'errors' ][] = [ 'code' => -12, 'message' => "Creating engine failed. Generic error" ];
+//
+//            return;
+//        }
+//        $functionParams = $this->engineData[ 'functionParams' ];
+//
+//        $function = $this->engineData[ 'function' ];
+//        if ( empty( $function ) ) {
+//            $this->result[ 'errors' ][] = [ 'code' => -10, 'message' => "No function specified" ];
+//
+//            return;
+//        } elseif ( empty( self::$allowed_execute_functions[ strtolower( $this->provider ) ] )
+//                || !in_array( $function, self::$allowed_execute_functions[ strtolower( $this->provider ) ] ) ) {
+//            $this->result[ 'errors' ][] = [ 'code' => -11, 'message' => "Function not allowed" ];
+//
+//            return;
+//        }
+//
+//        $executeResult = $tempEngine->$function( $functionParams );
+//        if ( isset( $executeResult[ 'error' ][ 'code' ] ) ) {
+//            $this->result[ 'errors' ][] = $executeResult[ 'error' ];
+//
+//            return;
+//        }
+//        $this->result[ 'data' ][ 'result' ] = $executeResult;
     }
 
+    /**
+     * Destroy cache for engine users query
+     *
+     * @throws Exception
+     */
+    private function destroyUserEnginesCache()
+    {
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineStruct = EnginesModel_EngineStruct::getStruct();
+        $engineStruct->uid = $this->user->uid;
+        $engineStruct->active = true;
+
+        $engineDAO->destroyCache($engineStruct);
+    }
 }

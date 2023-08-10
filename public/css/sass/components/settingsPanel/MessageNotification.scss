@@ -1,0 +1,32 @@
+.settingsPanel-notification {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  justify-content: space-between;
+  padding: 15px 10px;
+  border: 1px solid $grey8;
+  margin: 15px 0;
+  > div {
+    display: flex;
+    gap: 4px;
+  }
+  p {
+    text-align: left;
+    margin: 0;
+  }
+  &.settingsPanel-notification_success {
+    border-top: 3px solid $greenDefault;
+    background-color: $greenDefaultTransparent2;
+  }
+  &.settingsPanel-notification_warning {
+    border-top: 3px solid #ffcc01;
+    background-color: $orangeDefaultTransparent2;
+  }
+  &.settingsPanel-notification_error {
+    border-top: 3px solid $redDefault;
+    background-color: $redDefaultTransparent;
+  }
+  .button-close {
+    padding: 2px 4px;
+  }
+}

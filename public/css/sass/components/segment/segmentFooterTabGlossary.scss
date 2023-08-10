@@ -25,6 +25,7 @@
     }
     .select {
       border-radius: 4px;
+      line-height: 16px;
     }
     .select__dropdown-wrapper .custom-dropdown {
       margin-top: 0;
@@ -74,6 +75,8 @@
           background-color: $grey8;
         }
         .button-create-glossary-key {
+          width: 100%;
+          text-align: left;
           color: $grey6;
           font-style: italic;
           font-size: 14px;

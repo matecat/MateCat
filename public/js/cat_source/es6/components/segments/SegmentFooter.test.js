@@ -300,7 +300,6 @@ afterAll(() => {
 require('../../../ui.core')
 require('../../../ui.segment')
 UI.start = () => {}
-UI.checkCrossLanguageSettings = () => {}
 
 const props = {
   segment: JSON.parse(
@@ -365,11 +364,11 @@ xtest('Rendering elements', () => {
   expect(screen.getByTestId('alternatives')).toHaveClass('hide')
 })
 
-xtest('Add tab', () => {
-  UI.crossLanguageSettings = {primary: 'it-IT'}
+test('Add tab', () => {
+  const multiMatchLangs = {primary: 'it-IT'}
   UI.registerFooterTabs()
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
     </SegmentContext.Provider>,
   )
@@ -380,11 +379,11 @@ xtest('Add tab', () => {
   expect(screen.getByTestId('multiMatches')).toBeInTheDocument()
 })
 
-xtest('Remove tab', () => {
-  UI.crossLanguageSettings = undefined
+test('Remove tab', () => {
+  const multiMatchLangs = undefined
   UI.registerFooterTabs()
   render(
-    <SegmentContext.Provider value={{segment: props.segment}}>
+    <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
     </SegmentContext.Provider>,
   )

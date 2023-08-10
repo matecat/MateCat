@@ -1,7 +1,7 @@
 import React, {useState, useRef, useEffect, useCallback} from 'react'
 import PropTypes from 'prop-types'
 
-import {Dropdown} from './../common/Dropdown'
+import {Dropdown} from './Dropdown'
 import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 

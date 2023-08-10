@@ -306,6 +306,7 @@ class newProjectController extends viewController {
         $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                              = $this->user->email;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
+        $this->template->translation_engines_intento_prov_json = str_replace("\\\"","\\\\\\\"", json_encode(Intento::getProviderList())); // needed by JSON.parse() function
 
         $this->template->build_number   = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;

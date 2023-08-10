@@ -19,10 +19,16 @@ const CreateProjectActions = {
       message,
     })
   },
-  showWarning: function (message) {
+  createKeyFromTMXFile: function (message) {
     AppDispatcher.dispatch({
-      actionType: NewProjectConstants.SHOW_WARNING,
+      actionType: NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
       message,
+    })
+  },
+  enableAnalyzeButton: (value) => {
+    AppDispatcher.dispatch({
+      actionType: NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+      value,
     })
   },
 }

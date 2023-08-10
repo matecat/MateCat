@@ -1,9 +1,11 @@
 @import 'modals/instructionsModal';
 @import 'modals/tmShareModal';
+
 body.side-popup {
   overflow: hidden !important;
   font-family: Calibri, Arial, Helvetica, sans-serif;
 }
+
 h1,
 h2,
 h3,
@@ -12,12 +14,15 @@ h5,
 h6 {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
+
 h2 {
   font-size: 22px;
 }
+
 a {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
+
 ul,
 li,
 ol,
@@ -29,6 +34,7 @@ input,
 input[type='text'] input[type='email'] .input {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
+
 ::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -45,6 +51,7 @@ input[type='text'] input[type='email'] .input {
   float: left;
   cursor: pointer;
   color: $linkBlue;
+
   &:hover {
     text-decoration: none;
     color: $linkBlueHover;
@@ -155,8 +162,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding: 35px 20px 20px 50px;
 }
 
-.preferences-modal .user-dqf,
-.preferences-modal .user-gdrive {
+.preferences-modal .user-dqf {
   //border: 1px solid #ccc;
   padding: 10px 0 0 10px;
   border-radius: 4px;
@@ -168,6 +174,23 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+}
+
+.preferences-modal .user-gdrive {
+  //border: 1px solid #ccc;
+  padding: 10px;
+  background: white;
+  min-height: 50px;
+  margin-bottom: 25px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  > label {
+    font-size: 15px;
+    color: $grey1;
+  }
 }
 
 .preferences-modal .user-api {
@@ -186,9 +209,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   justify-content: space-between;
   padding: 15px 10px;
   flex-flow: row wrap;
+
   .user-api-text {
     width: 70%;
     order: 1;
+
     label,
     textarea {
       resize: none;
@@ -201,19 +226,23 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       white-space: nowrap;
       width: 100%;
       border: none;
+
       &:focus {
         outline: none;
       }
     }
   }
+
   .user-api-text-confirm-delete {
     label {
       color: $black;
     }
   }
+
   .user-api-buttons {
     order: 2;
   }
+
   .user-api-message {
     order: 3;
     flex: 1 100%;
@@ -226,26 +255,31 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     justify-content: center;
     flex-flow: row;
     padding: 10px;
+
     i {
       color: $greenDefault;
       margin-top: 8px;
       margin-left: 20px;
     }
+
     .user-api-message-content {
       margin-left: 10px;
       line-height: 30px;
     }
   }
+
   &.user-api-created {
     align-items: baseline;
 
     .user-api-text {
       display: flex;
       flex-direction: row;
+
       > div input {
         height: 38px;
         border-radius: 2px;
       }
+
       > :last-child {
         margin-left: 3px;
       }
@@ -307,6 +341,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   .dqf-container {
     padding: 40px;
   }
+
   .user-dqf {
     border: 1px solid #ccc;
     padding: 15px;
@@ -315,17 +350,20 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     min-height: 40px;
     margin-bottom: 25px;
     margin-top: 10px;
+
     input {
       max-width: 100%;
       //color: #999 !important;
       //cursor: not-allowed;
       //background: $grey2;
     }
+
     .dqf-message {
       float: right;
       margin-top: 10px;
     }
   }
+
   .button {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     vertical-align: top;
@@ -350,16 +388,19 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     text-align: center;
     text-decoration: none;
     user-select: none;
+
     &:hover {
       background-color: #08b3de;
       box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
         0 2px 4px rgba(0, 0, 0, 0.24) !important;
     }
   }
+
   .dqf-options-container {
     h2 {
       margin-bottom: 10px;
     }
+
     width: 100%;
     overflow-y: hidden;
     padding-top: 15px;
@@ -385,6 +426,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       border: 1px solid red;
       color: black;
     }
+
     float: right !important;
     width: 65%;
     height: 30px;
@@ -401,38 +443,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-.onoffswitch-drive {
-  position: relative;
-  width: 60px;
-  zoom: 0.7;
-  margin-top: 3px;
-  float: left;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.preferences-modal .onoffswitch-drive {
-  position: absolute;
-}
-
 .user-info-form .grey-txt {
   color: $grey1;
-}
-
-.user-gdrive > label {
-  line-height: 20px;
-  float: left;
-  margin: 2px 10px 12px 65px;
-  font-size: 15px;
-  max-width: 75%;
-  text-align: left;
-  word-wrap: break-word;
-  color: $grey1;
-}
-
-.preferences-modal .user-gdrive > label {
-  margin: 4px 10px 10px 95px;
 }
 
 .user-menu-flat {
@@ -687,9 +699,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   overflow: auto;
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.4);
+
   p {
     line-height: 25px;
   }
+
   .matecat-modal-header {
     text-align: left;
     min-height: 50px;
@@ -707,6 +721,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     position: relative;
     grid-column-gap: 16px;
     align-items: center;
+
     h2 {
       margin: 0 !important;
       line-height: 30px;
@@ -717,6 +732,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       font-weight: normal;
     }
   }
+
   .modal-logo {
     background-size: inherit;
     background: url(../../img/logo_matecat_small_white.svg) no-repeat;
@@ -725,6 +741,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     width: 35px;
     height: 35px;
   }
+
   /* Modal Body */
   .matecat-modal-body {
     min-height: 50px;
@@ -735,10 +752,12 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     margin: 0 auto;
     overflow: hidden;
     text-align: left;
+
     h1 {
       text-align: center;
     }
   }
+
   /* Modal Footer */
   .matecat-modal-footer {
     padding: 2px 16px;
@@ -746,6 +765,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     text-align: left;
     min-height: 30px;
   }
+
   /* Modal Content */
   .matecat-modal-content {
     margin: auto;
@@ -766,6 +786,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     .half-form-left {
       margin-right: 4%;
     }
+
     .half-form {
       width: 48%;
       float: left;
@@ -790,15 +811,18 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   height: 342px;
   overflow: auto;
   background-color: unset;
+
   .modal-logo {
     width: 34px;
   }
+
   .matecat-modal-content {
     width: 320px;
     min-width: unset;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
       0 2px 4px rgba(0, 0, 0, 0.24) !important;
   }
+
   .matecat-modal-header {
     text-align: left;
     min-height: 32px;
@@ -814,27 +838,34 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     grid-template-columns: 35px 1fr 24px;
     position: relative;
     grid-column-gap: 16px;
+
     h2 {
       font-size: 21px;
     }
   }
+
   .matecat-modal-body {
     h1 {
       font-size: 1.7rem;
     }
+
     .matecat-modal-textarea {
       padding: 0;
     }
+
     .matecat-modal-middle {
       padding: 0 20px;
     }
+
     .matecat-modal-top,
     .matecat-modal-bottom {
       padding: 15px 17px;
     }
+
     .ui.button {
       font-size: 15px;
     }
+
     .ui.button.cancel-button {
       //margin-right: 45px;
     }
@@ -874,167 +905,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: red;
   text-decoration: none;
   cursor: pointer;
-}
-
-/***********************/
-
-/* On-off switch */
-
-.onoffswitch {
-  position: relative;
-  width: 60px;
-  zoom: 0.7;
-  margin-top: 1px;
-  float: left;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.onoffswitch-checkbox {
-  display: none;
-}
-
-.onoffswitch-label {
-  display: block !important;
-  overflow: hidden;
-  cursor: pointer !important;
-  border: 2px solid #ccc;
-  border-radius: 20px;
-  height: 30px !important;
-  padding-left: initial !important;
-  margin-right: -2px;
-  box-sizing: content-box;
-}
-
-.onoffswitch-label:before,
-.onoffswitch-label:after {
-  border: none !important;
-}
-
-.onoffswitch-inner {
-  display: block;
-  width: 200%;
-  margin-left: -100%;
-  transition: margin 0.2s ease-out 0s;
-}
-
-.onoffswitch-inner:before,
-.onoffswitch-inner:after {
-  display: block;
-  float: left;
-  width: 50%;
-  height: 30px;
-  padding: 0;
-  text-align: left;
-  line-height: 30px;
-  font-size: 15px;
-  color: white;
-  font-weight: bold;
-  box-sizing: border-box;
-  border-radius: 16px;
-}
-
-.onoffswitch-inner:before {
-  content: '';
-  padding-left: 10px;
-  background-color: $linkBlue;
-  color: #ffffff;
-  opacity: 0;
-  transition: opacity 0.3s ease-in 0s;
-}
-
-.onoffswitch-inner:after {
-  content: '';
-  padding-right: 7px;
-  background-color: #eeeeee;
-  color: #999999;
-  text-align: right;
-}
-
-.onoffswitch-switch {
-  display: block;
-  width: 22px;
-  margin: 4px;
-  background: #ffffff;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 25px;
-  border: 2px solid #ccc;
-  border-radius: 20px;
-  transition: all 0.2s ease-out 0s;
-}
-
-.onoffswitch-label-status-active {
-  display: none;
-  font-weight: bold;
-  color: $linkBlue;
-}
-
-.onoffswitch-label-status-inactive,
-.onoffswitch-label-status-unavailable {
-  display: block;
-  color: #999999;
-}
-
-.onoffswitch-label:hover {
-  border-color: #a1a1a1;
-}
-
-.onoffswitch-label-status-active,
-.onoffswitch-label-status-inactive,
-.onoffswitch-label-status-unavailable {
-  position: absolute;
-  left: 80px;
-  font-size: 24px;
-  top: 6px;
-  line-height: 20px;
-}
-
-.onoffswitch-label-status-unavailable {
-  display: none;
-}
-
-.option-unavailable .onoffswitch-label-status-unavailable {
-  display: inline;
-}
-
-.option-unavailable .onoffswitch-label-status-inactive {
-  display: none;
-}
-
-.onoffswitch-checkbox:checked
-  + .onoffswitch-label
-  .onoffswitch-label-status-active {
-  display: block;
-}
-
-.onoffswitch-checkbox:checked
-  + .onoffswitch-label
-  .onoffswitch-label-status-inactive {
-  display: none;
-}
-
-.onoffswitch-label-ok {
-  display: block;
-  position: absolute;
-  right: -50px;
-}
-
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-ok {
-  display: none;
-}
-
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
-  margin-left: 0;
-}
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner:before {
-  opacity: 1;
-}
-
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
-  right: 0px;
 }
 
 /* buttons */
@@ -1133,6 +1003,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   font-variant: normal;
   text-transform: none;
   line-height: 1;
+
   &:hover {
     color: $darkBlueTransparent;
   }
@@ -1146,6 +1017,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .x-popup2:before {
   content: '\f057';
 }
+
 .matecat-modal-content,
 .matecat-modal-overlay-content {
   font-size: 16px;
@@ -1155,8 +1027,10 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   .matecat-modal-bottom,
   .matecat-modal-top {
     padding: 25px;
+
     .ui.members-list {
       min-height: 45px;
+
       .ui.divided.list {
         top: 0px;
         left: 0px;
@@ -1167,10 +1041,12 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         max-height: 210px;
         position: relative !important;
         padding: 0;
+
         .item {
           border-top: none !important;
         }
       }
+
       ::-webkit-scrollbar {
         width: 10px;
       }
@@ -1189,9 +1065,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         background: #a7a5a5;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
+
       ::-webkit-scrollbar-thumb:window-inactive {
         background: #a7a5a5;
       }
+
       &.team {
         .item {
           padding: 5px 5px 5px 0;
@@ -1200,10 +1078,12 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             .mini.ui.button.right.floated {
               display: inherit;
             }
+
             .content.pending-msg {
               display: none;
             }
           }
+
           .image {
             width: 40px !important;
             max-width: 40px;
@@ -1218,15 +1098,18 @@ a.ui.primary.right.floated.button.tiny.register-ok {
           .content.user {
             font-weight: bold;
             width: 340px;
+
             &.invited {
               font-weight: 100;
             }
           }
+
           .content.email-user-invited {
             font-weight: 100;
             font-size: 14px;
             color: $grey1;
           }
+
           .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
@@ -1250,13 +1133,16 @@ a.ui.primary.right.floated.button.tiny.register-ok {
               box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
+
             &:focus {
               box-shadow: none !important;
             }
+
             &:active {
               box-shadow: none !important;
             }
           }
+
           .mini.ui.primary.button {
             border: 1px solid #797979;
             border-radius: 2px;
@@ -1266,16 +1152,19 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             padding: 6px 15px;
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
               sans-serif;
+
             i {
               opacity: 1;
             }
           }
+
           .ui.primary.button {
             border: 1px solid #797979;
             border-radius: 2px;
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
               sans-serif;
           }
+
           .mini.ui.icon.button {
             width: 30px;
             height: 30px;
@@ -1313,9 +1202,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     padding: 10px 10px;
     font-size: 17px;
   }
+
   .matecat-modal-textarea {
     padding: 10px 10px;
     resize: none;
+
     textarea {
       padding: 10px;
       border: 1px solid grey;
@@ -1346,6 +1237,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     font-size: 18px;
     margin-right: 0px;
     border-radius: 2px;
+
     &.primary.button {
       border-radius: 2px;
     }
@@ -1369,6 +1261,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 .btn-cancel.outsource-cancel-date {
   height: 16px;
+
   &:hover {
     color: #333333;
   }
@@ -1379,11 +1272,13 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     margin-bottom: 15px;
   }
 }
+
 .register-modal {
   .form-divider {
     margin-top: 25px;
     margin-bottom: 10px;
   }
+
   .condition-google {
     font-size: 12px;
   }
@@ -1421,6 +1316,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
   .matecat-modal-middle {
     padding: 0 25px;
+
     .ui.primary.button,
     .ui.red.button {
       font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -1428,41 +1324,48 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       border-radius: 2px;
     }
   }
+
   .create-team-modal {
     .ui.members-list {
       .ui.divided.list {
         .item:first-child {
         }
       }
+
       .ui.divided.list.disabled {
         border: none;
         background-color: white;
       }
     }
   }
+
   .modify-team-modal {
     .matecat-modal-top {
       .ui.fluid.input {
         i {
           display: none;
         }
+
         &:hover {
           i {
             display: inherit;
           }
         }
       }
+
       .ui.icon.input > input:focus ~ i.icon {
         opacity: 1;
         display: inherit;
       }
     }
+
     .ui.members-list {
       //min-height: 180px;
       min-height: initial !important;
 
       .ui.divided.list {
         height: 210px;
+
         .item:first-child {
           //border-top: none !important;
         }
@@ -1509,9 +1412,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
           color: $grey6;
         }
       }
+
       .reset_button--hidden {
         visibility: hidden;
       }
+
       .reset_button--visible {
         visibility: visible;
       }
@@ -1523,29 +1428,36 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       padding: 7px;
     }
   }
+
   .change-team-modal {
     height: 305px;
+
     .matecat-modal-top {
       .move-ribbon {
         background: #e8e8e8;
         padding: 8px 15px;
         border-radius: 4px;
+
         .project-name {
           font-weight: 600;
         }
+
         .project-id {
           float: right;
         }
       }
     }
+
     .button {
       font-size: 18px;
       padding: 11px 22px;
     }
+
     .dropdown {
       .menu {
         max-height: 85px !important;
       }
+
       ::-webkit-scrollbar {
         width: 10px;
       }
@@ -1564,9 +1476,11 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         background: #a7a5a5;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
+
       ::-webkit-scrollbar-thumb:window-inactive {
         background: #a7a5a5;
       }
+
       .default.text {
         color: #000;
       }
@@ -1593,39 +1507,48 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
   .matecat-modal-top {
     padding: 15px 25px;
   }
+
   .matecat-modal-middle {
     padding: 10px 15px;
     max-height: 530px;
     overflow: auto;
+
     .shortcut-list {
       &:not(:first-of-type) {
         padding-top: 10px;
       }
+
       h2 {
         padding-left: 10px;
         padding-bottom: 10px;
         border-bottom: 1px solid #dee7e8;
       }
+
       .shortcut-item-list {
         .shortcut-item {
           padding: 7px 0 7px 10px;
           margin: 3px 0;
+
           &:first-child {
             margin-top: 10px;
           }
+
           &:hover {
             background: #f1f1f1;
           }
+
           .shortcut-title,
           .shortcut-keys {
             display: inline-block;
             width: 50%;
           }
+
           .shortcut-keys {
             .shortcuts {
               text-align: right;
               color: #03bdee;
             }
+
             .mac,
             .standard {
               .keys {
@@ -1640,111 +1563,147 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 font-size: 12px;
                 color: white;
                 border-radius: 2px;
+
                 &:first-child {
                   margin-left: 0px !important;
                 }
+
                 &.ctrl:after {
                   content: 'Ctrl';
                 }
+
                 &.Meta:after {
                   content: 'Cmd';
                 }
+
                 &.shift:after {
                   content: 'Shift';
                 }
+
                 &.return:after {
                   content: 'Enter';
                 }
+
                 &.meta:after {
                   content: 'Cmd';
                 }
+
                 &.alt:after {
                   content: 'Alt';
                 }
+
                 &.option:after {
                   content: 'Option';
                 }
+
                 &.\31 :after {
                   content: '1';
                 }
+
                 &.\32 :after {
                   content: '2';
                 }
+
                 &.\33 :after {
                   content: '3';
                 }
+
                 &.a:after {
                   content: 'A';
                 }
+
                 &.c:after {
                   content: 'C';
                 }
+
                 &.h:after {
                   content: 'H';
                 }
+
                 &.i:after {
                   content: 'I';
                 }
+
                 &.l:after {
                   content: 'L';
                 }
+
                 &.n:after {
                   content: 'N';
                 }
+
                 &.p:after {
                   content: 'P';
                 }
+
                 &.z:after {
                   content: 'Z';
                 }
+
                 &.f:after {
                   content: 'F';
                 }
+
                 &.k:after {
                   content: 'K';
                 }
+
                 &.y:after {
                   content: 'Y';
                 }
+
                 &.s:after {
                   content: 'S';
                 }
+
                 &.t:after {
                   content: 'T';
                 }
+
                 &.up:after {
                   content: 'Arrow up';
                 }
+
                 &.right:after {
                   content: 'Arrow right';
                 }
+
                 &.left:after {
                   content: 'Arrow left';
                 }
+
                 &.down:after {
                   content: 'Arrow down';
                 }
+
                 &.pagedown:after {
                   content: 'Page Down';
                 }
+
                 &.pageup:after {
                   content: 'Page Up';
                 }
+
                 &.previous:after {
                   content: '<';
                 }
+
                 &.next:after {
                   content: '>';
                 }
+
                 &.home:after {
                   content: 'Home';
                 }
+
                 &.arrows:after {
                   content: 'Arrows';
                 }
+
                 &.arrows-enter:after {
                   content: 'Arrows/Enter';
                 }
+
                 &.space:after {
                   content: 'Space';
                 }
@@ -1755,6 +1714,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
       }
     }
   }
+
   .matecat-modal-bottom {
     padding: 15px 25px;
   }
@@ -1762,31 +1722,38 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
 
 .copy-source-modal {
   padding: 30px 25px 20px;
+
   h3 {
     font-size: 20px;
   }
+
   .buttons-popup-container {
     padding: 25px 0 30px;
     border-bottom: 1px solid #f2f4f7;
+
     label {
       font-size: 18px;
       margin-right: 10px;
       position: relative;
       top: 2px;
     }
+
     .btn-cancel,
     .btn-ok {
       padding: 10px 15px;
       margin-left: 5px;
     }
+
     .btn-cancel {
       margin-right: 16px;
       font-weight: 100;
     }
   }
+
   .boxed {
     padding: 15px 0 0;
     text-align: right;
+
     label {
       position: relative;
       top: 1px;
@@ -1794,10 +1761,12 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     }
   }
 }
+
 .matecat-modal-content {
   .boxed {
     padding: 25px 15px 0;
     text-align: left;
+
     label {
       position: relative;
       top: -2px;
@@ -1812,16 +1781,20 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     display: inline-block;
     vertical-align: middle;
   }
+
   label {
     margin-left: 5px;
   }
+
   .text-container-top {
     padding: 20px !important;
     margin-top: 0 !important;
   }
+
   .popup p {
     margin-bottom: 0;
   }
+
   .boxed {
     padding-right: 20px;
     padding-bottom: 0 !important;
@@ -1831,6 +1804,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
 .alert_modal {
   .matecat-modal-body {
     padding: 30px !important;
+
     p {
       line-height: 25px;
     }
