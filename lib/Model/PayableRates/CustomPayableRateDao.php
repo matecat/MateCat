@@ -10,6 +10,7 @@ use PDO;
 class CustomPayableRateDao extends DataAccess_AbstractDao
 {
     const TABLE = 'payable_rate_templates';
+    const TABLE_JOB_PIVOT = 'job_custom_payable_rates';
 
     const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
     const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
@@ -247,5 +248,27 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     {
         $stmt = $conn->prepare( self::query_by_uid_name );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name,  ] );
+    }
+
+    /**
+     * @param int $modelId
+     * @param int $idJob
+     * @return string
+     */
+    public static function assocModelToJob($modelId, $idJob)
+    {
+        $sql = "INSERT INTO " . self::TABLE_JOB_PIVOT .
+            " ( `id_job`, `custom_payable_rate_model_id` ) " .
+            " VALUES " .
+            " ( :id_job, :model_id ); ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+            'id_job'   => $idJob,
+            'model_id' => $modelId
+        ] );
+
+        return $conn->lastInsertId();
     }
 }

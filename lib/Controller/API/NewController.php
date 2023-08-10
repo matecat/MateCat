@@ -1083,19 +1083,35 @@ class NewController extends ajaxController {
     {
         $payableRateModelTemplate = null;
 
-        if ( !empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
-
-            if ( empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
-                throw new \Exception('`payable_rate_template_name` param is MANDATORY when using `payable_rate_template_id`');
+        if( !empty($this->postInput[ 'payable_rate_template_name' ] ) ){
+            if ( empty( $this->postInput[ 'payable_rate_template_id' ] )) {
+                throw new \Exception('`payable_rate_template_id` param is missing');
             }
+        }
 
-            $payableRateModelTemplate = CustomPayableRateDao::getById($this->postInput[ 'payable_rate_template_id' ]);
+        if( !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
+            if ( empty( $this->postInput[ 'payable_rate_template_name' ] )) {
+                throw new \Exception('`payable_rate_template_name` param is missing');
+            }
+        }
 
-            if(null === $payableRateModelTemplate or $payableRateModelTemplate->uid !== $this->getUser()->uid){
+        if( !empty($this->postInput[ 'payable_rate_template_name' ] ) and !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
+
+            $payableRateTemplateId = $this->postInput[ 'payable_rate_template_id' ];
+            $payableRateTemplateName = $this->postInput[ 'payable_rate_template_name' ];
+            $userId = $this->getUser()->uid;
+
+            $payableRateModelTemplate = CustomPayableRateDao::getById($payableRateTemplateId);
+
+            if(null === $payableRateModelTemplate){
                 throw new \Exception('Payable rate model id not valid');
             }
 
-            $payableRateModelTemplate = CustomPayableRateDao::getByUidAndName($this->getUser()->uid, $this->postInput[ 'payable_rate_template_name' ]);
+            if($payableRateModelTemplate->uid !== $userId){
+                throw new \Exception('Payable rate model is not belonging to the current user');
+            }
+
+            $payableRateModelTemplate = CustomPayableRateDao::getByUidAndName($userId, $payableRateTemplateName);
 
             if(null === $payableRateModelTemplate){
                 throw new \Exception('Payable rate model name not matching or not belonging to the current user');
