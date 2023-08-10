@@ -135,7 +135,7 @@ abstract class Analysis_AbstractStatus {
 
             // is outsource available?
             if($target === null or $segInfo['target'] !== $target){
-                $outsourceAvailable = $this->featureSet->filter( 'outsourceAvailable', $segInfo['target'], $segInfo['id_customer'] );
+                $outsourceAvailable = $this->featureSet->filter( 'outsourceAvailable', $segInfo['target'], $segInfo['id_customer'], $jid );
 
                 // if the hook is not triggered by any plugin
                 if(!is_bool($outsourceAvailable)){
