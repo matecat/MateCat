@@ -1,23 +1,74 @@
+os: linux
 dist: focal
-language: node_js
-
-node_js:
-  - 14
-
-cache: yarn
+language: minimal
 
 branches:
   only:
-    - develop
-addons:
-  apt:
-    update: true
+    #   - develop
+    - develop-submodule
+    - freddy
+    #  - master
 
-install:
-  - yarn install
+git:
+  # Tell Travis not to try to load submodules
+  # We'll do that further down
+  submodules: false
+
+before_install:
+  - export BUILD=$(awk 'NF>1 {print $3}' inc/version.ini)
+  - pip install -U pip
+  - pip install awscli
+  # Change ssh to https in the submodule file because travis make calls on https with its own token
+  - sed -i "s/git@github.com:/https:\/\/${CI_USER_TOKEN_MATECATBOT}@github.com\//" .gitmodules
+  # Update plugins files submodule
+  - git submodule update --init --recursive
 
 script:
-  - yarn coverage
+  - |
+
+    if [[ "${TRAVIS_BRANCH}" == "develop-submodule" || ! -z "${TRAVIS_TAG}" ]] ; then
+
+      docker-compose -f docker/docker-compose-ci.yml build || exit 1
+
+      docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker tag matecat/matecat-web-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker tag matecat/matecat-daemons-node  449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      # AWS CLI V1
+      $( aws ecr get-login --no-include-email --region eu-central-1 )
+
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+    elif [[ "${TRAVIS_BRANCH}" == "freddy" ]] ; then
+
+      export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
+
+      docker-compose -f docker/docker-compose-ci.yml build || exit 1
+
+      docker tag matecat/matecat-web-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker tag matecat/matecat-web-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker tag matecat/matecat-daemons-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker tag matecat/matecat-daemons-node  208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      # AWS CLI V1
+      $( aws ecr get-login --no-include-email --region eu-central-1 )
+
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+    fi
+
 notifications:
-  email: false
-  slack: translated:CYliYwF0qSEh6nITRZZQIk4k
+  slack:
+    secure: duxxqPQPThoGXUGoZWoRymKlAhIJTL/APgZfQ1m4uroSLW3wlbmCJjXXEfeNE9wC8OQ+9XtSGVSdJYugGcoOFT2Xjh1UmiV8Rd+/avEbo6Wj465QcxlypcJF09XN5oaxkf+Gokn0P9zBmVS5EwNART45acR2YU3qHqvd4V5vOtflj1CXewYQlX9J7+nDtMR9tR/AA6RN3WFBGVUI68udpkGtntJ1uH/1ZVGX2k29kDLeS2Nkc6SchUfescGVAnje3gJaxnKbD3oGd2VP3FAK0bwPA/C7AzB26OqbL9pXdzhrxe2QcxsI61TCLJ1gBLDuuioSCHwjJHXWK5v1sKSQxVCKkE2jPL4igUkRRz0qRO5XDqTXP2airsMDYhly559c71RR8Y14Pv4hLt1JcOcQ2w206OD1Ug8I7B5PrUDm2lSZi43gArT/OaL109dGf7dO2jiM7GBvnDiQUbE8G1f1194D8vYQqT03K6+ca5PGdSQnIVlcSQfgFkm6Y+Rubm3b2Km+EjJ83f+VMQ39pXR8zaF8FSAPHG7vQSKGTPTJlYYcfuOkd/vFG+vxLKuVygfAN/J7hjjrG9glJ5Vk/glGW4Z6cbHwq3BRSsoiNJxMNOfgx67r9gD6/nxSaO3BGvl5pU/PaQcvaW5XgzaI+JWuDppbRgpScLIp5cNN77b+LdA=

@@ -71,7 +71,7 @@ class GlossaryWorker extends AbstractWorker {
         $response = $client->glossaryCheck($payload['source'], $payload['target'], $payload['source_language'], $payload['target_language'], $payload['keys']);
         $matches = $response->matches;
 
-        if($matches['id_segment'] === null or $matches['id_segment'] === ""){
+        if(empty($matches['id_segment'])){
             $id_segment = isset($payload['id_segment']) ? $payload['id_segment'] : null;
             $matches['id_segment'] = $id_segment;
         }
@@ -287,7 +287,8 @@ class GlossaryWorker extends AbstractWorker {
             $matches['id_segment'] = isset($payload['id_segment']) ? $payload['id_segment'] : null;
         }
 
-        $key = $matches['terms']['metadata']['key'];
+        // could not have metadata, suppress warning
+        $key = @$matches['terms']['metadata']['key'];
 
         foreach ($tmKeys as $index => $tmKey){
             if($tmKey['key'] === $key and $tmKey['is_shared'] === false){

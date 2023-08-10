@@ -1865,7 +1865,8 @@ class ProjectManager {
 
                                     if ( $this->features->filter( 'populatePreTranslations', true ) ) {
 
-                                        $state = $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
+                                        // could not have attributes, suppress warning
+                                        $state = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //

@@ -31,7 +31,7 @@ const logger = winston.createLogger( {
     level: 'info',
     format: winston.format.json(),
     transports: [
-        new winston.transports.Console( {level: 'debug'} ),
+        new winston.transports.Console( {level: 'info'} ),
         new winston.transports.File( {filename: path.resolve( __dirname, config.log.file ), level: config.log.level} ),
     ],
 } );
