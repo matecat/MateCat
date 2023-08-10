@@ -946,9 +946,38 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         // Engines_Results_MyMemory_TagProjectionResponse class
         $this->_config[ 'dataRefMap' ] = isset($config[ 'dataRefMap' ]) ? $config[ 'dataRefMap' ] : [];
 
+        //tag replace
+        $source_string = $config['source'];
+        $target_string = $config['target'];
+        $re2 = '<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>';
+        preg_match_all("/" . $re2 .'/siU', $source_string, $source_matches_tag,PREG_OFFSET_CAPTURE, 0);
+        preg_match_all("/" . $re2 .'/siU', $target_string, $target_matches_tag,PREG_OFFSET_CAPTURE, 0);
+
+        $map=[];
+        foreach ($source_matches_tag[0] as $source_key=>$source_tag){
+            foreach ($target_matches_tag[0] as $target_tag){
+                if($source_tag[0] == $target_tag[0]){
+                    $replace = " " . $source_matches_tag[2][$source_key][0] . " ";
+                    $source_string = str_replace($source_tag[0], $replace, $source_string);
+                    $target_string = str_replace($source_tag[0], $replace, $target_string);
+                    $map[$replace] = $source_tag[0];
+                }
+            }
+        }
+
+        //formatting strip
+        $re = '(&#09;|\p{Zs}|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
+        //trim chars that would have been lost with the guess tag
+        preg_match("/" . $re .'$/', $target_string, $r_matches,PREG_OFFSET_CAPTURE, 0);
+        preg_match("/^" . $re . '/', $target_string, $l_matches,PREG_OFFSET_CAPTURE, 0);
+        $r_index = (isset($r_matches[0][1])) ? $r_matches[0][1] : mb_strlen($target_string);
+        $l_index = (isset($l_matches[0][1])) ? $l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
+        $r_matches =    (isset($r_matches[0][0])) ? $r_matches[0][0] : '';
+        $l_matches =    (isset($l_matches[0][0])) ? $l_matches[0][0] :  '';
+
         $parameters                 = [];
-        $parameters[ 's' ]          = $config[ 'source' ];
-        $parameters[ 't' ]          = $config[ 'target' ];
+        $parameters[ 's' ]          = $source_string;
+        $parameters[ 't' ]          = substr($target_string, $l_index, $r_index - $l_index);
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
         $this->_setAdditionalCurlParams( [
@@ -956,10 +985,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ] );
 
         $this->engineRecord->base_url = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
-
         $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
-
         $this->call( 'tags_projection', $parameters );
+
+        if (!empty($this->result->responseData)){
+            //formatting replace
+            $this->result->responseData = $l_matches . $this->result->responseData . $r_matches;
+            //tag replace
+            foreach ($map as $key=>$value){
+                $this->result->responseData = str_replace($key, $value, $this->result->responseData);
+            }
+        }
 
         return $this->result;
 
