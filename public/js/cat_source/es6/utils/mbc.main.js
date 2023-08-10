@@ -518,7 +518,7 @@ MBC.init = function () {
   })(jQuery, config, window, MBC)
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function (event) {
   if (MBC.enabled()) {
     MBC.init()
   }

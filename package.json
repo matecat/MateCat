@@ -28,7 +28,7 @@
     "prop-types": "^15.6.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-hook-form": "^7.43.9",
+    "react-hook-form": "^7.45.4",
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",

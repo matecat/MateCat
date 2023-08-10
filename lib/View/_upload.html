@@ -30,45 +30,51 @@
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
 
-    <script type="text/javascript" src="${basepath}public/js/build/libs_upload.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/build/upload.js?build=${build_number}"></script>
+
+    <script type="text/javascript" src="${basepath}public/js/lib/fileupload/libs_fileupload-min.js?build=${build_number}"></script>
+
 
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
     <script type="text/javascript" >
-        /*<![CDATA[*/
-        var config = {
-            basepath: '${basepath | string:/}',
-            hostpath: '${hostpath | string:/}',
-            unsupportedFileTypes: '${unsupported_file_types}',
-            allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
-            isOpenAiEnabled: ${isOpenAiEnabled},
-            conversionEnabled: ${conversion_enabled},
-            analysisEnabled: ${volume_analysis_enabled},
-            maxFileSize: ${maxFileSize},
-            maxTMXFileSize: ${maxTMXFileSize},
-            maxNumberFiles: ${maxNumberFiles},
-            ownerIsMe: true,
-            blueimp_dataType: 'json',
-            defaults : {
-                tag_projection : ${tag_projection_default},
-                speech2text : false,
-                lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
-            },
-            lexiqa_languages: ${lexiqa_languages| string:[]},
-            tag_projection_languages: ${tag_projection_languages},
-            languages_array : ${languages_array},
-            private_keys: ${user_keys_obj | string: []},
-            currentTargetLang: '${currentTargetLang | string: []}',
-            currentSourceLang: '${currentSourceLang | string: []}',
-            enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-            subject_array: ${subjects | string:[]]},
-            formats_number: ${formats_number},
-            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-            supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
-        };
-        /*]]>*/
+      /*<![CDATA[*/
+      var config = {
+        basepath: '${basepath | string:/}',
+        hostpath: '${hostpath | string:/}',
+        unsupportedFileTypes: '${unsupported_file_types}',
+        allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
+        isOpenAiEnabled: ${isOpenAiEnabled},
+        conversionEnabled: ${conversion_enabled},
+        analysisEnabled: ${volume_analysis_enabled},
+        maxFileSize: ${maxFileSize},
+        maxTMXFileSize: ${maxTMXFileSize},
+        maxNumberFiles: ${maxNumberFiles},
+        ownerIsMe: true,
+        blueimp_dataType: 'json',
+        defaults : {
+          tag_projection : ${tag_projection_default},
+          speech2text : false,
+          lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
+        },
+        lxq_license: '${lxq_license | string:}',
+        lexiqa_languages: ${lexiqa_languages| string:[]},
+        tag_projection_languages: ${tag_projection_languages},
+        languages_array : ${languages_array},
+        private_keys: ${user_keys_obj | string: []},
+        currentTargetLang: '${currentTargetLang | string: []}',
+        currentSourceLang: '${currentSourceLang | string: []}',
+        enableMultiDomainApi: ${enableMultiDomainApi | string:false},
+        ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
+        subject_array: ${subjects | string:[]]},
+        formats_number: ${formats_number},
+        isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
+        supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
+        not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
+        intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
+        show_tag_projection: ${show_tag_projection | string: false},
+        get_public_matches: ${get_public_matches | string: false}
+      };
+      /*]]>*/
     </script>
 </head>
 <body tal:condition="not:supportedBrowser">
@@ -597,9 +603,6 @@
 
 <div class="notifications-wrapper"></div>
 
-<div metal:use-macro="tm.html/tm_panel"></div>
-
-
 <div id="uploadCallback"></div>
 
 
@@ -607,14 +610,13 @@
 
 <script type="text/javascript">
 
-    var developerKey = '${developerKey}';
-    var clientId = '${clientId}';
+  var developerKey = '${developerKey}';
+  var clientId = '${clientId}';
 
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
 
 <div metal:use-macro="common.html/footer_includes" />
-
 </body>
 
 </html>

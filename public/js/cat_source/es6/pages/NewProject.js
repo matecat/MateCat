@@ -250,7 +250,7 @@ const NewProject = ({
 
   useEffect(() => {
     APP.checkGDriveEvents()
-    UI.addEvents()
+    //UI.addEvents()
     setGuessTagActive(
       SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
     )

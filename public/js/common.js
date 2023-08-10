@@ -298,6 +298,6 @@ window.APP = {
   },
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function (event) {
   APP.init()
 })

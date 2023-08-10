@@ -206,7 +206,8 @@ Speech2Text.init = function () {
     }
   })
 }
-$(document).ready(function () {
+
+document.addEventListener('DOMContentLoaded', function (event) {
   if (Speech2Text.enabled()) {
     Speech2Text.init()
   }

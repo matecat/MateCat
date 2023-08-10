@@ -11,7 +11,6 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global $, window, document */
-import Cookies from 'js-cookie'
 import {initFileUpload} from "../../cat_source/es6/api/initFileUpload";
 import {convertFileRequest} from "../../cat_source/es6/api/convertFileRequest";
 import CreateProjectStore from "../../cat_source/es6/stores/CreateProjectStore";
@@ -874,8 +873,8 @@ window.onbeforeunload = function ( e ) {
 
 };
 
-$( document ).ready( function () {
-    config.unsupported = unsupported();
-    checkInit();
-    UI.init();
-} );
+document.addEventListener("DOMContentLoaded", function(event) {
+  config.unsupported = unsupported();
+  checkInit();
+  UI.init();
+});

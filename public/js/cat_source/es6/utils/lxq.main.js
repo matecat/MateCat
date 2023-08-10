@@ -782,7 +782,7 @@ LXQ.init = function () {
   })(jQuery, config, window, LXQ)
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   if (LXQ.enabled()) {
     LXQ.init()
   }

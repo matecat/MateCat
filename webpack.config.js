@@ -42,7 +42,7 @@ module.exports = ({env}) => {
       rules: [
         {
           test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
+          exclude: ['/node_modules/', '/public/js/lib/fileupload/'],
           use: {
             loader: 'babel-loader',
             options: {
@@ -96,7 +96,6 @@ module.exports = ({env}) => {
         path.resolve(__dirname, 'public/js/lib/jquery-3.3.1.min.js'),
         path.resolve(__dirname, 'public/js/lib/jquery-ui.min.js'),
         path.resolve(__dirname, 'public/js/lib/jquery.hotkeys.min.js'),
-        path.resolve(__dirname, 'public/js/lib/jquery.powertip.min.js'),
         path.resolve(__dirname, 'public/js/lib/jquery-dateFormat.min.js'),
         path.resolve(__dirname, 'public/js/lib/calendar.min.js'),
         path.resolve(__dirname, 'public/js/lib/jquery.atwho.min.js'),
@@ -107,14 +106,20 @@ module.exports = ({env}) => {
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/login.js'),
-        path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/components/quality_report/QualityReport.js',
         ),
         path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
       ],
-      'upload-build': [
+      upload: [
+        path.resolve(__dirname, 'public/js/lib/fileupload/main.js'),
+        path.resolve(__dirname, 'public/js/common.js'),
+        path.resolve(__dirname, 'public/js/user_store.js'),
+        path.resolve(__dirname, 'public/js/login.js'),
+        path.resolve(__dirname, 'public/js/gdrive.upload.js'),
+        path.resolve(__dirname, 'public/js/gdrive.picker.js'),
+        path.resolve(__dirname, 'public/js/new-project.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
     },
@@ -129,6 +134,13 @@ module.exports = ({env}) => {
         filename: path.resolve(__dirname, './lib/View/revise_summary.html'),
         template: path.resolve(__dirname, './lib/View/_revise_summary.html'),
         chunks: ['qa-report', 'libs'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/upload.html'),
+        template: path.resolve(__dirname, './lib/View/_upload.html'),
+        chunks: ['libs', 'upload'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

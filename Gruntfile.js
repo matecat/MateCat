@@ -239,8 +239,6 @@ module.exports = function (grunt) {
         src: [
           basePath + 'lib/jquery-3.3.1.min.js',
           basePath + 'lib/jquery-ui.min.js',
-          basePath + 'lib/diff_match_patch.js',
-          basePath + 'lib/jquery.powertip.min.js',
           // The Templates plugin is included to render the upload/download listings
           basePath + 'lib/fileupload/tmpl.min.js',
           // The Load Image plugin is included for the preview images and image resizing functionality
