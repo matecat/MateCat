@@ -247,7 +247,6 @@ module.exports = function (grunt) {
           basePath + 'lib/jquery.hotkeys.min.js',
           basePath + 'lib/jquery.powertip.min.js',
           basePath + 'lib/jquery-dateFormat.min.js',
-          basePath + 'lib/diff_match_patch.js',
           basePath + 'lib/calendar.min.js',
           basePath + 'lib/jquery.atwho.min.js',
           basePath + 'lib/jquery.caret.min.js',
@@ -262,34 +261,24 @@ module.exports = function (grunt) {
           basePath + 'lib/jquery-ui.min.js',
           basePath + 'lib/diff_match_patch.js',
           basePath + 'lib/jquery.powertip.min.js',
-
           // The Templates plugin is included to render the upload/download listings
           basePath + 'lib/fileupload/tmpl.min.js',
-
           // The Load Image plugin is included for the preview images and image resizing functionality
           basePath + 'lib/fileupload/load-image.min.js',
-
           // The Canvas to Blob plugin is included for image resizing functionality
           basePath + 'lib/fileupload/canvas-to-blob.min.js',
-
           // jQuery Image Gallery
           basePath + 'lib/fileupload/jquery.image-gallery.min.js',
-
           // The Iframe Transport is required for browsers without support for XHR file uploads
           basePath + 'lib/fileupload/jquery.iframe-transport.js',
-
           // The basic File Upload plugin
           basePath + 'lib/fileupload/jquery.fileupload.js',
-
           // The File Upload file processing plugin
           basePath + 'lib/fileupload/jquery.fileupload-fp.js',
-
           // The File Upload user interface plugin
           basePath + 'lib/fileupload/jquery.fileupload-ui.js',
-
           // The File Upload jQuery UI plugin
           basePath + 'lib/fileupload/jquery.fileupload-jui.js',
-
           // The localization script
           basePath + 'lib/fileupload/locale.js',
           basePath + 'lib/semantic.min.js',

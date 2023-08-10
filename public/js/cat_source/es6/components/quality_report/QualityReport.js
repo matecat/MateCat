@@ -154,7 +154,7 @@ class QualityReport extends React.Component {
             {jobInfo ? (
               <div className="qr-job-summary">
                 <div className="qr-header">
-                  <h3>QR Job summary</h3>
+                  <h3>QR Job summary Ciccio</h3>
 
                   {jobInfo.get('quality_summary').size > 1 ? (
                     <div className="qr-filter-list">

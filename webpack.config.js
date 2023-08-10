@@ -2,21 +2,41 @@ const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 
-module.exports = () => {
-  const isDev = false
+module.exports = ({env}) => {
+  const isDev = env === 'development'
   return {
     target: 'web',
+    watchOptions: {
+      aggregateTimeout: 500,
+      ignored: /node_modules/,
+      poll: 500,
+    },
     output: {
-      // filename: isDev ? '[name].[fullhash].js' : '[name].[contenthash].js',
-      filename: '[name].js',
-      // sourceMapFilename: isDev ? '[name].[fullhash].js.map' : '[file].map',
-      sourceMapFilename: '[name].js.map',
+      filename: isDev ? '[name].[fullhash].js' : '[name].[contenthash].js',
+      sourceMapFilename: isDev ? '[name].[fullhash].js.map' : '[file].map',
       path: path.resolve(__dirname, 'public/build'),
-      // chunkFilename: isDev
-      //   ? '[name].[fullhash].chunk.js'
-      //   : '[name].[contenthash].chunk.js',
-      chunkFilename: '[name].chunk.js',
+      chunkFilename: isDev
+        ? '[name].[fullhash].chunk.js'
+        : '[name].[contenthash].chunk.js',
       publicPath: '/',
+    },
+    optimization: {
+      moduleIds: 'deterministic',
+      runtimeChunk: 'single',
+      /*splitChunks: {
+        cacheGroups: {
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
+            name: 'vendors-react',
+            chunks: 'all',
+          },
+          corejsVendor: {
+            test: /[\\/]node_modules[\\/](core-js)[\\/]/,
+            name: 'vendor-corejs',
+            chunks: 'all',
+          },
+        },
+      },*/
     },
     module: {
       rules: [
@@ -72,9 +92,18 @@ module.exports = () => {
       ],
     },
     entry: {
+      libs: [
+        path.resolve(__dirname, 'public/js/lib/jquery-3.3.1.min.js'),
+        path.resolve(__dirname, 'public/js/lib/jquery-ui.min.js'),
+        path.resolve(__dirname, 'public/js/lib/jquery.hotkeys.min.js'),
+        path.resolve(__dirname, 'public/js/lib/jquery.powertip.min.js'),
+        path.resolve(__dirname, 'public/js/lib/jquery-dateFormat.min.js'),
+        path.resolve(__dirname, 'public/js/lib/calendar.min.js'),
+        path.resolve(__dirname, 'public/js/lib/jquery.atwho.min.js'),
+        path.resolve(__dirname, 'public/js/lib/jquery.caret.min.js'),
+        path.resolve(__dirname, 'public/js/lib/semantic.min.js'),
+      ],
       'qa-report': [
-        path.resolve(__dirname, 'public/js/cat_source/es6/react-libs.js'),
-        path.resolve(__dirname, 'public/js/cat_source/es6/components.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/login.js'),
@@ -83,22 +112,27 @@ module.exports = () => {
           __dirname,
           'public/js/cat_source/es6/components/quality_report/QualityReport.js',
         ),
+        path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
+      ],
+      'upload-build': [
+        path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
     },
     plugins: [
       !isDev &&
         new MiniCssExtractPlugin({
-          // filename: '[name].[contenthash].css',
-          // chunkFilename: '[id].[contenthash].css',
-          filename: '[name].css',
-          chunkFilename: '[id].css',
+          filename: '[name].[contenthash].css',
+          chunkFilename: '[id].[contenthash].css',
           ignoreOrder: true,
         }),
-      /*new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, 'lib/View/revise_summary.html'),
-        template: './lib/View/revise_summary_template.html',
-        chunks: ['qa-report'],
-      }),*/
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/revise_summary.html'),
+        template: path.resolve(__dirname, './lib/View/_revise_summary.html'),
+        chunks: ['qa-report', 'libs'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
     ],
+    devtool: isDev ? 'inline-source-map' : 'source-map',
   }
 }

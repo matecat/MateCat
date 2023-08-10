@@ -9,15 +9,6 @@ module.exports = {
     'no-undef': 'warn',
   },
   overrides: [
-    // nodejs 9.11 related files
-    {
-      files: ['*.js', '**/support_scripts/**/*.js'],
-      parserOptions: {
-        ecmaVersion: nodeEcmaVersion,
-      },
-      env: {node: true},
-    },
-
     // jest related files
     {
       files: ['**/*.jest.js', '**/*.test.js', '**/mocks/**/*.js'],

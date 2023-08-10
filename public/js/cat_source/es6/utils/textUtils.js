@@ -2,6 +2,7 @@ import _ from 'lodash'
 import {Base64} from 'js-base64'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CommonUtils from './commonUtils'
+import diff_match_patch from 'diff-match-patch'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
