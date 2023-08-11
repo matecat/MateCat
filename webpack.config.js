@@ -42,7 +42,7 @@ module.exports = ({env}) => {
       rules: [
         {
           test: /\.(js|jsx)$/,
-          exclude: ['/node_modules/', '/public/js/lib/fileupload/'],
+          exclude: '/node_modules/',
           use: {
             loader: 'babel-loader',
             options: {
@@ -122,6 +122,35 @@ module.exports = ({env}) => {
         path.resolve(__dirname, 'public/js/new-project.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
+      cattool: [
+        path.resolve(__dirname, 'public/js/common.js'),
+        path.resolve(__dirname, 'public/js/user_store.js'),
+        path.resolve(__dirname, 'public/js/login.js'),
+        path.resolve(__dirname, 'public/js/build/lxqlicense.js'),
+        path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
+        path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
+        path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
+        path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
+        path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
+        path.resolve(__dirname, 'public/js/cat_source/ui.review.js'),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/review_extended/review_extended.default.js',
+        ),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/review_extended/review_extended.ui_extension.js',
+        ),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/review_extended/review_extended.common_events.js',
+        ),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/segment_filter.common_extension.js',
+        ),
+        path.resolve(__dirname, 'public/css/sass/main.scss'),
+      ],
     },
     plugins: [
       !isDev &&
@@ -141,6 +170,13 @@ module.exports = ({env}) => {
         filename: path.resolve(__dirname, './lib/View/upload.html'),
         template: path.resolve(__dirname, './lib/View/_upload.html'),
         chunks: ['libs', 'upload'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/index.html'),
+        template: path.resolve(__dirname, './lib/View/_index.html'),
+        chunks: ['cattool', 'libs'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

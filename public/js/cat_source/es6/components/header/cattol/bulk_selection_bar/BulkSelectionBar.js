@@ -1,5 +1,5 @@
 import React from 'react'
-
+import classnames from 'classnames'
 import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'

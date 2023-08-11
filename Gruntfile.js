@@ -136,7 +136,6 @@ module.exports = function (grunt) {
           basePath +
             'cat_source/review_extended/review_extended.common_events.js',
           basePath + 'cat_source/segment_filter.common_extension.js',
-          //basePath + 'cat_source/speech2text.js',
         ],
         dest: `${buildPath}app.js`,
       },
