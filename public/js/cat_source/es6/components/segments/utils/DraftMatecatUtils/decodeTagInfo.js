@@ -31,7 +31,7 @@ const decodeTagInfo = (tag) => {
       const contentMatch = placeholderRegex.exec(tagEncodedText)
       if (contentMatch && contentMatch.length > 1) {
         decodedTagData.content = decodeNeeded
-          ? Base64.decode(contentMatch[1])
+          ? Base64.decode(contentMatch[1]).replace(/\n/g, '').replace(/\r/g, '')
           : contentMatch[1]
         decodedTagData.content = unescapeHTMLRecursive(
           decodedTagData.content,
