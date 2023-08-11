@@ -7,7 +7,7 @@ branches:
     #   - develop
     - develop-submodule
     - freddy
-    #  - master
+    # - master
 
 git:
   # Tell Travis not to try to load submodules
@@ -39,11 +39,11 @@ script:
       # AWS CLI V1
       $( aws ecr get-login --no-include-email --region eu-central-1 )
 
-      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
       docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
-
-      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
       docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
 
     elif [[ "${TRAVIS_BRANCH}" == "freddy" ]] ; then
 
@@ -61,11 +61,11 @@ script:
       # AWS CLI V1
       $( aws ecr get-login --no-include-email --region eu-central-1 )
 
-      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
       docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
-
-      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
       docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:build-${BUILD}-${TRAVIS_BUILD_NUMBER}
+
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
+      docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
 
     fi
 
