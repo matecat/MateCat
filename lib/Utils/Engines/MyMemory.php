@@ -599,6 +599,29 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $source
+     * @param $sourceLanguage
+     * @param $targetLanguage
+     * @param $keys
+     *
+     * @return array
+     */
+    public function glossarySearch($source, $sourceLanguage, $targetLanguage, $keys)
+    {
+        $payload = [
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            "source" => $source,
+            "source_language" => $sourceLanguage,
+            "target_language" => $targetLanguage,
+            "keys" => $keys,
+        ];
+
+        $this->call( "glossary_search_relative_url", $payload, true, true );
+
+        return $this->result;
+    }
+
+    /**
      * @param string $sourceLanguage
      * @param string $targetLanguage
      * @param array $keys

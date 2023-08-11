@@ -249,7 +249,7 @@ class GlossaryWorker extends AbstractWorker {
         $client = $this->getMyMemoryClient();
 
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
-        $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
+        $response = $client->glossarySearch($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
         $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
