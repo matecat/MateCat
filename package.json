@@ -78,5 +78,5 @@
     "webpack-cli": "5.1.4",
     "whatwg-fetch": "^3.6.2"
   },
-  "version": "2.20.54"
+  "version": "2.20.67"
 }
