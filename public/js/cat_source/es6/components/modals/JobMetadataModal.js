@@ -9,6 +9,7 @@ class JobMetadataModal extends React.Component {
     super(props)
     this.state = {}
     this.converter = new showdown.Converter()
+    this.converter.setOption('literalMidWordUnderscores', true)
     // this.instructions =
     //     '**Client:** Product - Rider  \n' +
     //     '**Domain:** UI  \n' +
