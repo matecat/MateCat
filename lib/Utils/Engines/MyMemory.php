@@ -89,6 +89,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             case 'glossary_get_relative_url':
                 $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
+            case 'glossary_search_relative_url':
+                $result_object = Engines_Results_MyMemory_SearchGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                break;
             case 'glossary_keys_relative_url':
                 $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
@@ -322,8 +325,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( $function, $parameters, true );
 
         if ( $this->result->responseStatus != "200" &&
-                ( $this->result->responseStatus != "404" ||
-                        $this->result->responseDetails != "NO ID FOUND" )
+            ( $this->result->responseStatus != "404" ||
+                $this->result->responseDetails != "NO ID FOUND" )
         ) {
             return false;
         }
@@ -415,9 +418,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         } catch ( RuntimeException $e ) {
             $this->result = new Engines_Results_MyMemory_TmxResponse( [
-                    "responseStatus"  => 406,
-                    "responseData"    => null,
-                    "responseDetails" => $e->getMessage()
+                "responseStatus"  => 406,
+                "responseData"    => null,
+                "responseDetails" => $e->getMessage()
             ] );
 
             return $this->result;
@@ -431,8 +434,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $postFields = [
-                'glossary' => $this->getCurlFile( $file ),
-                'key'      => trim( $key ),
+            'glossary' => $this->getCurlFile( $file ),
+            'key'      => trim( $key ),
         ];
 
         if ( $name and $name !== '' ) {
@@ -455,7 +458,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function getGlossaryImportStatus($uuid)
     {
         $this->call( 'glossary_import_status_relative_url', [
-                'uuid' => $uuid
+            'uuid' => $uuid
         ], false );
 
         return $this->result;
@@ -520,12 +523,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryCheck($source, $target, $sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                'source' => $source,
-                'target' => $target,
-                'source_language' => $sourceLanguage,
-                'target_language' => $targetLanguage,
-                'keys' => $keys,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            'source' => $source,
+            'target' => $target,
+            'source_language' => $sourceLanguage,
+            'target_language' => $targetLanguage,
+            'keys' => $keys,
         ];
         $this->call( "glossary_check_relative_url", $payload, true, true );
 
@@ -559,11 +562,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryDelete($idSegment, $idJob, $password, $term)
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                "id_segment" => $idSegment,
-                "id_job" => $idJob,
-                "password" => $password,
-                "term" => $term,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            "id_segment" => $idSegment,
+            "id_job" => $idJob,
+            "password" => $password,
+            "term" => $term,
         ];
         $this->call( "glossary_delete_relative_url", $payload, true, true );
 
@@ -652,11 +655,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossarySet($idSegment, $idJob, $password, $term)
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                "id_segment" => $idSegment,
-                "id_job" => $idJob,
-                "password" => $password,
-                "term" => $term,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            "id_segment" => $idSegment,
+            "id_job" => $idJob,
+            "password" => $password,
+            "term" => $term,
         ];
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
@@ -680,11 +683,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryUpdate($idSegment, $idJob, $password, $term)
     {
         $payload = [
-                'de' => \INIT::$MYMEMORY_API_KEY,
-                "id_segment" => $idSegment,
-                "id_job" => $idJob,
-                "password" => $password,
-                "term" => $term,
+            'de' => \INIT::$MYMEMORY_API_KEY,
+            "id_segment" => $idSegment,
+            "id_job" => $idJob,
+            "password" => $password,
+            "term" => $term,
         ];
         $this->call( "glossary_update_relative_url", $payload, true, true );
 
@@ -713,9 +716,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function import( $file, $key, $name = false ) {
 
         $postFields = [
-                'tmx'  => $this->getCurlFile($file),
-                'name' => $name,
-                'key'  => trim( $key )
+            'tmx'  => $this->getCurlFile($file),
+            'name' => $name,
+            'key'  => trim( $key )
         ];
 
         $this->call( "tmx_import_relative_url", $postFields, true );
@@ -801,7 +804,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function checkCorrectKey( $apiKey ) {
 
         $postFields = [
-                'key' => trim( $apiKey )
+            'key' => trim( $apiKey )
         ];
 
         //query db
@@ -832,8 +835,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         $this->_setAdditionalCurlParams( [
-                        CURLOPT_TIMEOUT => 300
-                ]
+                CURLOPT_TIMEOUT => 300
+            ]
         );
 
         $this->engineRecord['base_url'] = "https://analyze.mymemory.translated.net/api/v1";
@@ -895,7 +898,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
                 //remove tags, duplicated spaces and all not Unicode Letter
                 $singleSegment[ 0 ] = preg_replace( [ "#<[^<>]*>#", "#\x20{2,}#", '#\PL+#u' ], [
-                        "", " ", " "
+                    "", " ", " "
                 ], $singleSegment[ 0 ] );
 
                 //remove not useful spaces
@@ -930,15 +933,15 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         Log::doJsonLog( "DETECT LANG :", $segmentsToBeDetected );
 
         $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER         => 0,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 2,
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => $curl_parameters,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
+            CURLOPT_HEADER         => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER         => 0,
+            CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $curl_parameters,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2
         ];
 
         $url = strtolower( $this->base_url . "/" . $this->detect_language_url );
@@ -975,7 +978,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
         $this->_setAdditionalCurlParams( [
-                CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_FOLLOWLOCATION => true,
         ] );
 
         $this->engineRecord->base_url = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
