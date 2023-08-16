@@ -5,7 +5,7 @@ language: minimal
 branches:
   only:
     #   - develop
-    - develop-submodule
+    - /^v?(\d+\.)?(\d+\.)?(\d+)(-[a-z\d]+)?$/
     - freddy
     #  - master
 
@@ -26,7 +26,7 @@ before_install:
 script:
   - |
 
-    if [[ "${TRAVIS_BRANCH}" == "develop-submodule" || ! -z "${TRAVIS_TAG}" ]] ; then
+    if [[ ! -z "${TRAVIS_TAG}" ]] ; then
 
       docker-compose -f docker/docker-compose-ci.yml build || exit 1
 
