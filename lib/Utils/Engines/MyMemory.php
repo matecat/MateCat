@@ -966,7 +966,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         //formatting strip
-        $re = '(&#09;|\p{Zs}|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
+        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
         //trim chars that would have been lost with the guess tag
         preg_match("/" . $re .'$/', $target_string, $r_matches,PREG_OFFSET_CAPTURE, 0);
         preg_match("/^" . $re . '/', $target_string, $l_matches,PREG_OFFSET_CAPTURE, 0);
