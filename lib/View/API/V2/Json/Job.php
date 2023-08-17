@@ -20,6 +20,7 @@ use Langs_LanguageDomains;
 use Langs_Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
+use OutsourceTo_OutsourceAvailable;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
@@ -173,10 +174,18 @@ class Job {
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
 
         // is outsource available?
-        $outsourceAvailable = $featureSet->filter( 'outsourceAvailable', $chunk->target, $chunk->getProject()->id_customer, $chunk->id );
-        if(!is_bool($outsourceAvailable)){
-            $outsourceAvailable = true;
+        $outsourceAvailableInfo = $featureSet->filter( 'outsourceAvailableInfo', $chunk->target, $chunk->getProject()->id_customer, $chunk->id );
+
+        // if the hook is not triggered by any plugin
+        if(!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)){
+            $outsourceAvailableInfo = [
+                'disabled_email' => false,
+                'custom_payable_rate' => false,
+                'language_not_supported' => false,
+            ];
         }
+
+        $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable($outsourceAvailableInfo);
 
         $result = [
                 'id'                    => (int)$chunk->id,
@@ -204,6 +213,7 @@ class Job {
                 'stats'                 => ReviewUtils::formatStats( CatUtils::getFastStatsForJob( $jobStats, false ), $chunkReviews ),
                 'outsource'             => $outsource,
                 'outsource_available'   => $outsourceAvailable,
+                'outsource_info'        => $outsourceAvailableInfo,
                 'translator'            => $translator,
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
                 'standard_wc'           => (float)$chunk->standard_analysis_wc,
