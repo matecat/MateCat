@@ -312,8 +312,6 @@ class GlossaryController extends KleinController {
             $json['userKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
         }
 
-        unset($json['jobData']);
-
         return $json;
     }
 
