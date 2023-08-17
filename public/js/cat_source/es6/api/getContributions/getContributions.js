@@ -29,7 +29,7 @@ export const getContributions = async ({
   const idAfter = UI.getIdAfter(idSegment)
   const txt = TagUtils.prepareTextToSend(target)
 
-  const dataParams = {
+  const obj = {
     action: 'getContribution',
     password: password,
     is_concordance: 0,
@@ -45,6 +45,10 @@ export const getContributions = async ({
     cross_language: crossLanguages,
     current_password: currentPassword,
   }
+  const dataParams = Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v != null),
+  )
+
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {

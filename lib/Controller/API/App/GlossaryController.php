@@ -40,6 +40,8 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
+        unset($json['jobData']);
+
         $this->response->json($json);
     }
 
@@ -63,6 +65,8 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
+        unset($json['jobData']);
+
         $this->response->json($json);
     }
 
@@ -83,6 +87,8 @@ class GlossaryController extends KleinController {
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        unset($json['jobData']);
 
         $this->response->json($json);
     }
@@ -122,6 +128,8 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
+        unset($json['jobData']);
+
         $this->response->json($json);
     }
 
@@ -150,6 +158,8 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
+        unset($json['jobData']);
+
         $this->response->json($json);
     }
 
@@ -170,6 +180,8 @@ class GlossaryController extends KleinController {
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
+
+        unset($json['jobData']);
 
         $this->response->json($json);
     }
@@ -199,6 +211,8 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
+        unset($json['jobData']);
+
         $this->response->json($json);
     }
 
@@ -221,6 +235,8 @@ class GlossaryController extends KleinController {
         ];
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
+
+        unset($json['jobData']);
 
         $this->response->json($json);
     }
@@ -295,6 +311,8 @@ class GlossaryController extends KleinController {
 
             $json['userKeys'] = $userKeys->getKeys( $job->tm_keys )['job_keys'];
         }
+
+        unset($json['jobData']);
 
         return $json;
     }
