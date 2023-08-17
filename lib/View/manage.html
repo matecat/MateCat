@@ -13,10 +13,6 @@
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
-    <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/build/manage.js?build=${build_number}"></script>
-
-    <link href="${basepath}public/css/build/manage-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         var config = {
@@ -34,7 +30,9 @@
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
         };
     </script>
-</head>
+    <script type="text/javascript" src="${basepath}public/build/libs.js"></script>
+
+<script defer="defer" src="/public/build/runtime.72e0b600717e9433c51c.js"></script><script defer="defer" src="/public/build/dashboard.72e0b600717e9433c51c.js"></script><link href="/public/build/dashboard.24081e47aa0931beb9a8.css" rel="stylesheet"/></head>
 
 <body tal:condition="not:supportedBrowser" >
     <div metal:use-macro="unsupported_browser.html/unsupported"/>

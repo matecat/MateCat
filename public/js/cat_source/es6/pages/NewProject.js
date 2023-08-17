@@ -52,6 +52,7 @@ const NewProject = ({
   conversionEnabled,
   formatsNumber,
   googleDriveEnabled,
+  restartConversions,
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
@@ -250,7 +251,7 @@ const NewProject = ({
 
   useEffect(() => {
     APP.checkGDriveEvents()
-    //UI.addEvents()
+    setTimeout(() => UI.addEvents(), 1000)
     setGuessTagActive(
       SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
     )
@@ -387,7 +388,7 @@ const NewProject = ({
       selectedTeam,
     })
     if (prevSourceLang !== sourceLang) {
-      UI.UPLOAD_PAGE.restartConversions()
+      restartConversions()
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
@@ -650,5 +651,6 @@ NewProject.propTypes = {
   conversionEnabled: PropTypes.bool,
   formatsNumber: PropTypes.number,
   googleDriveEnabled: PropTypes.bool,
+  restartConversions: PropTypes.func,
 }
 export default NewProject

@@ -140,7 +140,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 
         /*]]>*/
     </script>
-<script defer="defer" src="/public/build/runtime.72e0b600717e9433c51c.js"></script><script defer="defer" src="/public/build/commonCss.72e0b600717e9433c51c.js"></script><link href="/public/build/commonCss.2f3ea64e9f2f94ca40c3.css" rel="stylesheet"/></head>
+</head>
 <body class="api swagger-section">
 
 

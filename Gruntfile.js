@@ -166,7 +166,7 @@ module.exports = function (grunt) {
           watch: true,
         },
         src: [
-          basePath + 'lib/fileupload/main.js',
+          basePath + 'js/upload_main.js',
           basePath + 'cat_source/es6/react-libs.js',
           basePath + 'cat_source/es6/components.js',
           basePath + 'common.js',
@@ -344,15 +344,6 @@ module.exports = function (grunt) {
         },
         src: [cssBase + 'sass/quality-report.scss'],
         dest: cssBase + 'build/quality_report.css',
-      },
-      distIcons: {
-        options: {
-          implementation: sass,
-          sourceMap: true,
-          includePaths: [cssBase],
-        },
-        src: [cssBase + 'sass/commons/icons_main.scss'],
-        dest: cssBase + 'build/icons.css',
       },
       distSemantic: {
         options: {
