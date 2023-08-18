@@ -15,7 +15,7 @@ const downloadFile = async (url, dest, cb) => {
       file.on('finish', function () {
         resolve()
       })
-      file.on('error', function () {
+      file.on('error', function (response) {
         reject()
       })
     })
@@ -35,6 +35,8 @@ module.exports = async ({env}, {mode}) => {
       lxqServer + '/js/lxqlicense.js',
       './public/build/lxqlicense.js',
     )
+  } else {
+    fs.closeSync(fs.openSync('./public/build/lxqlicense.js', 'w'))
   }
   return {
     target: 'web',
@@ -135,7 +137,6 @@ module.exports = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
       ],
       upload: [
-        // path.resolve(__dirname, 'public/js/lib/semantic.min.js'),
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
@@ -327,6 +328,13 @@ module.exports = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/activity_log.html'),
+        template: path.resolve(__dirname, './lib/View/_activity_log.html'),
+        chunks: ['cattool'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/job_archived.html'),
         template: path.resolve(__dirname, './lib/View/_job_archived.html'),
         chunks: ['commonCss'],
@@ -350,6 +358,34 @@ module.exports = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/project_not_found.html'),
         template: path.resolve(__dirname, './lib/View/_project_not_found.html'),
+        chunks: ['commonCss'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
+        template: path.resolve(__dirname, './lib/View/_badConfiguration.html'),
+        chunks: ['commonCss'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
+        template: path.resolve(__dirname, './lib/View/_badConfiguration.html'),
+        chunks: ['commonCss'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/configMissing.html'),
+        template: path.resolve(__dirname, './lib/View/_configMissing.html'),
+        chunks: ['commonCss'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/offline.html'),
+        template: path.resolve(__dirname, './lib/View/_offline.html'),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,
