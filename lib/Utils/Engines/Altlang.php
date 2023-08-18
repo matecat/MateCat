@@ -120,6 +120,15 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
         $this->call( "translate_relative_url", $parameters, true, true);
 
+        // fix missing info
+        if(empty($this->result['raw_segment'])){
+            $this->result['raw_segment'] = $_config[ 'segment' ];
+        }
+
+        if(empty($this->result['segment'])){
+            $this->result['segment'] = $_config[ 'segment' ];
+        }
+
         return $this->result;
 
     }

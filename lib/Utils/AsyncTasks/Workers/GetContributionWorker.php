@@ -510,6 +510,10 @@ class GetContributionWorker extends AbstractWorker {
             $matches = $tms_match;
         }
 
+        if( empty($matches) ){
+            return [ $mt_result ];
+        }
+
         return [ $mt_result, $matches ];
     }
 
