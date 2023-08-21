@@ -246,7 +246,7 @@ class GlossaryController extends KleinController {
             $this->validateLanguage($json['target_language']);
             $this->validateLanguage($json['source_language']);
 
-            $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $json['source_language'], $json['target_lang'], [] );
+            $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $json['source_language'], $json['target_language'], [] );
 
             // handle source and target
             if(isset($json['source'])){
