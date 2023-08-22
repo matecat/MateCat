@@ -15,6 +15,16 @@ class GlossaryController extends KleinController {
     const GLOSSARY_READ  = 'GLOSSARY_READ';
 
     /**
+     * @return array
+     */
+    private function responseOk()
+    {
+        return [
+            'success' => true
+        ];
+    }
+
+    /**
      * Glossary check action
      *
      * @throws \Swaggest\JsonSchema\InvalidValue
@@ -40,9 +50,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -65,9 +73,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -88,9 +94,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -128,9 +132,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -158,9 +160,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -181,9 +181,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -211,9 +209,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -236,9 +232,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        unset($json['jobData']);
-
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
