@@ -42,22 +42,53 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      */
     public function getPayableRates($source, $target)
     {
-        if(!Utils::isValidLanguage($source, 'isocode')){
-            throw new \DomainException($source . ' is not a supported language');
-        }
+        $shortSource = explode('-', $source);
+        $shortTarget = explode('-', $target);
 
-        if(!Utils::isValidLanguage($target, 'isocode')){
-            throw new \DomainException($target . ' is not a supported language');
-        }
-
+        $this->validateLanguage($shortSource[0]);
+        $this->validateLanguage($shortTarget[0]);
+        $this->validateLanguage($source);
+        $this->validateLanguage($target);
         $breakdowns = $this->getBreakdownsArray();
 
-        if ( isset( $breakdowns[ $source ][ $target ] ) ) {
-            return $breakdowns[ $source ][ $target ];
+        if ( isset( $breakdowns[ $source ] ) ) {
+            if ( isset( $breakdowns[ $source ][ $target ] ) ) {
+                return $breakdowns[ $source ][ $target ];
+            }
+
+            if ( isset( $breakdowns[ $source ][ $shortTarget[0] ] ) ) {
+                return $breakdowns[ $source ][ $shortTarget[0] ];
+            }
         }
 
-        if ( isset( $breakdowns[ $target ][ $source ] ) ) {
-            return $breakdowns[ $target ][ $source ];
+        if ( isset( $breakdowns[ $shortSource[0] ] ) ) {
+            if ( isset( $breakdowns[ $shortSource[0] ][ $target ] ) ) {
+                return $breakdowns[ $shortSource[0] ][ $target ];
+            }
+
+            if ( isset( $breakdowns[ $shortSource[0] ][ $shortTarget[0] ] ) ) {
+                return $breakdowns[ $shortSource[0] ][ $shortTarget[0] ];
+            }
+        }
+
+        if ( isset( $breakdowns[ $target ] ) ) {
+            if ( isset( $breakdowns[ $target ][ $source ] ) ) {
+                return $breakdowns[ $target ][ $source ];
+            }
+
+            if ( isset( $breakdowns[ $target ][ $shortSource[0] ] ) ) {
+                return $breakdowns[ $target ][ $shortSource[0] ];
+            }
+        }
+
+        if ( isset( $breakdowns[ $shortTarget[0] ] ) ) {
+            if ( isset( $breakdowns[ $shortTarget[0] ][ $source ] ) ) {
+                return $breakdowns[ $shortTarget[0] ][ $source ];
+            }
+
+            if ( isset( $breakdowns[ $shortTarget[0] ][ $shortSource[0] ] ) ) {
+                return $breakdowns[ $shortTarget[0] ][ $shortSource[0] ];
+            }
         }
 
         return $breakdowns['default'];
@@ -104,16 +135,25 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         unset($breakdowns['default']);
 
         foreach ($breakdowns as $language => $breakdown){
-
-            if(!Utils::isValidLanguage($language, 'isocode')){
-                throw new \DomainException($language . ' is not a supported language');
-            }
+            $this->validateLanguage($language);
 
             foreach ($breakdown as $targetLanguage => $rates){
-                if(!Utils::isValidLanguage($targetLanguage, 'isocode')){
-                    throw new \DomainException($targetLanguage . ' is not a supported language');
-                }
+                $this->validateLanguage($targetLanguage);
             }
+        }
+    }
+
+    /**
+     * @param $lang
+     */
+    private function validateLanguage($lang)
+    {
+        // rfc3066code --->  es-ES
+        // isocode     --->  es
+        $format = (strlen($lang) > 3) ? 'rfc3066code' : 'isocode';
+
+        if(!Utils::isValidLanguage($lang, $format)){
+            throw new \DomainException($lang . ' is not a supported language');
         }
     }
 

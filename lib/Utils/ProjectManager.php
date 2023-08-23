@@ -1146,14 +1146,11 @@ class ProjectManager {
                     throw new Exception( $e );
 
                 }
-
             }
 
             unset( $this->projectStructure[ 'array_files' ][ $file->getPosition() ] );
             unset( $this->projectStructure[ 'array_files_meta' ][ $file->getPosition() ] );
-
         }
-
     }
 
     protected function _zipFileHandling( $linkFiles ) {
@@ -1192,9 +1189,8 @@ class ProjectManager {
 
             // get payable rates
             if(isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id'])){
-
                 $payableRatesTemplate = CustomPayableRateDao::getById($projectStructure['payable_rate_model_id']);
-                $payableRates = $payableRatesTemplate->getPayableRates( $shortSourceLang, $shortTargetLang );
+                $payableRates = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates = json_encode($payableRates);
             } else {
                 $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
