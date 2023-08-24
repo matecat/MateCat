@@ -898,12 +898,8 @@ class Utils {
      */
     public static function convertLanguageToIsoCode($rfc3066code)
     {
-        if(self::isValidLanguage($rfc3066code)){
-            $shortedLanguage = explode('-', $rfc3066code);
+        $shortedLanguage = explode('-', $rfc3066code);
 
-            return $shortedLanguage[0];
-        }
-
-        return null;
+        return $shortedLanguage[0];
     }
 }

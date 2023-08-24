@@ -13,6 +13,28 @@ class CustomPayableRateStructTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
+    public function convertLanguageToIsoCode()
+    {
+        $langs = [
+            'es-419' => 'es',
+            'es-ES' => 'es',
+            'es' => 'es',
+            'fr-FR' => 'fr',
+            'fr-CA' => 'fr',
+            'fr' => 'fr',
+        ];
+
+        foreach ($langs as $rfc3066 => $iso){
+            $isoCode = Utils::convertLanguageToIsoCode($rfc3066);
+
+
+            $this->assertEquals($iso, $isoCode);
+        }
+    }
+
+    /**
+     * @test
+     */
     public function getPayableRates()
     {
         $model = new CustomPayableRateStruct();
