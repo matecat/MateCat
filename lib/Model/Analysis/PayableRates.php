@@ -180,7 +180,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 90
+                            'MT'          => 82
                     ],
                     "zh-HK" => [
                         'NO_MATCH'    => 100,
