@@ -1183,18 +1183,14 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            // shorten languages and get payable rates
-            $shortSourceLang = substr( $projectStructure[ 'source_language' ], 0, 2 );
-            $shortTargetLang = substr( $target, 0, 2 );
-
             // get payable rates
             if(isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id'])){
                 $payableRatesTemplate = CustomPayableRateDao::getById($projectStructure['payable_rate_model_id']);
                 $payableRates = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates = json_encode($payableRates);
             } else {
-                $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
-                $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $shortSourceLang, $shortTargetLang ) );
+                $payableRates = Analysis_PayableRates::getPayableRates(  $projectStructure[ 'source_language' ], $target );
+                $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates,  $projectStructure[ 'source_language' ], $target ) );
             }
 
             $password = $this->generatePassword();

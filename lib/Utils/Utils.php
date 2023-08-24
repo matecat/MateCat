@@ -934,4 +934,19 @@ class Utils {
 
         return $strippedHtml;
     }
+
+    /**
+     * Examples:
+     * it-IT  ---> it
+     * es-419 ---> es
+     *
+     * @param $rfc3066code
+     * @return string|null
+     */
+    public static function convertLanguageToIsoCode($rfc3066code)
+    {
+        $shortedLanguage = explode('-', $rfc3066code);
+
+        return $shortedLanguage[0];
+    }
 }

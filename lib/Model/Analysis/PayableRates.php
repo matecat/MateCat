@@ -182,6 +182,19 @@ class Analysis_PayableRates {
                             'INTERNAL'    => 60,
                             'MT'          => 90
                     ],
+                    "zh-HK" => [
+                        'NO_MATCH'    => 100,
+                        '50%-74%'     => 100,
+                        //'75%-99%'     => 60,
+                        '75%-84%'     => 60,
+                        '85%-94%'     => 60,
+                        '95%-99%'     => 60,
+                        '100%'        => 30,
+                        '100%_PUBLIC' => 30,
+                        'REPETITIONS' => 30,
+                        'INTERNAL'    => 60,
+                        'MT'          => 90
+                    ],
                     "ar" => [
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
@@ -277,20 +290,64 @@ class Analysis_PayableRates {
      */
     public static function getPayableRates( $source, $target ) {
 
-        $ret = static::$DEFAULT_PAYABLE_RATES;
+        $resolveBreakdowns = self::resolveBreakdowns(static::$langPair2MTpayableRates, $source, $target);
 
-        //search source -> target pair
-        if ( isset( static::$langPair2MTpayableRates[ $source ][ $target ] ) ) {
-            $ret = static::$langPair2MTpayableRates[ $source ][ $target ];
-
-        } elseif ( isset( static::$langPair2MTpayableRates[ $target ][ $source ] ) ) { //search target -> source pair
-            $ret = static::$langPair2MTpayableRates[ $target ][ $source ];
-        }
-
-        return $ret;
-
+        return (!empty($resolveBreakdowns)) ? $resolveBreakdowns : static::$DEFAULT_PAYABLE_RATES;
     }
 
+    /**
+     * @param $breakdowns
+     * @param $source
+     * @param $target
+     * @return array|mixed
+     */
+    public static function resolveBreakdowns($breakdowns, $source, $target)
+    {
+        $isoSource = Utils::convertLanguageToIsoCode($source);
+        $isoTarget = Utils::convertLanguageToIsoCode($target);
+
+        if ( isset( $breakdowns[ $source ] ) ) {
+            if ( isset( $breakdowns[ $source ][ $target ] ) ) {
+                return $breakdowns[ $source ][ $target ];
+            }
+
+            if ( isset( $breakdowns[ $source ][ $isoTarget ] ) ) {
+                return $breakdowns[ $source ][ $isoTarget ];
+            }
+        }
+
+        if ( isset( $breakdowns[ $isoSource ] ) ) {
+            if ( isset( $breakdowns[ $isoSource ][ $target ] ) ) {
+                return $breakdowns[ $isoSource ][ $target ];
+            }
+
+            if ( isset( $breakdowns[ $isoSource ][ $isoTarget ] ) ) {
+                return $breakdowns[ $isoSource ][ $isoTarget ];
+            }
+        }
+
+        if ( isset( $breakdowns[ $target ] ) ) {
+            if ( isset( $breakdowns[ $target ][ $source ] ) ) {
+                return $breakdowns[ $target ][ $source ];
+            }
+
+            if ( isset( $breakdowns[ $target ][ $isoSource ] ) ) {
+                return $breakdowns[ $target ][ $isoSource ];
+            }
+        }
+
+        if ( isset( $breakdowns[ $isoTarget ] ) ) {
+            if ( isset( $breakdowns[ $isoTarget ][ $source ] ) ) {
+                return $breakdowns[ $isoTarget ][ $source ];
+            }
+
+            if ( isset( $breakdowns[ $isoTarget ][ $isoSource ] ) ) {
+                return $breakdowns[ $isoTarget ][ $isoSource ];
+            }
+        }
+
+        return [];
+    }
 
     /**
      * This function returns the dynamic payable rate given a post-editing effort
