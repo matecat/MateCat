@@ -2,6 +2,7 @@
 
 namespace PayableRates;
 
+use Analysis_PayableRates;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 use Date\DateTimeUtil;
@@ -42,56 +43,29 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      */
     public function getPayableRates($source, $target)
     {
-        $shortSource = explode('-', $source);
-        $shortTarget = explode('-', $target);
-
-        $this->validateLanguage($shortSource[0]);
-        $this->validateLanguage($shortTarget[0]);
-        $this->validateLanguage($source);
-        $this->validateLanguage($target);
         $breakdowns = $this->getBreakdownsArray();
 
-        if ( isset( $breakdowns[ $source ] ) ) {
-            if ( isset( $breakdowns[ $source ][ $target ] ) ) {
-                return $breakdowns[ $source ][ $target ];
-            }
+        // $isoSource and $isoTarget is in 'isocode' format
+        // $source and $target are in 'rfc3066code' format
+        $isoSource = Utils::convertLanguageToIsoCode($source);
+        $isoTarget = Utils::convertLanguageToIsoCode($target);
 
-            if ( isset( $breakdowns[ $source ][ $shortTarget[0] ] ) ) {
-                return $breakdowns[ $source ][ $shortTarget[0] ];
-            }
+        if($isoSource === null){
+            return $breakdowns['default'];
         }
 
-        if ( isset( $breakdowns[ $shortSource[0] ] ) ) {
-            if ( isset( $breakdowns[ $shortSource[0] ][ $target ] ) ) {
-                return $breakdowns[ $shortSource[0] ][ $target ];
-            }
-
-            if ( isset( $breakdowns[ $shortSource[0] ][ $shortTarget[0] ] ) ) {
-                return $breakdowns[ $shortSource[0] ][ $shortTarget[0] ];
-            }
+        if($isoTarget === null){
+            return $breakdowns['default'];
         }
 
-        if ( isset( $breakdowns[ $target ] ) ) {
-            if ( isset( $breakdowns[ $target ][ $source ] ) ) {
-                return $breakdowns[ $target ][ $source ];
-            }
+        $this->validateLanguage($isoSource);
+        $this->validateLanguage($isoTarget);
+        $this->validateLanguage($source);
+        $this->validateLanguage($target);
 
-            if ( isset( $breakdowns[ $target ][ $shortSource[0] ] ) ) {
-                return $breakdowns[ $target ][ $shortSource[0] ];
-            }
-        }
+        $resolveBreakdowns = Analysis_PayableRates::resolveBreakdowns($breakdowns, $source, $target);
 
-        if ( isset( $breakdowns[ $shortTarget[0] ] ) ) {
-            if ( isset( $breakdowns[ $shortTarget[0] ][ $source ] ) ) {
-                return $breakdowns[ $shortTarget[0] ][ $source ];
-            }
-
-            if ( isset( $breakdowns[ $shortTarget[0] ][ $shortSource[0] ] ) ) {
-                return $breakdowns[ $shortTarget[0] ][ $shortSource[0] ];
-            }
-        }
-
-        return $breakdowns['default'];
+        return (!empty($resolveBreakdowns)) ? $resolveBreakdowns : $breakdowns['default'];
     }
 
     /**
