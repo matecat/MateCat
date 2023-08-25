@@ -1649,17 +1649,19 @@ class QA {
      */
     public function performTagPositionCheck($source, $target, $performIdCheck = true, $performTagPositionsCheck = true)
     {
+        $new = '/(<[a-zA-Z0-9\-\"\/ =:\_]+>|<\/([a-zA-Z]+)>)/';
+
         // extract tag from source
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $source, $matches );
-        $complete_malformedSrcStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlSrcStruct    = $matches[ 2 ];
-        $closing_malformedXmlSrcStruct = $matches[ 3 ];
+        preg_match_all( $new, $source, $matches );
+       // $complete_malformedSrcStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
+        $open_malformedXmlSrcStruct    = $matches[ 1 ];
+        $closing_malformedXmlSrcStruct = $matches[ 2 ];
 
         // extract tag from target
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $target, $matches );
-        $complete_malformedTrgStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlTrgStruct    = $matches[ 2 ];
-        $closing_malformedXmlTrgStruct = $matches[ 3 ];
+        preg_match_all( $new, $target, $matches );
+        $complete_malformedTrgStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
+        $open_malformedXmlTrgStruct    = $matches[ 1 ];
+        $closing_malformedXmlTrgStruct = $matches[ 2 ];
 
         // extract self closing tags from source and target
         preg_match_all( '#(<[^>]+/>)#', $source, $selfClosingTags_src );
