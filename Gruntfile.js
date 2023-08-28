@@ -403,7 +403,10 @@ module.exports = function (grunt) {
         replacements: [
           {
             from: /this\.version = '(.*?)'/gi,
-            to: 'this.version = "' + version + '"',
+            to:
+              'this.version = "' +
+              version.replace(/^"/, '').replace(/"$/, '') +
+              '"',
           },
         ],
       },
