@@ -103,6 +103,7 @@ const NewProject = ({
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
+  const createProject = useRef()
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
@@ -186,7 +187,7 @@ const NewProject = ({
     }
   }
 
-  const createProject = () => {
+  createProject.current = () => {
     const getParams = () => ({
       action: 'createProject',
       file_name: APP.getFilenameFromUploadedFiles(),
@@ -291,6 +292,11 @@ const NewProject = ({
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
 
+    const handlerKeyEnter = ({key}) => {
+      if (key === 'Enter') createProject.current()
+    }
+    document.addEventListener('keyup', handlerKeyEnter)
+
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -305,6 +311,7 @@ const NewProject = ({
         NewProjectConstants.ENABLE_ANALYZE_BUTTON,
         enableAnalizeButton,
       )
+      document.removeEventListener('keyup', handlerKeyEnter)
     }
   }, [])
   useEffect(() => {
@@ -578,7 +585,7 @@ const NewProject = ({
                 !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
               }`}
               value="Analyze"
-              onClick={createProject}
+              onClick={createProject.current}
             />
           ) : (
             <>
