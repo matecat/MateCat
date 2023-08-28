@@ -784,8 +784,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     text-align: center;
     max-width: 640px;
     min-width: 400px;
-    //-webkit-box-shadow: 0 1px 20px #000;
-    //box-shadow: 0 1px 20px #6f6e6e;
+    z-index: 2;
     .half-form-left {
       margin-right: 4%;
     }
@@ -794,6 +793,12 @@ a.ui.primary.right.floated.button.tiny.register-ok {
       width: 48%;
       float: left;
     }
+  }
+  .matecat-modal-background {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    position: relative;
   }
 }
 

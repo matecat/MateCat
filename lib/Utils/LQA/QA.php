@@ -1427,8 +1427,8 @@ class QA {
      *
      */
     protected function _resetDOMMaps() {
-        $this->srcDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [] ];
-        $this->trgDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [] ];
+        $this->srcDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [], 'ph' => [] ];
+        $this->trgDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [], 'ph' => [] ];
     }
 
     /**

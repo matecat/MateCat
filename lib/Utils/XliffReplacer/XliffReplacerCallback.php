@@ -89,7 +89,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         $check->setTargetSegLang( $this->targetLang );
         $check->setSourceSegLang( $this->sourceLang );
         $check->setIdSegment( $segmentId );
-        $check->performTagCheckOnly();
+        $check->performConsistencyCheck();
 
         return $check->thereAreErrors();
     }

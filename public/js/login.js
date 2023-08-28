@@ -61,7 +61,11 @@ $.extend(APP, {
       )
     })
     $('#modal').on('openresetpassword', function () {
-      ModalsActions.showModalComponent(ResetPasswordModal, {}, 'Reset Password')
+      ModalsActions.showModalComponent(
+        ResetPasswordModal,
+        {closeOnOutsideClick: false},
+        'Reset Password',
+      )
     })
     $('#modal').on('openforgotpassword', function () {
       var props = {}

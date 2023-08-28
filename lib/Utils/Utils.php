@@ -881,4 +881,40 @@ class Utils {
     public static function escapeJsonEncode($data){
        return str_replace("\\\"","\\\\\\\"", json_encode($data));
     }
+
+    /**
+     * This function strips html tag, but preserves hrefs.
+     *
+     * Example:
+     *
+     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: click here(https://matecat.com)
+     *
+     * @param string $html
+     * @return string
+     */
+    public static function stripTagsPreservingHrefs($html)
+    {
+        $htmlDom = new DOMDocument('1.0', 'UTF-8');
+        $htmlDom->formatOutput = false;
+
+        @$htmlDom->loadHTML($html);
+
+        $links = $htmlDom->getElementsByTagName('a');
+
+        /** @var DOMElement $link */
+        foreach($links as $link){
+            $linkLabel = $link->nodeValue;
+            $linkHref = $link->getAttribute('href');
+            $link->nodeValue = $linkLabel . "(".str_replace("\\\"","", $linkHref).")";
+        }
+
+        $html = $htmlDom->saveHtml($htmlDom->documentElement);
+        $html = utf8_decode($html);
+
+        $strippedHtml = strip_tags($html);
+        $strippedHtml = ltrim($strippedHtml);
+        $strippedHtml = rtrim($strippedHtml);
+
+        return $strippedHtml;
+    }
 }

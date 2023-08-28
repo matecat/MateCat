@@ -201,42 +201,51 @@ class MMTServiceApi {
      * @param $sentence
      * @param $translation
      *
+     * @param $session
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function addToMemoryContent( $id, $source, $target, $sentence, $translation ) {
+    public function addToMemoryContent( $id, $source, $target, $sentence, $translation, $session ) {
+
         if ( is_array( $id ) ) {
             return $this->send( 'POST', "$this->baseUrl/memories/content", [
-                    'memories' => empty( $id ) ? null : implode( ',', $id ),
-                    'source'   => $source, 'target' => $target, 'sentence' => $sentence, 'translation' => $translation
-            ] );
-        } else {
-            return $this->send( 'POST', "$this->baseUrl/memories/$id/content", [
-                    'source' => $source, 'target' => $target, 'sentence' => $sentence, 'translation' => $translation
+                'memories' => empty( $id ) ? null : implode( ',', $id ),
+                'source'   => $source,
+                'target' => $target,
+                'sentence' => $sentence,
+                'translation' => $translation,
+                'session' => $session,
             ] );
         }
+
+        return $this->send( 'POST', "$this->baseUrl/memories/$id/content", [
+            'source' => $source,
+            'target' => $target,
+            'sentence' => $sentence,
+            'translation' => $translation,
+            'session' => $session,
+        ] );
     }
 
     /**
      * @param $tuid
-     * @param string[] $memory_keys
+     * @param $memory_keys
      * @param $source
      * @param $target
      * @param $sentence
      * @param $translation
-     *
-     * @return void
+     * @param $session
      * @throws MMTServiceApiException
-     * @throws MMTServiceApiRequestException
      */
-    public function updateMemoryContent( $tuid, $memory_keys, $source, $target, $sentence, $translation ) {
+    public function updateMemoryContent( $tuid, $memory_keys, $source, $target, $sentence, $translation, $session ) {
         foreach ( $memory_keys as $memory ) {
             $debug = $this->send( 'PUT', "$this->baseUrl/memories/$memory/content", [
                     'tuid'        => $tuid,
                     'source'      => $source,
                     'target'      => $target,
                     'sentence'    => $sentence,
-                    'translation' => $translation
+                    'translation' => $translation,
+                    'session' => $session
             ] );
         }
     }
@@ -303,18 +312,20 @@ class MMTServiceApi {
     }
 
     /**
-     * @param             $source
-     * @param             $target
-     * @param             $text
-     * @param string|null $contextVector
-     * @param array|null  $hints
-     * @param int|null    $projectId
-     * @param int         $timeout
-     *
+     * @param $source
+     * @param $target
+     * @param $text
+     * @param null $contextVector
+     * @param null $hints
+     * @param null $projectId
+     * @param null $timeout
+     * @param null $priority
+     * @param null $session
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null ) {
+    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null ) {
+
         return $this->send( 'GET', "$this->baseUrl/translate", [
             'source'  => $source,
             'target' => $target,
@@ -323,7 +334,8 @@ class MMTServiceApi {
             'hints'   => ( $hints ? implode( ',', $hints ) : null ),
             'project_id' => $projectId,
             'timeout' => ( $timeout ? ( $timeout * 1000 ) : null ),
-            'priority' => ( $priority ?: 'normal' )
+            'priority' => ( $priority ?: 'normal' ),
+            'session' => ($session ? $session : null),
         ], false, $timeout );
     }
 
