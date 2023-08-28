@@ -167,7 +167,7 @@ const NewProject = ({
         ])
       })
     } else {
-      if (tmKeyFromQueryString) setTmKeys([keyFromQueryString])
+      setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
     }
   }
 
