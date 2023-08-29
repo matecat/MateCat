@@ -983,7 +983,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         foreach ($source_matches_tag[0] as $source_key=>$source_tag){
             foreach ($target_matches_tag[0] as $target_tag){
                 if($source_tag[0] == $target_tag[0]){
-                    $replace = " " . $source_matches_tag[2][$source_key][0] . " ";
+                    $replace = md5($source_matches_tag[2][$source_key][0]);
                     $source_string = str_replace($source_tag[0], $replace, $source_string);
                     $target_string = str_replace($source_tag[0], $replace, $target_string);
                     $map[$replace] = $source_tag[0];
