@@ -3,7 +3,6 @@ import _ from 'lodash'
 import CommentsActions from '../actions/CommentsActions'
 import SegmentActions from '../actions/SegmentActions'
 import CommentsStore from '../stores/CommentsStore'
-import {getMatecatApiDomain} from './getMatecatApiDomain'
 import TextUtils from './textUtils'
 import {getTeamUsers as getTeamUsersApi} from '../api/getTeamUsers'
 import {submitComment as submitCommentApi} from '../api/submitComment'
@@ -518,10 +517,10 @@ MBC.init = function () {
   })(jQuery, config, window, MBC)
 }
 
-document.addEventListener('DOMContentLoaded', function (event) {
-  if (MBC.enabled()) {
-    MBC.init()
-  }
-})
+// document.addEventListener('DOMContentLoaded', function (event) {
+if (MBC.enabled()) {
+  MBC.init()
+}
+// })
 
 export default MBC

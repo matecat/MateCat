@@ -14,7 +14,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
         <tal:block  tal:repeat="css_url css_resources">
-            <link rel="stylesheet" tal:attributes="href css_url"></link>
+            <link rel="stylesheet" tal:attributes="href css_url"/>
         </tal:block>
 
         <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
@@ -199,7 +199,7 @@
         <script type="text/javascript" src="${basepath}public/build/libs.js"></script>
 
 
-    <script defer="defer" src="/public/build/runtime.b72d662075f970413a1e.js"></script><script defer="defer" src="/public/build/cattool.b72d662075f970413a1e.js"></script><link href="/public/build/cattool.406d83b6a41dfc50e2af.css" rel="stylesheet"/></head>
+    <script defer="defer" src="/public/build/runtime.7314acaa49fc95538765.js"></script><script defer="defer" src="/public/build/cattool.7314acaa49fc95538765.js"></script><link href="/public/build/cattool.406d83b6a41dfc50e2af.css" rel="stylesheet"/></head>
     <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>

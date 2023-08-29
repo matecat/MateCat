@@ -54,11 +54,11 @@
     </script>
 
     <tal:block  tal:repeat="js_source footer_js">
-        <script  tal:attributes="src js_source"></script>
+        <script tal:attributes="src js_source"></script>
     </tal:block>
 
     <tal:block  tal:repeat="css_url css_resources">
-        <link rel="stylesheet" tal:attributes="href css_url"></link>
+        <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
 

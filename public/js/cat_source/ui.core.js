@@ -922,10 +922,6 @@ window.UI = {
   closeAllMenus: function () {
     CatToolActions.closeSubHeader()
   },
-  // overridden by plugin
-  inputEditAreaEventHandler: function () {
-    UI.currentSegment.trigger('modified')
-  },
 }
 
 $(document).ready(function () {
