@@ -1111,10 +1111,8 @@ class NewController extends ajaxController {
                 throw new \Exception('Payable rate model is not belonging to the current user');
             }
 
-            $payableRateModelTemplate = CustomPayableRateDao::getByUidAndName($userId, $payableRateTemplateName);
-
-            if(null === $payableRateModelTemplate){
-                throw new \Exception('Payable rate model name not matching or not belonging to the current user');
+            if($payableRateModelTemplate->name !== $payableRateTemplateName){
+                throw new \Exception('Payable rate model name not matching');
             }
         }
 
