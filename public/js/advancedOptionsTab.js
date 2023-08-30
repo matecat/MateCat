@@ -148,7 +148,7 @@ import CommonUtils from './cat_source/es6/utils/commonUtils'
         aiAssistantCheck.onchange = () => {
           //Track Event
           const message = {
-            user: APP.USER.STORE.user.uid,
+            user: APP.USER.STORE.user ? APP.USER.STORE.user.uid : 'anonymous',
             page: location.href,
             onHighlight: !SegmentUtils.isAiAssistantAuto(),
           }

@@ -70,7 +70,7 @@
           "additionalProperties": false,
           "properties": {
             "definition": {
-              "type": "string"
+              "type": ["null","string"]
             },
             "key": {
               "type": "string"

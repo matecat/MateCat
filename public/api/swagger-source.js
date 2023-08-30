@@ -3,7 +3,14 @@ var spec = {
   info: {
     title: 'Matecat API',
     description:
-      'We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.',
+      `<p>We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.</p>
+      <h2>How to authenticate</h2>
+      <div class="opblock opblock-get">
+        <div class="opblock-summary opblock-summary-get">
+            In order to authenticate, add the x-matecat-key header to the API call and populate it with your complete API credentials in this format: <code>{APIkey}-{APIsecret}</code>
+        </div>
+      </div>
+      `,
     version: '2.0.0',
   },
   host: config.swagger_host,
@@ -51,11 +58,10 @@ var spec = {
         tags: ['Project'],
         summary: 'Create new Project on Matecat in detached mode',
         description:
-          'Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/' +
-          'new has a maximum file size limit of 200 MB per file and a max number of files of 600. ' +
-          'This API will process the project creation in background. Client can poll the v1 project creation status API ' +
-          'to be notified when the project is actually created.',
-
+          `Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.
+          new has a maximum file size limit of 200 MB per file and a max number of files of 600. 
+          This API will process the project creation in background. Client can poll the v1 project creation status API to be notified when the project is actually created.
+          `,
         parameters: [
           {
             name: 'files',
@@ -3392,4 +3398,16 @@ var spec = {
       },
     },
   },
+  securityDefinitions: {
+    ApiKeyAuth: {
+      type: "apiKey",
+      in: "header",
+      name: "x-matecat-key"
+    },
+  },
+  security: [
+    {
+      ApiKeyAuth: []
+    }
+  ],
 }

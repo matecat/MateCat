@@ -39,6 +39,7 @@ class AnalysisDao extends DataAccess_AbstractDao {
                 p.fast_analysis_wc,
                 p.tm_analysis_wc,
                 p.standard_analysis_wc,
+                p.id_customer,
                 fp.tag_key,
                 fp.tag_value,
                 st.tm_analysis_status AS st_status_analysis,

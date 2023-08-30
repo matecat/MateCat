@@ -1865,6 +1865,8 @@ class ProjectManager {
 
                                     if ( $this->features->filter( 'populatePreTranslations', true ) ) {
 
+                                        // could not have attributes, suppress warning
+                                        $state = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
@@ -1885,7 +1887,13 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+                                        $initialTranslationStates = [
+                                            'new',
+                                            'initial',
+                                            'needs-translation',
+                                        ];
+
+                                        if ( !in_array($state, $initialTranslationStates) && $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -1901,7 +1909,11 @@ class ProjectManager {
                                              */
                                             $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
                                                 $seg_source[ 'mid' ],
-                                                new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
+                                                new ArrayObject( [
+                                                    2 => $target,
+                                                    4 => $xliff_trans_unit,
+                                                    6 => $position,
+                                                ] )
                                             );
 
                                             //seg-source and target translation can have different mrk id
@@ -2027,7 +2039,10 @@ class ProjectManager {
                                      * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                      */
                                     $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
-                                        new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
+                                        new ArrayObject( [
+                                            2 => $target,
+                                            4 => $xliff_trans_unit,
+                                        ] )
                                     );
                                 }
                             }
@@ -2544,14 +2559,20 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param $jid
+     * @throws NotFoundException
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
     protected function _insertPreTranslations( $jid ) {
 
         $this->_cleanSegmentsMetadata();
 
-        $status = Constants_TranslationStatus::STATUS_APPROVED;
-
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
-            $status,
+            Constants_TranslationStatus::STATUS_APPROVED,
             $this->projectStructure
         );
 
@@ -2565,6 +2586,7 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
+                $position          = (isset($translation_row[ 6 ])) ? $translation_row[ 6 ] : null;
                 $segment           = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
 
@@ -2576,7 +2598,7 @@ class ProjectManager {
                         // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
                         'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
                         'standard_word_count' => null,
-                        'status'              => $status,
+                        'status'              => $this->preTranslationStatus($translation_row[ 4 ], $position),
                         'suggestion_match'    => null,
                         'suggestion'          => null,
                         'trans-unit'          => $translation_row[ 4 ],
@@ -2654,6 +2676,38 @@ class ProjectManager {
         //clean translations and queries
         unset( $query_translations_values );
 
+    }
+
+    /**
+     * @param $trans_unit
+     * @param null $position
+     * @return string
+     */
+    private function preTranslationStatus($trans_unit, $position = null){
+
+        // state handling
+        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
+            $state = $trans_unit['seg-target'][$position]['attr']['state'];
+
+            switch ($state){
+
+                case 'new':
+                case 'needs-translation':
+                case 'initial':
+                    return Constants_TranslationStatus::STATUS_NEW;
+
+                case 'translated':
+                    return Constants_TranslationStatus::STATUS_TRANSLATED;
+
+                default:
+                case 'reviewed':
+                case 'final':
+                    return Constants_TranslationStatus::STATUS_APPROVED;
+            }
+        }
+
+        // retro-compatibility
+        return Constants_TranslationStatus::STATUS_APPROVED;
     }
 
     /**

@@ -2296,7 +2296,7 @@ import {uploadTm} from './cat_source/es6/api/uploadTm/uploadTm'
         'multiMatchLangs',
         JSON.stringify(UI.crossLanguageSettings),
       )
-      if (SegmentActions.getContribution) {
+      if (SegmentActions.getContribution && config.is_cattool) {
         if (primary) {
           SegmentActions.modifyTabVisibility('multiMatches', true)
           $('section.loaded').removeClass('loaded')

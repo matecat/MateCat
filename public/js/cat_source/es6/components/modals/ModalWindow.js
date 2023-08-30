@@ -11,6 +11,7 @@ const initialState = {
   component: '',
   compProps: {
     overlay: false,
+    closeOnOutsideClick: true,
   },
   title: '',
   styleContainer: '',
@@ -60,9 +61,11 @@ export class ModalWindow extends React.Component {
    */
   showModalComponent = (component, props, title, style, onCloseCallback) => {
     this.setState({
+      ...initialState,
       title,
       component,
       compProps: {
+        ...initialState.compProps,
         ...props,
         onClose: this.onCloseModal,
         closeOnSuccess: props.closeOnSuccess ? props.closeOnSuccess : true,
@@ -112,6 +115,7 @@ export class ModalWindow extends React.Component {
                 title,
                 styleContainer,
                 onClose: this.onCloseModal,
+                closeOnOutsideClick: compProps.closeOnOutsideClick,
               },
               <InjectedComponent {...compProps} />,
             )}

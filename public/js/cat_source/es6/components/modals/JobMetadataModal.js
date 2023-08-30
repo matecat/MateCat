@@ -9,13 +9,13 @@ class JobMetadataModal extends React.Component {
     super(props)
     this.state = {}
     this.converter = new showdown.Converter()
+    this.converter.setOption('literalMidWordUnderscores', true)
     // this.instructions =
     //     '**Client:** Product - Rider  \n' +
     //     '**Domain:** UI  \n' +
     //     '**Note:** Link to file a query: http://t.uber.com/riderq Rider  \n' +
     //     '            Screen Search: https://docs.google.com/document/d/19Dk92t9NXdN.';
   }
-
   createFileList() {
     const {currentFile, currentFilePart} = this.props
     return this.props.files.map((file) => {
@@ -94,6 +94,10 @@ class JobMetadataModal extends React.Component {
 
   componentDidMount() {
     $(this.accordion).accordion()
+    setTimeout(() => {
+      const element = document.querySelector('.title.current.active')
+      element && element.scrollIntoView({behavior: 'smooth'})
+    }, 200)
   }
 
   render() {

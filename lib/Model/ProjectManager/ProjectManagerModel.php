@@ -18,6 +18,7 @@ use PDOException;
 use Projects_ProjectDao;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
+use Utils;
 
 class ProjectManagerModel {
 
@@ -167,15 +168,15 @@ class ProjectManagerModel {
                     // from the UI
 
                     if(isset($attributes['entries'][$index])) {
-                        $metaKey = strip_tags( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
+                        $metaKey = Utils::stripTagsPreservingHrefs( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
 
                         // check for metaKey is `notes`
-                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
-                            $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+                        if(!self::isAMetadata($metaKey)){
+                            $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
                         }
 
                     } else {
-                        $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+                        $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
                     }
                 }
             }
@@ -186,7 +187,7 @@ class ProjectManagerModel {
                     if(isset($attributes['json'][$index])) {
                         $metaKey = $attributes['json'][$index];
 
-                        if($metaKey === 'notes' or $metaKey === 'NO_FROM'){
+                        if(!self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $internal_id, null, $json ];
                         }
 
@@ -250,10 +251,10 @@ class ProjectManagerModel {
                 foreach ( $entries as $index => $note ) {
 
                     if(isset($attributes['entries'][$index])){
-                        $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
-                        $metaValue = strip_tags(html_entity_decode($note));
+                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes['entries'][$index]));
+                        $metaValue = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
 
-                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                        if(self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
@@ -267,7 +268,7 @@ class ProjectManagerModel {
                         $metaKey = $attributes['json'][$index];
                         $metaValue = $json;
 
-                        if($metaKey !== 'notes' and $metaKey !== 'NO_FROM'){
+                        if(self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
@@ -299,6 +300,23 @@ class ProjectManagerModel {
             Log::doJsonLog( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes attributes import - DB Error: " . $e->getMessage(), 0, $e );
         }
+    }
+
+    /**
+     * @param $metaKey
+     * @return bool
+     */
+    private static function isAMetadata($metaKey)
+    {
+        $metaDataKeys = [
+            'id_request',
+            'id_content',
+            'id_order',
+            'id_order_group',
+            'screenshot'
+        ];
+
+        return in_array($metaKey, $metaDataKeys);
     }
 
     /**

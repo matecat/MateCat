@@ -298,7 +298,7 @@ class SegmentAnalysisController extends KleinController {
         }
 
         foreach ( $issuesRecords as $issuesRecord ) {
-            $issuesAggregate[$issuesRecord->id_segment][] = [
+            $issuesAggregate[$issuesRecord->id_job][$issuesRecord->id_segment][] = [
                 'source_page'         => $this->humanReadableSourcePage($issuesRecord->source_page),
                 'id_category'         => (int)$issuesRecord->id_category,
                 'severity'            => $issuesRecord->severity,
@@ -336,6 +336,16 @@ class SegmentAnalysisController extends KleinController {
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 
+        // issues
+        $issues = [];
+        if(
+            isset($issuesAggregate[$segmentForAnalysis->id_job]) and
+            isset($issuesAggregate[$segmentForAnalysis->id_job][$segmentForAnalysis->id]) and
+            !empty($issuesAggregate[$segmentForAnalysis->id_job][$segmentForAnalysis->id])
+        ){
+            $issues = $issuesAggregate[$segmentForAnalysis->id_job][$segmentForAnalysis->id];
+        }
+
         return [
             'id_segment' => (int)$segmentForAnalysis->id,
             'id_chunk' => (int)$segmentForAnalysis->id_job,
@@ -352,7 +362,7 @@ class SegmentAnalysisController extends KleinController {
             'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
             'match_type' => $this->humanReadableMatchType($segmentForAnalysis->match_type),
             'revision_number' => ($segmentForAnalysis->source_page) ? ReviewUtils::sourcePageToRevisionNumber($segmentForAnalysis->source_page) : null,
-            'issues' => (!empty($issuesAggregate[$segmentForAnalysis->id]) ? $issuesAggregate[$segmentForAnalysis->id] : []),
+            'issues' => $issues,
             'notes' => (!empty($notesAggregate[$segmentForAnalysis->id]) ? $notesAggregate[$segmentForAnalysis->id] : []),
             'status' => $this->getStatusObject($segmentForAnalysis),
             'last_edit' => ($segmentForAnalysis->last_edit !== null) ? date( DATE_ISO8601, strtotime( $segmentForAnalysis->last_edit ) ) : null,

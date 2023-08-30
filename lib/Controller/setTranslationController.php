@@ -7,13 +7,13 @@ use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\TranslationVersionsHandler;
+use Files\FilesPartsDao;
 use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
 use Matecat\SubFiltering\Filters\SprintfToPH;
-use TaskRunner\Commons\QueueElement;
 
 class setTranslationController extends ajaxController {
 
@@ -953,11 +953,14 @@ class setTranslationController extends ajaxController {
             return;
         }
 
+        $filesParts = (new FilesPartsDao())->getBySegmentId($this->id_segment);
+
         /**
          * Set the new contribution in queue
          */
         $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = self::isRevision();
+        $contributionStruct->id_file              = ($filesParts !== null) ? $filesParts->id_file : null;
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;
         $contributionStruct->id_segment           = $this->id_segment;

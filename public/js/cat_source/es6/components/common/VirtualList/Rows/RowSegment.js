@@ -71,6 +71,14 @@ function RowSegment({
       const file = files
         ? files.find((file) => file.id == idFileSegment)
         : false
+      let fileType = ''
+      if (file) {
+        fileType = file.file_name ? file.file_name.split('.').slice(-1) : ''
+        //check metadata for jsont2 files
+        fileType = file.metadata?.['data-type']
+          ? file.metadata?.['data-type']
+          : fileType
+      }
       let classes = sideOpen ? 'slide-right' : ''
       const isFirstSegment =
         files?.length &&
@@ -83,14 +91,7 @@ function RowSegment({
             <div className={'projectbar-filename'}>
               <span
                 title={segment.filename}
-                className={
-                  'fileFormat ' +
-                  CommonUtils.getIconClass(
-                    file.file_name.split('.')[
-                      file.file_name.split('.').length - 1
-                    ],
-                  )
-                }
+                className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
               >
                 {file.file_name}
               </span>
