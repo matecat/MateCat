@@ -877,19 +877,15 @@ class CatUtils {
     public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
         $job_stats                 = [];
         $job_stats[ 'id' ]         = $wCount->getIdJob();
-        $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
-        $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
-        $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
-        $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
-
-        //sometimes new_words + draft_words < 0 (why?). If it happens, set draft words to 0
-        if ( $job_stats[ 'DRAFT' ] < 0 ) {
-            $job_stats[ 'DRAFT' ] = 0;
-        }
+        $job_stats[ 'DRAFT' ]      = self::normalizeNumber($wCount->getNewWords()) + self::normalizeNumber($wCount->getDraftWords());
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($wCount->getTranslatedWords());
+        $job_stats[ 'APPROVED' ]   = self::normalizeNumber($wCount->getApprovedWords());
+        $job_stats[ 'REJECTED' ]   = self::normalizeNumber($wCount->getRejectedWords());
 
         //avoid division by zero warning
         $total                = $wCount->getTotal();
         $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
+        $job_stats[ 'TOTAL' ] = self::normalizeNumber(  $job_stats[ 'TOTAL' ] );
 
         return $job_stats;
     }
