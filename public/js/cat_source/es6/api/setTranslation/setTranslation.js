@@ -41,7 +41,7 @@ export const setTranslation = async ({
     ? translation
     : TagUtils.prepareTextToSend(segment.translation)
 
-  const dataParams = {
+  const obj = {
     id_segment: sid,
     id_job: idJob,
     password,
@@ -60,6 +60,10 @@ export const setTranslation = async ({
     splitStatuses,
     characters_counter: charactersCounter,
   }
+  const dataParams = Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v != null),
+  )
+
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
