@@ -94,49 +94,9 @@ $.extend(APP, {
       }
       ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
     })
-    $('#modal').on('openlogin', function (e, param) {
-      if ($('.popup-tm.open').length) {
-        UI.closeTMPanel()
-      }
-      APP.openLoginModal(param)
-    })
-
-    $('.link-manage-page').on('click', function (e) {
-      APP.openManagePage(e)
-    })
-
-    //Link footer
-    // $('.user-menu-preferences').on('click', function (e) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //     $('#modal').trigger('openpreferences');
-    //     return false;
-    // });
-
-    $('.open-login-modal').click(function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      $('#modal').trigger('openlogin')
-      return false
-    })
-
-    $('#sign-in').click(function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      $('#modal').trigger('openlogin')
-      return false
-    })
-
-    $('#sign-in-o, #sign-in-o-mt').click(function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      UI.closeTMPanel()
-      APP.openLoginModal()
-      return false
-    })
 
     if (config.showModalBoxLogin == 1) {
-      $('#modal').trigger('openlogin')
+      APP.openLoginModal()
     }
 
     onModalWindowMounted().then(() => this.checkForPopupToOpen())
@@ -158,7 +118,7 @@ $.extend(APP, {
         })
         break
       case 'login':
-        modal$.trigger('openlogin')
+        APP.openLoginModal()
         break
       case 'signup':
         if (!config.isLoggedIn) {
@@ -177,11 +137,11 @@ $.extend(APP, {
     if (!config.isLoggedIn) {
       e.preventDefault()
       e.stopPropagation()
-      $('#modal').trigger('openlogin', [{goToManage: true}])
+      APP.openLoginModal({goToManage: true})
     }
   },
 
-  openLoginModal: function (param) {
+  openLoginModal: function (param = {}) {
     var title = 'Add project to your management panel'
     var style = {
       width: '80%',
@@ -190,6 +150,7 @@ $.extend(APP, {
     }
     var props = {
       googleUrl: config.authURL,
+      ...param,
     }
 
     if (config.showModalBoxLogin == 1) {
@@ -197,9 +158,6 @@ $.extend(APP, {
       title = 'Add project to your management panel'
     }
 
-    if (param) {
-      $.extend(props, param)
-    }
     ModalsActions.showModalComponent(LoginModal, props, title, style)
   },
 })

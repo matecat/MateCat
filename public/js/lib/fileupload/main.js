@@ -29,15 +29,10 @@ window.UI = {
     var base = Math.log(config.maxFileSize) / Math.log(1024);
     config.maxFileSizePrint = parseInt(Math.pow(1024, (base - Math.floor(base))) + 0.5) + ' MB';
 
-    base = Math.log(config.maxTMXFileSize) / Math.log(1024);
-    config.maxTMXSizePrint = parseInt(Math.pow(1024, (base - Math.floor(base))) + 0.5) + ' MB';
-
-    if (this.initTM) {
-      this.initTM();
-    }
-    if (Cookies.get('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
-  },
-  getPrintableFileSize: function (filesizeInBytes) {
+        base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
+        config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
+    },
+    getPrintableFileSize: function ( filesizeInBytes ) {
 
     filesizeInBytes = filesizeInBytes / 1024;
     var ext = " KB";
@@ -49,28 +44,16 @@ window.UI = {
 
     return Math.round(filesizeInBytes * 100, 2) / 100 + ext;
 
-  },
-  enableAnalyze: function () {
-    enableAnalyze();
-  },
-  disableAnalyze: function () {
-    disableAnalyze();
-  },
-  conversionsAreToRestart: function () {
-    var num = 0;
-    $('.template-download .name').each(function () {
-      if ($(this).parent('tr').hasClass('failed')) return;
-      if ($(this).text().split('.')[$(this).text().split('.').length - 1] != 'sdlxliff') num++;
-    });
-    return num
-  },
-  confirmRestartConversions: function () {
-    UI.restartConversions();
-  },
-  confirmGDriveRestartConversions: function () {
-    APP.restartGDriveConversions();
-  },
-  errorsFileSize: function (file) {
+    },
+    conversionsAreToRestart: function () {
+        var num = 0;
+        $( '.template-download .name' ).each( function () {
+            if ( $( this ).parent( 'tr' ).hasClass( 'failed' ) ) return;
+            if ( $( this ).text().split( '.' )[$( this ).text().split( '.' ).length - 1] != 'sdlxliff' ) num++;
+        } );
+        return num
+    },
+    errorsFileSize: function ( file ) {
 
     var ext = file.name.split('.').pop();
 
@@ -149,25 +132,9 @@ window.UI = {
     this.createKeyByTMX();
   },
 
-  createKeyByTMX: function (extension) {
-    if (!isTMXAllowed()) return false;
-    if ($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled')) return false; //ajax call already running
-    if ($('.mgmt-panel #activetm tbody tr.mine').length && $('.mgmt-panel #activetm tbody tr.mine .update input').is(":checked")) return false; //a key is already selected in TMKey management panel
-
-    APP.createTMKey().then(function () {
-      UI.checkTMKeysUpdateChecks();
-    });
-    var textToDisplay = <span>A new resource has been generated for the TMX you uploaded. You can manage your resources in the  <a
-        href="#" onClick={() => APP.openOptionsPanel("tm")}> Settings panel</a>.</span>;
-    if (extension && extension === "g") {
-      textToDisplay =
-          <span>A new resource has been generated for the glossary you uploaded. You can manage your resources in the  <a
-              href="#" onClick={() => APP.openOptionsPanel("tm")}>Settings panel</a>.</span>;
-    }
-    CreateProjectActions.showWarning(textToDisplay)
-
-
-  },
+    createKeyByTMX: function (extension, filename) {
+        CreateProjectActions.createKeyFromTMXFile({extension, filename})
+    },
 
   checkFailedConversionsNumber: function () {
 
@@ -256,8 +223,8 @@ window.UI = {
         jqXHR.abort();
       }
 
-      disableAnalyze();
-      $('#fileupload table.upload-table tr').addClass('current');
+            CreateProjectActions.enableAnalyzeButton(false)
+            $( '#fileupload table.upload-table tr' ).addClass( 'current' );
 
     }).bind('fileuploadsend', function (e, data) {
       console.log('FIRE fileuploadsend');
@@ -319,13 +286,13 @@ window.UI = {
 
       if ($('.upload-table tr:not(.failed)').length) {
 
-        if (checkAnalyzability('fileuploaddestroyed')) {
-          enableAnalyze();
-        }
+                if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
+                    CreateProjectActions.enableAnalyzeButton(true)
+                }
 
-      } else {
-        disableAnalyze();
-      }
+            } else {
+                CreateProjectActions.enableAnalyzeButton(false)
+            }
 
     }).on('click', '.template-upload .cancel button, .template-download .delete button', function (e, data) {
 
@@ -346,13 +313,13 @@ window.UI = {
 
       if ($('.upload-table tr:not(.failed)').length) {
 
-        if (checkAnalyzability('fileuploaddestroyed')) {
-          enableAnalyze();
-        }
+                if ( checkAnalyzability( 'fileuploaddestroyed' ) ) {
+                    CreateProjectActions.enableAnalyzeButton(true)
+                }
 
-      } else {
-        disableAnalyze();
-      }
+            } else {
+                CreateProjectActions.enableAnalyzeButton(false)
+            }
 
     }).bind('fileuploadcompleted', function (e, data) {
       console.log('FIRE fileuploadcompleted');
@@ -396,19 +363,19 @@ window.UI = {
         };
       }
 
-      if (!fileSpecs.enforceConversion) {
-        if (checkAnalyzability('file upload completed')) {
-          enableAnalyze();
-        }
-      }
+            if ( !fileSpecs.enforceConversion ) {
+                if ( checkAnalyzability( 'file upload completed' ) ) {
+                    CreateProjectActions.enableAnalyzeButton(true)
+                }
+            }
 
-      if ($('body').hasClass('started')) {
-        setFileReadiness();
-        if (checkAnalyzability('primo caricamento')) {
-          enableAnalyze();
-        }
-      }
-      $('body').removeClass('started');
+            if ( $( 'body' ).hasClass( 'started' ) ) {
+                setFileReadiness();
+                if ( checkAnalyzability( 'primo caricamento' ) ) {
+                    CreateProjectActions.enableAnalyzeButton(true)
+                }
+            }
+            $( 'body' ).removeClass( 'started' );
 
       $('.name', fileSpecs.filerow).text(fileSpecs.fname);
 
@@ -425,24 +392,24 @@ window.UI = {
             convertFile(fileSpecs.fname, fileSpecs.filerow, fileSpecs.filesize, fileSpecs.enforceConversion);
           }
 
-        } else {
-          enableAnalyze();
-        }
+                } else {
+                    CreateProjectActions.enableAnalyzeButton(true)
+                }
 
-        /**
-         * Check for TMX file type, we must trigger the creation of a new TM key
-         */
-        var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length - 1];
-        if ((extension == 'tmx' || extension == 'g') && config.conversionEnabled) {
-          UI.createKeyByTMX(extension);
-        }
+                /**
+                 * Check for TMX file type, we must trigger the creation of a new TM key
+                 */
+                var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
+                if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
+                    UI.createKeyByTMX(extension, data.files[0].name);
+                }
 
-      } else if (fileSpecs.error) {
-        disableAnalyze();
-        $('#fileupload').fileupload('option', 'dropZone', null);
-        $('#add-files').addClass('disabled');
-        $('#add-files input').attr('disabled', 'disabled');
-      }
+            } else if ( fileSpecs.error ) {
+                CreateProjectActions.enableAnalyzeButton(false)
+                $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
+                $( '#add-files' ).addClass( 'disabled' );
+                $( '#add-files input' ).attr( 'disabled', 'disabled' );
+            }
 
       if ($('.upload-table tr').length) {
         $('.upload-files').addClass('uploaded');
@@ -531,36 +498,36 @@ var progressBar = function (filerow, start, filesize) {
 
 var convertFile = function (fname, filerow, filesize, enforceConversion) {
 
-  console.log('Enforce conversion: ' + enforceConversion);
-  var firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
-  enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
+    console.log( 'Enforce conversion: ' + enforceConversion );
+    enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
-  if (enforceConversion === false) {
-    filerow.addClass('ready');
-    if (checkAnalyzability('convert file')) {
-      enableAnalyze();
+    if ( enforceConversion === false ) {
+        filerow.addClass( 'ready' );
+        if ( checkAnalyzability( 'convert file' ) ) {
+            CreateProjectActions.enableAnalyzeButton(true)
+        }
+
+        return;
     }
-
-    return;
-  } else {
-    disableAnalyze();
-  }
+    else {
+        CreateProjectActions.enableAnalyzeButton(false)
+    }
 
   var ses = new Date();
   var session = ses.getTime();
 
   filerow.removeClass('ready').addClass('converting').data('session', session);
 
-  const controller = new AbortController()
-  const signal = controller.signal
-  convertFileRequest({
-    action: 'convertFile',
-    file_name: fname,
-    source_lang: CreateProjectStore.getSourceLang(),
-    target_lang: CreateProjectStore.getTargetLangs(),
-    segmentation_rule: $('#segm_rule').val(),
-    signal
-  }).then(function ({data, errors}) {
+    const controller = new AbortController()
+    const signal = controller.signal
+    convertFileRequest({
+        action: 'convertFile',
+        file_name: fname,
+        source_lang: CreateProjectStore.getSourceLang(),
+        target_lang: CreateProjectStore.getTargetLangs(),
+        segmentation_rule: UI.segmentationRule,
+        signal
+    }).then(function ( {data, errors} ) {
 
     filerow.removeClass('converting');
     filerow.addClass('ready');
@@ -568,15 +535,15 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
 
       $('.ui-progressbar-value', filerow).addClass('completed').css('width', '100%');
 
-      if (checkAnalyzability('convertfile on success')) {
-        enableAnalyze();
-      }
-      $('.operation', filerow).fadeOut('slow', function () {
-        // Animation complete.
-      });
-      $('.progress', filerow).fadeOut('slow', function () {
-        // Animation complete.
-      });
+            if ( checkAnalyzability( 'convertfile on success' ) ) {
+                CreateProjectActions.enableAnalyzeButton(true)
+            }
+            $( '.operation', filerow ).fadeOut( 'slow', function () {
+                // Animation complete.
+            } );
+            $( '.progress', filerow ).fadeOut( 'slow', function () {
+                // Animation complete.
+            } );
 
       //if this conversion is related to a Zip File
       if (typeof data.data != 'undefined' && typeof data.data['zipFiles'] !== 'undefined') {
@@ -660,28 +627,28 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
 
         });
 
-        if (errors.length > 0) {
-          UI.checkFailedConversionsNumber();
-          disableAnalyze();
-          return false;
-        }
-        //END editing by Roberto Tucci <roberto@translated.net>
+                if ( errors.length > 0 ) {
+                    UI.checkFailedConversionsNumber();
+                    CreateProjectActions.enableAnalyzeButton(false)
+                    return false;
+                }
+                //END editing by Roberto Tucci <roberto@translated.net>
 
-        var notTranslationFileCount = 0;
-        $(".name").each(function () {
-          var currSplitLength = $(this).text().split(".").length - 1;
-          if ($(this).text().split(".")[currSplitLength] == "tmx" ||
-              $(this).text().split(".")[currSplitLength - 1] == "tmx" ||
-              $(this).text().split(".")[currSplitLength] == "g" ||
-              $(this).text().split(".")[currSplitLength - 1] == "g" ||
-              $(this).text().split(".")[currSplitLength] == "zip") {
-            notTranslationFileCount++;
-          }
-        });
-        if (notTranslationFileCount == $(".name").length) {
-          disableAnalyze();
-        }
-      }
+                var notTranslationFileCount = 0;
+                $( ".name" ).each( function () {
+                    var currSplitLength = $( this ).text().split( "." ).length - 1;
+                    if ( $( this ).text().split( "." )[currSplitLength] == "tmx" ||
+                        $( this ).text().split( "." )[currSplitLength - 1] == "tmx" ||
+                        $( this ).text().split( "." )[currSplitLength] == "g" ||
+                        $( this ).text().split( "." )[currSplitLength - 1] == "g" ||
+                        $( this ).text().split( "." )[currSplitLength] == "zip" ) {
+                        notTranslationFileCount++;
+                    }
+                } );
+                if ( notTranslationFileCount == $( ".name" ).length ) {
+                    CreateProjectActions.enableAnalyzeButton(false)
+                }
+            }
 
     } else if (data.code <= 0 || errors.length > 0) {
 
@@ -695,10 +662,10 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
       }, 50);
       UI.checkFailedConversionsNumber();
 
-      //filters ocr warning
-      if (data.code == -20) {
-        enableAnalyze();
-      }
+            //filters ocr warning
+            if ( data.code == -20 ){
+                CreateProjectActions.enableAnalyzeButton(true)
+            }
 
     }
 
@@ -792,33 +759,6 @@ var checkAnalyzability = function (who) {
     return false;
   }
   ;
-}
-
-var isValidFileExtension = function (filename) {
-
-  console.log('filename: ' + filename);
-  var ext = filename.split('.')[filename.split('.').length - 1];
-  var res = (!filename.match(config.allowedFileTypes)) ? false : true;
-
-  console.log(res);
-  return res;
-}
-
-var isTMXAllowed = function () {
-  var filename = "test.tmx";
-  var res = (!filename.match(config.allowedFileTypes)) ? false : true;
-
-  console.log("function isTMXAllowed return value: " + res);
-  return res;
-}
-
-var enableAnalyze = function () {
-  $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
-  if (document.activeElement.nodeName.toLowerCase() !== 'input') $('.uploadbtn').focus();
-}
-
-var disableAnalyze = function () {
-  $('.uploadbtn').attr('disabled', 'disabled').addClass('disabled');
 }
 
 var setFileReadiness = function () {

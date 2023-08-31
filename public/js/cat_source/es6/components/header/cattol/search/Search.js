@@ -79,8 +79,7 @@ class Search extends React.Component {
     })
     // disable tag projection
     if (config.tag_projection_enabled === 1) {
-      UI.disableTagProjectionInJob()
-      UI.setTagProjectionChecked(false)
+      SegmentActions.changeTagProjectionStatus(false)
     }
   }
 
@@ -406,8 +405,7 @@ class Search extends React.Component {
       this.props.active !== prevProps.active &&
       this.state.previousIsTagProjectionEnabled
     ) {
-      UI.enableTagProjectionInJob()
-      UI.setTagProjectionChecked(true)
+      SegmentActions.changeTagProjectionStatus(true)
     }
   }
   getResultsHtml() {

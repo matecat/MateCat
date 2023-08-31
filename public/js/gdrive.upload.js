@@ -171,7 +171,7 @@ APP.displayGDriveFiles = function () {
     $('#upload-files-list, .gdrive-addlink-container').hide()
     $('#gdrive-files-list').show()
 
-    UI.enableAnalyze()
+    CreateProjectActions.enableAnalyzeButton(true)
   }
 }
 
@@ -179,7 +179,7 @@ APP.hideGDriveFiles = function () {
   if ($('#gdrive-files-list').is(':visible')) {
     $('#gdrive-files-list').hide()
     $('#upload-files-list, .gdrive-addlink-container').show()
-    UI.disableAnalyze()
+    CreateProjectActions.enableAnalyzeButton(false)
   }
 }
 

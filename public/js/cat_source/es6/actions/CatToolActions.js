@@ -325,14 +325,6 @@ let CatToolActions = {
   },
   onRender: (props = {}) => {
     UI.nextUntranslatedSegmentIdByServer = null
-    UI.tagModesEnabled =
-      typeof props.tagModesEnabled != 'undefined' ? props.tagModesEnabled : true
-
-    if (UI.tagModesEnabled && !SegmentUtils.checkTPEnabled())
-      UI.body.addClass('tagModes')
-    else UI.body.removeClass('tagModes')
-
-    UI.setTagLockCustomizeCookie(true)
 
     const segmentToOpen = props.segmentToOpen || false
 
@@ -363,6 +355,12 @@ let CatToolActions = {
   setHaveKeysGlossary: (value) => {
     AppDispatcher.dispatch({
       actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
+      value,
+    })
+  },
+  openSettingsPanel: (value) => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.OPEN_SETTINGS_PANEL,
       value,
     })
   },

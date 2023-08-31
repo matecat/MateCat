@@ -24,7 +24,7 @@ class ForgotPasswordModal extends React.Component {
   }
 
   openLoginModal() {
-    $('#modal').trigger('openlogin')
+    APP.openLoginModal()
   }
 
   handleFieldChanged(field) {

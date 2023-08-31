@@ -824,36 +824,7 @@ window.UI = {
       UI.recoverUnsavedSetTranslations()
     }, 1000)
   },
-  setTagLockCustomizeCookie: function (first) {
-    if (first && !config.tagLockCustomizable) {
-      UI.tagLockEnabled = true
-      return true
-    }
-    var cookieName = 'tagLockDisabled'
 
-    if (typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
-      if (first) {
-        if (Cookies.get(cookieName + '-' + config.id_job) == 'true') {
-          this.tagLockEnabled = false
-          setTimeout(function () {
-            $('.editor .tagLockCustomize').addClass('unlock')
-          }, 100)
-        } else {
-          this.tagLockEnabled = true
-        }
-      } else {
-        Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled, {
-          expires: 30,
-          secure: true,
-        })
-      }
-    } else {
-      Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled, {
-        expires: 30,
-        secure: true,
-      })
-    }
-  },
   /**
    * After User click on Translated or T+>> Button
    * @param segment
@@ -946,16 +917,6 @@ window.UI = {
       'If you must edit it, click on the padlock icon to the left of the segment. ' +
       'The owner of the project will be notified of any edits.'
     )
-  },
-  openOptionsPanel: function () {
-    if ($('.popup-tm').hasClass('open')) {
-      return false
-    }
-    var tab = 'opt'
-    $('body').addClass('side-popup')
-    $('.popup-tm').addClass('open').show().animate({right: '0px'}, 400)
-    $('.outer-tm').show()
-    $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click()
   },
 
   closeAllMenus: function () {
