@@ -120,21 +120,6 @@ class ProductionSummary extends React.Component {
                   }}
                 />
 
-                <a
-                  className="approved-bar translate-tooltip"
-                  data-variation="tiny"
-                  data-html={
-                    'Approved ' +
-                    Math.round((approvedWords / stats.get('total')) * 100) +
-                    '%'
-                  }
-                  style={{
-                    width:
-                      Math.round((approvedWords / stats.get('total')) * 100) +
-                      '%',
-                  }}
-                />
-
                 {approvedWords2ndPass ? (
                   <a
                     className="approved-bar-2nd-pass translate-tooltip"
@@ -154,6 +139,21 @@ class ProductionSummary extends React.Component {
                     }}
                   />
                 ) : null}
+
+                <a
+                  className="approved-bar translate-tooltip"
+                  data-variation="tiny"
+                  data-html={
+                    'Approved ' +
+                    Math.round((approvedWords / stats.get('total')) * 100) +
+                    '%'
+                  }
+                  style={{
+                    width:
+                      Math.round((approvedWords / stats.get('total')) * 100) +
+                      '%',
+                  }}
+                />
 
                 <a
                   className="translated-bar translate-tooltip"
