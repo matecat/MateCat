@@ -195,7 +195,7 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      mt_engine: activeMTEngine.id,
+      mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
       private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       pretranslate_100: isPretranslate100Active ? 1 : 0,
