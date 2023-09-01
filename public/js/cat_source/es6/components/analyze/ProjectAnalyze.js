@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import JobAnalyze from './JobAnalyze'
 
@@ -13,10 +13,8 @@ class ProjectAnalyze extends React.Component {
     return this.props.project.get('jobs').map((job) => {
       if (
         idArray.indexOf(job.get('id')) < 0 &&
-        !_.isUndefined(this.props.jobsInfo[job.get('id').toString()]) &&
-        !_.isUndefined(
-          this.props.volumeAnalysis.get(job.get('id').toString()),
-        ) &&
+        !isUndefined(this.props.jobsInfo[job.get('id').toString()]) &&
+        !isUndefined(this.props.volumeAnalysis.get(job.get('id').toString())) &&
         this.props.volumeAnalysis
       ) {
         let jobVolumeAnalysisChunk = this.props.volumeAnalysis

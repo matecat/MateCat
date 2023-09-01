@@ -1,5 +1,6 @@
 import React from 'react'
-import _ from 'lodash'
+import {round} from 'lodash/math'
+
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import CommonUtils from '../../utils/commonUtils'
@@ -995,7 +996,7 @@ class JobContainer extends React.Component {
         ? (approved.get('advancement_wc') * 100) /
           this.props.job.get('stats').get('TOTAL')
         : approvedPerc
-      approvedPercFormatted = _.round(approvedPerc, 1)
+      approvedPercFormatted = round(approvedPerc, 1)
       let approved2ndPass = this.props.job
         .get('stats')
         .get('revises')
@@ -1006,7 +1007,7 @@ class JobContainer extends React.Component {
         ? (approved2ndPass.get('advancement_wc') * 100) /
           this.props.job.get('stats').get('TOTAL')
         : approved2ndPass
-      approvedPercFormatted2ndPass = _.round(approvedPerc2ndPass, 1)
+      approvedPercFormatted2ndPass = round(approvedPerc2ndPass, 1)
     }
 
     return (

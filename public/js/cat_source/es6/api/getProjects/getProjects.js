@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isEmpty} from 'lodash'
 
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
@@ -22,7 +22,7 @@ export const getProjects = async ({
   const data = {
     id_team: team.id,
     page,
-    filter: _.isEmpty(searchFilter.filter) ? 0 : 1,
+    filter: isEmpty(searchFilter.filter) ? 0 : 1,
     ...searchFilter.filter,
   }
 

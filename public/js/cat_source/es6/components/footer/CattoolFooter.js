@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import _ from 'lodash'
+import {round} from 'lodash/math'
 
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
@@ -34,7 +34,7 @@ const transformStats = (stats) => {
         (parseFloat(reviewedWords.advancement_wc) * 100) / stats.TOTAL
       approvePerc =
         approvePerc > stats.APPROVED_PERC ? stats.APPROVED_PERC : approvePerc
-      a_perc_formatted = approvePerc < 0 ? 0 : _.round(approvePerc, 1)
+      a_perc_formatted = approvePerc < 0 ? 0 : round(approvePerc, 1)
       a_perc = approvePerc
     }
 
@@ -50,12 +50,12 @@ const transformStats = (stats) => {
           ? stats.APPROVED_PERC
           : approvePerc2ndPass
       a_perc_2nd_formatted =
-        approvePerc2ndPass < 0 ? 0 : _.round(approvePerc2ndPass, 1)
+        approvePerc2ndPass < 0 ? 0 : round(approvePerc2ndPass, 1)
       a_perc_2nd = approvePerc2ndPass
       revise_todo_formatted =
         config.revisionNumber === 2
           ? revise_todo_formatted +
-            _.round(parseFloat(reviewedWords.advancement_wc))
+            round(parseFloat(reviewedWords.advancement_wc))
           : revise_todo_formatted
     }
   }

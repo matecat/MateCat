@@ -1,5 +1,7 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined, size} from 'lodash'
+import {each, map} from 'lodash/collection'
+import {pick} from 'lodash/object'
 
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import ModalsActions from '../../actions/ModalsActions'
@@ -54,7 +56,7 @@ class AnalyzeChunksResume extends React.Component {
     let outsourceChunk = this.props.project.get('jobs').find((item) => {
       return !!item.get('outsource') && item.get('id') === idJob
     })
-    return !_.isUndefined(outsourceChunk)
+    return !isUndefined(outsourceChunk)
   }
 
   getTranslateUrl = (job, index) => {
@@ -200,11 +202,11 @@ class AnalyzeChunksResume extends React.Component {
     let buttonsClass =
       status !== 'DONE' || thereIsChunkOutsourced() ? 'disabled' : ''
     if (!jobsAnalysis.isEmpty()) {
-      return _.map(jobsInfo, (item, indexJob) => {
+      return map(jobsInfo, (item, indexJob) => {
         let tmpJobAnalysis = jobsAnalysis.get(indexJob)
 
-        if (item.splitted !== '' && _.size(item.chunks) > 1) {
-          let chunksHtml = _.map(item.chunks, (chunkConfig, index) => {
+        if (item.splitted !== '' && size(item.chunks) > 1) {
+          let chunksHtml = map(item.chunks, (chunkConfig, index) => {
             let indexChunk = chunkConfig.jpassword
             let chunkAnalysis = tmpJobAnalysis.get('totals').get(indexChunk)
             let chunk = chunkConfig
@@ -533,11 +535,11 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   componentDidUpdate() {
-    let changedData = _.pick(this.payableValuesChenged, (item) => {
+    let changedData = pick(this.payableValuesChenged, (item) => {
       return item === true
     })
-    if (_.size(changedData) > 0) {
-      _.each(changedData, (item, i) => {
+    if (size(changedData) > 0) {
+      each(changedData, (item, i) => {
         this.containers[i].classList.add('updated-count')
         setTimeout(() => {
           this.containers[i].classList.remove('updated-count')
@@ -548,7 +550,7 @@ class AnalyzeChunksResume extends React.Component {
 
   componentDidMount() {
     if (this.props.status === 'DONE') {
-      _.each(self.containers, (item, i) => {
+      each(self.containers, (item, i) => {
         this.classList.add('updated-count')
         setTimeout(() => {
           this.containers[i].classList.remove('updated-count')
