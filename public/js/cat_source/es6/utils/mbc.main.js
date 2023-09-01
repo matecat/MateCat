@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {find} from 'lodash'
 
 import CommentsActions from '../actions/CommentsActions'
 import SegmentActions from '../actions/SegmentActions'
@@ -215,7 +215,7 @@ MBC.init = function () {
     }
 
     var findUser = function (id) {
-      return _.find(MBC.teamUsers, function (item) {
+      return find(MBC.teamUsers, function (item) {
         return item.uid === id
       })
     }

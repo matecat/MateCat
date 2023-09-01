@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import {Base64} from 'js-base64'
 
 // import SegmentStore  from '../stores/SegmentStore';
@@ -402,7 +402,7 @@ const TAGS_UTILS = {
   hasDataOriginalTags: function (segmentSource) {
     var originalText = segmentSource
     const reg = getXliffRegExpression()
-    return !_.isUndefined(originalText) && reg.test(originalText)
+    return !isUndefined(originalText) && reg.test(originalText)
   },
 
   /**

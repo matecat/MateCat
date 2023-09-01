@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
@@ -43,7 +43,7 @@ let TranslationMatches = {
   renderContributions: function (data, sid) {
     if (!data) return true
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
-    if (_.isUndefined(segmentObj)) return
+    if (isUndefined(segmentObj)) return
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
@@ -64,7 +64,7 @@ let TranslationMatches = {
     if (
       matches &&
       matches.length > 0 &&
-      _.isUndefined(matches[0].error) &&
+      isUndefined(matches[0].error) &&
       (parseInt(match) > 70 || match === 'MT')
     ) {
       var editareaLength = segmentObj.translation.length
@@ -167,7 +167,7 @@ let TranslationMatches = {
       return $.Deferred().resolve()
     }
 
-    if (_.isUndefined(config.id_client)) {
+    if (isUndefined(config.id_client)) {
       setTimeout(function () {
         TranslationMatches.getContribution(segmentSid, next)
       }, 3000)
