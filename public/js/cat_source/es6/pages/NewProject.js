@@ -292,11 +292,6 @@ const NewProject = ({
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
 
-    const handlerKeyEnter = ({key}) => {
-      if (key === 'Enter') createProject.current()
-    }
-    document.addEventListener('keyup', handlerKeyEnter)
-
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -311,7 +306,6 @@ const NewProject = ({
         NewProjectConstants.ENABLE_ANALYZE_BUTTON,
         enableAnalizeButton,
       )
-      document.removeEventListener('keyup', handlerKeyEnter)
     }
   }, [])
   useEffect(() => {
@@ -599,7 +593,6 @@ const NewProject = ({
               />
             </>
           )}
-          <p className="enter">Press Enter</p>
         </div>
       </div>
       {isOpenMultiselectLanguages && (
