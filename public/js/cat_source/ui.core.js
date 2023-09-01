@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
@@ -78,7 +78,7 @@ window.UI = {
     // for this segment
 
     if (this.autopropagateConfirmNeeded(segment, opts.propagation)) {
-      var text = !_.isUndefined(segment.alternatives)
+      var text = !isUndefined(segment.alternatives)
         ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
           'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
         : 'The translation you are confirming for this segment is different from the version confirmed for other identical segments. <br><br>Would you ' +

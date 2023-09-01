@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {filter} from 'lodash'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
@@ -27,7 +27,7 @@ window.APP = {
 
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
-      return _.filter(config.flash_messages.service, function (service) {
+      return filter(config.flash_messages.service, function (service) {
         return service.key == name
       })
     }
