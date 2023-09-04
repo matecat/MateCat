@@ -34,6 +34,10 @@ class DuplicateNewLineTest extends PHPUnit_Framework_TestCase
                 'expected' => "This is markdown **string** \n\n with two break \n\n new lines",
             ],
             [
+                'original' => "This is a comment\nThis is a comment number two\nThis is a comment number three",
+                'expected' => "This is a comment\n\nThis is a comment number two\n\nThis is a comment number three",
+            ],
+            [
                 'original' => "This is markdown **string** no new line",
                 'expected' => "This is markdown **string** no new line",
             ],
