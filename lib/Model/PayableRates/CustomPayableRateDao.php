@@ -253,20 +253,25 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     /**
      * @param int $modelId
      * @param int $idJob
+     * @param int $version
+     * @param string $name
+     *
      * @return string
      */
-    public static function assocModelToJob($modelId, $idJob)
+    public static function assocModelToJob($modelId, $idJob, $version, $name)
     {
         $sql = "INSERT INTO " . self::TABLE_JOB_PIVOT .
-            " ( `id_job`, `custom_payable_rate_model_id` ) " .
+            " ( `id_job`, `custom_payable_rate_model_id`, `custom_payable_rate_model_version`, `custom_payable_rate_model_name` ) " .
             " VALUES " .
-            " ( :id_job, :model_id ); ";
+            " ( :id_job, :model_id, :version, :model_name ); ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-            'id_job'   => $idJob,
-            'model_id' => $modelId
+            'id_job'     => $idJob,
+            'model_id'   => $modelId,
+            'version'    => $version,
+            'model_name' => $name,
         ] );
 
         return $conn->lastInsertId();
