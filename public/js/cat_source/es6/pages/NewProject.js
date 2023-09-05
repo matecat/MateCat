@@ -387,7 +387,8 @@ const NewProject = ({
       targetLangs,
       selectedTeam,
     })
-    if (prevSourceLang !== sourceLang) {
+    if (prevSourceLang.current.id !== sourceLang.id) {
+      prevSourceLang.current = sourceLang
       UI.UPLOAD_PAGE.restartConversions()
     }
   }, [sourceLang, targetLangs, selectedTeam])
