@@ -127,7 +127,8 @@ export const Select = ({
         parentScrollTop -
         wrapperTopPosition -
         listTopPosition -
-        16 // 16 = margins
+        16 -
+        34 // 16 = margins
       if (availableHeight > maxHeightDroplist) {
         setListMaxHeight(availableHeight)
       } else {

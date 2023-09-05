@@ -209,3 +209,6 @@
   flex-direction: column;
   flex-grow: 1;
 }
+.options-box.multi-match .dropdown__list {
+  max-height: 300px !important;
+}
