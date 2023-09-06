@@ -85,7 +85,6 @@ const LXQ = {
       data,
       function (err, result) {
         if (!err) {
-          CommonUtils.dispatchTrackingEvents('lexiqa', data)
           var noVisibleErrorsFound = false
 
           if (result.hasOwnProperty('qaData') && result.qaData.length > 0) {

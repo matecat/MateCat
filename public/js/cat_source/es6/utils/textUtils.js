@@ -622,6 +622,23 @@ const TEXT_UTILS = {
     }
     return result
   },
+  getFullwidthVariantsMatches: (value, getSize) => {
+    const regex = /[\uFF01-\uFF60]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
   /* specify how chars size should be count */
   charsSizeMapping: {
     default: (value) => TEXT_UTILS.getDefaultCharsSize(value),
@@ -633,6 +650,11 @@ const TEXT_UTILS = {
         TEXT_UTILS.getGeorgianMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getFullwidthVariantsMatches(
+          value,
+          TEXT_UTILS.getUft16CharsSize,
+        ),
     ],
   },
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
