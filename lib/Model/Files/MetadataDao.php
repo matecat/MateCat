@@ -93,7 +93,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'id_file'        => $id_file,
                 'files_parts_id' => $filePartsId,
                 'key'            => $key,
-                'value'          => $value
+                'value'          => Utils::stripTagsPreservingHrefs($value)
         ] );
 
         return $this->get( $id_project, $id_file, $key, $filePartsId );
@@ -119,7 +119,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'id_file'        => $id_file,
                 'files_parts_id' => $filePartsId,
                 'key'            => $key,
-                'value'          => $value
+                'value'          => Utils::stripTagsPreservingHrefs($value)
         ] );
 
         return $this->get( $id_project, $id_file, $key, $filePartsId );
