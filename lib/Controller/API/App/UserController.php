@@ -2,23 +2,28 @@
 
 namespace API\App;
 
-use API\App\Json\ConnectedService;
-use API\V2\Json\Team;
-use API\V2\Json\User;
+use API\App\Json\UserProfile;
 use API\V2\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
+use ConnectedServices\ConnectedServiceStruct;
+use Exception;
+use Exceptions\ValidationError;
 use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
-use Users_UserDao;
-use Utils;
+use Users\ChangePasswordModel;
+use Users_UserStruct;
 
 class UserController extends AbstractStatefulKleinController {
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user;
+
+    /**
+     * @var ConnectedServiceStruct
+     */
     protected $connectedServices;
 
     public function show() {
@@ -36,40 +41,25 @@ class UserController extends AbstractStatefulKleinController {
                 $membersDao->findUserTeams( $this->user )
         );
 
-        // TODO: move this into a formatter class
-        $this->response->json( [
-                'user'               => User::renderItem( $this->user ),
-                'connected_services' => ( new ConnectedService( $this->connectedServices ) )->render(),
+        $this->response->json( ( new UserProfile() )->renderItem( $this->user, $userTeams, $this->connectedServices, $metadata ) );
 
-            // TODO: this is likely to be unsafe to be passed here without a whitelist.
-                'metadata'           => ( empty( $metadata ) ? null : $metadata ),
-
-                'teams' => ( new Team() )->render( $userTeams )
-
-        ] );
     }
 
-    public function updatePassword() {
-        $new_password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
+    /**
+     * @throws ValidationError
+     * @throws Exception
+     */
+    public function changePasswordAsLoggedUser() {
 
-        \Users_UserValidator::validatePassword( $new_password );
+        $old_password              = filter_var( $this->request->param( 'old_password' ), FILTER_SANITIZE_STRING );
+        $new_password              = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
+        $new_password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
 
-        $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
-        $fieldsToUpdate   = [
-                'fields' => [ 'pass' ]
-        ];
-
-        // update email_confirmed_at only if it's null
-        if ( null === $this->user->email_confirmed_at ) {
-            $this->user->email_confirmed_at = date( 'Y-m-d H:i:s' );
-            $fieldsToUpdate[ 'fields' ][]   = 'email_confirmed_at';
-        }
-
-        \Users_UserDao::updateStruct( $this->user, $fieldsToUpdate );
-        ( new Users_UserDao )->destroyCacheByEmail( $this->user->email );
-        ( new Users_UserDao )->destroyCacheByUid( $this->user->uid );
+        $cpModel = new ChangePasswordModel( $this->user );
+        $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
 
         $this->response->code( 200 );
+
     }
 
     protected function afterConstruct() {

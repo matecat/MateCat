@@ -218,18 +218,12 @@ class Utils {
 
     public static function encryptPass( $clear_pass, $salt ) {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
-
         return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
     public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ) {
-        if ( sha1( $clear_pass . $salt ) == $db_hashed_pass ) { //TODO: old implementation, remove in a next future when hopefully all people will be migrated to password_hash
-            return sha1( $clear_pass . $salt );
-        } else {
-            $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
-
-            return password_verify( $pepperedPass, $db_hashed_pass );
-        }
+        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+        return password_verify( $pepperedPass, $db_hashed_pass );
     }
 
     /**

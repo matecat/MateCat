@@ -9,7 +9,6 @@
 
 abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements DataAccess_IDaoStruct, Countable {
 
-    protected $validator;
     protected $cached_results = array();
 
     public function __construct( Array $array_params = array() ) {
@@ -18,7 +17,6 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
                 $this->$property = $value;
             }
         }
-        $this->tryValidator();
     }
 
     public function __set( $name, $value ) {
@@ -90,48 +88,6 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      *
      * @throws \Exceptions\ValidationError
      */
-
-    public function ensureValid() {
-        if ( !$this->isValid() ) {
-            throw new \Exceptions\ValidationError (
-                $this->validator->getErrorsAsString()
-            );
-        }
-    }
-
-    public function isValid() {
-        if ( $this->validator != null ) {
-            $this->validator->flushErrors();
-            $this->validator->validate();
-            // TODO: change this
-            $string = $this->validator->getErrors();
-            $isEmpty = empty( $string );
-
-            return  $isEmpty ;
-        }
-        return true;
-    }
-
-    /**
-     * Try to set the validator for this struct automatically.
-     */
-    protected function tryValidator() {
-        // try to set a validator for this struct it one exists
-        $current_class = get_class( $this );
-
-        // This regular expressions changes `FooStruct` in `FooValidator`
-        $validator_name = preg_replace('/(.+)(Struct)$/', '\1Validator', $current_class );
-        $validator_name = "\\$validator_name" ;
-
-        try {
-            $load = @class_exists($validator_name, true) ;
-            if ( $load  ) {
-                $this->validator = new $validator_name($this);
-            }
-        } catch ( \Exception $e ) {
-            \Log::doJsonLog("Class not found $validator_name");
-        }
-    }
 
     /**
      * Returns an array of the public attributes of the struct.

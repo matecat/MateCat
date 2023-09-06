@@ -77,13 +77,12 @@ class TranslationIssueModel {
      */
     public function save() {
         $this->setDefaultIssueValues();
-        $data = $this->issue->toArray();
 
         if ( !empty( $this->diff ) ) {
             $this->saveDiff();
         }
 
-        $this->issue = EntryDao::createEntry( $data );
+        EntryDao::createEntry( $this->issue );
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
         $chunk_review_model->addPenaltyPoints( $this->issue->penalty_points, $this->project );

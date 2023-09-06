@@ -314,7 +314,6 @@ abstract class DataAccess_AbstractDao {
             return $_cacheResult;
         }
 
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
@@ -471,7 +470,6 @@ abstract class DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
-        $struct->ensureValid();
 
         $attrs = $struct->toArray();
 

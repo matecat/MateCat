@@ -2,18 +2,21 @@
 
 namespace API\App;
 
+use Exception;
 use Exceptions\ValidationError;
 use FlashMessage;
+use Log;
+use Routes;
 use Teams\InvitedUser;
-use Users\PasswordReset;
+use Users\PasswordResetModel;
 use Users\RedeemableProject;
-use Users\Signup;
+use Users\SignupModel;
 
 class SignupController extends AbstractStatefulKleinController {
 
     public function create() {
-        // TODO: filter input params
-        $signup = new Signup( $this->request->param( 'user' ) );
+
+        $signup = new SignupModel( $this->request->param( 'user' ) );
 
         if ( $signup->valid() ) {
             $signup->process();
@@ -30,7 +33,7 @@ class SignupController extends AbstractStatefulKleinController {
 
     public function confirm() {
         try {
-            $user = Signup::confirm( $this->request->param( 'token' ) );
+            $user = SignupModel::confirm( $this->request->param( 'token' ) );
 
             if ( InvitedUser::hasPendingInvitations() ) {
                 InvitedUser::completeTeamSignUp( $user, $_SESSION[ 'invited_to_team' ] );
@@ -61,28 +64,22 @@ class SignupController extends AbstractStatefulKleinController {
     public function authForPasswordReset() {
         try {
 
-            $reset = new PasswordReset( $this->request->param( 'token' ), $_SESSION );
-            $reset->authenticateUser();
-
-            $project = new RedeemableProject( $reset->getUser(), $_SESSION );
-            $project->tryToRedeem();
-
-            if ( $project->getDestinationURL() ) {
-                $this->response->redirect( $project->getDestinationURL() );
-            } else {
-                $this->response->redirect( $this->__flushWantedURL() );
-            }
+            $reset = new PasswordResetModel( $this->request->param( 'token' ), $_SESSION );
+            $reset->validateUser();
+            $this->response->redirect( $this->__flushWantedURL() );
 
             FlashMessage::set( 'popup', 'passwordReset', FlashMessage::SERVICE );
-        } catch ( ValidationError $e ) {
-            FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
 
-            $this->response->redirect( \Routes::appRoot() );
+        } catch ( ValidationError $e ) {
+
+            FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
+            $this->response->redirect( Routes::appRoot() );
+
         }
     }
 
     public function resendEmailConfirm() {
-        Signup::resendEmailConfirm( $this->request->param( 'email' ) );
+        SignupModel::resendEmailConfirm( $this->request->param( 'email' ) );
         $this->response->code( 200 );
     }
 
@@ -90,7 +87,7 @@ class SignupController extends AbstractStatefulKleinController {
 
         $doForgotPassword = $this->doForgotPassword();
 
-        $this->response->code( empty($doForgotPassword) ? 200 : 500 );
+        $this->response->code( empty( $doForgotPassword ) ? 200 : 500 );
         $this->response->json( [
                 'email'      => $this->request->param( 'email' ),
                 'wanted_url' => $this->request->param( 'wanted_url' ),
@@ -125,10 +122,10 @@ class SignupController extends AbstractStatefulKleinController {
 
         if ( empty( $errors ) ) {
             try {
-                if ( !Signup::forgotPassword( $email, $wanted_url ) ) {
-                    \Log::doJsonLog('Failed attempt to recover password with email ' . $email);
+                if ( !SignupModel::forgotPassword( $email, $wanted_url ) ) {
+                    Log::doJsonLog( 'Failed attempt to recover password with email ' . $email );
                 }
-            } catch ( \Exception $exception ) {
+            } catch ( Exception $exception ) {
                 $errors[] = 'Error updating database.';
             }
         }
@@ -136,8 +133,23 @@ class SignupController extends AbstractStatefulKleinController {
         return $errors;
     }
 
+
+    /**
+     * @throws ValidationError
+     */
+    public function setNewPassword() {
+
+        $reset                 = new PasswordResetModel( null, $_SESSION );
+        $new_password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
+        $password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
+        $reset->resetPassword( $new_password, $password_confirmation );
+
+        $this->response->code( 200 );
+
+    }
+
     private function __flushWantedURL() {
-        $url = isset( $_SESSION[ 'wanted_url' ] ) ? $_SESSION[ 'wanted_url' ] : \Routes::appRoot();
+        $url = isset( $_SESSION[ 'wanted_url' ] ) ? $_SESSION[ 'wanted_url' ] : Routes::appRoot();
         unset( $_SESSION[ 'wanted_url' ] );
 
         return $url;
