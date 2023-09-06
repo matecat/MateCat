@@ -18,6 +18,7 @@ use PDOException;
 use Projects_ProjectDao;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
+use Utils;
 
 class ProjectManagerModel {
 
@@ -167,15 +168,15 @@ class ProjectManagerModel {
                     // from the UI
 
                     if(isset($attributes['entries'][$index])) {
-                        $metaKey = strip_tags( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
+                        $metaKey = Utils::stripTagsPreservingHrefs( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
 
                         // check for metaKey is `notes`
                         if(!self::isAMetadata($metaKey)){
-                            $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+                            $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
                         }
 
                     } else {
-                        $insert_values[] = [ $id_segment, $internal_id, strip_tags(html_entity_decode($note)), null ];
+                        $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
                     }
                 }
             }
@@ -250,8 +251,8 @@ class ProjectManagerModel {
                 foreach ( $entries as $index => $note ) {
 
                     if(isset($attributes['entries'][$index])){
-                        $metaKey = strip_tags(html_entity_decode($attributes['entries'][$index]));
-                        $metaValue = strip_tags(html_entity_decode($note));
+                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes['entries'][$index]));
+                        $metaValue = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
 
                         if(self::isAMetadata($metaKey)){
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];

@@ -126,9 +126,10 @@ class UserKeysModel {
                     /*
                      * This is not a key of that user, set right and obfuscate
                      */
-                    $jobKey->r = true;
-                    $jobKey->w = true;
-                    $jobKey    = $jobKey->hideKey( -1 );
+                    $jobKey->r     = true;
+                    $jobKey->w     = true;
+                    $jobKey->owner = false;
+                    $jobKey        = $jobKey->hideKey( -1 );
 
                 }
 
@@ -140,6 +141,7 @@ class UserKeysModel {
                  */
                 $jobKey->r                        = true;
                 $jobKey->w                        = true;
+                $jobKey->owner                    = false;
                 $this->_user_keys[ 'job_keys' ][] = $jobKey->hideKey( -1 );
 
             }

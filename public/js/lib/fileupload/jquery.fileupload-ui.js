@@ -104,7 +104,7 @@
                     if ( !data.isValidated ) {
                         $( '.cancel button', data.context ).click( function () {
                             if ( UI.checkAnalyzability() ) {
-                                UI.enableAnalyze();
+                                CreateProjectActions.enableAnalyzeButton(true)
                             }
                         } );
                     }

@@ -76,7 +76,6 @@ let SearchUtils = {
       )
       return false
     }
-    SegmentActions.disableTagLock()
 
     let p = this.searchParams
 

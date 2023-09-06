@@ -3,7 +3,6 @@ import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
-import Customizations from './es6/utils/customizations'
 
 $.extend(window.UI, {
   start: function () {
@@ -12,11 +11,7 @@ $.extend(window.UI, {
     // of SegmentFilter, see below.
     UI.firstLoad = true
     UI.body = $('body')
-    UI.checkCrossLanguageSettings()
     CommonUtils.setBrowserHistoryBehavior()
-    $('article').each(function () {
-      APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30)
-    })
 
     // page content mount point
     const targetPageContent = document.getElementsByClassName('page-content')[0]
@@ -37,7 +32,6 @@ $.extend(window.UI, {
     this.byButton = false
     this.displayedMessages = []
 
-    Customizations.loadCustomization()
     $('html').trigger('init')
     this.warningStopped = false
     this.unsavedSegmentsToRecover = []
@@ -46,8 +40,6 @@ $.extend(window.UI, {
     this.executingSetTranslation = []
 
     this.checkVersion()
-    this.initTM()
-    this.initAdvanceOptions()
 
     // SET EVENTS
     this.setEvents()

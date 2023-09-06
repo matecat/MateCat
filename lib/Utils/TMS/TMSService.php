@@ -13,6 +13,7 @@ use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
 use Exception;
 use FeatureSet;
+use Files\CSV;
 use INIT;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
@@ -21,6 +22,7 @@ use stdClass;
 use TMSService\TMSServiceDao;
 use Upload;
 use Utils;
+use Validator\GlossaryCSVValidator;
 
 class TMSService {
 
@@ -163,7 +165,10 @@ class TMSService {
             default:
         }
 
+        $numberOfLanguages = (new GlossaryCSVValidator())->getNumberOfLanguage( $file->getFilePath() );
+
         $file->setUuid( $importStatus->id );
+        $file->setNumberOfLanguages( $numberOfLanguages );
 
     }
 
@@ -206,7 +211,10 @@ class TMSService {
             default:
         }
 
+        $numberOfLanguages = (new GlossaryCSVValidator())->getNumberOfLanguage( $file->getFilePath() );
+
         $file->setUuid( $importStatus->id );
+        $file->setNumberOfLanguages( $numberOfLanguages );
 
     }
 
@@ -440,7 +448,7 @@ class TMSService {
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
-        <prop type="x-MateCAT-filename">' . $Filter->fromLayer0ToRawXliff( $row[ 'filename' ] ) . '</prop>
+        <prop type="x-MateCAT-filename">' . htmlspecialchars( $row[ 'filename' ], ENT_DISALLOWED, "UTF-8" ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
         ' . $chunkPropString . '
         ' . $tmOrigin . '

@@ -469,21 +469,20 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 
-                /**
-                 * @var $mt_engine \Engines_MMT
-                 */
                 $mt_engine = $contributionStruct->getMTEngine( $featureSet );
-
                 $config = $mt_engine->getConfigStruct();
 
                 //if a callback is not set only the first argument is returned, get the config params from the callback
                 $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
 
-                $config[ 'segment' ] = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]  = $jobStruct->source;
-                $config[ 'target' ]  = $jobStruct->target;
-                $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]   = $contributionStruct->segmentId;
+                $config[ 'segment' ]      = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]       = $jobStruct->source;
+                $config[ 'target' ]       = $jobStruct->target;
+                $config[ 'email' ]        = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]        = $contributionStruct->segmentId;
+                $config[ 'job_id' ]       = $jobStruct->id;
+                $config[ 'job_password' ] = $jobStruct->password;
+                $config[ 'session' ]      = $contributionStruct->getSessionId();
 
                 $mt_result = $mt_engine->get( $config );
             }
@@ -541,7 +540,7 @@ class GetContributionWorker extends AbstractWorker {
      */
     private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
-        if ( count( $matches ) > 0 ) {
+        if ( is_array($matches) and count( $matches ) > 0 ) {
 
             $segmentTranslation =  \Translations_SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 

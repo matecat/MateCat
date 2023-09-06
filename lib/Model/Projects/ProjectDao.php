@@ -613,8 +613,8 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
          r.review_password as r_password,
          r2.review_password as r2_password
          from jobs j
-         left join qa_chunk_reviews r on r.id_job = j.id and r.source_page = 2
-         left join qa_chunk_reviews r2 on r2.id_job = j.id and r2.source_page = 3
+         left join qa_chunk_reviews r on r.id_job = j.id and r.source_page = 2 and r.password = j.password
+         left join qa_chunk_reviews r2 on r2.id_job = j.id and r2.source_page = 3 and r.password = j.password
          where j.id_project = :pid;";
 
         $stmt = $db->getConnection()->prepare( $query );

@@ -236,7 +236,7 @@ class QualitySummary {
                     'segment_id' => (int)$issue->segment_id,
                     'content_id' => $issue->content_id,
                     'penalty_points' => floatval($issue->penalty_points),
-                    'category_code' => $catCode->code,
+                    'category_code' => !empty($catCode) ? @$catCode->code : null,
                     'category_label' => $issue->cat_label,
                     'severity_code' =>  substr($issue->severity_label, 0, 3),
                     'severity_label' => $issue->severity_label,

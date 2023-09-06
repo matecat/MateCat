@@ -23,11 +23,7 @@ class SegmentFooterTabMatches extends React.Component {
     this.processContributions = this.processContributions.bind(this)
     this.chooseSuggestion = this.chooseSuggestion.bind(this)
     this.setJobTmKeys = this.setJobTmKeys.bind(this)
-    SegmentActions.getContributions(
-      this.props.segment.sid,
-      this.props.fid,
-      this.props.segment.segment,
-    )
+
     this.state = {
       tmKeys: CatToolStore.getJobTmKeys(),
     }
@@ -206,7 +202,9 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   componentDidMount() {
+    const {multiMatchLangs} = this.context
     this._isMounted = true
+    SegmentActions.getContributions(this.props.segment.sid, multiMatchLangs)
     SegmentStore.addListener(
       SegmentConstants.CHOOSE_CONTRIBUTION,
       this.chooseSuggestion,
@@ -231,7 +229,8 @@ class SegmentFooterTabMatches extends React.Component {
    */
   componentDidUpdate(prevProps) {
     if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
-      SegmentActions.getContribution(this.props.segment.sid)
+      const {multiMatchLangs} = this.context
+      SegmentActions.getContribution(this.props.segment.sid, multiMatchLangs)
     }
   }
 

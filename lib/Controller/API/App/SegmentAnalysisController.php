@@ -378,7 +378,11 @@ class SegmentAnalysisController extends KleinController {
     {
         $passwords = [];
         foreach ($projectPasswordsMap as $map){
-            if($segmentForAnalysis->id_job == $map['id_job'] and $segmentForAnalysis->job_password == $map['t_password']){
+            if(
+                ($segmentForAnalysis->id >= $map['job_first_segment'] and $segmentForAnalysis->id <= $map['job_last_segment']) and
+                $segmentForAnalysis->id_job == $map['id_job'] and
+                $segmentForAnalysis->job_password == $map['t_password']
+            ){
                 $passwords[JobUrlStruct::LABEL_T] = $map['t_password'];
                 $passwords[JobUrlStruct::LABEL_R1] = $map['r_password'];
                 $passwords[JobUrlStruct::LABEL_R2] = $map['r2_password'];

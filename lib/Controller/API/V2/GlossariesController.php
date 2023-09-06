@@ -21,6 +21,7 @@ use TMS\TMSFile;
 use TMS\TMSService;
 use Users_UserDao;
 use Utils;
+use Validator\GlossaryCSVValidator;
 use ZipArchive;
 
 class GlossariesController extends AbstractStatefulKleinController {
@@ -79,6 +80,59 @@ class GlossariesController extends AbstractStatefulKleinController {
 
     }
 
+    public function check()
+    {
+        try {
+            $stdResult = $this->TMService->uploadFile();
+        } catch ( Exception $e ) {
+            $this->setErrorResponse( 500, $e->getMessage() );
+
+            return;
+        }
+
+        $filterArgs = [
+            'name'   => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags'  => FILTER_FLAG_STRIP_LOW
+            ],
+            'tm_key' => [
+                'filter' => FILTER_SANITIZE_STRING,
+                'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
+
+        $postInput = (object)filter_var_array( $this->request->params( [
+            'tm_key',
+            'name',
+        ] ), $filterArgs );
+
+        if ( !isset( $postInput->tm_key ) or $postInput->tm_key === "" ) {
+            $this->setErrorResponse( 400, "`TM key` field is mandatory" );
+
+            return;
+        }
+
+        set_time_limit( 600 );
+
+        $this->extractCSV( $stdResult );
+
+        $results = [];
+        $glossaryCsvValidator = new GlossaryCSVValidator();
+
+        foreach ( $stdResult as $fileInfo ) {
+            $results[] = [
+                'name' => $postInput->name,
+                'tmKey' => $postInput->tm_key,
+                'filePath' => $fileInfo->file_path,
+                'numberOfLanguages' => $glossaryCsvValidator->getNumberOfLanguage($fileInfo->file_path),
+            ];
+        }
+
+        $this->response->json( [
+            'results'    => $results
+        ] );
+    }
+
     /**
      * @throws Exception
      */
@@ -135,7 +189,11 @@ class GlossariesController extends AbstractStatefulKleinController {
 
                     $this->TMService->addGlossaryInMyMemory( $file );
 
-                    $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
+                    $uuids[] = [
+                        "uuid" => $file->getUuid(),
+                        "name" => $file->getName(),
+                        "numberOfLanguages" => $file->getNumberOfLanguages()
+                    ];
 
                 } catch ( Exception $e ) {
                     $this->setErrorResponse( $e->getCode(), $e->getMessage() );

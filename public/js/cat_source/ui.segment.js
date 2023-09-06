@@ -11,9 +11,7 @@ import {getTagProjection} from './es6/api/getTagProjection'
 import {setCurrentSegment} from './es6/api/setCurrentSegment'
 ;(function ($) {
   $.extend(window.UI, {
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-         Tag Proj start
-         */
+    /*++++++++++  Tag Proj start ++++++++++*/
 
     startSegmentTagProjection: function (sid) {
       UI.getSegmentTagsProjection(sid)
@@ -85,35 +83,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       })
     },
 
-    /**
-     * Set the tag projection to true and reload file
-     */
-    enableTagProjectionInJob: function () {
-      config.tag_projection_enabled = 1
-      toggleTagProjectionJob({enabled: true}).then(() => {
-        // UI.render({
-        //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
-        // });
-        // UI.checkWarnings(false);
-        SegmentActions.changeTagProjectionStatus(true)
-      })
-    },
-    /**
-     * Set the tag projection to true and reload file
-     */
-    disableTagProjectionInJob: function () {
-      config.tag_projection_enabled = 0
-      toggleTagProjectionJob({enabled: false}).then(() => {
-        // UI.render({
-        //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
-        // });
-        // UI.checkWarnings(false);
-        SegmentActions.changeTagProjectionStatus(false)
-      })
-    },
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-         Tag Proj end
-         */
+    /*++++++++++  Tag Proj end ++++++++++*/
 
     /** TODO: Remove
      * evalNextSegment

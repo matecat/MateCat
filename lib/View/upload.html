@@ -67,6 +67,7 @@
                 speech2text : false,
                 lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
             },
+            lxq_license: '${lxq_license | string:}',
             lexiqa_languages: ${lexiqa_languages| string:[]},
             tag_projection_languages: ${tag_projection_languages},
             languages_array : ${languages_array},
@@ -79,6 +80,10 @@
             formats_number: ${formats_number},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
+            not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
+            intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
+            show_tag_projection: ${show_tag_projection | string: false},
+            get_public_matches: ${get_public_matches | string: false}
         };
         /*]]>*/
     </script>
@@ -609,9 +614,6 @@
 
 <div class="notifications-wrapper"></div>
 
-<div metal:use-macro="tm.html/tm_panel"></div>
-
-
 <div id="uploadCallback"></div>
 
 
@@ -626,7 +628,6 @@
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
 
 <div metal:use-macro="common.html/footer_includes" />
-<script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>
 
 </html>

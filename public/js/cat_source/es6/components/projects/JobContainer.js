@@ -1063,13 +1063,6 @@ class JobContainer extends React.Component {
                       }}
                       ref={(tooltip) => (this.rejectedTooltip = tooltip)}
                     />
-                    <a
-                      className="approved-bar translate-tooltip"
-                      data-variation="tiny"
-                      data-html={'Approved ' + approvedPercFormatted + '%'}
-                      style={{width: approvedPerc + '%'}}
-                      ref={(tooltip) => (this.approvedTooltip = tooltip)}
-                    />
                     {approvedPercFormatted2ndPass ? (
                       <a
                         className="approved-bar-2nd-pass translate-tooltip"
@@ -1083,6 +1076,13 @@ class JobContainer extends React.Component {
                         }
                       />
                     ) : null}
+                    <a
+                      className="approved-bar translate-tooltip"
+                      data-variation="tiny"
+                      data-html={'Approved ' + approvedPercFormatted + '%'}
+                      style={{width: approvedPerc + '%'}}
+                      ref={(tooltip) => (this.approvedTooltip = tooltip)}
+                    />
                     <a
                       className="translated-bar translate-tooltip"
                       data-variation="tiny"

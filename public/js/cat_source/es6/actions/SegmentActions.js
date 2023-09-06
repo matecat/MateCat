@@ -30,6 +30,7 @@ import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
+import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -285,9 +286,13 @@ const SegmentActions = {
     })
   },
   changeTagProjectionStatus: function (enabled) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_GUESS_TAGS,
-      enabled: enabled,
+    //TODO: transform paremeter to bool
+    config.tag_projection_enabled = enabled ? 1 : 0
+    toggleTagProjectionJob({enabled}).then(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SET_GUESS_TAGS,
+        enabled: enabled,
+      })
     })
   },
   /**
@@ -317,12 +322,6 @@ const SegmentActions = {
       id: sid,
       fid: fid,
     })
-  },
-  disableTagLock: function () {
-    UI.tagLockEnabled = false
-  },
-  enableTagLock: function () {
-    UI.tagLockEnabled = true
   },
 
   setSegmentWarnings: function (sid, warnings, tagMismatch) {
@@ -916,14 +915,14 @@ const SegmentActions = {
     })
   },
 
-  getContributions: function (sid) {
-    TranslationMatches.getContribution(sid, 0)
-    TranslationMatches.getContribution(sid, 1)
-    TranslationMatches.getContribution(sid, 2)
+  getContributions: function (sid, multiMatchLangs) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
+    TranslationMatches.getContribution(sid, 1, multiMatchLangs)
+    TranslationMatches.getContribution(sid, 2, multiMatchLangs)
   },
 
-  getContribution: function (sid, force) {
-    TranslationMatches.getContribution(sid, 0, force)
+  getContribution: function (sid, multiMatchLangs) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
   },
 
   getContributionsSuccess: function (data, sid) {

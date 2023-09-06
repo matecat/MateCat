@@ -30,12 +30,6 @@ class SegmentBody extends React.Component {
     )
   }
 
-  checkLockTags() {
-    if (config.tagLockCustomizable || !UI.tagLockEnabled) {
-      return false
-    } else return this.context.segment.segment.match(/&lt;.*?&gt;/gi)
-  }
-
   openStatusSegmentMenu(e) {
     e.preventDefault()
     this.setState({

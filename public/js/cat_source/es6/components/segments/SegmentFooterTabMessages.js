@@ -1,7 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
 import _ from 'lodash'
-import CommonUtils from '../../utils/commonUtils'
 import TEXT_UTILS from '../../utils/textUtils'
 
 class SegmentFooterTabMessages extends React.Component {
@@ -74,24 +73,21 @@ class SegmentFooterTabMessages extends React.Component {
       })
     }
     if (this.props.context_groups && this.props.context_groups.context_json) {
-      this.props.context_groups.context_json.forEach((contextGroup) => {
-        if (contextGroup.attr.length > 0 && contextGroup.contexts.length > 0) {
-          const contextElems = contextGroup.contexts.map((context) => (
-            <div
-              className="context-item"
-              key={contextGroup.id + context.attr['context-type']}
-            >
-              <span className="context-item-name">{context.content}</span>
-            </div>
+      this.props.context_groups.context_json.forEach((contextGroup, index) => {
+        if (
+          contextGroup.attr?.purpose &&
+          contextGroup.attr.purpose === 'information' &&
+          contextGroup.contexts.length > 0
+        ) {
+          const contextElems = contextGroup.contexts.map((context, i) => (
+            <span key={'context-item' + i} className="context-item-name">
+              {i > 0 ? ' ;' : ''}
+              {context['raw-content']}
+            </span>
           ))
           notesHtml.push(
-            <div
-              className="context-group"
-              key={contextGroup.id + contextGroup.attr.name}
-            >
-              <span className="context-group-name">
-                {contextGroup.attr.name}:{' '}
-              </span>
+            <div className="context-group" key={'context-group' + index}>
+              <span className="context-group-name">Context: </span>
               {contextElems}
             </div>,
           )

@@ -91,7 +91,7 @@ var gdrive = new GDrive()
 
     // TODO: is this enough to know if the user is logged in?
     if (!APP.USER.STORE.user) {
-      $('#modal').trigger('openlogin')
+      APP.openLoginModal()
       return
     }
 

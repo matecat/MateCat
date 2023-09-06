@@ -259,7 +259,7 @@ class SegmentCommentsContainer extends React.Component {
             <a
               className="mbc-comment-link-btn mbc-login-link"
               onClick={() => {
-                $('#modal').trigger('openlogin')
+                APP.openLoginModal()
               }}
             >
               Login to receive comments
