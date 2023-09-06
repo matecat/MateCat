@@ -2,6 +2,7 @@
 
 namespace API\App;
 
+use API\App\Json\ConnectedService;
 use API\App\Json\UserProfile;
 use API\V2\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
@@ -22,7 +23,7 @@ class UserController extends AbstractStatefulKleinController {
     protected $user;
 
     /**
-     * @var ConnectedServiceStruct
+     * @var ConnectedServiceStruct[]
      */
     protected $connectedServices;
 
@@ -41,7 +42,12 @@ class UserController extends AbstractStatefulKleinController {
                 $membersDao->findUserTeams( $this->user )
         );
 
-        $this->response->json( ( new UserProfile() )->renderItem( $this->user, $userTeams, $this->connectedServices, $metadata ) );
+        $this->response->json( ( new UserProfile() )->renderItem(
+                $this->user,
+                $userTeams,
+                $this->connectedServices,
+                $metadata
+        ) );
 
     }
 

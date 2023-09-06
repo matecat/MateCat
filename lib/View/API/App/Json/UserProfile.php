@@ -17,11 +17,15 @@ use Users_UserStruct;
 
 class UserProfile {
 
-    public function renderItem( Users_UserStruct $user, array $teams, ConnectedServiceStruct $servicesStruct = null, array $userMetadata = [] ) {
-
-        /**
-         * @var TeamStruct[] $teams
-         */
+    /**
+     * @param Users_UserStruct              $user
+     * @param TeamStruct[]                         $teams
+     * @param ConnectedServiceStruct[]|null $servicesStruct
+     * @param array                         $userMetadata
+     *
+     * @return array
+     */
+    public function renderItem( Users_UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = [] ) {
 
         return [
                 'user'               => User::renderItem( $user ),
@@ -32,7 +36,6 @@ class UserProfile {
                 'metadata'           => ( empty( $userMetadata ) ? null : $userMetadata ),
 
         ];
-
 
     }
 
