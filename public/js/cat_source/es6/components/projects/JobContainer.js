@@ -689,10 +689,12 @@ class JobContainer extends React.Component {
     if (!config.enable_outsource) {
       return null
     }
-    const outsourceInfo = this.props.job.get('outsource_info').toJS()
+    const outsourceInfo = this.props.job.get('outsource_info')
+      ? this.props.job.get('outsource_info').toJS()
+      : undefined
     let label =
       !this.props.job.get('outsource_available') &&
-      outsourceInfo.custom_payable_rate ? (
+      outsourceInfo?.custom_payable_rate ? (
         <div
           className="open-outsource open-outsource-disabled buy-translation ui button"
           id="open-quote-request"
