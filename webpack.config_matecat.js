@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const terser = require('terser')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
@@ -42,7 +43,7 @@ const matecatConfig = async ({env}, {mode}) => {
     target: 'web',
     watchOptions: {
       aggregateTimeout: 500,
-      ignored: /node_modules/,
+      ignored: ['/node_modules/'],
       poll: 500,
     },
     output: {
@@ -211,6 +212,10 @@ const matecatConfig = async ({env}, {mode}) => {
       errorPage: [path.resolve(__dirname, 'public/css/sass/upload-main.scss')],
     },
     plugins: [
+      new webpack.DllReferencePlugin({
+        context: __dirname,
+        manifest: path.join(__dirname, 'public/build', 'vendor-manifest.json'),
+      }),
       new WebpackConcatPlugin({
         bundles: [
           {

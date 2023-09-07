@@ -7,7 +7,8 @@
     "prepare": "husky install support_scripts/husky",
     "dev": "webpack --mode development --watch",
     "build-dev": "webpack --mode development",
-    "build-prod": "webpack --mode production"
+    "build-prod": "webpack --mode production",
+    "buildVendor": "webpack --config webpack.vendor"
   },
   "private": true,
   "dependencies": {

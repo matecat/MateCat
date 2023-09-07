@@ -13,14 +13,7 @@
         <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
         <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
-        <tal:block  tal:repeat="css_url css_resources">
-            <link rel="stylesheet" tal:attributes="href css_url"/>
-        </tal:block>
-
-        <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
-
-
-
+        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
         <script type="text/javascript">
             /*<![CDATA[*/
 
@@ -134,9 +127,6 @@
             /*]]>*/
         </script>
 
-
-
-
         <script tal:condition="true:review_extended" type="text/javascript">
 
           /*<![CDATA[*/
@@ -195,23 +185,19 @@
             /*]]>*/
         </script>
 
-
         <script type="text/javascript" src="${basepath}public/build/libs.js"></script>
 
-
     </head>
-    <body tal:condition="php:supportedBrowser EQ 0">
-        <div  metal:use-macro="unsupported_browser.html/unsupported"/>
-    </body>
 
-    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
-      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
+    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
         <div class="page-content"></div>
+        <tal:block metal:use-macro="common.html/footer_includes" />
+        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
     </body>
 
-<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
-
-<div metal:use-macro="common.html/footer_includes" />
+    <body tal:condition="php:supportedBrowser EQ 0">
+        <div metal:use-macro="unsupported_browser.html/unsupported"/>
+    </body>
 
 <script tal:condition="exists:dqf_user_status">
     <tal:block>
