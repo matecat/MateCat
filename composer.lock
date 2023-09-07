@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "800dc358758042c6543626614c7dc5f4",
+    "content-hash": "2b81c02ee5de75baec95bf4a86b4e309",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -918,16 +918,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v1.2.9",
+            "version": "v1.2.10-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "903773a3667976e0a08b79e4c4d0ca477947b3b0"
+                "reference": "48de6aca6d3eca8f4d72ef69dcbb868b57c1093c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/903773a3667976e0a08b79e4c4d0ca477947b3b0",
-                "reference": "903773a3667976e0a08b79e4c4d0ca477947b3b0",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/48de6aca6d3eca8f4d72ef69dcbb868b57c1093c",
+                "reference": "48de6aca6d3eca8f4d72ef69dcbb868b57c1093c",
                 "shasum": ""
             },
             "require": {
@@ -968,9 +968,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v1.2.9"
+                "source": "https://github.com/matecat/subfiltering/tree/v1.2.10-beta"
             },
-            "time": "2023-08-10T14:28:14+00:00"
+            "time": "2023-09-07T12:47:30+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -4053,7 +4053,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "matecat/subfiltering": 10
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -4072,5 +4074,5 @@
         "ext-zlib": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
