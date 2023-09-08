@@ -15,7 +15,7 @@ export const addMTEngine = async ({name, provider, dataMt}) => {
     exec: 'add',
     name,
     provider,
-    data: dataMt,
+    data: JSON.stringify(dataMt),
   }
   const formData = new FormData()
 

@@ -1,16 +1,12 @@
 import React from 'react'
 
-export const SettingsButton = () => {
-  const openOptionsPanel = (event) => {
-    event.preventDefault()
-    UI.openOptionsPanel()
-  }
+export const SettingsButton = ({openTmPanel}) => {
   return (
     <div
       className="action-submenu ui floating"
       id="action-settings"
       title="Settings"
-      onClick={openOptionsPanel}
+      onClick={openTmPanel}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

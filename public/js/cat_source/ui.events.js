@@ -38,7 +38,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          UI.openLanguageResourcesPanel()
+          CatToolActions.openSettingsPanel()
         },
       )
       .on(

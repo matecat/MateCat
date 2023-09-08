@@ -34,7 +34,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $id_mt_engine;
     public $create_date;
     public $last_update;
-    public $disabled;
+    public $disabled = 0;
     public $owner;
     public $status_owner;
     public $status_translator;

@@ -1,11 +1,8 @@
 import createNewEntitiesFromMap from './createNewEntitiesFromMap'
-import linkEntities from './linkEntities'
-import beautifyEntities from './beautifyEntities'
-import {EditorState, SelectionState} from 'draft-js'
+import {EditorState} from 'draft-js'
 import splitOnTagPlaceholder from './splitOnTagPlaceHolder'
 import removeNewLineInContentState from './removeNewLineInContentState'
 import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
-import replaceOccurrences from './replaceOccurrences'
 
 /**
  *

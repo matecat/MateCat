@@ -9,6 +9,7 @@ class JobMetadataModal extends React.Component {
     super(props)
     this.state = {}
     this.converter = new showdown.Converter()
+    this.converter.setOption('literalMidWordUnderscores', true)
     // this.instructions =
     //     '**Client:** Product - Rider  \n' +
     //     '**Domain:** UI  \n' +
@@ -95,7 +96,7 @@ class JobMetadataModal extends React.Component {
     $(this.accordion).accordion()
     setTimeout(() => {
       const element = document.querySelector('.title.current.active')
-      element.scrollIntoView({behavior: 'smooth'})
+      element && element.scrollIntoView({behavior: 'smooth'})
     }, 200)
   }
 

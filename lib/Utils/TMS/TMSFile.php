@@ -18,6 +18,7 @@ class TMSFile extends stdClass {
     private $name;
     private $position;
     private $uuid;
+    private $numberOfLanguages;
 
     /**
      * @param $file_path
@@ -76,6 +77,22 @@ class TMSFile extends stdClass {
         $this->uuid = $uuid;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNumberOfLanguages()
+    {
+        return $this->numberOfLanguages;
+    }
+
+    /**
+     * @param mixed $numberOfLanguages
+     */
+    public function setNumberOfLanguages($numberOfLanguages)
+    {
+        $this->numberOfLanguages = $numberOfLanguages;
     }
 
 }

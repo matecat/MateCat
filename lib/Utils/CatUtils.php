@@ -271,6 +271,13 @@ class CatUtils {
      */
     protected static function _getStatsForJob( $job_stats ) {
 
+        $job_stats[ 'TOTAL' ] = self::normalizeNumber($job_stats[ 'TOTAL' ]);
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($job_stats[ 'TRANSLATED' ]);
+        $job_stats[ 'APPROVED' ] = self::normalizeNumber($job_stats[ 'APPROVED' ]);
+        $job_stats[ 'REJECTED' ] = self::normalizeNumber($job_stats[ 'REJECTED' ]);
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($job_stats[ 'TRANSLATED' ]);
+        $job_stats[ 'DRAFT' ] = self::normalizeNumber($job_stats[ 'DRAFT' ]);
+
         $job_stats[ 'PROGRESS' ]             = ( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ] );
         $job_stats[ 'TOTAL_FORMATTED' ]      = number_format( $job_stats[ 'TOTAL' ], 0, ".", "," );
         $job_stats[ 'PROGRESS_FORMATTED' ]   = number_format( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ], 0, ".", "," );
@@ -285,17 +292,11 @@ class CatUtils {
         $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
         $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        if ( $job_stats[ 'TRANSLATED_PERC' ] > 100 ) {
-            $job_stats[ 'TRANSLATED_PERC' ] = 100;
-        }
-
-        if ( $job_stats[ 'PROGRESS_PERC' ] > 100 ) {
-            $job_stats[ 'PROGRESS_PERC' ] = 100;
-        }
-
-        if ( $job_stats[ 'DRAFT_PERC' ] < 0 ) {
-            $job_stats[ 'DRAFT_PERC' ] = 0;
-        }
+        $job_stats[ 'APPROVED_PERC' ] = self::normalizePercent($job_stats[ 'APPROVED_PERC' ]);
+        $job_stats[ 'REJECTED_PERC' ] = self::normalizePercent($job_stats[ 'REJECTED_PERC' ]);
+        $job_stats[ 'DRAFT_PERC' ] = self::normalizePercent($job_stats[ 'DRAFT_PERC' ]);
+        $job_stats[ 'TRANSLATED_PERC' ] = self::normalizePercent($job_stats[ 'TRANSLATED_PERC' ]);
+        $job_stats[ 'PROGRESS_PERC' ] = self::normalizePercent($job_stats[ 'PROGRESS_PERC' ]);
 
         $temp = [
                 $job_stats[ 'TRANSLATED_PERC' ],
@@ -345,6 +346,36 @@ class CatUtils {
         $job_stats[ 'DOWNLOAD_STATUS' ] = $t;
 
         return $job_stats;
+    }
+
+    /**
+     * @param $number
+     * @return int
+     */
+    public static function normalizeNumber($number)
+    {
+        if ( $number < 0 ) {
+            return 0;
+        }
+
+        return $number;
+    }
+
+    /**
+     * @param $percent
+     * @return int
+     */
+    public static function normalizePercent($percent)
+    {
+        if ( $percent < 0 ) {
+            return 0;
+        }
+
+        if ( $percent > 100 ) {
+            return 100;
+        }
+
+        return $percent;
     }
 
     /**
@@ -846,19 +877,15 @@ class CatUtils {
     public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
         $job_stats                 = [];
         $job_stats[ 'id' ]         = $wCount->getIdJob();
-        $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
-        $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
-        $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
-        $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
-
-        //sometimes new_words + draft_words < 0 (why?). If it happens, set draft words to 0
-        if ( $job_stats[ 'DRAFT' ] < 0 ) {
-            $job_stats[ 'DRAFT' ] = 0;
-        }
+        $job_stats[ 'DRAFT' ]      = self::normalizeNumber($wCount->getNewWords()) + self::normalizeNumber($wCount->getDraftWords());
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($wCount->getTranslatedWords());
+        $job_stats[ 'APPROVED' ]   = self::normalizeNumber($wCount->getApprovedWords());
+        $job_stats[ 'REJECTED' ]   = self::normalizeNumber($wCount->getRejectedWords());
 
         //avoid division by zero warning
         $total                = $wCount->getTotal();
         $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
+        $job_stats[ 'TOTAL' ] = self::normalizeNumber(  $job_stats[ 'TOTAL' ] );
 
         return $job_stats;
     }

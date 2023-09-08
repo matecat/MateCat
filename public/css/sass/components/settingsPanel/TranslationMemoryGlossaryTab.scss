@@ -1,0 +1,279 @@
+@import '../../commons/colors';
+
+.translation-memory-glossary-tab {
+  display: flex;
+  flex-direction: column;
+}
+
+.translation-memory-glossary-tab-pre-translate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  border: 1px dashed $grey8;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: $grey9;
+}
+
+.translation-memory-glossary-tab-table-title {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  justify-content: space-between;
+
+  > span:first-of-type {
+    flex-grow: 1;
+    text-align: left;
+  }
+}
+
+.translation-memory-glossary-tab-input-text {
+  border-radius: 2px;
+  border: 1px solid $grey8;
+  padding: 6px;
+}
+
+.translation-memory-glossary-tab {
+  .settings-panel-table-rowHeading,
+  .settings-panel-row-content {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 22%;
+  }
+
+  .settings-panel-table-rowHeading-column {
+    text-align: center;
+    padding: 0;
+  }
+}
+
+.translation-memory-glossary-tab-inactive-resources {
+  margin-top: 20px;
+}
+
+.tm-key-lookup,
+.tm-key-update {
+  display: flex;
+  justify-content: center;
+}
+
+.tm-key-row-name {
+  width: 100%;
+  padding: 4px;
+  background-color: unset;
+  border: 1px solid $grey8;
+  border-radius: 3px;
+
+  &:focus,
+  &:hover {
+    background-color: white;
+  }
+}
+
+.tm-key-row-key {
+  text-align: center !important;
+}
+
+.tm-key-row-name-disabled {
+  border: unset;
+  &:focus,
+  &:hover {
+    background-color: unset;
+  }
+}
+
+.tm-key-row-button-item {
+  color: $grey6;
+
+  > :first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.tm-key-row-menu-button {
+  .menu-button-wrapper {
+    gap: 8px;
+
+    > :first-child {
+      min-width: 170px;
+      border-radius: 2px;
+    }
+
+    > :last-child {
+      border: none;
+      background-color: unset;
+      color: $grey6;
+    }
+  }
+
+  .just-button-import-tmx {
+    min-width: 170px;
+    border-radius: 2px;
+    font-size: 16px;
+    color: #000;
+    background: $grey4;
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid $grey7;
+
+    &:hover {
+      background-color: $grey5;
+    }
+  }
+}
+
+.tm-key-row-icons {
+  color: $grey;
+}
+
+.translation-memory-glossary-tab-buttons-group {
+  display: flex;
+  gap: 8px;
+  justify-content: end;
+}
+
+.tm-key-create-resource-row-input {
+  width: 100%;
+  padding: 4px;
+  border-radius: 3px;
+  border: solid 1px $grey3;
+
+  &.error {
+    border: solid 1px $redDefault;
+  }
+}
+
+.settings-panel-row {
+  .row-content-default-memory {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
+  }
+  .row-content-create-resource {
+    grid-template-columns: 100%;
+
+    > form {
+      padding: 0 !important;
+    }
+  }
+}
+
+.tm-key-small-row-button {
+  height: 32px;
+  margin: 0 !important;
+
+  &:last-child {
+    padding: 0 8px;
+  }
+}
+
+.translation-memory-glossary-tab-import,
+.translation-memory-glossary-tab-export,
+.translation-memory-glossary-tab-delete {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  min-height: 50px;
+
+  .action-form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    > :first-child {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+  }
+
+  .action-form-error {
+    input {
+      color: $redDefault;
+    }
+  }
+
+  .import-files {
+    margin-top: 30px;
+
+    > ul {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+
+      > li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        .filename {
+          font-weight: bold;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 60%;
+        }
+
+        .filename-error {
+          color: $redDefault;
+        }
+      }
+
+      > li:nth-child(even) {
+        background-color: $grey4;
+      }
+    }
+
+    .loading-bar {
+      width: 260px;
+      height: 6px;
+      border-radius: 4px;
+      background-color: $grey8;
+
+      > :first-child {
+        background-color: $approvedGreen;
+        height: 100%;
+        border-radius: 4px;
+      }
+    }
+
+    .import-completed {
+      color: $approvedGreenHover;
+    }
+
+    .message-error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $redDefault;
+
+      > button {
+        padding: 4px;
+      }
+    }
+  }
+
+  .export-successfull {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+
+    > :last-child {
+      color: $approvedGreenHover;
+    }
+  }
+}
+
+.translation-memory-glossary-tab-export {
+  .translation-memory-glossary-tab-input-text {
+    width: 300px;
+  }
+}
+
+.translation-memory-glossary-tab-delete {
+  border-top: 3px solid #ffcc01;
+  background-color: $orangeDefaultTransparent2;
+}

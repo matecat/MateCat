@@ -5,6 +5,7 @@ namespace API\App;
 use API\V2\Validators\LoginValidator;
 use CatUtils;
 use TmKeyManagement\UserKeysModel;
+use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
@@ -31,8 +32,21 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
         }
 
         if(!$this->userIsLogged()){
+
+            $tmKeys = [];
+            $job_keyList = json_decode( $chunk->tm_keys, true );
+
+            foreach ( $job_keyList as $jobKey ) {
+                $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+                $jobKey->complete_format = true;
+                $jobKey->r = true;
+                $jobKey->w = true;
+                $jobKey->owner = false;
+                $tmKeys[] = $jobKey->hideKey( -1 );
+            }
+
             $this->response->json( [
-                'tm_keys' => []
+                'tm_keys' => $tmKeys
             ] );
             exit();
         }

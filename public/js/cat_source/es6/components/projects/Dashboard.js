@@ -243,7 +243,7 @@ class Dashboard extends React.Component {
       job.id +
       '-' +
       job.password +
-      '&openTab=options'
+      '?openTab=options'
     window.open(url, '_blank')
   }
 
@@ -262,7 +262,7 @@ class Dashboard extends React.Component {
       job.id +
       '-' +
       job.password +
-      '&openTab=tm'
+      '?openTab=tm'
     window.open(url, '_blank')
   }
 

@@ -36,6 +36,7 @@ export const Header = ({
   analysisEnabled,
   isGDriveProject,
   showReviseLink,
+  openTmPanel,
 }) => {
   const [user, setUser] = useState()
 
@@ -119,7 +120,7 @@ export const Header = ({
           <SegmentsFilterButton />
 
           {/*Settings Icon*/}
-          <SettingsButton />
+          <SettingsButton openTmPanel={openTmPanel} />
 
           {/*Dropdown menu*/}
           <ActionMenu

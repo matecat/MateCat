@@ -34,6 +34,7 @@
             splitEnabled: ${split_enabled},
             targetIsCJK: ${targetIsCJK},
             isCJK: ${isCJK},
+            not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
@@ -57,6 +58,5 @@
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="common.html/footer_includes" />
-<script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>
 </html>

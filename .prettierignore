@@ -11,6 +11,7 @@
 /README.md
 /LICENSE.md
 /composer.*
+/docker
 
 # Build related files
 /node_modules

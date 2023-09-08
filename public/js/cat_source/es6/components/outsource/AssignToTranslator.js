@@ -3,6 +3,10 @@ import Cookies from 'js-cookie'
 
 import GMTSelect from './GMTSelect'
 import CommonUtils from '../../utils/commonUtils'
+import {addJobTranslator} from '../../api/addJobTranslator'
+import ModalsActions from '../../actions/ModalsActions'
+import CatToolActions from '../../actions/CatToolActions'
+import ManageActions from '../../actions/ManageActions'
 
 class AssignToTranslator extends React.Component {
   constructor(props) {
@@ -24,15 +28,165 @@ class AssignToTranslator extends React.Component {
     )
 
     let email = this.email.value
-
-    UI.sendJobToTranslator(
-      email,
-      date,
-      this.state.timezone,
-      this.props.job.toJS(),
-      this.props.project.toJS(),
-    )
+    const job = this.props.job.toJS()
+    const project = this.props.project.toJS()
+    addJobTranslator(email, date, this.state.timezone, job)
+      .then((data) => {
+        ModalsActions.onCloseModal()
+        if (data.job) {
+          this.checkShareToTranslatorResponse(data, email, date, job, project)
+        } else {
+          this.showShareTranslatorError()
+        }
+      })
+      .catch(() => {
+        this.showShareTranslatorError()
+      })
     this.props.closeOutsource()
+  }
+
+  checkShareToTranslatorResponse(response, mail, date, job, project) {
+    let message = ''
+    if (job.translator) {
+      let newDate = new Date(date)
+      let oldDate = new Date(job.translator.delivery_date)
+      if (oldDate.getTime() !== newDate.getTime()) {
+        message = this.shareToTranslatorDateChangeNotification(
+          mail,
+          oldDate,
+          newDate,
+        )
+      } else if (job.translator.email !== mail) {
+        message = this.shareToTranslatorMailChangeNotification(mail, job)
+      } else {
+        message = this.shareToTranslatorNotification(mail, job)
+      }
+    } else {
+      message = this.shareToTranslatorNotification(mail, job)
+    }
+    const notification = {
+      title: message.title,
+      text: message.text,
+      type: 'success',
+      position: 'bl',
+      allowHtml: true,
+      timer: 10000,
+    }
+    CatToolActions.addNotification(notification)
+    ManageActions.changeJobPasswordFromOutsource(
+      project,
+      job,
+      job.password,
+      response.job.password,
+    )
+    ManageActions.assignTranslator(
+      project.id,
+      job.id,
+      job.password,
+      response.job.translator,
+    )
+  }
+  shareToTranslatorMailChangeNotification(mail, job) {
+    return {
+      title:
+        'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
+      text:
+        '<div style="margin-top: 16px;">To: <a href="mailto:' +
+        mail +
+        '">' +
+        mail +
+        '</a> ' +
+        '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+        '<div class style="display: inline-block; font-size: 14px; color: grey;">(' +
+        job.id +
+        ')</div> ' +
+        '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+        '<div class="source-box" style="display: inherit;">' +
+        job.sourceTxt +
+        '</div> ' +
+        '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+        '<div class="target-box" style="display: inherit;">' +
+        job.targetTxt +
+        '</div> </div> </div></div>',
+    }
+  }
+  shareToTranslatorNotification(mail, job) {
+    return {
+      title: 'Job sent',
+      text:
+        '<div style="margin-top: 16px;">To: <a href="mailto:' +
+        mail +
+        '">' +
+        mail +
+        '</a> ' +
+        '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+        '<div class style="display: inline-block; font-size: 14px; color: grey;">' +
+        job.id +
+        ' </div> ' +
+        '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+        '<div class="source-box" style="display: inherit;">' +
+        job.sourceTxt +
+        '</div> ' +
+        '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+        '<div class="target-box" style="display: inherit;">' +
+        job.targetTxt +
+        '</div> </div> </div></div>',
+    }
+  }
+  shareToTranslatorDateChangeNotification(email, oldDate, newDate) {
+    oldDate = $.format.date(oldDate, 'yyyy-MM-d hh:mm a')
+    oldDate = CommonUtils.getGMTDate(oldDate)
+    newDate = $.format.date(newDate, 'yyyy-MM-d hh:mm a')
+    newDate = CommonUtils.getGMTDate(newDate)
+    return {
+      title: 'Job delivery update',
+      text:
+        '<div style="margin-top: 16px;"><div class="job-reference" style="display: inline-block; width: 100%;"> To: ' +
+        '<div class="job-delivery" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; margin-right: 10px;"> ' +
+        '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">' +
+        newDate.day +
+        '</div> ' +
+        '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">' +
+        newDate.month +
+        '</div> ' +
+        '<div class="outsource-time-text" style="display: inline-block;">' +
+        newDate.time +
+        '</div> ' +
+        '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100;color: grey;">(' +
+        newDate.gmt +
+        ')</div> ' +
+        '</div> <div class="job-delivery not-used" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; text-decoration: line-through; position: relative;"> ' +
+        '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">' +
+        oldDate.day +
+        '</div> ' +
+        '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">' +
+        oldDate.month +
+        '</div> ' +
+        '<div class="outsource-time-text" style="display: inline-block;">' +
+        oldDate.time +
+        '</div> ' +
+        '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100; color: grey;">(' +
+        oldDate.gmt +
+        ')</div> ' +
+        '<div class="old" style="width: 100%; height: 1px; border-top: 1px solid black; top: -10px; position: relative;"></div> </div> ' +
+        '</div>Translator: <a href="mailto:' +
+        email +
+        '">' +
+        email +
+        '</a> </div></div>',
+    }
+  }
+  showShareTranslatorError() {
+    ModalsActions.onCloseModal()
+    const notification = {
+      title: 'Problems sending the job',
+      text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+      type: 'error',
+      position: 'bl',
+      allowHtml: true,
+      timer: 10000,
+    }
+    CatToolActions.addNotification(notification)
   }
 
   GmtSelectChanged(value) {
