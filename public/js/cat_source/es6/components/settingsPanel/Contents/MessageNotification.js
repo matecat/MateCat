@@ -12,7 +12,11 @@ export const MessageNotification = ({
     <div
       className={`settingsPanel-notification_${type} settingsPanel-notification`}
     >
-      <p dangerouslySetInnerHTML={{__html: message}} />
+      {typeof message === 'string' ? (
+        <p dangerouslySetInnerHTML={{__html: message}} />
+      ) : (
+        message
+      )}
       <div>
         {confirmCallback && (
           <button className="ui primary button" onClick={confirmCallback}>
@@ -31,7 +35,7 @@ export const MessageNotification = ({
 }
 MessageNotification.propTypes = {
   type: PropTypes.oneOf(['success', 'warning', 'error']),
-  message: PropTypes.string,
+  message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   confirmCallback: PropTypes.func,
   closeCallback: PropTypes.func,
 }
