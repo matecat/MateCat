@@ -5,11 +5,13 @@
     "test": "jest --watchAll",
     "coverage": "jest --coverage",
     "prepare": "husky install support_scripts/husky",
-    "dev": "webpack --mode development --watch",
+    "watch": "webpack --mode development --watch",
     "build-dev": "webpack --mode development",
-    "build-prod": "webpack --mode production",
-    "buildVendor": "webpack --config webpack.vendor"
+    "build-prod": "webpack --mode production"
   },
+  "workspaces": [
+    "plugins/*"
+  ],
   "private": true,
   "dependencies": {
     "classnames": "^2.2.6",
