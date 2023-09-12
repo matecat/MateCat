@@ -975,21 +975,21 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         //tag replace
         $source_string = $config['source'];
         $target_string = $config['target'];
-        $re2 = '<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>';
-        preg_match_all("/" . $re2 .'/siU', $source_string, $source_matches_tag,PREG_OFFSET_CAPTURE, 0);
-        preg_match_all("/" . $re2 .'/siU', $target_string, $target_matches_tag,PREG_OFFSET_CAPTURE, 0);
-
-        $map=[];
-        foreach ($source_matches_tag[0] as $source_key=>$source_tag){
-            foreach ($target_matches_tag[0] as $target_tag){
-                if($source_tag[0] == $target_tag[0]){
-                    $replace = md5($source_matches_tag[2][$source_key][0]);
-                    $source_string = str_replace($source_tag[0], $replace, $source_string);
-                    $target_string = str_replace($source_tag[0], $replace, $target_string);
-                    $map[$replace] = $source_tag[0];
-                }
-            }
-        }
+//        $re2 = '<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>';
+//        preg_match_all("/" . $re2 .'/siU', $source_string, $source_matches_tag,PREG_OFFSET_CAPTURE, 0);
+//        preg_match_all("/" . $re2 .'/siU', $target_string, $target_matches_tag,PREG_OFFSET_CAPTURE, 0);
+//
+//        $map=[];
+//        foreach ($source_matches_tag[0] as $source_key=>$source_tag){
+//            foreach ($target_matches_tag[0] as $target_tag){
+//                if($source_tag[0] == $target_tag[0]){
+//                    $replace = md5($source_matches_tag[2][$source_key][0]);
+//                    $source_string = str_replace($source_tag[0], $replace, $source_string);
+//                    $target_string = str_replace($source_tag[0], $replace, $target_string);
+//                    $map[$replace] = $source_tag[0];
+//                }
+//            }
+//        }
 
         //formatting strip
         $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
@@ -1018,9 +1018,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             //formatting replace
             $this->result->responseData = $l_matches . $this->result->responseData . $r_matches;
             //tag replace
-            foreach ($map as $key=>$value){
-                $this->result->responseData = str_replace($key, $value, $this->result->responseData);
-            }
+//            foreach ($map as $key=>$value){
+//                $this->result->responseData = str_replace($key, $value, $this->result->responseData);
+//            }
         }
 
         return $this->result;
