@@ -33,6 +33,8 @@
             splitEnabled: ${split_enabled},
             targetIsCJK: ${targetIsCJK},
             isCJK: ${isCJK},
+            user_plugins: '${user_plugins}',
+            project_plugins: '${project_plugins}',
             not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
