@@ -74,7 +74,7 @@
                 isReview: ${isReview | string: false},
                 reviewType: '${review_type}',
                 enableReview: true,
-                user_plugins: '${user_plugins}',
+                user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
                 stat_quality: ${structure php: stat_quality },
                 offlineModeEnabled: true,
                 splitSegmentEnabled: ${splitSegmentEnabled},
@@ -121,7 +121,8 @@
                 project_name: '${pname | string: 0}',
                 review_password: '${review_password}',
                 show_tag_projection: ${show_tag_projection | string: false},
-                get_public_matches: ${get_public_matches | string: false}
+                get_public_matches: ${get_public_matches | string: false},
+
             };
 
             var renderStart = new Date();

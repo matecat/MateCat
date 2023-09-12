@@ -56,7 +56,7 @@
         lexiqa_languages: ${lexiqa_languages| string:[]},
         tag_projection_languages: ${tag_projection_languages},
         languages_array : ${languages_array},
-        user_plugins: '${user_plugins}',
+        user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
         private_keys: ${user_keys_obj | string: []},
         currentTargetLang: '${currentTargetLang | string: []}',
         currentSourceLang: '${currentSourceLang | string: []}',
