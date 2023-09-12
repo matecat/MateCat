@@ -34,6 +34,8 @@
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
             jobs: ${json_jobs},
             jobAnalysis: true,
+            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
+            project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
             isCJK: ${isCJK},
 
         };

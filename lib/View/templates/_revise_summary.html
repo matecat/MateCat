@@ -27,6 +27,8 @@
             isReview: ${isReview | string: false},
             source_code: '${source_code}',
             target_code: '${target_code}',
+            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
+            project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
             pname: '${pname}',
 
         };
