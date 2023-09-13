@@ -32,9 +32,9 @@ function getDirectories(path) {
 const matecatConfig = async ({env}, {mode}) => {
   const isDev = mode === 'development'
   const config = ini.parse(fs.readFileSync('./inc/config.ini', 'utf-8'))
-  const lxqLicence = config[mode]?.LXQ_LICENSE
+  const lxqLicence = config[config.ENV]?.LXQ_LICENSE
   if (lxqLicence) {
-    const lxqServer = config[mode].LXQ_SERVER
+    const lxqServer = config[config.ENV].LXQ_SERVER
     if (!fs.existsSync('./public/build')) {
       fs.mkdirSync('./public/build')
     }
@@ -50,42 +50,37 @@ const matecatConfig = async ({env}, {mode}) => {
   let pluginsAllPagesFiles = []
   const pluginDirectories = getDirectories('./plugins/')
   pluginDirectories.forEach((dir) => {
-    const cattoolDirectory = './plugins/' + dir + '/static/src/*/cattool/'
+    const cattoolDirectory = './plugins/' + dir + '/static/src/cattool/'
     pluginsCattoolFiles = pluginsCattoolFiles.concat(
       globSync('./' + cattoolDirectory + '*.js').map((item) => {
         return path.resolve(__dirname, item)
       }),
     )
-    pluginsCattoolFiles = pluginsCattoolFiles.concat(
-      globSync('./' + cattoolDirectory + '*.scss').map((item) => {
-        return path.resolve(__dirname, item)
-      }),
-    )
 
-    const uploadDirectory = './plugins/' + dir + '/static/src/*/upload/'
+    const uploadDirectory = './plugins/' + dir + '/static/src/upload/'
     pluginsUploadFiles = pluginsUploadFiles.concat(
       globSync('./' + uploadDirectory + '*.js').map((item) => {
         return path.resolve(__dirname, item)
       }),
     )
-    pluginsUploadFiles = pluginsUploadFiles.concat(
-      globSync('./' + uploadDirectory + '*.scss').map((item) => {
-        return path.resolve(__dirname, item)
-      }),
-    )
 
-    const allDirectory = './plugins/' + dir + '/static/src/*/all/'
+    const allDirectory = './plugins/' + dir + '/static/src/all/'
     pluginsAllPagesFiles = pluginsAllPagesFiles.concat(
       globSync('./' + allDirectory + '*.js').map((item) => {
         return path.resolve(__dirname, item)
       }),
     )
-    pluginsAllPagesFiles = pluginsAllPagesFiles.concat(
-      globSync('./' + allDirectory + '*.scss').map((item) => {
-        return path.resolve(__dirname, item)
-      }),
-    )
   })
+  let entryPoints = {}
+  if (pluginsCattoolFiles.length > 0) {
+    entryPoints.cattoolPlugins = pluginsCattoolFiles
+  }
+  if (pluginsUploadFiles.length > 0) {
+    entryPoints.uploadPlugins = pluginsUploadFiles
+  }
+  if (pluginsAllPagesFiles.length > 0) {
+    entryPoints.allPagesPlugins = pluginsAllPagesFiles
+  }
   return {
     target: 'web',
     watchOptions: {
@@ -100,25 +95,20 @@ const matecatConfig = async ({env}, {mode}) => {
       chunkFilename: isDev
         ? '[name].[fullhash].chunk.js'
         : '[name].[contenthash].chunk.js',
-      publicPath: '/',
+      publicPath: '/public/build/',
     },
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
-      /*splitChunks: {
+      splitChunks: {
         cacheGroups: {
           react: {
-            test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
+            test: /[\\/]node_modules[\\/](react|react-dom|lodash|immutable|flux|draft-js)[\\/]/,
             name: 'vendors-react',
             chunks: 'all',
           },
-          corejsVendor: {
-            test: /[\\/]node_modules[\\/](core-js)[\\/]/,
-            name: 'vendor-corejs',
-            chunks: 'all',
-          },
         },
-      },*/
+      },
     },
     module: {
       rules: [
@@ -194,9 +184,7 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/new-project.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
-      cattoolPlugins: pluginsCattoolFiles,
-      uploadPlugins: pluginsUploadFiles,
-      allPagesPlugins: pluginsAllPagesFiles,
+      ...entryPoints,
       cattool: [
         path.resolve(__dirname, 'public/build/lxqlicense.js'),
         path.resolve(__dirname, 'public/js/common.js'),
