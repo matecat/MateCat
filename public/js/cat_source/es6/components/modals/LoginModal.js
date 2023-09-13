@@ -9,6 +9,8 @@ import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {loginUser} from '../../api/loginUser'
 
+const PASSWORD_MIN_LENGTH = 12
+
 class LoginModal extends React.Component {
   constructor(props) {
     super(props)
@@ -196,7 +198,7 @@ class LoginModal extends React.Component {
             type="password"
             showError={this.state.showErrors}
             onFieldChanged={this.handleFieldChanged('password')}
-            placeholder="Password (minimum 8 characters)"
+            placeholder={`Password (minimum ${PASSWORD_MIN_LENGTH} characters)`}
             name="password"
             errorText={this.errorFor('password')}
             tabindex={2}
@@ -290,7 +292,7 @@ const fieldValidations = [
     'password',
     'Password',
     FormRules.requiredRule,
-    FormRules.minLength(8),
+    FormRules.minLength(PASSWORD_MIN_LENGTH),
   ),
 ]
 

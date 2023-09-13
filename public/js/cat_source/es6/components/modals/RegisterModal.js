@@ -7,6 +7,8 @@ import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {registerUser} from '../../api/registerUser'
 
+const PASSWORD_MIN_LENGTH = 12
+
 class RegisterModal extends React.Component {
   constructor(props) {
     super(props)
@@ -242,7 +244,7 @@ class RegisterModal extends React.Component {
             showError={this.state.showErrors}
             onFieldChanged={this.handleFieldChanged('password')}
             type="password"
-            placeholder="Password"
+            placeholder={`Password (Minimum ${PASSWORD_MIN_LENGTH} characters, at least one special character)`}
             name="password"
             errorText={this.errorFor('password')}
             tabindex={4}
@@ -311,7 +313,7 @@ const fieldValidations = [
     'password',
     'Password',
     FormRules.requiredRule,
-    FormRules.minLength(8),
+    FormRules.minLength(PASSWORD_MIN_LENGTH),
   ),
 ]
 
