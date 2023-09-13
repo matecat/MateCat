@@ -80,7 +80,7 @@ let TranslationMatches = {
         translation = currentContribution.translation
         if (SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj)) {
           if (parseInt(match) !== 100) {
-            translation = DraftMatecatUtils.cleanSegmentString(translation)
+            translation = TagUtils.removeAllTagsForGuessTags(translation)
           } else {
             SegmentActions.disableTPOnSegment(segmentObj)
           }

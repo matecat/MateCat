@@ -306,8 +306,7 @@ const SegmentActions = {
     if (!currentSegment) return
 
     var tagProjectionEnabled =
-      TagUtils.hasDataOriginalTags(currentSegment.segment) &&
-      !currentSegment.tagged
+      TagUtils.hasTagsToHide(currentSegment.segment) && !currentSegment.tagged
     if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
       SegmentActions.setSegmentAsTagged(
         currentSegment.sid,

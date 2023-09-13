@@ -19,6 +19,7 @@ import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
+import TagUtils from '../../utils/tagUtils'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -55,7 +56,7 @@ class SegmentSource extends React.Component {
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? TagUtils.removeAllTagsForGuessTags(translation)
       : translation
     // New EditorState with translation
     const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -121,7 +122,7 @@ class SegmentSource extends React.Component {
 
       // If GuessTag enabled, clean string from tag
       const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
-        ? DraftMatecatUtils.cleanSegmentString(translation)
+        ? TagUtils.removeAllTagsForGuessTags(translation)
         : translation
       // TODO: get taggedSource from store
       const contentEncoded = DraftMatecatUtils.encodeContent(
