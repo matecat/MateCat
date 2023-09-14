@@ -6,6 +6,7 @@ import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
+import ModalsActions from '../actions/ModalsActions'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
