@@ -6,6 +6,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import CommonUtils from '../../utils/commonUtils'
 import CatToolActions from '../../actions/CatToolActions'
+import classnames from 'classnames'
 
 class ReviewExtendedIssue extends React.Component {
   constructor(props) {

@@ -11,6 +11,7 @@ import {forEach, filter, isUndefined} from 'lodash'
 import {isNull} from 'lodash/lang'
 import {each} from 'lodash/collection'
 import {findIndex} from 'lodash/array'
+import classnames from 'classnames'
 
 class ReviewExtendedIssuesContainer extends React.Component {
   static contextType = SegmentContext
