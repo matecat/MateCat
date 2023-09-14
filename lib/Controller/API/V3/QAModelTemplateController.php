@@ -7,7 +7,7 @@ use API\V2\Validators\LoginValidator;
 use PayableRates\CustomPayableRateDao;
 use Validator\Errors\JSONValidatorError;
 
-class PayableRateController extends KleinController
+class QAModelTemplateController extends KleinController
 {
     protected function afterConstruct() {
         parent::afterConstruct();
