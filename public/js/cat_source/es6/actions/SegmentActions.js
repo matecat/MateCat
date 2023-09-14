@@ -921,8 +921,8 @@ const SegmentActions = {
     TranslationMatches.getContribution(sid, 2, multiMatchLangs)
   },
 
-  getContribution: function (sid, multiMatchLangs) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
+  getContribution: function (sid, multiMatchLangs, force) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
   },
 
   getContributionsSuccess: function (data, sid) {
