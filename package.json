@@ -6,8 +6,8 @@
     "coverage": "jest --coverage",
     "prepare": "husky install support_scripts/husky",
     "watch": "webpack --mode development --watch",
-    "build-dev": "webpack --mode development",
-    "build-prod": "webpack --mode production"
+    "build:dev": "webpack --mode development",
+    "build:production": "webpack --mode production"
   },
   "workspaces": [
     "plugins/*"

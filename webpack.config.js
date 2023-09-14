@@ -100,15 +100,6 @@ const matecatConfig = async ({env}, {mode}) => {
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
-      splitChunks: {
-        cacheGroups: {
-          react: {
-            test: /[\\/]node_modules[\\/](react|react-dom|lodash|immutable|flux|draft-js)[\\/]/,
-            name: 'vendors-react',
-            chunks: 'all',
-          },
-        },
-      },
     },
     module: {
       rules: [
