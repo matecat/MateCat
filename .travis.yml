@@ -1,6 +1,6 @@
 os: linux
 dist: focal
-language: minimal
+language: php
 
 branches:
   only:
