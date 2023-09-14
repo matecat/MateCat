@@ -19,4 +19,31 @@ class Constants {
     const PUBLIC_TM  = "Public TM";
     const NO_DESCRIPTION_TM = "No description";
 
+    public static $allowed_seg_rules = [
+            'standard',
+            'patent',
+            'paragraph',
+            ''
+    ];
+
+    /**
+     * @throws Exception
+     */
+    public static function validateSegmentationRules( $segmentation_rule ) {
+
+        $segmentation_rule = ( !empty( $segmentation_rule ) ) ? $segmentation_rule : '';
+
+        if ( !in_array( $segmentation_rule, Constants::$allowed_seg_rules ) ) {
+            throw new Exception( "Segmentation rule not allowed: " . $segmentation_rule, -4 );
+        }
+
+        //normalize segmentation rule to what it's used internally
+        if ( $segmentation_rule == 'standard' || $segmentation_rule == '' ) {
+            $segmentation_rule = null;
+        }
+
+        return $segmentation_rule;
+
+    }
+    
 }
