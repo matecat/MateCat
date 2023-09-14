@@ -105,7 +105,12 @@ class SegmentFooterTabMessages extends React.Component {
   getMetadataNoteTemplate() {
     let metadataNotes = []
     for (const [index, item] of this.props.metadata.entries()) {
-      const {meta_key: label, meta_value: body} = item
+      const {meta_key, meta_value: body} = item
+      const label =
+        meta_key === 'sizeRestriction' ? 'Characters limit: ' : meta_key
+
+      if (meta_key === 'sizeRestriction' && body <= 0) continue
+
       metadataNotes.push(
         <div className="note" key={`meta-${index}`}>
           <span className="note-label">{label}: </span>
