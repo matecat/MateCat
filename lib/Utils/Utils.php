@@ -902,7 +902,7 @@ class Utils {
 
         return $shortedLanguage[0];
     }
-    
+
     /**
      * This escape is need by
      * javascript JSON.parse() function
@@ -948,16 +948,5 @@ class Utils {
         $strippedHtml = rtrim($strippedHtml);
 
         return $strippedHtml;
-    }
-
-    /**
-     * This escape is need by
-     * javascript JSON.parse() function
-     *
-     * @param array $data
-     * @return string
-     */
-    public static function escapeJsonEncode($data){
-       return str_replace("\\\"","\\\\\\\"", json_encode($data));
     }
 }
