@@ -349,7 +349,7 @@ beforeEach(() => {
   executeMswServer()
 })
 
-xtest('Rendering elements', () => {
+test('Rendering elements', () => {
   UI.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>

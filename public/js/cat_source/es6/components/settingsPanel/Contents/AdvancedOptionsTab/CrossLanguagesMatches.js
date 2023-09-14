@@ -28,7 +28,7 @@ export const CrossLanguagesMatches = ({
     setMultiMatchLangs(settings)
     localStorage.setItem('multiMatchLangs', JSON.stringify(settings))
     if (SegmentActions.getContribution) {
-      if (settings.activeLang1) {
+      if (settings.primary) {
         SegmentActions.modifyTabVisibility('multiMatches', true)
         SegmentActions.getContribution(UI.currentSegmentId, settings, true)
       } else {

@@ -15,6 +15,16 @@ class GlossaryController extends KleinController {
     const GLOSSARY_READ  = 'GLOSSARY_READ';
 
     /**
+     * @return array
+     */
+    private function responseOk()
+    {
+        return [
+            'success' => true
+        ];
+    }
+
+    /**
      * Glossary check action
      *
      * @throws \Swaggest\JsonSchema\InvalidValue
@@ -40,7 +50,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -63,7 +73,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -84,7 +94,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -122,7 +132,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -150,7 +160,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -171,7 +181,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -199,7 +209,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -222,7 +232,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -246,7 +256,7 @@ class GlossaryController extends KleinController {
             $this->validateLanguage($json['target_language']);
             $this->validateLanguage($json['source_language']);
 
-            $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $json['source_language'], $json['target_lang'], [] );
+            $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $json['source_language'], $json['target_language'], [] );
 
             // handle source and target
             if(isset($json['source'])){

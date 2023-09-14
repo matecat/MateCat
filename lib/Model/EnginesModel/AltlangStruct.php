@@ -23,12 +23,12 @@ class EnginesModel_AltlangStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "http://api.altlang.net";
+    public $base_url = "https://api2.prompsit.com";
         
     /**
      * @var string
      */
-    public $translate_relative_url = "ws/";
+    public $translate_relative_url = "wsprompsit/";
 
     /**
      * @var string

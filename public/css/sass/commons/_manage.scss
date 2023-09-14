@@ -681,7 +681,10 @@ div#manage-container {
                 //border: 1px solid #797979;
                 border-radius: 2px;
                 float: right;
-
+                .buy-translation-button {
+                  display: flex;
+                  align-items: center;
+                }
                 &.buy-translation {
                   display: flex;
                   align-items: center;
@@ -698,15 +701,16 @@ div#manage-container {
                     text-decoration: underline;
                     font-size: 14px;
                   }
+                  &.open-outsource-disabled span {
+                    color: $grey;
+                  }
                   span {
                     color: #000;
                     margin-left: 4px;
                     line-height: 1.6;
                   }
-                  img {
+                  svg {
                     margin-left: 3px;
-                    width: 20px;
-                    height: 20px;
                   }
                 }
               }
