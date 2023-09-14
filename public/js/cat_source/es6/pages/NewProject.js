@@ -195,7 +195,7 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      mt_engine: activeMTEngine.id,
+      mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
       private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       pretranslate_100: isPretranslate100Active ? 1 : 0,
@@ -292,11 +292,6 @@ const NewProject = ({
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
 
-    const handlerKeyEnter = ({key}) => {
-      if (key === 'Enter') createProject.current()
-    }
-    document.addEventListener('keyup', handlerKeyEnter)
-
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -311,7 +306,6 @@ const NewProject = ({
         NewProjectConstants.ENABLE_ANALYZE_BUTTON,
         enableAnalizeButton,
       )
-      document.removeEventListener('keyup', handlerKeyEnter)
     }
   }, [])
   useEffect(() => {
@@ -393,7 +387,8 @@ const NewProject = ({
       targetLangs,
       selectedTeam,
     })
-    if (prevSourceLang !== sourceLang) {
+    if (prevSourceLang.current.id !== sourceLang.id) {
+      prevSourceLang.current = sourceLang
       UI.UPLOAD_PAGE.restartConversions()
     }
   }, [sourceLang, targetLangs, selectedTeam])
@@ -599,7 +594,6 @@ const NewProject = ({
               />
             </>
           )}
-          <p className="enter">Press Enter</p>
         </div>
       </div>
       {isOpenMultiselectLanguages && (

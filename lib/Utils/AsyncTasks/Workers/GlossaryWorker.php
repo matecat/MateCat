@@ -192,7 +192,6 @@ class GlossaryWorker extends AbstractWorker {
         /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet($payload['source'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
-
         $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishMessage(
@@ -248,8 +247,8 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var \Engines_Results_MyMemory_GetGlossaryResponse $response */
-        $response = $client->glossaryGet($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
+        /** @var \Engines_Results_MyMemory_SearchGlossaryResponse $response */
+        $response = $client->glossarySearch($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
         $matches = $response->matches;
         $matches = $this->formatGetGlossaryMatches($matches, $payload);
 

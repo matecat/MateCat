@@ -7,6 +7,7 @@ import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import CatToolActions from '../actions/CatToolActions'
+import CommonUtils from './commonUtils'
 
 const LXQ = {
   enabled: function () {
@@ -68,19 +69,20 @@ const LXQ = {
     var translation = segObj.lxqDecodedTranslation
 
     var returnUrl = window.location.href.split('#')[0] + '#' + id_segment
+    const data = {
+      sourcelanguage: config.source_rfc,
+      targetlanguage: config.target_rfc,
+      sourcetext: sourcetext,
+      targettext: translation,
+      returnUrl: returnUrl,
+      segmentId: id_segment,
+      partnerId: LXQ.partnerid,
+      projectId: LXQ.projectid,
+      isSegmentCompleted: isSegmentCompleted,
+      responseMode: 'includeQAResults',
+    }
     $.lexiqaAuthenticator.doLexiQA(
-      {
-        sourcelanguage: config.source_rfc,
-        targetlanguage: config.target_rfc,
-        sourcetext: sourcetext,
-        targettext: translation,
-        returnUrl: returnUrl,
-        segmentId: id_segment,
-        partnerId: LXQ.partnerid,
-        projectId: LXQ.projectid,
-        isSegmentCompleted: isSegmentCompleted,
-        responseMode: 'includeQAResults',
-      },
+      data,
       function (err, result) {
         if (!err) {
           var noVisibleErrorsFound = false

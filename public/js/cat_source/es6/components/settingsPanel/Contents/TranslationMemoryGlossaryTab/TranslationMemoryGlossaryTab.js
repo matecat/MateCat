@@ -46,7 +46,6 @@ const DEFAULT_TRANSLATION_MEMORY = {
   isActive: true,
   isDraggable: false,
   isLocked: true,
-  r: true,
   w: true,
 }
 
@@ -94,6 +93,10 @@ export const getTmDataStructureToSendServer = ({tmKeys, keysOrdered}) => {
   })
 }
 
+const memoData = {
+  DEFAULT_TRANSLATION_MEMORY,
+}
+
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
@@ -103,7 +106,12 @@ export const TranslationMemoryGlossaryTab = () => {
     useContext(SettingsPanelContext)
 
   const [specialRows, setSpecialRows] = useState([
-    {...DEFAULT_TRANSLATION_MEMORY, r: Boolean(config.get_public_matches)},
+    {
+      ...memoData.DEFAULT_TRANSLATION_MEMORY,
+      ...(typeof memoData.DEFAULT_TRANSLATION_MEMORY.r === 'undefined' && {
+        r: Boolean(config.get_public_matches),
+      }),
+    },
   ])
   const [keyRows, setKeyRows] = useState([])
   const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
@@ -146,6 +154,11 @@ export const TranslationMemoryGlossaryTab = () => {
   }
 
   useEffect(() => {
+    // update memoized default translation memory checks
+    memoData.DEFAULT_TRANSLATION_MEMORY = specialRows.find(
+      ({id}) => id === SPECIAL_ROWS_ID.defaultTranslationMemory,
+    )
+
     const onExpandRow = ({row, shouldExpand, content}) =>
       setKeyRows((prevState) =>
         prevState.map((item) =>
@@ -241,7 +254,6 @@ export const TranslationMemoryGlossaryTab = () => {
     if (!config.is_cattool) return
 
     const {current} = previousStatesRef
-
     if (typeof current.tmKeys === 'object') {
       const tmKeysActive = tmKeys.filter(({isActive}) => isActive)
       const prevTmKeysActive = current.tmKeys.filter(({isActive}) => isActive)

@@ -865,4 +865,27 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         return (float)$object->standard_word_count;
     }
+
+    /**
+     * @param $id_job
+     * @param int $ttl
+     * @return bool
+     */
+    public static function hasACustomPayableRate($id_job, $ttl = 86400) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+
+        $stmt    = $conn->prepare( "
+            SELECT * 
+            FROM job_custom_payable_rates 
+            where id_job = :id_job
+        " );
+
+        $object = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $id_job,
+        ] )[0];
+
+        return $object !== null;
+    }
 }
