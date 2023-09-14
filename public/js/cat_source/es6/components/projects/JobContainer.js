@@ -10,6 +10,8 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
+import TranslatedIconSmall from '../../../../../img/icons/TranslatedIconSmall'
+import Tooltip from '../common/Tooltip'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -20,6 +22,7 @@ class JobContainer extends React.Component {
       showTranslatorBox: false,
       extendedView: true,
     }
+    this.ousorceButton = React.createRef()
     this.getTranslateUrl = this.getTranslateUrl.bind(this)
     this.getAnalysisUrl = this.getAnalysisUrl.bind(this)
     this.changePassword = this.changePassword.bind(this)
@@ -686,22 +689,47 @@ class JobContainer extends React.Component {
     if (!config.enable_outsource) {
       return null
     }
-    let label = (
-      <a
-        className="open-outsource buy-translation ui button"
-        id="open-quote-request"
-        onClick={this.openOutsourceModal.bind(this, false, true)}
-        data-testid="buy-translation-button"
-      >
-        <span className="buy-translation-span">Buy Translation</span>
-        <span>from</span>
-        <img
-          src={
-            "data:image/svg+xml;charset=utf-8,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.686 2.77C10.353 2.78 2.79 10.317 2.78 19.62c0 9.306 7.57 16.85 16.907 16.85 9.338 0 16.908-7.544 16.908-16.85 0-9.307-7.57-16.85-16.908-16.85zm0-2.77c10.872 0 19.686 8.784 19.686 19.62 0 10.835-8.814 19.62-19.686 19.62S0 30.454 0 19.62C0 8.784 8.814 0 19.686 0zm4.756 27.857a5.533 5.533 0 01-3.448 1.074c-1.766 0-3.119-.578-3.92-1.842-.495-.743-.69-1.623-.69-3.027v-7.568h-3.54v-2.331h3.54v-3.88h3.063v13.821c0 1.458.69 2.144 1.969 2.144a2.892 2.892 0 001.82-.63l1.206 2.24zm-1.415-12.556c-.004-.474.182-.93.515-1.267.333-.338.787-.53 1.263-.533h.056c.475.004.93.195 1.262.533.334.337.519.793.515 1.267a1.788 1.788 0 01-1.777 1.796h-.056a1.788 1.788 0 01-1.778-1.796z' fill-rule='evenodd'/%3E%3C/svg%3E"
-          }
-        />
-      </a>
-    )
+    const outsourceInfo = this.props.job.get('outsource_info')
+      ? this.props.job.get('outsource_info').toJS()
+      : undefined
+    let label =
+      !this.props.job.get('outsource_available') &&
+      outsourceInfo?.custom_payable_rate ? (
+        <div
+          className="open-outsource open-outsource-disabled buy-translation ui button"
+          id="open-quote-request"
+          data-testid="buy-translation-button"
+        >
+          <Tooltip
+            content={
+              <div>
+                Jobs created with custom billing models cannot be outsourced to
+                Translated.
+                <br />
+                In order to outsource this job to Translated, please recreate it
+                using Matecat's standard billing model
+              </div>
+            }
+          >
+            <div ref={this.ousorceButton} className={'buy-translation-button'}>
+              <span className="buy-translation-span">Buy Translation</span>
+              <span>from</span>
+              <TranslatedIconSmall size={20} />
+            </div>
+          </Tooltip>
+        </div>
+      ) : (
+        <a
+          className="open-outsource buy-translation ui button"
+          id="open-quote-request"
+          onClick={this.openOutsourceModal.bind(this, false, true)}
+          data-testid="buy-translation-button"
+        >
+          <span className="buy-translation-span">Buy Translation</span>
+          <span>from</span>
+          <TranslatedIconSmall size={20} />
+        </a>
+      )
     if (this.props.job.get('outsource')) {
       if (this.props.job.get('outsource').get('id_vendor') == '1') {
         label = (

@@ -5,6 +5,7 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use PayableRates\CustomPayableRateDao;
+use PayableRates\CustomPayableRateStruct;
 use Validator\Errors\JSONValidatorError;
 
 class PayableRateController extends KleinController
@@ -43,8 +44,9 @@ class PayableRateController extends KleinController
             $id = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
+
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
@@ -75,11 +77,19 @@ class PayableRateController extends KleinController
             ]);
         }
 
+        if($this->getUser()->uid !== $model->uid){
+            $this->response->code(401);
+
+            return $this->response->json([
+                'error' => 'User not allowed'
+            ]);
+        }
+
         try {
             CustomPayableRateDao::remove($id);
 
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (\Exception $exception){
             $this->response->code(500);
@@ -90,6 +100,9 @@ class PayableRateController extends KleinController
         }
     }
 
+    /**
+     * @return \Klein\Response
+     */
     public function edit()
     {
         $id = $this->request->param( 'id' );
@@ -103,13 +116,21 @@ class PayableRateController extends KleinController
             ]);
         }
 
+        if($this->getUser()->uid !== $model->uid){
+            $this->response->code(401);
+
+            return $this->response->json([
+                'error' => 'User not allowed'
+            ]);
+        }
+
         try {
             $json = $this->request->body();
             $id = CustomPayableRateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
@@ -132,7 +153,7 @@ class PayableRateController extends KleinController
         $id = $this->request->param( 'id' );
         $model = CustomPayableRateDao::getById($id);
 
-        if($model->uid !== $this->getUser()->uid){
+        if(empty($model)){
             $this->response->code(404);
 
             return $this->response->json([
@@ -140,15 +161,15 @@ class PayableRateController extends KleinController
             ]);
         }
 
-        if(!empty($model)){
-            return $this->response->json($model);
+        if($this->getUser()->uid !== $model->uid){
+            $this->response->code(401);
+
+            return $this->response->json([
+                'error' => 'User not allowed'
+            ]);
         }
 
-        $this->response->code(404);
-
-        return $this->response->json([
-            'error' => 'Model not found'
-        ]);
+        return $this->response->json($model);
     }
 
     /**
@@ -177,9 +198,16 @@ class PayableRateController extends KleinController
             $validator->validate($validatorObject);
 
             $errors = $validator->getErrors();
+
+            if($validator->isValid()){
+                $customPayableRateStruct = new CustomPayableRateStruct();
+                $customPayableRateStruct->hydrateFromJSON($json);
+            }
+
             $code = ($validator->isValid()) ? 200 : 500;
 
             $this->response->code($code);
+
             return $this->response->json([
                 'errors' => $errors
             ]);
