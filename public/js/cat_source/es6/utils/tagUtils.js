@@ -1,7 +1,5 @@
 import {isUndefined} from 'lodash'
 import {Base64} from 'js-base64'
-
-// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils'
 import {
   tagSignatures,
