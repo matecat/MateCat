@@ -84,9 +84,9 @@ class OutsourceContainer extends React.Component {
       setTimeout(function () {
         window.addEventListener('click', self.handleDocumentClick)
         window.addEventListener('keydown', self._handleEscKey)
-        $('html, body').animate(
+        $('#manage-container').animate(
           {
-            scrollTop: $(self.container).offset().top - 55,
+            scrollTop: $(self.container).offset().top - 130,
           },
           500,
         )
@@ -95,7 +95,7 @@ class OutsourceContainer extends React.Component {
       window.removeEventListener('click', self.handleDocumentClick)
       window.removeEventListener('keydown', self._handleEscKey)
       if (prevProps.openOutsource) {
-        $('html, body').animate(
+        $('#manage-container').animate(
           {
             scrollTop: $(self.container).offset().top - 200,
           },
