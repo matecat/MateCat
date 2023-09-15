@@ -229,7 +229,12 @@ class ProjectsContainer extends React.Component {
   }
 
   render() {
-    let projects = this.state.projects
+    let projects = Immutable.fromJS([
+      ...this.state.projects.toJS(),
+      ...this.state.projects.toJS(),
+      ...this.state.projects.toJS(),
+      ...this.state.projects.toJS(),
+    ])
 
     let items = projects.map((project) => (
       <ProjectContainer

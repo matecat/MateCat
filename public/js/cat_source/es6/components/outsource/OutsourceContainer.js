@@ -78,23 +78,17 @@ class OutsourceContainer extends React.Component {
     window.removeEventListener('keydown', this._handleEscKey)
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     let self = this
-    const scrollableContainer = document.getElementById('manage-container')
     if (this.props.openOutsource || this.props.showTranslatorBox) {
       setTimeout(function () {
         window.addEventListener('click', self.handleDocumentClick)
         window.addEventListener('keydown', self._handleEscKey)
-        scrollableContainer.scrollTop =
-          self.container.getBoundingClientRect().top - 130
+        self.container.scrollIntoView({block: 'center'})
       }, 500)
     } else {
       window.removeEventListener('click', self.handleDocumentClick)
       window.removeEventListener('keydown', self._handleEscKey)
-      if (prevProps.openOutsource) {
-        scrollableContainer.scrollTop =
-          self.container.getBoundingClientRect().top - 200
-      }
     }
     $(this.languageTooltip).popup()
   }
