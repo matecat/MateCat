@@ -47,11 +47,10 @@ class OutsourceContainer extends React.Component {
 
   handleDocumentClick(evt) {
     evt.stopPropagation()
-    const area = ReactDOM.findDOMNode(this.container)
 
     if (
       this.container &&
-      !area.contains(evt.target) &&
+      !this.container.contains(evt.target) &&
       !$(evt.target).hasClass('open-view-more') &&
       !$(evt.target).hasClass('outsource-goBack') &&
       !$(evt.target).hasClass('faster') &&
