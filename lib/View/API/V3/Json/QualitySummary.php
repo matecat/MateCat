@@ -202,12 +202,23 @@ class QualitySummary {
         $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
 
         $model      = $project->getLqaModel();
-        $categories = $model->getCategoriesAndSeverities();
-        $passFail   = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit( $model ) ] ];
+        $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
+
+        if($model){
+            $passFail = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit( $model ) ] ];
+        } else {
+            $passFail = true;
+        }
 
         return [
                 $passFail,
-                $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model->hash
+                $reviseIssues,
+                $quality_overall,
+                $is_pass, $score,
+                $total_issues_weight,
+                $total_reviewed_words_count,
+                $categories,
+                ($model ? $model->hash : null)
         ];
     }
 

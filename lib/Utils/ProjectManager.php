@@ -13,6 +13,8 @@ use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Exceptions\NotFoundException;
+use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventStruct;
 use Files\FilesPartsDao;
 use Files\FilesPartsStruct;
 use Files\MetadataDao;
@@ -20,6 +22,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use LQA\ChunkReviewDao;
 use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -1270,7 +1273,7 @@ class ProjectManager {
 
                 //prepare pre-translated segments queries
                 if ( !empty( $projectStructure[ 'translations' ] ) ) {
-                    $this->_insertPreTranslations( $newJob->id );
+                    $this->_insertPreTranslations( $newJob, $projectStructure );
                 }
             } catch ( Exception $e ) {
                 $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
@@ -2570,15 +2573,19 @@ class ProjectManager {
     }
 
     /**
-     * @param $jid
+     * @param Jobs_JobStruct $job
+     * @param ArrayObject $projectStructure
      * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _insertPreTranslations( $jid ) {
+    protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
 
+        $jid = $job->id;
+        $createSecondPassReview = false;
+        $r2SegmentEvents = [];
         $this->_cleanSegmentsMetadata();
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
@@ -2593,12 +2600,31 @@ class ProjectManager {
                 continue;
             }
 
-            //array of segmented translations
+            // array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
                 $position          = (isset($translation_row[ 6 ])) ? $translation_row[ 6 ] : null;
                 $segment           = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
+                $originalState     = @$translation_row[ 4 ]['seg-target'][$position]['attr']['state'];
+
+                // create a R2 for the job is state is 'final'
+                if($originalState !== null and $originalState === 'final'){
+                    $createSecondPassReview = true;
+
+                    $translationEventStruct = new TranslationEventStruct();
+                    $translationEventStruct->uid = isset($projectStructure['uid']) ? $projectStructure['uid'] : 0;
+                    $translationEventStruct->id_job = $job->id;
+                    $translationEventStruct->id_segment = $segment->id;
+                    $translationEventStruct->version_number = 0;
+                    $translationEventStruct->status = Constants_TranslationStatus::STATUS_APPROVED;
+                    $translationEventStruct->source_page = 3;
+                    $translationEventStruct->final_revision = 1;
+                    $translationEventStruct->create_date = new \DateTime();
+                    $translationEventStruct->time_to_edit = 0;
+
+                    $r2SegmentEvents[] = $translationEventStruct;
+                }
 
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                     [
@@ -2683,9 +2709,39 @@ class ProjectManager {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
         }
 
+        // First, create a R2 for the job is state is 'final',
+        // then, save an event of each segment with state 'final'
+        if($createSecondPassReview){
+            $this->createSecondPassReview($job);
+            $translationEventDao = new TranslationEventDao();
+            $translationEventDao->bulkInsert($r2SegmentEvents);
+        }
+
         //clean translations and queries
         unset( $query_translations_values );
+    }
 
+    /**
+     * @param $job
+     * @throws NotFoundException
+     * @throws Exception
+     */
+    private function createSecondPassReview(Jobs_JobStruct $job)
+    {
+        $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
+            [ $job ],
+            $this->project,
+            [
+                'source_page' => 3
+            ]
+        );
+
+        // destroy project data cache
+        ( new \Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
+
+        // destroy the 5 minutes chunk review cache
+        $chunk = (new \Chunks_ChunkDao())->getByIdAndPassword($records[ 0 ]->id_job, $records[ 0 ]->password);
+        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews($chunk, 60 * 5 );
     }
 
     /**

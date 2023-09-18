@@ -9,6 +9,7 @@
 namespace Features\TranslationVersions\Model;
 
 use DataAccess\ShapelessConcreteStruct;
+use Database;
 use PDO;
 
 class TranslationEventDao extends \DataAccess_AbstractDao {
@@ -145,5 +146,105 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
         $id_segment_list[] = $id_job;
 
         return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list );
+    }
+
+    /**
+     * @param TranslationEventStruct[] $structs
+     * @return bool
+     */
+    public function bulkInsert(array $structs = [])
+    {
+        $sql = "INSERT INTO segment_translation_events
+            (
+                `id_job`,
+                `id_segment`,
+                `uid`,
+                `version_number`,
+                `source_page`,
+                `status`,
+                `create_date`,
+                `final_revision`,
+                `time_to_edit`
+            )
+            VALUES ";
+
+        $bind_values   = [];
+        $index = 1;
+
+        foreach ($structs as $struct){
+            $isLast = ($index === count($structs));
+
+            $sql .= "(?,?,?,?,?,?,?,?,?)";
+
+            if(!$isLast){
+                $sql .= ',';
+            }
+
+            $bind_values[] = $struct->id_job;
+            $bind_values[] = $struct->id_segment;
+            $bind_values[] = $struct->uid;
+            $bind_values[] = $struct->version_number;
+            $bind_values[] = $struct->source_page;
+            $bind_values[] = $struct->status;
+            $bind_values[] = (($struct->create_date instanceof \DateTime) ? $struct->create_date->format("Y-m-d H:i:s") : $struct->create_date);
+            $bind_values[] = $struct->final_revision;
+            $bind_values[] = $struct->time_to_edit;
+        }
+
+        if(!empty($bind_values)){
+            $conn = Database::obtain()->getConnection();
+            $stmt = $conn->prepare( $sql );
+
+            return $stmt->execute( $bind_values );
+        }
+    }
+
+    /**
+     * @param TranslationEventStruct $struct
+     * @return int
+     */
+    public function insert(TranslationEventStruct $struct){
+        $sql = "INSERT INTO segment_translation_events
+                    (
+                        `id_job`,
+                        `id_segment`,
+                        `uid`,
+                        `version_number`,
+                        `source_page`,
+                        `status`,
+                        `create_date`,
+                        `final_revision`,
+                        `time_to_edit`
+                    )
+                    VALUES
+                    (
+                        :id_job,
+                        :id_segment,
+                        :uid,
+                        :version_number,
+                        :source_page,
+                        :status,
+                        :create_date,
+                        :final_revision,
+                        :time_to_edit
+                    )
+                ";
+
+        $conn = $this->getDatabaseHandler()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+            'id_job' => $struct->id_job,
+            'id_segment' => $struct->id_segment,
+            'uid' => $struct->uid,
+            'version_number' => $struct->version_number,
+            'source_page' => $struct->source_page,
+            'status' => $struct->status,
+            'create_date' => (($struct->create_date instanceof \DateTime) ? $struct->create_date->format("Y-m-d H:i:s") : $struct->create_date),
+            'final_revision' => $struct->final_revision == 1,
+            'time_to_edit' => $struct->time_to_edit,
+        ] );
+
+        return $stmt->rowCount();
     }
 }
