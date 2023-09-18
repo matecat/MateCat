@@ -1903,7 +1903,7 @@ class ProjectManager {
                                             'needs-translation',
                                         ];
 
-                                        if ( !in_array($state, $initialTranslationStates) && $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+                                        if ( !in_array($state, $initialTranslationStates) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -3292,8 +3292,8 @@ class ProjectManager {
      *
      * @param $source
      * @param $target
-     *
      * @param $xliff_trans_unit
+     * @param $state
      *
      * @return bool|mixed
      * @throws NotFoundException
@@ -3302,7 +3302,12 @@ class ProjectManager {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function __isTranslated( $source, $target, $xliff_trans_unit ) {
+    private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null ) {
+
+        if($state !== null){
+            return $state !== 'initial';
+        }
+
         if ( $source != $target ) {
 
             // evaluate if different source and target should be considered translated
