@@ -196,15 +196,55 @@ export const TMCreateResourceRow = ({row}) => {
       })
   }
 
+  const activateInactiveSharedKey = ({event, rowAlreadyAssigned}) => {
+    onReset()
+
+    setTmKeys((prevState) =>
+      prevState.map((tm) =>
+        tm.id === rowAlreadyAssigned.id
+          ? {
+              ...tm,
+              isActive: true,
+              r: true,
+              w: true,
+            }
+          : tm,
+      ),
+    )
+
+    event.preventDefault()
+  }
+
   const checkSharedKey = (dispathNotification = true) => {
-    if (tmKeys.filter(({owner}) => owner).find(({key}) => key === keyCode)) {
+    const rowAlreadyAssigned = tmKeys
+      .filter(({owner}) => owner)
+      .find(({key}) => key === keyCode)
+
+    if (rowAlreadyAssigned) {
+      const message = rowAlreadyAssigned.isActive ? (
+        <p>The key is already assigned to one of your Active TMs.</p>
+      ) : (
+        <p>
+          The key is already assigned to one of your Inactive TMs.{' '}
+          <a
+            className="active-tm-key-link activate-key"
+            href="/"
+            onClick={(event) =>
+              activateInactiveSharedKey({event, rowAlreadyAssigned})
+            }
+          >
+            Click here to activate it
+          </a>
+        </p>
+      )
+
       if (dispathNotification) {
         setNotification({
           type: 'error',
-          message:
-            'The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link activate-key">Click here to activate it</a>',
+          message,
         })
       }
+
       return false
     }
     return true
