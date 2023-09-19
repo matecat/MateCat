@@ -12,6 +12,7 @@ namespace API\V2;
 use API\V2\Json\SegmentVersion;
 use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\SegmentTranslation;
+use Chunks_ChunkDao;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Jobs_JobStruct;
 
@@ -32,7 +33,7 @@ class ReviseTranslationIssuesController extends BaseChunkController {
                 $this->request->id_segment
         );
 
-        $chunk = \Chunks_ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+        $chunk = Chunks_ChunkDao::getByIdAndPassword( $this->params[ 'id_job' ], $this->params[ 'password' ] );
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -44,7 +45,7 @@ class ReviseTranslationIssuesController extends BaseChunkController {
     /**
      * @param Jobs_JobStruct $chunk
      */
-    public function setChunk(Jobs_JobStruct $chunk) {
+    public function setChunk( Jobs_JobStruct $chunk = null ) {
         $this->chunk = $chunk;
     }
 }

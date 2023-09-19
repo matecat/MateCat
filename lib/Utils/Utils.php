@@ -824,9 +824,10 @@ class Utils {
     }
 
     /**
+     * @param string $format
      * @return array
      */
-    public static function allowedLanguages()
+    public static function allowedLanguages($format = 'rfc3066code')
     {
         $allowedLanguages = [];
 
@@ -835,12 +836,28 @@ class Utils {
         $langs = json_decode( $string, true );
 
         foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = $lang['rfc3066code'];
+            $allowedLanguages[] = (isset($lang[$format])) ? $lang[$format] : $lang['rfc3066code'];
         }
 
         return $allowedLanguages;
     }
 
+    /**
+     * @param string $language
+     * @param string $format
+     * @return bool
+     */
+    public static function isValidLanguage($language, $format = 'rfc3066code')
+    {
+        $allowedLanguages = Utils::allowedLanguages($format);
+
+        return in_array($language, $allowedLanguages);
+    }
+
+    /**
+     * @param $rfc3066code
+     * @return |null
+     */
     public static function getLocalizedLanguage($rfc3066code)
     {
         $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
@@ -871,6 +888,21 @@ class Utils {
         return $phrase;
     }
 
+    /**
+     * Examples:
+     * it-IT  ---> it
+     * es-419 ---> es
+     *
+     * @param $rfc3066code
+     * @return string|null
+     */
+    public static function convertLanguageToIsoCode($rfc3066code)
+    {
+        $shortedLanguage = explode('-', $rfc3066code);
+
+        return $shortedLanguage[0];
+    }
+    
     /**
      * This escape is need by
      * javascript JSON.parse() function

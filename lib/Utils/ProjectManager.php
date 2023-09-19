@@ -29,6 +29,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use PayableRates\CustomPayableRateDao;
 use ProjectManager\ProjectManagerModel;
 use Teams\TeamStruct;
 use TMS\TMSFile;
@@ -1145,14 +1146,11 @@ class ProjectManager {
                     throw new Exception( $e );
 
                 }
-
             }
 
             unset( $this->projectStructure[ 'array_files' ][ $file->getPosition() ] );
             unset( $this->projectStructure[ 'array_files_meta' ][ $file->getPosition() ] );
-
         }
-
     }
 
     protected function _zipFileHandling( $linkFiles ) {
@@ -1185,13 +1183,16 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            //shorten languages and get payable rates
-            $shortSourceLang = substr( $projectStructure[ 'source_language' ], 0, 2 );
-            $shortTargetLang = substr( $target, 0, 2 );
-
-            //get payable rates
-            $payableRates = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
-            $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $shortSourceLang, $shortTargetLang ) );
+            // get payable rates
+            if(isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id'])){
+                $payableRatesTemplate = CustomPayableRateDao::getById($projectStructure['payable_rate_model_id']);
+                $payableRates = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates = json_encode($payableRates);
+            } else {
+                $payableRatesTemplate = null;
+                $payableRates = Analysis_PayableRates::getPayableRates(  $projectStructure[ 'source_language' ], $target );
+                $payableRates = json_encode( $this->features->filter( "filterPayableRates", $payableRates,  $projectStructure[ 'source_language' ], $target ) );
+            }
 
             $password = $this->generatePassword();
 
@@ -1258,6 +1259,15 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             try {
+                if(isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id']) and $payableRatesTemplate !== null) {
+                    CustomPayableRateDao::assocModelToJob(
+                        $projectStructure['payable_rate_model_id'],
+                        $newJob->id,
+                        $payableRatesTemplate->version,
+                        $payableRatesTemplate->name
+                    );
+                }
+
                 //prepare pre-translated segments queries
                 if ( !empty( $projectStructure[ 'translations' ] ) ) {
                     $this->_insertPreTranslations( $newJob->id );
