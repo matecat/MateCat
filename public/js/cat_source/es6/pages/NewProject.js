@@ -312,24 +312,26 @@ const NewProject = ({
     const createKeyFromTMXFile = ({extension, filename}) => {
       const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
 
-      tmCreateRandUser().then((response) => {
-        const {key} = response.data
-        setTmKeys((prevState) => [
-          ...(prevState ?? []),
-          {
-            r: true,
-            w: true,
-            tm: true,
-            glos: true,
-            owner: true,
-            name: filename,
-            key,
-            is_shared: false,
-            id: key,
-            isActive: true,
-          },
-        ])
-      })
+      if (haveNoActiveKeys) {
+        tmCreateRandUser().then((response) => {
+          const {key} = response.data
+          setTmKeys((prevState) => [
+            ...(prevState ?? []),
+            {
+              r: true,
+              w: true,
+              tm: true,
+              glos: true,
+              owner: true,
+              name: filename,
+              key,
+              is_shared: false,
+              id: key,
+              isActive: true,
+            },
+          ])
+        })
+      }
 
       const glossaryMessage = (
         <span>
