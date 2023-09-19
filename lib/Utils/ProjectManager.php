@@ -2714,7 +2714,12 @@ class ProjectManager {
         if($createSecondPassReview){
             $this->createSecondPassReview($job);
             $translationEventDao = new TranslationEventDao();
-            $translationEventDao->bulkInsert($r2SegmentEvents);
+
+            // bulk update, max 100 inserts
+            $r2SegmentEventsChunks = array_chunk($r2SegmentEvents, 100);
+            foreach ($r2SegmentEventsChunks as $r2SegmentEventsChunk){
+                $translationEventDao->bulkInsert($r2SegmentEventsChunk);
+            }
         }
 
         //clean translations and queries
