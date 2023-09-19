@@ -707,6 +707,7 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
         //filters ocr warning
         if (data.code == -20) {
           CreateProjectActions.enableAnalyzeButton(true)
+          $(filerow).removeClass('failed')
         }
       }
     })
