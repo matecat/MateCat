@@ -240,18 +240,7 @@ class NewController extends ajaxController {
      * @throws Exception
      */
     private function __validateSegmentationRules() {
-
-        $this->postInput[ 'segmentation_rule' ] = ( !empty( $this->postInput[ 'segmentation_rule' ] ) ) ? $this->postInput[ 'segmentation_rule' ] : '';
-
-        if ( !in_array( $this->postInput[ 'segmentation_rule' ], self::$allowed_seg_rules ) ) {
-            throw new Exception( "Segmentation rule not allowed: " . $this->postInput[ 'segmentation_rule' ], -4 );
-        }
-
-        //normalize segmentation rule to what it's used internally
-        if ( $this->postInput[ 'segmentation_rule' ] == 'standard' || $this->postInput[ 'segmentation_rule' ] == '' ) {
-            $this->postInput[ 'segmentation_rule' ] = null;
-        }
-
+        $this->postInput[ 'segmentation_rule' ] = Constants::validateSegmentationRules( $this->postInput[ 'segmentation_rule' ] );
     }
 
     /**
@@ -1111,10 +1100,8 @@ class NewController extends ajaxController {
                 throw new \Exception('Payable rate model is not belonging to the current user');
             }
 
-            $payableRateModelTemplate = CustomPayableRateDao::getByUidAndName($userId, $payableRateTemplateName);
-
-            if(null === $payableRateModelTemplate){
-                throw new \Exception('Payable rate model name not matching or not belonging to the current user');
+            if($payableRateModelTemplate->name !== $payableRateTemplateName){
+                throw new \Exception('Payable rate model name not matching');
             }
         }
 

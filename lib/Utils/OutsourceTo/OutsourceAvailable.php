@@ -28,6 +28,6 @@ class OutsourceTo_OutsourceAvailable
             }
         }
 
-        return $check > 0;
+        return $check === 0;
     }
 }

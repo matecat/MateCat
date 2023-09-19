@@ -92,7 +92,7 @@ const NewProject = ({
   )
   const [segmentationRule, setSegmentationRule] = useState({
     name: 'General',
-    id: '',
+    id: 'standard',
   })
   const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
   const [getPublicMatches, setGetPublicMatches] = useState(
@@ -103,6 +103,7 @@ const NewProject = ({
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
+  const createProject = useRef()
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
@@ -167,7 +168,7 @@ const NewProject = ({
         ])
       })
     } else {
-      if (tmKeyFromQueryString) setTmKeys([keyFromQueryString])
+      setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
     }
   }
 
@@ -186,7 +187,7 @@ const NewProject = ({
     }
   }
 
-  const createProject = () => {
+  createProject.current = () => {
     const getParams = () => ({
       action: 'createProject',
       file_name: APP.getFilenameFromUploadedFiles(),
@@ -194,7 +195,7 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      mt_engine: activeMTEngine.id,
+      mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
       private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       pretranslate_100: isPretranslate100Active ? 1 : 0,
@@ -386,7 +387,8 @@ const NewProject = ({
       targetLangs,
       selectedTeam,
     })
-    if (prevSourceLang !== sourceLang) {
+    if (prevSourceLang.current.id !== sourceLang.id) {
+      prevSourceLang.current = sourceLang
       UI.UPLOAD_PAGE.restartConversions()
     }
   }, [sourceLang, targetLangs, selectedTeam])
@@ -394,7 +396,7 @@ const NewProject = ({
   useEffect(() => {
     //TODO: used in main.js, remove
     UI.segmentationRule = segmentationRule.id
-    //UI.UPLOAD_PAGE.restartConversions()
+    UI.UPLOAD_PAGE.restartConversions()
   }, [segmentationRule])
 
   return (
@@ -578,7 +580,7 @@ const NewProject = ({
                 !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
               }`}
               value="Analyze"
-              onClick={createProject}
+              onClick={createProject.current}
             />
           ) : (
             <>
@@ -592,7 +594,6 @@ const NewProject = ({
               />
             </>
           )}
-          <p className="enter">Press Enter</p>
         </div>
       </div>
       {isOpenMultiselectLanguages && (

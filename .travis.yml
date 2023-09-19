@@ -1,13 +1,13 @@
 os: linux
 dist: focal
-language: minimal
+language: php
 
 branches:
   only:
     #   - develop
     - /^v?(\d+\.)?(\d+\.)?(\d+)(-[a-z\d]+)?$/
     - freddy
-    # - master
+    #  - master
 
 git:
   # Tell Travis not to try to load submodules
@@ -15,7 +15,7 @@ git:
   submodules: false
 
 before_install:
-  - export BUILD=$(awk 'NF>1 {print $3}' inc/version.ini)
+  - export BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
   - pip install -U pip
   - pip install awscli
   # Change ssh to https in the submodule file because travis make calls on https with its own token

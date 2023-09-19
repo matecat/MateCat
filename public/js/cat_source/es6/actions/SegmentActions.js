@@ -306,7 +306,8 @@ const SegmentActions = {
     if (!currentSegment) return
 
     var tagProjectionEnabled =
-      TagUtils.hasTagsToHide(currentSegment.segment) && !currentSegment.tagged
+      TagUtils.hasDataOriginalTags(currentSegment.segment) &&
+      !currentSegment.tagged
     if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
       SegmentActions.setSegmentAsTagged(
         currentSegment.sid,
@@ -920,8 +921,8 @@ const SegmentActions = {
     TranslationMatches.getContribution(sid, 2, multiMatchLangs)
   },
 
-  getContribution: function (sid, multiMatchLangs) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
+  getContribution: function (sid, multiMatchLangs, force) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
   },
 
   getContributionsSuccess: function (data, sid) {

@@ -37,7 +37,7 @@ function CatTool() {
   })
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
+  const [activeMTEngine, setActiveMTEngine] = useState()
   const [guessTagActive, setGuessTagActive] = useState(
     SegmentUtils.checkTPEnabled(),
   )
@@ -97,7 +97,7 @@ function CatTool() {
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
-        if (config.isAnInternalUser) {
+        if (config.isAnInternalUser && config.active_engine.length > 0) {
           const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
           if (mmt) {
             setActiveMTEngine(mmt)

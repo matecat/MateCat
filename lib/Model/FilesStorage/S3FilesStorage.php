@@ -147,7 +147,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return bool|mixed
      * @throws \Exception
      */
-    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
+    public function makeCachePackage( $hash, $lang, $originalPath, $xliffPath ) {
 
         // get the prefix
         $prefix = $this->getCachePackageHashFolder( $hash, $lang );
@@ -163,7 +163,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         // Example: حديث_أمني_ريف_حلب_الغربي.docx (OK) -----> حديث_أمني_ريف_حلب_الغربي.doxs.xliff (TOO LONG)
         //
         try {
-            $xliffDestination = $this->getXliffDestination( $prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath );
+            $xliffDestination = $this->storeOriginalFileAndGetXliffDestination( $prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath );
 
             $this->s3Client->uploadItem( [
                     'bucket' => static::$FILES_STORAGE_BUCKET,
@@ -216,14 +216,15 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    private function getXliffDestination( $prefix, $xliffPath, $bucketName, $originalPath = false ) {
+    private function  storeOriginalFileAndGetXliffDestination( $prefix, $xliffPath, $bucketName, $originalPath = false ) {
         if ( !$originalPath ) {
+            $force_extension = "";
             $fileType = XliffProprietaryDetect::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }
 
-            return $prefix . DIRECTORY_SEPARATOR . 'work' . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . @$force_extension;
+            return $prefix . DIRECTORY_SEPARATOR . 'work' . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . $force_extension;
         }
 
         $raw_file_path   = explode( DIRECTORY_SEPARATOR, $originalPath );

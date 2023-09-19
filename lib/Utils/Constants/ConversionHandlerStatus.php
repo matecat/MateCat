@@ -18,6 +18,7 @@ class ConversionHandlerStatus {
     const INVALID_TOKEN                = -19;
     const OCR_WARNING                  = -20;
     const OCR_ERROR                    = -21;
+    const INVALID_SEGMENTATION_RULE    = -22;
     const GENERIC_ERROR                = -100;
     const FILESYSTEM_ERROR             = -103;
     const S3_ERROR                     = -230;

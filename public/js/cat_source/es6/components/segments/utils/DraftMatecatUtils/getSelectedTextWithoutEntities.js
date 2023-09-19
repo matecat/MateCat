@@ -6,33 +6,39 @@ const getSelectedTextWithoutEntities = (editorState) => {
   const start = selectionState.getStartOffset()
   const end = selectionState.getEndOffset()
 
-  const result = new Array(end - start)
-    .fill({})
-    .map((item, index) => start + index)
-    .reduce((acc, cur) => {
-      const isEntity = !!currentContentBlock.getEntityAt(cur)
-      const updateAccumulator = [...acc]
+  let result = []
 
-      const lastItem =
-        updateAccumulator.length &&
-        (!isEntity || (isEntity && !updateAccumulator.slice(-1)[0]?.value))
-          ? updateAccumulator.pop()
-          : {}
+  try {
+    result = new Array(end - start)
+      .fill({})
+      .map((item, index) => start + index)
+      .reduce((acc, cur) => {
+        const isEntity = !!currentContentBlock.getEntityAt(cur)
+        const updateAccumulator = [...acc]
 
-      const item = {
-        ...lastItem,
-        ...(!isEntity && {
-          ...(lastItem.start === undefined && {start: cur}),
-          value: `${lastItem.value ? lastItem.value : ''}${currentContentBlock
-            .getText()
-            .substring(cur, cur + 1)}`,
-          end: cur + 1,
-        }),
-      }
+        const lastItem =
+          updateAccumulator.length &&
+          (!isEntity || (isEntity && !updateAccumulator.slice(-1)[0]?.value))
+            ? updateAccumulator.pop()
+            : {}
 
-      return [...updateAccumulator, item]
-    }, [])
-    .filter((item) => item.value)
+        const item = {
+          ...lastItem,
+          ...(!isEntity && {
+            ...(lastItem.start === undefined && {start: cur}),
+            value: `${lastItem.value ? lastItem.value : ''}${currentContentBlock
+              .getText()
+              .substring(cur, cur + 1)}`,
+            end: cur + 1,
+          }),
+        }
+
+        return [...updateAccumulator, item]
+      }, [])
+      .filter((item) => item.value)
+  } catch (e) {
+    console.log(e)
+  }
 
   return result
 }
