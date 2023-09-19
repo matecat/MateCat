@@ -8,12 +8,12 @@
 
 namespace Teams;
 
-use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use PDO;
 use Users\MetadataDao;
 use Users_UserDao;
+use Users_UserStruct;
 use Utils;
 
 class MembershipDao extends \DataAccess_AbstractDao {
@@ -21,8 +21,8 @@ class MembershipDao extends \DataAccess_AbstractDao {
     const TABLE       = "teams_users";
     const STRUCT_TYPE = "\\Teams\\MembershipStruct";
 
-    protected static $auto_increment_field = array( 'id' );
-    protected static $primary_keys         = array( 'id' );
+    protected static $auto_increment_field = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
 
     protected static $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
@@ -49,7 +49,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
         $sql  = " SELECT * FROM " . self::TABLE . " WHERE id = ? ";
         $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
-        $stmt->execute( array( $id ) );
+        $stmt->execute( [ $id ] );
 
         return $stmt->fetch();
     }
@@ -58,38 +58,38 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * Find ONE team for the given user. This is to enforce the temporary requirement to
      * have just one team per user.
      *
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
      * @return null|TeamStruct[]
      */
-    public function findUserTeams( \Users_UserStruct $user ) {
+    public function findUserTeams( Users_UserStruct $user ) {
 
         $stmt      = $this->_getStatementForCache( self::$_query_user_teams );
         $teamQuery = new TeamStruct();
 
         return static::resultOrNull( $this->_fetchObject( $stmt,
                 $teamQuery,
-                array(
+                [
                         'uid' => $user->uid,
-                )
+                ]
         ) );
 
     }
 
     /**
-     * Cache deletion for @see MembershipDao::findUserTeams
-     *
-     * @param \Users_UserStruct $user
+     * Cache deletion for @param Users_UserStruct $user
      *
      * @return bool|int
+     * @see MembershipDao::findUserTeams
+     *
      */
-    public function destroyCacheUserTeams( \Users_UserStruct $user ) {
+    public function destroyCacheUserTeams( Users_UserStruct $user ) {
         $stmt = $this->_getStatementForCache( self::$_query_user_teams );
 
         return $this->_destroyObjectCache( $stmt,
-                array(
+                [
                         'uid' => $user->uid,
-                )
+                ]
         );
     }
 
@@ -97,25 +97,28 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * Finds an team in user scope.
      *
      * @param int               $id
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
      * @return null|TeamStruct
      */
-    public function findTeamByIdAndUser( $id, \Users_UserStruct $user ) {
+    public function findTeamByIdAndUser( $id, Users_UserStruct $user ) {
         $stmt = $this->_getStatementForCache( self::$_query_team_from_uid_and_id );
+
         return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $user->uid, $id ] )[ 0 ] );
     }
 
     /**
-     * Cache deletion for @see MembershipDao::findTeamByIdAndUser
+     * Cache deletion for @param int $id
      *
-     * @param int               $id
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
      * @return bool|int
+     * @see MembershipDao::findTeamByIdAndUser
+     *
      */
-    public function destroyCacheTeamByIdAndUser( $id, \Users_UserStruct $user ) {
+    public function destroyCacheTeamByIdAndUser( $id, Users_UserStruct $user ) {
         $stmt = $this->_getStatementForCache( self::$_query_team_from_uid_and_id );
+
         return $this->_destroyObjectCache( $stmt, [ $user->uid, $id ] );
     }
 
@@ -134,9 +137,9 @@ class MembershipDao extends \DataAccess_AbstractDao {
          */
         $members = $this->_fetchObject( $stmt,
                 $membershipStruct,
-                array(
+                [
                         'id_team' => $id_team,
-                )
+                ]
         );
 
         if ( $traverse ) {
@@ -146,13 +149,13 @@ class MembershipDao extends \DataAccess_AbstractDao {
                 $membersUIDs[] = $member->uid;
             }
 
-            $users = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUids( $membersUIDs );
+            $users    = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUids( $membersUIDs );
             $metadata = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUidList( $membersUIDs );
 
-            foreach( $members as $member ){
+            foreach ( $members as $member ) {
                 $member->setUser( $users[ $member->uid ] );
 
-                if( isset($metadata[ $member->uid ]) and is_array($metadata[ $member->uid ])){
+                if ( isset( $metadata[ $member->uid ] ) and is_array( $metadata[ $member->uid ] ) ) {
                     $member->setUserMetadata( $metadata[ $member->uid ] );
                 }
             }
@@ -164,19 +167,19 @@ class MembershipDao extends \DataAccess_AbstractDao {
 
 
     /**
-     * Destroy cache for @see MembershipDao::getMemberListByTeamId()
-     *
-     * @param $id_team
+     * Destroy cache for @param $id_team
      *
      * @return bool|int
+     * @see MembershipDao::getMemberListByTeamId()
+     *
      */
     public function destroyCacheForListByTeamId( $id_team ) {
         $stmt = $this->_getStatementForCache( self::$_query_member_list );
 
         return $this->_destroyObjectCache( $stmt,
-                array(
+                [
                         'id_team' => $id_team,
-                )
+                ]
         );
     }
 
@@ -184,7 +187,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @param $uid
      * @param $teamId
      *
-     * @return \Users_UserStruct|null
+     * @return Users_UserStruct|null
      */
     public function deleteUserFromTeam( $uid, $teamId ) {
         $user = ( new Users_UserDao() )->setCacheTTL( 3600 )->getByUid( $uid );
@@ -218,18 +221,18 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @return MembershipStruct[]
      * @throws Exception
      */
-    public function createList( Array $obj_arr ) {
+    public function createList( array $obj_arr ) {
 
         if ( !Database::obtain()->getConnection()->inTransaction() ) {
-            throw new Exception('this method requires to be wrapped in a transaction' ) ;
+            throw new Exception( 'this method requires to be wrapped in a transaction' );
         }
 
-        $obj_arr = Utils::ensure_keys( $obj_arr, array( 'members', 'team' ) );
+        $obj_arr = Utils::ensure_keys( $obj_arr, [ 'members', 'team' ] );
 
         $users = ( new Users_UserDao )->getByEmails( $obj_arr[ 'members' ] );
 
         if ( empty( $users ) ) {
-            return array();
+            return [];
         }
 
         $teamStruct = $obj_arr[ 'team' ];

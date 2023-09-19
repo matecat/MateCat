@@ -22,10 +22,7 @@ class SegmentTranslationIssue {
     public function renderItem( $record ) {
 
         $dao = new EntryCommentDao();
-
         $comments = $dao->findByIssueId( $record->id );
-
-        $record = new EntryStruct( $record->getArrayCopy() );
 
         $row = [
                 'comment'             => $record->comment,
