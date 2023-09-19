@@ -18,7 +18,6 @@ class ConversionHandler {
     protected $source_lang;
     protected $target_lang;
     protected $segmentation_rule;
-    protected $cache_days = 10;
     protected $intDir;
     protected $errDir;
     protected $cookieDir;
@@ -57,34 +56,27 @@ class ConversionHandler {
         //XLIFF Conversion management
         $fileMustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $file_path, $forceXliff, INIT::$FILTERS_ADDRESS );
 
-        switch ( $fileMustBeConverted ) {
+        if( $fileMustBeConverted === false ){
+            return 0;
+        } else if( $fileMustBeConverted === true ){
+            //Continue with conversion
+        }  else {
+            /**
+             * Application misconfiguration.
+             * upload should not be happened, but if we are here, raise an error.
+             * @see upload.class.php
+             */
+            unlink( $file_path );
 
-            case true:
-                //Continue with conversion
-                break;
-            case false:
-                return 0;
-                break;
-            case -1:
-            default:
-                /**
-                 * Application misconfiguration.
-                 * upload should not be happened, but if we are here, raise an error.
-                 * @see upload.class.php
-                 */
-                unlink( $file_path );
+            $this->result->changeCode(ConversionHandlerStatus::MISCONFIGURATION);
+            $this->result->addError('Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+                    AbstractFilesStorage::basename_fix( $this->file_name ));
 
-                $this->result->changeCode(ConversionHandlerStatus::MISCONFIGURATION);
-                $this->result->addError('Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                        AbstractFilesStorage::basename_fix( $this->file_name ));
-
-                return -1;
-                break;
-
+            return -1;
         }
 
-        //compute hash to locate the file in the cache
-        $sha1 = sha1_file( $file_path );
+        //compute hash to locate the file in the cache, add the segmentation rule
+        $sha1 = sha1_file( $file_path ) . ( isset( $this->segmentation_rule ) ? "_" . $this->segmentation_rule : '' );
 
         //initialize path variable
         $cachedXliffPath = false;
@@ -369,20 +361,6 @@ class ConversionHandler {
      */
     public function setSegmentationRule( $segmentation_rule ) {
         $this->segmentation_rule = $segmentation_rule;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCacheDays() {
-        return $this->cache_days;
-    }
-
-    /**
-     * @param int $cache_days
-     */
-    public function setCacheDays( $cache_days ) {
-        $this->cache_days = $cache_days;
     }
 
     /**

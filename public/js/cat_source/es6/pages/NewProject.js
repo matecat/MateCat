@@ -92,7 +92,7 @@ const NewProject = ({
   )
   const [segmentationRule, setSegmentationRule] = useState({
     name: 'General',
-    id: '',
+    id: 'standard',
   })
   const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
   const [getPublicMatches, setGetPublicMatches] = useState(
@@ -396,7 +396,7 @@ const NewProject = ({
   useEffect(() => {
     //TODO: used in main.js, remove
     UI.segmentationRule = segmentationRule.id
-    //UI.UPLOAD_PAGE.restartConversions()
+    UI.UPLOAD_PAGE.restartConversions()
   }, [segmentationRule])
 
   return (

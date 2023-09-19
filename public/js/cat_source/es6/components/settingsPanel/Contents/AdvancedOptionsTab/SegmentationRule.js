@@ -6,7 +6,7 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   const [active, setActive] = useState(segmentationRule)
 
   const options = [
-    {name: 'General', id: '1'},
+    {name: 'General', id: 'standard'},
     {name: 'Patent', id: 'patent'},
     {name: 'Paragraph', id: 'paragraph'},
   ]
