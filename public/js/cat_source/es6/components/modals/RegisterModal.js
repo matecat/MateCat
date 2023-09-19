@@ -7,6 +7,8 @@ import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {registerUser} from '../../api/registerUser'
 
+const PASSWORD_MIN_LENGTH = 12
+
 class RegisterModal extends React.Component {
   constructor(props) {
     super(props)
@@ -108,7 +110,7 @@ class RegisterModal extends React.Component {
       surname: this.state.surname,
       email: this.state.emailAddress,
       password: this.state.password,
-      passwordConfirmation: this.state.password,
+      passwordConfirmation: this.state.password_confirmation,
       wantedUrl: window.location.href,
     })
   }
@@ -242,7 +244,7 @@ class RegisterModal extends React.Component {
             showError={this.state.showErrors}
             onFieldChanged={this.handleFieldChanged('password')}
             type="password"
-            placeholder="Password"
+            placeholder={`Password (Minimum ${PASSWORD_MIN_LENGTH} characters, at least one special character)`}
             name="password"
             errorText={this.errorFor('password')}
             tabindex={4}
@@ -250,7 +252,18 @@ class RegisterModal extends React.Component {
               e.key === 'Enter' ? this.handleSubmitClicked() : null
             }}
           />
-
+          <TextField
+            showError={this.state.showErrors}
+            onFieldChanged={this.handleFieldChanged('password_confirmation')}
+            type="password"
+            placeholder="Confirm Password"
+            name="password_confirmation"
+            errorText={this.errorFor('password_confirmation')}
+            tabindex={5}
+            onKeyPress={(e) => {
+              e.key === 'Enter' ? this.handleSubmitClicked() : null
+            }}
+          />
           <br />
           <input
             type="checkbox"
@@ -258,7 +271,7 @@ class RegisterModal extends React.Component {
             name="terms"
             ref={(input) => (this.textInput = input)}
             onChange={this.changeCheckbox.bind(this)}
-            tabIndex={5}
+            tabIndex={6}
           />
           <label
             className="check-conditions"
@@ -282,7 +295,7 @@ class RegisterModal extends React.Component {
               e.key === 'Enter' ? this.handleSubmitClicked() : null
             }}
             onClick={this.handleSubmitClicked}
-            tabIndex={6}
+            tabIndex={7}
           >
             <span className={'button-loader ' + loaderClass} /> Register Now{' '}
           </a>
@@ -311,7 +324,14 @@ const fieldValidations = [
     'password',
     'Password',
     FormRules.requiredRule,
-    FormRules.minLength(8),
+    FormRules.minLength(PASSWORD_MIN_LENGTH),
+    FormRules.atLeastOneSpecialChar(),
+  ),
+  RuleRunner.ruleRunner(
+    'password_confirmation',
+    'Password confirmation',
+    FormRules.requiredRule,
+    FormRules.mustMatch('password', 'Password'),
   ),
 ]
 

@@ -10,7 +10,7 @@ export const requiredRule = (text) => {
 
 export const mustMatch = (field, fieldName) => {
   return (text, state) => {
-    return state[field] == text ? null : ErrorMessages.mustMatch(fieldName)
+    return state[field] === text ? null : ErrorMessages.mustMatch(fieldName)
   }
 }
 
@@ -20,8 +20,17 @@ export const minLength = (length) => {
   }
 }
 
+export const atLeastOneSpecialChar = (length) => {
+  return (text) => {
+    return text.search(/[ !"#$%&'()*+,-.\/:;<=>?@\[\]^_`{|}~]/) !== -1
+      ? null
+      : ErrorMessages.atLeastOneSpecialChar(length)
+  }
+}
+
 export const checkEmail = (text) => {
-  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  var re =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   if (!re.test(text.trim())) {
     return ErrorMessages.validEmail
   }

@@ -58,6 +58,7 @@ class ConvertedFileModel implements \JsonSerializable
             ConversionHandlerStatus::UPLOAD_ERROR,
             ConversionHandlerStatus::MISCONFIGURATION,
             ConversionHandlerStatus::INVALID_TOKEN,
+            ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
             ConversionHandlerStatus::OCR_WARNING,
             ConversionHandlerStatus::OCR_ERROR,
             ConversionHandlerStatus::GENERIC_ERROR,

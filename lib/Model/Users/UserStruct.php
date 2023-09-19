@@ -48,7 +48,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     }
 
     public function initAuthToken() {
-        $this->confirmation_token = Utils::randomString( 15, true ) ;
+        $this->confirmation_token = Utils::randomString( 50, true ) ;
         $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
     }
 
