@@ -37,7 +37,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @return bool|mixed
      * @throws FileSystemException
      */
-    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
+    public function makeCachePackage( $hash, $lang, $originalPath, $xliffPath ) {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 

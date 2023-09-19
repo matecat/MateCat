@@ -519,6 +519,12 @@ body.analyze {
             width: 32%;
             flex-flow: column;
             height: 100%;
+            &.outsource-translation-disabled {
+              span,
+              a {
+                color: $grey;
+              }
+            }
             a {
               color: #09beec;
               text-decoration: underline;
