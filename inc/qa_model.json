@@ -6,23 +6,23 @@
     "categories": [
       {
         "label": "Style (readability, consistent style and tone)",
-        "code": "STY",
+        "code": "STY"
       }
-      ,{
+    ,{
         "label": "Tag issues (mismatches, whitespaces)",
-        "code": "TAG",
+        "code": "TAG"
       },
       {
         "label": "Translation errors (mistranslation, additions or omissions)",
-        "code": "TER",
+        "code": "TER"
       },
       {
         "label": "Terminology and translation consistency",
-        "code": "TRM",
+        "code": "TRM"
       },
       {
         "label": "Language quality (grammar, punctuation, spelling)",
-        "code": "LQ",
+        "code": "LQ"
       }
     ],
     "severities": [

@@ -49,7 +49,6 @@ class QualitySummaryTable extends React.Component {
         })
       }
     })
-    severities = _.orderBy(severities, ['dqf_id'])
     return {
       severities,
       thereAreSubCategories,
