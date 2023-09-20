@@ -26,28 +26,6 @@ export const getIdAttributeRegEx = () => {
  * @param escapedHTML
  * @returns {string}
  */
-export const unescapeHTML = (escapedHTML) => {
-  try {
-    return (
-      escapedHTML
-        // .replace(/&lt;/g, '<')
-        // .replace(/&gt;/g, '>')
-        // .replace(/&amp;amp;/g, '&')
-        // .replace(/&amp;/g, '&')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&apos;/g, "'")
-        .replace(/&quot;/g, '"')
-    )
-  } catch (e) {
-    return ''
-  }
-}
-
-/**
- *
- * @param escapedHTML
- * @returns {string}
- */
 export const unescapeHTMLinTags = (escapedHTML) => {
   try {
     return escapedHTML
@@ -74,25 +52,6 @@ export const unescapeHTMLRecursive = (escapedHTML) => {
     console.error('Error unescapeHTMLRecursive')
   }
 
-  return escapedHTML
-}
-
-/**
- *
- * @param escapedHTML
- * @returns {string}
- */
-export const unescapeHTMLLeaveTags = (escapedHTML) => {
-  if (escapedHTML) {
-    return (
-      escapedHTML
-        // .replace(/&amp;/g, '&')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&#39;/g, '’')
-        .replace(/&apos;/g, "'")
-        .replace(/&quot;/g, '"')
-    )
-  }
   return escapedHTML
 }
 

@@ -12,7 +12,6 @@ import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
-import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
@@ -402,7 +401,6 @@ const SegmentActions = {
       let source = currentSegment.segment
       let sid = currentSegment.sid
       // Escape html
-      source = unescapeHTMLLeaveTags(source)
       SegmentActions.replaceEditAreaTextContent(sid, source)
       SegmentActions.modifiedTranslation(sid, true)
       SegmentActions.getSegmentsQa(currentSegment)

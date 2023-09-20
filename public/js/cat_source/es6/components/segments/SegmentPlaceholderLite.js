@@ -18,9 +18,7 @@ class SegmentPlaceholderLite extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructureSource)
     // --- Prepare Source
     const plainEditorStateSource = EditorState.createEmpty(decorator)
-    const source = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.segment,
-    )
+    const source = this.props.segment.segment
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
@@ -34,9 +32,8 @@ class SegmentPlaceholderLite extends React.Component {
 
     // --- Prepare Translation
     const plainEditorStateTarget = EditorState.createEmpty(decorator)
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.translation,
-    )
+    const translation = this.props.segment.translation
+
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )

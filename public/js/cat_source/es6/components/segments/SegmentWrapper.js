@@ -26,9 +26,7 @@ class SegmentWrapper extends React.Component {
       )
     }
     let textToDisplay = isTarget ? segment.translation : segment.segment
-    textToDisplay = TagUtils.transformTextForEditor(
-      DraftMatecatUtils.unescapeHTML(textToDisplay),
-    )
+    textToDisplay = TagUtils.transformTextForEditor(textToDisplay)
     return <SimpleEditor text={textToDisplay} isTarget={isTarget} />
   }
 }

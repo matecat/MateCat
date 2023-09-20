@@ -78,9 +78,8 @@ class Editarea extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructure)
     //const decorator = new CompoundDecorator(this.decoratorsStructure);
     // Escape html
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.translation,
-    )
+    const translation = this.props.translation
+
     // If GuessTag is Enabled, clean translation from tags
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
@@ -223,7 +222,7 @@ class Editarea extends React.Component {
       const {editorState} = this.state
       const contentEncoded = DraftMatecatUtils.encodeContent(
         editorState,
-        DraftMatecatUtils.unescapeHTMLLeaveTags(translation),
+        translation,
         this.props.segment.sourceTagMap,
       )
       // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
@@ -1219,9 +1218,7 @@ class Editarea extends React.Component {
     } else if (text) {
       // we're handling an external copy, special chars must be striped from text
       // and we have to add tag for external entities like nbsp or tab
-      let cleanText = DraftMatecatUtils.cleanSegmentString(
-        DraftMatecatUtils.unescapeHTML(text),
-      )
+      let cleanText = DraftMatecatUtils.cleanSegmentString(text)
       // Replace with placeholder
       const nbspSign = tagSignatures['nbsp'].encodedPlaceholder
       const tabSign = tagSignatures['tab'].encodedPlaceholder

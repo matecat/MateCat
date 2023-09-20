@@ -161,8 +161,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
             segment: TagUtils.transformTextFromBe(splittedSourceAr[i]),
-            decodedSource: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+            decodedSource: DraftMatecatUtils.decodeTagsToPlainText(
+              segment.segment,
             ),
             segment_hash: segment.segment_hash,
             original_sid: segment.sid,
@@ -172,16 +172,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             status: status,
             time_to_edit: '0',
             originalDecodedTranslation: translation
-              ? DraftMatecatUtils.unescapeHTML(
-                  TagUtils.transformTextFromBe(translation),
-                )
+              ? TagUtils.transformTextFromBe(translation)
               : '',
             translation: translation
               ? TagUtils.transformTextFromBe(translation)
               : '',
-            decodedTranslation: DraftMatecatUtils.unescapeHTML(
+            decodedTranslation:
               DraftMatecatUtils.decodeTagsToPlainText(translation),
-            ),
             warning: '0',
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -226,14 +223,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.searchParams = this.searchParams
         segment.segment = TagUtils.transformTextFromBe(segment.segment)
         segment.translation = TagUtils.transformTextFromBe(segment.translation)
-        segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
+        segment.originalDecodedTranslation = segment.translation
+        segment.decodedTranslation = DraftMatecatUtils.decodeTagsToPlainText(
           segment.translation,
         )
-        segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
-        )
-        segment.decodedSource = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+        segment.decodedSource = DraftMatecatUtils.decodeTagsToPlainText(
+          segment.segment,
         )
         segment.updatedSource = segment.segment
         segment.openComments = false

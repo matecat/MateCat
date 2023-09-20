@@ -15,8 +15,6 @@ import {
   getXliffRegExpression,
   getIdAttributeRegEx,
   cleanSegmentString,
-  unescapeHTML,
-  unescapeHTMLLeaveTags,
   decodeTagsToPlainText,
   formatText,
   getCharactersCounter,
@@ -52,9 +50,7 @@ const DraftMatecatUtils = {
   cleanSegmentString,
   getXliffRegExpression,
   getIdAttributeRegEx,
-  unescapeHTML,
   unescapeHTMLinTags,
-  unescapeHTMLLeaveTags,
   formatText,
   // Tag Utils
   matchTag,

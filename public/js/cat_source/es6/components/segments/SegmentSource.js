@@ -47,10 +47,8 @@ class SegmentSource extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructure)
     // Initialise EditorState
     const plainEditorState = EditorState.createEmpty(decorator)
-    // Escape html
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.segment,
-    )
+    const translation = this.props.segment.segment
+
     // If GuessTag enabled, clean string from tag
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
@@ -115,9 +113,7 @@ class SegmentSource extends React.Component {
     if (sid === this.props.segment.sid) {
       // Escape html
 
-      const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-        this.props.segment.segment,
-      )
+      const translation = this.props.segment.segment
 
       // If GuessTag enabled, clean string from tag
       const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
