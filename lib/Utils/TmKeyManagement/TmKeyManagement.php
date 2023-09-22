@@ -413,9 +413,9 @@ class TmKeyManagement_TmKeyManagement {
 
                 //remove the uid property
                 if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
-                    $_job_Key->uid_transl = null;
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
                     $_job_Key->uid_rev = null;
+                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+                    $_job_Key->uid_transl = null;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
@@ -434,7 +434,7 @@ class TmKeyManagement_TmKeyManagement {
                             $server_reorder_position[ -1000000 + $i ] = $_job_Key;
                         } else {
                             // Remove the key!!!
-                            //only the owner can remove it's keys
+                            //only the owner can remove its keys
                         }
 
                     }
