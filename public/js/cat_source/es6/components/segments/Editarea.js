@@ -8,6 +8,7 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   CompositeDecorator,
+  SelectionState,
 } from 'draft-js'
 
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -32,6 +33,8 @@ import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
+import getEntities from './utils/DraftMatecatUtils/getEntities'
+import {regexWordDelimiter} from './utils/DraftMatecatUtils/textUtils'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -52,6 +55,148 @@ const typingWordJoiner = matchTypingSequence(
   ],
   2000,
 )
+
+const navArrows = ({
+  editorState,
+  direction = 'right',
+  isShiftPressed = false,
+}) => {
+  const anchorKey = editorState.getSelection().getStartKey()
+  // const currentContent = editorState.getCurrentContent()
+  // const currentBlock = currentContent.getBlockForKey(anchorKey)
+  const selection = editorState.getSelection()
+  const isBackward = selection.getIsBackward()
+
+  const start = selection.getStartOffset()
+  const end = selection.getEndOffset()
+  // console.log('start', start, 'end', end)
+
+  const blockedOffset = isShiftPressed && selection.getAnchorOffset()
+
+  const entities = getEntities(editorState)
+  const entitiesMatched = entities.find((entity) =>
+    direction === 'left'
+      ? start <= entity.end && start > entity.start
+      : end < entity.end && end >= entity.start,
+  )
+
+  if (entitiesMatched) {
+    const pointOffset =
+      direction === 'left' ? entitiesMatched.start : entitiesMatched.end
+
+    const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
+      anchorOffset: blockedOffset ? blockedOffset : pointOffset,
+      focusOffset: pointOffset,
+      focusKey: anchorKey,
+      isBackward,
+    })
+    console.log('@', updatedSelection)
+    return EditorState.forceSelection(editorState, updatedSelection)
+  }
+
+  // if (isCtrlPressed) {
+  //   const text = currentBlock.getText()
+  //   const tempPart =
+  //     direction === 'left'
+  //       ? text.substring(0, start)
+  //       : text.substring(end, text.length - 1)
+
+  //   const part =
+  //     direction === 'left'
+  //       ? tempPart.slice(-1) === ' '
+  //         ? tempPart.substring(0, tempPart.length - 1)
+  //         : tempPart
+  //       : tempPart[0] === ' '
+  //       ? tempPart.substring(1, tempPart.length)
+  //       : tempPart
+
+  //   const regex = new RegExp(regexWordDelimiter, 'g')
+
+  //   console.log(part)
+  //   let matchArr, startIndex, endIndex
+  //   while ((matchArr = regex.exec(part)) !== null) {
+  //     try {
+  //       startIndex = matchArr.index
+  //       endIndex = start + matchArr[0].length
+  //       console.log(startIndex, endIndex)
+  //     } catch (e) {
+  //       return false
+  //     }
+  //   }
+  // }
+}
+
+const adjustCaretPosition = (direction) => {
+  const selection = window.getSelection()
+  if (!selection) return
+
+  const getEntityContainer = (classNameToMatch) => {
+    let container
+
+    const iterate = (node = selection.focusNode) => {
+      if (
+        node &&
+        typeof node.getAttribute === 'function' &&
+        node.getAttribute('contenteditable') === 'true'
+      )
+        return
+
+      if (node?.classList?.contains(classNameToMatch)) {
+        container = node
+      } else if (node) {
+        iterate(node.parentNode)
+      }
+    }
+
+    iterate()
+    return container
+  }
+
+  const getTextNode = (element) => {
+    let textNode
+
+    const iterate = (node = element) => {
+      if (!node) return
+
+      if (node.nodeName === '#text') {
+        textNode = node
+      } else if (node) {
+        iterate(node.firstChild)
+      }
+    }
+
+    iterate()
+    return textNode
+  }
+
+  const entityContainer = getEntityContainer('tag-container')
+  // remove caret inside entity
+  if (entityContainer) {
+    const focusOnElement =
+      direction === 'left'
+        ? entityContainer.previousElementSibling
+        : entityContainer.nextElementSibling
+
+    if (focusOnElement) {
+      const textNode = getTextNode(focusOnElement)
+      console.log('textNode', textNode)
+
+      const offset = direction === 'left' ? textNode.length : 0
+      console.log('#offset', offset, direction)
+
+      // const anchorNode = getTextNode(selection.anchorNode)
+      // const anchorOffset = selection.anchorOffset
+
+      // selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
+
+      const range = document.createRange()
+      range.setStart(textNode, offset)
+      range.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+  }
+}
 
 class Editarea extends React.Component {
   static contextType = SegmentContext
@@ -492,7 +637,7 @@ class Editarea extends React.Component {
     )
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (!prevProps.segment.opened && this.props.segment.opened) {
       const newEditorState = EditorState.moveFocusToEnd(this.state.editorState)
       this.setState({editorState: newEditorState})
@@ -519,6 +664,24 @@ class Editarea extends React.Component {
     ) {
       this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
       this.setNewTranslation(this.props.segment.sid, this.props.translation)
+    }
+
+    // Adjust caret position
+    if (prevState.editorState !== this.state.editorState) {
+      const currentAnchorOffset = this.state.editorState
+        .getSelection()
+        .getFocusOffset()
+      const prevAnchorOffset = prevState.editorState
+        .getSelection()
+        .getFocusOffset()
+
+      if (prevAnchorOffset !== currentAnchorOffset) {
+        console.log('Caret position after update:', currentAnchorOffset)
+        const direction =
+          currentAnchorOffset > prevAnchorOffset ? 'right' : 'left'
+
+        adjustCaretPosition(direction)
+      }
     }
   }
 
@@ -685,21 +848,41 @@ class Editarea extends React.Component {
     ) {
       return 'insert-nbsp-tag' // Chromebook
     } else if (e.key === 'ArrowLeft' && !e.altKey) {
-      if (e.shiftKey) {
-        if (handleCursorMovement(-1, true, config.isTargetRTL))
-          return 'left-nav-shift'
-      } else {
-        if (handleCursorMovement(-1, false, config.isTargetRTL))
-          return 'left-nav'
+      const newEditorState = navArrows({
+        editorState: this.state.editorState,
+        direction: 'left',
+        isCtrlPressed: e.ctrlKey,
+        isShiftPressed: e.shiftKey,
+      })
+      if (newEditorState) {
+        this.setState({editorState: newEditorState})
+        return 'left-nav'
       }
+      // if (e.shiftKey) {
+      //   if (handleCursorMovement(-1, true, config.isTargetRTL))
+      //     return 'left-nav-shift'
+      // } else {
+      //   if (handleCursorMovement(-1, false, config.isTargetRTL))
+      //     return 'left-nav'
+      // }
     } else if (e.key === 'ArrowRight' && !e.altKey) {
-      if (e.shiftKey) {
-        if (handleCursorMovement(1, true, config.isTargetRTL))
-          return 'right-nav-shift'
-      } else {
-        if (handleCursorMovement(1, false, config.isTargetRTL))
-          return 'right-nav'
+      const newEditorState = navArrows({
+        editorState: this.state.editorState,
+        direction: 'right',
+        isCtrlPressed: e.ctrlKey,
+        isShiftPressed: e.shiftKey,
+      })
+      if (newEditorState) {
+        this.setState({editorState: newEditorState})
+        return 'right-nav'
       }
+      // if (e.shiftKey) {
+      //   if (handleCursorMovement(1, true, config.isTargetRTL))
+      //     return 'right-nav-shift'
+      // } else {
+      //   if (handleCursorMovement(1, false, config.isTargetRTL))
+      //     return 'right-nav'
+      // }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
     } else if (
