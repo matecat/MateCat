@@ -126,31 +126,37 @@ const navArrows = ({
   // }
 }
 
-const adjustCaretPosition = (direction) => {
+const getEntityContainer = (classNameToMatch) => {
   const selection = window.getSelection()
   if (!selection) return
 
-  const getEntityContainer = (classNameToMatch) => {
-    let container
+  let container
 
-    const iterate = (node = selection.focusNode) => {
-      if (
-        node &&
-        typeof node.getAttribute === 'function' &&
-        node.getAttribute('contenteditable') === 'true'
-      )
-        return
+  const iterate = (node = selection.focusNode) => {
+    if (
+      node &&
+      typeof node.getAttribute === 'function' &&
+      node.getAttribute('contenteditable') === 'true'
+    )
+      return
 
-      if (node?.classList?.contains(classNameToMatch)) {
-        container = node
-      } else if (node) {
-        iterate(node.parentNode)
-      }
+    if (node?.classList?.contains(classNameToMatch)) {
+      container = node
+    } else if (node) {
+      iterate(node.parentNode)
     }
-
-    iterate()
-    return container
   }
+
+  iterate()
+  return container
+}
+
+const isCaretInsideEntity = () =>
+  typeof getEntityContainer('tag-container') !== 'undefined'
+
+const adjustCaretPosition = (direction) => {
+  const selection = window.getSelection()
+  if (!selection) return
 
   const getTextNode = (element) => {
     let textNode
@@ -184,16 +190,19 @@ const adjustCaretPosition = (direction) => {
       const offset = direction === 'left' ? textNode.length : 0
       console.log('#offset', offset, direction)
 
-      // const anchorNode = getTextNode(selection.anchorNode)
-      // const anchorOffset = selection.anchorOffset
+      const anchorNode = getTextNode(selection.anchorNode)
+      const {anchorOffset, focusOffset} = selection
+      const isSelectingContent = anchorOffset !== focusOffset
 
-      // selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
-
-      const range = document.createRange()
-      range.setStart(textNode, offset)
-      range.collapse(true)
-      selection.removeAllRanges()
-      selection.addRange(range)
+      if (isSelectingContent) {
+        selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
+      } else {
+        const range = document.createRange()
+        range.setStart(textNode, offset)
+        range.collapse(true)
+        selection.removeAllRanges()
+        selection.addRange(range)
+      }
     }
   }
 }
