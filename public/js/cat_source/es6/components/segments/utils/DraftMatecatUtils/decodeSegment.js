@@ -34,9 +34,10 @@ const decodeSegment = (editorState) => {
     totalBlocksLength += block.getLength() + 1
   })
 
-  let decodedSegmentPlain = plainEditorText
-    .replace(/\n/gi, config.lfPlaceholder)
-    .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'), '')
+  let decodedSegmentPlain = plainEditorText.replace(
+    /\n/gi,
+    config.lfPlaceholder,
+  )
 
   return {entitiesRange: entities, decodedSegment: decodedSegmentPlain}
 }

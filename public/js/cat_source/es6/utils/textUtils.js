@@ -336,14 +336,6 @@ const TEXT_UTILS = {
 
     //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
     //used to detect initial and final spaces in html diff
-    _str =
-      String.fromCharCode(parseInt(0x200b, 10)) +
-      _str +
-      String.fromCharCode(parseInt(0x200b, 10))
-    _edit =
-      String.fromCharCode(parseInt(0x200b, 10)) +
-      _edit +
-      String.fromCharCode(parseInt(0x200b, 10))
 
     let diff_obj = this.diffMatchPatch.diff_main(_edit, _str)
     this.diffMatchPatch.diff_cleanupEfficiency(diff_obj)

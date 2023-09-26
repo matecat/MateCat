@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import _ from 'lodash'
 import Immutable from 'immutable'
 import {
@@ -8,7 +8,6 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   CompositeDecorator,
-  SelectionState,
 } from 'draft-js'
 
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -25,7 +24,6 @@ import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
-import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
@@ -33,8 +31,10 @@ import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
-import getEntities from './utils/DraftMatecatUtils/getEntities'
-import {regexWordDelimiter} from './utils/DraftMatecatUtils/textUtils'
+import {
+  checkCaretIsNearEntity,
+  adjustCaretPosition,
+} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -55,157 +55,6 @@ const typingWordJoiner = matchTypingSequence(
   ],
   2000,
 )
-
-const navArrows = ({
-  editorState,
-  direction = 'right',
-  isShiftPressed = false,
-}) => {
-  const anchorKey = editorState.getSelection().getStartKey()
-  // const currentContent = editorState.getCurrentContent()
-  // const currentBlock = currentContent.getBlockForKey(anchorKey)
-  const selection = editorState.getSelection()
-  const isBackward = selection.getIsBackward()
-
-  const start = selection.getStartOffset()
-  const end = selection.getEndOffset()
-  // console.log('start', start, 'end', end)
-
-  const blockedOffset = isShiftPressed && selection.getAnchorOffset()
-
-  const entities = getEntities(editorState)
-  const entitiesMatched = entities.find((entity) =>
-    direction === 'left'
-      ? start <= entity.end && start > entity.start
-      : end < entity.end && end >= entity.start,
-  )
-
-  if (entitiesMatched) {
-    const pointOffset =
-      direction === 'left' ? entitiesMatched.start : entitiesMatched.end
-
-    const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
-      anchorOffset: blockedOffset ? blockedOffset : pointOffset,
-      focusOffset: pointOffset,
-      focusKey: anchorKey,
-      isBackward,
-    })
-    console.log('@', updatedSelection)
-    return EditorState.forceSelection(editorState, updatedSelection)
-  }
-
-  // if (isCtrlPressed) {
-  //   const text = currentBlock.getText()
-  //   const tempPart =
-  //     direction === 'left'
-  //       ? text.substring(0, start)
-  //       : text.substring(end, text.length - 1)
-
-  //   const part =
-  //     direction === 'left'
-  //       ? tempPart.slice(-1) === ' '
-  //         ? tempPart.substring(0, tempPart.length - 1)
-  //         : tempPart
-  //       : tempPart[0] === ' '
-  //       ? tempPart.substring(1, tempPart.length)
-  //       : tempPart
-
-  //   const regex = new RegExp(regexWordDelimiter, 'g')
-
-  //   console.log(part)
-  //   let matchArr, startIndex, endIndex
-  //   while ((matchArr = regex.exec(part)) !== null) {
-  //     try {
-  //       startIndex = matchArr.index
-  //       endIndex = start + matchArr[0].length
-  //       console.log(startIndex, endIndex)
-  //     } catch (e) {
-  //       return false
-  //     }
-  //   }
-  // }
-}
-
-const getEntityContainer = (classNameToMatch) => {
-  const selection = window.getSelection()
-  if (!selection) return
-
-  let container
-
-  const iterate = (node = selection.focusNode) => {
-    if (
-      node &&
-      typeof node.getAttribute === 'function' &&
-      node.getAttribute('contenteditable') === 'true'
-    )
-      return
-
-    if (node?.classList?.contains(classNameToMatch)) {
-      container = node
-    } else if (node) {
-      iterate(node.parentNode)
-    }
-  }
-
-  iterate()
-  return container
-}
-
-const isCaretInsideEntity = () =>
-  typeof getEntityContainer('tag-container') !== 'undefined'
-
-const adjustCaretPosition = (direction) => {
-  const selection = window.getSelection()
-  if (!selection) return
-
-  const getTextNode = (element) => {
-    let textNode
-
-    const iterate = (node = element) => {
-      if (!node) return
-
-      if (node.nodeName === '#text') {
-        textNode = node
-      } else if (node) {
-        iterate(node.firstChild)
-      }
-    }
-
-    iterate()
-    return textNode
-  }
-
-  const entityContainer = getEntityContainer('tag-container')
-  // remove caret inside entity
-  if (entityContainer) {
-    const focusOnElement =
-      direction === 'left'
-        ? entityContainer.previousElementSibling
-        : entityContainer.nextElementSibling
-
-    if (focusOnElement) {
-      const textNode = getTextNode(focusOnElement)
-      console.log('textNode', textNode)
-
-      const offset = direction === 'left' ? textNode.length : 0
-      console.log('#offset', offset, direction)
-
-      const anchorNode = getTextNode(selection.anchorNode)
-      const {anchorOffset, focusOffset} = selection
-      const isSelectingContent = anchorOffset !== focusOffset
-
-      if (isSelectingContent) {
-        selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
-      } else {
-        const range = document.createRange()
-        range.setStart(textNode, offset)
-        range.collapse(true)
-        selection.removeAllRanges()
-        selection.addRange(range)
-      }
-    }
-  }
-}
 
 class Editarea extends React.Component {
   static contextType = SegmentContext
@@ -248,6 +97,9 @@ class Editarea extends React.Component {
       cleanTranslation,
     )
     const {editorState, tagRange} = contentEncoded
+
+    this.keyNavigationNearEntity = createRef()
+    this.isCtrlPressedDuringNavigation = createRef()
 
     this.state = {
       editorState: editorState,
@@ -444,12 +296,7 @@ class Editarea extends React.Component {
       DraftMatecatUtils.decodeSegment(editorState)
     if (decodedSegment !== '') {
       let contentState = editorState.getCurrentContent()
-      let plainText = contentState
-        .getPlainText()
-        .replace(
-          new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'),
-          '',
-        )
+      let plainText = contentState.getPlainText()
       // Match tag without compute tag id
       const currentTagRange = DraftMatecatUtils.matchTagInEditor(
         editorState,
@@ -676,21 +523,33 @@ class Editarea extends React.Component {
     }
 
     // Adjust caret position
-    if (prevState.editorState !== this.state.editorState) {
-      const currentAnchorOffset = this.state.editorState
+    if (
+      prevState.editorState !== this.state.editorState &&
+      this.isCtrlPressedDuringNavigation.current
+    ) {
+      const currentFocusOffset = this.state.editorState
         .getSelection()
         .getFocusOffset()
-      const prevAnchorOffset = prevState.editorState
+      const prevFocusOffset = prevState.editorState
         .getSelection()
         .getFocusOffset()
 
-      if (prevAnchorOffset !== currentAnchorOffset) {
-        console.log('Caret position after update:', currentAnchorOffset)
+      if (prevFocusOffset !== currentFocusOffset) {
+        console.log('Caret position after update:', currentFocusOffset)
         const direction =
-          currentAnchorOffset > prevAnchorOffset ? 'right' : 'left'
+          currentFocusOffset > prevFocusOffset ? 'right' : 'left'
 
         adjustCaretPosition(direction)
       }
+    }
+
+    if (
+      typeof this.keyNavigationNearEntity.current === 'symbol' &&
+      prevState.editorState === this.state.editorState
+    ) {
+      const direction = this.keyNavigationNearEntity.current?.description
+      adjustCaretPosition(direction)
+      this.keyNavigationNearEntity.current = undefined
     }
   }
 
@@ -810,7 +669,6 @@ class Editarea extends React.Component {
 
   myKeyBindingFn = (e) => {
     const {displayPopover} = this.state
-    const {handleCursorMovement} = this
     const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
     if (
       (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
@@ -856,42 +714,17 @@ class Editarea extends React.Component {
       isChromeBook
     ) {
       return 'insert-nbsp-tag' // Chromebook
-    } else if (e.key === 'ArrowLeft' && !e.altKey) {
-      const newEditorState = navArrows({
+    } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
+      const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
+
+      const isCaretNearEntity = checkCaretIsNearEntity({
         editorState: this.state.editorState,
-        direction: 'left',
-        isCtrlPressed: e.ctrlKey,
-        isShiftPressed: e.shiftKey,
+        direction,
       })
-      if (newEditorState) {
-        this.setState({editorState: newEditorState})
-        return 'left-nav'
-      }
-      // if (e.shiftKey) {
-      //   if (handleCursorMovement(-1, true, config.isTargetRTL))
-      //     return 'left-nav-shift'
-      // } else {
-      //   if (handleCursorMovement(-1, false, config.isTargetRTL))
-      //     return 'left-nav'
-      // }
-    } else if (e.key === 'ArrowRight' && !e.altKey) {
-      const newEditorState = navArrows({
-        editorState: this.state.editorState,
-        direction: 'right',
-        isCtrlPressed: e.ctrlKey,
-        isShiftPressed: e.shiftKey,
-      })
-      if (newEditorState) {
-        this.setState({editorState: newEditorState})
-        return 'right-nav'
-      }
-      // if (e.shiftKey) {
-      //   if (handleCursorMovement(1, true, config.isTargetRTL))
-      //     return 'right-nav-shift'
-      // } else {
-      //   if (handleCursorMovement(1, false, config.isTargetRTL))
-      //     return 'right-nav'
-      // }
+
+      if (isCaretNearEntity)
+        this.keyNavigationNearEntity.current = Symbol(direction)
+      this.isCtrlPressedDuringNavigation.current = e.ctrlKey
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
     } else if (
@@ -950,14 +783,6 @@ class Editarea extends React.Component {
       case 'enter-press':
         acceptTagMenuSelection()
         return 'handled'
-      case 'left-nav':
-        return 'handled'
-      case 'left-nav-shift':
-        return 'handled'
-      case 'right-nav':
-        return 'handled'
-      case 'right-nav-shift':
-        return 'handled'
       case 'insert-tab-tag':
         insertTagAtSelection('tab')
         return 'handled'
@@ -1008,25 +833,6 @@ class Editarea extends React.Component {
         this.onCompositionStopDebounced()
       },
     )
-  }
-
-  handleCursorMovement = (step, shift = false, isRTL = false) => {
-    const {editorState} = this.state
-    step = isRTL ? step * -1 : step
-    // When in composition mode avoid setState to let editor commit its "composition state"
-    if (editorState.isInCompositionMode()) return true
-
-    const newState = DraftMatecatUtils.moveCursorJumpEntity(
-      editorState,
-      step,
-      shift,
-      isRTL,
-    )
-    if (newState) {
-      this.setState({editorState: newState})
-      return true
-    }
-    return false
   }
 
   onMouseUpEvent = () => {
@@ -1576,19 +1382,10 @@ class Editarea extends React.Component {
       // Selection
       const latestEditorState = this.editor._latestEditorState
       const selectionState = latestEditorState.getSelection()
-      const currentBlockText = latestEditorState
-        .getCurrentContent()
-        .getBlockForKey(selectionState.getFocusKey())
-        .getText()
-      const zwsp = String.fromCharCode(parseInt('200B', 16))
-      const selectedTextAfter = currentBlockText.slice(end, end + 1)
-      const selectedTextBefore = currentBlockText.slice(start - 1, start)
-      const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0
-      const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0
 
       let newSelection = selectionState.merge({
-        anchorOffset: start - addZwspExtraStepBefore, // -1 is to catch the zero-width space char placed before every entity
-        focusOffset: end + addZwspExtraStepAfter, // +1 is to catch the zero-width space char placed after every entity
+        anchorOffset: start,
+        focusOffset: end,
       })
       const newEditorState = EditorState.forceSelection(
         editorState,

@@ -20,43 +20,13 @@ const insertTag = (tagSuggestion, editorState, triggerText = null) => {
   const entityKey = contentState.getLastCreatedEntityKey()
   const inlinestyle = editorState.getCurrentInlineStyle()
 
-  // Insert ZWSP char before entity
+  // Insert entity
   let replacedContent = Modifier.replaceText(
     contentState,
-    selectionState,
-    '​',
-    inlinestyle,
-    null,
-  )
-
-  // move selection forward by one char
-  selectionState = selectionState.merge({
-    anchorOffset: selectionState.anchorOffset + 1,
-    focusOffset: selectionState.anchorOffset + 1,
-  })
-
-  // Insert entity
-  replacedContent = Modifier.insertText(
-    replacedContent,
     selectionState,
     data.placeholder,
     inlinestyle,
     entityKey,
-  )
-
-  // Move selection after entity
-  selectionState = selectionState.merge({
-    anchorOffset: selectionState.anchorOffset + data.placeholder.length,
-    focusOffset: selectionState.anchorOffset + data.placeholder.length,
-  })
-
-  // Insert ZWSP after entity
-  replacedContent = Modifier.insertText(
-    replacedContent,
-    selectionState,
-    '​',
-    inlinestyle,
-    null,
   )
 
   return EditorState.push(editorState, replacedContent, 'insert-characters')
