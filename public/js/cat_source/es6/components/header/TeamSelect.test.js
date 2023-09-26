@@ -27,7 +27,6 @@ window.config = {
   hostpath: 'https://dev.matecat.com',
 }
 
-require('../../components')
 require('../../../../common')
 require('../../../../login')
 require('../../../../user_store')

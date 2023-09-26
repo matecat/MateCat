@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined, size} from 'lodash'
 import Immutable from 'immutable'
 
 import TagUtils from '../../utils/tagUtils'
@@ -149,10 +149,10 @@ class SegmentFooterTabConflicts extends React.Component {
     return (
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||
-      ((!_.isUndefined(nextProps.segment.alternatives) ||
-        !_.isUndefined(this.props.segment.alternatives)) &&
-        ((!_.isUndefined(nextProps.segment.alternatives) &&
-          _.isUndefined(this.props.segment.alternatives)) ||
+      ((!isUndefined(nextProps.segment.alternatives) ||
+        !isUndefined(this.props.segment.alternatives)) &&
+        ((!isUndefined(nextProps.segment.alternatives) &&
+          isUndefined(this.props.segment.alternatives)) ||
           !Immutable.fromJS(this.props.segment.alternatives).equals(
             Immutable.fromJS(nextProps.segment.alternatives),
           )))
@@ -163,7 +163,7 @@ class SegmentFooterTabConflicts extends React.Component {
     let html
     if (
       this.props.segment.alternatives &&
-      _.size(this.props.segment.alternatives) > 0
+      size(this.props.segment.alternatives) > 0
     ) {
       html = this.renderAlternatives(this.props.segment.alternatives)
       return (

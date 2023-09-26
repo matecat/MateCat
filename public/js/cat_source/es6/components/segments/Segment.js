@@ -1,6 +1,7 @@
-import _ from 'lodash'
+import {forEach, isUndefined} from 'lodash'
 import Immutable from 'immutable'
 import React from 'react'
+import {union} from 'lodash/array'
 
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
@@ -267,7 +268,7 @@ class Segment extends React.Component {
       let classes = this.state.segment_classes.slice()
       if (newClass.indexOf(' ') > 0) {
         let classesSplit = newClass.split(' ')
-        _.forEach(classesSplit, function (item) {
+        forEach(classesSplit, function (item) {
           if (classes.indexOf(item) < 0) {
             classes.push(item)
           }
@@ -298,7 +299,7 @@ class Segment extends React.Component {
       }
       if (className.indexOf(' ') > 0) {
         let classesSplit = className.split(' ')
-        _.forEach(classesSplit, function (item) {
+        forEach(classesSplit, function (item) {
           removeFn(item)
         })
       } else {
@@ -351,12 +352,12 @@ class Segment extends React.Component {
     return classes
   }
   isSplitted() {
-    return !_.isUndefined(this.props.segment.split_group)
+    return !isUndefined(this.props.segment.split_group)
   }
 
   isFirstOfSplit() {
     return (
-      !_.isUndefined(this.props.segment.split_group) &&
+      !isUndefined(this.props.segment.split_group) &&
       this.props.segment.split_group.indexOf(this.props.segment.sid) === 0
     )
   }
@@ -411,7 +412,7 @@ class Segment extends React.Component {
 
   checkSegmentClasses() {
     let classes = this.state.segment_classes.slice()
-    classes = _.union(classes, this.createSegmentClasses())
+    classes = union(classes, this.createSegmentClasses())
     classes = this.checkSegmentStatus(classes)
     if (classes.indexOf('muted') > -1 && classes.indexOf('editor') > -1) {
       let indexEditor = classes.indexOf('editor')

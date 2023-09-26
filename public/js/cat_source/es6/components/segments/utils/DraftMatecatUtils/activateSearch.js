@@ -1,5 +1,4 @@
-import _ from 'lodash'
-
+import {cloneDeep} from 'lodash'
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component'
 import * as DraftMatecatConstants from './editorConstants'
 import SearchUtils from '../../../header/cattol/search/searchUtils'
@@ -87,7 +86,7 @@ const activateSearch = (
   }
 
   let search = text
-  let occurrencesClone = _.cloneDeep(occurrencesInSegment)
+  let occurrencesClone = cloneDeep(occurrencesInSegment)
   return generateSearchDecorator(
     search,
     occurrencesClone,
