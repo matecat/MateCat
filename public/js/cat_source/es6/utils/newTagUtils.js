@@ -1,0 +1,140 @@
+import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/newtagModel'
+import {Base64} from 'js-base64'
+
+export const transformTagsToHtml = (text) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, decodeNeeded, style, placeholder, regex} =
+        tagSignatures[key]
+      if (placeholderRegex) {
+        let globalRegex = new RegExp(
+          placeholderRegex.source,
+          placeholderRegex.flags + 'g',
+        )
+        text = text.replace(globalRegex, (match, text) => {
+          let tagText = decodeNeeded ? Base64.decode(text) : match
+          return '<span class="tag ' + style + '">' + tagText + '</span>'
+        })
+      } else if (regex) {
+        let globalRegex = new RegExp(regex)
+        text = text.replace(globalRegex, (match) => {
+          let tagText = placeholder ? placeholder : match
+          return '<span class="tag ' + style + '">' + tagText + '</span>'
+        })
+      }
+    }
+    text = matchTag(text)
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
+export const transformTagsToText = (text) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, decodeNeeded, placeholder, regex} =
+        tagSignatures[key]
+      if (placeholderRegex) {
+        let globalRegex = new RegExp(
+          placeholderRegex.source,
+          placeholderRegex.flags + 'g',
+        )
+        text = text.replace(globalRegex, (match, text) => {
+          return decodeNeeded ? decodeHtmlEntities(Base64.decode(text)) : match
+        })
+      } else if (regex) {
+        let globalRegex = new RegExp(regex)
+        text = text.replace(globalRegex, (match) => {
+          return placeholder ? placeholder : match
+        })
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
+// Associate tag of type g with integer id
+const matchTag = (tx) => {
+  const openRegex = tagSignatures['g'].regex
+  const closeRegex = tagSignatures['gCl'].regex
+  try {
+    let openingMatchArr
+    let openings = []
+    while ((openingMatchArr = openRegex.exec(tx)) !== null) {
+      const openingGTag = {}
+      openingGTag.length = openingMatchArr[0].length
+      openingGTag.id = openingMatchArr[1]
+      openingGTag.offset = openingMatchArr.index
+      openings.push(openingGTag)
+    }
+
+    let closingMatchArr
+    let closings = []
+    while ((closingMatchArr = closeRegex.exec(tx)) !== null) {
+      const closingGTag = {}
+      closingGTag.length = closingMatchArr[0].length
+      closingGTag.offset = closingMatchArr.index
+      closings.push(closingGTag)
+    }
+
+    openings.sort((a, b) => {
+      return b.offset - a.offset
+    })
+    closings.sort((a, b) => {
+      return a.offset - b.offset
+    })
+
+    closings.forEach((closingTag) => {
+      let i = 0,
+        notFound = true
+      while (i < openings.length && notFound) {
+        if (closingTag.offset > openings[i].offset && !openings[i].closeTagId) {
+          notFound = !notFound
+          openings[i].closeTagId = true
+          // Closing tag has no ID, so take the one available inside open tag
+          closingTag.id = openings[i].id
+        }
+        i++
+      }
+      // display every orphan closure as '?'
+      if (notFound) closingTag.id = '?'
+    })
+
+    tx = tx.replace(openRegex, function () {
+      return (
+        String.fromCharCode(parseInt('200B', 16)) +
+        openings.pop().id +
+        String.fromCharCode(parseInt('200B', 16))
+      )
+    })
+
+    tx = tx.replace(closeRegex, function () {
+      return (
+        String.fromCharCode(parseInt('200B', 16)) +
+        closings.shift().id +
+        String.fromCharCode(parseInt('200B', 16))
+      )
+    })
+  } catch (e) {
+    console.error('Error matching tag g in TagUtils.matchTag function')
+  }
+  return tx
+}
+
+export const decodeHtmlEntities = (text) => {
+  return text
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+}
+export const encodeHtmlEntities = (text) => {
+  return text
+    .replace(/</g, '&lt;')
+    .replace(/</g, '&gt;')
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&apos;')
+}

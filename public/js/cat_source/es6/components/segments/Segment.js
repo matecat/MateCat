@@ -705,7 +705,6 @@ class Segment extends React.Component {
         locked,
         removeSelection: this.removeSelection.bind(this),
         openSegment: this.openSegment,
-        isReviewImproved: this.props.isReviewImproved,
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
         multiMatchLangs,

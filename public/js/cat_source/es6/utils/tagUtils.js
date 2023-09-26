@@ -68,14 +68,6 @@ const TAGS_UTILS = {
     return tx
   },
 
-  transformPlaceholdersAndTagsNew: function (text) {
-    text = this.decodePlaceholdersToTextSimple(text || '')
-    // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
-    text = this.matchTag(this.decodeHtmlInTag(text))
-
-    return text
-  },
-
   // Replace old function decodePlaceholdersToText
   decodePlaceholdersToTextSimple: function (str) {
     return str
@@ -140,43 +132,6 @@ const TAGS_UTILS = {
       .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
       .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
   },
-
-  /*transformTextForLockTags: function ( tx ) {
-        let brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
-        let brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
-
-
-        tx = tx.replace( /&amp;/gi, "&" )
-            .replace( /<span/gi, "<_plh_" )
-            .replace( /<\/span/gi, "</_plh_" )
-            .replace( /&lt;/gi, "<" )
-            .replace( /(<(ph.*?)\s*?\/&gt;)/gi, brTx1 )
-            .replace( /(<(g|x|bx|ex|bpt|ept|ph.*?|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1 )
-            .replace( /(<(ph.*?)\sid[^<“]*?\/>)/gi, brTx1 )
-            .replace( /</gi, "&lt;" )
-            .replace( /\&lt;_plh_/gi, "<span" )
-            .replace( /\&lt;\/_plh_/gi, "</span" )
-            .replace( /\&lt;lxqwarning/gi, "<lxqwarning" )
-            .replace( /\&lt;\/lxqwarning/gi, "</lxqwarning" )
-            .replace( /\&lt;div\>/gi, "<div>" )
-            .replace( /\&lt;\/div\>/gi, "</div>" )
-            .replace( /\&lt;br\>/gi, "<br />" )
-            .replace( /\&lt;br \/>/gi, "<br />" )
-            .replace( /\&lt;mark /gi, "<mark " )
-            .replace( /\&lt;\/mark/gi, "</mark" )
-            .replace( /\&lt;ins /gi, "<ins " ) // For translation conflicts tab
-            .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
-            .replace( /\&lt;del /gi, "<del " ) // For translation conflicts tab
-            .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
-            .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
-            .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
-
-        tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
-        tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
-        tx = this.transformTagsWithHtmlAttribute(tx);
-        // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
-        return tx;
-    },*/
 
   // Replace old function transformTextForLockTags
   decodeHtmlInTag: function (tx, isRTL = false) {
