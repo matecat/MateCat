@@ -228,7 +228,7 @@ let SSE = {
   },
 }
 
-let NOTIFICATIONS = {
+const NOTIFICATIONS = {
   start: function () {
     SSE.init()
     this.source = SSE.getSource('notifications')
@@ -273,4 +273,4 @@ let NOTIFICATIONS = {
   },
 }
 
-module.exports = NOTIFICATIONS
+export default NOTIFICATIONS

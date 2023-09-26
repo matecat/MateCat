@@ -1,7 +1,7 @@
 import {createRoot} from 'react-dom/client'
 import React from 'react'
 import $ from 'jquery'
-import _ from 'lodash'
+import {filter} from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import CattolConstants from '../constants/CatToolConstants'
@@ -184,7 +184,7 @@ let CatToolActions = {
       $('#quality-report-button').attr('data-revised', true)
     }
     let reviseCount = config.isReview
-      ? _.filter(
+      ? filter(
           stats.revises,
           (rev) => rev.revision_number === config.revisionNumber,
         )

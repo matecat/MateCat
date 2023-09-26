@@ -896,7 +896,7 @@ class Utils {
 
         return $shortedLanguage[0];
     }
-    
+
     /**
      * This escape is need by
      * javascript JSON.parse() function

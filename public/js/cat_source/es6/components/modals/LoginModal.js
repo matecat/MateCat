@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import update from 'immutability-helper'
-import _ from 'lodash'
+import {size} from 'lodash'
 import React from 'react'
 
 import TextField from '../common/TextField'
@@ -164,7 +164,7 @@ class LoginModal extends React.Component {
     if (!(config.pluggable && config.pluggable.auth_disable_email)) {
       let generalErrorHtml = ''
       let buttonSignInClass =
-        _.size(this.state.validationErrors) === 0 ? '' : 'disabled'
+        size(this.state.validationErrors) === 0 ? '' : 'disabled'
       if (this.state.generalError.length) {
         generalErrorHtml = (
           <div style={{color: 'red', fontSize: '14px'}} className="text">

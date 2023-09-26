@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import _ from 'lodash'
+import {each} from 'lodash'
 
 import LXQ from '../../../utils/lxq.main'
 
@@ -13,7 +13,7 @@ class LexiqaTooltipInfo extends Component {
   buildTooltipError = () => {
     let messages = this.props.messages
     let html = []
-    _.each(messages, (message, i) => {
+    each(messages, (message, i) => {
       html.push(
         <div className="tooltip-error-container" key={i}>
           <span className="tooltip-error-category">{message.msg}</span>

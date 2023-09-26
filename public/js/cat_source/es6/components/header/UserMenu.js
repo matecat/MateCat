@@ -3,6 +3,7 @@ import IconUserLogout from '../icons/IconUserLogout'
 import {logoutUser} from '../../api/logoutUser'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 export const UserMenu = ({user, userLogged}) => {
   const dropdownProfile = useRef()
