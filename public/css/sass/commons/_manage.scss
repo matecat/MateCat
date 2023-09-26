@@ -10,9 +10,10 @@ body.manage {
 
 div#manage-container {
   overflow: auto;
-  height: 100%;
+  height: calc(100% - 60px);
   position: relative;
   padding-top: 40px;
+  scroll-behavior: smooth;
 }
 
 .ui.icon.button {

@@ -43,7 +43,7 @@ export const CrossLanguagesMatches = ({
     if (!activeLang1) {
       setActiveLang2()
     }
-  }, activeLang1)
+  }, [activeLang1])
   return (
     <div className="options-box multi-match">
       <h3>Cross-language Matches</h3>

@@ -484,7 +484,7 @@ class Segment extends React.Component {
   }
 
   handleKeyDown(event) {
-    if (event.code === 'Escape') {
+    if (event.code === 'Escape' && !config.targetIsCJK) {
       if (
         this.props.segment.opened &&
         !this.props.segment.openComments &&

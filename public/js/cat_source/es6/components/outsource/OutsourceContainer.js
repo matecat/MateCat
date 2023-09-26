@@ -47,11 +47,10 @@ class OutsourceContainer extends React.Component {
 
   handleDocumentClick(evt) {
     evt.stopPropagation()
-    const area = ReactDOM.findDOMNode(this.container)
 
     if (
       this.container &&
-      !area.contains(evt.target) &&
+      !this.container.contains(evt.target) &&
       !$(evt.target).hasClass('open-view-more') &&
       !$(evt.target).hasClass('outsource-goBack') &&
       !$(evt.target).hasClass('faster') &&
@@ -78,30 +77,17 @@ class OutsourceContainer extends React.Component {
     window.removeEventListener('keydown', this._handleEscKey)
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     let self = this
     if (this.props.openOutsource || this.props.showTranslatorBox) {
       setTimeout(function () {
         window.addEventListener('click', self.handleDocumentClick)
         window.addEventListener('keydown', self._handleEscKey)
-        $('html, body').animate(
-          {
-            scrollTop: $(self.container).offset().top - 55,
-          },
-          500,
-        )
+        self.container.scrollIntoView({block: 'center'})
       }, 500)
     } else {
       window.removeEventListener('click', self.handleDocumentClick)
       window.removeEventListener('keydown', self._handleEscKey)
-      if (prevProps.openOutsource) {
-        $('html, body').animate(
-          {
-            scrollTop: $(self.container).offset().top - 200,
-          },
-          200,
-        )
-      }
     }
     $(this.languageTooltip).popup()
   }

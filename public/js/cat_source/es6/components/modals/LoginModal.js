@@ -196,7 +196,7 @@ class LoginModal extends React.Component {
             type="password"
             showError={this.state.showErrors}
             onFieldChanged={this.handleFieldChanged('password')}
-            placeholder="Password (minimum 8 characters)"
+            placeholder="Password"
             name="password"
             errorText={this.errorFor('password')}
             tabindex={2}
@@ -285,12 +285,6 @@ const fieldValidations = [
     'Email address',
     FormRules.requiredRule,
     FormRules.checkEmail,
-  ),
-  RuleRunner.ruleRunner(
-    'password',
-    'Password',
-    FormRules.requiredRule,
-    FormRules.minLength(8),
   ),
 ]
 

@@ -61,7 +61,6 @@ class RedeemableProject
             ( new Jobs_JobDao() )->updateOwner( $this->project, $this->user );
         }
 
-
         $this->clear();
     }
 
