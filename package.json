@@ -76,5 +76,5 @@
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.2"
   },
-  "version": "2.20.105"
+  "version": "2.20.106"
 }
