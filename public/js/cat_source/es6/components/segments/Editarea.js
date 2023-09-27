@@ -35,7 +35,6 @@ import {
   checkCaretIsNearEntity,
   adjustCaretPosition,
   isCaretInsideEntity,
-  moveCaretOutsideEntity,
   checkCaretIsNearZwsp,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
@@ -296,7 +295,12 @@ class Editarea extends React.Component {
       DraftMatecatUtils.decodeSegment(editorState)
     if (decodedSegment !== '') {
       let contentState = editorState.getCurrentContent()
-      let plainText = contentState.getPlainText()
+      let plainText = contentState
+        .getPlainText()
+        .replace(
+          new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'),
+          '',
+        )
       // Match tag without compute tag id
       const currentTagRange = DraftMatecatUtils.matchTagInEditor(
         editorState,
@@ -709,7 +713,7 @@ class Editarea extends React.Component {
     ) {
       const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
 
-      // check caret is near zwsp cahr and move caret position
+      // check caret is near zwsp char and move caret position
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
         direction,
