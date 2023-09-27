@@ -15,6 +15,7 @@ const createNewEntitiesFromMap = (
   plainText = '',
   sourceTagMap,
 ) => {
+  const excludeReplaceZWSP = ['nbsp']
   // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
   const tagRange = matchTag(plainText) // absolute offset
   // Apply each entity to the block where it belongs
@@ -50,8 +51,19 @@ const createNewEntitiesFromMap = (
       const start = tagEntity.offset - slicedLength
       const end = start + encodedText.length
       offsetWithEntities.push({start, tag: tagEntity})
-      plainText = plainText.slice(0, start) + placeholder + plainText.slice(end)
-      slicedLength += end - start - placeholder.length
+      if (!excludeReplaceZWSP.includes(tagName)) {
+        plainText =
+          plainText.slice(0, start) +
+          '​' +
+          placeholder +
+          '​' +
+          plainText.slice(end) //String.fromCharCode(parseInt('200B',16))
+        slicedLength += end - start - (placeholder.length + 2) // add 2 ZWSP
+      } else {
+        plainText =
+          plainText.slice(0, start) + placeholder + plainText.slice(end)
+        slicedLength += end - start - placeholder.length // add 2 ZWSP
+      }
     }
   })
 
@@ -87,11 +99,17 @@ const createNewEntitiesFromMap = (
 
     offsetWithEntities.forEach((tagEntity) => {
       const {start, tag} = tagEntity
-
+      const extraPositionZWSP = excludeReplaceZWSP.includes(
+        tagEntity.tag.data.name,
+      )
+        ? 0
+        : 1
       if (
-        start < maxCharsInBlocks &&
-        start + tag.data.placeholder.length <= maxCharsInBlocks &&
-        start >= maxCharsInBlocks - contentBlock.getLength() &&
+        start + extraPositionZWSP < maxCharsInBlocks &&
+        start + extraPositionZWSP + tag.data.placeholder.length <=
+          maxCharsInBlocks &&
+        start + extraPositionZWSP >=
+          maxCharsInBlocks - contentBlock.getLength() &&
         !excludedTagsType.includes(tag.data.name)
       ) {
         // Clone tag
@@ -100,9 +118,11 @@ const createNewEntitiesFromMap = (
         // Each block start with offset = 0 so we have to adapt selection
         let selectionState = SelectionState.createEmpty(contentBlock.getKey())
         selectionState = selectionState.merge({
-          anchorOffset: start - (maxCharsInBlocks - blockLength),
+          anchorOffset:
+            start + extraPositionZWSP - (maxCharsInBlocks - blockLength),
           focusOffset:
             start +
+            extraPositionZWSP +
             tag.data.placeholder.length -
             (maxCharsInBlocks - blockLength),
         })

@@ -1,3 +1,4 @@
+import {EditorState, SelectionState} from 'draft-js'
 import getEntities from './getEntities'
 
 const getEntityContainer = (classNameToMatch) => {
@@ -49,13 +50,77 @@ export const checkCaretIsNearEntity = ({editorState, direction = 'right'}) => {
   const end = selection.getEndOffset()
 
   const entities = getEntities(editorState)
-  const entitiesMatched = entities.find((entity) =>
+  const entityMatched = entities.find((entity) =>
     direction === 'left'
       ? start <= entity.end && start > entity.start
       : end < entity.end && end >= entity.start,
   )
 
-  return typeof entitiesMatched !== 'undefined'
+  return entityMatched
+    ? moveCaretOutsideEntity({editorState, entity: entityMatched, direction})
+    : undefined
+}
+
+export const checkCaretIsNearZwsp = ({editorState, direction = 'right'}) => {
+  const selection = editorState.getSelection()
+  const contentState = editorState.getCurrentContent()
+  const focusKey = selection.getFocusKey()
+  const currentBlock = contentState.getBlockForKey(focusKey)
+
+  const start = selection.getStartOffset()
+  const end = selection.getEndOffset()
+
+  if (start !== end) return
+
+  const point = {
+    ...(direction === 'left'
+      ? {start: start - 1, end: start}
+      : {start, end: start + 1}),
+  }
+  const zwsp = String.fromCharCode(parseInt('200B', 16))
+  const textPortion = currentBlock.getText().slice(point.start, point.end)
+
+  if (textPortion === zwsp) {
+    const pointOffset = direction === 'left' ? start - 1 : start + 1
+
+    const updatedSelection = SelectionState.createEmpty(focusKey).merge({
+      anchorOffset: pointOffset,
+      focusOffset: pointOffset,
+      focusKey,
+    })
+    return EditorState.forceSelection(editorState, updatedSelection)
+  }
+}
+
+export const moveCaretOutsideEntity = ({
+  editorState,
+  entity,
+  direction = 'right',
+}) => {
+  const selection = editorState.getSelection()
+  const focusKey = selection.getFocusKey()
+
+  const start = selection.getStartOffset()
+  const end = selection.getEndOffset()
+
+  if (start === end) {
+    const pointOffset = direction === 'left' ? entity.start : entity.end
+
+    const updatedSelection = SelectionState.createEmpty(focusKey).merge({
+      anchorOffset: pointOffset,
+      focusOffset: pointOffset,
+      focusKey,
+    })
+    const updatedState = EditorState.forceSelection(
+      editorState,
+      updatedSelection,
+    )
+    const updatedStateNearZwsp = checkCaretIsNearZwsp({
+      editorState: updatedState,
+      direction,
+    })
+    return updatedStateNearZwsp ? updatedStateNearZwsp : updatedState
+  }
 }
 
 export const isCaretInsideEntity = () => {

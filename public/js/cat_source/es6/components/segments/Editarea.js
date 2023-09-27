@@ -1,4 +1,4 @@
-import React, {createRef} from 'react'
+import React from 'react'
 import _ from 'lodash'
 import Immutable from 'immutable'
 import {
@@ -35,6 +35,8 @@ import {
   checkCaretIsNearEntity,
   adjustCaretPosition,
   isCaretInsideEntity,
+  moveCaretOutsideEntity,
+  checkCaretIsNearZwsp,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
@@ -98,9 +100,6 @@ class Editarea extends React.Component {
       cleanTranslation,
     )
     const {editorState, tagRange} = contentEncoded
-
-    this.keyNavigationNearEntity = createRef()
-    this.isCtrlPressedDuringNavigation = createRef()
 
     this.state = {
       editorState: editorState,
@@ -524,10 +523,7 @@ class Editarea extends React.Component {
     }
 
     // Adjust caret position
-    if (
-      prevState.editorState !== this.state.editorState &&
-      this.isCtrlPressedDuringNavigation.current
-    ) {
+    if (prevState.editorState !== this.state.editorState) {
       const currentFocusOffset = this.state.editorState
         .getSelection()
         .getFocusOffset()
@@ -542,15 +538,6 @@ class Editarea extends React.Component {
 
         adjustCaretPosition(direction)
       }
-    }
-
-    if (
-      typeof this.keyNavigationNearEntity.current === 'symbol' &&
-      prevState.editorState === this.state.editorState
-    ) {
-      const direction = this.keyNavigationNearEntity.current.description
-      adjustCaretPosition(direction)
-      this.keyNavigationNearEntity.current = undefined
     }
   }
 
@@ -715,17 +702,34 @@ class Editarea extends React.Component {
       isChromeBook
     ) {
       return 'insert-nbsp-tag' // Chromebook
-    } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
+    } else if (
+      (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
+      !e.ctrlKey &&
+      !e.altKey
+    ) {
       const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
 
-      const isCaretNearEntity = checkCaretIsNearEntity({
+      // check caret is near zwsp cahr and move caret position
+      const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
         direction,
       })
 
-      if (isCaretNearEntity)
-        this.keyNavigationNearEntity.current = Symbol(direction)
-      this.isCtrlPressedDuringNavigation.current = e.ctrlKey
+      // check caret is near entity and move caret position
+      const updatedStateNearEntity = checkCaretIsNearEntity({
+        editorState: updatedStateNearZwsp
+          ? updatedStateNearZwsp
+          : this.state.editorState,
+        direction,
+      })
+      if (updatedStateNearEntity || updatedStateNearZwsp) {
+        this.setState({
+          editorState: updatedStateNearEntity
+            ? updatedStateNearEntity
+            : updatedStateNearZwsp,
+        })
+        return `${direction}-nav`
+      }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
     } else if (
@@ -783,6 +787,10 @@ class Editarea extends React.Component {
         return 'handled'
       case 'enter-press':
         acceptTagMenuSelection()
+        return 'handled'
+      case 'left-nav':
+        return 'handled'
+      case 'right-nav':
         return 'handled'
       case 'insert-tab-tag':
         insertTagAtSelection('tab')
@@ -1396,10 +1404,19 @@ class Editarea extends React.Component {
       // Selection
       const latestEditorState = this.editor._latestEditorState
       const selectionState = latestEditorState.getSelection()
+      const currentBlockText = latestEditorState
+        .getCurrentContent()
+        .getBlockForKey(selectionState.getFocusKey())
+        .getText()
+      const zwsp = String.fromCharCode(parseInt('200B', 16))
+      const selectedTextAfter = currentBlockText.slice(end, end + 1)
+      const selectedTextBefore = currentBlockText.slice(start - 1, start)
+      const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0
+      const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0
 
       let newSelection = selectionState.merge({
-        anchorOffset: start,
-        focusOffset: end,
+        anchorOffset: start - addZwspExtraStepBefore, // -1 is to catch the zero-width space char placed before every entity
+        focusOffset: end + addZwspExtraStepAfter, // +1 is to catch the zero-width space char placed after every entity
       })
       const newEditorState = EditorState.forceSelection(
         editorState,
