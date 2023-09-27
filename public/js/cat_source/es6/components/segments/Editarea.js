@@ -34,6 +34,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import {
   checkCaretIsNearEntity,
   adjustCaretPosition,
+  isCaretInsideEntity,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
@@ -547,7 +548,7 @@ class Editarea extends React.Component {
       typeof this.keyNavigationNearEntity.current === 'symbol' &&
       prevState.editorState === this.state.editorState
     ) {
-      const direction = this.keyNavigationNearEntity.current?.description
+      const direction = this.keyNavigationNearEntity.current.description
       adjustCaretPosition(direction)
       this.keyNavigationNearEntity.current = undefined
     }
@@ -947,6 +948,19 @@ class Editarea extends React.Component {
       activeDecorators,
     } = this.state
     const {closePopover} = this
+
+    // check caret is inside entity and restore previous editorState
+    if (isCaretInsideEntity()) {
+      this.setState(
+        () => ({
+          editorState: prevEditorState,
+        }),
+        () => {
+          this.onCompositionStopDebounced()
+        },
+      )
+      return
+    }
 
     const contentChanged =
       editorState.getCurrentContent().getPlainText() !==

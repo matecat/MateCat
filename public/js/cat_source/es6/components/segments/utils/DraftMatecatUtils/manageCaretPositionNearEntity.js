@@ -25,6 +25,23 @@ const getEntityContainer = (classNameToMatch) => {
   return container
 }
 
+const getTextNode = (element) => {
+  let textNode
+
+  const iterate = (node = element) => {
+    if (!node) return
+
+    if (node.nodeName === '#text') {
+      textNode = node
+    } else if (node) {
+      iterate(node.firstChild)
+    }
+  }
+
+  iterate()
+  return textNode
+}
+
 export const checkCaretIsNearEntity = ({editorState, direction = 'right'}) => {
   const selection = editorState.getSelection()
 
@@ -41,29 +58,21 @@ export const checkCaretIsNearEntity = ({editorState, direction = 'right'}) => {
   return typeof entitiesMatched !== 'undefined'
 }
 
-export const isCaretInsideEntity = () =>
-  typeof getEntityContainer('tag-container') !== 'undefined'
+export const isCaretInsideEntity = () => {
+  const entityContainer = getEntityContainer('tag-container')
+  if (entityContainer) {
+    const selection = window.getSelection()
+    const textNode = getTextNode(entityContainer)
+    const {focusOffset} = selection
+    if (focusOffset > 0 && focusOffset < textNode.length) return true
+  }
+
+  return false
+}
 
 export const adjustCaretPosition = (direction) => {
   const selection = window.getSelection()
   if (!selection) return
-
-  const getTextNode = (element) => {
-    let textNode
-
-    const iterate = (node = element) => {
-      if (!node) return
-
-      if (node.nodeName === '#text') {
-        textNode = node
-      } else if (node) {
-        iterate(node.firstChild)
-      }
-    }
-
-    iterate()
-    return textNode
-  }
 
   const entityContainer = getEntityContainer('tag-container')
 
