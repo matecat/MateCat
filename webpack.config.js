@@ -1,9 +1,11 @@
 const path = require('path')
+const webpack = require('webpack')
 const {globSync} = require('glob')
 const terser = require('terser')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const WebpackConcatPlugin = require('webpack-concat-files-plugin')
+const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
@@ -81,6 +83,19 @@ const matecatConfig = async ({env}, {mode}) => {
   if (pluginsAllPagesFiles.length > 0) {
     entryPoints.allPagesPlugins = pluginsAllPagesFiles
   }
+  //look for webpack config files
+  const files = globSync('./plugins/*/plugin.webpack.config.js', {
+    ignore: './plugins/**/node_modules/**',
+  })
+  console.log('Plugins file', files)
+
+  let pluginConfig = {}
+  files.forEach((file) => {
+    const data = fs.readFileSync(file)
+    const config = eval(data.toString('utf8'))
+    pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
+  })
+
   return {
     target: 'web',
     watchOptions: {
@@ -241,6 +256,12 @@ const matecatConfig = async ({env}, {mode}) => {
       errorPage: [path.resolve(__dirname, 'public/css/sass/upload-main.scss')],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        'process.env._ENV': JSON.stringify(config.ENV),
+      }),
+      !isDev &&
+        pluginConfig.sentryWebpackPlugin &&
+        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
       new WebpackConcatPlugin({
         bundles: [
           {
