@@ -169,10 +169,9 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
             VALUES ";
 
         $bind_values   = [];
-        $index = 1;
 
-        foreach ($structs as $struct){
-            $isLast = ($index === count($structs));
+        foreach ($structs as $index => $struct){
+            $isLast = ($index === (count($structs)-1));
 
             $sql .= "(?,?,?,?,?,?,?,?,?)";
 
