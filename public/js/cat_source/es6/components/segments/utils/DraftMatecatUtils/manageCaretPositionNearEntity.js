@@ -1,6 +1,8 @@
 import {EditorState, SelectionState} from 'draft-js'
 import getEntities from './getEntities'
 
+const ZWSP = String.fromCharCode(parseInt('200B', 16))
+
 const getEntityContainer = (classNameToMatch) => {
   const selection = window.getSelection()
   if (!selection) return
@@ -77,10 +79,9 @@ export const checkCaretIsNearZwsp = ({editorState, direction = 'right'}) => {
       ? {start: start - 1, end: start}
       : {start, end: start + 1}),
   }
-  const zwsp = String.fromCharCode(parseInt('200B', 16))
-  const textPortion = currentBlock.getText().slice(point.start, point.end)
+  const textPortion = currentBlock.getText().substring(point.start, point.end)
 
-  if (textPortion === zwsp) {
+  if (textPortion === ZWSP) {
     const pointOffset = direction === 'left' ? start - 1 : start + 1
 
     const updatedSelection = SelectionState.createEmpty(focusKey).merge({
@@ -161,8 +162,21 @@ export const adjustCaretPosition = (direction) => {
       if (isSelectingContent) {
         selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
       } else {
+        const charAtOffset =
+          direction === 'left'
+            ? textNode.textContent.slice(textNode.length - 1)
+            : textNode.textContent[0]
+        const isOffsetNearZwsp = charAtOffset === ZWSP
+
         const range = document.createRange()
-        range.setStart(textNode, offset)
+        range.setStart(
+          textNode,
+          isOffsetNearZwsp
+            ? direction === 'left'
+              ? offset - 1
+              : offset + 1
+            : offset,
+        )
         range.collapse(true)
         selection.removeAllRanges()
         selection.addRange(range)

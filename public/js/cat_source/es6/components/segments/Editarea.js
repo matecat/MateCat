@@ -706,11 +706,7 @@ class Editarea extends React.Component {
       isChromeBook
     ) {
       return 'insert-nbsp-tag' // Chromebook
-    } else if (
-      (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
-      !e.ctrlKey &&
-      !e.altKey
-    ) {
+    } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
       const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
 
       // check caret is near zwsp char and move caret position
