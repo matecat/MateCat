@@ -77,5 +77,5 @@
     "whatwg-fetch": "^3.6.2",
     "@sentry/webpack-plugin": "2.7.1"
   },
-  "version": "2.20.97"
+  "version": "2.20.106"
 }
