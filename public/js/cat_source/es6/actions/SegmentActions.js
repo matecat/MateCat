@@ -1361,6 +1361,8 @@ const SegmentActions = {
           target: trg_content,
           source: src_content,
           keys: jobTmKeys.map(({key}) => key),
+        }).catch((error) => {
+          console.log('Glossary check failed', error)
         })
       }
     })

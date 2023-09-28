@@ -1,3 +1,4 @@
+import React from 'react'
 import {find} from 'lodash'
 
 const SearchHighlight = (props) => {
