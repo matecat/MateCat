@@ -1,4 +1,4 @@
-import {EditorState, Modifier, SelectionState} from 'draft-js'
+import {EditorState, Modifier} from 'draft-js'
 
 const insertTag = (tagSuggestion, editorState, triggerText = null) => {
   let contentState = editorState.getCurrentContent()

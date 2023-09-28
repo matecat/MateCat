@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import _ from 'lodash'
 import Immutable from 'immutable'
 import {
@@ -99,6 +99,8 @@ class Editarea extends React.Component {
       cleanTranslation,
     )
     const {editorState, tagRange} = contentEncoded
+
+    this.isShiftPressedOnNavigation = createRef()
 
     this.state = {
       editorState: editorState,
@@ -540,7 +542,10 @@ class Editarea extends React.Component {
         const direction =
           currentFocusOffset > prevFocusOffset ? 'right' : 'left'
 
-        adjustCaretPosition(direction)
+        adjustCaretPosition({
+          direction,
+          isShiftPressed: this.isShiftPressedOnNavigation.current,
+        })
       }
     }
   }
@@ -707,12 +712,14 @@ class Editarea extends React.Component {
     ) {
       return 'insert-nbsp-tag' // Chromebook
     } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
+      this.isShiftPressedOnNavigation.current = e.shiftKey
       const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
 
       // check caret is near zwsp char and move caret position
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
         direction,
+        isShiftPressed: e.shiftKey,
       })
 
       // check caret is near entity and move caret position
@@ -721,7 +728,9 @@ class Editarea extends React.Component {
           ? updatedStateNearZwsp
           : this.state.editorState,
         direction,
+        isShiftPressed: e.shiftKey,
       })
+
       if (updatedStateNearEntity || updatedStateNearZwsp) {
         this.setState({
           editorState: updatedStateNearEntity

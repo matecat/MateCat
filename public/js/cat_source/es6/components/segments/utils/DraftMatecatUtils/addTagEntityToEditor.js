@@ -15,16 +15,46 @@ const addTagEntityToEditor = (editorState, tag, selectionState = null) => {
   const entityKey = contentState.getLastCreatedEntityKey()
   const inlinestyle = editorState.getCurrentInlineStyle()
 
-  // Sostituisce il contenuto
-  const replacedContent = Modifier.replaceText(
+  // Insert ZWSP char before entity
+  let replacedContent = Modifier.replaceText(
     contentState,
+    selectionState,
+    '​',
+    inlinestyle,
+    null,
+  )
+
+  // move selection forward by one char
+  selectionState = selectionState.merge({
+    anchorOffset: selectionState.anchorOffset + 1,
+    focusOffset: selectionState.anchorOffset + 1,
+  })
+
+  // Insert entity
+  replacedContent = Modifier.insertText(
+    replacedContent,
     selectionState,
     data.placeholder,
     inlinestyle,
     entityKey,
   )
 
-  return EditorState.push(editorState, replacedContent, 'apply-entity')
+  // Move selection after entity
+  selectionState = selectionState.merge({
+    anchorOffset: selectionState.anchorOffset + data.placeholder.length,
+    focusOffset: selectionState.anchorOffset + data.placeholder.length,
+  })
+
+  // Insert ZWSP after entity
+  replacedContent = Modifier.insertText(
+    replacedContent,
+    selectionState,
+    '​',
+    inlinestyle,
+    null,
+  )
+
+  return EditorState.push(editorState, replacedContent, 'insert-characters')
 }
 
 export default addTagEntityToEditor

@@ -45,10 +45,50 @@ const getTextNode = (element) => {
   return textNode
 }
 
-export const checkCaretIsNearEntity = ({editorState, direction = 'right'}) => {
+export const checkCaretIsNearZwsp = ({
+  editorState,
+  direction = 'right',
+  isShiftPressed = false,
+}) => {
+  const selection = editorState.getSelection()
+  const contentState = editorState.getCurrentContent()
+  const anchorKey = selection.getStartKey()
+  const focusKey = selection.getFocusKey()
+  const isBackward = direction === 'left'
+  const currentBlock = contentState.getBlockForKey(focusKey)
+
+  const start = selection.getFocusOffset()
+
+  const blockedOffset = isShiftPressed && selection.getAnchorOffset()
+
+  const point = {
+    ...(direction === 'left'
+      ? {start: start - 1, end: start}
+      : {start, end: start + 1}),
+  }
+
+  const textPortion = currentBlock.getText().substring(point.start, point.end)
+  if (textPortion === ZWSP) {
+    const pointOffset = direction === 'left' ? start - 1 : start + 1
+
+    const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
+      anchorOffset: blockedOffset ? blockedOffset : pointOffset,
+      focusOffset: pointOffset,
+      focusKey: anchorKey,
+      isBackward,
+    })
+    return EditorState.forceSelection(editorState, updatedSelection)
+  }
+}
+
+export const checkCaretIsNearEntity = ({
+  editorState,
+  direction = 'right',
+  isShiftPressed = false,
+}) => {
   const selection = editorState.getSelection()
 
-  const start = selection.getStartOffset()
+  const start = selection.getFocusOffset()
   const end = selection.getEndOffset()
 
   const entities = getEntities(editorState)
@@ -59,69 +99,42 @@ export const checkCaretIsNearEntity = ({editorState, direction = 'right'}) => {
   )
 
   return entityMatched
-    ? moveCaretOutsideEntity({editorState, entity: entityMatched, direction})
+    ? moveCaretOutsideEntity({
+        editorState,
+        entity: entityMatched,
+        direction,
+        isShiftPressed,
+      })
     : undefined
-}
-
-export const checkCaretIsNearZwsp = ({editorState, direction = 'right'}) => {
-  const selection = editorState.getSelection()
-  const contentState = editorState.getCurrentContent()
-  const focusKey = selection.getFocusKey()
-  const currentBlock = contentState.getBlockForKey(focusKey)
-
-  const start = selection.getStartOffset()
-  const end = selection.getEndOffset()
-
-  if (start !== end) return
-
-  const point = {
-    ...(direction === 'left'
-      ? {start: start - 1, end: start}
-      : {start, end: start + 1}),
-  }
-  const textPortion = currentBlock.getText().substring(point.start, point.end)
-
-  if (textPortion === ZWSP) {
-    const pointOffset = direction === 'left' ? start - 1 : start + 1
-
-    const updatedSelection = SelectionState.createEmpty(focusKey).merge({
-      anchorOffset: pointOffset,
-      focusOffset: pointOffset,
-      focusKey,
-    })
-    return EditorState.forceSelection(editorState, updatedSelection)
-  }
 }
 
 export const moveCaretOutsideEntity = ({
   editorState,
   entity,
   direction = 'right',
+  isShiftPressed = false,
 }) => {
   const selection = editorState.getSelection()
-  const focusKey = selection.getFocusKey()
+  const anchorKey = selection.getStartKey()
+  const isBackward = direction === 'left'
 
-  const start = selection.getStartOffset()
-  const end = selection.getEndOffset()
+  const blockedOffset = isShiftPressed && selection.getAnchorOffset()
 
-  if (start === end) {
-    const pointOffset = direction === 'left' ? entity.start : entity.end
+  const pointOffset = direction === 'left' ? entity.start : entity.end
 
-    const updatedSelection = SelectionState.createEmpty(focusKey).merge({
-      anchorOffset: pointOffset,
-      focusOffset: pointOffset,
-      focusKey,
-    })
-    const updatedState = EditorState.forceSelection(
-      editorState,
-      updatedSelection,
-    )
-    const updatedStateNearZwsp = checkCaretIsNearZwsp({
-      editorState: updatedState,
-      direction,
-    })
-    return updatedStateNearZwsp ? updatedStateNearZwsp : updatedState
-  }
+  const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
+    anchorOffset: blockedOffset ? blockedOffset : pointOffset,
+    focusOffset: pointOffset,
+    focusKey: anchorKey,
+    isBackward,
+  })
+  const updatedState = EditorState.forceSelection(editorState, updatedSelection)
+  const updatedStateNearZwsp = checkCaretIsNearZwsp({
+    editorState: updatedState,
+    direction,
+    isShiftPressed,
+  })
+  return updatedStateNearZwsp ? updatedStateNearZwsp : updatedState
 }
 
 export const isCaretInsideEntity = () => {
@@ -136,7 +149,7 @@ export const isCaretInsideEntity = () => {
   return false
 }
 
-export const adjustCaretPosition = (direction) => {
+export const adjustCaretPosition = ({direction, isShiftPressed}) => {
   const selection = window.getSelection()
   if (!selection) return
 
@@ -151,15 +164,10 @@ export const adjustCaretPosition = (direction) => {
 
     if (focusOnElement) {
       const textNode = getTextNode(focusOnElement)
-      console.log('textNode', textNode)
       const offset = direction === 'left' ? textNode.length : 0
-      console.log('#offset', offset, direction)
+      const {anchorOffset, anchorNode} = selection
 
-      const anchorNode = getTextNode(selection.anchorNode)
-      const {anchorOffset, focusOffset} = selection
-      const isSelectingContent = anchorOffset !== focusOffset
-
-      if (isSelectingContent) {
+      if (isShiftPressed) {
         selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
       } else {
         const charAtOffset =
@@ -169,14 +177,7 @@ export const adjustCaretPosition = (direction) => {
         const isOffsetNearZwsp = charAtOffset === ZWSP
 
         const range = document.createRange()
-        range.setStart(
-          textNode,
-          isOffsetNearZwsp
-            ? direction === 'left'
-              ? offset - 1
-              : offset + 1
-            : offset,
-        )
+        range.setStart(textNode, offset)
         range.collapse(true)
         selection.removeAllRanges()
         selection.addRange(range)
