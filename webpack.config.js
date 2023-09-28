@@ -100,7 +100,6 @@ const matecatConfig = async ({env}, {mode}) => {
       config.BUILD_NUMBER,
     )
   }
-  console.log('@@@@@@@@@@@@@@@@', pluginConfig)
   return {
     target: 'web',
     watchOptions: {
