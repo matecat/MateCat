@@ -382,6 +382,7 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'segment' ]    = $contributionStruct->getContexts()->segment;
         $_config[ 'source' ]     = $jobStruct->source;
         $_config[ 'target' ]     = $targetLang;
+        $_config[ 'uid' ]        = ($contributionStruct->user !== null ? $contributionStruct->user->uid : 0);
 
         $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
 
