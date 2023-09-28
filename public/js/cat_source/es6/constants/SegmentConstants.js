@@ -4,7 +4,7 @@
 
 import keyMirror from 'keymirror'
 
-module.exports = keyMirror({
+const SegmentConstants = keyMirror({
   RENDER_SEGMENTS: null,
   ADD_SEGMENTS: null,
   ADD_SEGMENT_CLASS: null,
@@ -115,3 +115,4 @@ module.exports = keyMirror({
   SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG: null,
   OPEN_GLOSSARY_FORM_PREFILL: null,
 })
+export default SegmentConstants

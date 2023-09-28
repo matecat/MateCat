@@ -1,5 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
+import TagUtils from '../../utils/tagUtils'
 /**
  * Get contributions
  *

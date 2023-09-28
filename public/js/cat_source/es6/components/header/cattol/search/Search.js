@@ -1,5 +1,8 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
+import {cloneDeep} from 'lodash/lang'
+import {find, map} from 'lodash/collection'
+import {findIndex, remove} from 'lodash/array'
 
 import CattolConstants from '../../../../constants/CatToolConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
@@ -42,7 +45,7 @@ class Search extends React.Component {
       searchResultsDictionary: {},
       featuredSearchResult: null,
     }
-    this.state = _.cloneDeep(this.defaultState)
+    this.state = cloneDeep(this.defaultState)
 
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleCancelClick = this.handleCancelClick.bind(this)
@@ -94,7 +97,7 @@ class Search extends React.Component {
       isSelectedTag: false,
     })
     setTimeout(() => {
-      !_.isUndefined(this.state.occurrencesList[data.featuredSearchResult]) &&
+      !isUndefined(this.state.occurrencesList[data.featuredSearchResult]) &&
         SegmentActions.openSegment(
           this.state.occurrencesList[data.featuredSearchResult],
         )
@@ -126,13 +129,13 @@ class Search extends React.Component {
 
   updateAfterReplace(sid) {
     let {searchResults} = this.state
-    let itemReplaced = _.find(searchResults, (item) => item.id === sid)
+    let itemReplaced = find(searchResults, (item) => item.id === sid)
     let total = this.state.total
     total--
     if (itemReplaced.occurrences.length === 1) {
-      _.remove(searchResults, (item) => item.id === sid)
+      remove(searchResults, (item) => item.id === sid)
     }
-    let newResultArray = _.map(searchResults, (item) => item.id)
+    let newResultArray = map(searchResults, (item) => item.id)
     const searchObject =
       SearchUtils.updateSearchObjectAfterReplace(newResultArray)
     this.setState({
@@ -204,7 +207,7 @@ class Search extends React.Component {
     setTimeout(() => {
       CatToolActions.closeSubHeader()
       SegmentActions.removeSearchResultToSegments()
-      this.setState(_.cloneDeep(this.defaultState))
+      this.setState(cloneDeep(this.defaultState))
     })
   }
 
@@ -213,7 +216,7 @@ class Search extends React.Component {
     // SearchUtils.clearSearchMarkers();
     this.resetStatusFilter()
     setTimeout(() => {
-      this.setState(_.cloneDeep(this.defaultState))
+      this.setState(cloneDeep(this.defaultState))
       SegmentActions.removeSearchResultToSegments()
     })
   }
@@ -314,7 +317,7 @@ class Search extends React.Component {
   }
 
   handleStatusChange(value) {
-    let search = _.cloneDeep(this.state.search)
+    let search = cloneDeep(this.state.search)
     search['selectStatus'] = value
     if (value === 'APPROVED-2') {
       search.revisionNumber = 2
@@ -412,7 +415,7 @@ class Search extends React.Component {
     var html = ''
     const {featuredSearchResult, searchReturn, occurrencesList, searchResults} =
       this.state
-    const segmentIndex = _.findIndex(
+    const segmentIndex = findIndex(
       searchResults,
       (item) => item.id === occurrencesList[featuredSearchResult],
     )

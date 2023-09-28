@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {debounce} from 'lodash'
 
 import Filters from './FilterSegments'
 import FileDetails from './FileDetails'
@@ -36,7 +36,7 @@ class SegmentsDetails extends React.Component {
 
   scrollDebounceFn() {
     let self = this
-    return _.debounce(function () {
+    return debounce(function () {
       self.onScroll()
     }, 200)
   }

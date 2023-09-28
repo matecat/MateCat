@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
@@ -236,7 +236,7 @@ class SegmentsFilter extends React.Component {
   }
 
   setFilter(data, state) {
-    if (_.isUndefined(state)) {
+    if (isUndefined(state)) {
       this.setState({
         filteredCount: data.count,
         filtering: true,
