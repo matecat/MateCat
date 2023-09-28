@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import CommentsStore from '../../stores/CommentsStore'
 import SegmentActions from '../../actions/SegmentActions'
@@ -22,7 +22,7 @@ class SegmentsCommentsIcon extends React.Component {
   }
 
   updateComments(sid) {
-    if (_.isUndefined(sid) || sid === this.context.segment.sid) {
+    if (isUndefined(sid) || sid === this.context.segment.sid) {
       const comments = CommentsStore.getCommentsCountBySegment(
         this.context.segment.original_sid,
       )

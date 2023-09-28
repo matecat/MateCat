@@ -29,9 +29,9 @@ APP.getFilenameFromUploadedFiles = function () {
   return files.substr(7)
 }
 
-UI.UPLOAD_PAGE = {}
+let UPLOAD_PAGE = {}
 
-$.extend(UI.UPLOAD_PAGE, {
+$.extend(UPLOAD_PAGE, {
   init: function () {
     this.addEvents()
   },
@@ -64,7 +64,7 @@ $.extend(UI.UPLOAD_PAGE, {
 })
 
 APP.restartConversion = function () {
-  UI.UPLOAD_PAGE.restartConversions()
+  UPLOAD_PAGE.restartConversions()
 }
 
 APP.checkGDriveEvents = function () {
@@ -238,7 +238,7 @@ APP.postProjectCreation = function (d) {
 }
 
 $(document).ready(function () {
-  UI.UPLOAD_PAGE.init()
+  UPLOAD_PAGE.init()
   //TODO: REMOVE
   let currentTargetLangs = localStorage.getItem('currentTargetLang')
   let currentSourceLangs = localStorage.getItem('currentSourceLang')
@@ -264,6 +264,7 @@ $(document).ready(function () {
       conversionEnabled={!!config.conversionEnabled}
       formatsNumber={config.formats_number}
       googleDriveEnabled={!!config.googleDriveEnabled}
+      restartConversions={UPLOAD_PAGE.restartConversions}
     />,
   )
 

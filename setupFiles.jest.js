@@ -7,4 +7,3 @@ global.config = {
 }
 
 require('./public/js/lib/semantic.min.js')
-require('./public/js/lib/diff_match_patch.js')

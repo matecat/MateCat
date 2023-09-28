@@ -1,12 +1,12 @@
 import React from 'react'
-import _ from 'lodash'
+import {debounce} from 'lodash'
 
 class SearchInput extends React.Component {
   constructor(props) {
     super(props)
     this.onKeyPressEvent = this.onKeyPressEvent.bind(this)
     let self = this
-    this.filterByNameDebounce = _.debounce(function (e) {
+    this.filterByNameDebounce = debounce(function (e) {
       self.filterByName(e)
     }, 500)
   }
