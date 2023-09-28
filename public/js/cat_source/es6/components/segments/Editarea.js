@@ -32,7 +32,6 @@ import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
-import getEntities from './utils/DraftMatecatUtils/getEntities'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -957,38 +956,6 @@ class Editarea extends React.Component {
 
     // if not on an entity, remove any previous selection highlight
     const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState)
-
-    if (entityKey) {
-      const {start, blockKey} = getEntities(prevEditorState).find(
-        (entity) => entity.entityKey === entityKey,
-      )
-      console.log(
-        getEntities(prevEditorState).find(
-          (entity) => entity.entityKey === entityKey,
-        ),
-      )
-
-      const selection = prevEditorState.getSelection()
-      const newSelection = selection.merge({
-        anchorKey: blockKey,
-        anchorOffset: start - 1,
-        focusOffset: start - 1,
-        focusKey: blockKey,
-      })
-      this.setState(
-        () => ({
-          editorState: EditorState.forceSelection(
-            prevEditorState,
-            newSelection,
-          ),
-        }),
-        () => {
-          this.onCompositionStopDebounced()
-        },
-      )
-      return
-    }
-
     let newActiveDecorators = {...activeDecorators}
     // select no tag
     if (!entityKey)
