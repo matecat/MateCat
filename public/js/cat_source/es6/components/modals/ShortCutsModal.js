@@ -1,5 +1,5 @@
-import _ from 'lodash'
 import React from 'react'
+import {each} from 'lodash/collection'
 
 import Shortcuts from '../../utils/shortcuts'
 
@@ -24,9 +24,9 @@ class ShortCutsModal extends React.Component {
   getShortcutsHtml() {
     let html = []
     let label = UI.isMac ? 'mac' : 'standard'
-    _.each(Shortcuts, function (elem, c) {
+    each(Shortcuts, function (elem, c) {
       let events = []
-      _.each(elem.events, function (item, z) {
+      each(elem.events, function (item, z) {
         let keys = item.keystrokes[label].split('+')
         let keysHtml = []
         keys.forEach(function (key, i) {

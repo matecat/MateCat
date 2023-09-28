@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import {SelectionState, Modifier, EditorState} from 'draft-js'
 import TextUtils from '../../../../utils/textUtils'
 /**
@@ -39,8 +39,8 @@ const replaceOccurrences = (editorState, oldText, newText, index) => {
         focusOffset: end,
       })
       if (
-        _.isUndefined(index) ||
-        (!_.isUndefined(index) && indexToReplace === index)
+        isUndefined(index) ||
+        (!isUndefined(index) && indexToReplace === index)
       ) {
         selectionsToReplace.push(blockSelection)
       }

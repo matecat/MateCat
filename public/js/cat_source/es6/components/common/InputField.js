@@ -1,7 +1,6 @@
 import React from 'react'
-import _ from 'lodash'
-
 import PropTypes from 'prop-types'
+import {debounce} from 'lodash/function'
 
 const styleInput = {
   fontFamily: 'calibri, Arial, Helvetica, sans-serif',
@@ -32,7 +31,7 @@ export default class InputField extends React.Component {
     this.state = {
       value: this.props.value ? this.props.value : '',
     }
-    this.debouncedOnChange = _.debounce(() => {
+    this.debouncedOnChange = debounce(() => {
       this.props.onFieldChanged(this.state.value)
     }, 500)
   }

@@ -133,4 +133,14 @@ abstract class BaseFeature implements IBaseFeature {
      */
     public static function loadRoutes( Klein $klein ){}
 
+    /**
+     *
+     * Return a list of files in build path of a plugin
+     * @return array|false
+     */
+    public function getBuildFiles() {
+        $path = realpath( self::getPluginBasePath() . '/../static/build' );
+        return scandir($path);
+    }
+
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'
 import TagUtils from '../../utils/tagUtils'
@@ -78,7 +78,7 @@ class SegmentTarget extends React.Component {
     let issues = []
     if (this.props.segment.versions) {
       this.props.segment.versions.forEach(function (version) {
-        if (!_.isEmpty(version.issues)) {
+        if (!isEmpty(version.issues)) {
           issues = issues.concat(version.issues)
         }
       })
@@ -260,7 +260,7 @@ class SegmentTarget extends React.Component {
   }
 
   autoFillTagsInTarget(sid) {
-    if (_.isUndefined(sid) || sid === this.props.segment.sid) {
+    if (isUndefined(sid) || sid === this.props.segment.sid) {
       let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment)
       //lock tags and run again getWarnings
       setTimeout(() => {

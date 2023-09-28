@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {forEach} from 'lodash'
 
 import CommonUtils from '../es6/utils/commonUtils'
 import SegmentActions from '../es6/actions/SegmentActions'
@@ -114,9 +114,9 @@ if (ReviewExtended.enabled()) {
     getSegmentRevisionIssues(segment, revisionNumber) {
       let issues = []
       if (segment.versions && segment.versions.length > 0) {
-        _.forEach(segment.versions, (version) => {
+        forEach(segment.versions, (version) => {
           if (version.issues && version.issues.length > 0) {
-            _.forEach(version.issues, (issue) => {
+            forEach(version.issues, (issue) => {
               if (issue.revision_number === revisionNumber) {
                 issues.push(issue)
               }

@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import Immutable from 'immutable'
 
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -35,7 +35,7 @@ class SegmentFooterTabMatches extends React.Component {
     // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
       if (
-        _.isUndefined(this.segment) ||
+        isUndefined(this.segment) ||
         this.segment === '' ||
         this.translation === ''
       )
@@ -103,7 +103,7 @@ class SegmentFooterTabMatches extends React.Component {
         )
       }
 
-      if (!_.isUndefined(this.tm_properties)) {
+      if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
       }
       let matchToInsert = self.processMatchCallback(item)
@@ -236,10 +236,10 @@ class SegmentFooterTabMatches extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      ((!_.isUndefined(nextProps.segment.contributions) ||
-        !_.isUndefined(this.props.segment.contributions)) &&
-        ((!_.isUndefined(nextProps.segment.contributions) &&
-          _.isUndefined(this.props.segment.contributions)) ||
+      ((!isUndefined(nextProps.segment.contributions) ||
+        !isUndefined(this.props.segment.contributions)) &&
+        ((!isUndefined(nextProps.segment.contributions) &&
+          isUndefined(this.props.segment.contributions)) ||
           !Immutable.fromJS(this.props.segment.contributions).equals(
             Immutable.fromJS(nextProps.segment.contributions),
           ))) ||
@@ -398,7 +398,7 @@ class SegmentFooterTabMatches extends React.Component {
         {clientConnected ? (
           <>
             <div className="overflow">
-              {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+              {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
                 matchesHtml
               ) : (
                 <span className="loader loader_on" />

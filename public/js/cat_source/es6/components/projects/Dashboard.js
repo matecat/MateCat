@@ -1,7 +1,8 @@
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {isEmpty} from 'lodash'
+import {debounce} from 'lodash/function'
 import ReactDOM, {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
@@ -16,7 +17,6 @@ import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
-import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
 import NotificationBox from '../notificationsComponent/NotificationBox'
@@ -133,7 +133,7 @@ class Dashboard extends React.Component {
     })
   }
 
-  scrollDebounceFn = () => _.debounce(() => this.handleScroll(), 300)
+  scrollDebounceFn = () => debounce(() => this.handleScroll(), 300)
 
   handleScroll = () => {
     let scrollableHeight =
@@ -318,7 +318,7 @@ class Dashboard extends React.Component {
       filter.status = status
     }
     this.Search.filter = $.extend(this.Search.filter, filter)
-    if (!_.isEmpty(this.Search.filter)) {
+    if (!isEmpty(this.Search.filter)) {
       this.Search.currentPage = 1
     }
 
