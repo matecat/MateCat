@@ -44,7 +44,7 @@ import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
-import manageCaretPositionNearEntity from './manageCaretPositionNearEntity'
+import * as manageCaretPositionNearEntity from './manageCaretPositionNearEntity'
 
 const DraftMatecatUtils = {
   // Text utils
