@@ -14,6 +14,7 @@ const CatToolConstants = keyMirror({
   RELOAD_QR: null,
   STORE_SEARCH_RESULT: null,
   CLIENT_CONNECT: null,
+  CLIENT_RECONNECTION: null,
   ADD_NOTIFICATION: null,
   REMOVE_NOTIFICATION: null,
   REMOVE_ALL_NOTIFICATION: null,
