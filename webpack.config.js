@@ -95,7 +95,11 @@ const matecatConfig = async ({env}, {mode}) => {
     const config = eval(data.toString('utf8'))
     pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
   })
-
+  if (pluginConfig.sentryWebpackPlugin) {
+    pluginConfig.sentryWebpackPlugin.release = JSON.stringify(
+      config.BUILD_NUMBER,
+    )
+  }
   return {
     target: 'web',
     watchOptions: {
@@ -258,6 +262,7 @@ const matecatConfig = async ({env}, {mode}) => {
     plugins: [
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
+        'process.env.version': JSON.stringify(config.BUILD_NUMBER),
       }),
       !isDev &&
         pluginConfig.sentryWebpackPlugin &&
