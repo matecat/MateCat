@@ -163,15 +163,13 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
   const selection = window.getSelection()
   if (!selection) return
 
-  const step = getStepByDirection(direction)
-
   const entityContainer = getEntityContainer(entityClassname)
-
+  console.log('entityContainer', entityContainer, selection.focusNode)
   // remove caret inside entity
   if (entityContainer) {
     // avoid carret adjustment when cursor move forward and previous element is an entity
     if (
-      step > 0 &&
+      direction === 'right' &&
       entityContainer.previousElementSibling?.classList?.contains(
         entityClassname,
       )
@@ -179,20 +177,21 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
       return
 
     const focusOnElement =
-      step < 0
+      direction === 'left'
         ? entityContainer.previousElementSibling
         : entityContainer.nextElementSibling
 
+    console.log(focusOnElement)
     if (focusOnElement) {
       const textNode = getTextNode(focusOnElement)
-      const offset = step < 0 ? textNode.length : 0
+      const offset = direction === 'left' ? textNode.length : 0
       const {anchorOffset, anchorNode} = selection
 
       if (isShiftPressed) {
         selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
       } else {
         const charAtOffset =
-          step < 0
+          direction === 'left'
             ? textNode.textContent.slice(textNode.length - 1)
             : textNode.textContent[0]
         const isOffsetNearZwsp = charAtOffset === ZWSP
@@ -200,7 +199,11 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
         const range = document.createRange()
         range.setStart(
           textNode,
-          isOffsetNearZwsp ? (step < 0 ? offset - 1 : offset + 1) : offset,
+          isOffsetNearZwsp
+            ? direction === 'left'
+              ? offset - 1
+              : offset + 1
+            : offset,
         )
         range.collapse(true)
         selection.removeAllRanges()
@@ -208,7 +211,7 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
       }
     } else {
       const textNode = getTextNode(entityContainer)
-      const offset = step < 0 ? 0 : textNode.length
+      const offset = direction === 'left' ? 0 : textNode.length
       const range = document.createRange()
       range.setStart(textNode, offset)
       range.collapse(true)
