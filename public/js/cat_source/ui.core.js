@@ -426,19 +426,19 @@ window.UI = {
       }
     })
   },
-  checkVersion: function () {
-    if (this.version != config.build_number) {
-      var notification = {
-        uid: 'checkVersion',
-        title: 'New version of Matecat',
-        text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
-        type: 'warning',
-        allowHtml: true,
-        position: 'bl',
-      }
-      CatToolActions.addNotification(notification)
-    }
-  },
+  // checkVersion: function () {
+  //   if (this.version != config.build_number) {
+  //     var notification = {
+  //       uid: 'checkVersion',
+  //       title: 'New version of Matecat',
+  //       text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+  //       type: 'warning',
+  //       allowHtml: true,
+  //       position: 'bl',
+  //     }
+  //     CatToolActions.addNotification(notification)
+  //   }
+  // },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
