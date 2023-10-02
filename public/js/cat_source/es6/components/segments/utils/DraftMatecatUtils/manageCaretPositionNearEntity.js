@@ -1,6 +1,7 @@
 import {EditorState, SelectionState} from 'draft-js'
 import getEntities from './getEntities'
 
+const entityClassname = 'tag-container'
 const ZWSP = String.fromCharCode(parseInt('200B', 16))
 
 const getStepByDirection = (direction) => {
@@ -57,16 +58,17 @@ export const checkCaretIsNearZwsp = ({
   direction = 'right',
   isShiftPressed = false,
 }) => {
+  const step = getStepByDirection(direction)
+
   const selection = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
   const anchorKey = selection.getStartKey()
   const focusKey = selection.getFocusKey()
-  const isBackward = direction === 'left'
+  const isBackward = step < 0
   const currentBlock = contentState.getBlockForKey(focusKey)
 
   const start = selection.getFocusOffset()
   const blockedOffset = isShiftPressed && selection.getAnchorOffset()
-  const step = getStepByDirection(direction)
 
   const point = {
     ...(step > 0 ? {start, end: start + 1} : {start: start - 1, end: start}),
@@ -103,7 +105,7 @@ export const checkCaretIsNearEntity = ({
       ? start <= entity.end && start > entity.start
       : end < entity.end && end >= entity.start,
   )
-  console.log('entityMatched', entityMatched, step)
+
   return entityMatched
     ? moveCaretOutsideEntity({
         editorState,
@@ -120,12 +122,13 @@ export const moveCaretOutsideEntity = ({
   direction = 'right',
   isShiftPressed = false,
 }) => {
+  const step = getStepByDirection(direction)
+
   const selection = editorState.getSelection()
   const anchorKey = selection.getStartKey()
-  const isBackward = direction === 'left'
+  const isBackward = step < 0
 
   const blockedOffset = isShiftPressed && selection.getAnchorOffset()
-  const step = getStepByDirection(direction)
   const pointOffset = step < 0 ? entity.start : entity.end
 
   const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
@@ -134,6 +137,7 @@ export const moveCaretOutsideEntity = ({
     focusKey: anchorKey,
     isBackward,
   })
+
   const updatedState = EditorState.forceSelection(editorState, updatedSelection)
   const updatedStateNearZwsp = checkCaretIsNearZwsp({
     editorState: updatedState,
@@ -144,7 +148,7 @@ export const moveCaretOutsideEntity = ({
 }
 
 export const isCaretInsideEntity = () => {
-  const entityContainer = getEntityContainer('tag-container')
+  const entityContainer = getEntityContainer(entityClassname)
   if (entityContainer) {
     const selection = window.getSelection()
     const textNode = getTextNode(entityContainer)
@@ -160,12 +164,20 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
   if (!selection) return
 
   const step = getStepByDirection(direction)
-  console.log('adjustCaretPosition')
 
-  const entityContainer = getEntityContainer('tag-container')
+  const entityContainer = getEntityContainer(entityClassname)
 
   // remove caret inside entity
   if (entityContainer) {
+    // avoid carret adjustment when cursor move forward and previous element is an entity
+    if (
+      step > 0 &&
+      entityContainer.previousElementSibling?.classList?.contains(
+        entityClassname,
+      )
+    )
+      return
+
     const focusOnElement =
       step < 0
         ? entityContainer.previousElementSibling
@@ -179,8 +191,17 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
       if (isShiftPressed) {
         selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
       } else {
+        const charAtOffset =
+          step < 0
+            ? textNode.textContent.slice(textNode.length - 1)
+            : textNode.textContent[0]
+        const isOffsetNearZwsp = charAtOffset === ZWSP
+
         const range = document.createRange()
-        range.setStart(textNode, offset)
+        range.setStart(
+          textNode,
+          isOffsetNearZwsp ? (step < 0 ? offset - 1 : offset + 1) : offset,
+        )
         range.collapse(true)
         selection.removeAllRanges()
         selection.addRange(range)

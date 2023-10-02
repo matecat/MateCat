@@ -102,6 +102,7 @@ class Editarea extends React.Component {
     const {editorState, tagRange} = contentEncoded
 
     this.isShiftPressedOnNavigation = createRef()
+    this.caretDirectionOnNavigation = createRef()
 
     this.state = {
       editorState: editorState,
@@ -544,6 +545,15 @@ class Editarea extends React.Component {
           isShiftPressed: this.isShiftPressedOnNavigation.current,
         })
       }
+    } else {
+      if (typeof this.caretDirectionOnNavigation.current === 'symbol') {
+        const direction = this.caretDirectionOnNavigation.current.description
+        adjustCaretPosition({
+          direction,
+          isShiftPressed: this.isShiftPressedOnNavigation.current,
+        })
+        this.caretDirectionOnNavigation.current = undefined
+      }
     }
   }
 
@@ -710,7 +720,9 @@ class Editarea extends React.Component {
       return 'insert-nbsp-tag' // Chromebook
     } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
       this.isShiftPressedOnNavigation.current = e.shiftKey
+
       const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
+      if (e.ctrlKey) this.caretDirectionOnNavigation.current = Symbol(direction)
 
       // check caret is near zwsp char and move caret position
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
