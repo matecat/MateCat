@@ -1900,13 +1900,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        $initialTranslationStates = [
-                                            'new',
-                                            'initial',
-                                            'needs-translation',
-                                        ];
-
-                                        if ( !in_array($state, $initialTranslationStates) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+                                        if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2609,7 +2603,7 @@ class ProjectManager {
                 $originalState     = @$translation_row[ 4 ]['seg-target'][$position]['attr']['state'];
 
                 // create a R2 for the job is state is 'final'
-                if($originalState !== null and $originalState === 'final'){
+                if($originalState !== null and $originalState === Constants_XliffTranslationStatus::FINAL_STATE){
                     $createSecondPassReview = true;
 
                     $translationEventStruct = new TranslationEventStruct();
@@ -2760,20 +2754,16 @@ class ProjectManager {
         if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
             $state = $trans_unit['seg-target'][$position]['attr']['state'];
 
-            switch ($state){
+            if(Constants_XliffTranslationStatus::isNew($state)){
+                return Constants_TranslationStatus::STATUS_NEW;
+            }
 
-                case 'new':
-                case 'needs-translation':
-                case 'initial':
-                    return Constants_TranslationStatus::STATUS_NEW;
+            if(Constants_XliffTranslationStatus::isTranslated($state)){
+                return Constants_TranslationStatus::STATUS_TRANSLATED;
+            }
 
-                case 'translated':
-                    return Constants_TranslationStatus::STATUS_TRANSLATED;
-
-                default:
-                case 'reviewed':
-                case 'final':
-                    return Constants_TranslationStatus::STATUS_APPROVED;
+            if(Constants_XliffTranslationStatus::isRevision($state)){
+                return Constants_TranslationStatus::STATUS_TRANSLATED;
             }
         }
 
