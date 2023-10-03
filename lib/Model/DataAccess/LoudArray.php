@@ -14,8 +14,6 @@ class LoudArray extends DataAccess_AbstractDaoObjectStruct implements ArrayAcces
 
     use ArrayAccessTrait;
 
-    protected function tryValidator() {}
-
     /**
      * __set() is run when writing data to inaccessible properties
      *

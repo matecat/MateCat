@@ -27,7 +27,7 @@ export const CrossLanguagesMatches = ({
     }
     setMultiMatchLangs(settings)
     localStorage.setItem('multiMatchLangs', JSON.stringify(settings))
-    if (SegmentActions.getContribution) {
+    if (SegmentActions.getContribution && config.is_cattool) {
       if (settings.primary) {
         SegmentActions.modifyTabVisibility('multiMatches', true)
         SegmentActions.getContribution(UI.currentSegmentId, settings, true)
@@ -43,7 +43,7 @@ export const CrossLanguagesMatches = ({
     if (!activeLang1) {
       setActiveLang2()
     }
-  }, activeLang1)
+  }, [activeLang1])
   return (
     <div className="options-box multi-match">
       <h3>Cross-language Matches</h3>

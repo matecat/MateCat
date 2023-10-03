@@ -143,12 +143,19 @@ abstract class viewController extends controller {
      *
      * Initialize template variables that must be initialized to avoid templte errors.
      * These variables are expected to be overridden.
+     * @throws Exception
      */
     private function setInitialTemplateVars() {
 
         if ( is_null( $this->template ) ) {
             throw new Exception( 'Tamplate is not defined' );
         }
+
+        if ( $this->userIsLogged ) {
+            $this->featureSet->loadFromUserEmail( $this->user->email );
+        }
+
+        $this->template->user_plugins =  $this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes());
 
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
@@ -157,6 +164,8 @@ abstract class viewController extends controller {
         $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
+
+
     }
 
     /**

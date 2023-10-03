@@ -1,6 +1,6 @@
 import assign from 'object-assign'
 import {EventEmitter} from 'events'
-import _ from 'lodash'
+import {round, filter} from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
@@ -35,11 +35,11 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     stats.revision1Completed =
       stats.revises &&
       stats.revises.length > 0 &&
-      _.round(stats.revises[0].advancement_wc) === stats.TOTAL
+      round(stats.revises[0].advancement_wc) === stats.TOTAL
     stats.revision2Completed =
       stats.revises &&
       stats.revises.length > 1 &&
-      _.round(stats.revises[1].advancement_wc) === stats.TOTAL
+      round(stats.revises[1].advancement_wc) === stats.TOTAL
 
     this._projectProgess = stats
   },
@@ -48,7 +48,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getQR: function (revisionNumber) {
     if (this.qr) {
-      return _.filter(
+      return filter(
         this.qr.chunk.reviews,
         (rev) => rev.revision_number === revisionNumber,
       )
@@ -60,6 +60,8 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   clientConnect: function (clientId) {
     this.clientConnected = !!clientId
+    //TODO: remove
+    config.id_client
     this.clientId = clientId
   },
   updateJobTmKeys: function (keys) {
@@ -71,6 +73,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getJobTmKeys: function () {
     return this.tmKeys
+  },
+  isClientConnected: function () {
+    return this.clientConnected
   },
   getClientId: function () {
     return this.clientId
@@ -153,6 +158,9 @@ AppDispatcher.register(function (action) {
     case CatToolConstants.CLIENT_CONNECT:
       CatToolStore.clientConnect(action.clientId)
       CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT, action.clientId)
+      break
+    case CatToolConstants.CLIENT_RECONNECTION:
+      CatToolStore.emitChange(CatToolConstants.CLIENT_RECONNECTION)
       break
     case CatToolConstants.ADD_NOTIFICATION:
       CatToolStore.emitChange(

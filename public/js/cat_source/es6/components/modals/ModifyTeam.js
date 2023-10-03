@@ -6,6 +6,7 @@ import CommonUtils from '../../utils/commonUtils'
 import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
 import TEXT_UTILS from '../../utils/textUtils'
+import ModalsActions from '../../actions/ModalsActions'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)

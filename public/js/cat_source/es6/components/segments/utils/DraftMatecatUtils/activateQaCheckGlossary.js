@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import * as DraftMatecatConstants from './editorConstants'
 import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils'

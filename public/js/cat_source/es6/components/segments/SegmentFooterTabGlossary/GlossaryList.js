@@ -5,11 +5,11 @@ import React, {
   useRef,
   useState,
 } from 'react'
+import {isEqual} from 'lodash'
 import SegmentStore from '../../../stores/SegmentStore'
 import {GlossaryItem} from './GlossaryItem'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import SegmentConstants from '../../../constants/SegmentConstants'
-import _ from 'lodash'
 import SegmentActions from '../../../actions/SegmentActions'
 
 const setIntervalCounter = ({callback, delay, maximumNumOfTime}) => {
@@ -75,7 +75,7 @@ const GlossaryList = () => {
 
       await new Promise((resolve) => {
         if (
-          !_.isEqual(
+          !isEqual(
             segment.glossary.map(({term_id}) => term_id),
             segment.glossary_search_results.map(({term_id}) => term_id),
           )
@@ -146,7 +146,7 @@ const GlossaryList = () => {
   useEffect(() => {
     if (
       previousTerms?.current &&
-      _.isEqual(
+      isEqual(
         terms.map(({term_id}) => term_id),
         previousTerms?.current.map(({term_id}) => term_id),
       )

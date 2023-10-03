@@ -114,5 +114,8 @@ class SegmentTranslationIssueValidator extends Base {
         if ( $this->issue->id_segment != $this->translation->id_segment ) {
             throw new ValidationError( 'issue not found' );
         }
+
+        $this->issue->ensureValid();
+
     }
 }

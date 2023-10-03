@@ -1,6 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {remove, cloneDeep, size, isUndefined} from 'lodash'
 import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
 
 import SegmentStore from '../../stores/SegmentStore'
@@ -162,7 +162,7 @@ class SegmentSource extends React.Component {
       currentInSearchIndex,
       tagRange,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
@@ -175,7 +175,7 @@ class SegmentSource extends React.Component {
       glossary.filter(({isBlacklist}) => !isBlacklist),
       sid,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) =>
         decorator.name === DraftMatecatConstants.GLOSSARY_DECORATOR,
@@ -192,7 +192,7 @@ class SegmentSource extends React.Component {
       sid,
       SegmentActions.activateTab,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) =>
         decorator.name === DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
@@ -204,7 +204,7 @@ class SegmentSource extends React.Component {
     let {editorState} = this.state
     let {lexiqa, sid, lxqDecodedSource} = this.props.segment
     let ranges = LexiqaUtils.getRanges(
-      _.cloneDeep(lexiqa.source),
+      cloneDeep(lexiqa.source),
       lxqDecodedSource,
       true,
     )
@@ -217,7 +217,7 @@ class SegmentSource extends React.Component {
         true,
         this.getUpdatedSegmentInfo,
       )
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) =>
           decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
@@ -259,8 +259,8 @@ class SegmentSource extends React.Component {
       const prevGlossary = prevProps ? prevProps.segment.glossary : undefined
       if (
         glossary &&
-        _.size(glossary) > 0 &&
-        (_.isUndefined(prevGlossary) ||
+        size(glossary) > 0 &&
+        (isUndefined(prevGlossary) ||
           !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ||
           !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
       ) {
@@ -268,8 +268,8 @@ class SegmentSource extends React.Component {
         changedDecorator = true
         this.addGlossaryDecorator()
       } else if (
-        _.size(prevGlossary) > 0 &&
-        (!glossary || _.size(glossary) === 0)
+        size(prevGlossary) > 0 &&
+        (!glossary || size(glossary) === 0)
       ) {
         activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
         changedDecorator = true
@@ -284,7 +284,7 @@ class SegmentSource extends React.Component {
       if (
         missingGlossaryItems &&
         missingGlossaryItems.length > 0 &&
-        (_.isUndefined(prevMissingGlossaryItems) ||
+        (isUndefined(prevMissingGlossaryItems) ||
           !Immutable.fromJS(prevMissingGlossaryItems).equals(
             Immutable.fromJS(missingGlossaryItems),
           ))
@@ -305,10 +305,9 @@ class SegmentSource extends React.Component {
       //Lexiqa
       const {lexiqa} = this.props.segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
-      const currentLexiqaSource =
-        lexiqa && lexiqa.source && _.size(lexiqa.source)
+      const currentLexiqaSource = lexiqa && lexiqa.source && size(lexiqa.source)
       const prevLexiqaSource =
-        prevLexiqa && prevLexiqa.source && _.size(prevLexiqa.source)
+        prevLexiqa && prevLexiqa.source && size(prevLexiqa.source)
       const lexiqaChanged =
         prevLexiqaSource &&
         currentLexiqaSource &&
@@ -684,7 +683,7 @@ class SegmentSource extends React.Component {
   }
 
   disableDecorator = (editorState, decoratorName) => {
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === decoratorName,
     )
@@ -696,12 +695,12 @@ class SegmentSource extends React.Component {
   removeDecorator = (decoratorName) => {
     if (!decoratorName) {
       // All decorators except tags
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
       )
     } else {
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name === decoratorName,
       )

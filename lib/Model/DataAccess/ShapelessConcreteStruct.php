@@ -16,8 +16,6 @@ class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct impleme
 
     use ArrayAccessTrait;
 
-    protected function tryValidator() {}
-
     public function __set( $name, $value ) {
         $this->$name = $value;
     }

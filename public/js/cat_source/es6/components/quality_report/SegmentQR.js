@@ -1,6 +1,6 @@
 import React from 'react'
-import _ from 'lodash'
 import classnames from 'classnames'
+import {isNull} from 'lodash/lang'
 
 import TextUtils from '../../utils/textUtils'
 import TagUtils from '../../utils/tagUtils'
@@ -13,15 +13,15 @@ class SegmentQR extends React.Component {
     this.source = this.props.segment.get('segment')
     this.suggestion = this.props.segment.get('suggestion')
     this.target =
-      !_.isNull(this.props.segment.get('last_translation')) &&
+      !isNull(this.props.segment.get('last_translation')) &&
       this.props.segment.get('last_translation')
     this.revise =
-      !_.isNull(this.props.segment.get('last_revisions')) &&
+      !isNull(this.props.segment.get('last_revisions')) &&
       this.props.segment.get('last_revisions').find((value) => {
         return value.get('revision_number') === 1
       })
     this.revise2 =
-      !_.isNull(this.props.segment.get('last_revisions')) &&
+      !isNull(this.props.segment.get('last_revisions')) &&
       this.props.segment.get('last_revisions').find((value) => {
         return value.get('revision_number') === 2
       })
@@ -47,18 +47,18 @@ class SegmentQR extends React.Component {
     this.state = {
       translateDiffOn:
         this.props.segment.get('last_translation') &&
-        !_.isNull(this.props.segment.get('last_translation')) &&
-        _.isNull(this.props.segment.get('last_revisions')),
+        !isNull(this.props.segment.get('last_translation')) &&
+        isNull(this.props.segment.get('last_revisions')),
       reviseDiffOn:
-        !_.isNull(this.props.segment.get('last_revisions')) &&
+        !isNull(this.props.segment.get('last_revisions')) &&
         this.revise &&
         !this.revise2 &&
         this.props.segment.get('last_translation') &&
-        !_.isNull(this.props.segment.get('last_translation')),
+        !isNull(this.props.segment.get('last_translation')),
       revise2DiffOn:
-        !_.isNull(this.props.segment.get('last_revisions')) &&
+        !isNull(this.props.segment.get('last_revisions')) &&
         this.revise2 &&
-        (this.revise || !_.isNull(this.props.segment.get('last_translation'))),
+        (this.revise || !isNull(this.props.segment.get('last_translation'))),
       htmlDiff: '',
       automatedQaOpen:
         this.props.segment.get('issues').size === 0 &&
@@ -461,7 +461,7 @@ class SegmentQR extends React.Component {
               }
             />
           ) : null}
-          {!_.isNull(this.props.segment.get('last_revisions')) && revise ? (
+          {!isNull(this.props.segment.get('last_revisions')) && revise ? (
             <SegmentQRLine
               segment={this.props.segment}
               classes={revisedClasses}
@@ -471,11 +471,11 @@ class SegmentQR extends React.Component {
               showDiffButton={true}
               onClickDiff={this.showReviseDiff.bind(this)}
               diffActive={this.state.reviseDiffOn}
-              showIceMatchInfo={_.isNull(target)}
+              showIceMatchInfo={isNull(target)}
               tte={this.props.segment.get('time_to_edit_revise')}
             />
           ) : null}
-          {!_.isNull(this.props.segment.get('last_revisions')) && revise2 ? (
+          {!isNull(this.props.segment.get('last_revisions')) && revise2 ? (
             <SegmentQRLine
               segment={this.props.segment}
               classes={revised2Classes}
@@ -485,7 +485,7 @@ class SegmentQR extends React.Component {
               showDiffButton={true}
               onClickDiff={this.showRevise2Diff.bind(this)}
               diffActive={this.state.revise2DiffOn}
-              showIceMatchInfo={_.isNull(target) && _.isNull(revise)}
+              showIceMatchInfo={isNull(target) && isNull(revise)}
               tte={this.props.segment.get('time_to_edit_revise_2')}
             />
           ) : null}

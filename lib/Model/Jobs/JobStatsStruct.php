@@ -165,7 +165,6 @@ class JobStatsStruct extends \DataAccess_AbstractDaoSilentStruct implements \Dat
                 $this->{strtolower($property)} = $value;
             }
         }
-        $this->tryValidator();
     }
 
     public function isAllTranslated(){

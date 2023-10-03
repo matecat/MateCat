@@ -7,6 +7,8 @@ let SSE = {
   init: function () {
     // TODO configure this
     this.baseURL = config.sse_base_url
+    this.clientConnected = false
+    this.disconnect = false
     this.initEvents()
   },
   getSource: function (what) {
@@ -39,8 +41,13 @@ let SSE = {
   },
   initEvents: function () {
     $(document).on('sse:ack', function (ev, message) {
+      SSE.clientConnected = true
       config.id_client = message.data.clientId
-      CatToolActions.clientConntected(message.data.clientId)
+      CatToolActions.clientConnected(message.data.clientId)
+      if (SSE.disconnect) {
+        SSE.disconnect = false
+        CatToolActions.clientReconnect()
+      }
     })
     $(document).on('sse:concordance', function (ev, message) {
       SegmentActions.setConcordanceResult(message.data.id_segment, message.data)
@@ -228,7 +235,7 @@ let SSE = {
   },
 }
 
-let NOTIFICATIONS = {
+const NOTIFICATIONS = {
   start: function () {
     SSE.init()
     this.source = SSE.getSource('notifications')
@@ -256,8 +263,17 @@ let NOTIFICATIONS = {
       'error',
       () => {
         console.error('SSE: server disconnect')
-        config.id_client = undefined
-        CatToolActions.clientConntected()
+        if (SSE.clientConnected) {
+          SSE.clientConnected = false
+          SSE.disconnect = true
+          setTimeout(() => {
+            if (!SSE.clientConnected) {
+              config.id_client = undefined
+              CatToolActions.clientConnected()
+            }
+          }, 5000)
+        }
+
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -273,4 +289,4 @@ let NOTIFICATIONS = {
   },
 }
 
-module.exports = NOTIFICATIONS
+export default NOTIFICATIONS
