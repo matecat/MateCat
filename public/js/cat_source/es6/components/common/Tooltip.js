@@ -24,7 +24,7 @@ const Tooltip = ({
 }) => {
   const TooltipTimeout = useRef()
 
-  const [isVisible, setVisibility] = useState(true)
+  const [isVisible, setVisibility] = useState(false)
   const [coords, setCoordinate] = useState()
   const Portal = usePortal(document.body)
 
