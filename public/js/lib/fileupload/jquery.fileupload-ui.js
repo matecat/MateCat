@@ -11,7 +11,6 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window, document, URL, webkitURL, FileReader */
-import CreateProjectActions from "../../cat_source/es6/actions/CreateProjectActions";
 (function (factory ) {
     'use strict';
     if ( typeof define === 'function' && define.amd ) {
