@@ -13,14 +13,7 @@
         <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
         <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
-        <tal:block  tal:repeat="css_url css_resources">
-            <link rel="stylesheet" tal:attributes="href css_url"></link>
-        </tal:block>
-
-        <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
-
-
-
+        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
         <script type="text/javascript">
             /*<![CDATA[*/
 
@@ -81,6 +74,8 @@
                 isReview: ${isReview | string: false},
                 reviewType: '${review_type}',
                 enableReview: true,
+                user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
+                project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
                 stat_quality: ${structure php: stat_quality },
                 offlineModeEnabled: true,
                 splitSegmentEnabled: ${splitSegmentEnabled},
@@ -127,15 +122,13 @@
                 project_name: '${pname | string: 0}',
                 review_password: '${review_password}',
                 show_tag_projection: ${show_tag_projection | string: false},
-                get_public_matches: ${get_public_matches | string: false}
+                get_public_matches: ${get_public_matches | string: false},
+
             };
 
             var renderStart = new Date();
             /*]]>*/
         </script>
-
-
-
 
         <script tal:condition="true:review_extended" type="text/javascript">
 
@@ -195,25 +188,19 @@
             /*]]>*/
         </script>
 
-        <link href="${basepath}public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css" />
-
-        <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-        <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
-
+        <script type="text/javascript" src="${basepath}public/build/libs.js"></script>
 
     </head>
-    <body tal:condition="php:supportedBrowser EQ 0">
-        <div  metal:use-macro="unsupported_browser.html/unsupported"/>
-    </body>
 
-    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}"
-      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
+    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
         <div class="page-content"></div>
+        <tal:block metal:use-macro="common.html/footer_includes" />
+        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
     </body>
 
-<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
-
-<div metal:use-macro="common.html/footer_includes" />
+    <body tal:condition="php:supportedBrowser EQ 0">
+        <div metal:use-macro="unsupported_browser.html/unsupported"/>
+    </body>
 
 <script tal:condition="exists:dqf_user_status">
     <tal:block>

@@ -52,6 +52,7 @@ const NewProject = ({
   conversionEnabled,
   formatsNumber,
   googleDriveEnabled,
+  restartConversions,
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
@@ -399,14 +400,14 @@ const NewProject = ({
     })
     if (prevSourceLang.current.id !== sourceLang.id) {
       prevSourceLang.current = sourceLang
-      UI.UPLOAD_PAGE.restartConversions()
+      restartConversions()
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
   useEffect(() => {
     //TODO: used in main.js, remove
     UI.segmentationRule = segmentationRule.id
-    UI.UPLOAD_PAGE.restartConversions()
+    restartConversions()
   }, [segmentationRule])
 
   return (
@@ -661,5 +662,6 @@ NewProject.propTypes = {
   conversionEnabled: PropTypes.bool,
   formatsNumber: PropTypes.number,
   googleDriveEnabled: PropTypes.bool,
+  restartConversions: PropTypes.func,
 }
 export default NewProject

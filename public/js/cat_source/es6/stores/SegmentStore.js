@@ -29,7 +29,7 @@
      "notes":null
  }
  */
-import _ from 'lodash'
+import {isUndefined, uniq, each} from 'lodash'
 import {EventEmitter} from 'events'
 import Immutable from 'immutable'
 import assign from 'object-assign'
@@ -913,7 +913,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     ).length
     //lexiqa
     if (this._globalWarnings.lexiqa && this._globalWarnings.lexiqa.length > 0) {
-      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = uniq(
         this._globalWarnings.lexiqa,
       )
       this._globalWarnings.matecat.INFO.total =
@@ -927,7 +927,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       this.filterGlobalWarning.bind(this, 'LXQ'),
     )
     if (warnings && warnings.length > 0) {
-      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings)
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = uniq(warnings)
       this._globalWarnings.matecat.INFO.total = warnings.length
       this._globalWarnings.matecat.total =
         this._globalWarnings.matecat.total + warnings.length
@@ -1079,7 +1079,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let result,
       currentFind = false
     this._segments.forEach((segment) => {
-      if (_.isUndefined(result)) {
+      if (isUndefined(result)) {
         if (currentFind || current_sid === -1) {
           if (segment.get('readonly') === 'true') {
             return false
@@ -1633,7 +1633,7 @@ AppDispatcher.register(function (action) {
       break
     }
     case SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES:
-      _.each(action.versionsIssues, function (issues, segmentId) {
+      each(action.versionsIssues, function (issues, segmentId) {
         SegmentStore.addSegmentPreloadedIssues(segmentId, issues)
       })
       SegmentStore.emitChange(

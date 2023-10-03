@@ -1,5 +1,4 @@
 import React from 'react'
-import _ from 'lodash'
 import Immutable from 'immutable'
 import {
   Modifier,
@@ -9,6 +8,8 @@ import {
   KeyBindingUtil,
   CompositeDecorator,
 } from 'draft-js'
+import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
+import {debounce} from 'lodash/function'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
@@ -24,7 +25,6 @@ import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
-import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
@@ -120,13 +120,13 @@ class Editarea extends React.Component {
       DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
     )
 
-    this.updateTranslationDebounced = _.debounce(
+    this.updateTranslationDebounced = debounce(
       this.updateTranslationInStore,
       100,
     )
-    this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500)
-    this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000)
-    this.focusEditorDebounced = _.debounce(this.focusEditor, 500)
+    this.updateTagsInEditorDebounced = debounce(updateTagsInEditor, 500)
+    this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
+    this.focusEditorDebounced = debounce(this.focusEditor, 500)
   }
 
   getSearchParams = () => {
@@ -166,7 +166,7 @@ class Editarea extends React.Component {
       currentInSearchIndex,
       tagRange,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
@@ -179,7 +179,7 @@ class Editarea extends React.Component {
       qaBlacklistGlossary,
       sid,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) =>
         decorator.name === DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
@@ -192,7 +192,7 @@ class Editarea extends React.Component {
     let {lexiqa, sid, lxqDecodedTranslation} = this.props.segment
     // pass decoded translation with tags like <g id='1'>
     let ranges = LexiqaUtils.getRanges(
-      _.cloneDeep(lexiqa.target),
+      cloneDeep(lexiqa.target),
       lxqDecodedTranslation,
       false,
     )
@@ -205,7 +205,7 @@ class Editarea extends React.Component {
         false,
         this.getUpdatedSegmentInfo,
       )
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) =>
           decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
@@ -258,7 +258,7 @@ class Editarea extends React.Component {
       currentInSearch,
     } = this.props.segment
     if (currentInSearch && searchParams.target) {
-      let index = _.findIndex(
+      let index = findIndex(
         occurrencesInSearch.occurrences,
         (item) => item.searchProgressiveIndex === currentInSearchIndex,
       )
@@ -342,7 +342,7 @@ class Editarea extends React.Component {
         qaBlacklistGlossary &&
         qaBlacklistGlossary.length > 0 &&
         !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] /* &&
-        (_.isUndefined(prevQaBlacklistGlossary) ||
+        (isUndefined(prevQaBlacklistGlossary) ||
           !Immutable.fromJS(prevQaBlacklistGlossary).equals(
             Immutable.fromJS(qaBlacklistGlossary),
           )) */
@@ -363,10 +363,9 @@ class Editarea extends React.Component {
       //Lexiqa
       const {lexiqa} = this.props.segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
-      const currentLexiqaTarget =
-        lexiqa && lexiqa.target && _.size(lexiqa.target)
+      const currentLexiqaTarget = lexiqa && lexiqa.target && size(lexiqa.target)
       const prevLexiqaTarget =
-        prevLexiqa && prevLexiqa.target && _.size(prevLexiqa.target)
+        prevLexiqa && prevLexiqa.target && size(prevLexiqa.target)
       const lexiqaChanged =
         prevLexiqaTarget &&
         currentLexiqaTarget &&
@@ -511,10 +510,7 @@ class Editarea extends React.Component {
     // update editor state when receive prop of segment "sourceTagMap"
     if (
       this.props.segment.sourceTagMap?.length &&
-      !_.isEqual(
-        this.state.previousSourceTagMap,
-        this.props.segment.sourceTagMap,
-      )
+      !isEqual(this.state.previousSourceTagMap, this.props.segment.sourceTagMap)
     ) {
       this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
       this.setNewTranslation(this.props.segment.sid, this.props.translation)
@@ -917,12 +913,12 @@ class Editarea extends React.Component {
 
   removeDecorator = (decoratorName) => {
     if (!decoratorName) {
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
       )
     } else {
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name === decoratorName,
       )
@@ -931,7 +927,7 @@ class Editarea extends React.Component {
 
   // has to be followed by a setState for editorState
   disableDecorator = (editorState, decoratorName) => {
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === decoratorName,
     )

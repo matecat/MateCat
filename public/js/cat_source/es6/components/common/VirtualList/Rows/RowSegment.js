@@ -6,6 +6,7 @@ import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
 import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
+import SegmentUtils from '../../../../utils/segmentUtils'
 
 const LinkIcon = () => {
   return (

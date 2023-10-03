@@ -12,7 +12,6 @@ import beautifyEntities from './beautifyEntities'
 import decodeTagInfo from './decodeTagInfo'
 import replaceOccurrences from './replaceOccurrences'
 import {
-  getXliffRegExpression,
   getIdAttributeRegEx,
   cleanSegmentString,
   decodeTagsToPlainText,
@@ -48,7 +47,6 @@ import replaceMultipleText from './replaceMultipleText'
 const DraftMatecatUtils = {
   // Text utils
   cleanSegmentString,
-  getXliffRegExpression,
   getIdAttributeRegEx,
   unescapeHTMLinTags,
   formatText,

@@ -1,7 +1,8 @@
 import React from 'react'
 import Immutable from 'immutable'
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
+import {isNull} from 'lodash/lang'
 
 import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
@@ -13,8 +14,8 @@ class OutsourceVendor extends React.Component {
   constructor(props) {
     super(props)
     let changesRates =
-      !_.isUndefined(Cookies.get('matecat_changeRates')) &&
-      !_.isNull(Cookies.get('matecat_changeRates'))
+      !isUndefined(Cookies.get('matecat_changeRates')) &&
+      !isNull(Cookies.get('matecat_changeRates'))
         ? $.parseJSON(Cookies.get('matecat_changeRates'))
         : {}
     this.state = {
@@ -126,11 +127,7 @@ class OutsourceVendor extends React.Component {
 
   getCurrentCurrency() {
     let currency = Cookies.get('matecat_currency')
-    if (
-      !_.isUndefined(currency) &&
-      !_.isNull(currency) &&
-      currency !== 'null'
-    ) {
+    if (!isUndefined(currency) && !isNull(currency) && currency !== 'null') {
       return currency
     } else {
       Cookies.set('matecat_currency', 'EUR', {secure: true})
@@ -170,13 +167,13 @@ class OutsourceVendor extends React.Component {
     let self = this
     let changeRates = Cookies.get('matecat_changeRates')
     if (
-      _.isUndefined(changeRates) ||
-      _.isNull(changeRates) ||
+      isUndefined(changeRates) ||
+      isNull(changeRates) ||
       changeRates === 'null'
     ) {
       getChangeRates().then(function (response) {
         var rates = $.parseJSON(response.data)
-        if (!_.isUndefined(rates) && !_.isNull(changeRates)) {
+        if (!isUndefined(rates) && !isNull(changeRates)) {
           self.setState({
             changeRates: rates,
           })
@@ -253,7 +250,7 @@ class OutsourceVendor extends React.Component {
   }
 
   getDeliveryDate() {
-    if (!_.isNull(this.props.job.get('outsource'))) {
+    if (!isNull(this.props.job.get('outsource'))) {
       return CommonUtils.getGMTDate(
         this.props.job.get('outsource').get('delivery_date'),
       )
@@ -287,7 +284,7 @@ class OutsourceVendor extends React.Component {
 
   getPrice() {
     let price
-    if (!_.isNull(this.props.job.get('outsource'))) {
+    if (!isNull(this.props.job.get('outsource'))) {
       price = this.props.job.get('outsource').get('price')
       return this.getCurrencyPrice(parseFloat(price))
     } else if (this.state.outsource) {

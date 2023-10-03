@@ -1,7 +1,5 @@
-import _ from 'lodash'
+import {each} from 'lodash'
 import LexiqaHighlight from '../../LexiqaHighlight/LexiqaHighlight.component'
-import CompoundDecorator from '../CompoundDecorator'
-import {CompositeDecorator, EditorState} from 'draft-js'
 import * as DraftMatecatConstants from './editorConstants'
 import canDecorateRange from './canDecorateRange'
 
@@ -16,7 +14,7 @@ const activateLexiqa = (
     return {
       name: DraftMatecatConstants.LEXIQA_DECORATOR,
       strategy: (contentBlock, callback, contentState) => {
-        _.each(warnings, (warn) => {
+        each(warnings, (warn) => {
           if (warn.blockKey === contentBlock.getKey()) {
             const canDecorate = canDecorateRange(
               warn.start,

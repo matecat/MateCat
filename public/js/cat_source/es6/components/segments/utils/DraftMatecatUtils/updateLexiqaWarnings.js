@@ -1,7 +1,7 @@
-import _ from 'lodash'
+import {each, cloneDeep} from 'lodash'
 
 import getEntities from './getEntities'
-import {isToReplaceForLexiqa, getTagSignature} from './tagModel'
+import {isToReplaceForLexiqa} from './tagModel'
 
 const updateLexiqaWarnings = (editorState, warnings) => {
   const contentState = editorState.getCurrentContent()
@@ -18,7 +18,7 @@ const updateLexiqaWarnings = (editorState, warnings) => {
     const entitiesInBlock = entities.filter(
       (ent) => ent.blockKey === loopedBlockKey,
     )
-    _.each(warnings, (warn) => {
+    each(warnings, (warn) => {
       // Todo: warnings between 2 block are now ignored
       const alreadyScannedChars =
         maxCharsInBlocks - loopedContentBlock.getLength()
@@ -52,7 +52,7 @@ const updateLexiqaWarnings = (editorState, warnings) => {
           relativeStart += 1 // start on next block
         }
         const relativeEnd = relativeStart + warnLength
-        const warnUpdated = _.cloneDeep(warn)
+        const warnUpdated = cloneDeep(warn)
         warnUpdated.start = relativeStart // to remove '<' and '>' that wrap
         warnUpdated.end = relativeEnd
         // Add blockKey needed in decorator to find correct warning
