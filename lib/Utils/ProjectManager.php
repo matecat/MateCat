@@ -2693,9 +2693,7 @@ class ProjectManager {
                 ];
 
                 $query_translations_values[] = $sql_values;
-
             }
-
         }
 
         // Executing the Query
@@ -2763,7 +2761,7 @@ class ProjectManager {
             }
 
             if(Constants_XliffTranslationStatus::isRevision($state)){
-                return Constants_TranslationStatus::STATUS_TRANSLATED;
+                return Constants_TranslationStatus::STATUS_APPROVED;
             }
         }
 
@@ -3356,7 +3354,7 @@ class ProjectManager {
     private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null ) {
 
         if($state !== null){
-            return $state !== 'initial';
+            return !Constants_XliffTranslationStatus::isNew($state);
         }
 
         if ( $source != $target ) {
