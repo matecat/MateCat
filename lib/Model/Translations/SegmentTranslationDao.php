@@ -843,25 +843,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         }
 
         if(!isset($propagationTotal)){
-              $propagationTotal = [
-                'totals' => [
-                    'total'    => null,
-                    'countSeg' => null,
-                    'status'   => null
-                ],
-                'propagated_ids'           => [],
-                'segments_for_propagation' => [
-                    'propagated' => [
-                        'ice' => [],
-                        'not_ice' => [],
-                    ],
-                    'not_propagated' => [
-                        'ice' => [],
-                        'not_ice' => [],
-                    ],
-                    'propagated_ids' => [],
-                ]
-             ];
+            $propagationTotal = new Propagation_PropagationTotalStruct();
         }
 
         return ( new PropagationApi( $propagationTotal ) )->render();
