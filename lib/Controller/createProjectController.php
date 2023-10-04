@@ -199,8 +199,8 @@ class createProjectController extends ajaxController {
             $this->project_name = $default_project_name;
         }
 
-        $sourceLangHistory = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
-        $targetLangHistory = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
+        $sourceLangHistory = isset($_COOKIE[ \Constants::COOKIE_SOURCE_LANG ]) ? $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] : null;
+        $targetLangHistory = isset($_COOKIE[ \Constants::COOKIE_TARGET_LANG ]) ? $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] : null;
 
         // SET SOURCE COOKIE
 
