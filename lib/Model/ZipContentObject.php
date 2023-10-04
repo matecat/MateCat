@@ -70,7 +70,7 @@ class ZipContentObject extends stdClass {
     public function __construct( $_array_params = [] ) {
 
         //This is a multidimensional array
-        if ( array_key_exists( 0, $_array_params ) ) {
+        if ( isset( $_array_params[ 0 ] ) ) {
             foreach ( $_array_params as $pos => $array_params ) {
                 $this->build( $array_params );
             }
@@ -84,7 +84,7 @@ class ZipContentObject extends stdClass {
     public function build( $_array_params ) {
 
         //This is a multidimensional array
-        if ( array_key_exists( 0, $_array_params ) ) {
+        if ( isset( $_array_params[ 0 ] ) ) {
             foreach ( $_array_params as $pos => $array_params ) {
                 $this->build( $array_params );
             }

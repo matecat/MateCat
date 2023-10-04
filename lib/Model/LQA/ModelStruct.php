@@ -90,12 +90,14 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
 
             $category = $categoryStruct->toArrayWithJsonDecoded();
 
-            $categoriesArray[] = [
-                'id' => (int)$category['id'],
-                'label' => $category['label'],
-                'code' => $category['options']['code'],
-                'severities' => $category['severities'],
-            ];
+            if(!empty($category)){
+                $categoriesArray[] = [
+                    'id' => (int)$category['id'],
+                    'label' => $category['label'],
+                    'code' => $category['options']['code'],
+                    'severities' => $category['severities'],
+                ];
+            }
         }
 
         return [
