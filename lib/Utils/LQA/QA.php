@@ -2089,8 +2089,10 @@ class QA {
 
             } else {
 
-                $srcNode        = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                $srcNodeContent = $srcNode->textContent;
+                $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
+                if($srcNode !== null){
+                    $srcNodeContent = $srcNode->textContent;
+                }
 
                 foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
                     if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
@@ -2100,8 +2102,9 @@ class QA {
 
                 $trgTagPos      = $trgTagReference[ 'node_idx' ];
                 $trgNode        = $trgNodeList->item( $trgTagPos );
-                $trgNodeContent = $trgNode->textContent;
-
+                if($trgNode !== null){
+                    $trgNodeContent = $trgNode->textContent;
+                }
             }
 
             /**
