@@ -433,6 +433,10 @@ class catController extends viewController {
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
+        $projectMetaDataDao = new Projects_MetadataDao();
+        $projectMetaData = $projectMetaDataDao->get($this->project->id, Projects_MetadataDao::FEATURES_KEY);
+        $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
+
         //Maybe some plugin want disable the Split from the config
         $this->template->splitSegmentEnabled = var_export(true, true);
 

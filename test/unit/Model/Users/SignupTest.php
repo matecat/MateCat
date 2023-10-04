@@ -1,6 +1,6 @@
 <?php
 
-use Users\Signup;
+use Users\SignupModel;
 
 class SignupTest extends PHPUnit_Framework_TestCase {
 
@@ -10,7 +10,7 @@ class SignupTest extends PHPUnit_Framework_TestCase {
 
     public function testSignupWithValidParams() {
 
-        $signup = new Signup( [
+        $signup = new SignupModel( [
                 'first_name'            => 'John',
                 'last_name'             => 'Doe',
                 'password'              => '1234abcd',

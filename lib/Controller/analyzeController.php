@@ -159,6 +159,10 @@ class analyzeController extends viewController {
 
         $this->__evalModalBoxForLogin();
 
+        $projectMetaDataDao = new Projects_MetadataDao();
+        $projectMetaData = $projectMetaDataDao->get($this->pid, Projects_MetadataDao::FEATURES_KEY);
+        $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
+
         $this->decorator = new AnalyzeDecorator( $this, $this->template );
         $this->decorator->decorate();
 

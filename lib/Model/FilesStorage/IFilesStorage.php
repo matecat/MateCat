@@ -2,7 +2,7 @@
 
 namespace FilesStorage;
 
-use FileStorage\Exceptions\FileSystemException;
+use FilesStorage\Exceptions\FileSystemException;
 
 /**
  * Interface IFilesStorage
@@ -45,7 +45,7 @@ interface IFilesStorage {
      * @return mixed
      * @throws FileSystemException
      */
-    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
+    public function makeCachePackage( $hash, $lang, $originalPath, $xliffPath );
 
     /**
      * Rebuild the filename that will be taken from disk in the cache directory

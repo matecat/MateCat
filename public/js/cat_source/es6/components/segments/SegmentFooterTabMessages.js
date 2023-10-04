@@ -1,6 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import TEXT_UTILS from '../../utils/textUtils'
 
 class SegmentFooterTabMessages extends React.Component {
@@ -135,8 +135,8 @@ class SegmentFooterTabMessages extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     return (
-      _.isUndefined(nextProps.notes) ||
-      _.isUndefined(this.props.note) ||
+      isUndefined(nextProps.notes) ||
+      isUndefined(this.props.note) ||
       !Immutable.fromJS(this.props.notes).equals(
         Immutable.fromJS(nextProps.notes),
       ) ||

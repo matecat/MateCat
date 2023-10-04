@@ -19,8 +19,6 @@ class convertFileController extends ajaxController {
     protected $target_lang;
     protected $segmentation_rule;
 
-    protected $cache_days = 10;
-
     protected $intDir;
     protected $errDir;
 
@@ -35,6 +33,9 @@ class convertFileController extends ajaxController {
      */
     protected $files_storage;
 
+    /**
+     * @throws Exception
+     */
     public function __construct() {
         parent::__construct();
 
@@ -64,10 +65,6 @@ class convertFileController extends ajaxController {
         $this->target_lang       = $postInput[ "target_lang" ];
         $this->segmentation_rule = $postInput[ "segmentation_rule" ];
 
-        if ( $this->segmentation_rule == "" ) {
-            $this->segmentation_rule = null;
-        }
-
         $this->cookieDir = $_COOKIE[ 'upload_session' ];
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
         $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
@@ -84,6 +81,15 @@ class convertFileController extends ajaxController {
         $this->lang_handler = Langs_Languages::getInstance();
         $this->validateSourceLang();
         $this->validateTargetLangs();
+
+        try {
+            $this->segmentation_rule = Constants::validateSegmentationRules( $this->segmentation_rule );
+        } catch ( Exception $e ){
+            $this->result->changeCode( ConversionHandlerStatus::INVALID_SEGMENTATION_RULE );
+            $this->result->addError( $e->getMessage() );
+
+            return false;
+        }
 
         if ( !Utils::isTokenValid( $this->cookieDir ) ) {
             $this->result->changeCode(ConversionHandlerStatus::INVALID_TOKEN);

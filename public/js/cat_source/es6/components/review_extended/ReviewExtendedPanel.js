@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isEmpty} from 'lodash'
 import React from 'react'
 import classnames from 'classnames'
 
@@ -44,7 +44,7 @@ class ReviewExtendedPanel extends React.Component {
   getAllIssues() {
     let issues = []
     this.props.segment.versions.forEach(function (version) {
-      if (!_.isEmpty(version.issues)) {
+      if (!isEmpty(version.issues)) {
         issues = issues.concat(version.issues)
       }
     })

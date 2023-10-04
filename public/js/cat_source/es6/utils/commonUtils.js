@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {round} from 'lodash'
 import Cookies from 'js-cookie'
 import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
@@ -6,6 +6,7 @@ import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
+import ModalsActions from '../actions/ModalsActions'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -34,12 +35,9 @@ const CommonUtils = {
         return value.revision_number === 2
       })
 
-      if (revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0) {
+      if (revWords1 && round(parseFloat(revWords1.advancement_wc)) > 0) {
         app = parseFloat(revWords1.advancement_wc)
-      } else if (
-        revWords2 &&
-        _.round(parseFloat(revWords2.advancement_wc)) > 0
-      ) {
+      } else if (revWords2 && round(parseFloat(revWords2.advancement_wc)) > 0) {
         app = parseFloat(revWords2.advancement_wc)
         t = 'approved-2ndpass'
       }
