@@ -150,6 +150,13 @@ window.UI = {
     }
   },
 
+  enableAnalyzeButton: function (enable) {
+    CreateProjectActions.enableAnalyzeButton(enable)
+  },
+  hideUploadErrors: function () {
+    CreateProjectActions.hideErrors()
+  },
+
   addInlineMessage: function (fileName, message) {
     var currDeleteDiv = $('.upload-table td.name:contains("' + fileName + '")')
       .next()

@@ -60,6 +60,8 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   clientConnect: function (clientId) {
     this.clientConnected = !!clientId
+    //TODO: remove
+    config.id_client
     this.clientId = clientId
   },
   updateJobTmKeys: function (keys) {
@@ -71,6 +73,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getJobTmKeys: function () {
     return this.tmKeys
+  },
+  isClientConnected: function () {
+    return this.clientConnected
   },
   getClientId: function () {
     return this.clientId
@@ -153,6 +158,9 @@ AppDispatcher.register(function (action) {
     case CatToolConstants.CLIENT_CONNECT:
       CatToolStore.clientConnect(action.clientId)
       CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT, action.clientId)
+      break
+    case CatToolConstants.CLIENT_RECONNECTION:
+      CatToolStore.emitChange(CatToolConstants.CLIENT_RECONNECTION)
       break
     case CatToolConstants.ADD_NOTIFICATION:
       CatToolStore.emitChange(

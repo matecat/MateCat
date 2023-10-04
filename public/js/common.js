@@ -5,6 +5,7 @@ import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessa
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
 
 window.APP = null
 
