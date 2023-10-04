@@ -387,9 +387,14 @@ class commentController extends ajaxController {
         return $users;
     }
 
+    /**
+     * @param $users
+     * @param array $uidSentList
+     * @return array
+     */
     private function filterUsers( $users, $uidSentList = [] ) {
         $userIsLogged = $this->userIsLogged;
-        $current_uid  = $this->current_user->uid;
+        $current_uid  = $this->current_user ? $this->current_user->uid : 0;
 
         // find deep duplicates
         $users = array_filter( $users, function ( $item ) use ( $userIsLogged, $current_uid, &$uidSentList ) {
