@@ -107,7 +107,7 @@ class SegmentFooterTabMessages extends React.Component {
     for (const [index, item] of this.props.metadata.entries()) {
       const {meta_key, meta_value: body} = item
       const label =
-        meta_key === 'sizeRestriction' ? 'Characters limit: ' : meta_key
+        meta_key === 'sizeRestriction' ? 'Characters limit' : meta_key
 
       if (meta_key === 'sizeRestriction' && body <= 0) continue
 
