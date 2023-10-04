@@ -161,7 +161,7 @@ export const decodeHtmlEntities = (text) => {
 export const encodeHtmlEntities = (text) => {
   return text
     .replace(/</g, '&lt;')
-    .replace(/</g, '&gt;')
+    .replace(/>/g, '&gt;')
     .replace(/&/g, '&amp;')
     .replace(/'/g, '&apos;')
 }
