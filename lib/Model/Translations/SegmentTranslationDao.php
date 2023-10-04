@@ -764,7 +764,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     -$e->getCode() );
         }
 
-        if ( !empty( $propagationTotal->getTotals() ) ) {
+        if ( isset($propagationTotal) and $propagationTotal !== null and !empty( $propagationTotal->getTotals() ) ) {
 
             if ( true === $execute_update and !empty( $propagationTotal->getSegmentsForPropagation() ) ) {
 
@@ -840,6 +840,28 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             -$e->getCode() );
                 }
             }
+        }
+
+        if(!isset($propagationTotal)){
+              $propagationTotal = [
+                'totals' => [
+                    'total'    => null,
+                    'countSeg' => null,
+                    'status'   => null
+                ],
+                'propagated_ids'           => [],
+                'segments_for_propagation' => [
+                    'propagated' => [
+                        'ice' => [],
+                        'not_ice' => [],
+                    ],
+                    'not_propagated' => [
+                        'ice' => [],
+                        'not_ice' => [],
+                    ],
+                    'propagated_ids' => [],
+                ]
+             ];
         }
 
         return ( new PropagationApi( $propagationTotal ) )->render();
