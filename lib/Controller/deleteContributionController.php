@@ -35,7 +35,7 @@ class deleteContributionController extends ajaxController {
         $this->target_lang       = $__postInput[ 'target_lang' ];
         $this->source            = trim( $__postInput[ 'seg' ] );
         $this->target            = trim( $__postInput[ 'tra' ] );
-        $this->id_translator     = trim( $__postInput[ 'id_translator' ] ); //no more used
+        $this->id_translator     = (isset($__postInput[ 'id_translator' ]) ? trim( $__postInput[ 'id_translator' ] ) : null );
         $this->password          = trim( $__postInput[ 'password' ] );
         $this->received_password = trim( $__postInput[ 'current_password' ] );
         $this->id_match          = $__postInput[ 'id_match' ];
