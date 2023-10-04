@@ -1,12 +1,8 @@
 import {isUndefined} from 'lodash'
 import CommonUtils from './es6/utils/commonUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import TagUtils from './es6/utils/tagUtils'
-import TextUtils from './es6/utils/textUtils'
-import DraftMatecatUtils from './es6/components/segments/utils/DraftMatecatUtils'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
-import {toggleTagProjectionJob} from './es6/api/toggleTagProjectionJob'
 import {getTagProjection} from './es6/api/getTagProjection'
 import {setCurrentSegment} from './es6/api/setCurrentSegment'
 ;(function ($) {
@@ -19,9 +15,8 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           // Set as Tagged and restore source with taggedText
           SegmentActions.setSegmentAsTagged(sid)
           // Unescape HTML
-          let unescapedTranslation = TagUtils.transformTextFromBe(
-            response.data.translation,
-          )
+          let unescapedTranslation = response.data.translation
+
           // Update target area
           SegmentActions.copyTagProjectionInCurrentSegment(
             sid,
@@ -53,13 +48,11 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
      * @returns translation with the Tag prjection
      */
     getSegmentTagsProjection: function (sid) {
-      var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
-      var source = segmentObj.segment
-      source = TagUtils.prepareTextToSend(source)
-      // source = TextUtils.htmlDecode(source);
+      const segmentObj = SegmentStore.getSegmentByIdToJS(sid)
+      const source = segmentObj.segment
       //Retrieve the chosen suggestion if exist
-      var suggestion
-      var currentContribution = SegmentStore.getSegmentChoosenContribution(sid)
+      let suggestion
+      let currentContribution = SegmentStore.getSegmentChoosenContribution(sid)
       // Send the suggestion to Tag Projection only if is > 89% and is not MT
       if (
         !_.isUndefined(currentContribution) &&
@@ -69,7 +62,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
         suggestion = currentContribution.translation
       }
 
-      var target = TagUtils.prepareTextToSend(segmentObj.translation)
+      const target = segmentObj.translation
       return getTagProjection({
         action: 'getTagProjection',
         password: config.password,
@@ -252,7 +245,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           return this.getContextBefore(segmentBeforeId)
         }
       } else {
-        return TagUtils.prepareTextToSend(segmentBefore.segment)
+        return segmentBefore.segment
       }
     },
     getContextAfter: function (segmentId) {
@@ -272,7 +265,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           return this.getContextAfter(segmentAfterId)
         }
       } else {
-        return TagUtils.prepareTextToSend(segmentAfter.segment)
+        return segmentAfter.segment
       }
     },
     getIdBefore: function (segmentId) {

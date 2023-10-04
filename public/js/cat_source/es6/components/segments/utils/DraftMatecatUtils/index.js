@@ -11,14 +11,7 @@ import linkEntities from './linkEntities'
 import beautifyEntities from './beautifyEntities'
 import decodeTagInfo from './decodeTagInfo'
 import replaceOccurrences from './replaceOccurrences'
-import {
-  getIdAttributeRegEx,
-  cleanSegmentString,
-  decodeTagsToPlainText,
-  formatText,
-  getCharactersCounter,
-  unescapeHTMLinTags,
-} from './textUtils'
+import {formatText, getCharactersCounter} from './textUtils'
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
 import updateEntityData from './updateEntityData'
@@ -43,12 +36,18 @@ import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
+import {
+  transformTagsToHtml,
+  transformTagsToText,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
+  decodePlaceholdersToPlainText,
+  removeTagsFromText,
+} from './tagUtils'
 
 const DraftMatecatUtils = {
   // Text utils
-  cleanSegmentString,
-  getIdAttributeRegEx,
-  unescapeHTMLinTags,
+  removeTagsFromText,
   formatText,
   // Tag Utils
   matchTag,
@@ -81,7 +80,6 @@ const DraftMatecatUtils = {
   encodeContent,
   decodeSegment,
   replaceOccurrences,
-  decodeTagsToPlainText,
   // General
   insertText,
   getSelectedText,
@@ -96,6 +94,11 @@ const DraftMatecatUtils = {
   getCharactersCounter,
   getSelectedTextWithoutEntities,
   replaceMultipleText,
+  transformTagsToHtml,
+  transformTagsToText,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
+  decodePlaceholdersToPlainText,
 }
 
 export default DraftMatecatUtils

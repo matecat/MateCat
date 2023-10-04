@@ -160,8 +160,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
-            segment: TagUtils.transformTextFromBe(splittedSourceAr[i]),
-            decodedSource: DraftMatecatUtils.decodeTagsToPlainText(
+            segment: splittedSourceAr[i],
+            decodedSource: DraftMatecatUtils.transformTagsToText(
               segment.segment,
             ),
             segment_hash: segment.segment_hash,
@@ -171,14 +171,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             split_points_source: [],
             status: status,
             time_to_edit: '0',
-            originalDecodedTranslation: translation
-              ? TagUtils.transformTextFromBe(translation)
-              : '',
-            translation: translation
-              ? TagUtils.transformTextFromBe(translation)
-              : '',
+            originalDecodedTranslation: translation ? translation : '',
+            translation: translation ? translation : '',
             decodedTranslation:
-              DraftMatecatUtils.decodeTagsToPlainText(translation),
+              DraftMatecatUtils.transformTagsToText(translation),
             warning: '0',
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -221,13 +217,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
-        segment.segment = TagUtils.transformTextFromBe(segment.segment)
-        segment.translation = TagUtils.transformTextFromBe(segment.translation)
         segment.originalDecodedTranslation = segment.translation
-        segment.decodedTranslation = DraftMatecatUtils.decodeTagsToPlainText(
+        segment.decodedTranslation = DraftMatecatUtils.transformTagsToText(
           segment.translation,
         )
-        segment.decodedSource = DraftMatecatUtils.decodeTagsToPlainText(
+        segment.decodedSource = DraftMatecatUtils.transformTagsToText(
           segment.segment,
         )
         segment.updatedSource = segment.segment
@@ -368,7 +362,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.decodeTagsToPlainText(translation)
+    const newTrans = DraftMatecatUtils.transformTagsToText(translation)
 
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],

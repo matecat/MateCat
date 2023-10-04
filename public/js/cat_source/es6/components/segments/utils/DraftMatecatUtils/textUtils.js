@@ -1,101 +1,46 @@
-import {getXliffRegExpression} from './tagModel'
-import {Base64} from 'js-base64'
-
-import TagUtils from '../../../../utils/tagUtils'
 import TEXT_UTILS from '../../../../utils/textUtils'
 
-/**
- *
- * @param segmentString
- * @returns {*}
- */
-export const cleanSegmentString = (segmentString) => {
-  const regExp = getXliffRegExpression()
-  if (segmentString) {
-    return segmentString.replace(regExp, '')
-  }
-  return segmentString
-}
-
-export const getIdAttributeRegEx = () => {
-  return /id="(-?\w+)"/g
-}
-
-/**
- *
- * @param escapedHTML
- * @returns {string}
- */
-export const unescapeHTMLinTags = (escapedHTML) => {
-  try {
-    return escapedHTML
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-  } catch (e) {
-    return ''
-  }
-}
-
-export const unescapeHTMLRecursive = (escapedHTML) => {
-  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
-
-  try {
-    while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTMLinTags(escapedHTML)
-    }
-  } catch (e) {
-    console.error('Error unescapeHTMLRecursive')
-  }
-
-  return escapedHTML
-}
-
-export const decodeTagsToPlainText = (text) => {
-  let decoded = ''
-
-  if (text) {
-    // Match G - temporary until backend put IDs in closing tags </g>
-    decoded = TagUtils.matchTag(text)
-    // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)
-    decoded = decoded.replace(
-      /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-      (match, text) => {
-        return (
-          String.fromCharCode(parseInt('200B', 16)) +
-          text +
-          String.fromCharCode(parseInt('200B', 16))
-        )
-      },
-    )
-    // Match PH
-    decoded = decoded.replace(
-      /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/g,
-      (match, text) => {
-        try {
-          return (
-            String.fromCharCode(parseInt('200B', 16)) +
-            Base64.decode(text) +
-            String.fromCharCode(parseInt('200B', 16))
-          )
-            .replace(/&lt;/gi, '<')
-            .replace(/&gt;/gi, '>')
-        } catch (e) {
-          console.error('Fail decoding tags in text', match, text)
-        }
-      },
-    )
-
-    // Convert placeholder (nbsp, tab, lineFeed, carriageReturn)
-    decoded = TagUtils.decodePlaceholdersToPlainText(decoded)
-    return decoded
-  }
-  return ''
-}
+// export const decodeTagsToPlainText = (text) => {
+//   let decoded = ''
+//
+//   if (text) {
+//     // Match G - temporary until backend put IDs in closing tags </g>
+//     decoded = TagUtils.matchTag(text)
+//     // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)
+//     decoded = decoded.replace(
+//       /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
+//       (match, text) => {
+//         return (
+//           String.fromCharCode(parseInt('200B', 16)) +
+//           text +
+//           String.fromCharCode(parseInt('200B', 16))
+//         )
+//       },
+//     )
+//     // Match PH
+//     decoded = decoded.replace(
+//       /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/g,
+//       (match, text) => {
+//         try {
+//           return (
+//             String.fromCharCode(parseInt('200B', 16)) +
+//             Base64.decode(text) +
+//             String.fromCharCode(parseInt('200B', 16))
+//           )
+//             .replace(/&lt;/gi, '<')
+//             .replace(/&gt;/gi, '>')
+//         } catch (e) {
+//           console.error('Fail decoding tags in text', match, text)
+//         }
+//       },
+//     )
+//
+//     // Convert placeholder (nbsp, tab, lineFeed, carriageReturn)
+//     decoded = TagUtils.decodePlaceholdersToPlainText(decoded)
+//     return decoded
+//   }
+//   return ''
+// }
 
 export const formatText = (text, format) => {
   const regexCapitalize =

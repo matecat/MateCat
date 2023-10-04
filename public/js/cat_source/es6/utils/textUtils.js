@@ -225,105 +225,8 @@ const TEXT_UTILS = {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
   },
 
-  ///*************************************************************************
-  // test jsfiddle http://jsfiddle.net/YgKDu/
-  placehold_xliff_tags(segment) {
-    let LTPLACEHOLDER = '##LESSTHAN##'
-    let GTPLACEHOLDER = '##GREATERTHAN##'
-    segment = segment.replace(/&lt;/gi, LTPLACEHOLDER)
-    segment = segment.replace(/&gt;/gi, GTPLACEHOLDER)
-    return segment
-  },
-
-  restore_xliff_tags(segment) {
-    let LTPLACEHOLDER = '##LESSTHAN##'
-    let GTPLACEHOLDER = '##GREATERTHAN##'
-    let re_lt = new RegExp(LTPLACEHOLDER, 'g')
-    let re_gt = new RegExp(GTPLACEHOLDER, 'g')
-    segment = segment.replace(re_lt, '<')
-    segment = segment.replace(re_gt, '>')
-    return segment
-  },
-  ///*************************************************************************
-
   cleanupHTMLCharsForDiff(string) {
     return this.replacePlaceholder(string.replace(/&nbsp;/g, ''))
-  },
-
-  trackChangesHTML(source, target) {
-    /*
-        There are problems when you delete or add a tag next to another, the algorithm that makes the diff fails to recognize the tags,
-        they come out of the function broken.
-        Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
-        indexed with the id of the tags.
-         */
-    var phTagsObject = {}
-    var diff
-    source = source.replace(
-      /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-      function (match, group1, group2) {
-        if (isUndefined(phTagsObject[group2])) {
-          phTagsObject[group2] = match
-        }
-        return '<' + Base64.encode(group2) + '> '
-      },
-    )
-
-    target = target.replace(
-      /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-      function (match, gruop1, group2) {
-        if (isUndefined(phTagsObject[group2])) {
-          phTagsObject[group2] = match
-        }
-        return '<' + Base64.encode(group2) + '> '
-      },
-    )
-
-    diff = this.diffMatchPatch.diff_main(
-      this.cleanupHTMLCharsForDiff(source),
-      this.cleanupHTMLCharsForDiff(target),
-    )
-
-    this.diffMatchPatch.diff_cleanupSemantic(diff)
-
-    /*
-        Before adding spans to identify added or subtracted portions we need to check and fix broken tags
-         */
-    diff = this.setUnclosedTagsInDiff(diff)
-    var diffTxt = ''
-
-    $.each(diff, function (index, text) {
-      text[1] = text[1].replace(/<(.*?)>/gi, function (match, text) {
-        try {
-          var decodedText = Base64.decode(text)
-          if (!isUndefined(phTagsObject[decodedText])) {
-            return phTagsObject[decodedText]
-          }
-          return match
-        } catch (e) {
-          return match
-        }
-      })
-      var rootElem
-      var newElem
-      if (this[0] === -1) {
-        rootElem = $(document.createElement('div'))
-        newElem = $.parseHTML('<span class="deleted"/>')
-        $(newElem).text(TEXT_UTILS.htmlDecode(text[1]))
-        rootElem.append(newElem)
-        diffTxt += $(rootElem).html()
-      } else if (text[0] === 1) {
-        rootElem = $(document.createElement('div'))
-        newElem = $.parseHTML('<span class="added"/>')
-        $(newElem).text(TEXT_UTILS.htmlDecode(text[1]))
-        rootElem.append(newElem)
-        diffTxt += $(rootElem).html()
-      } else {
-        diffTxt += text[1]
-      }
-    })
-
-    return this.restorePlaceholders(diffTxt)
   },
 
   execDiff: function (mainStr, cfrStr) {
@@ -372,20 +275,6 @@ const TEXT_UTILS = {
     }
 
     return !!container
-  },
-
-  //Change with TagUtils.decodePlaceholdersToPlainText
-  clenaupTextFromPleaceholders: function (text) {
-    text = text
-      .replace(config.crPlaceholderRegex, '\r')
-      .replace(config.lfPlaceholderRegex, '\n')
-      .replace(config.crlfPlaceholderRegex, '\r\n')
-      .replace(config.tabPlaceholderRegex, '\t')
-      .replace(
-        config.nbspPlaceholderRegex,
-        String.fromCharCode(parseInt(0xa0, 10)),
-      )
-    return text
   },
   replaceUrl: function (textToReplace) {
     let regExpUrl =

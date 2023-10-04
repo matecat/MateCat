@@ -1,4 +1,4 @@
-import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/newtagModel'
+import {getXliffRegExpression, tagSignatures} from './tagModel'
 import {Base64} from 'js-base64'
 
 export const transformTagsToHtml = (text) => {
@@ -13,13 +13,25 @@ export const transformTagsToHtml = (text) => {
         )
         text = text.replace(globalRegex, (match, text) => {
           let tagText = decodeNeeded ? Base64.decode(text) : match
-          return '<span class="tag ' + style + '">' + tagText + '</span>'
+          return (
+            '<span contenteditable="false" class="tag small ' +
+            style +
+            '">' +
+            tagText +
+            '</span>'
+          )
         })
       } else if (regex) {
         let globalRegex = new RegExp(regex)
         text = text.replace(globalRegex, (match) => {
           let tagText = placeholder ? placeholder : match
-          return '<span class="tag ' + style + '">' + tagText + '</span>'
+          return (
+            '<span contenteditable="false" class="tag small ' +
+            style +
+            '">' +
+            tagText +
+            '</span>'
+          )
         })
       }
     }
@@ -124,6 +136,21 @@ const matchTag = (tx) => {
   return tx
 }
 
+export const decodePlaceholdersToPlainText = (str) => {
+  return str
+    .replace(config.lfPlaceholderRegex, tagSignatures['lineFeed'].placeholder)
+    .replace(
+      config.crPlaceholderRegex,
+      tagSignatures['carriageReturn'].placeholder,
+    )
+    .replace(
+      config.crlfPlaceholderRegex,
+      `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
+    )
+    .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
+    .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
+}
+
 export const decodeHtmlEntities = (text) => {
   return text
     .replace(/&apos;/g, "'")
@@ -137,4 +164,55 @@ export const encodeHtmlEntities = (text) => {
     .replace(/</g, '&gt;')
     .replace(/&/g, '&amp;')
     .replace(/'/g, '&apos;')
+}
+
+export const getIdAttributeRegEx = () => {
+  return /id="(-?\w+)"/g
+}
+
+/**
+ *
+ * @param segmentString
+ * @returns {*}
+ */
+export const removeTagsFromText = (segmentString) => {
+  const regExp = getXliffRegExpression()
+  if (segmentString) {
+    return segmentString.replace(regExp, '')
+  }
+  return segmentString
+}
+
+/**
+ *
+ * @param escapedHTML
+ * @returns {string}
+ */
+const unescapeHTMLinTags = (escapedHTML) => {
+  try {
+    return escapedHTML
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+      .replace(/&amp;/g, '&')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&apos;/g, "'")
+      .replace(/&quot;/g, '"')
+  } catch (e) {
+    return ''
+  }
+}
+
+export const unescapeHTMLRecursive = (escapedHTML) => {
+  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
+
+  try {
+    while (regex.exec(escapedHTML) !== null) {
+      escapedHTML = unescapeHTMLinTags(escapedHTML)
+    }
+  } catch (e) {
+    console.error('Error unescapeHTMLRecursive')
+  }
+
+  return escapedHTML
 }

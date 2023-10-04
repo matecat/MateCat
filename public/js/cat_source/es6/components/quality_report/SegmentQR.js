@@ -3,9 +3,9 @@ import classnames from 'classnames'
 import {isNull} from 'lodash/lang'
 
 import TextUtils from '../../utils/textUtils'
-import TagUtils from '../../utils/tagUtils'
 import SegmentQRLine from './SegmentQRLine'
 import SegmentQRIssue from './SegmentQRIssue'
+import DraftMatecatUtils from '../segments/utils/DraftMatecatUtils'
 
 class SegmentQR extends React.Component {
   constructor(props) {
@@ -314,9 +314,7 @@ class SegmentQR extends React.Component {
     if (text) {
       // Fix for more than 2 followed spaces
       text = text.replace(/  /gi, '&nbsp; ')
-      let decodedText = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
-      )
+      let decodedText = DraftMatecatUtils.transformTagsToHtml(text)
       return decodedText
     }
     return text

@@ -53,7 +53,7 @@ class SegmentSource extends React.Component {
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     // New EditorState with translation
     const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -117,7 +117,7 @@ class SegmentSource extends React.Component {
 
       // If GuessTag enabled, clean string from tag
       const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
-        ? DraftMatecatUtils.cleanSegmentString(translation)
+        ? DraftMatecatUtils.removeTagsFromText(translation)
         : translation
       // TODO: get taggedSource from store
       const contentEncoded = DraftMatecatUtils.encodeContent(

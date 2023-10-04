@@ -23,6 +23,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from '../segments/SegmentContext'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolStore from '../../stores/CatToolStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -65,7 +66,7 @@ class Segment extends React.Component {
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
         !TagUtils.checkXliffTagsInText(this.props.segment.translation) &&
-        TagUtils.removeAllTags(this.props.segment.segment) !== '',
+        DraftMatecatUtils.removeTagsFromText(this.props.segment.segment) !== '',
       selectedTextObj: null,
       showActions: false,
     }

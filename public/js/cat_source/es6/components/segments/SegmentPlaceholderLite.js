@@ -22,7 +22,7 @@ class SegmentPlaceholderLite extends React.Component {
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(source)
+      ? DraftMatecatUtils.removeTagsFromText(source)
       : source
     const contentEncodedSource = DraftMatecatUtils.encodeContent(
       plainEditorStateSource,
@@ -37,7 +37,7 @@ class SegmentPlaceholderLite extends React.Component {
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     const contentEncodedTarget = DraftMatecatUtils.encodeContent(
       plainEditorStateTarget,

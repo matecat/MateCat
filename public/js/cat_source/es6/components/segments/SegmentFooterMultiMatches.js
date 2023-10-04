@@ -2,12 +2,12 @@ import React from 'react'
 import Immutable from 'immutable'
 import {isUndefined} from 'lodash'
 
-import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterMultiMatches extends React.Component {
   static contextType = SegmentContext
@@ -70,17 +70,13 @@ class SegmentFooterMultiMatches extends React.Component {
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
       //
-      item.suggestionDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.segment),
-        ),
+      item.suggestionDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.segment,
       )
-      item.translationDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.translation),
-        ),
+      item.translationDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.translation,
       )
-      item.translation = TagUtils.transformTextFromBe(this.translation)
+      item.translation = this.translation
       item.sourceDiff = item.suggestionDecodedHtml
 
       if (
@@ -139,11 +135,7 @@ class SegmentFooterMultiMatches extends React.Component {
 
         item.sourceDiff = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
         item.sourceDiff = item.sourceDiff.replace(/&amp;/g, '&')
-        item.sourceDiff = TagUtils.matchTag(
-          TagUtils.decodeHtmlInTag(
-            TagUtils.decodePlaceholdersToTextSimple(item.sourceDiff),
-          ),
-        )
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(item.sourceDiff)
       }
       if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties

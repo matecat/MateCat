@@ -22,18 +22,12 @@ class SegmentFooterTabConflicts extends React.Component {
     const segment_id = this.props.segment.sid
     let html = []
     const self = this
-    const source = TagUtils.matchTag(
-      TagUtils.decodeHtmlInTag(
-        TagUtils.decodePlaceholdersToTextSimple(
-          TagUtils.transformTextForEditor(segment.segment),
-        ),
-      ),
-    )
+    const source = DraftMatecatUtils.transformTagsToHtml(segment.segment)
     $.each(alternatives.editable, function (index) {
       // Execute diff
       const segmentTranslation = segment.decodedTranslation
-      const conflictTranslation = DraftMatecatUtils.decodeTagsToPlainText(
-        TagUtils.transformTextFromBe(this.translation),
+      const conflictTranslation = DraftMatecatUtils.transformTagsToText(
+        this.translation,
       )
       let diff_obj = TagUtils.executeDiff(
         segmentTranslation,
@@ -47,11 +41,7 @@ class SegmentFooterTabConflicts extends React.Component {
           className="graysmall"
           data-item={index + 1}
           key={'editable' + index}
-          onDoubleClick={() =>
-            self.chooseAlternative(
-              TagUtils.transformTextFromBe(this.translation),
-            )
-          }
+          onDoubleClick={() => self.chooseAlternative(this.translation)}
         >
           <li className="sugg-source">
             <span
@@ -89,11 +79,7 @@ class SegmentFooterTabConflicts extends React.Component {
       // Restore Tags
       let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
       translation = translation.replace(/&amp;/g, '&')
-      translation = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(translation),
-        ),
-      )
+      translation = DraftMatecatUtils.transformTagsToHtml(translation)
       // No diff executed on source
       html.push(
         <ul

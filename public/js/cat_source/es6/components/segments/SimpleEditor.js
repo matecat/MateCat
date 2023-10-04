@@ -1,8 +1,8 @@
 import React from 'react'
-import {transformTagsToHtml} from '../../utils/newTagUtils'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 const SimpleEditor = ({className = '', text}) => {
-  let htmlText = transformTagsToHtml(text)
+  let htmlText = DraftMatecatUtils.transformTagsToHtml(text)
   return (
     <div
       data-testid="simple-editor-test"

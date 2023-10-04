@@ -10,6 +10,7 @@ import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -99,9 +100,8 @@ class SegmentTarget extends React.Component {
         this.props.segment.versions[0].translation
           ? this.props.segment.versions[0].translation
           : translation
-      let currentTranslationVersion = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
-      )
+      let currentTranslationVersion =
+        DraftMatecatUtils.transformTagsToHtml(text)
       textAreaContainer = (
         <div
           className="segment-text-area-container"

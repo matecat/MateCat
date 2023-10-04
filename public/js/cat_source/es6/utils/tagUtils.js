@@ -10,45 +10,45 @@ const TAGS_UTILS = {
   // TODO: move it in another module
   // We need to send to BE the reverse (more or less) of what we receive in the getSegments (WHY??)
   // EX: From BE
-  prepareTextToSend: function (tx) {
-    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
-    tx = tx
-      .replace(/</g, '##LESSTHANLT##')
-      .replace(/>/g, '##GREATERTHANGT##')
-      .replace(/&lt;/gi, '<')
-      .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
-      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
-      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
-      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
-      .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
-      .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
-      .replace(/</gi, '&lt;')
-    tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
-    tx = tx
-      .replace(/##LESSTHANLT##/g, '&lt;')
-      .replace(/##GREATERTHANGT##/g, '&gt;')
-      .replace(/##LESSTHAN##/g, '<')
-      .replace(/##GREATERTHAN##/g, '>')
-    return tx
-  },
+  // prepareTextToSend: function (tx) {
+  //   let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+  //   tx = tx
+  //     .replace(/</g, '##LESSTHANLT##')
+  //     .replace(/>/g, '##GREATERTHANGT##')
+  //     .replace(/&lt;/gi, '<')
+  //     .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
+  //     .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+  //     .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+  //     .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
+  //     .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
+  //     .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
+  //     .replace(/</gi, '&lt;')
+  //   tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
+  //   tx = tx
+  //     .replace(/##LESSTHANLT##/g, '&lt;')
+  //     .replace(/##GREATERTHANGT##/g, '&gt;')
+  //     .replace(/##LESSTHAN##/g, '<')
+  //     .replace(/##GREATERTHAN##/g, '>')
+  //   return tx
+  // },
 
-  transformTextFromBe: (tx) => {
-    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
-    tx = tx
-      .replace(/&lt;/gi, '<')
-      .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
-      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
-      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
-      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
-      .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
-      .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
-      .replace(/</gi, '&lt;')
-    tx = tx.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/g, '&')
-    tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
-    return tx
-  },
+  // transformTextFromBe: (tx) => {
+  //   let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+  //   tx = tx
+  //     .replace(/&lt;/gi, '<')
+  //     .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
+  //     .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+  //     .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+  //     .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
+  //     .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
+  //     .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
+  //     .replace(/</gi, '&lt;')
+  //   tx = tx.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/g, '&')
+  //   tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
+  //   return tx
+  // },
 
-  transformTextForEditor: (tx) => {
+  /*transformTextForEditor: (tx) => {
     let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
     tx = tx
       .replace(/</g, '##LESSTHAN##')
@@ -64,10 +64,10 @@ const TAGS_UTILS = {
     tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
     tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
     return tx
-  },
+  },*/
 
   // Replace old function decodePlaceholdersToText
-  decodePlaceholdersToTextSimple: function (str) {
+  /*decodePlaceholdersToTextSimple: function (str) {
     return str
       .replace(
         config.crlfPlaceholderRegex,
@@ -105,18 +105,18 @@ const TAGS_UTILS = {
           tagSignatures['wordJoiner'].placeholder,
         )}</span>`,
       )
-  },
+  },*/
 
-  encodeToHtml: (str) => {
+  /*encodeToHtml: (str) => {
     const buf = []
     for (let i = str.length - 1; i >= 0; i--) {
       buf.unshift(['&#', str[i].charCodeAt(), ';'].join(''))
     }
     return buf.join('')
-  },
+  },*/
 
   // Same as decodePlaceholdersToTextSimple but transform placeholder to plain text
-  decodePlaceholdersToPlainText: function (str) {
+  /*decodePlaceholdersToPlainText: function (str) {
     return str
       .replace(config.lfPlaceholderRegex, tagSignatures['lineFeed'].placeholder)
       .replace(
@@ -129,10 +129,10 @@ const TAGS_UTILS = {
       )
       .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
       .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
-  },
+  },*/
 
   // Replace old function transformTextForLockTags
-  decodeHtmlInTag: function (tx, isRTL = false) {
+  /*decodeHtmlInTag: function (tx, isRTL = false) {
     let brTx1 = `<_plh_ contenteditable="false" class="tag small ${
       isRTL ? 'tag-close' : 'tag-open'
     }">$1</_plh_>`
@@ -177,12 +177,12 @@ const TAGS_UTILS = {
     tx = tx.replace(/(<\/span>)$(\s){0,}/gi, '</span> ')
     tx = this.transformTagsWithHtmlAttributeGeneral(tx)
     return tx
-  },
+  },*/
 
   // Replace old function transformTagsWithHtmlAttribute
   // Each tag is replaced with its own placeholder except for <g id=""> tags that will be passed to matchTag()
   // for open-close match
-  transformTagsWithHtmlAttributeGeneral: function (tx) {
+  /*transformTagsWithHtmlAttributeGeneral: function (tx) {
     let returnValue
     try {
       tx = tx.replace(/&quot;/gi, '"')
@@ -208,10 +208,10 @@ const TAGS_UTILS = {
       returnValue = tx
     }
     return returnValue
-  },
+  },*/
 
   // Associate tag of type g with integer id
-  matchTag: function (tx) {
+  /*matchTag: function (tx) {
     let returnValue = tx
     const openRegex = tagSignatures['g'].regex
     const closeRegex = tagSignatures['gCl'].regex
@@ -281,7 +281,7 @@ const TAGS_UTILS = {
       console.error('Error matching tag g in TagUtils.matchTag function')
     }
     return returnValue
-  },
+  },*/
 
   cleanTextFromTag: function (text) {
     let tagsMap = []
@@ -358,12 +358,12 @@ const TAGS_UTILS = {
     return !isUndefined(originalText) && reg.test(originalText)
   },
 
-  /**
+  /*/!**
    * Remove all xliff source tags from the string
    * @param currentString :  string to parse
    * @returns the decoded String
    * TODO: Same of function cleanTextFromTag
-   */
+   *!/
   removeAllTags: function (currentString) {
     if (currentString) {
       var regExp = getXliffRegExpression()
@@ -372,14 +372,14 @@ const TAGS_UTILS = {
     } else {
       return ''
     }
-  },
+  },*/
 
   checkXliffTagsInText: function (text) {
     var reg = getXliffRegExpression()
     return reg.test(text)
   },
 
-  /**
+  /*/!**
    * Not used
    * Old function used before execute diff on text
    * @param mainStr
@@ -387,7 +387,7 @@ const TAGS_UTILS = {
    * @param replacementsMap
    * @returns {[*, *, *]}
    * @private
-   */
+   *!/
   _treatTagsAsBlock: function (mainStr, transDecoded, replacementsMap) {
     var placeholderPhRegEx = /(&lt;ph id="mtc_.*?\/&gt;)/g
     var reverseMapElements = {}
@@ -398,7 +398,7 @@ const TAGS_UTILS = {
       return [mainStr, transDecoded, replacementsMap]
     }
 
-    /**
+    /!**
      * UI.execDiff works at character level, when a tag differs only for a part of it in the source/translation it breaks the tag
      * Ex:
      *
@@ -426,17 +426,17 @@ const TAGS_UTILS = {
      *  So, transform the string in a single character ( Private Use Unicode char ) for the diff function, place it in a map and reinsert in the diff_obj after the UI.execDiff executed
      *
      * //U+E000..U+F8FF, 6,400 Private-Use Characters Unicode, should be impossible to have those in source/target
-     */
+     *!/
     var charCodePlaceholder = 57344
 
     listMainStr.forEach(function (element) {
       var actualCharCode = String.fromCharCode(charCodePlaceholder)
 
-      /**
+      /!**
        * override because we already have an element in the map, so the content is the same
        * ( duplicated TAG, should be impossible but it's easy to cover the case ),
        * use such character
-       */
+       *!/
       if (reverseMapElements[element]) {
         actualCharCode = reverseMapElements[element]
       }
@@ -452,11 +452,11 @@ const TAGS_UTILS = {
       listTransDecoded.forEach(function (element) {
         var actualCharCode = String.fromCharCode(charCodePlaceholder)
 
-        /**
+        /!**
          * override because we already have an element in the map, so the content is the same
          * ( tag is present in source and target )
          * use such character
-         */
+         *!/
         if (reverseMapElements[element]) {
           actualCharCode = reverseMapElements[element]
         }
@@ -468,7 +468,7 @@ const TAGS_UTILS = {
       })
     }
     return [mainStr, transDecoded, replacementsMap]
-  },
+  },*/
 
   // Execute diff between two string also handling tags
   executeDiff: function (item1, item2) {
