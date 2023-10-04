@@ -60,7 +60,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'end_offset'          => $this->request->end_offset,
                 'is_full_segment'     => false,
                 'comment'             => $this->request->comment,
-                'uid'                 => (($this->user !== null) ? $this->user->uid : null),
+                'uid'                 => (($this->user !== null and $this->user instanceof \Users_UserStruct) ? $this->user->uid : null),
                 'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
         ];
 
