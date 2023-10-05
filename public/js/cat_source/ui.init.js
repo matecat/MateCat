@@ -25,7 +25,7 @@ $.extend(window.UI, {
     this.shortcutLeader = this.isMac ? 'CMD' : 'CTRL'
 
     this.initStart = new Date()
-    this.version = 'x.x.x'
+    // this.version = 'x.x.x'
     this.numContributionMatchesResults = 3
     this.numMatchesResults = 10
     this.editarea = ''
@@ -39,7 +39,7 @@ $.extend(window.UI, {
     this.setTranslationTail = []
     this.executingSetTranslation = []
 
-    this.checkVersion()
+    //this.checkVersion()
 
     // SET EVENTS
     this.setEvents()

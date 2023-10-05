@@ -21,6 +21,8 @@ import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
 import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from '../segments/SegmentContext'
+import CatToolConstants from '../../constants/CatToolConstants'
+import CatToolStore from '../../stores/CatToolStore'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -45,6 +47,7 @@ class Segment extends React.Component {
     this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
     this.forceUpdateSegment = this.forceUpdateSegment.bind(this)
+    this.clientReconnection = this.clientReconnection.bind(this)
 
     let readonly = UI.isReadonlySegment(this.props.segment)
     this.secondPassLocked =
@@ -505,6 +508,18 @@ class Segment extends React.Component {
     }
   }
 
+  clientReconnection() {
+    SegmentActions.getGlossaryForSegment({
+      sid: this.props.segment.sid,
+      fid: this.props.fid,
+      text: this.props.segment.segment,
+    })
+    SegmentActions.getContributions(
+      this.props.segment.sid,
+      this.props.multiMatchLangs,
+    )
+  }
+
   forceUpdateSegment(sid) {
     if (this.props.segment.sid === sid) {
       this.forceUpdate()
@@ -538,6 +553,10 @@ class Segment extends React.Component {
     SegmentStore.addListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.CLIENT_RECONNECTION,
+      this.clientReconnection,
     )
 
     //Review
@@ -580,6 +599,11 @@ class Segment extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
+    )
+
+    CatToolStore.removeListener(
+      CatToolConstants.CLIENT_RECONNECTION,
+      this.clientReconnection,
     )
 
     //Review
@@ -637,13 +661,6 @@ class Segment extends React.Component {
         (!prevProps.segment.opened && this.props.segment.opened))
     ) {
       setTimeout(() => Speech2Text.enableMicrophone(this.$section))
-    }
-    if (!prevProps.clientConnected && this.props.clientConnected) {
-      SegmentActions.getGlossaryForSegment({
-        sid: this.props.segment.sid,
-        fid: this.props.fid,
-        text: this.props.segment.segment,
-      })
     }
     return null
   }
