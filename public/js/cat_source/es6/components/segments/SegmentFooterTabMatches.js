@@ -92,8 +92,8 @@ class SegmentFooterTabMatches extends React.Component {
           this.segment,
           self.props.segment.segment,
         )
-        item.sourceDiff = item.sourceDiff.replace(/&amp;/g, '&')
-        item.sourceDiff = config.isSourceRTL(item.sourceDiff)
+
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(item.sourceDiff)
       }
 
       if (!isUndefined(this.tm_properties)) {
