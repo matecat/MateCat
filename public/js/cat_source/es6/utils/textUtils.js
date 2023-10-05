@@ -17,7 +17,7 @@ const TEXT_UTILS = {
     var diff
     try {
       source = source.replace(
-        /<;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+        /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
         function (match) {
           var id = Math.floor(Math.random() * 10000)
           phTagsObject.push({
@@ -83,6 +83,41 @@ const TEXT_UTILS = {
     } catch (e) {
       return source
     }
+  },
+  /**
+   * Replace temporaly tags with placeholder
+   * @param text
+   */
+  replaceTempTags: (text) => {
+    let tags = []
+    text = text.replace(
+      /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+      function (match) {
+        var id = Math.floor(Math.random() * 10000)
+        tags.push({
+          id,
+          match,
+        })
+        return '#' + id + '#'
+      },
+    )
+    return {tags, text}
+  },
+  restoreTempTags(tags, text) {
+    text = text.replace(/#(.*?)#/gi, (match, id) => {
+      try {
+        const tag = tags.find((item) => {
+          return item.id === parseInt(id)
+        })
+        if (!isUndefined(tag)) {
+          return tag.match
+        }
+        return match
+      } catch (e) {
+        return match
+      }
+    })
+    return text
   },
   /**
    *This function takes in the array that exits the TextUtils.diffMatchPatch.diff_main function and parses the array elements to see if they contain broken tags.

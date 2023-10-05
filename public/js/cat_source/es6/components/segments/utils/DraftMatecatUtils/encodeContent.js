@@ -3,6 +3,7 @@ import {EditorState} from 'draft-js'
 import splitOnTagPlaceholder from './splitOnTagPlaceHolder'
 import removeNewLineInContentState from './removeNewLineInContentState'
 import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
+import {decodeHtmlEntities} from './tagUtils'
 
 /**
  *
@@ -22,6 +23,7 @@ const encodeContent = (originalEditorState, plainText = '', sourceTagMap) => {
     /<g\sid="((?:(?!>).)+?)"\s?\/>/gi,
     '<g id="$1"></g>',
   )
+  plainText = decodeHtmlEntities(plainText)
   // Create entities
   const entitiesFromMap = createNewEntitiesFromMap(
     originalEditorState,

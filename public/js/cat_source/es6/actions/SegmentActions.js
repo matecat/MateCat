@@ -1283,18 +1283,15 @@ const SegmentActions = {
   getSegmentsQa: (segment) => {
     if (!segment) return
 
-    var segment_status = segment.status
-
-    const src_content = segment.updatedSource
-    const trg_content = segment.translation
+    const {status, segment: source, translation} = segment
 
     getLocalWarnings({
       id: segment.sid,
       id_job: config.id_job,
       password: config.password,
-      src_content: src_content,
-      trg_content: trg_content,
-      segment_status: segment_status,
+      src_content: source,
+      trg_content: translation,
+      segment_status: status,
       characters_counter: segment.charactersCounter ?? 0,
     })
       .then((data) => {
@@ -1352,12 +1349,12 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary() && trg_content) {
+      if (CatToolStore.getHaveKeysGlossary() && translation) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: trg_content,
-          source: src_content,
+          target: translation,
+          source: source,
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)

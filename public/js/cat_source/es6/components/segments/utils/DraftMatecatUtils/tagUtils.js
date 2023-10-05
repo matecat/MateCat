@@ -152,18 +152,17 @@ export const decodePlaceholdersToPlainText = (str) => {
 }
 
 export const decodeHtmlEntities = (text) => {
-  return text
-    .replace(/&apos;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
+  return (
+    text
+      // .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+  )
 }
 export const encodeHtmlEntities = (text) => {
-  return text
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/&/g, '&amp;')
-    .replace(/'/g, '&apos;')
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  // .replace(/'/g, '&apos;')
 }
 
 export const getIdAttributeRegEx = () => {

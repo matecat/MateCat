@@ -16,7 +16,6 @@ const createNewEntitiesFromMap = (
   plainText = '',
   sourceTagMap,
 ) => {
-  plainText = decodeHtmlEntities(plainText)
   const excludeReplaceZWSP = ['nbsp']
   // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
   const tagRange = matchTag(plainText) // absolute offset
