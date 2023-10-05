@@ -521,7 +521,7 @@ class Stomp {
         }
 
         $data = $stompFrame->__toString();
-        $r    = fwrite( $this->_socket, $data, strlen( $data ) );
+        $r    = @fwrite( $this->_socket, $data, strlen( $data ) );
         if ( $r === false || $r == 0 ) {
             $this->_reconnect();
             $this->_writeFrame( $stompFrame );
