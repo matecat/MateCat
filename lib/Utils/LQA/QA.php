@@ -2132,17 +2132,19 @@ class QA {
              *
              */
             $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
-            if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
-                $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+
+            if(isset($trgNodeContent) and isset($srcNodeContent)){
+                if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
+                    $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+                }
+
+                $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
             }
-
-            $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
-            $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
         }
-
     }
 
     /**
