@@ -841,10 +841,9 @@ class Editarea extends React.Component {
       editorState,
       DraftMatecatConstants.LEXIQA_DECORATOR,
     )
-    newEditorState = DraftMatecatUtils.insertEntityAtSelection(
-      newEditorState,
-      customTag,
-    )
+
+    newEditorState = insertTag(customTag, newEditorState)
+
     this.setState(
       (prevState) => ({
         activeDecorators: {

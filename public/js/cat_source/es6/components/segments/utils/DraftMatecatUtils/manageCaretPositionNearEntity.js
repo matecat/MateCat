@@ -153,7 +153,7 @@ export const isCaretInsideEntity = () => {
     const selection = window.getSelection()
     const textNode = getTextNode(entityContainer)
     const {focusOffset} = selection
-    if (focusOffset > 0 && focusOffset < textNode.length) return true
+    if (focusOffset >= 0 && focusOffset <= textNode.length) return true
   }
 
   return false
@@ -164,7 +164,7 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
   if (!selection) return
 
   const entityContainer = getEntityContainer(entityClassname)
-  console.log('entityContainer', entityContainer, selection.focusNode)
+
   // remove caret inside entity
   if (entityContainer) {
     // avoid carret adjustment when cursor move forward and previous element is an entity
@@ -181,7 +181,6 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
         ? entityContainer.previousElementSibling
         : entityContainer.nextElementSibling
 
-    console.log(focusOnElement)
     if (focusOnElement) {
       const textNode = getTextNode(focusOnElement)
       const offset = direction === 'left' ? textNode.length : 0
