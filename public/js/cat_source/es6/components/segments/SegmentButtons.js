@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined, isNull} from 'lodash'
 
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
@@ -81,7 +81,7 @@ class SegmentButton extends React.Component {
       revisionCompleted = this.state.progress.revisionCompleted
     }
     let enableGoToNext =
-      !_.isUndefined(nextSegment) &&
+      !isUndefined(nextSegment) &&
       !revisionCompleted &&
       ((nextSegment.status.toLowerCase() === 'approved' &&
         nextSegment.autopropagated_from == 0) || //Approved and propagation confirmed
@@ -95,8 +95,8 @@ class SegmentButton extends React.Component {
       : ''
     enableGoToNext = ReviewExtended.enabled()
       ? enableGoToNext &&
-        (_.isNull(nextSegment.revision_number) ||
-          (!_.isNull(nextSegment.revision_number) &&
+        (isNull(nextSegment.revision_number) ||
+          (!isNull(nextSegment.revision_number) &&
             (nextSegment.revision_number === config.revisionNumber ||
               (nextSegment.revision_number === 2 &&
                 config.revisionNumber === 1))) || //Not Same Rev
@@ -187,7 +187,7 @@ class SegmentButton extends React.Component {
     let translationCompleted =
       this.state.progress && this.state.progress.translationCompleted
     let enableGoToNext =
-      !_.isUndefined(nextSegment) &&
+      !isUndefined(nextSegment) &&
       !translationCompleted &&
       ((nextSegment.status !== 'NEW' &&
         nextSegment.status !== 'DRAFT' &&

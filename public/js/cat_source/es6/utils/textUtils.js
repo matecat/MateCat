@@ -1,7 +1,8 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import {Base64} from 'js-base64'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CommonUtils from './commonUtils'
+import diff_match_patch from 'diff-match-patch'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -19,7 +20,7 @@ const TEXT_UTILS = {
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
         var id = Math.floor(Math.random() * 10000)
-        if (_.isUndefined(phTagsObject[match])) {
+        if (isUndefined(phTagsObject[match])) {
           phTagsObject[match] = {
             id,
             match,
@@ -35,7 +36,7 @@ const TEXT_UTILS = {
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
         var id = Math.floor(Math.random() * 10000000)
-        if (_.isUndefined(phTagsObject[match])) {
+        if (isUndefined(phTagsObject[match])) {
           phTagsObject[match] = {
             id,
             match,
@@ -67,10 +68,10 @@ const TEXT_UTILS = {
     $.each(diff, function (index, text) {
       text[1] = text[1].replace(/<(.*?)>/gi, function (match, id) {
         try {
-          var tag = _.find(phTagsObject, function (item) {
+          var tag = find(phTagsObject, function (item) {
             return item.id === parseInt(id)
           })
-          if (!_.isUndefined(tag)) {
+          if (!isUndefined(tag)) {
             return tag.match
           }
           return match
@@ -261,7 +262,7 @@ const TEXT_UTILS = {
     source = source.replace(
       /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
       function (match, group1, group2) {
-        if (_.isUndefined(phTagsObject[group2])) {
+        if (isUndefined(phTagsObject[group2])) {
           phTagsObject[group2] = match
         }
         return '<' + Base64.encode(group2) + '> '
@@ -271,7 +272,7 @@ const TEXT_UTILS = {
     target = target.replace(
       /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
       function (match, gruop1, group2) {
-        if (_.isUndefined(phTagsObject[group2])) {
+        if (isUndefined(phTagsObject[group2])) {
           phTagsObject[group2] = match
         }
         return '<' + Base64.encode(group2) + '> '
@@ -295,7 +296,7 @@ const TEXT_UTILS = {
       text[1] = text[1].replace(/<(.*?)>/gi, function (match, text) {
         try {
           var decodedText = Base64.decode(text)
-          if (!_.isUndefined(phTagsObject[decodedText])) {
+          if (!isUndefined(phTagsObject[decodedText])) {
             return phTagsObject[decodedText]
           }
           return match

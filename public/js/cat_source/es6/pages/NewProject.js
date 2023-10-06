@@ -52,6 +52,7 @@ const NewProject = ({
   conversionEnabled,
   formatsNumber,
   googleDriveEnabled,
+  restartConversions,
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
@@ -92,7 +93,7 @@ const NewProject = ({
   )
   const [segmentationRule, setSegmentationRule] = useState({
     name: 'General',
-    id: '',
+    id: 'standard',
   })
   const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
   const [getPublicMatches, setGetPublicMatches] = useState(
@@ -310,7 +311,9 @@ const NewProject = ({
   }, [])
   useEffect(() => {
     const createKeyFromTMXFile = ({extension, filename}) => {
-      if (tmKeys.every(({isActive}) => !isActive)) {
+      const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
+
+      if (haveNoActiveKeys) {
         tmCreateRandUser().then((response) => {
           const {key} = response.data
           setTmKeys((prevState) => [
@@ -331,27 +334,35 @@ const NewProject = ({
         })
       }
 
-      const message =
-        extension === 'g' ? (
-          <span>
-            A new resource has been generated for the glossary you uploaded. You
-            can manage your resources in the{' '}
-            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
-              Settings panel
-            </a>
-            .
-          </span>
-        ) : (
-          <span>
-            A new resource has been generated for the TMX you uploaded. You can
-            manage your resources in the{' '}
-            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
-              {' '}
-              Settings panel
-            </a>
-            .
-          </span>
-        )
+      const glossaryMessage = (
+        <span>
+          A new resource has been generated for the glossary you uploaded. You
+          can manage your resources in the{' '}
+          <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+            Settings panel
+          </a>
+          .
+        </span>
+      )
+
+      const tmMessage = haveNoActiveKeys ? (
+        <span>
+          A new resource has been generated for the TMX you uploaded. You can
+          manage your resources in the{' '}
+          <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+            {' '}
+            Settings panel
+          </a>
+          .
+        </span>
+      ) : (
+        <span>
+          The TMX file(s) you have uploaded have been imported into the active
+          private key(s)
+        </span>
+      )
+
+      const message = extension === 'g' ? glossaryMessage : tmMessage
       setWarnings(message)
     }
     CreateProjectStore.addListener(
@@ -389,14 +400,14 @@ const NewProject = ({
     })
     if (prevSourceLang.current.id !== sourceLang.id) {
       prevSourceLang.current = sourceLang
-      UI.UPLOAD_PAGE.restartConversions()
+      restartConversions()
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
   useEffect(() => {
     //TODO: used in main.js, remove
     UI.segmentationRule = segmentationRule.id
-    //UI.UPLOAD_PAGE.restartConversions()
+    restartConversions()
   }, [segmentationRule])
 
   return (
@@ -651,5 +662,6 @@ NewProject.propTypes = {
   conversionEnabled: PropTypes.bool,
   formatsNumber: PropTypes.number,
   googleDriveEnabled: PropTypes.bool,
+  restartConversions: PropTypes.func,
 }
 export default NewProject

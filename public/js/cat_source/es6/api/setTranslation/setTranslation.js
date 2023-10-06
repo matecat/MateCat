@@ -1,5 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
+import TagUtils from '../../utils/tagUtils'
 /**
  * Set segment to translation on review extended issue panel
  *

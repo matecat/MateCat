@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import IconDown from '../../icons/IconDown'
 import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'
@@ -68,9 +68,9 @@ class FilterProjects extends React.Component {
   }
 
   getSnapshotBeforeUpdate(propsBefore) {
-    if (_.isUndefined(this.props.selectedTeam)) return null
+    if (isUndefined(this.props.selectedTeam)) return null
     if (
-      _.isUndefined(propsBefore.selectedTeam) ||
+      isUndefined(propsBefore.selectedTeam) ||
       this.props.selectedTeam.get('id') !==
         propsBefore.selectedTeam.get('id') ||
       this.props.selectedTeam.get('members') !==
@@ -79,7 +79,7 @@ class FilterProjects extends React.Component {
       this.teamChanged = true
       this.dropDownUsersInitialized = false
       if (
-        !_.isUndefined(propsBefore.selectedTeam) &&
+        !isUndefined(propsBefore.selectedTeam) &&
         this.props.selectedTeam.get('id') !== propsBefore.selectedTeam.get('id')
       ) {
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER
@@ -272,8 +272,8 @@ class FilterProjects extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      _.isUndefined(this.props.selectedTeam) ||
-      (!_.isUndefined(nextProps.selectedTeam) &&
+      isUndefined(this.props.selectedTeam) ||
+      (!isUndefined(nextProps.selectedTeam) &&
         !nextProps.selectedTeam.equals(this.props.selectedTeam)) ||
       nextState.searchMember !== this.state.searchMember
     )

@@ -1,7 +1,7 @@
 import {EventEmitter} from 'events'
 import assign from 'object-assign'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {forEach} from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
 import QRConstants from '../constants/QualityReportConstants'
@@ -35,7 +35,7 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
   },
 
   addSegments: function (segmentsData) {
-    _.forEach(segmentsData.segments, (segment) => {
+    forEach(segmentsData.segments, (segment) => {
       const fileId = segment.file.id.toString()
       if (this._segmentsFiles.get(fileId)) {
         let immFiles = Immutable.fromJS(segment)

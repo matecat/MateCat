@@ -7,6 +7,7 @@ use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use API\V2\Json\TranslationIssueComment;
 use API\V2\Validators\ChunkPasswordValidator;
 use Database;
+use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
 use Features\ReviewExtended\TranslationIssueModel;
 use Features\SecondPassReview;
@@ -41,6 +42,10 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->response->json( [ 'issues' => $rendered ] );
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws ValidationError
+     */
     public function create() {
         $data = [
                 'id_segment'          => $this->request->id_segment,
@@ -129,21 +134,25 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->response->json( [ 'comments' => $rendered ] );
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function createComment() {
 
         $data = [
                 'comment'     => $this->request->message,
                 'id_qa_entry' => $this->validator->issue->id,
                 'source_page' => $this->request->source_page,
-                'uid'         => ($this->user) ? $this->user->uid : null
+                'uid'         => ( $this->user ) ? $this->user->uid : null
         ];
 
-        $dao = new EntryCommentDao();
+        $dao   = new EntryCommentDao();
+        $entry = EntryDao::findById( $this->validator->issue->id );
 
-        $result = $dao->createComment( $data );
+        $dao->createComment( $data );
 
         $json     = new TranslationIssueFormatter();
-        $rendered = $json->renderItem( $result );
+        $rendered = $json->renderItem( $entry );
 
         $response = [ 'comment' => $rendered ];
 

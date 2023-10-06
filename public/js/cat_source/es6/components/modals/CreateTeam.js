@@ -2,6 +2,7 @@ import React from 'react'
 
 import ManageActions from '../../actions/ManageActions'
 import CommonUtils from '../../utils/commonUtils'
+import ModalsActions from '../../actions/ModalsActions'
 
 class CreateTeam extends React.Component {
   constructor(props) {

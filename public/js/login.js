@@ -1,5 +1,3 @@
-import React from 'react'
-
 import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
 import ConfirmRegister from './cat_source/es6/components/modals/ConfirmRegister'
 import PreferencesModal from './cat_source/es6/components/modals/PreferencesModal'
@@ -61,9 +59,13 @@ $.extend(APP, {
       )
     })
     $('#modal').on('openresetpassword', function () {
+      let props = {closeOnOutsideClick: false, showOldPassword: true}
+      if (APP.lookupFlashServiceParam('popup')) {
+        props.showOldPassword = false
+      }
       ModalsActions.showModalComponent(
         ResetPasswordModal,
-        {closeOnOutsideClick: false},
+        props,
         'Reset Password',
       )
     })

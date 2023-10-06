@@ -33,7 +33,6 @@ class LoginController extends AbstractStatefulKleinController  {
             AuthCookie::setCredentials( $user->email, $user->uid );
 
             $project = new RedeemableProject( $user, $_SESSION );
-
             $project->tryToRedeem();
             $this->response->code( 200 );
         } else {
