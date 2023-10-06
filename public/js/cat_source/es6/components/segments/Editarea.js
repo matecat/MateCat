@@ -103,6 +103,7 @@ class Editarea extends React.Component {
 
     this.isShiftPressedOnNavigation = createRef()
     this.caretDirectionOnNavigation = createRef()
+    this.compositionEventChecks = createRef()
 
     this.state = {
       editorState: editorState,
@@ -465,6 +466,10 @@ class Editarea extends React.Component {
         this.focusEditor()
       }
     })
+
+    const {editor: editorElement} = this.editor
+    editorElement.addEventListener('compositionstart', this.onCompositionStart)
+    editorElement.addEventListener('compositionend', this.onCompositionEnd)
   }
 
   copyGlossaryToEditArea = (segment, glossaryTranslation) => {
@@ -498,6 +503,13 @@ class Editarea extends React.Component {
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
     )
+
+    const {editor: editorElement} = this.editor
+    editorElement.removeEventListener(
+      'compositionstart',
+      this.onCompositionStart,
+    )
+    editorElement.removeEventListener('compositionend', this.onCompositionEnd)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -553,6 +565,19 @@ class Editarea extends React.Component {
         })
         this.caretDirectionOnNavigation.current = undefined
       }
+    }
+  }
+
+  onCompositionStart = () => {
+    this.compositionEventChecks.current = {
+      startIsInsideEntity: isCaretInsideEntity(),
+      endIsTriggered: false,
+    }
+  }
+  onCompositionEnd = () => {
+    this.compositionEventChecks.current = {
+      ...this.compositionEventChecks.current,
+      endIsTriggered: true,
     }
   }
 
@@ -974,7 +999,10 @@ class Editarea extends React.Component {
     const {closePopover} = this
 
     // check caret is inside entity and restore previous editorState
-    if (isCaretInsideEntity()) {
+    if (
+      isCaretInsideEntity() ||
+      this.compositionEventChecks.current?.startIsInsideEntity
+    ) {
       this.setState(
         () => ({
           editorState: prevEditorState,
@@ -983,6 +1011,11 @@ class Editarea extends React.Component {
           this.onCompositionStopDebounced()
         },
       )
+      if (this.compositionEventChecks?.endIsTriggered)
+        this.compositionEventChecks.current = {
+          startIsInsideEntity: false,
+          endIsTriggered: false,
+        }
       return
     }
 
