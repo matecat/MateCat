@@ -92,10 +92,15 @@ let CatToolActions = {
   startNotifications: function () {
     Notifications.start()
   },
-  clientConntected: function (clientId) {
+  clientConnected: function (clientId) {
     AppDispatcher.dispatch({
       actionType: CattolConstants.CLIENT_CONNECT,
       clientId,
+    })
+  },
+  clientReconnect: () => {
+    AppDispatcher.dispatch({
+      actionType: CattolConstants.CLIENT_RECONNECTION,
     })
   },
 
@@ -246,7 +251,7 @@ let CatToolActions = {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
     const haveKeysGlossary = CatToolStore.getHaveKeysGlossary()
-    if ((!jobKeys || forceUpdate) && config.id_client) {
+    if ((!jobKeys || forceUpdate) && CatToolStore.isClientConnected()) {
       getTmKeysJob().then(({tm_keys: tmKeys}) => {
         // filter not private keys
         const filteredKeys = tmKeys.filter(({is_private}) => !is_private)

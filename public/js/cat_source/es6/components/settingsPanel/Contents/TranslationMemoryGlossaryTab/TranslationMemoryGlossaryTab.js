@@ -65,9 +65,11 @@ const NEW_RESOURCE = {
   w: true,
 }
 
+export const isOwnerOfKey = (key) => !/[*]/g.test(key)
+
 export const getTmDataStructureToSendServer = ({tmKeys, keysOrdered}) => {
   const mine = tmKeys
-    .filter(({owner, isActive}) => owner && isActive)
+    .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
     .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
 
   const order = (acc, cur) => {
@@ -212,7 +214,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
       return [...rowsActive, ...rowsNotActive].map((row) => {
         const prevStateRow = prevState.find(({id}) => id === row.id) ?? {}
-        const {id, key, name, owner, isActive, isLocked} = row
+        const {id, key, name, isActive, isLocked} = row
         const {isExpanded, extraNode} = prevStateRow
 
         const isCreateResourceRow =
@@ -227,7 +229,7 @@ export const TranslationMemoryGlossaryTab = () => {
           id,
           key,
           name,
-          isDraggable: isActive && !isSpecialRow && owner,
+          isDraggable: isActive && !isSpecialRow && isOwnerOfKey(key),
           isActive,
           isLocked,
           isExpanded,
@@ -262,7 +264,7 @@ export const TranslationMemoryGlossaryTab = () => {
         getPublicMatches !== current.getPublicMatches ||
         tmKeysActive.length !== prevTmKeysActive.length ||
         tmKeysActive
-          .filter(({owner}) => owner)
+          .filter(({key}) => isOwnerOfKey(key))
           .some(({key, r, w}) => {
             const prevTm = prevTmKeysActive.find((prev) => prev.key === key)
             return prevTm && (r !== prevTm.r || w !== prevTm.w)
