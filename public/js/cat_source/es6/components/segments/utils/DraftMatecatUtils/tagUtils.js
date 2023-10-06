@@ -1,4 +1,8 @@
-import {getXliffRegExpression, tagSignatures} from './tagModel'
+import {
+  getXliffRegExpression,
+  isToReplaceForLexiqa,
+  tagSignatures,
+} from './tagModel'
 import {Base64} from 'js-base64'
 
 export const transformTagsToHtml = (text) => {
@@ -59,6 +63,38 @@ export const transformTagsToText = (text) => {
         let globalRegex = new RegExp(regex)
         text = text.replace(globalRegex, (match) => {
           return placeholder ? placeholder : match
+        })
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
+export const transformTagsToLexiqaText = (text) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
+        tagSignatures[key]
+      if (placeholderRegex) {
+        let globalRegex = new RegExp(
+          placeholderRegex.source,
+          placeholderRegex.flags + 'g',
+        )
+        text = text.replace(globalRegex, (match, text) => {
+          let tag = decodeNeeded
+            ? decodeHtmlEntities(Base64.decode(text))
+            : match
+          tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
+          return tag
+        })
+      } else if (regex) {
+        let globalRegex = new RegExp(regex)
+        text = text.replace(globalRegex, (match) => {
+          let tag = placeholder ? placeholder : match
+          tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
+          return tag
         })
       }
     }

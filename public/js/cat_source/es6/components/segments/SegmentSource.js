@@ -231,7 +231,7 @@ class SegmentSource extends React.Component {
       let plainText = contentState.getPlainText()
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
       const lxqDecodedSource =
-        DraftMatecatUtils.prepareTextForLexiqa(editorState)
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       SegmentActions.updateSource(
         this.props.segment.sid,
         decodedSegment,

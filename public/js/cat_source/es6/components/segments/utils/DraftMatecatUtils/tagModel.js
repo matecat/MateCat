@@ -138,7 +138,8 @@ const tagSignatures = {
     glossaryAvailable: false,
     style: 'tag-selfclosed tag-tab',
     showTooltip: false,
-    replaceForLexiqa: false,
+    replaceForLexiqa: true,
+    lexiqaText: ' ',
   },
   carriageReturn: {
     type: 'carriageReturn',
@@ -154,7 +155,8 @@ const tagSignatures = {
     glossaryAvailable: false,
     style: 'tag-selfclosed tag-cr',
     showTooltip: false,
-    replaceForLexiqa: false,
+    replaceForLexiqa: true,
+    lexiqaText: '\n',
   },
   lineFeed: {
     type: 'lineFeed',
@@ -170,7 +172,8 @@ const tagSignatures = {
     glossaryAvailable: false,
     style: 'tag-selfclosed tag-lf',
     showTooltip: false,
-    replaceForLexiqa: false,
+    replaceForLexiqa: true,
+    lexiqaText: '\n',
   },
   splitPoint: {
     type: 'splitpoint',
@@ -302,7 +305,7 @@ const isToReplaceForLexiqa = (tagType, isClosure = false) => {
 }
 
 const getXliffRegExpression = () => {
-  return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?&gt;)/gim
+  return /(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?>)/gim
 }
 
 const getTagSignature = (tagType) => {
