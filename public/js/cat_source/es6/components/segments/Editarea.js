@@ -536,7 +536,6 @@ class Editarea extends React.Component {
         .getFocusOffset()
 
       if (prevFocusOffset !== currentFocusOffset) {
-        console.log('Caret position after update:', currentFocusOffset)
         const direction =
           currentFocusOffset > prevFocusOffset ? 'right' : 'left'
 
