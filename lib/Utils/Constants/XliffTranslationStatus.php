@@ -2,6 +2,9 @@
 
 class Constants_XliffTranslationStatus {
 
+    const FUZZY_MATCH = 'fuzzy-match';
+    const MT_SUGGESTION = 'mt-suggestion';
+
     const NEW_STATE = 'new';
     const INITIAL = 'initial';
     const NEEDS_TRANSLATION = 'needs-translation';
@@ -17,6 +20,18 @@ class Constants_XliffTranslationStatus {
     const SIGNED_OFF = 'signed-off';
 
     const FINAL_STATE = 'final';
+
+    /**
+     * @param $status
+     * @return bool
+     */
+    public static function isFuzzyMatch( $status )
+    {
+        return in_array($status, [
+            self::FUZZY_MATCH,
+            self::MT_SUGGESTION,
+        ]);
+    }
 
     /**
      * @param $status

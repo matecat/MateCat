@@ -1880,6 +1880,7 @@ class ProjectManager {
 
                                         // could not have attributes, suppress warning
                                         $state = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
+                                        $stateQualifier = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ];
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
@@ -1900,7 +1901,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+                                        if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2701,6 +2702,8 @@ class ProjectManager {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
         }
 
+      //  $this->createReview($job, 2);
+
         // First, create a R2 for the job is state is 'final',
         // then, save an event of each segment with state 'final'
         if($createSecondPassReview){
@@ -2719,9 +2722,9 @@ class ProjectManager {
     }
 
     /**
-     * @param $job
-     * @throws NotFoundException
-     * @throws Exception
+     * @param Jobs_JobStruct $job
+     * @param $source_page
+     * @throws \Exception
      */
     private function createSecondPassReview(Jobs_JobStruct $job)
     {
@@ -3343,6 +3346,7 @@ class ProjectManager {
      * @param $target
      * @param $xliff_trans_unit
      * @param $state
+     * @param $stateQualifier
      *
      * @return bool|mixed
      * @throws NotFoundException
@@ -3351,7 +3355,14 @@ class ProjectManager {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null ) {
+    private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null, $stateQualifier = null ) {
+
+        // ignore translations for fuzzy matches (xliff 1.2)
+        if($stateQualifier !== null){
+            if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return false;
+            }
+        }
 
         if($state !== null){
             return !Constants_XliffTranslationStatus::isNew($state);
