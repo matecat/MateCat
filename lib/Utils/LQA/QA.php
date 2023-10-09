@@ -2089,8 +2089,10 @@ class QA {
 
             } else {
 
-                $srcNode        = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                $srcNodeContent = $srcNode->textContent;
+                $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
+                if($srcNode !== null){
+                    $srcNodeContent = $srcNode->textContent;
+                }
 
                 foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
                     if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
@@ -2100,8 +2102,9 @@ class QA {
 
                 $trgTagPos      = $trgTagReference[ 'node_idx' ];
                 $trgNode        = $trgNodeList->item( $trgTagPos );
-                $trgNodeContent = $trgNode->textContent;
-
+                if($trgNode !== null){
+                    $trgNodeContent = $trgNode->textContent;
+                }
             }
 
             /**
@@ -2129,17 +2132,19 @@ class QA {
              *
              */
             $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
-            if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
-                $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+
+            if(isset($trgNodeContent) and isset($srcNodeContent)){
+                if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
+                    $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+                }
+
+                $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
             }
-
-            $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
-            $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
         }
-
     }
 
     /**
