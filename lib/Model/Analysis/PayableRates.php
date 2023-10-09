@@ -20,7 +20,7 @@ class Analysis_PayableRates {
             '100%_PUBLIC' => 30,
             'REPETITIONS' => 30,
             'INTERNAL'    => 60,
-            'MT'          => 77
+            'MT'          => 72
     ];
 
     protected static $langPair2MTpayableRates = [
@@ -36,7 +36,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 72
+                            'MT'          => 67
                     ],
                     "fr" => [
                             'NO_MATCH'    => 100,
@@ -49,7 +49,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 72
+                            'MT'          => 67
                     ],
                     "pt" => [
                             'NO_MATCH' => 100,
@@ -63,7 +63,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 72
+                            'MT'          => 67
                     ],
                     "es" => [
                             'NO_MATCH'    => 100,
@@ -76,7 +76,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 72
+                            'MT'          => 67
                     ],
                     "nl" => [
                             'NO_MATCH'    => 100,
@@ -89,7 +89,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 72
+                            'MT'          => 67
                     ],
                     "pl" => [
                             'NO_MATCH'    => 100,
@@ -102,7 +102,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "uk" => [
                             'NO_MATCH'    => 100,
@@ -115,7 +115,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "hi" => [
                             'NO_MATCH'    => 100,
@@ -128,7 +128,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "fi" => [
                             'NO_MATCH'    => 100,
@@ -141,7 +141,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "tr" => [
                             'NO_MATCH'    => 100,
@@ -154,7 +154,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "ru" => [
                             'NO_MATCH'    => 100,
@@ -206,7 +206,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "ko" => [
                             'NO_MATCH'    => 100,
@@ -232,7 +232,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "ja" => [
                             'NO_MATCH'    => 100,
@@ -245,7 +245,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "he" => [
                             'NO_MATCH'    => 100,
@@ -258,7 +258,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ],
                     "sr" => [
                             'NO_MATCH'    => 100,
@@ -271,7 +271,7 @@ class Analysis_PayableRates {
                             '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 82
+                            'MT'          => 77
                     ]
             ]
     ];
