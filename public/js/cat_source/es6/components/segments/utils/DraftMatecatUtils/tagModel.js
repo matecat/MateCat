@@ -32,7 +32,8 @@ const tagSignatures = {
   },
   g: {
     type: 'g',
-    regex: /<g[^&]*id="(.*?)".*?>/g,
+    regex: /<g .*?\bid="(.*?)".*?>/g,
+    // regex: /<g[^>]+?id="([^"]+)".*?>/g,
     selfClosing: false,
     isClosure: false,
     placeholder: null,
@@ -64,7 +65,7 @@ const tagSignatures = {
   },
   bx: {
     type: 'bx',
-    regex: /<bx[^&]*id="(.*?)".*?\/>/g,
+    regex: /<bx .*?id="(.*?)".*?\/>/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
@@ -79,7 +80,7 @@ const tagSignatures = {
   },
   ex: {
     type: 'ex',
-    regex: /<ex[^&]*id="(.*?)".*?\/>/g,
+    regex: /<ex .*?id="(.*?)".*?\/>/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
@@ -94,7 +95,7 @@ const tagSignatures = {
   },
   x: {
     type: 'x',
-    regex: /<x[^&]*id="(.*?)".*?>/gi,
+    regex: /<x .*?id="(.*?)".*?\/>/gi,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
