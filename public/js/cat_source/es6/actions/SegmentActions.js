@@ -1283,13 +1283,13 @@ const SegmentActions = {
   getSegmentsQa: (segment) => {
     if (!segment) return
 
-    const {status, segment: source, translation} = segment
+    const {status, translation, updatedSource} = segment
 
     getLocalWarnings({
       id: segment.sid,
       id_job: config.id_job,
       password: config.password,
-      src_content: source,
+      src_content: updatedSource,
       trg_content: translation,
       segment_status: status,
       characters_counter: segment.charactersCounter ?? 0,
@@ -1354,7 +1354,7 @@ const SegmentActions = {
         getGlossaryCheck({
           idSegment: segment.sid,
           target: translation,
-          source: source,
+          source: updatedSource,
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)

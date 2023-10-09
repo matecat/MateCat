@@ -224,7 +224,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.decodedSource = DraftMatecatUtils.transformTagsToText(
           segment.segment,
         )
-        segment.updatedSource = segment.segment
+        segment.updatedSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+          segment,
+        )
+          ? DraftMatecatUtils.removeTagsFromText(segment.segment)
+          : segment.segment
         segment.openComments = false
         segment.openSplit = false
         newSegments.push(segment)

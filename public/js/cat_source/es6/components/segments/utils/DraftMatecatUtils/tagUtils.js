@@ -4,6 +4,7 @@ import {
   tagSignatures,
 } from './tagModel'
 import {Base64} from 'js-base64'
+import TextUtils from '../../../../utils/textUtils'
 
 export const transformTagsToHtml = (text) => {
   try {
@@ -74,6 +75,9 @@ export const transformTagsToText = (text) => {
 
 export const transformTagsToLexiqaText = (text) => {
   try {
+    let {tags, text: tempText} = TextUtils.replaceTempTags(text)
+    text = decodeHtmlEntities(tempText)
+    text = TextUtils.restoreTempTags(tags, text)
     for (let key in tagSignatures) {
       const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
         tagSignatures[key]
