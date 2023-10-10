@@ -124,7 +124,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                 $redis->set("mmt_counter", 0);
             }
 
-            $redis->set("mmt_counter", ( (int)$redis->get("mmt_counter") + mb_strlen($_config[ 'segment' ]) ) );
+            $redis->incrby("mmt_counter", mb_strlen($_config[ 'segment' ]));
 
             return ( new Engines_Results_MyMemory_Matches(
                     $_config[ 'segment' ],
