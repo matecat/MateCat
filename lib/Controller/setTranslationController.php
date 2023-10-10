@@ -407,7 +407,9 @@ class setTranslationController extends ajaxController {
         $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
 
         // if saveVersionAndIncrement() return true it means that it was persisted a new version of the parent segment
-        $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
+        if($this->VersionsHandler !== null){
+            $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
+        }
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -472,14 +474,16 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
             try {
-                $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
+                if($this->VersionsHandler !== null){
+                    $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $this->chunk,
                         $this->id_segment,
                         $this->project,
                         $this->VersionsHandler,
                         true
-                );
+                    );
+                }
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
@@ -625,7 +629,8 @@ class setTranslationController extends ajaxController {
          * This is also the init handler of all R1/R2 handling and Qr score calculation by
          *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
          */
-        $this->VersionsHandler->storeTranslationEvent( [
+        if($this->VersionsHandler !== null){
+            $this->VersionsHandler->storeTranslationEvent( [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
                 'propagation'       => $propagationTotal,
@@ -636,7 +641,8 @@ class setTranslationController extends ajaxController {
                 'controller_result' => & $this->result,
                 'features'          => $this->featureSet,
                 'project'           => $project
-        ] );
+            ] );
+        }
 
         //COMMIT THE TRANSACTION
         try {
@@ -864,8 +870,20 @@ class setTranslationController extends ajaxController {
         }
     }
 
+    /**
+     * init VersionHandler
+     */
     private function initVersionHandler() {
-        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->chunk, $this->id_segment, $this->user, $this->project );
+
+        // fix null pointer error
+        if(
+            $this->chunk !== null and
+            $this->id_segment !== null and
+            $this->user !== null and
+            $this->project !== null
+        ){
+            $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->chunk, $this->id_segment, $this->user, $this->project );
+        }
     }
 
     /**

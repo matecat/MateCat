@@ -16,11 +16,10 @@ use Users_UserStruct;
 class JobAnonymous extends Job {
 
     /**
-     * @param Users_UserStruct $user
-     *
-     * @return $this
+     * @param Users_UserStruct|null $user
+     * @return $this|Job
      */
-    public function setUser( Users_UserStruct $user ) {
+    public function setUser( Users_UserStruct $user = null ) {
         return $this;
     }
 
