@@ -318,11 +318,15 @@ class TmKeyManagement_TmKeyManagement {
 
         if( $uniq_num != count( $reverse_lookup_client_json[ 'pos' ] ) )  throw new Exception( "A key is already present in this project.", 5 );
 
-        //update existing job keys
+        /**
+         * @var $_job_Key TmKeyManagement_TmKeyStruct
+         */
         foreach ( $job_tm_keys as $i => $_job_Key ) {
-            /**
-             * @var $_job_Key TmKeyManagement_TmKeyStruct
-             */
+
+            // exit from loop if read and write are false
+            if($_job_Key->r == false and $_job_Key->w == false){
+                break;
+            }
 
             $_index_position = array_search( $_job_Key->key, $reverse_lookup_client_json[ 'pos' ] );
 
