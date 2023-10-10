@@ -272,10 +272,14 @@ const getTooltipTag = () => {
   )
 }
 
-const getStyleForName = (tagName) => {
+const getStyleForName = (tagName, isRtl) => {
   return Object.keys(tagSignatures)
     .filter((tagKey) => tagKey === tagName)
-    .map((tagKey) => tagSignatures[tagKey].style)
+    .map((tagKey) =>
+      isRtl && tagSignatures[tagKey].styleRTL
+        ? tagSignatures[tagKey].styleRTL
+        : tagSignatures[tagKey].style,
+    )
 }
 
 const getCorrectClosureTag = (tagType) => {

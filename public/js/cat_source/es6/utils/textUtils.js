@@ -1,4 +1,5 @@
 import {isUndefined} from 'lodash'
+
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CommonUtils from './commonUtils'
 import diff_match_patch from 'diff-match-patch'
@@ -90,24 +91,37 @@ const TEXT_UTILS = {
    */
   replaceTempTags: (text) => {
     let tags = []
+    const makeid = (length) => {
+      let result = ''
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+      const charactersLength = characters.length
+      let counter = 0
+      while (counter < length) {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength),
+        )
+        counter += 1
+      }
+      return result
+    }
     text = text.replace(
       /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000)
+        var id = makeid(5)
         tags.push({
           id,
           match,
         })
-        return '#' + id + '#'
+        return '#_' + id + '_#'
       },
     )
     return {tags, text}
   },
   restoreTempTags(tags, text) {
-    text = text.replace(/#(.*?)#/gi, (match, id) => {
+    text = text.replace(/#_(.*?)_#/gi, (match, id) => {
       try {
         const tag = tags.find((item) => {
-          return item.id === parseInt(id)
+          return item.id === id
         })
         if (!isUndefined(tag)) {
           return tag.match
