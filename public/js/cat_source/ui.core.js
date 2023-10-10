@@ -4,7 +4,6 @@ import Cookies from 'js-cookie'
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
-import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentActions from './es6/actions/SegmentActions'
@@ -559,8 +558,8 @@ window.UI = {
 
     try {
       // Attention, to be modified when we will lock tags
-      translation = TagUtils.prepareTextToSend(segment.translation)
-      sourceSegment = TagUtils.prepareTextToSend(segment.updatedSource)
+      translation = segment.translation
+      sourceSegment = segment.updatedSource
     } catch (e) {
       var indexSegment = UI.executingSetTranslation.indexOf(id_segment)
       if (indexSegment > -1) {
@@ -670,9 +669,7 @@ window.UI = {
     $.each(segments, function (index) {
       var segment = this
       totalTranslation +=
-        selector === '.source'
-          ? segment.segment
-          : TagUtils.prepareTextToSend(segment.translation)
+        selector === '.source' ? segment.segment : segment.translation
       if (index < segments.length - 1)
         totalTranslation += UI.splittedTranslationPlaceholder
     })

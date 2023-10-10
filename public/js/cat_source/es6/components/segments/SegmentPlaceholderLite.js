@@ -18,13 +18,11 @@ class SegmentPlaceholderLite extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructureSource)
     // --- Prepare Source
     const plainEditorStateSource = EditorState.createEmpty(decorator)
-    const source = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.segment,
-    )
+    const source = this.props.segment.segment
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(source)
+      ? DraftMatecatUtils.removeTagsFromText(source)
       : source
     const contentEncodedSource = DraftMatecatUtils.encodeContent(
       plainEditorStateSource,
@@ -34,13 +32,12 @@ class SegmentPlaceholderLite extends React.Component {
 
     // --- Prepare Translation
     const plainEditorStateTarget = EditorState.createEmpty(decorator)
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.translation,
-    )
+    const translation = this.props.segment.translation
+
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     const contentEncodedTarget = DraftMatecatUtils.encodeContent(
       plainEditorStateTarget,

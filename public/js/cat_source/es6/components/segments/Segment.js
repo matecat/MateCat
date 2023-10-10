@@ -11,7 +11,6 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentHeader from './SegmentHeader'
 import SegmentFooter from './SegmentFooter'
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel'
-import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
@@ -23,6 +22,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from '../segments/SegmentContext'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolStore from '../../stores/CatToolStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -64,8 +64,10 @@ class Segment extends React.Component {
         this.props.enableTagProjection &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
-        !TagUtils.checkXliffTagsInText(this.props.segment.translation) &&
-        TagUtils.removeAllTags(this.props.segment.segment) !== '',
+        !DraftMatecatUtils.checkXliffTagsInText(
+          this.props.segment.translation,
+        ) &&
+        DraftMatecatUtils.removeTagsFromText(this.props.segment.segment) !== '',
       selectedTextObj: null,
       showActions: false,
     }
@@ -723,7 +725,6 @@ class Segment extends React.Component {
         locked,
         removeSelection: this.removeSelection.bind(this),
         openSegment: this.openSegment,
-        isReviewImproved: this.props.isReviewImproved,
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
         multiMatchLangs,

@@ -47,15 +47,13 @@ class SegmentSource extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructure)
     // Initialise EditorState
     const plainEditorState = EditorState.createEmpty(decorator)
-    // Escape html
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.segment,
-    )
+    const translation = this.props.segment.segment
+
     // If GuessTag enabled, clean string from tag
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     // New EditorState with translation
     const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -115,13 +113,11 @@ class SegmentSource extends React.Component {
     if (sid === this.props.segment.sid) {
       // Escape html
 
-      const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-        this.props.segment.segment,
-      )
+      const translation = this.props.segment.segment
 
       // If GuessTag enabled, clean string from tag
       const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
-        ? DraftMatecatUtils.cleanSegmentString(translation)
+        ? DraftMatecatUtils.removeTagsFromText(translation)
         : translation
       // TODO: get taggedSource from store
       const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -233,9 +229,9 @@ class SegmentSource extends React.Component {
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
-      const lxqDecodedSource =
-        DraftMatecatUtils.prepareTextForLexiqa(editorState)
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
+      const lxqDecodedSource =
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       SegmentActions.updateSource(
         this.props.segment.sid,
         decodedSegment,

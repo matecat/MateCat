@@ -11,16 +11,7 @@ import linkEntities from './linkEntities'
 import beautifyEntities from './beautifyEntities'
 import decodeTagInfo from './decodeTagInfo'
 import replaceOccurrences from './replaceOccurrences'
-import {
-  getIdAttributeRegEx,
-  cleanSegmentString,
-  unescapeHTML,
-  unescapeHTMLLeaveTags,
-  decodeTagsToPlainText,
-  formatText,
-  getCharactersCounter,
-  unescapeHTMLinTags,
-} from './textUtils'
+import {formatText, getCharactersCounter} from './textUtils'
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
 import updateEntityData from './updateEntityData'
@@ -45,19 +36,28 @@ import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
+import {
+  transformTagsToHtml,
+  transformTagsToText,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
+  decodePlaceholdersToPlainText,
+  removeTagsFromText,
+  autoFillTagsInTarget,
+  hasDataOriginalTags,
+  checkXliffTagsInText,
+} from './tagUtils'
 
 const DraftMatecatUtils = {
-  // Text utils
-  cleanSegmentString,
-  getIdAttributeRegEx,
-  unescapeHTML,
-  unescapeHTMLinTags,
-  unescapeHTMLLeaveTags,
+  // Tag utils
+  removeTagsFromText,
   formatText,
-  // Tag Utils
   matchTag,
   decodeTagInfo,
   tagFromEntity,
+  autoFillTagsInTarget,
+  hasDataOriginalTags,
+  checkXliffTagsInText,
   /*tagFromString,*/
   structFromName,
   // Entity Utils
@@ -85,7 +85,6 @@ const DraftMatecatUtils = {
   encodeContent,
   decodeSegment,
   replaceOccurrences,
-  decodeTagsToPlainText,
   // General
   insertText,
   getSelectedText,
@@ -100,6 +99,11 @@ const DraftMatecatUtils = {
   getCharactersCounter,
   getSelectedTextWithoutEntities,
   replaceMultipleText,
+  transformTagsToHtml,
+  transformTagsToText,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
+  decodePlaceholdersToPlainText,
 }
 
 export default DraftMatecatUtils

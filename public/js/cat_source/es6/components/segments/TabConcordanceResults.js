@@ -10,7 +10,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CommonUtils from '../../utils/commonUtils'
 import Cookies from 'js-cookie'
-import TagUtils from '../../utils/tagUtils'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)
   const [isExtended, setIsExtended] = useState(
@@ -38,12 +38,16 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
       setResults(
         dataSorted.map((item) => {
-          const source = TagUtils.decodePlaceholdersToTextSimple(item.segment)
+          const source = DraftMatecatUtils.transformTagsToHtml(
+            item.segment,
+            config.isSourceRTL,
+          )
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')
 
-          const translation = TagUtils.decodePlaceholdersToTextSimple(
+          const translation = DraftMatecatUtils.transformTagsToHtml(
             item.translation,
+            config.isTargetRTL,
           )
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')
