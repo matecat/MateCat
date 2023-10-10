@@ -26,7 +26,7 @@ class Analysis_PayableRates {
     protected static $langPair2MTpayableRates = [
             "tr" => [
                 [
-                    'ge' => [
+                    'de' => [
                         'NO_MATCH'    => 100,
                         '50%-74%'     => 100,
                         //'75%-99%'     => 60,
