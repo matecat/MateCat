@@ -2,7 +2,6 @@ import React from 'react'
 import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'
-import TagUtils from '../../utils/tagUtils'
 import CursorUtils from '../../utils/cursorUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -100,8 +99,10 @@ class SegmentTarget extends React.Component {
         this.props.segment.versions[0].translation
           ? this.props.segment.versions[0].translation
           : translation
-      let currentTranslationVersion =
-        DraftMatecatUtils.transformTagsToHtml(text)
+      let currentTranslationVersion = DraftMatecatUtils.transformTagsToHtml(
+        text,
+        config.isTargetRTL,
+      )
       textAreaContainer = (
         <div
           className="segment-text-area-container"
@@ -261,7 +262,9 @@ class SegmentTarget extends React.Component {
 
   autoFillTagsInTarget(sid) {
     if (isUndefined(sid) || sid === this.props.segment.sid) {
-      let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment)
+      let newTranslation = DraftMatecatUtils.autoFillTagsInTarget(
+        this.props.segment,
+      )
       //lock tags and run again getWarnings
       setTimeout(() => {
         SegmentActions.replaceEditAreaTextContent(

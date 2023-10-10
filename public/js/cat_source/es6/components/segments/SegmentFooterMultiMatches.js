@@ -72,9 +72,11 @@ class SegmentFooterMultiMatches extends React.Component {
       //
       item.suggestionDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
         this.segment,
+        config.isTargetRTL,
       )
       item.translationDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
         this.translation,
+        config.isTargetRTL,
       )
       item.translation = this.translation
       item.sourceDiff = item.suggestionDecodedHtml
@@ -89,7 +91,10 @@ class SegmentFooterMultiMatches extends React.Component {
           self.props.segment.segment,
         )
 
-        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(item.sourceDiff)
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
+          item.sourceDiff,
+          config.isSourceRTL,
+        )
       }
       if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties

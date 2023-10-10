@@ -1,7 +1,6 @@
 import {isNull} from 'lodash'
 
 import CommonUtils from './commonUtils'
-import TagUtils from './tagUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 
@@ -110,7 +109,7 @@ const SegmentUtils = {
         currentSegment.segment,
       )
       var tagProjectionEnabled =
-        TagUtils.hasDataOriginalTags(currentSegment.segment) &&
+        DraftMatecatUtils.hasDataOriginalTags(currentSegment.segment) &&
         !currentSegment.tagged &&
         segmentNoTags !== ''
       // If the segment has already be tagged

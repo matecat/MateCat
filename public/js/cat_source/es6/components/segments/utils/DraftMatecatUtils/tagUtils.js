@@ -5,12 +5,20 @@ import {
 } from './tagModel'
 import {Base64} from 'js-base64'
 import TextUtils from '../../../../utils/textUtils'
+import {isUndefined} from 'lodash'
 
-export const transformTagsToHtml = (text) => {
+export const transformTagsToHtml = (text, isRtl = 0) => {
+  isRtl = !!isRtl
   try {
     for (let key in tagSignatures) {
-      const {placeholderRegex, decodeNeeded, style, placeholder, regex} =
-        tagSignatures[key]
+      const {
+        placeholderRegex,
+        decodeNeeded,
+        style,
+        placeholder,
+        regex,
+        styleRTL,
+      } = tagSignatures[key]
       if (placeholderRegex) {
         let globalRegex = new RegExp(
           placeholderRegex.source,
@@ -20,7 +28,7 @@ export const transformTagsToHtml = (text) => {
           let tagText = decodeNeeded ? Base64.decode(text) : match
           return (
             '<span contenteditable="false" class="tag small ' +
-            style +
+            (isRtl && styleRTL ? styleRTL : style) +
             '">' +
             tagText +
             '</span>'
@@ -32,7 +40,7 @@ export const transformTagsToHtml = (text) => {
           let tagText = placeholder ? placeholder : match
           return (
             '<span contenteditable="false" class="tag small ' +
-            style +
+            (isRtl && styleRTL ? styleRTL : style) +
             '">' +
             tagText +
             '</span>'
@@ -254,4 +262,57 @@ export const unescapeHTMLRecursive = (escapedHTML) => {
   }
 
   return escapedHTML
+}
+
+/**
+ * Add at the end of the target the missing tags
+ */
+export const autoFillTagsInTarget = (segmentObj) => {
+  const regx = getXliffRegExpression()
+  let sourceTags = segmentObj.segment.match(regx)
+
+  let newhtml = segmentObj.translation
+
+  let targetTags = segmentObj.translation.match(regx)
+
+  if (targetTags == null) {
+    targetTags = []
+  } else {
+    targetTags = targetTags.map(function (elem) {
+      return elem.replace(/<\/span>/gi, '').replace(/<span.*?>/gi, '')
+    })
+  }
+
+  let missingTags = sourceTags.map(function (elem) {
+    return elem.replace(/<\/span>/gi, '').replace(/<span.*?>/gi, '')
+  })
+  //remove from source tags all the tags in target segment
+  for (let i = 0; i < targetTags.length; i++) {
+    let pos = missingTags.indexOf(targetTags[i])
+    if (pos > -1) {
+      missingTags.splice(pos, 1)
+    }
+  }
+
+  //add tags into the target segment
+  for (let i = 0; i < missingTags.length; i++) {
+    newhtml = newhtml + missingTags[i]
+  }
+  return newhtml
+}
+
+/**
+ * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>)
+ * (Note that in the data-original attribute there are the &amp;lt instead of &lt)
+ * @param originalText
+ * @returns {boolean}
+ */
+export const hasDataOriginalTags = (originalText) => {
+  const reg = getXliffRegExpression()
+  return !isUndefined(originalText) && reg.test(originalText)
+}
+
+export const checkXliffTagsInText = (text) => {
+  const reg = getXliffRegExpression()
+  return reg.test(text)
 }

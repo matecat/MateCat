@@ -38,12 +38,16 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
       setResults(
         dataSorted.map((item) => {
-          const source = DraftMatecatUtils.transformTagsToHtml(item.segment)
+          const source = DraftMatecatUtils.transformTagsToHtml(
+            item.segment,
+            config.isSourceRTL,
+          )
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')
 
           const translation = DraftMatecatUtils.transformTagsToHtml(
             item.translation,
+            config.isTargetRTL,
           )
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')

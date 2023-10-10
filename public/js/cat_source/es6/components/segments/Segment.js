@@ -11,7 +11,6 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentHeader from './SegmentHeader'
 import SegmentFooter from './SegmentFooter'
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel'
-import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
@@ -65,7 +64,9 @@ class Segment extends React.Component {
         this.props.enableTagProjection &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
-        !TagUtils.checkXliffTagsInText(this.props.segment.translation) &&
+        !DraftMatecatUtils.checkXliffTagsInText(
+          this.props.segment.translation,
+        ) &&
         DraftMatecatUtils.removeTagsFromText(this.props.segment.segment) !== '',
       selectedTextObj: null,
       showActions: false,

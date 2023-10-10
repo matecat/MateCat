@@ -43,16 +43,21 @@ import {
   encodeHtmlEntities,
   decodePlaceholdersToPlainText,
   removeTagsFromText,
+  autoFillTagsInTarget,
+  hasDataOriginalTags,
+  checkXliffTagsInText,
 } from './tagUtils'
 
 const DraftMatecatUtils = {
-  // Text utils
+  // Tag utils
   removeTagsFromText,
   formatText,
-  // Tag Utils
   matchTag,
   decodeTagInfo,
   tagFromEntity,
+  autoFillTagsInTarget,
+  hasDataOriginalTags,
+  checkXliffTagsInText,
   /*tagFromString,*/
   structFromName,
   // Entity Utils

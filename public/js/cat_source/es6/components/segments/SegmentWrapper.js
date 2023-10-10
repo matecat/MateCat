@@ -48,6 +48,7 @@ class SegmentWrapper extends React.Component {
           className={isTarget ? `targetarea editarea` : ``}
           text={textToDisplay}
           isTarget={isTarget}
+          isRtl={isTarget ? config.isTargetRTL : config.isSourceRTL}
         />
       </div>
     )

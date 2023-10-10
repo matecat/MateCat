@@ -8,7 +8,6 @@ import EditAreaConstants from '../constants/EditAreaConstants'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
-import TagUtils from '../utils/tagUtils'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
@@ -31,6 +30,7 @@ import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
+import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -306,7 +306,7 @@ const SegmentActions = {
     if (!currentSegment) return
 
     var tagProjectionEnabled =
-      TagUtils.hasDataOriginalTags(currentSegment.segment) &&
+      DraftMatecatUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged
     if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
       SegmentActions.setSegmentAsTagged(

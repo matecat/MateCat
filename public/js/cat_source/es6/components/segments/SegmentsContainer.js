@@ -750,7 +750,7 @@ const getSegmentStructure = (segment, sideOpen) => {
   }
 
   source = DraftMatecatUtils.transformTagsToHtml(source, config.isSourceRTL)
-  target = DraftMatecatUtils.transformTagsToHtml(target, config.isSourceRTL)
+  target = DraftMatecatUtils.transformTagsToHtml(target, config.isTargetRTL)
 
   return (
     <section

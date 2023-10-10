@@ -133,7 +133,7 @@ const TEXT_UTILS = {
     /*
         Function to understand if an element contains broken tags
          */
-    var thereAreIncompletedTagsInDiff = function (text) {
+    var thereAreUncompletedTagsInDiff = function (text) {
       return (
         (text.indexOf('<') > -1 || text.indexOf('>') > -1) &&
         (text.split('<').length - 1 !== text.split('>').length - 1 ||
@@ -145,7 +145,7 @@ const TEXT_UTILS = {
          */
     var thereAreCloseTags = function (text) {
       return (
-        thereAreIncompletedTagsInDiff(text) &&
+        thereAreUncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('>') > -1 &&
             item[1].indexOf('>') < item[1].indexOf('<')))
@@ -156,10 +156,10 @@ const TEXT_UTILS = {
          */
     var thereAreOpenTags = function (text) {
       return (
-        thereAreIncompletedTagsInDiff(text) &&
+        thereAreUncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('<') > -1 &&
-            item[1].indexOf('>') > item[1].indexOf('<')))
+            item[1].indexOf('>') < item[1].indexOf('<')))
       )
     }
     var i
@@ -169,7 +169,7 @@ const TEXT_UTILS = {
     var tagToMoveClose = ''
     for (i = 0; i < array.length; i++) {
       var item = array[i]
-      var thereAreUnclosedTags = thereAreIncompletedTagsInDiff(item[1])
+      var thereAreUnclosedTags = thereAreUncompletedTagsInDiff(item[1])
       if (!adding && item[0] === 0) {
         if (thereAreUnclosedTags) {
           tagToMoveOpen = item[1].substr(

@@ -36,7 +36,6 @@ import assign from 'object-assign'
 
 import AppDispatcher from './AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
-import TagUtils from '../utils/tagUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
 import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
@@ -1016,8 +1015,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (SegmentUtils.checkTPEnabled()) {
       if (
         (segment.status === 'NEW' || segment.status === 'DRAFT') &&
-        TagUtils.checkXliffTagsInText(segment.segment) &&
-        !TagUtils.checkXliffTagsInText(segment.translation)
+        DraftMatecatUtils.checkXliffTagsInText(segment.segment) &&
+        !DraftMatecatUtils.checkXliffTagsInText(segment.translation)
       ) {
         return true
       }

@@ -2,7 +2,6 @@ import React from 'react'
 import {isUndefined, size} from 'lodash'
 import Immutable from 'immutable'
 
-import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
@@ -22,17 +21,17 @@ class SegmentFooterTabConflicts extends React.Component {
     const segment_id = this.props.segment.sid
     let html = []
     const self = this
-    const source = DraftMatecatUtils.transformTagsToHtml(segment.segment)
+    const source = DraftMatecatUtils.transformTagsToHtml(
+      segment.segment,
+      config.isSourceRTL,
+    )
     $.each(alternatives.editable, function (index) {
       // Execute diff
       const segmentTranslation = segment.decodedTranslation
       const conflictTranslation = DraftMatecatUtils.transformTagsToText(
         this.translation,
       )
-      let diff_obj = TagUtils.executeDiff(
-        segmentTranslation,
-        conflictTranslation,
-      )
+      let diff_obj = TextUtils.execDiff(segmentTranslation, conflictTranslation)
       let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
 
       // No diff executed on source
@@ -75,11 +74,14 @@ class SegmentFooterTabConflicts extends React.Component {
 
     $.each(alternatives.not_editable, function (index1) {
       // Execute diff
-      let diff_obj = TagUtils.executeDiff(segment.translation, this.translation)
+      let diff_obj = TextUtils.execDiff(segment.translation, this.translation)
       // Restore Tags
       let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
       translation = translation.replace(/&amp;/g, '&')
-      translation = DraftMatecatUtils.transformTagsToHtml(translation)
+      translation = DraftMatecatUtils.transformTagsToHtml(
+        translation,
+        config.isTargetRTL,
+      )
       // No diff executed on source
       html.push(
         <ul

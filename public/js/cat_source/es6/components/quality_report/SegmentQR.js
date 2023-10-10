@@ -310,11 +310,11 @@ class SegmentQR extends React.Component {
     }
   }
 
-  decodeTextAndTransformTags(text) {
+  decodeTextAndTransformTags(text, isRtl) {
     if (text) {
       // Fix for more than 2 followed spaces
       text = text.replace(/  /gi, '&nbsp; ')
-      let decodedText = DraftMatecatUtils.transformTagsToHtml(text)
+      let decodedText = DraftMatecatUtils.transformTagsToHtml(text, isRtl)
       return decodedText
     }
     return text
@@ -332,28 +332,49 @@ class SegmentQR extends React.Component {
   }
 
   render() {
-    let source = this.decodeTextAndTransformTags(this.source)
-    let suggestion = this.decodeTextAndTransformTags(this.suggestion)
-    let target = this.target && this.decodeTextAndTransformTags(this.target)
-    let revise = this.revise && this.decodeTextAndTransformTags(this.revise)
-    let revise2 = this.revise2 && this.decodeTextAndTransformTags(this.revise2)
+    let source = this.decodeTextAndTransformTags(
+      this.source,
+      config.isSourceRTL,
+    )
+    let suggestion = this.decodeTextAndTransformTags(
+      this.suggestion,
+      config.isTargetRTL,
+    )
+    let target =
+      this.target &&
+      this.decodeTextAndTransformTags(this.target, config.isTargetRTL)
+    let revise =
+      this.revise &&
+      this.decodeTextAndTransformTags(this.revise, config.isTargetRTL)
+    let revise2 =
+      this.revise2 &&
+      this.decodeTextAndTransformTags(this.revise2, config.isTargetRTL)
 
     if (this.state.translateDiffOn) {
-      target = this.decodeTextAndTransformTags(this.state.htmlDiff)
+      target = this.decodeTextAndTransformTags(
+        this.state.htmlDiff,
+        config.isTargetRTL,
+      )
     }
 
     if (this.state.reviseDiffOn) {
-      revise = this.decodeTextAndTransformTags(this.state.htmlDiff)
+      revise = this.decodeTextAndTransformTags(
+        this.state.htmlDiff,
+        config.isTargetRTL,
+      )
     }
 
     if (this.state.revise2DiffOn) {
-      revise2 = this.decodeTextAndTransformTags(this.state.htmlDiff)
+      revise2 = this.decodeTextAndTransformTags(
+        this.state.htmlDiff,
+        config.isTargetRTL,
+      )
     }
 
     let sourceClass = classnames({
       'segment-container': true,
       'qr-source': true,
-      'rtl-lang': config.source_rtl,
+      'rtl-lang': config.isSourceRTL,
     })
 
     let segmentBodyClass = classnames({
@@ -370,7 +391,7 @@ class SegmentQR extends React.Component {
         this.state.translateDiffOn ||
         (this.state.reviseDiffOn && !this.target) ||
         (this.state.revise2DiffOn && !this.revise && !this.target),
-      'rtl-lang': config.target_rtl,
+      'rtl-lang': config.isTargetRTL,
     })
     let translateClasses = classnames({
       'segment-container': true,
@@ -379,20 +400,20 @@ class SegmentQR extends React.Component {
         this.state.translateDiffOn ||
         this.state.reviseDiffOn ||
         (this.state.revise2DiffOn && !this.revise),
-      'rtl-lang': config.target_rtl,
+      'rtl-lang': config.isTargetRTL,
     })
     let revisedClasses = classnames({
       'segment-container': true,
       'qr-revised': true,
       'shadow-1': this.state.reviseDiffOn || this.state.revise2DiffOn,
-      'rtl-lang': config.target_rtl,
+      'rtl-lang': config.isTargetRTL,
     })
     let revised2Classes = classnames({
       'segment-container': true,
       'qr-revised': true,
       'qr-revised-2ndpass': true,
       'shadow-1': this.state.revise2DiffOn,
-      'rtl-lang': config.target_rtl,
+      'rtl-lang': config.isTargetRTL,
     })
     return (
       <div className="qr-single-segment">

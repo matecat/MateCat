@@ -93,7 +93,10 @@ class SegmentFooterTabMatches extends React.Component {
           self.props.segment.segment,
         )
 
-        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(item.sourceDiff)
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
+          item.sourceDiff,
+          config.isSourceRTL,
+        )
       }
 
       if (!isUndefined(this.tm_properties)) {
