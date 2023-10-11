@@ -69,7 +69,7 @@ class TmKeyManagement_TmKeyManagement {
 
         $filter = new TmKeyManagement_Filter( $uid );
         $filter->setGrants( $grant_level )
-                ->setTmType( $type );
+            ->setTmType( $type );
 
         switch ( $user_role ) {
             case TmKeyManagement_Filter::ROLE_TRANSLATOR:
@@ -140,7 +140,7 @@ class TmKeyManagement_TmKeyManagement {
 
             $filter = new TmKeyManagement_Filter();
             $filter->setGrants( $grant_level )
-                    ->setTmType( $type );
+                ->setTmType( $type );
             $tmKey  = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
             $result_arr[ ] = $tmKey;
@@ -323,10 +323,10 @@ class TmKeyManagement_TmKeyManagement {
          */
         foreach ( $job_tm_keys as $i => $_job_Key ) {
 
-            // exit from loop if read and write are false
-            if($_job_Key->r == false and $_job_Key->w == false){
-                break;
-            }
+//            // exit from loop if read and write are false
+//            if($_job_Key->r == false and $_job_Key->w == false){
+//                break;
+//            }
 
             $_index_position = array_search( $_job_Key->key, $reverse_lookup_client_json[ 'pos' ] );
 
@@ -365,26 +365,27 @@ class TmKeyManagement_TmKeyManagement {
                 }
 
                 //override the static values
-                $_job_Key->tm   = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                $_job_Key->glos = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_ket_element = $reverse_lookup_client_json[ 'elements' ][ $_index_position ];
+                $_job_Key->tm   = filter_var( $_job_ket_element->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_Key->glos = filter_var( $_job_ket_element->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 if ( $userRole == TmKeyManagement_Filter::OWNER ) {
 
                     //override grants
-                    $_job_Key->r = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->w = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->r = filter_var( $_job_ket_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->w = filter_var( $_job_ket_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
 
                     //override role specific grants
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $_job_ket_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $_job_ket_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 }
 
                 //change name if modified
-                if ( $_job_Key->name != $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name ) {
-                    $_job_Key->name = $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name;
+                if ( $_job_Key->name != $_job_ket_element->name ) {
+                    $_job_Key->name = $_job_ket_element->name;
                 }
 
                 //set as owner if it is but should be already set
@@ -418,16 +419,20 @@ class TmKeyManagement_TmKeyManagement {
                 // remove the uid property
                 if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
                     $_job_Key->uid_rev = null;
+                    $_job_Key->r = null;
+                    $_job_Key->w = null;
                     $_job_Key->r_rev = null;
                     $_job_Key->w_rev = null;
-                    $_job_Key->r_transl = true;
-                    $_job_Key->w_transl = true;
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
-                    $_job_Key->uid_transl = null;
                     $_job_Key->r_transl = null;
                     $_job_Key->w_transl = null;
-                    $_job_Key->r_rev = true;
-                    $_job_Key->w_rev = true;
+                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+                    $_job_Key->uid_transl = null;
+                    $_job_Key->r = null;
+                    $_job_Key->w = null;
+                    $_job_Key->r_transl = null;
+                    $_job_Key->w_transl = null;
+                    $_job_Key->r_rev = null;
+                    $_job_Key->w_rev = null;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
@@ -515,10 +520,10 @@ class TmKeyManagement_TmKeyManagement {
                          */
                         $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
                         $dh      = new TmKeyManagement_MemoryKeyStruct( array(
-                                'uid'    => $uid,
-                                'tm_key' => new TmKeyManagement_TmKeyStruct( array(
-                                        'key' => $justCreatedKey->key
-                                ) )
+                            'uid'    => $uid,
+                            'tm_key' => new TmKeyManagement_TmKeyStruct( array(
+                                'key' => $justCreatedKey->key
+                            ) )
                         ) );
 
                         $keyList = $_keyDao->read( $dh );
@@ -598,8 +603,8 @@ class TmKeyManagement_TmKeyManagement {
 
                 //if the key is still linked to someone, add it to the result.
                 if ( $curr_tm_key->owner ||
-                        !is_null( $curr_tm_key->uid_transl ) ||
-                        !is_null( $curr_tm_key->uid_rev )
+                    !is_null( $curr_tm_key->uid_transl ) ||
+                    !is_null( $curr_tm_key->uid_rev )
                 ) {
                     $result[ ] = $curr_tm_key;
                 }
