@@ -136,7 +136,7 @@ const TEXT_UTILS = {
         thereAreIncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('<') > -1 &&
-            item[1].indexOf('>') > item[1].indexOf('<')))
+            item[1].indexOf('>') < item[1].indexOf('<')))
       )
     }
     var i
