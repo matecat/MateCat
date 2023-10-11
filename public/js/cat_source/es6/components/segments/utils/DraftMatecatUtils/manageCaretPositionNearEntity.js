@@ -62,7 +62,7 @@ export const checkCaretIsNearZwsp = ({
 
   const selection = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
-  const anchorKey = selection.getStartKey()
+  const anchorKey = selection.getAnchorKey()
   const focusKey = selection.getFocusKey()
   const isBackward = step < 0
   const currentBlock = contentState.getBlockForKey(focusKey)
@@ -81,7 +81,7 @@ export const checkCaretIsNearZwsp = ({
     const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
       anchorOffset: blockedOffset ? blockedOffset : pointOffset,
       focusOffset: pointOffset,
-      focusKey: anchorKey,
+      focusKey,
       isBackward,
     })
     return EditorState.forceSelection(editorState, updatedSelection)
@@ -94,6 +94,7 @@ export const checkCaretIsNearEntity = ({
   isShiftPressed = false,
 }) => {
   const selection = editorState.getSelection()
+  const focusKey = selection.getFocusKey()
 
   const start = selection.getFocusOffset()
   const end = selection.getEndOffset()
@@ -101,9 +102,11 @@ export const checkCaretIsNearEntity = ({
 
   const entities = getEntities(editorState)
   const entityMatched = entities.find((entity) =>
-    step < 0
-      ? start <= entity.end && start > entity.start
-      : end < entity.end && end >= entity.start,
+    entity.blockKey === focusKey
+      ? step < 0
+        ? start <= entity.end && start > entity.start
+        : end < entity.end && end >= entity.start
+      : false,
   )
 
   return entityMatched
@@ -125,7 +128,8 @@ export const moveCaretOutsideEntity = ({
   const step = getStepByDirection(direction)
 
   const selection = editorState.getSelection()
-  const anchorKey = selection.getStartKey()
+  const anchorKey = selection.getAnchorKey()
+  const focusKey = selection.getFocusKey()
   const isBackward = step < 0
 
   const blockedOffset = isShiftPressed && selection.getAnchorOffset()
@@ -134,7 +138,7 @@ export const moveCaretOutsideEntity = ({
   const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
     anchorOffset: blockedOffset ? blockedOffset : pointOffset,
     focusOffset: pointOffset,
-    focusKey: anchorKey,
+    focusKey,
     isBackward,
   })
 
@@ -167,7 +171,7 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
 
   // remove caret inside entity
   if (entityContainer) {
-    // avoid carret adjustment when cursor move forward and previous element is an entity
+    // avoid caret adjustment when cursor move forward and previous element is an entity
     if (
       direction === 'right' &&
       entityContainer.previousElementSibling?.classList?.contains(

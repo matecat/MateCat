@@ -789,6 +789,37 @@ class Editarea extends React.Component {
       } else {
         reset()
       }
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      const direction = e.key === 'Backspace' ? 'left' : 'right'
+
+      const updatedStateNearZwsp = checkCaretIsNearZwsp({
+        editorState: this.state.editorState,
+        direction,
+        isShiftPressed: true,
+      })
+
+      // check caret is near entity and move caret position
+      const updatedStateNearEntity = checkCaretIsNearEntity({
+        editorState: updatedStateNearZwsp
+          ? updatedStateNearZwsp
+          : this.state.editorState,
+        direction,
+        isShiftPressed: true,
+      })
+
+      if (updatedStateNearEntity) {
+        const selectionState = updatedStateNearEntity.getSelection()
+        const contentState = updatedStateNearEntity.getCurrentContent()
+
+        this.setState({
+          editorState: EditorState.push(
+            updatedStateNearEntity,
+            Modifier.replaceText(contentState, selectionState, null),
+            'insert-characters',
+          ),
+        })
+        return 'delete-entity'
+      }
     }
     return getDefaultKeyBinding(e)
   }
@@ -844,6 +875,8 @@ class Editarea extends React.Component {
         return 'handled'
       case 'insert-word-joiner-tag':
         insertTagAtSelection('wordJoiner')
+        return 'handled'
+      case 'delete-entity':
         return 'handled'
       case 'translate':
         return 'not-handled'
