@@ -205,19 +205,7 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.review.js'),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/review_extended/review_extended.default.js',
-        ),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/review_extended/review_extended.ui_extension.js',
-        ),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/review_extended/review_extended.common_events.js',
-        ),
+        path.resolve(__dirname, 'public/js/cat_source/review_extended.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/segment_filter.common_extension.js',

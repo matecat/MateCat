@@ -117,6 +117,7 @@ export const CattolFooter = ({
 
   const onClickTodo = (e, targetName) => {
     e.preventDefault()
+    if (!UI.projectStats) return
     // show tooltip
     if (
       (!config.isReview && UI.projectStats.translationCompleted) ||

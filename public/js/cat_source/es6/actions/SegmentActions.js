@@ -32,6 +32,7 @@ import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
+import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -956,7 +957,7 @@ const SegmentActions = {
   },
 
   openIssuesPanel: function (data, openSegment) {
-    if (UI.openIssuesPanel(data, openSegment)) {
+    if (ReviewExtended.openIssuesPanel(data, openSegment)) {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_ISSUES_PANEL,
         data: data,
@@ -992,7 +993,7 @@ const SegmentActions = {
   },
 
   submitIssue: function (sid, data) {
-    return UI.submitIssues(sid, data)
+    return ReviewExtended.submitIssue(sid, data)
   },
 
   issueAdded: function (sid, issueId) {
@@ -1026,8 +1027,15 @@ const SegmentActions = {
     })
   },
 
-  deleteIssue: function (issue, sid, dontShowMessage) {
-    UI.deleteIssue(issue, sid, dontShowMessage)
+  deleteIssue: function (issue, sid) {
+    deleteSegmentIssueApi({
+      idSegment: sid,
+      idIssue: issue.id,
+    }).then(() => {
+      SegmentActions.confirmDeletedIssue(sid, issue.id)
+      ReviewExtended.getSegmentVersionsIssues(sid)
+      CatToolActions.reloadQualityReport()
+    })
   },
 
   confirmDeletedIssue: function (sid, issue_id) {
@@ -1038,8 +1046,8 @@ const SegmentActions = {
     })
   },
 
-  submitComment: function (sid, idIssue, data) {
-    return UI.submitComment(sid, idIssue, data)
+  submitIssueComment: function (sid, idIssue, data) {
+    return ReviewExtended.submitIssueComment(sid, idIssue, data)
   },
 
   showApproveAllModalWarnirng: function () {
