@@ -14,20 +14,16 @@ const TEXT_UTILS = {
         Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
         indexed with the id of the tags.
          */
-    var phTagsObject = {}
+    var phTagsObject = []
     var diff
     source = source.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
         var id = Math.floor(Math.random() * 10000)
-        if (isUndefined(phTagsObject[match])) {
-          phTagsObject[match] = {
-            id,
-            match,
-          }
-        } else {
-          id = phTagsObject[match].id
-        }
+        phTagsObject.push({
+          id,
+          match,
+        })
         return '<' + id + '>'
       },
     )
@@ -36,14 +32,10 @@ const TEXT_UTILS = {
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
         var id = Math.floor(Math.random() * 10000000)
-        if (isUndefined(phTagsObject[match])) {
-          phTagsObject[match] = {
-            id,
-            match,
-          }
-        } else {
-          id = phTagsObject[match].id
-        }
+        phTagsObject.push({
+          id,
+          match,
+        })
         return '<' + id + '>'
       },
     )
@@ -68,7 +60,7 @@ const TEXT_UTILS = {
     $.each(diff, function (index, text) {
       text[1] = text[1].replace(/<(.*?)>/gi, function (match, id) {
         try {
-          var tag = find(phTagsObject, function (item) {
+          var tag = phTagsObject.find((item) => {
             return item.id === parseInt(id)
           })
           if (!isUndefined(tag)) {
