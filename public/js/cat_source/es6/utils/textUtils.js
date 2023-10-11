@@ -19,24 +19,34 @@ const TEXT_UTILS = {
     source = source.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000)
-        phTagsObject.push({
-          id,
-          match,
-        })
-        return '<' + id + '>'
+        const existingTag = phTagsObject.find((item) => item.match === match)
+        if (!existingTag) {
+          const id = Math.floor(Math.random() * 10000)
+          phTagsObject.push({
+            id,
+            match,
+          })
+          return '<' + id + '>'
+        } else {
+          return '<' + existingTag.id + '>'
+        }
       },
     )
 
     target = target.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000000)
-        phTagsObject.push({
-          id,
-          match,
-        })
-        return '<' + id + '>'
+        const existingTag = phTagsObject.find((item) => item.match === match)
+        if (!existingTag) {
+          const id = Math.floor(Math.random() * 10000)
+          phTagsObject.push({
+            id,
+            match,
+          })
+          return '<' + id + '>'
+        } else {
+          return '<' + existingTag.id + '>'
+        }
       },
     )
 
