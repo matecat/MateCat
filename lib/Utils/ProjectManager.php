@@ -2757,8 +2757,15 @@ class ProjectManager {
     private function preTranslationStatus($trans_unit, $position = null){
 
         // state handling
+        $state = null;
+
         if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
             $state = $trans_unit['seg-target'][$position]['attr']['state'];
+        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state'])){
+            $state = $trans_unit['target']['attr']['state'];
+        }
+
+        if($state !== null){
 
             if(Constants_XliffTranslationStatus::isNew($state)){
                 return Constants_TranslationStatus::STATUS_NEW;
