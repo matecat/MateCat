@@ -790,16 +790,11 @@ class Editarea extends React.Component {
       } else {
         reset()
       }
-    } else if (e.key === 'Backspace' || e.key === 'Delete') {
-      const isSelected = isSelectedEntity(this.state.editorState)
-      const isRTL = Boolean(config.isTargetRTL)
-      const direction = !isRTL
-        ? e.key === 'Backspace' && !isSelected
-          ? 'left'
-          : 'right'
-        : e.key === 'Cancel' && !isSelected
-        ? 'right'
-        : 'left'
+    } else if (
+      (e.key === 'Backspace' || e.key === 'Delete') &&
+      !isSelectedEntity(this.state.editorState)
+    ) {
+      const direction = e.key === 'Backspace' ? 'left' : 'right'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
