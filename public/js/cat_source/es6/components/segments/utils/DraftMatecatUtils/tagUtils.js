@@ -25,7 +25,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           placeholderRegex.flags + 'g',
         )
         text = text.replace(globalRegex, (match, text) => {
-          let tagText = decodeNeeded ? Base64.decode(text) : match
+          let tagText = decodeNeeded ? Base64.decode(text) : text
           return (
             '<span contenteditable="false" class="tag small ' +
             (isRtl && styleRTL ? styleRTL : style) +
