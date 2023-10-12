@@ -18,6 +18,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
         placeholder,
         regex,
         styleRTL,
+        selfClosing,
       } = tagSignatures[key]
       if (placeholderRegex) {
         let globalRegex = new RegExp(
@@ -25,7 +26,11 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           placeholderRegex.flags + 'g',
         )
         text = text.replace(globalRegex, (match, text) => {
-          let tagText = decodeNeeded ? Base64.decode(text) : text
+          let tagText = decodeNeeded
+            ? Base64.decode(text)
+            : selfClosing
+            ? text
+            : match
           return (
             '<span contenteditable="false" class="tag small ' +
             (isRtl && styleRTL ? styleRTL : style) +
