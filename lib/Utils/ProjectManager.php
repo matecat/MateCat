@@ -875,7 +875,8 @@ class ProjectManager {
             foreach ( $array_files as $index => $filename ) {
                 if ( $file_info[ 'original_filename' ] === $filename ) {
                     if ( isset( $this->projectStructure[ 'instructions' ][ $index ] ) && !empty( $this->projectStructure[ 'instructions' ][ $index ] ) ) {
-                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $index ] );
+                        $instructions = Utils::stripTagsPreservingHrefs($this->projectStructure[ 'instructions' ][ $index ]);
+                        $this->_insertInstructions( $fid, $instructions );
                     }
 
                 }
@@ -2030,9 +2031,13 @@ class ProjectManager {
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
+
+                                // could not have attributes, suppress warning
+                                $state = @$xliff_trans_unit['target']['attr']['state'];
+                                $stateQualifier = @$xliff_trans_unit['target']['attr'][ 'state-qualifier' ];
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
+                                if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2702,7 +2707,7 @@ class ProjectManager {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
         }
 
-      //  $this->createReview($job, 2);
+        //  $this->createReview($job, 2);
 
         // First, create a R2 for the job is state is 'final',
         // then, save an event of each segment with state 'final'
