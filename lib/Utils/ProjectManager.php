@@ -2636,14 +2636,7 @@ class ProjectManager {
                 $target = $filter->fromLayer0ToLayer1( $target );
 
                 $pipeline = new Pipeline( $chunk->source, $chunk->target );
-                $counter  = new PhCounter();
-                $counter->transform( $target );
 
-                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-                    $pipeline->getNextId();
-                }
-
-                $pipeline->addLast( new FromViewNBSPToSpaces() );
                 $pipeline->addLast( new SprintfToPH() );
 
                 $src = $pipeline->transform( $source );
