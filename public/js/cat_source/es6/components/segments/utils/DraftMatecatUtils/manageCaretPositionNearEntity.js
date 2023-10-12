@@ -151,6 +151,23 @@ export const moveCaretOutsideEntity = ({
   return updatedStateNearZwsp ? updatedStateNearZwsp : updatedState
 }
 
+export const isSelectedEntity = (editorState) => {
+  const selection = editorState.getSelection()
+  const focusKey = selection.getFocusKey()
+
+  const start = selection.getAnchorOffset() + 1
+  const end = selection.getFocusOffset() - 1
+
+  const entities = getEntities(editorState)
+  const entityMatched = entities.find((entity) =>
+    entity.blockKey === focusKey
+      ? start === entity.start && end === entity.end
+      : false,
+  )
+
+  return typeof entityMatched !== 'undefined'
+}
+
 export const isCaretInsideEntity = () => {
   const entityContainer = getEntityContainer(entityClassname)
   if (entityContainer) {

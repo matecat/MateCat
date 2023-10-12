@@ -37,6 +37,7 @@ import {
   adjustCaretPosition,
   isCaretInsideEntity,
   checkCaretIsNearZwsp,
+  isSelectedEntity,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
@@ -790,7 +791,15 @@ class Editarea extends React.Component {
         reset()
       }
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
-      const direction = e.key === 'Backspace' ? 'left' : 'right'
+      const isSelected = isSelectedEntity(this.state.editorState)
+      const isRTL = Boolean(config.isTargetRTL)
+      const direction = !isRTL
+        ? e.key === 'Backspace' && !isSelected
+          ? 'left'
+          : 'right'
+        : e.key === 'Cancel' && !isSelected
+        ? 'right'
+        : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
