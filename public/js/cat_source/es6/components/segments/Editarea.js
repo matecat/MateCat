@@ -815,13 +815,12 @@ class Editarea extends React.Component {
         const selectionState = updatedStateNearEntity.getSelection()
         const contentState = updatedStateNearEntity.getCurrentContent()
 
-        this.setState({
-          editorState: EditorState.push(
-            updatedStateNearEntity,
-            Modifier.replaceText(contentState, selectionState, null),
-            'insert-characters',
-          ),
-        })
+        const updatedEditorState = EditorState.push(
+          updatedStateNearEntity,
+          Modifier.replaceText(contentState, selectionState, null),
+          'insert-characters',
+        )
+        this.onChange(updatedEditorState)
         return 'delete-entity'
       }
     }
