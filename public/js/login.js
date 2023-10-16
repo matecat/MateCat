@@ -135,14 +135,6 @@ $.extend(APP, {
     }
   },
 
-  openManagePage: function (e) {
-    if (!config.isLoggedIn) {
-      e.preventDefault()
-      e.stopPropagation()
-      APP.openLoginModal({goToManage: true})
-    }
-  },
-
   openLoginModal: function (param = {}) {
     var title = 'Add project to your management panel'
     var style = {
