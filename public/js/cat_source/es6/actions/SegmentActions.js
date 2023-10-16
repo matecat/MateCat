@@ -33,6 +33,8 @@ import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
+import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
+import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -1217,11 +1219,59 @@ const SegmentActions = {
     })
   },
   gotoNextSegment() {
-    let next = SegmentStore.getNextSegment()
-    if (next) {
-      SegmentActions.openSegment(next.sid)
+    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+      SegmentsFilterUtil.gotoNextSegment(SegmentStore.getCurrentSegmentId())
     } else {
-      this.closeSegment()
+      let next = SegmentStore.getNextSegment()
+      if (next) {
+        SegmentActions.openSegment(next.sid)
+      } else {
+        this.closeSegment()
+      }
+    }
+  },
+  /**
+   * Search for the next translated segment to propose for revision.
+   * This function searches in the current UI first, then falls back
+   * to invoke the server and eventually reload the page to the new
+   * URL.
+   *
+   */
+  gotoNextTranslatedSegment(sid) {
+    sid = sid || SegmentStore.getCurrentSegmentId()
+    // this is expected behaviour in review
+    // change this if we are filtering, go to the next
+    // segment, assuming the sample is what we want to revise.
+    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+      SegmentsFilterUtil.gotoNextTranslatedSegment(sid)
+    } else {
+      const nextTranslatedSegment = SegmentStore.getNextSegment(
+        sid,
+        null,
+        7,
+        null,
+        true,
+      )
+      const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
+        -1,
+        null,
+        7,
+        null,
+        true,
+      )
+      // find in next segments
+      if (nextTranslatedSegment) {
+        SegmentActions.openSegment(nextTranslatedSegment.sid)
+      } else if (
+        UI.nextUntranslatedSegmentIdByServer ||
+        nextTranslatedSegmentInPrevious
+      ) {
+        SegmentActions.openSegment(
+          UI.nextUntranslatedSegmentIdByServer
+            ? UI.nextUntranslatedSegmentIdByServer
+            : nextTranslatedSegmentInPrevious.sid,
+        )
+      }
     }
   },
   gotoNextUntranslatedSegment() {

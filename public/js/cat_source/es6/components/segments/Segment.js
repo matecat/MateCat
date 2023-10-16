@@ -137,7 +137,7 @@ class Segment extends React.Component {
     setTimeout(() =>
       ModalsActions.showModalComponent(ConfirmMessageModal, {
         cancelText: 'Close',
-        successCallback: () => UI.openNextTranslated(sid),
+        successCallback: () => SegmentActions.gotoNextTranslatedSegment(sid),
         successText: 'Open next translated segment',
         text: UI.alertNotTranslatedMessage,
       }),

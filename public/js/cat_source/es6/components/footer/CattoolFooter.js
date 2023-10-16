@@ -132,7 +132,7 @@ export const CattolFooter = ({
       return
     }
     if (config.isReview) {
-      UI.openNextTranslated()
+      SegmentActions.gotoNextTranslatedSegment()
     } else {
       SegmentActions.gotoNextUntranslatedSegment()
     }

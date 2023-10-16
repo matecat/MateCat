@@ -108,55 +108,6 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
         : null
       this.nextSegmentId = next ? next.sid : null
     },
-    //Override by  plugin
-    gotoNextSegment: function () {
-      SegmentActions.gotoNextSegment()
-    },
-    //Overridden by  plugin
-    gotoPreviousSegment: function () {
-      var prevSeg = SegmentStore.getPrevSegment()
-      if (prevSeg) {
-        SegmentActions.openSegment(prevSeg.sid)
-      }
-    },
-    /**
-     * Search for the next translated segment to propose for revision.
-     * This function searches in the current UI first, then falls back
-     * to invoke the server and eventually reload the page to the new
-     * URL.
-     *
-     * Overridden by  plugin
-     */
-    openNextTranslated: function (sid) {
-      sid = sid || UI.currentSegmentId
-      var nextTranslatedSegment = SegmentStore.getNextSegment(
-        sid,
-        null,
-        7,
-        null,
-        true,
-      )
-      var nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
-        -1,
-        null,
-        7,
-        null,
-        true,
-      )
-      // find in next segments
-      if (nextTranslatedSegment) {
-        SegmentActions.openSegment(nextTranslatedSegment.sid)
-      } else if (
-        UI.nextUntranslatedSegmentIdByServer ||
-        nextTranslatedSegmentInPrevious
-      ) {
-        SegmentActions.openSegment(
-          UI.nextUntranslatedSegmentIdByServer
-            ? UI.nextUntranslatedSegmentIdByServer
-            : nextTranslatedSegmentInPrevious.sid,
-        )
-      }
-    },
     //Overridden by  plugin
     isReadonlySegment: function (segment) {
       const projectCompletionCheck =

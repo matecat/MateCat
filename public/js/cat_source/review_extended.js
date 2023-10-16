@@ -175,10 +175,10 @@ if (ReviewExtended.enabled()) {
           if (segment.revision_number > 1) {
             UI.openNextApproved()
           } else {
-            UI.openNextTranslated()
+            SegmentActions.gotoNextTranslatedSegment()
           }
         } else {
-          UI.gotoNextSegment(sid)
+          SegmentActions.gotoNextSegment(sid)
         }
       }
 

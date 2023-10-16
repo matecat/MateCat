@@ -97,7 +97,6 @@ $.extend(window.UI, {
           e.preventDefault()
           e.stopPropagation()
           SegmentActions.selectPrevSegmentDebounced()
-          // UI.gotoPreviousSegment();
         },
       )
       .on(
@@ -108,7 +107,6 @@ $.extend(window.UI, {
           e.preventDefault()
           e.stopPropagation()
           SegmentActions.selectNextSegmentDebounced()
-          // UI.gotoNextSegment();
         },
       )
       //For shortcut arrows + ctrl in windows to move between segments
@@ -335,7 +333,7 @@ $.extend(window.UI, {
       .on('click', '#statistics .meter a', function (e) {
         e.preventDefault()
         if (config.isReview) {
-          UI.openNextTranslated()
+          SegmentActions.gotoNextTranslatedSegment()
         } else {
           SegmentActions.gotoNextUntranslatedSegment()
         }
