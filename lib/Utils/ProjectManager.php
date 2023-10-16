@@ -2707,46 +2707,24 @@ class ProjectManager {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
         }
 
-        //  $this->createReview($job, 2);
-
+        // We do not create Chunk reviews since this is a task for postProjectCreate
         // First, create a R2 for the job is state is 'final',
         // then, save an event of each segment with state 'final'
         if($createSecondPassReview){
-            $this->createSecondPassReview($job);
-            $translationEventDao = new TranslationEventDao();
 
+            $projectStructure['create_2_pass_review'] = true;
+
+            $translationEventDao = new TranslationEventDao();
             // bulk update, max 100 inserts
             $r2SegmentEventsChunks = array_chunk($r2SegmentEvents, 100);
             foreach ($r2SegmentEventsChunks as $r2SegmentEventsChunk){
                 $translationEventDao->bulkInsert($r2SegmentEventsChunk);
             }
+
         }
 
         //clean translations and queries
         unset( $query_translations_values );
-    }
-
-    /**
-     * @param Jobs_JobStruct $job
-     * @param $source_page
-     * @throws \Exception
-     */
-    private function createSecondPassReview(Jobs_JobStruct $job)
-    {
-        $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
-            [ $job ],
-            $this->project,
-            [
-                'source_page' => 3
-            ]
-        );
-
-        // destroy project data cache
-        ( new \Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
-
-        // destroy the 5 minutes chunk review cache
-        $chunk = (new \Chunks_ChunkDao())->getByIdAndPassword($records[ 0 ]->id_job, $records[ 0 ]->password);
-        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews($chunk, 60 * 5 );
     }
 
     /**
