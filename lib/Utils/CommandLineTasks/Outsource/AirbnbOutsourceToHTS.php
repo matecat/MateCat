@@ -87,7 +87,7 @@ class AirbnbOutsourceToHTS extends AbstractOutsource {
      */
     protected function prepareConfirmUrl( $urls, \Projects_ProjectStruct $project ) {
 
-        return "http://www.translated.net/hts/index.php?" . http_build_query( [
+        return "https://www.translated.net/hts/index.php?" . http_build_query( [
                         'f'                => 'confirm',
                         'cid'              => $this->config[ 'translated_username' ],
                         'p'                => $this->config[ 'translated_password' ],
@@ -113,7 +113,7 @@ class AirbnbOutsourceToHTS extends AbstractOutsource {
      */
     protected function prepareQuoteUrl( \Jobs_JobStruct $job, $eq_word, \Projects_ProjectStruct $project, $service_type = ServiceTypes::SERVICE_TYPE_PROFESSIONAL ){
 
-        return "http://www.translated.net/hts/index.php?" . http_build_query( [
+        return "https://www.translated.net/hts/index.php?" . http_build_query( [
                         'f'                => 'quote',
                         'cid'              => $this->config[ 'translated_username' ],
                         'p'                => $this->config[ 'translated_password' ],
