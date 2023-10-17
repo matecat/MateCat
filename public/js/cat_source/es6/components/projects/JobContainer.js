@@ -658,7 +658,7 @@ class JobContainer extends React.Component {
     return icon
   }
 
-  openOutsourceModal(showTranslatorBox, extendedView) {
+  openOutsourceModal = (showTranslatorBox, extendedView) => {
     if (showTranslatorBox && !this.props.job.get('outsource_available')) {
       this.setState({
         showTranslatorBox: showTranslatorBox,
