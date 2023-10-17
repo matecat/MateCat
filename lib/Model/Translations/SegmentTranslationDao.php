@@ -972,6 +972,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateSuggestionsArray($id_segment, $suggestions) {
 
+        $suggestionSource = null;
+        if(!empty($suggestions)){
+            $suggestionSource = (substr( $suggestions[0]["created_by"], 0, 2 ) === "MT") ? "MT" : "TM";
+        }
+
         $conn  = Database::obtain()->getConnection();
         $query = "UPDATE segment_translations SET suggestions_array = :suggestions_array WHERE id_segment=:id_segment";
         $stmt  = $conn->prepare( $query );
@@ -981,6 +986,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             'id_segment'        => $id_segment,
             'suggestions_array' => $suggestions_array,
         ];
+
+        if($suggestionSource !== null){
+            $params['suggestion_source'] = $suggestionSource;
+        }
 
         $stmt->execute( $params );
     }
