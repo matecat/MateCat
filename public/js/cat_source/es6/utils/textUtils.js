@@ -223,7 +223,7 @@ const TEXT_UTILS = {
     }
   },
 
-  escapeRegExp(str) {
+  escapeRegExp(str = '') {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
   },
 
