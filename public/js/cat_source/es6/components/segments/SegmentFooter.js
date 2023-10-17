@@ -368,7 +368,7 @@ function SegmentFooter() {
         return tabItems.find(({code}) => code === 'gl')?.isLoading
       case 'cc':
         if (!clientConnected) return true
-        return tabItems.find(({code}) => code === 'gl')?.isLoading
+        return tabItems.find(({code}) => code === 'cc')?.isLoading
       default:
         return false
     }
