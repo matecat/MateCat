@@ -142,7 +142,7 @@ class AnalyzeChunksResume extends React.Component {
       <OutsourceButton
         chunk={chunk}
         index={index}
-        openOutsourceModal={this.openMergeModal}
+        openOutsourceModal={this.openOutsourceModal}
       />
     )
   }
