@@ -259,31 +259,31 @@ MBC.init = function () {
       refreshBadgeHeaderIcon()
     }
 
-    var getTeamUsers = function () {
-      var teamId = config.id_team
-      if (teamId) {
-        const promise = getTeamUsersApi({teamId})
-        promise
-          .then((data) => {
-            var team = {
-              uid: 'team',
-              first_name: 'Team',
-              last_name: '',
-            }
-            MBC.teamUsers = [...data]
-            MBC.teamUsers.unshift(team)
-
-            CommentsActions.updateTeamUsers(MBC.teamUsers)
-          })
-          .catch(() => {
-            MBC.teamUsers = []
-          })
-        return promise
-      } else {
-        MBC.teamUsers = []
-        return Promise.resolve()
-      }
-    }
+    // var getTeamUsers = function () {
+    //   var teamId = config.id_team
+    //   if (teamId) {
+    //     const promise = getTeamUsersApi({teamId})
+    //     promise
+    //       .then((data) => {
+    //         var team = {
+    //           uid: 'team',
+    //           first_name: 'Team',
+    //           last_name: '',
+    //         }
+    //         MBC.teamUsers = [...data]
+    //         MBC.teamUsers.unshift(team)
+    //
+    //         CommentsActions.updateTeamUsers(MBC.teamUsers)
+    //       })
+    //       .catch(() => {
+    //         MBC.teamUsers = []
+    //       })
+    //     return promise
+    //   } else {
+    //     MBC.teamUsers = []
+    //     return Promise.resolve()
+    //   }
+    // }
 
     var checkOpenSegmentComment = function (id_segment) {
       if (
@@ -416,13 +416,13 @@ MBC.init = function () {
     //      the section, so we close the balloon.
     //
     //
-    var delegate = '#outer'
+    // var delegate = '#outer'
 
     // Click reached #outer , close the history balloon
-    $(delegate).on('click', function () {
+    /*    $(delegate).on('click', function () {
       $('.mbc-history-balloon-outer').removeClass('mbc-visible')
       $('#mbc-history').removeClass('open')
-    })
+    })*/
 
     $(window).on('segmentsAdded', function () {
       loadCommentData(function (resp) {
@@ -432,28 +432,28 @@ MBC.init = function () {
     })
 
     $(document).on('getSegments_success', function () {
-      loadCommentData(function (resp) {
-        MBC.commentsLoaded = true
-        resetDatabase(resp)
-        $(document).trigger('mbc:ready')
-      })
+      // loadCommentData(function (resp) {
+      //   MBC.commentsLoaded = true
+      //   resetDatabase(resp)
+      //   $(document).trigger('mbc:ready')
+      // })
     })
 
     $(document).on('mbc:ready', function () {
-      $('#mbc-history').remove()
-      $('.action-menu #action-filter').before($(tpls.historyIcon))
-      $('#mbc-history').append(
-        $(tpls.historyOuter).append($(tpls.historyNoComments)),
-      )
+      // $('#mbc-history').remove()
+      // $('.action-menu #action-filter').before($(tpls.historyIcon))
+      // $('#mbc-history').append(
+      //   $(tpls.historyOuter).append($(tpls.historyNoComments)),
+      // )
 
-      getTeamUsers().then(function () {
-        refreshElements()
-        // open a comment if was asked by hash
-        var lastAsked = popLastCommentHash()
-        if (lastAsked) {
-          openSegmentComment(lastAsked.segmentId)
-        }
-      })
+      // getTeamUsers().then(function () {
+      refreshElements() // ->>> modifica le classi per visualizzare cose
+      // open a comment if was asked by hash
+      var lastAsked = popLastCommentHash()
+      if (lastAsked) {
+        openSegmentComment(lastAsked.segmentId)
+      }
+      // })
     })
 
     $(document).on('click', '.mbc-show-comment-btn', function (e) {
@@ -466,10 +466,10 @@ MBC.init = function () {
       SegmentActions.scrollToSegment(sid, SegmentActions.openSegmentComment)
     })
 
-    $(document).on('click', '#action-search', function () {
+    /*$(document).on('click', '#action-search', function () {
       $('.mbc-history-balloon-outer').removeClass('mbc-visible')
       $('#mbc-history').removeClass('open')
-    })
+    })*/
 
     $(document).on('click', '#mbc-history', function (ev) {
       if ($('.mbc-history-balloon-outer').hasClass('mbc-visible')) {
@@ -508,12 +508,12 @@ MBC.init = function () {
       }
     })
 
-    $(document).on('ui:segment:focus', function (e, sid) {
+    /* $(document).on('ui:segment:focus', function (e, sid) {
       if (lastCommentHash && lastCommentHash.segmentId == sid) {
         openSegmentComment(UI.Segment.findEl(sid))
         lastCommentHash = null
       }
-    })
+    })*/
   })(jQuery, config, window, MBC)
 }
 
