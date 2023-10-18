@@ -579,12 +579,17 @@ class Session {
      * @throws Exception
      */
     public function createRemoteCopiesWhereToSaveTranslation( $id_file, $id_job ) {
-        $this->getService();
+
+        $service = $this->getService();
+
+        if(!$service){
+            throw new Exception( 'Cannot instantiate service' );
+        }
 
         $listRemoteFiles = \RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
         $remoteFile      = $listRemoteFiles[ 0 ];
 
-        $gdriveFile = $this->service->files->get( $remoteFile->remote_id );
+        $gdriveFile = $service->files->get( $remoteFile->remote_id );
         $fileTitle = $gdriveFile->getName();
 
         $job                 = \Jobs_JobDao::getById( $id_job )[ 0 ];
@@ -615,7 +620,13 @@ class Session {
         //$urlPermission->setEmailAddress( $this->__getUser()->getEmail() );
         //$urlPermission->setWithLink( true ); setWithLink() was removed
 
-        return $this->getService()->permissions->create( $fileId, $urlPermission );
+        $service = $this->getService();
+
+        if(!$service){
+            throw new Exception( 'Cannot instantiate service' );
+        }
+
+        return $service->permissions->create( $fileId, $urlPermission );
     }
 
     /**
@@ -631,6 +642,10 @@ class Session {
         }
 
         $service = $this->getService();
+
+        if(!$service){
+            throw new Exception( 'Cannot instantiate service' );
+        }
 
         // get meta and mimetype
         $meta = $service->files->get( $fileId );

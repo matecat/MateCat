@@ -54,11 +54,11 @@ class GDriveController extends KleinController {
             return $this->request->param( 'source' );
         }
 
-        if ( isset( $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) and null !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) {
+        if ( isset( $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) and null !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] and  "_EMPTY_" !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ]) {
             return $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
         }
 
-        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
+        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] and  "_EMPTY_" !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
             $cookieSource = explode('||', $_COOKIE[ Constants::COOKIE_SOURCE_LANG ]);
 
             return $cookieSource[0];
@@ -105,14 +105,14 @@ class GDriveController extends KleinController {
         } else {
             $this->guid = Utils::createToken();
             CookieManager::setCookie( "upload_session", $this->guid,
-                    [
-                            'expires'  => time() + 86400,
-                            'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
-                            'secure'   => true,
-                            'httponly' => true,
-                            'samesite' => 'None',
-                    ]
+                [
+                    'expires'  => time() + 86400,
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => true,
+                    'samesite' => 'None',
+                ]
             );
             $_SESSION[ "upload_session" ] = $this->guid;
 
@@ -137,9 +137,9 @@ class GDriveController extends KleinController {
             } catch ( Exception $e){
                 $this->isImportingSuccessful = false;
                 $this->error = [
-                        'code' => $e->getCode(),
-                        'class' => get_class($e),
-                        'msg' => $this->getExceptionMessage($e)
+                    'code' => $e->getCode(),
+                    'class' => get_class($e),
+                    'msg' => $this->getExceptionMessage($e)
                 ];
                 break;
             }
@@ -187,14 +187,14 @@ class GDriveController extends KleinController {
     private function doRedirect() {
         // set a cookie to allow the frontend to call list endpoint
         CookieManager::setCookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ],
-                [
-                        'expires'  => time() + 86400,
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
-                ]
+            [
+                'expires'  => time() + 86400,
+                'path'     => '/',
+                'domain'   => INIT::$COOKIE_DOMAIN,
+                'secure'   => true,
+                'httponly' => true,
+                'samesite' => 'None',
+            ]
         );
         header( "Location: /", true, 302 );
         exit;
@@ -202,10 +202,10 @@ class GDriveController extends KleinController {
 
     private function doResponse() {
         $this->response->json( [
-                "success" => $this->isImportingSuccessful,
-                "error_msg" => isset($this->error['msg']) ? $this->error['msg'] : null,
-                "error_class" => isset($this->error['class']) ? $this->error['class'] : null,
-                "error_code" => isset($this->error['code']) ? $this->error['code'] : null,
+            "success" => $this->isImportingSuccessful,
+            "error_msg" => isset($this->error['msg']) ? $this->error['msg'] : null,
+            "error_class" => isset($this->error['class']) ? $this->error['class'] : null,
+            "error_code" => isset($this->error['code']) ? $this->error['code'] : null,
         ] );
     }
 
@@ -218,14 +218,14 @@ class GDriveController extends KleinController {
 
         // delete the cookie
         CookieManager::setCookie( $this->gdriveListCookieName, "",
-                [
-                        'expires'  => time() - 3600,
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
-                ]
+            [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'domain'   => INIT::$COOKIE_DOMAIN,
+                'secure'   => true,
+                'httponly' => true,
+                'samesite' => 'None',
+            ]
         );
     }
 
@@ -246,7 +246,7 @@ class GDriveController extends KleinController {
         }
 
         $this->response->json( [
-                "success" => $success
+            "success" => $success
         ] );
     }
 
@@ -265,7 +265,7 @@ class GDriveController extends KleinController {
         }
 
         $this->response->json( [
-                "success" => $success
+            "success" => $success
         ] );
     }
 
