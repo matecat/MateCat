@@ -263,6 +263,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
+        'process.env.MODE': JSON.stringify(mode),
       }),
       !isDev &&
         pluginConfig.sentryWebpackPlugin &&

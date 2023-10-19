@@ -79,7 +79,7 @@ class SegmentFooterTabConcordance extends React.Component {
     })
 
     // reset component results
-    this.resultsRef.reset()
+    this.resultsRef && this.resultsRef.reset()
   }
 
   renderConcordances(sid, data) {
