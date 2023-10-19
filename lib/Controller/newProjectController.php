@@ -1,6 +1,7 @@
 <?php
 
 
+use ConnectedServices\GDrive\GDriveController;
 use Engines_Intento as Intento;
 use LexiQA\LexiQADecorator;
 
@@ -26,7 +27,7 @@ class newProjectController extends viewController {
         parent::makeTemplate( "upload.html" );
 
         $filterArgs = [
-                'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
+            'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
@@ -131,14 +132,14 @@ class newProjectController extends viewController {
 
             if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
                 CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
-                        [
-                                'expires'  => time() + ( 86400 * 365 ),
-                                'path'     => '/',
-                                'domain'   => INIT::$COOKIE_DOMAIN,
-                                'secure'   => true,
-                                'httponly' => true,
-                                'samesite' => 'None',
-                        ]
+                    [
+                        'expires'  => time() + ( 86400 * 365 ),
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                    ]
                 );
                 $this->noSourceLangHistory = true;
             } else {
@@ -174,23 +175,26 @@ class newProjectController extends viewController {
 
     private function setOrGetGuid() {
 
-        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
-            Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
-        }
+        // If isset the GDRIVE_LIST_COOKIE_NAME cookie, do nothing
+        if(!isset($_COOKIE[GDriveController::GDRIVE_LIST_COOKIE_NAME])){
 
-        $this->guid = Utils::createToken();
-        CookieManager::setCookie( "upload_session", $this->guid,
+            // Get the guid from the guid if it exists, otherwise set the guid into the cookie
+            if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
+            }
+
+            $this->guid = Utils::createToken();
+            CookieManager::setCookie( "upload_session", $this->guid,
                 [
-                        'expires'  => time() + 86400,
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
+                    'expires'  => time() + 86400,
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => false,
+                    'samesite' => 'None',
                 ]
-        );
-
+            );
+        }
     }
 
     private function isUploadTMXAllowed( $default = false ) {
@@ -253,8 +257,8 @@ class newProjectController extends viewController {
             $val = [];
             foreach ( $value as $ext => $info ) {
                 $val[] = [
-                        'ext'   => $ext,
-                        'class' => $info[ 2 ]
+                    'ext'   => $ext,
+                    'class' => $info[ 2 ]
                 ];
             }
             $val = array_chunk( $val, 1 );
@@ -369,14 +373,14 @@ class newProjectController extends viewController {
         } else {
             if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
                 CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
-                        [
-                                'expires'  => time() + ( 86400 * 365 ),
-                                'path'     => '/',
-                                'domain'   => INIT::$COOKIE_DOMAIN,
-                                'secure'   => true,
-                                'httponly' => true,
-                                'samesite' => 'None',
-                        ]
+                    [
+                        'expires'  => time() + ( 86400 * 365 ),
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                    ]
                 );
                 $this->noTargetLangHistory = true;
             } else {

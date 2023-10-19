@@ -14,7 +14,8 @@ use Utils;
 
 class GDriveController extends KleinController {
 
-    private $gdriveListCookieName  = "gdrive_files_to_be_listed";
+    const GDRIVE_LIST_COOKIE_NAME = 'gdrive_files_to_be_listed';
+
     private $source_lang           = Constants::DEFAULT_SOURCE_LANG;
     private $target_lang           = Constants::DEFAULT_TARGET_LANG;
     private $seg_rule              = null;
@@ -186,7 +187,7 @@ class GDriveController extends KleinController {
 
     private function doRedirect() {
         // set a cookie to allow the frontend to call list endpoint
-        CookieManager::setCookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ],
+        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, $_SESSION[ "upload_session" ],
             [
                 'expires'  => time() + 86400,
                 'path'     => '/',
@@ -217,7 +218,7 @@ class GDriveController extends KleinController {
         $this->response->json( $response );
 
         // delete the cookie
-        CookieManager::setCookie( $this->gdriveListCookieName, "",
+        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, "",
             [
                 'expires'  => time() - 3600,
                 'path'     => '/',
