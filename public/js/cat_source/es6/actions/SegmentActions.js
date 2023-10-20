@@ -176,7 +176,7 @@ const SegmentActions = {
     if (SegmentStore.getCurrentSegment())
       this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
-  scrollToSegment: function (sid, callback) {
+  scrollToSegment: function (sid, callback = null) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
       AppDispatcher.dispatch({

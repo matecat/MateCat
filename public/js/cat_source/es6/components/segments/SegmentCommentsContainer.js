@@ -3,8 +3,7 @@
 
  */
 import React from 'react'
-import {isUndefined, find} from 'lodash'
-
+import {isUndefined} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
@@ -100,8 +99,8 @@ class SegmentCommentsContainer extends React.Component {
       )
     }
 
-    var findUser = (id) => {
-      return find(this.state.teamUsers, function (item) {
+    const findUser = (id) => {
+      return this.state.teamUsers.find((item) => {
         return item.uid === id
       })
     }

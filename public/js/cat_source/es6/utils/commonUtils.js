@@ -635,12 +635,7 @@ const ParsedHash = function (hash) {
   }
 
   this.cleanupHash = function () {
-    notifyModules()
     window.location.hash = CommonUtils.parsedHash.segmentId
-  }
-
-  var notifyModules = function () {
-    MBC.enabled() && that.isComment() && MBC.setLastCommentHash(that)
   }
 }
 
