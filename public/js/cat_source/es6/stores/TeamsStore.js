@@ -73,6 +73,11 @@ const TeamsStore = assign({}, EventEmitter.prototype, {
   getUser: function () {
     return this.user
   },
+  getUserName: function () {
+    return this.user
+      ? `${this.user.user.first_name} ${this.user.user.last_name}`
+      : 'Anonymous'
+  },
 
   emitChange: function () {
     this.emit.apply(this, arguments)

@@ -102,9 +102,11 @@ export const CommentsButton = ({teams}) => {
   }
   useEffect(() => {
     const close = () => setShowComments(false)
+    const openMenu = () => setShowComments(true)
     loadCommentData()
     CommentsStore.addListener(CommentsConstants.DELETE_COMMENT, updateComments)
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, updateComments)
+    CommentsStore.addListener(CommentsConstants.OPEN_MENU, openMenu)
     CatToolStore.addListener(CattolConstants.CLOSE_SUBHEADER, close)
     return () => {
       CommentsStore.removeListener(
@@ -116,6 +118,7 @@ export const CommentsButton = ({teams}) => {
         updateComments,
       )
       CatToolStore.removeListener(CattolConstants.CLOSE_SUBHEADER, close)
+      CatToolStore.removeListener(CattolConstants.OPEN_MENU, openMenu)
     }
   }, [])
   useEffect(() => {

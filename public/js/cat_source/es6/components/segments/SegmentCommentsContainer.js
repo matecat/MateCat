@@ -8,7 +8,6 @@ import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
-import MBC from '../../utils/mbc.main'
 import {SegmentContext} from './SegmentContext'
 
 class SegmentCommentsContainer extends React.Component {
@@ -35,7 +34,6 @@ class SegmentCommentsContainer extends React.Component {
     e.preventDefault()
     e.stopPropagation()
     SegmentActions.closeSegmentComment(this.context.segment.sid)
-    localStorage.setItem(MBC.localStorageCommentsClosed, true)
   }
 
   sendComment() {

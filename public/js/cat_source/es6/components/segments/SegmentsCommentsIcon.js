@@ -4,7 +4,6 @@ import {isUndefined} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import SegmentActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'
-import MBC from '../../utils/mbc.main'
 import Shortcuts from '../../utils/shortcuts'
 import {SegmentContext} from './SegmentContext'
 
@@ -37,7 +36,6 @@ class SegmentsCommentsIcon extends React.Component {
     SegmentActions.openSegmentComment(this.context.segment.sid)
     if (!UI.isReadonlySegment(this.context.segment))
       SegmentActions.openSegment(this.context.segment.sid)
-    localStorage.setItem(MBC.localStorageCommentsClosed, false)
   }
 
   componentDidMount() {
