@@ -52,7 +52,7 @@ class newProjectController extends viewController {
         }
 
         try {
-            $this->evalTragetLangHistory();
+            $this->evalTargetLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
             Log::doJsonLog( $e->getMessage() );
             $this->template->noTargetLangHistory = true;
@@ -367,12 +367,12 @@ class newProjectController extends viewController {
         return Constants::DEFAULT_SOURCE_LANG;
     }
 
-    private function evalTragetLangHistory() {
+    private function evalTargetLangHistory() {
         if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ Constants::COOKIE_TARGET_LANG ] == Constants::EMPTY_VAL ) {
             $this->noTargetLangHistory = true;
         } else {
             if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
-                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
+                CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL,
                     [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',

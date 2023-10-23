@@ -51,18 +51,15 @@ class GDriveController extends KleinController {
      * @return string
      */
     private function getSource() {
+
         if ( null !== $this->request->param( 'source' ) ) {
             return $this->request->param( 'source' );
         }
 
-        if ( isset( $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) and null !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] and  "_EMPTY_" !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ]) {
-            return $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        }
-
-        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] and  "_EMPTY_" !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
+        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] and Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
             $cookieSource = explode('||', $_COOKIE[ Constants::COOKIE_SOURCE_LANG ]);
 
-            return $cookieSource[0];
+            return $cookieSource[ count($cookieSource) - 2 ];
         }
 
         return Constants::DEFAULT_SOURCE_LANG;
@@ -72,14 +69,15 @@ class GDriveController extends KleinController {
      * @return string
      */
     private function getTarget() {
+
         if ( null !== $this->request->param( 'target' ) ) {
             return $this->request->param( 'target' );
         }
 
-        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
+        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] and Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
             $cookieTarget = explode('||', $_COOKIE[ Constants::COOKIE_TARGET_LANG ]);
 
-            return $cookieTarget[0];
+            return $cookieTarget[ count($cookieTarget) - 2 ];
         }
 
         return Constants::DEFAULT_TARGET_LANG;

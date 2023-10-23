@@ -273,7 +273,7 @@ class createProjectController extends ajaxController {
             }
         }
 
-        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal,
+        CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, $newCookieVal,
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
