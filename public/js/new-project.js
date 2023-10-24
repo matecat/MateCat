@@ -243,10 +243,10 @@ $(document).ready(function () {
   let currentTargetLangs = localStorage.getItem('currentTargetLang')
   let currentSourceLangs = localStorage.getItem('currentSourceLang')
   if (!currentSourceLangs) {
-    currentSourceLangs = config.currentSourceLang
+    currentSourceLangs = 'en-US'
   }
   if (!currentTargetLangs) {
-    currentTargetLangs = config.currentTargetLang
+    currentTargetLangs = 'fr-FR'
   }
   const domMountPoint = document.getElementsByClassName('new_project__page')[0]
   if (domMountPoint) {
