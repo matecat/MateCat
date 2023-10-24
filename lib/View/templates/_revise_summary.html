@@ -14,13 +14,11 @@
         /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
-            qa_equivalent_class: '${qa_equivalent_class | string: 30}',
             id_job: '${jid}',
             password: '${password}',
             source_rtl: ${source_rtl | string:false},
             target_rtl: ${target_rtl | string:false},
             searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-            project_type: '${project_type}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},

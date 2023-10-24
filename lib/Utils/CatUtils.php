@@ -736,33 +736,23 @@ class CatUtils {
 
     /**
      * Returns the string representing the overall quality for a job,
-     * taking into account both old revision and new revision.
      *
      * @param Jobs_JobStruct         $job
      *
-     * @param Projects_ProjectStruct $project
-     * @param FeatureSet             $featureSet
      * @param array                  $chunkReviews
      *
      * @return string
      * @throws ReflectionException
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet, array $chunkReviews = [] ) {
-        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $featureSet, $chunkReviews );
-        $result = null;
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job,  array $chunkReviews = [] ) {
+        $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
-        if ( $featureSet->hasRevisionFeature() ) {
-
-            if ( @$values->is_pass == null ) {
-                $result = $values->is_pass;
-            } elseif ( !empty( $values->is_pass ) ) {
-                $result = 'excellent';
-            } else {
-                $result = 'fail';
-            }
-
+        if ( @$values->is_pass == null ) {
+            $result = $values->is_pass;
+        } elseif ( !empty( $values->is_pass ) ) {
+            $result = 'excellent';
         } else {
-            $result = strtolower( $values[ 'minText' ] );
+            $result = 'fail';
         }
 
         return $result;
@@ -770,103 +760,15 @@ class CatUtils {
 
     /**
      * @param Jobs_JobStruct $job
-     * @param FeatureSet     $featureSet
      * @param array          $chunkReviews
      *
-     * @return array|\LQA\ChunkReviewStruct|null
+     * @return ChunkReviewStruct|null
      * @throws ReflectionException
      * @internal   param Projects_ProjectStruct $project
-     * @deprecated this method should only return values for legacy revision, it should not return ChunkReviewStruct nor
-     *             it should make use of $featureSet to determine the revision type, use `getQualityOverallFromJobStruct`.
      */
-    public static function getQualityInfoOrChunkReviewStructFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet, array $chunkReviews = [] ) {
-
-        $result = null;
-        if ( $featureSet->hasRevisionFeature() ) {
-            // we can pass $chunkReviews by reference
-            // avoiding duplicate queries
-            $result = ( $chunkReviews ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
-        } else {
-            $result = self::getQualityInfoFromJobStruct( $job, $featureSet );
-        }
-
+    public static function getChunkReviewStructFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ) {
+        $result = ( $chunkReviews ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
         return $result;
-    }
-
-    /**
-     * @param Jobs_JobStruct $job
-     * @param FeatureSet     $featureSet
-     *
-     * @return array
-     */
-    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
-        $struct      = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
-        $reviseClass = new Constants_Revise;
-
-        $jobQA = new Revise_JobQA(
-                $job->id,
-                $job->password, $struct->getTotal(),
-                $reviseClass
-        );
-
-        /**
-         * @var $jobQA Revise_JobQA
-         */
-        list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
-        $jobQA->retrieveJobErrorTotals();
-
-        return $jobQA->evalJobVote();
-    }
-
-
-    /**
-     * @param Jobs_JobStruct $job
-     * @param                $analysis_status
-     *
-     * @return WordCount_Struct
-     */
-    public static function getWStructFromJobStruct( Jobs_JobStruct $job, $analysis_status ) {
-
-        $wStruct = new WordCount_Struct();
-
-        $wStruct->setIdJob( $job->id );
-        $wStruct->setJobPassword( $job->password );
-        $wStruct->setNewWords( $job->new_words );
-        $wStruct->setDraftWords( $job->draft_words );
-        $wStruct->setTranslatedWords( $job->translated_words );
-        $wStruct->setApprovedWords( $job->approved_words );
-        $wStruct->setRejectedWords( $job->rejected_words );
-
-        // For projects created with No tm analysis enabled
-        if ( $wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-            $wCounter = new WordCount_CounterModel();
-            $wStruct  = $wCounter->initializeJobWordCount( $job->id, $job->password );
-            Log::doJsonLog( "BackWard compatibility set Counter." );
-
-            return $wStruct;
-        }
-
-        return $wStruct;
-    }
-
-    public static function getSerializedCategories( $reviseClass ) {
-        $categoriesDbNames = Constants_Revise::$categoriesDbNames;
-        $categories        = [];
-        foreach ( $categoriesDbNames as $categoryDbName ) {
-
-            $categories[] = [
-                    'label'         => constant( get_class( $reviseClass ) . "::" . strtoupper( $categoryDbName ) ),
-                    'id'            => $categoryDbName,
-                    'severities'    => [
-                            [ 'label' => Constants_Revise::MINOR, 'penalty' => Constants_Revise::$const2ServerValues[ Constants_Revise::MINOR ] ],
-                            [ 'label' => Constants_Revise::MAJOR, 'penalty' => Constants_Revise::$const2ServerValues[ Constants_Revise::MAJOR ] ]
-                    ],
-                    'subcategories' => [],
-                    'options'       => [],
-            ];
-        }
-
-        return $categories;
     }
 
     /**

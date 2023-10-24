@@ -201,6 +201,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     /**
      * @param Chunks_ChunkStruct $chunkStruct
+     * @param null|int               $ttl
      *
      * @return ChunkReviewStruct[]
      */

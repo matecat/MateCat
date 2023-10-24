@@ -11,7 +11,6 @@ namespace QualityReport;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Constants;
-use Constants_Revise;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
@@ -22,15 +21,12 @@ use LQA\CategoryDao;
 use LQA\CategoryStruct;
 use LQA\ChunkReviewDao;
 use LQA\EntryCommentDao;
-use QualityReport_QualityReportSegmentStruct;
-use Revise_ReviseDAO;
-use Segments_SegmentDao;
 use Matecat\SubFiltering\MateCatFilter;
-use ZipArchiveExtended;
+use QualityReport_QualityReportSegmentStruct;
+use Segments_SegmentDao;
 
 class QualityReportSegmentModel {
 
-    protected $_legacySegmentRevisions;
     protected $chunk;
 
     protected $_chunkReviews;
@@ -161,19 +157,13 @@ class QualityReportSegmentModel {
         $featureSet->loadForProject( $this->chunk->getProject() );
         $issue_comments = [];
 
-        if ( $featureSet->hasRevisionFeature() ) {
-            $issues = QualityReportDao::getIssuesBySegments( $segment_ids, $this->chunk->id );
-            if ( !empty( $issues ) ) {
-                $issue_comments = ( new EntryCommentDao() )->fetchCommentsGroupedByIssueIds(
-                        array_map( function ( $issue ) {
-                            return $issue->issue_id;
-                        }, $issues )
-                );
-            }
-
-        } else {
-            $reviseDao          = new Revise_ReviseDAO();
-            $segments_revisions = $reviseDao->readBySegments( $segment_ids, $this->chunk->id );
+        $issues = QualityReportDao::getIssuesBySegments( $segment_ids, $this->chunk->id );
+        if ( !empty( $issues ) ) {
+            $issue_comments = ( new EntryCommentDao() )->fetchCommentsGroupedByIssueIds(
+                    array_map( function ( $issue ) {
+                        return $issue->issue_id;
+                    }, $issues )
+            );
         }
 
         $commentsDao = new \Comments_CommentDao;
@@ -182,21 +172,15 @@ class QualityReportSegmentModel {
 
         $last_revisions = [];
 
-        if ( in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
+        $translationVersionDao = new TranslationVersionDao;
+        $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
+                $segment_ids, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
+        );
 
-            $translationVersionDao = new TranslationVersionDao;
-            $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
-                    $segment_ids, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
+        foreach ( $this->_getChunkReviews() as $chunkReview ) {
+            $last_revisions [ $chunkReview->source_page ] = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
+                    $segment_ids, $this->chunk->id, $chunkReview->source_page
             );
-
-            foreach ( $this->_getChunkReviews() as $chunkReview ) {
-                $last_revisions [ $chunkReview->source_page ] = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
-                        $segment_ids, $this->chunk->id, $chunkReview->source_page
-                );
-            }
-
-        } else {
-            $last_translations = $this->makeSegmentsVersionsUniform( $segment_ids );
         }
 
         $segments = [];
@@ -313,85 +297,6 @@ class QualityReportSegmentModel {
         }
 
         return $this->_chunkReviews;
-    }
-
-    protected function _getLegacySegmentRevisions( $segments_id ) {
-        if ( $this->_legacySegmentRevisions == null ) {
-            $reviseDao                     = new Revise_ReviseDAO();
-            $this->_legacySegmentRevisions = $reviseDao->readBySegments( $segments_id, $this->chunk->id );
-        }
-
-        return $this->_legacySegmentRevisions;
-    }
-
-    private function makeSegmentsVersionsUniform( $segment_ids ) {
-        $array = [];
-        foreach ( $this->_getLegacySegmentRevisions( $segment_ids ) as $segment_version ) {
-            $array[] = new \DataAccess\ShapelessConcreteStruct( [
-                    'id_segment'     => $segment_version->id_segment,
-                    'translation'    => $segment_version->original_translation,
-                    'version_number' => 0,
-                    'creation_date'  => null,
-                    'source_page'    => 1
-            ] );
-        }
-
-        return $array;
-
-    }
-
-    private function makeIssuesDataUniform( $issues ) {
-        $issues_categories = [];
-        foreach ( $issues as $issue ) {
-            $issues_categories = array_merge( $issues_categories, $this->makeIssueDataUniform( $issue ) );
-        }
-
-        return $issues_categories;
-    }
-
-    /**
-     * This is a temporary method. It helps to uniformize issues data coming from different features.
-     * From the oldest one version to the new one.
-     *
-     * @param $issue
-     *
-     * @return \DataAccess\ShapelessConcreteStruct[]
-     */
-
-    private function makeIssueDataUniform( $issue ) {
-
-        $categories_values = Constants_Revise::$categoriesDbNames;
-
-        $categories = [];
-        foreach ( $categories_values as $category_value ) {
-
-            $issue_old_severity = $issue->{$category_value};
-            if ( $issue_old_severity == "" || $issue_old_severity == "none" ) {
-                continue;
-            }
-
-            $categories[] = new \DataAccess\ShapelessConcreteStruct( [
-                    "segment_id"          => $issue->id_segment,
-                    "issue_id"            => null,
-                    "issue_create_date"   => null,
-                    "issue_replies_count" => "0",
-                    "issue_start_offset"  => "0",
-                    "issue_end_offset"    => "0",
-                    "issue_category"      => constant( "Constants_Revise::" . strtoupper( $category_value ) ),
-                    "category_options"    => null,
-                    "issue_severity"      => $issue_old_severity,
-                    "issue_comment"       => null,
-                    "target_text"         => null,
-                    "issue_uid"           => null,
-                    "warning_scope"       => null,
-                    "warning_data"        => null,
-                    "warning_severity"    => null
-            ] );
-
-        }
-
-        return $categories;
-
     }
 
     /**

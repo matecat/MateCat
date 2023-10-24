@@ -55,19 +55,18 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $draft_words;
     public $translated_words;
     public $approved_words;
+    public $approved2_words;
     public $rejected_words;
+
+    public $new_raw_words;
+    public $draft_raw_words;
+    public $translated_raw_words;
+    public $approved_raw_words;
+    public $approved2_raw_words;
+
     public $subject;
     public $payable_rates;
-    public $revision_stats_typing_min;
-    public $revision_stats_translations_min;
-    public $revision_stats_terminology_min;
-    public $revision_stats_language_quality_min;
-    public $revision_stats_style_min;
-    public $revision_stats_typing_maj;
-    public $revision_stats_translations_maj;
-    public $revision_stats_terminology_maj;
-    public $revision_stats_language_quality_maj;
-    public $revision_stats_style_maj;
+
     public $total_raw_wc;
 
     /**

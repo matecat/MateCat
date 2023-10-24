@@ -132,37 +132,16 @@ class Chunk extends \API\V2\Json\Chunk {
                 'blacklist_word_count'    => $blacklistWordsCount,
         ];
 
-        if ( $featureSet->hasRevisionFeature() ) {
 
-            $chunkReviewsList = $this->getChunkReviews();
+        $chunkReviewsList = $this->getChunkReviews();
 
-            $result = array_merge( $result, ( new QualitySummary( $chunk, $project ) )->render( $chunkReviewsList ) );
+        $result = array_merge( $result, ( new QualitySummary( $chunk, $project ) )->render( $chunkReviewsList ) );
 
-            foreach ( $chunkReviewsList as $index => $chunkReview ) {
-                $result = static::populateRevisePasswords( $chunkReview, $result );
-            }
-
-        } else { //OLD
-            $qualityInfoArray = CatUtils::getQualityInfoFromJobStruct( $chunk, $featureSet );
-
-            list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
-                    $this->legacyRevisionQualityVars( $chunk, $featureSet, $jobStats, $qualityInfoArray );
-
-            $result[ 'quality_summary' ][] = QualitySummary::populateQualitySummarySection(
-                    Constants::SOURCE_PAGE_REVISION,
-                    $chunk,
-                    $quality_overall,
-                    $reviseIssues,
-                    $score,
-                    $categories,
-                    $total_issues_weight,
-                    $total_reviewed_words_count,
-                    $passfail,
-                    0,
-                    0,
-                    0
-            );
+        foreach ( $chunkReviewsList as $index => $chunkReview ) {
+            $result = static::populateRevisePasswords( $chunkReview, $result );
         }
+
+
 
         /**
          * @var $projectData ShapelessConcreteStruct[]
@@ -230,7 +209,7 @@ class Chunk extends \API\V2\Json\Chunk {
                     'revision_number' => 1,
                     'password'        => $chunk_review->review_password
             ];
-        } elseif ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
+        } else {
             $result[ 'revise_passwords' ][] = [
                     'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
                     'password'        => $chunk_review->review_password
@@ -247,71 +226,6 @@ class Chunk extends \API\V2\Json\Chunk {
         $stats = array_change_key_case( $stats, CASE_LOWER );
 
         return ReviewUtils::formatStats( $stats, $this->getChunkReviews() );
-    }
-
-    /**
-     * @param Chunks_ChunkStruct $jStruct
-     * @param FeatureSet         $featureSet
-     * @param WordCount_Struct   $jobStats
-     * @param                    $chunkReview
-     *
-     * @return array
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \ReflectionException
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
-     * @internal param $reviseIssues
-     */
-    protected function legacyRevisionQualityVars( Chunks_ChunkStruct $jStruct, FeatureSet $featureSet, WordCount_Struct $jobStats, $chunkReview ) {
-        $reviseIssues = [];
-
-        $reviseClass = new \Constants_Revise();
-
-        $jobQA = new \Revise_JobQA(
-                $jStruct->id,
-                $jStruct->password,
-                $jobStats->getTotal(),
-                $reviseClass
-        );
-
-        list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [
-                $jobQA, $reviseClass
-        ], $jStruct->id,
-                $jStruct->password,
-                $jobStats->getTotal() );
-
-        /**
-         * @var $jobQA \Revise_JobQA
-         */
-        $jobQA->retrieveJobErrorTotals();
-        $jobQA->evalJobVote();
-        $qa_data = $jobQA->getQaData();
-
-        foreach ( $qa_data as $issue ) {
-            $reviseIssues[ "err_" . str_replace( " ", "_", strtolower( $issue[ 'field' ] ) ) ] = [
-                    'allowed' => $issue[ 'allowed' ],
-                    'found'   => $issue[ 'found' ],
-                    'founds'  => $issue[ 'founds' ],
-                    'vote'    => $issue[ 'vote' ]
-            ];
-        }
-
-        $quality_overall = strtolower( $chunkReview[ 'minText' ] );
-
-        $score = 0;
-
-        $total_issues_weight        = 0;
-        $total_reviewed_words_count = 0;
-
-        $categories = CatUtils::getSerializedCategories( $reviseClass );
-        $passfail   = '';
-
-        return [
-                $passfail,
-                $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories
-        ];
     }
 
 }

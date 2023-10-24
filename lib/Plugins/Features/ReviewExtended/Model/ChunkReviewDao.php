@@ -53,35 +53,6 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         return $penalty_points;
     }
 
-    public function getPenaltyPointsForChunkAndSourcePageAndSegment( $chunk, $segment_ids, $source_page ) {
-        $segment_ids = implode( ',', $segment_ids );
-
-        $sql = "SELECT SUM(penalty_points) FROM qa_entries e
-                JOIN jobs j on j.id = e.id_job
-                    AND e.id_segment >= j.job_first_segment
-                    AND e.id_segment <= j.job_last_segment
-                WHERE j.id = :id_job
-                    AND j.password = :password
-                    AND e.id_segment IN ( $segment_ids ) 
-                    AND source_page = :source_page 
-                    AND e.deleted_at IS NULL
-        ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-            'id_job'      => $chunk->id,
-            'password'    => $chunk->password,
-            'source_page' => $source_page
-        ] );
-
-        $count = $stmt->fetch();
-
-        $penalty_points = $count[ 0 ] == null ? 0 : $count[ 0 ];
-
-        return $penalty_points;
-    }
-
     public function countTimeToEdit( Chunks_ChunkStruct $chunk, $source_page ) {
         $sql = "
             SELECT SUM( time_to_edit ) FROM jobs

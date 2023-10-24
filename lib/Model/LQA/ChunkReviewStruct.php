@@ -18,6 +18,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $reviewed_words_count = 0;
     public $undo_data ;
     public $advancement_wc = 0;
+    public $advancement_raw_wc = 0;
     public $total_tte = 0;
     public $avg_pee = 0;
 

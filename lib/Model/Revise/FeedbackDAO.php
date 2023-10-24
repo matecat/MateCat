@@ -1,19 +1,21 @@
 <?php
-
+namespace Revise;
 use DataAccess\ShapelessConcreteStruct;
+use DataAccess_AbstractDao;
+use DataAccess_IDaoStruct;
 
-class Revise_FeedbackDAO extends DataAccess_AbstractDao {
+class FeedbackDAO extends DataAccess_AbstractDao {
 
     const TABLE = "revision_feedbacks";
 
-    const STRUCT_TYPE = "Revise_FeedbackStruct";
+    const STRUCT_TYPE = "\\Revise\\FeedbackStruct";
 
     /**
-     * @param Revise_FeedbackStruct $feedbackStruct
+     * @param FeedbackStruct $feedbackStruct
      *
      * @return int
      */
-    public function insertOrUpdate( Revise_FeedbackStruct $feedbackStruct ) {
+    public function insertOrUpdate( FeedbackStruct $feedbackStruct ) {
 
         $query = "INSERT INTO  " . self::TABLE . " (id_job, password, revision_number, feedback) 
                 VALUES (:id_job, :password, :revision_number, :feedback)

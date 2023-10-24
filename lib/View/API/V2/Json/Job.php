@@ -21,6 +21,7 @@ use Langs_Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
 use OutsourceTo_OutsourceAvailable;
+use Projects_ProjectDao;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
@@ -34,7 +35,7 @@ class Job {
     protected $status;
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user;
 
@@ -56,7 +57,7 @@ class Job {
     }
 
     /**
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
      * @return $this
      */
@@ -136,40 +137,6 @@ class Job {
 
         $warningsCount = $chunk->getWarningsCount();
 
-        if ( $featureSet->hasRevisionFeature() ) {
-            $reviseIssues = new \stdClass();
-
-        } else {
-
-            $reviseClass = new \Constants_Revise();
-
-            $jobQA = new \Revise_JobQA(
-                    $chunk->id,
-                    $chunk->password,
-                    $jobStats->getTotal(),
-                    $reviseClass
-            );
-
-            list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $chunk->id,
-                    $chunk->password,
-                    $jobStats->getTotal() );
-
-            /**
-             * @var $jobQA \Revise_JobQA
-             */
-            $jobQA->retrieveJobErrorTotals();
-            $jobQA->evalJobVote();
-            $qa_data = $jobQA->getQaData();
-
-            $reviseIssues = [];
-            foreach ( $qa_data as $issue ) {
-                $reviseIssues[ str_replace( " ", "_", strtolower( $issue[ 'type' ] ) ) ] = [
-                        'allowed' => $issue[ 'allowed' ],
-                        'found'   => $issue[ 'found' ]
-                ];
-            }
-        }
-
         // Added 5 minutes cache here
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
 
@@ -204,7 +171,7 @@ class Job {
                 'created_at'            => Utils::api_timestamp( $chunk->create_date ),
                 'create_date'           => $chunk->create_date,
                 'formatted_create_date' => ManageUtils::formatJobDate( $chunk->create_date ),
-                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $project, $featureSet, $chunkReviews ),
+                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $chunkReviews ),
                 'pee'                   => $chunk->getPeeForTranslatedSegments(),
                 'tte'                   => (int)( (int)$chunk->total_time_to_edit / 1000 ),
                 'private_tm_key'        => $this->getKeyList( $chunk ),
@@ -218,10 +185,8 @@ class Job {
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
                 'standard_wc'           => (float)$chunk->standard_analysis_wc,
                 'quality_summary'       => [
-                        'equivalent_class' => $chunk->getQualityInfo($chunkReviews),
                         'quality_overall'  => $chunk->getQualityOverall($chunkReviews),
-                        'errors_count'     => (int)$chunk->getErrorsCount(),
-                        'revise_issues'    => $reviseIssues
+                        'errors_count'     => (int)$chunk->getErrorsCount()
                 ],
 
         ];
@@ -248,7 +213,7 @@ class Job {
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
+        $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
         $formatted = new ProjectUrls( $projectData );
 

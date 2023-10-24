@@ -14,12 +14,11 @@ use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
-use Files\FilesPartsDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use Projects_ProjectStruct;
-use Revise_FeedbackDAO;
+use Revise\FeedbackDAO;
 use RevisionFactory;
 
 class QualitySummary {
@@ -129,14 +128,13 @@ class QualitySummary {
 
         $feedback = null;
         if($chunkReviewPassword){
-            $feedback = ( new Revise_FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
+            $feedback = ( new FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
         }
 
         return [
             'revision_number'            => $revisionNumber,
             'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
             'model_version'              => ( $model_version ? (int)$model_version : null ),
-            'equivalent_class'           => $jStruct->getQualityInfo(),
             'is_pass'                    => $is_pass,
             'quality_overall'            => $quality_overall,
             'errors_count'               => (int)$jStruct->getErrorsCount(),

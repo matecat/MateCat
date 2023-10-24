@@ -302,27 +302,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             ) {
                 $this->increaseAllCounters( $chunkReview );
                 $chunkReviews[] = $chunkReview;
-
-//                $increaseToDo = true;
-//                if( $this->_event->isR1() ){ // ICEs are already green, it's not needed to increase the to-do counter
-//                    $increaseToDo = false;
-//                }
-//
-//                $this->increaseAllCounters( $chunkReview, $increaseToDo );
-//                $chunkReviews[] = $chunkReview;
-//
-//            } elseif (
-//
-//                    /*
-//                     * When a ICE match is modified for the first time in the translation page
-//                     * we need to decrease the R(N) advancement word count
-//                     */
-//                    $this->_event->iceIsChangingForTheFirstTime() &&
-//                    $this->_event->isTranslation() &&
-//                    $chunkReview->source_page == Constants::SOURCE_PAGE_REVISION
-//            ) {
-//                $this->decreaseTodoBar( $chunkReview );
-//                $chunkReviews[] = $chunkReview;
             }
             else { // Upper transition
 

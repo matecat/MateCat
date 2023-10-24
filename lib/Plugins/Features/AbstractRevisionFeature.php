@@ -31,7 +31,7 @@ use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use Revise_FeedbackDAO;
+use Revise\FeedbackDAO;
 use RevisionFactory;
 use Utils;
 use WordCount_CounterModel;
@@ -402,7 +402,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param $revision_number
      */
     public function review_password_changed( $job_id, $old_password, $new_password, $revision_number ) {
-        $feedbackDao = new Revise_FeedbackDAO();
+        $feedbackDao = new FeedbackDAO();
         $feedbackDao->updateFeedbackPassword($job_id, $old_password, $new_password, $revision_number);
     }
 
@@ -558,7 +558,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
 
-    public function revise_summary_project_type( $old_value ) {
+    public function summary_project_type( $old_value ) {
         return 'new';
     }
 
