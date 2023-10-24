@@ -59,7 +59,7 @@ class GDriveController extends KleinController {
         if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] and Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
             $cookieSource = explode('||', $_COOKIE[ Constants::COOKIE_SOURCE_LANG ]);
 
-            return $cookieSource[ count($cookieSource) - 2 ];
+            return $cookieSource[ 0 ];
         }
 
         return Constants::DEFAULT_SOURCE_LANG;
@@ -77,7 +77,7 @@ class GDriveController extends KleinController {
         if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] and Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
             $cookieTarget = explode('||', $_COOKIE[ Constants::COOKIE_TARGET_LANG ]);
 
-            return $cookieTarget[ count($cookieTarget) - 2 ];
+            return implode(",", $cookieTarget);
         }
 
         return Constants::DEFAULT_TARGET_LANG;
