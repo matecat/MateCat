@@ -8,12 +8,12 @@
 
 namespace Features\TranslationVersions\Handlers;
 
-use BasicFeatureStruct;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended;
 use Features\TranslationVersions\Model\TranslationEvent;
 use FeatureSet;
+use Projects_ProjectStruct;
 use TransactionableTrait;
 
 class TranslationEventsHandler {
@@ -35,7 +35,7 @@ class TranslationEventsHandler {
      */
     protected $_chunk;
 
-    /** @var \Projects_ProjectStruct */
+    /** @var Projects_ProjectStruct */
     protected $_project;
 
     /**
@@ -109,9 +109,9 @@ class TranslationEventsHandler {
 
         $basicFeatureStruct = $this->_featureSet->getFeaturesStructs();
 
-        if( isset( $basicFeatureStruct[ 'review_extended' ] ) ){
+        if( isset( $basicFeatureStruct[ ReviewExtended::FEATURE_CODE ] ) ){
             /** @var $reviewExtended ReviewExtended */
-            $reviewExtended = $basicFeatureStruct[ 'review_extended' ]->toNewObject();
+            $reviewExtended = $basicFeatureStruct[ ReviewExtended::FEATURE_CODE ]->toNewObject();
             $reviewExtended->processReviewTransitions( $this );
         }
 

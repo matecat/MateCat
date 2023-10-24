@@ -246,10 +246,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
             ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
             Projects_ProjectDao::destroyCacheById( $chunk->id_project );
         } catch ( Exception $e ) {
-            $params[ 'controller_result' ][ 'errors' ] [] = [
-                    'code'    => -2000,
-                    'message' => $e->getMessage()
-            ];
             throw new ControllerReturnException( $e->getMessage(), -2000 );
         }
 

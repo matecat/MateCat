@@ -1,6 +1,8 @@
 <?php
 
-class Constants_XliffTranslationStatus {
+namespace Constants;
+
+class XliffTranslationStatus {
 
     const FUZZY_MATCH = 'fuzzy-match';
     const MT_SUGGESTION = 'mt-suggestion';

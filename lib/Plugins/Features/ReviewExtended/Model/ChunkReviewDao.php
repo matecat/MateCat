@@ -137,8 +137,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 ( 
                    source_page = :source_page 
                       OR
-                  ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
-                
+                   ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
                 ) ;
             ";
 

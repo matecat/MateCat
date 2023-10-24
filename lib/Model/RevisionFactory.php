@@ -59,13 +59,13 @@ class RevisionFactory {
     }
 
     /**
-     * @param TranslationEvent    $translationEventModel
+     * @param TranslationEvent    $translationEvent
      * @param ChunkReviewStruct[] $chunkReviews
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translationEventModel, array $chunkReviews ) {
-        return $this->revision->getSegmentTranslationModel( $translationEventModel, $chunkReviews );
+    public function getSegmentTranslationModel( TranslationEvent $translationEvent, array $chunkReviews, WordCount_CounterModel $jobWordCounter ) {
+        return $this->revision->getSegmentTranslationModel( $translationEvent, $jobWordCounter, $chunkReviews );
     }
 
     /**

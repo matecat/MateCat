@@ -30,7 +30,6 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     public $serialized_errors_list;
     public $version_number;
 
-
     public function isReviewedStatus() {
         return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES );
     }

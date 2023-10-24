@@ -217,76 +217,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $db->update( 'segment_translations', $data, $where );
     }
 
-    /**
-     * @param $chunk
-     *
-     * @return int
-     * @throws ReflectionException
-     */
-    public function setApprovedByChunk( $chunk ) {
-
-        $sql = "UPDATE segment_translations
-            SET status = :status
-              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'status'        => Constants_TranslationStatus::STATUS_APPROVED,
-                'id_job'        => $chunk->id,
-                'first_segment' => $chunk->job_first_segment,
-                'last_segment'  => $chunk->job_last_segment
-        ] );
-
-        $counter = new \WordCount_CounterModel;
-        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * @param $chunk
-     *
-     * @return int
-     * @throws ReflectionException
-     */
-    public function setTranslatedByChunk( $chunk ) {
-
-        $sql = "UPDATE segment_translations
-            SET status = :status
-              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment AND status != :approved_status";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'status'          => Constants_TranslationStatus::STATUS_TRANSLATED,
-                'id_job'          => $chunk->id,
-                'first_segment'   => $chunk->job_first_segment,
-                'last_segment'    => $chunk->job_last_segment,
-                'approved_status' => Constants_TranslationStatus::STATUS_APPROVED,
-        ] );
-
-        $counter = new \WordCount_CounterModel;
-        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-
-        return $stmt->rowCount();
-    }
-
-    public static function getSegmentsWithIssues( $job_id, $segments_ids ) {
-        $where_values = $segments_ids;
-
-        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ") AND id_job = ?";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
-        $where_values[] = $job_id;
-        $stmt->execute( $where_values );
-
-        return $stmt->fetchAll();
-    }
-
     public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
@@ -367,6 +297,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return int
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
 
@@ -659,12 +590,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
-            $sum_sql = " SUM( eq_word_count )";
+            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
         }
 
         /**
          * Sum the word count grouped by status, so that we can later update the count on jobs table.
-         * We only count segments with status different than the current, because we don't need to update
+         * We only count segments with status different from the current, because we don't need to update
          * the count for the same status.
          *
          */

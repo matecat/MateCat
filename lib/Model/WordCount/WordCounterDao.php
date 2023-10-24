@@ -127,36 +127,36 @@ class WordCounterDao extends DataAccess_AbstractDao {
          *
          */
         $query = "
-            SELECT
+                SELECT
                     j.id,
                     SUM(
-                            IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count )
-                       ) as TOTAL,
+                            IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count )
+                        ) AS TOTAL,
                     SUM(
                             IF(
-                                st.status IS NULL OR
-                                st.status = 'NEW',
-                                IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as NEW,
+                                        st.status IS NULL OR
+                                        st.status = 'NEW',
+                                        IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS NEW,
                     SUM(
-                            IF( 
-                                st.status IS NULL OR st.status = 'DRAFT' OR st.status = 'NEW',
-                                IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as DRAFT,
+                            IF(
+                                        st.status IS NULL OR st.status = 'DRAFT' OR st.status = 'NEW',
+                                        IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS DRAFT,
                     SUM(
-                            IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as TRANSLATED,
-                       
+                            IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS TRANSLATED,
+                
                     SUM(
-                            IF(st.status='APPROVED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as APPROVED,
+                            IF(st.status='APPROVED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS APPROVED,
                     SUM(
-                            IF(st.status='REJECTED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as REJECTED
+                            IF(st.status='REJECTED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS REJECTED
                 FROM jobs AS j
-                INNER JOIN files_job as fj on j.id = fj.id_job
-                INNER join segments as s on fj.id_file = s.id_file
-                LEFT join segment_translations as st on s.id = st.id_segment and st.id_job = j.id
+                         INNER JOIN files_job AS fj ON j.id = fj.id_job
+                         INNER JOIN segments AS s ON fj.id_file = s.id_file
+                         LEFT JOIN segment_translations AS st ON s.id = st.id_segment AND st.id_job = j.id
                 WHERE j.id = :id_job
  			    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			";

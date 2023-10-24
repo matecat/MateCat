@@ -34,6 +34,7 @@ use Projects_ProjectStruct;
 use Revise_FeedbackDAO;
 use RevisionFactory;
 use Utils;
+use WordCount_CounterModel;
 use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
@@ -537,10 +538,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translation, array $chunkReviews = [] ) {
+    public function getSegmentTranslationModel( TranslationEvent $translation, WordCount_CounterModel $jobWordCounter, array $chunkReviews = [] ) {
         $class_name = get_class( $this ) . '\SegmentTranslationModel';
 
-        return new $class_name( $translation, $chunkReviews );
+        return new $class_name( $translation, $jobWordCounter, $chunkReviews );
     }
 
     /**

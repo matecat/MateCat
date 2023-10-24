@@ -33,6 +33,17 @@ class WordCount_CounterModel {
     private $project;
 
     protected static $constCache = array();
+    /**
+     * @var WordCount_Struct[]
+     */
+    private $values;
+
+    /**
+     * @return WordCount_Struct[]
+     */
+    public function getValues() {
+        return $this->values;
+    }
 
     /**
      * @param WordCount_Struct $oldWCount
@@ -82,6 +93,10 @@ class WordCount_CounterModel {
         $this->_verifyStatus( $old_status );
         $this->oldStatusCall = $this->methodNameForStatusCall( $old_status );
         $this->oldStatus     = $old_status;
+    }
+
+    public function setUpdatedValues( $words_amount ) {
+        $this->values[] = $this->getUpdatedValues( $words_amount );
     }
 
     /**
@@ -146,92 +161,6 @@ class WordCount_CounterModel {
 
         return $newTotalWCount;
 
-    }
-
-    public function updateCounts( WordCount_Struct $wordCount_Struct ) {
-
-        $id_job = $wordCount_Struct->getIdJob();;
-        $password = $wordCount_Struct->getJobPassword();
-
-        Log::doJsonLog( sprintf(
-                        "Requested updateCounts for job %s-%s",
-                        $id_job,
-                        $password
-                )
-        );
-
-        $sum_sql = $this->getSumSqlBasedOnProjectWordCountType();
-
-        $queryStats = "select
-                        st.status,
-                        $sum_sql as wc_sum
-                        from
-                            jobs j join segment_translations st  on j.id = st.id_job
-                          join segments s on s.id = st.id_segment
-                        where j.id = :id_job
-                        and j.password = :password
-                        and s.show_in_cattool = 1
-                        group by st.status";
-
-        /*
-         * generate job counters
-         */
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare( $queryStats );
-
-        $stmt->execute( [
-                'id_job'   => $id_job,
-                'password' => $password
-        ] );
-
-        $jobStats = $stmt->fetchAll();
-
-        $new_words        = 0.0;
-        $draft_words      = 0.0;
-        $translated_words = 0.0;
-        $approved_words   = 0.0;
-        $rejected_words   = 0.0;
-
-
-        // find the appropriate column based on
-        // project config.
-
-        foreach ( $jobStats as $row_stat ) {
-
-            $counter_name = strtolower( $row_stat[ 'status' ] ) . "_words";
-            if ( isset( $$counter_name ) ) {
-                $$counter_name += $row_stat[ 'wc_sum' ];
-            }
-
-        }
-
-        /**
-         * update job counters
-         */
-
-        $queryUpdate = "UPDATE jobs AS j SET
-           new_words = :new_words,
-           draft_words = :draft_words,
-           translated_words = :translated_words,
-           approved_words = :approved_words,
-           rejected_words = :rejected_words
-           WHERE j.id = :id_job
-           AND j.password = :password";
-
-        $stmt = $conn->prepare( $queryUpdate );
-
-        $stmt->execute( [
-                'new_words'        => $new_words,
-                'draft_words'      => $draft_words,
-                'translated_words' => $translated_words,
-                'approved_words'   => $approved_words,
-                'rejected_words'   => $rejected_words,
-                'id_job'           => $id_job,
-                'password'         => $password,
-        ] );
-
-        return $stmt->rowCount();
     }
 
     /**
@@ -312,21 +241,4 @@ class WordCount_CounterModel {
         );
     }
 
-    private function getSumSqlBasedOnProjectWordCountType() {
-        $sum_eq_word_count = 'sum(st.eq_word_count)';
-        $sum_raw_word_count = 'sum(s.raw_word_count)';
-
-        if ( !$this->project ) {
-            return $sum_eq_word_count ;
-        }
-
-        $type = $this->project->getWordCountType();
-        if ( $type == Projects_MetadataDao::WORD_COUNT_RAW ) {
-            return $sum_raw_word_count ;
-        }
-        else {
-            return $sum_eq_word_count ;
-        }
-    }
-
-} 
+}
