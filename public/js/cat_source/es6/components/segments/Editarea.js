@@ -103,7 +103,6 @@ class Editarea extends React.Component {
     const {editorState, tagRange} = contentEncoded
 
     this.isShiftPressedOnNavigation = createRef()
-    this.caretDirectionOnNavigation = createRef()
     this.compositionEventChecks = createRef()
 
     this.state = {
@@ -558,13 +557,16 @@ class Editarea extends React.Component {
         })
       }
     } else {
-      if (typeof this.caretDirectionOnNavigation.current === 'symbol') {
-        const direction = this.caretDirectionOnNavigation.current.description
+      const selection = window.getSelection()
+      if (selection.focusNode) {
+        const direction =
+          selection.focusOffset < selection.focusNode.length / 2
+            ? 'left'
+            : 'right'
         adjustCaretPosition({
           direction,
           isShiftPressed: this.isShiftPressedOnNavigation.current,
         })
-        this.caretDirectionOnNavigation.current = undefined
       }
     }
   }
@@ -747,7 +749,6 @@ class Editarea extends React.Component {
       this.isShiftPressedOnNavigation.current = e.shiftKey
 
       const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
-      if (e.ctrlKey) this.caretDirectionOnNavigation.current = Symbol(direction)
 
       // check caret is near zwsp char and move caret position
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
