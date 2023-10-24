@@ -36,7 +36,7 @@ export const MachineTranslationTab = () => {
   const [errorDeletingMT, setErrorDeletingMT] = useState(false)
 
   const enginesList = [
-    {name: 'ModernMt', id: 'mmt', component: ModernMt},
+    {name: 'ModernMT', id: 'mmt', component: ModernMt},
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
     {

@@ -69,7 +69,7 @@ class TmKeyManagement_TmKeyManagement {
 
         $filter = new TmKeyManagement_Filter( $uid );
         $filter->setGrants( $grant_level )
-                ->setTmType( $type );
+            ->setTmType( $type );
 
         switch ( $user_role ) {
             case TmKeyManagement_Filter::ROLE_TRANSLATOR:
@@ -140,7 +140,7 @@ class TmKeyManagement_TmKeyManagement {
 
             $filter = new TmKeyManagement_Filter();
             $filter->setGrants( $grant_level )
-                    ->setTmType( $type );
+                ->setTmType( $type );
             $tmKey  = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
             $result_arr[ ] = $tmKey;
@@ -511,10 +511,10 @@ class TmKeyManagement_TmKeyManagement {
                          */
                         $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
                         $dh      = new TmKeyManagement_MemoryKeyStruct( array(
-                                'uid'    => $uid,
-                                'tm_key' => new TmKeyManagement_TmKeyStruct( array(
-                                        'key' => $justCreatedKey->key
-                                ) )
+                            'uid'    => $uid,
+                            'tm_key' => new TmKeyManagement_TmKeyStruct( array(
+                                'key' => $justCreatedKey->key
+                            ) )
                         ) );
 
                         $keyList = $_keyDao->read( $dh );
@@ -594,8 +594,8 @@ class TmKeyManagement_TmKeyManagement {
 
                 //if the key is still linked to someone, add it to the result.
                 if ( $curr_tm_key->owner ||
-                        !is_null( $curr_tm_key->uid_transl ) ||
-                        !is_null( $curr_tm_key->uid_rev )
+                    !is_null( $curr_tm_key->uid_transl ) ||
+                    !is_null( $curr_tm_key->uid_rev )
                 ) {
                     $result[ ] = $curr_tm_key;
                 }

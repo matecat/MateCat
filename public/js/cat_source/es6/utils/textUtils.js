@@ -19,24 +19,34 @@ const TEXT_UTILS = {
     source = source.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000)
-        phTagsObject.push({
-          id,
-          match,
-        })
-        return '<' + id + '>'
+        const existingTag = phTagsObject.find((item) => item.match === match)
+        if (!existingTag) {
+          const id = Math.floor(Math.random() * 10000)
+          phTagsObject.push({
+            id,
+            match,
+          })
+          return '<' + id + '>'
+        } else {
+          return '<' + existingTag.id + '>'
+        }
       },
     )
 
     target = target.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000000)
-        phTagsObject.push({
-          id,
-          match,
-        })
-        return '<' + id + '>'
+        const existingTag = phTagsObject.find((item) => item.match === match)
+        if (!existingTag) {
+          const id = Math.floor(Math.random() * 10000)
+          phTagsObject.push({
+            id,
+            match,
+          })
+          return '<' + id + '>'
+        } else {
+          return '<' + existingTag.id + '>'
+        }
       },
     )
 
@@ -136,7 +146,7 @@ const TEXT_UTILS = {
         thereAreIncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('<') > -1 &&
-            item[1].indexOf('>') > item[1].indexOf('<')))
+            item[1].indexOf('>') < item[1].indexOf('<')))
       )
     }
     var i
@@ -213,7 +223,7 @@ const TEXT_UTILS = {
     }
   },
 
-  escapeRegExp(str) {
+  escapeRegExp(str = '') {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
   },
 
@@ -581,6 +591,23 @@ const TEXT_UTILS = {
 
     return result
   },
+  getSinhalaMatches: (value, getSize) => {
+    const regex = /[\u0D80-\u0DFF]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
   getEmojiMatches: (value, getSize) => {
     const regex =
       /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g
@@ -641,6 +668,8 @@ const TEXT_UTILS = {
         TEXT_UTILS.getArmenianMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getGeorgianMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getSinhalaMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
