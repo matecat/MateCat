@@ -65,9 +65,6 @@
           "type": "string",
           "maxLength": 3
         },
-        "dqf_id": {
-          "type": "integer"
-        },
         "penalty": {
           "type": "number",
           "format": "currency",
