@@ -244,10 +244,6 @@ class SegmentCommentsContainer extends React.Component {
         className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input"
         ref={(container) => (this.container = container)}
       >
-        {/*<div className="mbc-new-message-notification">*/}
-        {/*<span className="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>*/}
-        {/*<a className="mbc-new-message-link"/>*/}
-        {/*</div>*/}
         <div className="mbc-post-comment">
           <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label">
             {this.state.user ? this.state.user.full_name : 'Anonymous'}

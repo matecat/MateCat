@@ -70,7 +70,10 @@ class SegmentsCommentsIcon extends React.Component {
     ) {
       let html
       let rootClasses = ['mbc-comment-icon-button', 'txt']
-      if (this.state.comments.total === 0) {
+      if (
+        this.state.comments.total === 0 ||
+        (this.state.comments.total > 0 && this.state.comments.active === 0)
+      ) {
         html = (
           <span className="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">
             +
@@ -98,7 +101,7 @@ class SegmentsCommentsIcon extends React.Component {
           onClick={(e) => this.openComments(e)}
         >
           <span className="mbc-comment-icon icon-bubble2" />
-          {html}
+          <div className="mbc-comment-notifications-container">{html}</div>
         </div>
       )
     } else {
