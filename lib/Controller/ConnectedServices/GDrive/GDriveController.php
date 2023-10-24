@@ -14,7 +14,8 @@ use Utils;
 
 class GDriveController extends KleinController {
 
-    private $gdriveListCookieName  = "gdrive_files_to_be_listed";
+    const GDRIVE_LIST_COOKIE_NAME = 'gdrive_files_to_be_listed';
+
     private $source_lang           = Constants::DEFAULT_SOURCE_LANG;
     private $target_lang           = Constants::DEFAULT_TARGET_LANG;
     private $seg_rule              = null;
@@ -50,18 +51,15 @@ class GDriveController extends KleinController {
      * @return string
      */
     private function getSource() {
+
         if ( null !== $this->request->param( 'source' ) ) {
             return $this->request->param( 'source' );
         }
 
-        if ( isset( $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) and null !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] and  "_EMPTY_" !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ]) {
-            return $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        }
-
-        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] and  "_EMPTY_" !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
+        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] and Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
             $cookieSource = explode('||', $_COOKIE[ Constants::COOKIE_SOURCE_LANG ]);
 
-            return $cookieSource[0];
+            return $cookieSource[ 0 ];
         }
 
         return Constants::DEFAULT_SOURCE_LANG;
@@ -71,14 +69,15 @@ class GDriveController extends KleinController {
      * @return string
      */
     private function getTarget() {
+
         if ( null !== $this->request->param( 'target' ) ) {
             return $this->request->param( 'target' );
         }
 
-        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
+        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] and Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
             $cookieTarget = explode('||', $_COOKIE[ Constants::COOKIE_TARGET_LANG ]);
 
-            return $cookieTarget[0];
+            return implode(",", $cookieTarget);
         }
 
         return Constants::DEFAULT_TARGET_LANG;
@@ -186,7 +185,7 @@ class GDriveController extends KleinController {
 
     private function doRedirect() {
         // set a cookie to allow the frontend to call list endpoint
-        CookieManager::setCookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ],
+        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, $_SESSION[ "upload_session" ],
             [
                 'expires'  => time() + 86400,
                 'path'     => '/',
@@ -217,7 +216,7 @@ class GDriveController extends KleinController {
         $this->response->json( $response );
 
         // delete the cookie
-        CookieManager::setCookie( $this->gdriveListCookieName, "",
+        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, "",
             [
                 'expires'  => time() - 3600,
                 'path'     => '/',
