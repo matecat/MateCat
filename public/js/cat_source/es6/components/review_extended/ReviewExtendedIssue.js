@@ -154,7 +154,7 @@ class ReviewExtendedIssue extends React.Component {
           comment_text: '',
         })
       })
-      .catch(this.handleFail)
+      .catch(() => this.handleFail())
   }
 
   handleFail() {
