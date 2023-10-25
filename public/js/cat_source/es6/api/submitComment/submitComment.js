@@ -19,7 +19,6 @@ export const submitComment = async ({
   username,
   sourcePage,
   message,
-  idClient = config.id_client,
   idJob = config.id_job,
   password = config.password,
   revisionNumber = config.revisionNumber,
@@ -27,7 +26,6 @@ export const submitComment = async ({
   const dataParams = {
     action: 'comment',
     _sub: 'create',
-    id_client: idClient,
     id_job: idJob,
     id_segment: idSegment,
     revision_number: revisionNumber,

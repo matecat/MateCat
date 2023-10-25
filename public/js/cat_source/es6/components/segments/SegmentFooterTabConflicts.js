@@ -1,10 +1,11 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined, size} from 'lodash'
 import Immutable from 'immutable'
 
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterTabConflicts extends React.Component {
   chooseAlternative(text) {
@@ -23,26 +24,36 @@ class SegmentFooterTabConflicts extends React.Component {
     const self = this
     const source = TagUtils.matchTag(
       TagUtils.decodeHtmlInTag(
-        TagUtils.decodePlaceholdersToTextSimple(segment.segment),
+        TagUtils.decodePlaceholdersToTextSimple(
+          TagUtils.transformTextForEditor(segment.segment),
+        ),
       ),
     )
     $.each(alternatives.editable, function (index) {
       // Execute diff
-      let diff_obj = TagUtils.executeDiff(segment.translation, this.translation)
-      let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
-      translation = translation.replace(/&amp;/g, '&')
-      translation = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(translation),
+      const segmentTranslation = segment.decodedTranslation
+      const conflictTranslation = DraftMatecatUtils.unescapeHTML(
+        DraftMatecatUtils.decodeTagsToPlainText(
+          TagUtils.transformTextFromBe(this.translation),
         ),
       )
+      let diff_obj = TagUtils.executeDiff(
+        segmentTranslation,
+        conflictTranslation,
+      )
+      let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
+
       // No diff executed on source
       html.push(
         <ul
           className="graysmall"
           data-item={index + 1}
           key={'editable' + index}
-          onDoubleClick={() => self.chooseAlternative(this.translation)}
+          onDoubleClick={() =>
+            self.chooseAlternative(
+              TagUtils.transformTextFromBe(this.translation),
+            )
+          }
         >
           <li className="sugg-source">
             <span
@@ -138,10 +149,10 @@ class SegmentFooterTabConflicts extends React.Component {
     return (
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||
-      ((!_.isUndefined(nextProps.segment.alternatives) ||
-        !_.isUndefined(this.props.segment.alternatives)) &&
-        ((!_.isUndefined(nextProps.segment.alternatives) &&
-          _.isUndefined(this.props.segment.alternatives)) ||
+      ((!isUndefined(nextProps.segment.alternatives) ||
+        !isUndefined(this.props.segment.alternatives)) &&
+        ((!isUndefined(nextProps.segment.alternatives) &&
+          isUndefined(this.props.segment.alternatives)) ||
           !Immutable.fromJS(this.props.segment.alternatives).equals(
             Immutable.fromJS(nextProps.segment.alternatives),
           )))
@@ -152,7 +163,7 @@ class SegmentFooterTabConflicts extends React.Component {
     let html
     if (
       this.props.segment.alternatives &&
-      _.size(this.props.segment.alternatives) > 0
+      size(this.props.segment.alternatives) > 0
     ) {
       html = this.renderAlternatives(this.props.segment.alternatives)
       return (

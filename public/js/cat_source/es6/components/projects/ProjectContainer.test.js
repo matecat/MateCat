@@ -19,6 +19,7 @@ require('../../../../login')
 window.config = {
   enable_outsource: 1,
   basepath: '/',
+  id_job: 2,
 }
 
 const fakeProjectsData = {

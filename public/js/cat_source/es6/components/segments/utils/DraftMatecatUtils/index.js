@@ -12,7 +12,6 @@ import beautifyEntities from './beautifyEntities'
 import decodeTagInfo from './decodeTagInfo'
 import replaceOccurrences from './replaceOccurrences'
 import {
-  getXliffRegExpression,
   getIdAttributeRegEx,
   cleanSegmentString,
   unescapeHTML,
@@ -20,6 +19,7 @@ import {
   decodeTagsToPlainText,
   formatText,
   getCharactersCounter,
+  unescapeHTMLinTags,
 } from './textUtils'
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
@@ -43,14 +43,15 @@ import activateGlossary from './activateGlossary'
 import activateQaCheckGlossary from './activateQaCheckGlossary'
 import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
-// import tagFromString from "./tagFromString";
+import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
+import replaceMultipleText from './replaceMultipleText'
 
 const DraftMatecatUtils = {
   // Text utils
   cleanSegmentString,
-  getXliffRegExpression,
   getIdAttributeRegEx,
   unescapeHTML,
+  unescapeHTMLinTags,
   unescapeHTMLLeaveTags,
   formatText,
   // Tag Utils
@@ -97,6 +98,8 @@ const DraftMatecatUtils = {
   activateQaCheckBlacklist,
   prepareTextForLexiqa,
   getCharactersCounter,
+  getSelectedTextWithoutEntities,
+  replaceMultipleText,
 }
 
 export default DraftMatecatUtils

@@ -1,7 +1,5 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
-import TagUtils from '../../../utils/tagUtils'
-import TextUtils from '../../../utils/textUtils'
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
@@ -11,15 +9,20 @@ import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
+import TagUtils from '../../../utils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
     if (!config.translation_matches_enabled) return
-    let matchToUse = segment.contributions.matches[index - 1]
+    let matchToUse = segment.contributions.matches[index - 1] ?? {}
+
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
+      SegmentActions.replaceEditAreaTextContent(
+        segment.sid,
+        TagUtils.transformTextFromBe(translation),
+      )
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,
@@ -40,7 +43,7 @@ let TranslationMatches = {
   renderContributions: function (data, sid) {
     if (!data) return true
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
-    if (_.isUndefined(segmentObj)) return
+    if (isUndefined(segmentObj)) return
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
@@ -61,7 +64,7 @@ let TranslationMatches = {
     if (
       matches &&
       matches.length > 0 &&
-      _.isUndefined(matches[0].error) &&
+      isUndefined(matches[0].error) &&
       (parseInt(match) > 70 || match === 'MT')
     ) {
       var editareaLength = segmentObj.translation.length
@@ -102,7 +105,7 @@ let TranslationMatches = {
       }
     }
   },
-  getContribution: function (segmentSid, next, force) {
+  getContribution: function (segmentSid, next, crossLanguageSettings, force) {
     const segment = SegmentStore.getSegmentByIdToJS(segmentSid)
     if (!config.translation_matches_enabled) {
       SegmentActions.addClassToSegment(segment.sid, 'loaded')
@@ -164,7 +167,7 @@ let TranslationMatches = {
       return $.Deferred().resolve()
     }
 
-    if (_.isUndefined(config.id_client)) {
+    if (isUndefined(config.id_client)) {
       setTimeout(function () {
         TranslationMatches.getContribution(segmentSid, next)
       }, 3000)
@@ -175,8 +178,8 @@ let TranslationMatches = {
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,
-      crossLanguages: UI.crossLanguageSettings
-        ? [UI.crossLanguageSettings.primary, UI.crossLanguageSettings.secondary]
+      crossLanguages: crossLanguageSettings
+        ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
         : [],
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
@@ -239,4 +242,4 @@ let TranslationMatches = {
   },
 }
 
-module.exports = TranslationMatches
+export default TranslationMatches

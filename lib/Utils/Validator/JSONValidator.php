@@ -48,7 +48,6 @@ class JSONValidator extends AbstractValidator {
 
     /**
      * @param ValidatorObject $object
-     *
      * @return bool
      * @throws \Exception
      */

@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import CommonUtils from './es6/utils/commonUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import TagUtils from './es6/utils/tagUtils'
@@ -11,9 +11,7 @@ import {getTagProjection} from './es6/api/getTagProjection'
 import {setCurrentSegment} from './es6/api/setCurrentSegment'
 ;(function ($) {
   $.extend(window.UI, {
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-         Tag Proj start
-         */
+    /*++++++++++  Tag Proj start ++++++++++*/
 
     startSegmentTagProjection: function (sid) {
       UI.getSegmentTagsProjection(sid)
@@ -21,7 +19,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           // Set as Tagged and restore source with taggedText
           SegmentActions.setSegmentAsTagged(sid)
           // Unescape HTML
-          let unescapedTranslation = DraftMatecatUtils.unescapeHTMLLeaveTags(
+          let unescapedTranslation = TagUtils.transformTextFromBe(
             response.data.translation,
           )
           // Update target area
@@ -33,7 +31,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           //SegmentActions.autoFillTagsInTarget(sid);
         })
         .catch((errors) => {
-          if (errors && (errors.length > 0 || !_.isUndefined(errors.code))) {
+          if (errors && (errors.length > 0 || !isUndefined(errors.code))) {
             UI.processErrors(errors, 'getTagProjection')
             SegmentActions.disableTPOnSegment()
             // Set as Tagged and restore source with taggedText
@@ -57,7 +55,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
     getSegmentTagsProjection: function (sid) {
       var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
       var source = segmentObj.segment
-      source = TextUtils.htmlDecode(source).replace(/&quot;/g, '"')
+      source = TagUtils.prepareTextToSend(source)
       // source = TextUtils.htmlDecode(source);
       //Retrieve the chosen suggestion if exist
       var suggestion
@@ -71,7 +69,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
         suggestion = currentContribution.translation
       }
 
-      var target = segmentObj.translation
+      var target = TagUtils.prepareTextToSend(segmentObj.translation)
       return getTagProjection({
         action: 'getTagProjection',
         password: config.password,
@@ -85,35 +83,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       })
     },
 
-    /**
-     * Set the tag projection to true and reload file
-     */
-    enableTagProjectionInJob: function () {
-      config.tag_projection_enabled = 1
-      toggleTagProjectionJob({enabled: true}).then(() => {
-        // UI.render({
-        //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
-        // });
-        // UI.checkWarnings(false);
-        SegmentActions.changeTagProjectionStatus(true)
-      })
-    },
-    /**
-     * Set the tag projection to true and reload file
-     */
-    disableTagProjectionInJob: function () {
-      config.tag_projection_enabled = 0
-      toggleTagProjectionJob({enabled: false}).then(() => {
-        // UI.render({
-        //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
-        // });
-        // UI.checkWarnings(false);
-        SegmentActions.changeTagProjectionStatus(false)
-      })
-    },
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-         Tag Proj end
-         */
+    /*++++++++++  Tag Proj end ++++++++++*/
 
     /** TODO: Remove
      * evalNextSegment
@@ -176,7 +146,10 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       // find in next segments
       if (nextTranslatedSegment) {
         SegmentActions.openSegment(nextTranslatedSegment.sid)
-      } else {
+      } else if (
+        UI.nextUntranslatedSegmentIdByServer ||
+        nextTranslatedSegmentInPrevious
+      ) {
         SegmentActions.openSegment(
           UI.nextUntranslatedSegmentIdByServer
             ? UI.nextUntranslatedSegmentIdByServer

@@ -1,5 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
+import TagUtils from '../../utils/tagUtils'
 /**
  * Set segment to translation on review extended issue panel
  *
@@ -30,7 +30,7 @@ export const setTranslation = async ({
   propagate = false,
   splitStatuses = null,
 }) => {
-  const {sid, segment: segmentDetails} = segment
+  const {sid, segment: segmentDetails, charactersCounter = 0} = segment
 
   const contextBefore = UI.getContextBefore(sid)
   const idBefore = UI.getIdBefore(sid)
@@ -40,7 +40,8 @@ export const setTranslation = async ({
   const translationToSend = translation
     ? translation
     : TagUtils.prepareTextToSend(segment.translation)
-  const dataParams = {
+
+  const obj = {
     id_segment: sid,
     id_job: idJob,
     password,
@@ -57,7 +58,12 @@ export const setTranslation = async ({
     revision_number: revisionNumber,
     current_password: currentPassword,
     splitStatuses,
+    characters_counter: charactersCounter,
   }
+  const dataParams = Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v != null),
+  )
+
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
@@ -72,7 +78,7 @@ export const setTranslation = async ({
     },
   )
 
-  if (!response.ok) return Promise.reject({response})
+  if (!response.ok) return Promise.reject({response, errors: undefined})
 
   const {errors, ...data} = await response.json()
   if (errors && errors.length > 0) return Promise.reject({errors})

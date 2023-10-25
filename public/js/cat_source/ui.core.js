@@ -1,25 +1,18 @@
-import _ from 'lodash'
-import React, {useEffect} from 'react'
+import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
-import {createRoot} from 'react-dom/client'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
-import SegmentsContainer from './es6/components/segments/SegmentsContainer'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
-import LXQ from './es6/utils/lxq.main'
 import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTranslationMismatches} from './es6/api/getTranslationMismatches'
 import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
-import {getLocalWarnings} from './es6/api/getLocalWarnings'
-import {getSegments} from './es6/api/getSegments'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
-import NotificationBox from './es6/components/notificationsComponent/NotificationBox'
 import ModalsActions from './es6/actions/ModalsActions'
 
 window.UI = {
@@ -84,8 +77,8 @@ window.UI = {
     // ask if the user wants propagation or this is valid only
     // for this segment
 
-    if (this.autopropagateConfirmNeeded(opts.propagation)) {
-      var text = !_.isUndefined(segment.alternatives)
+    if (this.autopropagateConfirmNeeded(segment, opts.propagation)) {
+      var text = !isUndefined(segment.alternatives)
         ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
           'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
         : 'The translation you are confirming for this segment is different from the version confirmed for other identical segments. <br><br>Would you ' +
@@ -122,8 +115,7 @@ window.UI = {
     }
   },
 
-  autopropagateConfirmNeeded: function (propagation) {
-    var segment = SegmentStore.getCurrentSegment()
+  autopropagateConfirmNeeded: function (segment, propagation) {
     var segmentModified = segment.modified
     var segmentStatus = segment.status.toLowerCase()
     var statusNotConfirmationNeeded = ['new', 'draft']
@@ -434,19 +426,19 @@ window.UI = {
       }
     })
   },
-  checkVersion: function () {
-    if (this.version != config.build_number) {
-      var notification = {
-        uid: 'checkVersion',
-        title: 'New version of Matecat',
-        text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
-        type: 'warning',
-        allowHtml: true,
-        position: 'bl',
-      }
-      CatToolActions.addNotification(notification)
-    }
-  },
+  // checkVersion: function () {
+  //   if (this.version != config.build_number) {
+  //     var notification = {
+  //       uid: 'checkVersion',
+  //       title: 'New version of Matecat',
+  //       text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+  //       type: 'warning',
+  //       allowHtml: true,
+  //       position: 'bl',
+  //     }
+  //     CatToolActions.addNotification(notification)
+  //   }
+  // },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
@@ -616,8 +608,8 @@ window.UI = {
 
     setTranslation(requestArgs)
       .then((data) => {
-        var idSegment = options.id_segment
-        var index = UI.executingSetTranslation.indexOf(idSegment)
+        const idSegment = options.id_segment
+        const index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)
         }
@@ -636,19 +628,20 @@ window.UI = {
         }
       })
       .catch(({errors}) => {
+        const idSegment = options.id_segment
+        const index = UI.executingSetTranslation.indexOf(idSegment)
+        if (index > -1) {
+          UI.executingSetTranslation.splice(index, 1)
+        }
         if (errors && errors.length) {
           this.processErrors(errors, 'setTranslation')
         } else {
-          var idSegment = options.id_segment
-          var index = UI.executingSetTranslation.indexOf(idSegment)
-          if (index > -1) {
-            UI.executingSetTranslation.splice(index, 1)
-          }
           UI.addToSetTranslationTail(options)
           OfflineUtils.changeStatusOffline(idSegment)
           OfflineUtils.failedConnection(reqArguments, 'setTranslation')
           OfflineUtils.decrementOfflineCacheRemaining()
         }
+        SegmentActions.setSegmentSaving(id_segment, false)
       })
   },
 
@@ -686,10 +679,6 @@ window.UI = {
     return totalTranslation
   },
 
-  targetContainerSelector: function () {
-    return '.targetarea'
-  },
-
   processErrors: function (err, operation) {
     $.each(err, function () {
       var codeInt = parseInt(this.code)
@@ -725,7 +714,9 @@ window.UI = {
         ModalsActions.showModalComponent(
           AlertModal,
           {
-            text: this.message,
+            text:
+              'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
+              'Please edit the segment first if you want to change its status to "Translated".',
           },
           'Error',
         )
@@ -742,10 +733,7 @@ window.UI = {
       SegmentActions.setStatus(id_segment, null, status)
       this.setDownloadStatus(response.stats)
       CatToolActions.setProgress(response.stats)
-      SegmentActions.removeClassToSegment(
-        options.id_segment,
-        'setTranslationPending',
-      )
+      SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
 
       this.checkWarnings(false)
       $(segment).attr('data-version', response.version)
@@ -836,48 +824,14 @@ window.UI = {
       UI.recoverUnsavedSetTranslations()
     }, 1000)
   },
-  setTagLockCustomizeCookie: function (first) {
-    if (first && !config.tagLockCustomizable) {
-      UI.tagLockEnabled = true
-      return true
-    }
-    var cookieName = 'tagLockDisabled'
 
-    if (typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
-      if (first) {
-        if (Cookies.get(cookieName + '-' + config.id_job) == 'true') {
-          this.tagLockEnabled = false
-          setTimeout(function () {
-            $('.editor .tagLockCustomize').addClass('unlock')
-          }, 100)
-        } else {
-          this.tagLockEnabled = true
-        }
-      } else {
-        Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled, {
-          expires: 30,
-          secure: true,
-        })
-      }
-    } else {
-      Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled, {
-        expires: 30,
-        secure: true,
-      })
-    }
-  },
   /**
    * After User click on Translated or T+>> Button
    * @param segment
    * @param goToNextUntranslated
    */
   clickOnTranslatedButton: function (segment, goToNextUntranslated) {
-    var sid = UI.currentSegmentId
-    //??
-    $('.temp-highlight-tags').remove()
-
-    SegmentActions.removeClassToSegment(sid, 'modified')
-    UI.currentSegment.data('modified', false)
+    SegmentActions.removeClassToSegment(segment.sid, 'modified')
 
     UI.setTimeToEdit(segment.sid)
 
@@ -895,6 +849,7 @@ window.UI = {
 
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
+    console.log(section)
     const projectCompletionCheck =
       config.project_completion_feature_enabled &&
       !config.isReview &&
@@ -963,23 +918,9 @@ window.UI = {
       'The owner of the project will be notified of any edits.'
     )
   },
-  openOptionsPanel: function () {
-    if ($('.popup-tm').hasClass('open')) {
-      return false
-    }
-    var tab = 'opt'
-    $('body').addClass('side-popup')
-    $('.popup-tm').addClass('open').show().animate({right: '0px'}, 400)
-    $('.outer-tm').show()
-    $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click()
-  },
 
   closeAllMenus: function () {
     CatToolActions.closeSubHeader()
-  },
-  // overridden by plugin
-  inputEditAreaEventHandler: function () {
-    UI.currentSegment.trigger('modified')
   },
 }
 

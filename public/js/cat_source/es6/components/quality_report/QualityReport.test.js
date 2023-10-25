@@ -5,7 +5,9 @@ import {rest} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 
 jest.setTimeout(30000)
-
+window.config = {
+  id_job: 2,
+}
 test('renders properly', async () => {
   mswServer.use(
     rest.get(
@@ -1301,9 +1303,12 @@ test('renders properly', async () => {
   const modal = document.createElement('div')
   modal.id = 'modal'
 
+  const footer = document.createElement('footer')
+
   document.body.appendChild(header)
   document.body.appendChild(content)
   document.body.appendChild(modal)
+  document.body.appendChild(footer)
 
   await import('./QualityReport')
 

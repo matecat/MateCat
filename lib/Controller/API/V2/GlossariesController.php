@@ -12,15 +12,16 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Validators\LoginValidator;
-use DateTime;
 use DirectoryIterator;
 use Exception;
 use Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
-use TMSService;
+use TMS\TMSFile;
+use TMS\TMSService;
 use Users_UserDao;
 use Utils;
+use Validator\GlossaryCSVValidator;
 use ZipArchive;
 
 class GlossariesController extends AbstractStatefulKleinController {
@@ -53,82 +54,158 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         parent::validateRequest();
 
-        $filterArgs = array(
-                'name'          => array(
+        $filterArgs = [
+                'name'          => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
-                ),
-                'tm_key'        => array(
+                ],
+                'tm_key'        => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'downloadToken' => array(
+                ],
+                'downloadToken' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+        ];
 
         $postInput = (object)filter_var_array( $this->request->params(
-                array(
+                [
                         'tm_key',
                         'name',
                         'downloadToken'
-                )
+                ]
         ), $filterArgs );
 
         $this->name          = $postInput->name;
         $this->tm_key        = $postInput->tm_key;
         $this->downloadToken = $postInput->downloadToken;
 
-        $this->TMService->setName( $postInput->name );
-        $this->TMService->setTmKey( $postInput->tm_key );
-
     }
 
-    public function import() {
-
+    public function check()
+    {
         try {
             $stdResult = $this->TMService->uploadFile();
         } catch ( Exception $e ) {
-            $this->setErrorResponse( -2, $e->getMessage() );
+            $this->setErrorResponse( 500, $e->getMessage() );
 
             return;
         }
 
         $filterArgs = [
-            'name' => [
+            'name'   => [
                 'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW
+                'flags'  => FILTER_FLAG_STRIP_LOW
             ],
             'tm_key' => [
                 'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ],
         ];
 
-        $postInput = (object)filter_var_array( $this->request->params([
+        $postInput = (object)filter_var_array( $this->request->params( [
             'tm_key',
             'name',
-        ]), $filterArgs );
+        ] ), $filterArgs );
 
-        if(!isset($postInput->tm_key) or $postInput->tm_key === ""){
-            $this->setErrorResponse( -2, "`TM key` field is mandatory" );
+        if ( !isset( $postInput->tm_key ) or $postInput->tm_key === "" ) {
+            $this->setErrorResponse( 400, "`TM key` field is mandatory" );
 
             return;
         }
 
-        set_time_limit(600);
+        set_time_limit( 600 );
 
-        $fileInfo = $this->extractCSV( $stdResult );
+        $this->extractCSV( $stdResult );
 
-        // load it into MyMemory
-        $this->TMService->setName( $postInput->name );
-        $this->TMService->setFile( array( $fileInfo ) );
+        $results = [];
+        $glossaryCsvValidator = new GlossaryCSVValidator();
+
+        foreach ( $stdResult as $fileInfo ) {
+            $results[] = [
+                'name' => $postInput->name,
+                'tmKey' => $postInput->tm_key,
+                'filePath' => $fileInfo->file_path,
+                'numberOfLanguages' => $glossaryCsvValidator->getNumberOfLanguage($fileInfo->file_path),
+            ];
+        }
+
+        $this->response->json( [
+            'results'    => $results
+        ] );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function import() {
 
         try {
-            $uuids = $this->TMService->addGlossaryInMyMemory();
+            $stdResult = $this->TMService->uploadFile();
         } catch ( Exception $e ) {
-            $this->setErrorResponse( $e->getCode(), $e->getMessage() );
-            unlink( $fileInfo->file_path );
+            $this->setErrorResponse( 500, $e->getMessage() );
 
             return;
+        }
+
+        $filterArgs = [
+                'name'   => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ],
+                'tm_key' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+        ];
+
+        $postInput = (object)filter_var_array( $this->request->params( [
+                'tm_key',
+                'name',
+        ] ), $filterArgs );
+
+        if ( !isset( $postInput->tm_key ) or $postInput->tm_key === "" ) {
+            $this->setErrorResponse( 400, "`TM key` field is mandatory" );
+
+            return;
+        }
+
+        set_time_limit( 600 );
+
+        $this->extractCSV( $stdResult );
+
+        $uuids = [];
+
+        try {
+
+            foreach ( $stdResult as $fileInfo ) {
+
+                // load it into MyMemory
+                try {
+
+                    $file = new TMSFile(
+                            $fileInfo->file_path,
+                            $postInput->tm_key,
+                            $postInput->name
+                    );
+
+                    $this->TMService->addGlossaryInMyMemory( $file );
+
+                    $uuids[] = [
+                        "uuid" => $file->getUuid(),
+                        "name" => $file->getName(),
+                        "numberOfLanguages" => $file->getNumberOfLanguages()
+                    ];
+
+                } catch ( Exception $e ) {
+                    $this->setErrorResponse( $e->getCode(), $e->getMessage() );
+                    return;
+                }
+
+            }
+
+        } finally {
+            foreach ( $stdResult as $_fileInfo ) {
+                unlink( $_fileInfo->file_path );
+            }
         }
 
         if ( !$this->response->isLocked() ) {
@@ -137,16 +214,14 @@ class GlossariesController extends AbstractStatefulKleinController {
             ] );
         }
 
-        unlink( $fileInfo->file_path );
-
     }
 
     public function uploadStatus() {
 
-        $uuid = $this->params['uuid'];
+        $uuid = $this->params[ 'uuid' ];
 
         try {
-            $result = $this->TMService->glossaryUploadStatus($uuid);
+            $result = $this->TMService->glossaryUploadStatus( $uuid );
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
@@ -154,7 +229,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( $result->responseStatus, $result->responseData );
+            $this->setSuccessResponse( $result->responseStatus, $result[ 'data' ] );
         }
 
     }
@@ -162,36 +237,36 @@ class GlossariesController extends AbstractStatefulKleinController {
     public function download() {
 
         $filterArgs = [
-            'key_name' => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW
-            ],
-            'key' => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
-            'email' => [
-                'filter' => FILTER_SANITIZE_EMAIL,
-                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
+                'key_name' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ],
+                'key'      => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'email'    => [
+                        'filter' => FILTER_SANITIZE_EMAIL,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
         ];
 
-        $postInput = (object)filter_var_array( $this->request->params([
+        $postInput = (object)filter_var_array( $this->request->params( [
                 'email',
                 'key_name',
                 'key',
-        ]), $filterArgs );
+        ] ), $filterArgs );
 
         try {
-            $user = (new Users_UserDao())->getByEmail( $postInput->email );
+            $user = ( new Users_UserDao() )->getByEmail( $postInput->email );
 
-            if(!$user){
-                $this->setErrorResponse( 404, "User with email ".$postInput->email." not found" );
+            if ( !$user ) {
+                $this->setErrorResponse( 404, "User with email " . $postInput->email . " not found" );
 
                 return;
             }
 
-            $result = $this->TMService->glossaryExport($postInput->key, $postInput->key_name, $postInput->email, $user->fullName());
+            $result = $this->TMService->glossaryExport( $postInput->key, $postInput->key_name, $postInput->email, $user->fullName() );
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
 
@@ -204,14 +279,14 @@ class GlossariesController extends AbstractStatefulKleinController {
     }
 
     protected function logDownloadError( Exception $e ) {
-        $r = "<pre>";
-        $r .= print_r( $e->getMessage(), true );
-        $r .= print_r( $e->getTraceAsString(), true );
-        $r .= "\n\n";
-        $r .= " - API REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-        $r .= " - API REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-        $r .= "\n\n\n";
-        $r .= "</pre>";
+        $r             = "<pre>";
+        $r             .= print_r( $e->getMessage(), true );
+        $r             .= print_r( $e->getTraceAsString(), true );
+        $r             .= "\n\n";
+        $r             .= " - API REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+        $r             .= " - API REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+        $r             .= "\n\n\n";
+        $r             .= "</pre>";
         Log::$fileName = 'php_errors.txt';
         Log::doJsonLog( $r );
         Utils::sendErrMailReport( $r, "API: Download Glossary Error: " . $e->getMessage() );
@@ -235,20 +310,21 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         $this->response->code( 404 );
         $this->response->json( [
-                'errors'  => [ [ "code" => $errCode, "message" => $message ] ],
-                "data"    => [],
-                "success" => false
+                'errors'    => [ [ "code" => $errCode, "message" => $message ] ],
+                "data"      => [],
+                "success"   => false,
+                "completed" => false
         ] );
 
     }
 
-    protected function setSuccessResponse( $code = 200, Array $data = [] ) {
+    protected function setSuccessResponse( $code = 200, array $data = [] ) {
 
         $this->response->code( $code );
         $this->response->json( [
-                'errors'  => [],
-                "data"    => $data,
-                "success" => true
+                'errors'    => [],
+                "data"      => $data,
+                "success"   => true
         ] );
 
     }
@@ -276,7 +352,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         }
 
-        return $fileInfo;
+        return $stdResult;
 
     }
 

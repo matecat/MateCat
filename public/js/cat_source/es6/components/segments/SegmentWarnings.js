@@ -4,7 +4,7 @@
  */
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {forOwn} from 'lodash'
 
 class SegmentWarnings extends React.Component {
   constructor(props) {
@@ -44,14 +44,14 @@ class SegmentWarnings extends React.Component {
         })
       }
       if (this.props.warnings.WARNING) {
-        _.forOwn(this.props.warnings.WARNING.Categories, (value, key) => {
+        forOwn(this.props.warnings.WARNING.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'WARNING')
           })
         })
       }
       if (this.props.warnings.INFO) {
-        _.forOwn(this.props.warnings.INFO.Categories, (value, key) => {
+        forOwn(this.props.warnings.INFO.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'INFO')
           })

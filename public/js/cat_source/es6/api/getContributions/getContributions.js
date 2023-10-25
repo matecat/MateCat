@@ -1,5 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
+import TagUtils from '../../utils/tagUtils'
 /**
  * Get contributions
  *
@@ -27,9 +27,9 @@ export const getContributions = async ({
   const idBefore = UI.getIdBefore(idSegment)
   const contextAfter = UI.getContextAfter(idSegment)
   const idAfter = UI.getIdAfter(idSegment)
-  const txt = TextUtils.view2rawxliff(TagUtils.prepareTextToSend(target))
+  const txt = TagUtils.prepareTextToSend(target)
 
-  const dataParams = {
+  const obj = {
     action: 'getContribution',
     password: password,
     is_concordance: 0,
@@ -45,6 +45,10 @@ export const getContributions = async ({
     cross_language: crossLanguages,
     current_password: currentPassword,
   }
+  const dataParams = Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v != null),
+  )
+
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {

@@ -66,7 +66,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
 
       if (typeof CommentsStore.db.segments[s] === 'undefined') {
         CommentsStore.db.segments[s] = [data]
-      } else {
+      } else if (!CommentsStore.db.segments[s].find((e) => e.id === data.id)) {
         CommentsStore.db.segments[s].push(data)
       }
       if (Number(data.message_type) === this.types.resolve) {
@@ -112,11 +112,11 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       var count = 0
 
       for (var segmentID in CommentsStore.db.segments) {
-        var el =
+        const el =
           CommentsStore.db.segments[segmentID][
             CommentsStore.db.segments[segmentID].length - 1
           ]
-        parseInt(el.message_type) === 1 ? count++ : null
+        if (el && el.message_type && parseInt(el.message_type) === 1) count++
       }
       return count
     },
@@ -164,4 +164,4 @@ AppDispatcher.register(function (action) {
       CommentsStore.emitChange(action.actionType, action.data)
   }
 })
-module.exports = CommentsStore
+export default CommentsStore

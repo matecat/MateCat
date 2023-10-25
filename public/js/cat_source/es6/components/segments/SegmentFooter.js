@@ -18,43 +18,63 @@ import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
+import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
+import IconCloseCircle from '../icons/IconCloseCircle'
+import CatToolActions from '../../actions/CatToolActions'
+
+export const TAB = {
+  MATCHES: 'matches',
+  CONCORDANCES: 'concordances',
+  GLOSSARY: 'glossary',
+  ALTERNATIVES: 'alternatives',
+  MESSAGES: 'messages',
+  MULTIMATCHES: 'multiMatches',
+  AI_ASSISTANT: 'AiAssistant',
+}
 
 const TAB_ITEMS = {
-  matches: {
+  [TAB.MATCHES]: {
     label: 'Translation Matches',
     code: 'tm',
     tabClass: 'matches',
     isLoading: false,
   },
-  concordances: {
+  [TAB.CONCORDANCES]: {
     label: 'TM Search',
     code: 'cc',
     tabClass: 'concordances',
     isLoading: false,
   },
-  glossary: {
+  [TAB.GLOSSARY]: {
     label: 'Glossary',
     code: 'gl',
     tabClass: 'glossary',
     isLoading: false,
   },
-  alternatives: {
+  [TAB.ALTERNATIVES]: {
     label: 'Translation conflicts',
     code: 'al',
     tabClass: 'alternatives',
     isLoading: false,
   },
-  messages: {
+  [TAB.MESSAGES]: {
     label: 'Messages',
     code: 'notes',
     tabClass: 'segment-notes',
     isLoading: false,
   },
-  multiMatches: {
+  [TAB.MULTIMATCHES]: {
     label: 'Crosslanguage Matches',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
+  },
+  [TAB.AI_ASSISTANT]: {
+    label: 'AI Assistant',
+    code: 'ai',
+    tabClass: 'ai-assistant',
+    isLoading: false,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -82,7 +102,7 @@ function SegmentFooter() {
   const [userChangedTab, setUserChangedTab] = useState(undefined)
   const [message, setMessage] = useState('')
 
-  const {segment} = useContext(SegmentContext)
+  const {segment, clientConnected, multiMatchLangs} = useContext(SegmentContext)
 
   const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
@@ -155,7 +175,7 @@ function SegmentFooter() {
     }
     const registerTab = (tabs, configs) => setConfigurations(configs)
     const modifyTabVisibility = (name, visible) =>
-      setTabStateChanges({name, visible})
+      setTabStateChanges({name, visible, enabled: visible})
     const openTab = (sidProp, name) =>
       segment.sid === sidProp && setActiveTab({name, forceOpen: true})
     const addTabIndex = (sidProp, name, index) =>
@@ -163,12 +183,22 @@ function SegmentFooter() {
     const closeAllTabs = () => setTabStateChanges({visible: false})
     const showMessage = (sidProp, message) =>
       segment.sid === sidProp && setMessage(message)
+    const hideAIAssistant = () =>
+      setTabStateChanges({
+        name: TAB.AI_ASSISTANT,
+        visible: false,
+        enabled: false,
+      })
 
     document.addEventListener('keydown', handleShortcutsKeyDown)
     SegmentStore.addListener(SegmentConstants.REGISTER_TAB, registerTab)
     SegmentStore.addListener(
       SegmentConstants.MODIFY_TAB_VISIBILITY,
       modifyTabVisibility,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.HIDE_AI_ASSISTANT,
+      hideAIAssistant,
     )
     SegmentStore.addListener(SegmentConstants.OPEN_TAB, openTab)
     SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, addTabIndex)
@@ -181,6 +211,10 @@ function SegmentFooter() {
       SegmentStore.removeListener(
         SegmentConstants.MODIFY_TAB_VISIBILITY,
         modifyTabVisibility,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.HIDE_AI_ASSISTANT,
+        hideAIAssistant,
       )
       SegmentStore.removeListener(SegmentConstants.OPEN_TAB, openTab)
       SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, addTabIndex)
@@ -200,8 +234,8 @@ function SegmentFooter() {
         ...item,
         ...(configurations[item.name] && {...configurations[item.name]}),
         open: hasNotes
-          ? item.name === 'messages'
-          : !hasNotes && item.name === 'messages'
+          ? item.name === TAB.MESSAGES
+          : !hasNotes && item.name === TAB.MESSAGES
           ? false
           : configurations[item.name]?.open,
       })),
@@ -213,30 +247,28 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasMultiMatches = Boolean(
-      UI.crossLanguageSettings && UI.crossLanguageSettings.primary,
-    )
+    const hasMultiMatches = Boolean(multiMatchLangs && multiMatchLangs.primary)
 
     setTabItems((prevState) =>
       prevState.map((item) => ({
         ...item,
         open:
-          item.name !== 'alternatives' && hasAlternatives ? false : item.open,
-        ...(item.name === 'alternatives' && {
+          item.name !== TAB.ALTERNATIVES && hasAlternatives ? false : item.open,
+        ...(item.name === TAB.ALTERNATIVES && {
           visible: hasAlternatives,
           open: hasAlternatives,
         }),
-        ...(item.name === 'messages' && {
+        ...(item.name === TAB.MESSAGES && {
           enabled: hasNotes,
           visible: hasNotes,
         }),
-        ...(item.name === 'multiMatches' && {
+        ...(item.name === TAB.MULTIMATCHES && {
           enabled: hasMultiMatches,
           visible: hasMultiMatches,
         }),
       })),
     )
-  }, [segment])
+  }, [segment, multiMatchLangs])
 
   // check if no tab is open
   useEffect(() => {
@@ -244,7 +276,7 @@ function SegmentFooter() {
       const openedTab = prevState.find(({open}) => open)
       return !openedTab || (openedTab && openedTab.open && !openedTab.visible)
         ? prevState.map((item) =>
-            item.name === 'matches'
+            item.name === TAB.MATCHES
               ? {...item, open: true}
               : {...item, open: false},
           )
@@ -278,7 +310,8 @@ function SegmentFooter() {
       userChangedTab &&
       userChangedTab[Object.getOwnPropertySymbols(userChangedTab)[0]]
     if (!name) return
-    setTimeout(() => SegmentActions.setTabOpen(segment.sid, name))
+    if (!TAB_ITEMS[name].isEnableCloseButton)
+      setTimeout(() => SegmentActions.setTabOpen(segment.sid, name))
     setActiveTab({name: name})
   }, [userChangedTab, segment?.sid])
 
@@ -317,19 +350,25 @@ function SegmentFooter() {
   const isInitTabLoading = ({code}) => {
     switch (code) {
       case 'tm':
+        if (!clientConnected) return true
         return (
           isUndefined(segment.contributions) ||
           (isUndefined(segment.contributions.matches) &&
             segment.contributions.errors.length === 0)
         )
       case 'cl':
+        if (!clientConnected) return true
         return (
           isUndefined(segment.cl_contributions) ||
           (isUndefined(segment.cl_contributions.matches) &&
             segment.cl_contributions.errors.length === 0)
         )
       case 'gl':
+        //if (!clientConnected) return true
         return tabItems.find(({code}) => code === 'gl')?.isLoading
+      case 'cc':
+        if (!clientConnected) return true
+        return tabItems.find(({code}) => code === 'cc')?.isLoading
       default:
         return false
     }
@@ -415,6 +454,16 @@ function SegmentFooter() {
             segment={segment}
           />
         )
+      case 'ai':
+        return (
+          <SegmentFooterTabAiAssistant
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
       default:
         return ''
     }
@@ -427,6 +476,16 @@ function SegmentFooter() {
       ? true
       : false
     const countResult = !isLoading && getTabIndex(tab)
+    const onClickRemoveTab = (event) => {
+      setTabStateChanges({
+        name: TAB.AI_ASSISTANT,
+        visible: false,
+        enabled: false,
+      })
+      if (tab.open) SegmentActions.activateTab(segment.sid, TAB.MATCHES)
+      event.stopPropagation()
+    }
+
     return (
       <li
         key={tab.code}
@@ -441,19 +500,24 @@ function SegmentFooter() {
         onClick={() => setUserChangedTab({[Symbol()]: tab.name})}
         data-testid={tab.name}
       >
-        {!isLoading ? (
-          <a tabIndex="-1">
-            {tab.label}
+        <a tabIndex="-1">
+          {tab.label}
+          {!isLoading ? (
             <span className="number">
-              {!isLoading && countResult ? ' (' + countResult + ')' : ''}
+              {countResult ? ' (' + countResult + ')' : ''}
             </span>
-          </a>
-        ) : (
-          <a tabIndex="-1">
-            {tab.label}
+          ) : clientConnected ? (
             <span className="loader loader_on" />
-          </a>
-        )}
+          ) : (
+            <i className="icon-warning2 icon" />
+          )}
+
+          {tab.isEnableCloseButton && (
+            <span className="icon-close" onClick={onClickRemoveTab}>
+              <IconCloseCircle />
+            </span>
+          )}
+        </a>
       </li>
     )
   }
@@ -475,7 +539,7 @@ function SegmentFooter() {
       <div className="addtmx-tr white-tx">
         <a
           className="open-popup-addtm-tr"
-          onClick={() => UI.openLanguageResourcesPanel()}
+          onClick={() => CatToolActions.openSettingsPanel()}
         >
           Add private resources
         </a>

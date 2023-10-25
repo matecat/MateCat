@@ -2,6 +2,15 @@
   text-align: left;
 }
 
+.submenu {
+  .icon-warning2 {
+    color: #ea862c;
+    position: absolute;
+    top: 8px;
+    right: 10px;
+  }
+}
+
 .sub-editor {
   &.concordances {
     &.extended.have-results {

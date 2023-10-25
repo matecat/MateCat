@@ -1,10 +1,9 @@
 import React from 'react'
-import _ from 'lodash'
+import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'
 import TagUtils from '../../utils/tagUtils'
 import CursorUtils from '../../utils/cursorUtils'
-import Customizations from '../../utils/customizations'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentButtons from './SegmentButtons'
@@ -79,7 +78,7 @@ class SegmentTarget extends React.Component {
     let issues = []
     if (this.props.segment.versions) {
       this.props.segment.versions.forEach(function (version) {
-        if (!_.isEmpty(version.issues)) {
+        if (!isEmpty(version.issues)) {
           issues = issues.concat(version.issues)
         }
       })
@@ -95,9 +94,11 @@ class SegmentTarget extends React.Component {
     var textAreaContainer = ''
     let issues = this.getAllIssues()
     if (this.props.segment.edit_area_locked) {
-      const text = this.props.segment.versions
-        ? this.props.segment.versions[0].translation
-        : translation
+      const text =
+        this.props.segment.versions &&
+        this.props.segment.versions[0].translation
+          ? this.props.segment.versions[0].translation
+          : translation
       let currentTranslationVersion = TagUtils.matchTag(
         TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
       )
@@ -135,25 +136,6 @@ class SegmentTarget extends React.Component {
       var s2tMicro = ''
       var tagModeButton = ''
       var tagCopyButton = ''
-      var tagLockCustomizable
-      if (
-        this.props.segment.segment.match(/&lt;.*?&gt;/gi) &&
-        config.tagLockCustomizable
-      ) {
-        tagLockCustomizable = UI.tagLockEnabled ? (
-          <a
-            className="tagLockCustomize icon-lock"
-            title="Toggle Tag Lock"
-            onClick={() => SegmentActions.disableTagLock()}
-          />
-        ) : (
-          <a
-            className="tagLockCustomize icon-unlocked3"
-            title="Toggle Tag Lock"
-            onClick={() => SegmentActions.enableTagLock()}
-          />
-        )
-      }
 
       //Speeche2Text
       var s2t_enabled = this.context.speech2textEnabledFn()
@@ -187,31 +169,9 @@ class SegmentTarget extends React.Component {
         )
       }
 
-      //Tag Mode Buttons
-
-      if (
-        /*this.context.tagModesEnabled &&*/ !this.context.enableTagProjection &&
-        UI.tagLockEnabled
-      ) {
-        var buttonClass = $('body').hasClass('tagmode-default-extended')
-          ? 'active'
-          : ''
-        tagModeButton = (
-          <a
-            className={'tagModeToggle ' + buttonClass}
-            alt="Display full/short tags"
-            onClick={() => Customizations.toggleTagsMode()}
-            title="Display full/short tags"
-          >
-            <span className="icon-chevron-left" />
-            <span className="icon-tag-expand" />
-            <span className="icon-chevron-right" />
-          </a>
-        )
-      }
       // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
       if (
-        /*this.context.tagModesEnabled  &&*/ segment.missingTagsInTarget &&
+        segment.missingTagsInTarget &&
         segment.missingTagsInTarget.length > 0 &&
         this.editArea
       ) {
@@ -266,7 +226,6 @@ class SegmentTarget extends React.Component {
                 QR
               </a>
             ) : null}
-            {tagLockCustomizable}
             {tagModeButton}
             {tagCopyButton}
             <ul
@@ -301,7 +260,7 @@ class SegmentTarget extends React.Component {
   }
 
   autoFillTagsInTarget(sid) {
-    if (_.isUndefined(sid) || sid === this.props.segment.sid) {
+    if (isUndefined(sid) || sid === this.props.segment.sid) {
       let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment)
       //lock tags and run again getWarnings
       setTimeout(() => {
@@ -371,7 +330,7 @@ class SegmentTarget extends React.Component {
 
     return (
       <div
-        className="target item"
+        className={`target item target-${config.target_code}`}
         id={'segment-' + this.props.segment.sid + '-target'}
         ref={(target) => (this.target = target)}
       >

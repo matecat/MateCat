@@ -38,14 +38,14 @@ export const sendSegmentVersionIssue = async (
   if (!response.ok) {
     if (response.headers.get('Content-Length') !== '0') {
       const data = await response.json()
-      return Promise.reject({response, errors: data.errors ?? data})
+      return Promise.reject({errors: data.errors ?? data})
     } else {
-      return Promise.reject({response})
+      return Promise.reject()
     }
   }
 
   const {errors, ...data} = await response.json()
-  if (errors && errors.length > 0) return Promise.reject({response, errors})
+  if (errors && errors.length > 0) return Promise.reject({errors})
 
   return data
 }

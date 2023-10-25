@@ -19,6 +19,9 @@ export const JobMetadata = ({idJob, password}) => {
     let currentSegment = SegmentStore.getCurrentSegment()
     let props = {
       currentFile: currentSegment ? parseInt(currentSegment.id_file) : null,
+      currentFilePart: currentSegment
+        ? parseInt(currentSegment.id_file_part)
+        : null,
       files: files,
       projectInfo: projectInfo,
     }

@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
+import {debounce} from 'lodash/function'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
@@ -30,6 +31,7 @@ import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
+import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 
 const SegmentActions = {
   /********* SEGMENTS *********/
@@ -171,7 +173,8 @@ const SegmentActions = {
     }
   },
   scrollToCurrentSegment() {
-    this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
+    if (SegmentStore.getCurrentSegment())
+      this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
   scrollToSegment: function (sid, callback) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
@@ -204,13 +207,15 @@ const SegmentActions = {
   },
 
   removeClassToSegment: function (sid, className) {
-    setTimeout(function () {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
-        id: sid,
-        className: className,
-      })
-    }, 0)
+    if (sid) {
+      setTimeout(function () {
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
+          id: sid,
+          className: className,
+        })
+      }, 0)
+    }
   },
 
   setStatus: function (sid, fid, status) {
@@ -282,9 +287,13 @@ const SegmentActions = {
     })
   },
   changeTagProjectionStatus: function (enabled) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_GUESS_TAGS,
-      enabled: enabled,
+    //TODO: transform paremeter to bool
+    config.tag_projection_enabled = enabled ? 1 : 0
+    toggleTagProjectionJob({enabled}).then(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SET_GUESS_TAGS,
+        enabled: enabled,
+      })
     })
   },
   /**
@@ -294,6 +303,9 @@ const SegmentActions = {
     var currentSegment = segmentObj
       ? segmentObj
       : SegmentStore.getCurrentSegment()
+
+    if (!currentSegment) return
+
     var tagProjectionEnabled =
       TagUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged
@@ -311,12 +323,6 @@ const SegmentActions = {
       id: sid,
       fid: fid,
     })
-  },
-  disableTagLock: function () {
-    UI.tagLockEnabled = false
-  },
-  enableTagLock: function () {
-    UI.tagLockEnabled = true
   },
 
   setSegmentWarnings: function (sid, warnings, tagMismatch) {
@@ -363,7 +369,7 @@ const SegmentActions = {
       type: type,
     })
   },
-  selectNextSegmentDebounced: _.debounce(() => {
+  selectNextSegmentDebounced: debounce(() => {
     SegmentActions.selectNextSegment()
   }, 100),
 
@@ -374,7 +380,7 @@ const SegmentActions = {
       direction: 'next',
     })
   },
-  selectPrevSegmentDebounced: _.debounce(() => {
+  selectPrevSegmentDebounced: debounce(() => {
     SegmentActions.selectPrevSegment()
   }, 100),
   selectPrevSegment: function (sid) {
@@ -564,7 +570,7 @@ const SegmentActions = {
     })
   },
   copyTagProjectionInCurrentSegment(sid, translation) {
-    if (!_.isUndefined(translation) && translation.length > 0) {
+    if (!isUndefined(translation) && translation.length > 0) {
       SegmentActions.replaceEditAreaTextContent(sid, translation)
     }
   },
@@ -635,12 +641,15 @@ const SegmentActions = {
       alternatives: alternatives,
     })
   },
-  chooseContribution: function (sid, index) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
-      sid: sid,
-      index: index,
-    })
+  chooseContributionOnCurrentSegment: function (index) {
+    const segment = SegmentStore.getCurrentSegment()
+    if (segment.contributions) {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
+        sid: segment.sid,
+        index: index,
+      })
+    }
   },
   deleteContribution: function (source, target, matchId, sid) {
     TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).then(
@@ -717,7 +726,10 @@ const SegmentActions = {
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
       let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
-      if (typeof segment.glossary === 'undefined' || sid === request.sid) {
+      if (
+        segment &&
+        (typeof segment.glossary === 'undefined' || sid === request.sid)
+      ) {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
@@ -904,14 +916,14 @@ const SegmentActions = {
     })
   },
 
-  getContributions: function (sid) {
-    TranslationMatches.getContribution(sid, 0)
-    TranslationMatches.getContribution(sid, 1)
-    TranslationMatches.getContribution(sid, 2)
+  getContributions: function (sid, multiMatchLangs) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
+    TranslationMatches.getContribution(sid, 1, multiMatchLangs)
+    TranslationMatches.getContribution(sid, 2, multiMatchLangs)
   },
 
-  getContribution: function (sid, force) {
-    TranslationMatches.getContribution(sid, 0, force)
+  getContribution: function (sid, multiMatchLangs, force) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
   },
 
   getContributionsSuccess: function (data, sid) {
@@ -1239,6 +1251,11 @@ const SegmentActions = {
       actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
+  hideAiAssistant: () => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.HIDE_AI_ASSISTANT,
+    })
+  },
   characterCounter: ({sid, counter, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
@@ -1280,6 +1297,7 @@ const SegmentActions = {
       src_content: src_content,
       trg_content: trg_content,
       segment_status: segment_status,
+      characters_counter: segment.charactersCounter ?? 0,
     })
       .then((data) => {
         if (data.details && data.details.id_segment) {
@@ -1343,6 +1361,8 @@ const SegmentActions = {
           target: trg_content,
           source: src_content,
           keys: jobTmKeys.map(({key}) => key),
+        }).catch((error) => {
+          console.log('Glossary check failed', error)
         })
       }
     })
@@ -1355,6 +1375,41 @@ const SegmentActions = {
       termId,
       type,
       isTarget,
+    })
+  },
+  helpAiAssistant: ({sid, value}) => {
+    SegmentActions.modifyTabVisibility('AiAssistant', true)
+    SegmentActions.activateTab(sid, 'AiAssistant')
+
+    setTimeout(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.HELP_AI_ASSISTANT,
+        sid,
+        value,
+      })
+    }, 100)
+  },
+  aiSuggestion: ({sid, suggestion, isCompleted, hasError}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_SUGGESTION,
+      sid,
+      suggestion,
+      isCompleted,
+      hasError,
+    })
+  },
+  setIsCurrentSearchOccurrenceTag: (value) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      value,
+    })
+  },
+  openGlossaryFormPrefill: ({sid, ...filledFields}) => {
+    SegmentActions.activateTab(sid, 'glossary')
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
+      sid,
+      ...filledFields,
     })
   },
 }

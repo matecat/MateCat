@@ -181,3 +181,12 @@ GLOSSARY_WRITE[pid_set_name]  = "ch_pid_glossary_write"
 GLOSSARY_WRITE[max_executors] = 1
 GLOSSARY_WRITE[redis_key]     = "glossary_write"
 GLOSSARY_WRITE[loggerName]    = "glossary_write.log"
+
+;;###################################
+;;##### AI Assistant            #####
+;;###################################
+AI_ASSISTANT_EXPLAIN_MEANING[queue_name]    = "ai_assistant_explain_meaning"
+AI_ASSISTANT_EXPLAIN_MEANING[pid_set_name]  = "ch_pid_ai_assistant_explain_meaning"
+AI_ASSISTANT_EXPLAIN_MEANING[max_executors] = 1
+AI_ASSISTANT_EXPLAIN_MEANING[redis_key]     = "ai_assistant_explain_meaning"
+AI_ASSISTANT_EXPLAIN_MEANING[loggerName]    = "ai_assistant_explain_meaning.log"

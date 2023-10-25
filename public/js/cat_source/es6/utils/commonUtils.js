@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {round} from 'lodash'
 import Cookies from 'js-cookie'
 import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
@@ -6,6 +6,7 @@ import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
+import ModalsActions from '../actions/ModalsActions'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -34,12 +35,9 @@ const CommonUtils = {
         return value.revision_number === 2
       })
 
-      if (revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0) {
+      if (revWords1 && round(parseFloat(revWords1.advancement_wc)) > 0) {
         app = parseFloat(revWords1.advancement_wc)
-      } else if (
-        revWords2 &&
-        _.round(parseFloat(revWords2.advancement_wc)) > 0
-      ) {
+      } else if (revWords2 && round(parseFloat(revWords2.advancement_wc)) > 0) {
         app = parseFloat(revWords2.advancement_wc)
         t = 'approved-2ndpass'
       }
@@ -156,7 +154,7 @@ const CommonUtils = {
     let updateAppByPopState = () => {
       var segment = SegmentStore.getSegmentByIdToJS(this.parsedHash.segmentId)
       var currentSegment = SegmentStore.getCurrentSegment()
-      if (segment && currentSegment.sid === segment.sid) return
+      if (segment && currentSegment?.sid === segment.sid) return
       if (segment && !segment.opened) {
         SegmentActions.openSegment(this.parsedHash.segmentId, true)
       }
@@ -274,6 +272,9 @@ const CommonUtils = {
       case 'xtg':
         return 'extqxp'
       case 'xml':
+      case 'x-jsont2':
+      case 'json':
+      case 'jsont':
         return 'extxml'
       case 'rc':
         return 'extrcc'
@@ -417,7 +418,7 @@ const CommonUtils = {
     try {
       return config.languages_array.find((e) => e.code === code).name
     } catch (e) {
-      console.error('Unknown Language', e)
+      //console.error('Unknown Language', e)
       return ''
     }
   },
@@ -534,6 +535,9 @@ const CommonUtils = {
   parseFiles: (files) => {
     return files
   },
+  //Plugins
+  fileHasInstructions: (file) =>
+    file && file.metadata && file.metadata.instructions,
 
   /**
    * Returns true if the current OS is MacOS or iOS, false otherwise
@@ -550,6 +554,14 @@ const CommonUtils = {
     )
   },
   isAllowedLinkRedirect: () => false,
+  dispatchTrackingError: (message) => {
+    const event = new CustomEvent('track-error', {detail: message})
+    document.dispatchEvent(event)
+  },
+  dispatchTrackingEvents: (name, message) => {
+    const event = new CustomEvent('track-event', {detail: {name, message}})
+    document.dispatchEvent(event)
+  },
 }
 
 const ParsedHash = function (hash) {

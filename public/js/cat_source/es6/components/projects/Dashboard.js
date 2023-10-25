@@ -1,8 +1,9 @@
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
-import _ from 'lodash'
-import {flushSync} from 'react-dom'
+import {isEmpty} from 'lodash'
+import {debounce} from 'lodash/function'
+import ReactDOM, {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
@@ -16,10 +17,10 @@ import TeamConstants from '../../constants/TeamConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
-import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import {getUserData} from '../../api/getUserData'
 import {getTeamMembers} from '../../api/getTeamMembers'
 import NotificationBox from '../notificationsComponent/NotificationBox'
+import {CookieConsent} from '../common/CookieConsent'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -132,12 +133,17 @@ class Dashboard extends React.Component {
     })
   }
 
-  scrollDebounceFn = () => _.debounce(() => this.handleScroll(), 300)
+  scrollDebounceFn = () => debounce(() => this.handleScroll(), 300)
 
   handleScroll = () => {
+    let scrollableHeight =
+      document.getElementById('manage-container').scrollHeight -
+      document.getElementById('manage-container').clientHeight
+    // When the user is [modifier]px from the bottom, fire the event.
+    let modifier = 200
     if (
-      $(window).scrollTop() + $(window).height() >
-      $(document).height() - 200
+      document.getElementById('manage-container').scrollTop + modifier >
+      scrollableHeight
     ) {
       console.log('Scroll end')
       this.renderMoreProjects()
@@ -175,13 +181,13 @@ class Dashboard extends React.Component {
           }
         })
         .catch((err) => {
-          if (err[0].code == 401) {
+          if (err && err[0]?.code == 401) {
             //Not Logged or not in the team
             window.location.reload()
             return
           }
 
-          if (err[0].code == 404) {
+          if (err[0]?.code == 404) {
             this.selectPersonalTeam()
             return
           }
@@ -209,10 +215,14 @@ class Dashboard extends React.Component {
         ManageActions.updateProjects(total_projects)
       })
     }
-    getUserData().then((data) => {
-      this.setState({teams: data.teams})
-      TeamsActions.updateTeams(data.teams)
-    })
+    getUserData()
+      .then((data) => {
+        this.setState({teams: data.teams})
+        TeamsActions.updateTeams(data.teams)
+      })
+      .catch(() => {
+        console.log('User not logged')
+      })
   }
 
   selectPersonalTeam = () => {
@@ -237,7 +247,7 @@ class Dashboard extends React.Component {
       job.id +
       '-' +
       job.password +
-      '&openTab=options'
+      '?openTab=options'
     window.open(url, '_blank')
   }
 
@@ -256,7 +266,7 @@ class Dashboard extends React.Component {
       job.id +
       '-' +
       job.password +
-      '&openTab=tm'
+      '?openTab=tm'
     window.open(url, '_blank')
   }
 
@@ -312,7 +322,7 @@ class Dashboard extends React.Component {
       filter.status = status
     }
     this.Search.filter = $.extend(this.Search.filter, filter)
-    if (!_.isEmpty(this.Search.filter)) {
+    if (!isEmpty(this.Search.filter)) {
       this.Search.currentPage = 1
     }
 
@@ -359,7 +369,9 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     this.getData()
-    window.addEventListener('scroll', this.scrollDebounceFn())
+    document
+      .getElementById('manage-container')
+      .addEventListener('scroll', this.scrollDebounceFn())
     let self = this
     $(window).on('blur focus', function (e) {
       const prevType = $(this).data('prevType')
@@ -419,7 +431,9 @@ class Dashboard extends React.Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.scrollDebounceFn())
+    document
+      .getElementById('manage-container')
+      .removeEventListener('scroll', this.scrollDebounceFn())
 
     //Job Actions
     ProjectsStore.removeListener(
@@ -457,6 +471,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    const cookieBannerMountPoint = document.getElementsByTagName('footer')[0]
     return (
       <React.Fragment>
         <DashboardHeader>
@@ -479,6 +494,7 @@ class Dashboard extends React.Component {
             <div className="ui massive text loader">Loading Projects</div>
           </div>
         )}
+        {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
       </React.Fragment>
     )
   }

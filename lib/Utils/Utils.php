@@ -77,7 +77,21 @@ class Utils {
         return 0;
     }
 
+    /**
+     * @return array
+     */
     static public function getBrowser() {
+
+        // handle Undefined index: HTTP_USER_AGENT
+        if(!isset($_SERVER[ 'HTTP_USER_AGENT' ])){
+            return [
+                'userAgent' => null,
+                'name'      => null,
+                'version'   => null,
+                'platform'  => null
+            ];
+        }
+
         $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
 
         //First get the platform?
@@ -218,18 +232,12 @@ class Utils {
 
     public static function encryptPass( $clear_pass, $salt ) {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
-
         return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
     public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ) {
-        if ( sha1( $clear_pass . $salt ) == $db_hashed_pass ) { //TODO: old implementation, remove in a next future when hopefully all people will be migrated to password_hash
-            return sha1( $clear_pass . $salt );
-        } else {
-            $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
-
-            return password_verify( $pepperedPass, $db_hashed_pass );
-        }
+        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+        return password_verify( $pepperedPass, $db_hashed_pass );
     }
 
     /**
@@ -266,6 +274,14 @@ class Utils {
 
     }
 
+    /**
+     * @param $string
+     * @return bool
+     */
+    public static function isJson( $string ) {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
 
     public static function mysqlTimestamp( $time ) {
         return date( 'Y-m-d H:i:s', $time );
@@ -533,27 +549,28 @@ class Utils {
      */
     public static function deleteDir( $dirPath ) {
 
-        $iterator = new DirectoryIterator( $dirPath );
+        if(is_dir($dirPath)){
+            $iterator = new DirectoryIterator( $dirPath );
 
-        foreach ( $iterator as $fileInfo ) {
-            if ( $fileInfo->isDot() ) {
-                continue;
-            }
-            if ( $fileInfo->isDir() ) {
-                self::deleteDir( $fileInfo->getPathname() );
-            } else {
-                $fileName = $fileInfo->getFilename();
-                if ( $fileName[0] == '.' ) {
+            foreach ( $iterator as $fileInfo ) {
+                if ( $fileInfo->isDot() ) {
                     continue;
                 }
-                $outcome = unlink( $fileInfo->getPathname() );
-                if ( !$outcome ) {
-                    Log::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
+                if ( $fileInfo->isDir() ) {
+                    self::deleteDir( $fileInfo->getPathname() );
+                } else {
+                    $fileName = $fileInfo->getFilename();
+                    if ( $fileName[0] == '.' ) {
+                        continue;
+                    }
+                    $outcome = unlink( $fileInfo->getPathname() );
+                    if ( !$outcome ) {
+                        Log::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
+                    }
                 }
             }
+            rmdir( $iterator->getPath() );
         }
-        rmdir( $iterator->getPath() );
-
     }
 
     /**
@@ -812,5 +829,132 @@ class Utils {
      */
     public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
         return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
+    }
+
+    /**
+     * @param string $format
+     * @return array
+     */
+    public static function allowedLanguages($format = 'rfc3066code')
+    {
+        $allowedLanguages = [];
+
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
+
+        foreach ($langs['langs'] as $lang){
+            $allowedLanguages[] = (isset($lang[$format])) ? $lang[$format] : $lang['rfc3066code'];
+        }
+
+        return $allowedLanguages;
+    }
+
+    /**
+     * @param string $language
+     * @param string $format
+     * @return bool
+     */
+    public static function isValidLanguage($language, $format = 'rfc3066code')
+    {
+        $allowedLanguages = Utils::allowedLanguages($format);
+
+        return in_array($language, $allowedLanguages);
+    }
+
+    /**
+     * @param $rfc3066code
+     * @return |null
+     */
+    public static function getLocalizedLanguage($rfc3066code)
+    {
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
+
+        foreach ($langs['langs'] as $lang){
+            if($lang['rfc3066code'] === $rfc3066code){
+                return @$lang['localized'][0]['en'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $phrase
+     * @param int $max_words
+     * @return mixed
+     */
+    public static function truncatePhrase($phrase, $max_words){
+
+        $phrase_array = explode(' ',$phrase);
+        if(count($phrase_array) > $max_words && $max_words > 0){
+            $phrase = implode(' ',array_slice($phrase_array, 0, $max_words));
+        }
+
+        return $phrase;
+    }
+
+    /**
+     * Examples:
+     * it-IT  ---> it
+     * es-419 ---> es
+     *
+     * @param $rfc3066code
+     * @return string|null
+     */
+    public static function convertLanguageToIsoCode($rfc3066code)
+    {
+        $shortedLanguage = explode('-', $rfc3066code);
+
+        return $shortedLanguage[0];
+    }
+
+    /**
+     * This escape is need by
+     * javascript JSON.parse() function
+     *
+     * @param array $data
+     * @return string
+     */
+    public static function escapeJsonEncode($data){
+       return str_replace("\\\"","\\\\\\\"", json_encode($data));
+    }
+
+    /**
+     * This function strips html tag, but preserves hrefs.
+     *
+     * Example:
+     *
+     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: click here(https://matecat.com)
+     *
+     * @param string $html
+     * @return string
+     */
+    public static function stripTagsPreservingHrefs($html)
+    {
+        $htmlDom = new DOMDocument('1.0', 'UTF-8');
+        $htmlDom->formatOutput = false;
+
+        @$htmlDom->loadHTML($html);
+
+        $links = $htmlDom->getElementsByTagName('a');
+
+        /** @var DOMElement $link */
+        foreach($links as $link){
+            $linkLabel = $link->nodeValue;
+            $linkHref = $link->getAttribute('href');
+            $link->nodeValue = $linkLabel . "(".str_replace("\\\"","", $linkHref).")";
+        }
+
+        $html = $htmlDom->saveHtml($htmlDom->documentElement);
+        $html = utf8_decode($html);
+
+        $strippedHtml = strip_tags($html);
+        $strippedHtml = ltrim($strippedHtml);
+        $strippedHtml = rtrim($strippedHtml);
+
+        return $strippedHtml;
     }
 }

@@ -84,7 +84,7 @@ class QAModelTemplateController extends KleinController {
             $this->response->code(404);
 
             return $this->response->json([
-                    'error' => 'Model not found'
+                'error' => 'Model not found'
             ]);
         }
 
@@ -92,7 +92,7 @@ class QAModelTemplateController extends KleinController {
             QAModelTemplateDao::remove($id);
 
             return $this->response->json([
-                    'id' => $id
+                'id' => $id
             ]);
         } catch (\Exception $exception){
             $this->response->code(500);
@@ -120,7 +120,7 @@ class QAModelTemplateController extends KleinController {
             $this->response->code(404);
 
             return $this->response->json([
-                    'error' => 'Model not found'
+                'error' => 'Model not found'
             ]);
         }
 
@@ -140,7 +140,7 @@ class QAModelTemplateController extends KleinController {
             $this->response->code(500);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -165,7 +165,7 @@ class QAModelTemplateController extends KleinController {
         $this->response->code(404);
 
         return $this->response->json([
-                'error' => 'Model not found'
+            'error' => 'Model not found'
         ]);
     }
 
@@ -195,7 +195,7 @@ class QAModelTemplateController extends KleinController {
             $validator->validate($validatorObject);
 
             $errors = $validator->getErrors();
-            $code = ($validator->isValid()) ? 500 : 200;
+            $code = ($validator->isValid()) ? 200 : 500;
 
             $this->response->code($code);
             return $this->response->json([
@@ -205,7 +205,7 @@ class QAModelTemplateController extends KleinController {
             $this->response->code(500);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }

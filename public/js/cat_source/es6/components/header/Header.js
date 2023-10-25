@@ -8,6 +8,7 @@ import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
 import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
+import CatToolActions from '../../actions/CatToolActions'
 
 class Header extends React.Component {
   constructor(props) {
@@ -33,6 +34,11 @@ class Header extends React.Component {
     TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser)
     if (this.props.isQualityReport) {
       QRStore.addListener(QRConstants.RENDER_REPORT, this.storeJobUrls)
+    }
+    if (this.state.loggedUser) {
+      setTimeout(function () {
+        CatToolActions.showHeaderTooltip()
+      }, 2000)
     }
   }
 
@@ -153,11 +159,6 @@ class Header extends React.Component {
                     </li>
                     <li>
                       <a href="https://guides.matecat.com/">User Guide</a>
-                    </li>
-                    <li>
-                      <a href="https://site.matecat.com/contact-us/">
-                        Contact us
-                      </a>
                     </li>
                     {/*<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>*/}
                     {this.getMoreLinks()}

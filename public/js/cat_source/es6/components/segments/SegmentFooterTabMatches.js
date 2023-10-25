@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import Immutable from 'immutable'
 
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -9,18 +9,24 @@ import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import CommonUtils from '../../utils/commonUtils'
+import CatToolStore from '../../stores/CatToolStore'
+import CatToolConstants from '../../constants/CatToolConstants'
+import {SegmentContext} from './SegmentContext'
+import {SegmentFooterTabError} from './SegmentFooterTabError'
 
 class SegmentFooterTabMatches extends React.Component {
+  static contextType = SegmentContext
+
   constructor(props) {
     super(props)
     this.suggestionShortcutLabel = 'CTRL+'
     this.processContributions = this.processContributions.bind(this)
     this.chooseSuggestion = this.chooseSuggestion.bind(this)
-    SegmentActions.getContributions(
-      this.props.segment.sid,
-      this.props.fid,
-      this.props.segment.segment,
-    )
+    this.setJobTmKeys = this.setJobTmKeys.bind(this)
+
+    this.state = {
+      tmKeys: CatToolStore.getJobTmKeys(),
+    }
   }
 
   processContributions(matches) {
@@ -29,7 +35,7 @@ class SegmentFooterTabMatches extends React.Component {
     // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
       if (
-        _.isUndefined(this.segment) ||
+        isUndefined(this.segment) ||
         this.segment === '' ||
         this.translation === ''
       )
@@ -76,8 +82,10 @@ class SegmentFooterTabMatches extends React.Component {
           config.isTargetRTL,
         ),
       )
-      item.sourceDiff = item.suggestionDecodedHtml
+      item.translation = TagUtils.transformTextFromBe(this.translation)
 
+      item.sourceDiff = item.suggestionDecodedHtml
+      item.memoryKey = this.memory_key
       if (
         this.match !== 'MT' &&
         parseInt(this.match) > 70 &&
@@ -95,7 +103,7 @@ class SegmentFooterTabMatches extends React.Component {
         )
       }
 
-      if (!_.isUndefined(this.tm_properties)) {
+      if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
       }
       let matchToInsert = self.processMatchCallback(item)
@@ -120,6 +128,20 @@ class SegmentFooterTabMatches extends React.Component {
       this.suggestionDblClick(this.props.segment.contributions, index)
     }
   }
+  setJobTmKeys(keys) {
+    this.setState({tmKeys: keys})
+  }
+
+  isOwnerKey(key) {
+    const {tmKeys} = this.state
+    if (tmKeys && tmKeys.length > 0) {
+      const ownedKey = tmKeys.find(
+        (currentKey) => currentKey.key === key && currentKey.w === 1,
+      )
+      return !!ownedKey
+    }
+    return false
+  }
 
   suggestionDblClick(match, index) {
     setTimeout(() => {
@@ -136,8 +158,8 @@ class SegmentFooterTabMatches extends React.Component {
   deleteSuggestion(match) {
     var source = TextUtils.htmlDecode(match.segment)
     var target = TextUtils.htmlDecode(match.translation)
-    target = TextUtils.view2rawxliff(target)
-    source = TextUtils.view2rawxliff(source)
+    target = TagUtils.prepareTextToSend(target)
+    source = TagUtils.prepareTextToSend(source)
     SegmentActions.deleteContribution(
       source,
       target,
@@ -156,9 +178,9 @@ class SegmentFooterTabMatches extends React.Component {
             {CommonUtils.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
-        <li className="graydesc">
+        <li className="graydesc graydesc-sourcekey">
           Source:
-          <span className="bold" style={{fontSize: '14px'}}>
+          <span className="bold" style={{fontSize: '14px'}} title={match.cb}>
             {' '}
             {match.cb}
           </span>
@@ -180,11 +202,14 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   componentDidMount() {
+    const {multiMatchLangs} = this.context
     this._isMounted = true
+    SegmentActions.getContributions(this.props.segment.sid, multiMatchLangs)
     SegmentStore.addListener(
       SegmentConstants.CHOOSE_CONTRIBUTION,
       this.chooseSuggestion,
     )
+    CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, this.setJobTmKeys)
   }
 
   componentWillUnmount() {
@@ -193,6 +218,10 @@ class SegmentFooterTabMatches extends React.Component {
       SegmentConstants.CHOOSE_CONTRIBUTION,
       this.chooseSuggestion,
     )
+    CatToolStore.removeListener(
+      CatToolConstants.UPDATE_TM_KEYS,
+      this.setJobTmKeys,
+    )
   }
 
   /**
@@ -200,22 +229,24 @@ class SegmentFooterTabMatches extends React.Component {
    */
   componentDidUpdate(prevProps) {
     if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
-      SegmentActions.getContribution(this.props.segment.sid)
+      const {multiMatchLangs} = this.context
+      SegmentActions.getContribution(this.props.segment.sid, multiMatchLangs)
     }
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate(nextProps, nextState) {
     return (
-      ((!_.isUndefined(nextProps.segment.contributions) ||
-        !_.isUndefined(this.props.segment.contributions)) &&
-        ((!_.isUndefined(nextProps.segment.contributions) &&
-          _.isUndefined(this.props.segment.contributions)) ||
+      ((!isUndefined(nextProps.segment.contributions) ||
+        !isUndefined(this.props.segment.contributions)) &&
+        ((!isUndefined(nextProps.segment.contributions) &&
+          isUndefined(this.props.segment.contributions)) ||
           !Immutable.fromJS(this.props.segment.contributions).equals(
             Immutable.fromJS(nextProps.segment.contributions),
           ))) ||
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||
-      this.props.segment.unlocked !== nextProps.segment.unlocked
+      this.props.segment.unlocked !== nextProps.segment.unlocked ||
+      this.state.tmKeys !== nextState.tmKeys
     )
   }
 
@@ -224,6 +255,8 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   render() {
+    const {clientConnected} = this.context
+
     let matchesHtml = []
     let self = this
     if (
@@ -234,17 +267,21 @@ class SegmentFooterTabMatches extends React.Component {
       let tpmMatches = this.processContributions(
         this.props.segment.contributions.matches,
       )
-      tpmMatches.forEach(function (match, index) {
-        var trashIcon = match.disabled ? (
-          ''
-        ) : (
-          <span
-            id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
-            className="trash"
-            title="delete this row"
-            onClick={self.deleteSuggestion.bind(self, match, index)}
-          />
-        )
+      tpmMatches.forEach((match, index) => {
+        const {memoryKey} = match
+        const isOwnedKey = memoryKey ? this.isOwnerKey(memoryKey) : false
+        const isPublicTm = match.cb !== 'MT' && !memoryKey
+        const trashIcon =
+          match.disabled || (!isOwnedKey && !isPublicTm) ? (
+            ''
+          ) : (
+            <span
+              id={self.props.segment.sid + '-tm-' + match.id + '-delete'}
+              className="trash"
+              title="delete this row"
+              onClick={self.deleteSuggestion.bind(self, match, index)}
+            />
+          )
         var item = (
           <ul
             key={match.id}
@@ -358,14 +395,20 @@ class SegmentFooterTabMatches extends React.Component {
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
       >
-        <div className="overflow">
-          {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-            matchesHtml
-          ) : (
-            <span className="loader loader_on" />
-          )}
-        </div>
-        <div className="engine-errors">{errors}</div>
+        {clientConnected ? (
+          <>
+            <div className="overflow">
+              {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+                matchesHtml
+              ) : (
+                <span className="loader loader_on" />
+              )}
+            </div>
+            {errors.length > 0 && <div className="engine-errors">{errors}</div>}
+          </>
+        ) : (
+          <SegmentFooterTabError />
+        )}
       </div>
     )
   }

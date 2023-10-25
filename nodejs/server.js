@@ -11,6 +11,7 @@ const uuid = require( 'uuid' );
 
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
+const AI_ASSISTANT_EXPLAIN_MEANING = 'ai_assistant_explain_meaning';
 const COMMENTS_TYPE = 'comment';
 const GLOSSARY_TYPE_G = 'glossary_get';
 const GLOSSARY_TYPE_S = 'glossary_set';
@@ -30,7 +31,7 @@ const logger = winston.createLogger( {
     level: 'info',
     format: winston.format.json(),
     transports: [
-        new winston.transports.Console( {level: 'debug'} ),
+        new winston.transports.Console( {level: 'info'} ),
         new winston.transports.File( {filename: path.resolve( __dirname, config.log.file ), level: config.log.level} ),
     ],
 } );
@@ -97,6 +98,8 @@ browserChannel.on( 'connect', ( context, req, res ) => {
             clientId: res._clientId
         }
     }, [res] );
+    logger.debug( ['New client connection ' + res._clientId ] );
+
 } );
 
 /**
@@ -138,6 +141,9 @@ http.createServer( ( req, res ) => {
 const checkCandidate = ( type, response, message ) => {
     let candidate;
     switch ( type ) {
+        case AI_ASSISTANT_EXPLAIN_MEANING:
+            candidate = response._clientId === message.data.id_client;
+            break;
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&

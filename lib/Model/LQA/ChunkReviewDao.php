@@ -496,14 +496,12 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @param      $data array of data to use
      *
      * @return ChunkReviewStruct
-     * @throws \Exceptions\ValidationError
      * @throws \ReflectionException
      * @internal param bool $setDefaults
      */
     public static function createRecord( $data ) {
         $struct = new ChunkReviewStruct( $data );
 
-        $struct->ensureValid();
         $struct->setDefaults();
 
         $attrs = $struct->toArray( [

@@ -13,12 +13,18 @@ class LanguageSelector extends React.Component {
       querySearch: '',
       filteredLanguages: [],
     }
+
+    this.listRef = React.createRef()
   }
 
   componentDidMount() {
     const {selectedLanguagesFromDropdown, languagesList, fromLanguage} =
       this.props
-    document.addEventListener('keydown', this.pressEscKey)
+    this.container.addEventListener(
+      'keydown',
+      this.listRef.current.navigateLanguagesList,
+    )
+    document.addEventListener('keydown', this.keyHandler)
 
     this.setState({
       fromLanguage: languagesList.filter((i) => i.code === fromLanguage)[0],
@@ -32,7 +38,11 @@ class LanguageSelector extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.pressEscKey)
+    this.container.removeEventListener(
+      'keydown',
+      this.listRef.current.navigateLanguagesList,
+    )
+    document.removeEventListener('keydown', this.keyHandler)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -62,10 +72,14 @@ class LanguageSelector extends React.Component {
     const {languagesList, onClose} = this.props
     const {selectedLanguages, querySearch, fromLanguage, filteredLanguages} =
       this.state
+
     return (
       <div
         id="matecat-modal-languages"
         className="matecat-modal"
+        ref={(el) => {
+          this.container = el
+        }}
         onClick={onClose}
       >
         <div className="matecat-modal-content" onClick={preventDismiss}>
@@ -113,6 +127,7 @@ class LanguageSelector extends React.Component {
             </div>
 
             <LanguageSelectorList
+              ref={this.listRef}
               languagesList={languagesList}
               selectedLanguages={selectedLanguages}
               querySearch={querySearch}
@@ -241,12 +256,16 @@ class LanguageSelector extends React.Component {
     this.setState({querySearch: ''})
   }
 
-  pressEscKey = (event) => {
+  keyHandler = (event) => {
     const {onClose} = this.props
     const keyCode = event.keyCode
 
     if (keyCode === 27) {
       onClose()
+    }
+
+    if (event.key === 'Enter' && !this.state.querySearch) {
+      this.onConfirm()
     }
 
     //27

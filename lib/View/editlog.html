@@ -5,10 +5,7 @@
         <title>Editing log - Matecat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
-        <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-        <link href="${basepath}public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-        <link href="${basepath}public/css/build/semantic.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="${basepath}public/css/build/legacy-misc.css?build=${build_number}"/>
+        <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
         <script type="text/javascript">
             var config = {
@@ -16,8 +13,6 @@
             };
         </script>
 
-        <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-        <script type="text/javascript" src="${basepath}public/js/lib/semantic.min.js"></script>
     </head>
 
     <body class="editlog" tal:condition="not:supportedBrowser">
@@ -90,7 +85,6 @@
                             </svg>
                         </a>
                     </div>
-                    <div metal:use-macro="common.html/login_includes" />
                 </div> <!-- .profile-menu -->
 
             </div>
@@ -283,7 +277,6 @@
 
         <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
-        <div metal:use-macro="cookiebanner.html/cookieBanner"/>
         <div metal:use-macro="common.html/footer_includes" />
 
         <script>
@@ -325,6 +318,5 @@
                 /*]]>*/
             </tal:block>
         </script>
-        <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
     </body>
 </html>

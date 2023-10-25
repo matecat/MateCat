@@ -17,6 +17,11 @@ use Projects_ProjectStruct;
 
 class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {
 
+    // Needed by getSessionId()
+    public $id_file;
+    public $id_job;
+    public $password;
+
     public $jobStruct;
 
     public $dataRefMap;
@@ -153,4 +158,11 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
         return $this->__user;
     }
 
+    /**
+     * @return string
+     */
+    public function getSessionId()
+    {
+        return md5($this->id_file. '-' . $this->id_job . '-' . $this->password);
+    }
 }

@@ -2,11 +2,33 @@
 
 namespace LQA;
 
+use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
+use DataAccess_AbstractDao;
+use DataAccess_IDaoStruct;
+use Database;
+use Exceptions\ValidationError;
+use Log;
+use PDO;
 use Utils;
 
-class EntryDao extends \DataAccess_AbstractDao {
+class EntryDao extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     */
+    public static function getBySegmentIds(array $ids = [])
+    {
+        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment IN ( " . implode(', ' , $ids ) . " ) ";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute();
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+
+        return $stmt->fetchAll();
     }
 
     public static function updateRepliesCount( $id ) {
@@ -15,9 +37,9 @@ class EntryDao extends \DataAccess_AbstractDao {
                 " qa_entry_comments WHERE id_qa_entry = :id " .
                 " ) WHERE id = :id ";
 
-        \Log::doJsonLog( $sql );
+        Log::doJsonLog( $sql );
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [ 'id' => $id ] );
@@ -26,7 +48,7 @@ class EntryDao extends \DataAccess_AbstractDao {
     public static function hardDeleteEntry( EntryStruct $record ) {
         $sql = "DELETE FROM qa_entries WHERE id = :id ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [ 'id' => $record->id ] );
@@ -35,7 +57,7 @@ class EntryDao extends \DataAccess_AbstractDao {
     public static function deleteEntry( EntryStruct $record ) {
         $sql = "UPDATE qa_entries SET deleted_at = :deleted_at WHERE id = :id ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [
@@ -55,20 +77,20 @@ class EntryDao extends \DataAccess_AbstractDao {
                 " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
                 " WHERE qa_entries.id = :id AND qa_entries.deleted_at IS NULL LIMIT 1";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
 
         return $stmt->fetch();
     }
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param Chunks_ChunkStruct $chunk
      *
      * @return EntryStruct[]
      */
-    public static function findAllByChunk( \Chunks_ChunkStruct $chunk ) {
+    public static function findAllByChunk( Chunks_ChunkStruct $chunk ) {
         $sql = "SELECT qa_entries.*, qa_categories.label as category_label FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
@@ -80,10 +102,10 @@ class EntryDao extends \DataAccess_AbstractDao {
             qa_entries.deleted_at IS NULL AND
             qa_entries.id_job = :id AND jobs.password = :password ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id' => $chunk->id, 'password' => $chunk->password ] );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
         return $stmt->fetchAll();
     }
@@ -105,10 +127,10 @@ class EntryDao extends \DataAccess_AbstractDao {
         }
 
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $data );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
         return $stmt->fetchAll();
     }
@@ -128,11 +150,11 @@ class EntryDao extends \DataAccess_AbstractDao {
                 'source_page' => $source_page
         ];
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $opts );
 
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryWithCategoryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryWithCategoryStruct' );
 
         return $stmt->fetchAll();
     }
@@ -152,11 +174,11 @@ class EntryDao extends \DataAccess_AbstractDao {
                 'translation_version' => $version
         ];
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $opts );
 
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
 
         return $stmt->fetchAll();
     }
@@ -173,27 +195,25 @@ class EntryDao extends \DataAccess_AbstractDao {
                 'source_page' => $source_page
         ];
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $opts );
 
-        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
         return $stmt->fetch();
     }
 
     /**
-     * @param $data
+     * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
      */
-    public static function createEntry( $data ) {
-        $data = self::ensureStartAndStopPositionAreOrdered( $data );
+    public static function createEntry( EntryStruct $entryStruct ) {
 
-        $struct = new EntryStruct( $data );
-        $struct->ensureValid();
-        $struct->setDefaults();
+        $entryStruct = self::ensureStartAndStopPositionAreOrdered( $entryStruct );
+        $entryStruct->setDefaults();
 
         $sql  = "INSERT INTO qa_entries 
              ( 
@@ -220,10 +240,10 @@ class EntryDao extends \DataAccess_AbstractDao {
                 :source_page 
              ); 
         ";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $values = $struct->toArray(
+        $values = $entryStruct->toArray(
                 [
                         'id_segment', 'id_job', 'id_category', 'severity',
                         'translation_version', 'start_node', 'start_offset',
@@ -234,12 +254,10 @@ class EntryDao extends \DataAccess_AbstractDao {
 
         $stmt->execute( $values );
         $lastId = $conn->lastInsertId();
-        /**
-         * @deprecated do not use insert and find.
-         */
-        $record = self::findById( $lastId );
 
-        return $record;
+        $entryStruct->id = $lastId;
+
+        return $entryStruct;
     }
 
     /**
@@ -253,35 +271,39 @@ class EntryDao extends \DataAccess_AbstractDao {
      *
      * This silent correction of provided data is to reduce the amount of work
      * required on the clients.
+     *
+     * @return EntryStruct
+     *
      */
-    private static function ensureStartAndStopPositionAreOrdered( $data ) {
-        \Log::doJsonLog( $data );
+    private static function ensureStartAndStopPositionAreOrdered( $entryStruct ) {
 
-        if ( $data[ 'start_node' ] == $data[ 'end_node' ] ) {
+        Log::doJsonLog( $entryStruct );
+
+        if ( $entryStruct->start_node == $entryStruct->end_node ) {
             // if start node and stop node are the same, just order the offsets if needed
-            if ( intval( $data[ 'start_offset' ] ) > intval( $data[ 'end_offset' ] ) ) {
-                $tmp                    = $data[ 'start_offset' ];
-                $data[ 'start_offset' ] = $data[ 'end_offset' ];
-                $data[ 'end_offset' ]   = $tmp;
+            if ( intval( $entryStruct->start_offset ) > intval( $entryStruct->end_offset ) ) {
+                $tmp                       = $entryStruct->start_offset;
+                $entryStruct->start_offset = $entryStruct->end_offset;
+                $entryStruct->end_offset   = $tmp;
                 unset( $tmp );
             }
         } else {
-            if ( intval( $data[ 'start_node' ] > intval( $data[ 'end_node' ] ) ) ) {
+            if ( intval( $entryStruct->start_node > intval( $entryStruct->end_node ) ) ) {
                 // in this case selection was backward, invert both nodes and
                 // offsets.
-                $tmp                    = $data[ 'start_offset' ];
-                $data[ 'start_offset' ] = $data[ 'end_offset' ];
-                $data[ 'end_offset' ]   = $tmp;
+                $tmp                       = $entryStruct->start_offset;
+                $entryStruct->start_offset = $entryStruct->end_offset;
+                $entryStruct->end_offset   = $tmp;
 
-                $tmp                  = $data[ 'start_node' ];
-                $data[ 'start_node' ] = $data[ 'end_node' ];
-                $data[ 'end_node' ]   = $tmp;
+                $tmp                     = $entryStruct->start_node;
+                $entryStruct->start_node = $entryStruct->end_node;
+                $entryStruct->end_node   = $tmp;
             } else {
                 // in any other case leave everything as is
             }
         }
 
-        return $data;
+        return $entryStruct;
 
     }
 
@@ -324,12 +346,12 @@ class EntryDao extends \DataAccess_AbstractDao {
      * @param null $idFilePart
      * @param int  $ttl
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
     public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0) {
 
         $thisDao = new self();
-        $conn    = \Database::obtain()->getConnection();
+        $conn    = Database::obtain()->getConnection();
         $sql     = "SELECT
                 s.internal_id as content_id,
                 s.id as segment_id,

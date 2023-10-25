@@ -1,4 +1,7 @@
-import _ from 'lodash'
+import {cloneDeep} from 'lodash/lang'
+import {each} from 'lodash/collection'
+import {merge} from 'lodash/object'
+import {isUndefined} from 'lodash'
 
 import SegmentActions from '../actions/SegmentActions'
 import {toggleTagLexica} from '../api/toggleTagLexica'
@@ -7,6 +10,7 @@ import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import CatToolActions from '../actions/CatToolActions'
+import CommonUtils from './commonUtils'
 
 const LXQ = {
   enabled: function () {
@@ -36,7 +40,7 @@ const LXQ = {
     }
   },
   checkCanActivate: function () {
-    if (_.isUndefined(this.canActivate)) {
+    if (isUndefined(this.canActivate)) {
       this.canActivate =
         config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
         config.lexiqa_languages.indexOf(config.target_rfc) > -1
@@ -51,16 +55,6 @@ const LXQ = {
     segmentsInfo: {},
   },
 
-  getTargetTextForQa: function (segment) {
-    let clone = $(UI.targetContainerSelector(), segment).clone()
-    return clone.text().replace(/\uFEFF/g, '')
-  },
-  getSourceTextForQa: function (text) {
-    var div = document.createElement('div')
-    var $div = $(div)
-    $div.html(text)
-    return $div.text()
-  },
   doLexiQA: function (segment, isSegmentCompleted, callback) {
     if (!LXQ.enabled()) {
       if (callback !== undefined && typeof callback === 'function') {
@@ -78,19 +72,20 @@ const LXQ = {
     var translation = segObj.lxqDecodedTranslation
 
     var returnUrl = window.location.href.split('#')[0] + '#' + id_segment
+    const data = {
+      sourcelanguage: config.source_rfc,
+      targetlanguage: config.target_rfc,
+      sourcetext: sourcetext,
+      targettext: translation,
+      returnUrl: returnUrl,
+      segmentId: id_segment,
+      partnerId: LXQ.partnerid,
+      projectId: LXQ.projectid,
+      isSegmentCompleted: isSegmentCompleted,
+      responseMode: 'includeQAResults',
+    }
     $.lexiqaAuthenticator.doLexiQA(
-      {
-        sourcelanguage: config.source_rfc,
-        targetlanguage: config.target_rfc,
-        sourcetext: sourcetext,
-        targettext: translation,
-        returnUrl: returnUrl,
-        segmentId: id_segment,
-        partnerId: LXQ.partnerid,
-        projectId: LXQ.projectid,
-        isSegmentCompleted: isSegmentCompleted,
-        responseMode: 'includeQAResults',
-      },
+      data,
       function (err, result) {
         if (!err) {
           var noVisibleErrorsFound = false
@@ -134,12 +129,12 @@ const LXQ = {
                 if (qadata.insource) {
                   highlights.source = highlights.source
                     ? highlights.source
-                    : _.cloneDeep(errorsMap)
+                    : cloneDeep(errorsMap)
                   highlights.source[category].push(qadata)
                 } else {
                   highlights.target = highlights.target
                     ? highlights.target
-                    : _.cloneDeep(errorsMap)
+                    : cloneDeep(errorsMap)
                   highlights.target[category].push(qadata)
                 }
               }
@@ -220,12 +215,12 @@ const LXQ = {
               if (qadata.insource) {
                 highlights.source = highlights.source
                   ? highlights.source
-                  : _.cloneDeep(errorsMap)
+                  : cloneDeep(errorsMap)
                 highlights.source[qadata.category].push(qadata)
               } else {
                 highlights.target = highlights.target
                   ? highlights.target
-                  : _.cloneDeep(errorsMap)
+                  : cloneDeep(errorsMap)
                 highlights.target[qadata.category].push(qadata)
               }
             }
@@ -303,13 +298,13 @@ LXQ.init = function () {
   $(window).on('segmentsAdded', function (e, data) {
     globalReceived = false
     console.log('[LEXIQA] got segmentsAdded ')
-    _.each(data.resp, function (file) {
+    each(data.resp, function (file) {
       if (
         file.segments &&
         LXQ.hasOwnProperty('lexiqaData') &&
         LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings')
       ) {
-        _.each(file.segments, function (segment) {
+        each(file.segments, function (segment) {
           if (LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(segment.sid)) {
             // console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
             //clean up and redo powertip on any glossaries/blacklists
@@ -603,7 +598,7 @@ LXQ.init = function () {
         return range
       })
 
-      return _.merge(ranges.out, ranges.newout)
+      return merge(ranges.out, ranges.newout)
     }
 
     var buildTooltipMessages = function (range, sid, isSource) {
@@ -667,13 +662,15 @@ LXQ.init = function () {
       var targetSeg = splits[1]
       var inSource = splits[splits.length - 1] === 's' ? true : false
       //console.log('ignoring error with id: '+ errorid +' in segment: '+targetSeg);
-      LXQ.lexiqaData.lexiqaWarnings[targetSeg][errorid].ignored = true
-      redoHighlighting(targetSeg, inSource)
-      if (getVisibleWarningsCountForSegment(targetSeg) <= 0) {
-        //remove the segment from database/reduce the number count
-        LXQ.lxqRemoveSegmentFromWarningList(targetSeg)
+      if (LXQ.lexiqaData.lexiqaWarnings[targetSeg]) {
+        LXQ.lexiqaData.lexiqaWarnings[targetSeg][errorid].ignored = true
+        redoHighlighting(targetSeg, inSource)
+        if (getVisibleWarningsCountForSegment(targetSeg) <= 0) {
+          //remove the segment from database/reduce the number count
+          LXQ.lxqRemoveSegmentFromWarningList(targetSeg)
+        }
+        postIgnoreError(errorid)
       }
-      postIgnoreError(errorid)
     }
 
     var redoHighlighting = function (segmentId, insource) {
@@ -790,7 +787,7 @@ LXQ.init = function () {
   })(jQuery, config, window, LXQ)
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   if (LXQ.enabled()) {
     LXQ.init()
   }

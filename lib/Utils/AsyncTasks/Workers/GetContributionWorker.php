@@ -469,21 +469,20 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 
-                /**
-                 * @var $mt_engine \Engines_MMT
-                 */
                 $mt_engine = $contributionStruct->getMTEngine( $featureSet );
-
                 $config = $mt_engine->getConfigStruct();
 
                 //if a callback is not set only the first argument is returned, get the config params from the callback
                 $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
 
-                $config[ 'segment' ] = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]  = $jobStruct->source;
-                $config[ 'target' ]  = $jobStruct->target;
-                $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]   = $contributionStruct->segmentId;
+                $config[ 'segment' ]      = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]       = $jobStruct->source;
+                $config[ 'target' ]       = $jobStruct->target;
+                $config[ 'email' ]        = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]        = $contributionStruct->segmentId;
+                $config[ 'job_id' ]       = $jobStruct->id;
+                $config[ 'job_password' ] = $jobStruct->password;
+                $config[ 'session' ]      = $contributionStruct->getSessionId();
 
                 $mt_result = $mt_engine->get( $config );
             }
@@ -541,54 +540,54 @@ class GetContributionWorker extends AbstractWorker {
      */
     private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
-        if ( count( $matches ) > 0 ) {
+        if ( is_array($matches) and count( $matches ) > 0 ) {
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
+            $segmentTranslation =  \Translations_SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
-            foreach ( $matches as $k => $m ) {
+            // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
+            if($segmentTranslation->status === Constants_TranslationStatus::STATUS_NEW){
 
-                $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
+                $Filter = MateCatFilter::getInstance( $featureSet, $contributionStruct->getJobStruct()->source, $contributionStruct->getJobStruct()->target, [] );
 
-                if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
-                    $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
-                } else {
-                    $user = new \Users_UserStruct();
+                foreach ( $matches as $k => $m ) {
 
-                    if ( !$contributionStruct->getUser()->isAnonymous() ) {
-                        $user = $contributionStruct->getUser();
-                    }
+                    $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
-                    $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                    if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
+                        $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                    } else {
+                        $user = new \Users_UserStruct();
+
+                        if ( !$contributionStruct->getUser()->isAnonymous() ) {
+                            $user = $contributionStruct->getUser();
+                        }
+
+                        $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                             $m,
                             $contributionStruct->getJobStruct()->tm_keys,
                             $contributionStruct->getJobStruct()->owner,
                             $user->uid
-                    );
-
+                        );
+                    }
                 }
 
-            }
+                $suggestions_json_array = json_encode( $matches );
+                $match                  = $matches[ 0 ];
 
-            $suggestions_json_array = json_encode( $matches );
-            $match                  = $matches[ 0 ];
+                $data                        = [];
+                $data[ 'suggestions_array' ] = $suggestions_json_array;
+                $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+                $data[ 'translation' ]       = $match[ 'raw_translation' ];
+                $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $data                        = [];
-            $data[ 'suggestions_array' ] = $suggestions_json_array;
-            $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
-            $data[ 'translation' ]       = $match[ 'raw_translation' ];
-            $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
-
-            $where = [
+                $where = [
                     'id_segment' => $contributionStruct->segmentId,
                     'id_job'     => $contributionStruct->getJobStruct()->id,
                     'status'     => Constants_TranslationStatus::STATUS_NEW
-            ];
+                ];
 
-            \Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
-
-
+                \Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
+            }
         }
-
     }
-
 }

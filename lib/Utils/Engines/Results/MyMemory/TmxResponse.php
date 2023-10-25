@@ -6,28 +6,36 @@
  * Time: 15.33
  */
 
-class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractResponse{
+class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractResponse {
 
-    //response example: {"responseStatus":"202","responseData":{"id":495779}}
+    /*
+    {
+        "messageType": "tms-import",
+        "responseData": {
+            "uuid": "eab692c7-0872-aa4f-5abf-9cd333df48f0",
+            "id": null,
+            "creation_date": "2023-04-28 15:32:24",
+            "totals": null,
+            "completed": 0,
+            "skipped": 0,
+            "status": 0
+        },
+        "responseStatus": 202
+    }
+    */
 
     public $id;
 
-    public function __construct( $response ){
+    public function __construct( $response ) {
 
         $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
         $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
         $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';
 
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
-
-            if( !isset( $this->responseData[ 'tm' ] ) ){
-                //TMX IMPORT STATUS CARRIES A LIST and not a single element, skip the id assignment
-                $this->id = $this->responseData[ 'id' ];
-            }
-
-        }
-        else {
-            Log::doJsonLog($response);
+            $this->id = empty( $this->responseData[ 'uuid' ] ) ? $this->responseData[ 'UUID' ] : $this->responseData[ 'uuid' ];
+        } else {
+            Log::doJsonLog( $response );
         }
     }
 

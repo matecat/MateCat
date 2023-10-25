@@ -231,6 +231,11 @@ class QA {
      */
     protected $tagPositionError = [];
 
+    /**
+     * @var int
+     */
+    protected $characters_count;
+
     const ERR_NONE                    = 0;
     const ERR_COUNT                   = 1;
     const ERR_SOURCE                  = 2;
@@ -1050,6 +1055,11 @@ class QA {
         $this->id_segment = $id_segment;
     }
 
+    public function setCharactersCount( $characters_count )
+    {
+        $this->characters_count = (int)$characters_count;
+    }
+
     /**
      * @return string
      */
@@ -1417,8 +1427,8 @@ class QA {
      *
      */
     protected function _resetDOMMaps() {
-        $this->srcDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [] ];
-        $this->trgDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [] ];
+        $this->srcDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [], 'ph' => [] ];
+        $this->trgDomMap = [ 'elemCount' => 0, 'x' => [], 'bx' => [], 'ex' => [], 'g' => [], 'refID' => [], 'DOMElement' => [], 'DOMText' => [], 'ph' => [] ];
     }
 
     /**
@@ -1622,21 +1632,40 @@ class QA {
      */
     protected function _checkTagPositions() {
 
+        // a custom check was already performed?
+        $customCheckTagPositions = $this->getFeatureSet()->filter( 'checkTagPositions', self::ERR_NONE, $this );
+
+        // if a custom check was already performed run this:
+        if($customCheckTagPositions !== true){
+            $this->performTagPositionCheck($this->source_seg, $this->target_seg);
+        }
+    }
+
+    /**
+     * @param $source
+     * @param $target
+     * @param bool $performIdCheck
+     * @param bool $performTagPositionsCheck
+     */
+    public function performTagPositionCheck($source, $target, $performIdCheck = true, $performTagPositionsCheck = true)
+    {
+        $new = '/(<[a-zA-Z0-9\-\"\/ =:\_]+>|<\/([a-zA-Z]+)>)/';
+
         // extract tag from source
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
-        $complete_malformedSrcStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlSrcStruct    = $matches[ 2 ];
-        $closing_malformedXmlSrcStruct = $matches[ 3 ];
+        preg_match_all( $new, $source, $matches );
+       // $complete_malformedSrcStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
+        $open_malformedXmlSrcStruct    = $matches[ 1 ];
+        $closing_malformedXmlSrcStruct = $matches[ 2 ];
 
         // extract tag from target
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->target_seg, $matches );
-        $complete_malformedTrgStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlTrgStruct    = $matches[ 2 ];
-        $closing_malformedXmlTrgStruct = $matches[ 3 ];
+        preg_match_all( $new, $target, $matches );
+        $complete_malformedTrgStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
+        $open_malformedXmlTrgStruct    = $matches[ 1 ];
+        $closing_malformedXmlTrgStruct = $matches[ 2 ];
 
         // extract self closing tags from source and target
-        preg_match_all( '#(<[^>]+/>)#', $this->source_seg, $selfClosingTags_src );
-        preg_match_all( '#(<[^>]+/>)#', $this->target_seg, $selfClosingTags_trg );
+        preg_match_all( '#(<[^>]+/>)#', $source, $selfClosingTags_src );
+        preg_match_all( '#(<[^>]+/>)#', $target, $selfClosingTags_trg );
         $selfClosingTags_src = $selfClosingTags_src[ 1 ];
         $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
 
@@ -1674,12 +1703,14 @@ class QA {
         $this->checkContentAndAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
 
         // check for id mismatch
-        $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        if($performIdCheck){
+            $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+            $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        }
 
         // check for warnings only if there are no errors
-        if( !$this->thereAreErrors() ){
+        if( !$this->thereAreErrors() and $performTagPositionsCheck ){
             $this->checkTagPositionsAndAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
             $this->checkTagPositionsAndAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
             $this->checkTagPositionsAndAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
@@ -2060,8 +2091,10 @@ class QA {
 
             } else {
 
-                $srcNode        = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                $srcNodeContent = $srcNode->textContent;
+                $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
+                if($srcNode !== null){
+                    $srcNodeContent = $srcNode->textContent;
+                }
 
                 foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
                     if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
@@ -2071,8 +2104,9 @@ class QA {
 
                 $trgTagPos      = $trgTagReference[ 'node_idx' ];
                 $trgNode        = $trgNodeList->item( $trgTagPos );
-                $trgNodeContent = $trgNode->textContent;
-
+                if($trgNode !== null){
+                    $trgNodeContent = $trgNode->textContent;
+                }
             }
 
             /**
@@ -2100,17 +2134,19 @@ class QA {
              *
              */
             $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
-            if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
-                $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+
+            if(isset($trgNodeContent) and isset($srcNodeContent)){
+                if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
+                    $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+                }
+
+                $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
             }
-
-            $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
-            $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
         }
-
     }
 
     /**
@@ -2498,14 +2534,7 @@ class QA {
         // check size restriction
         if ( $this->id_segment ) {
 
-            $Filter = MateCatFilter::getInstance( $this->featureSet, $this->source_seg_lang, $this->target_seg_lang, \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
-
-            // remove trailing space
-            $preparedTargetToBeChecked = $Filter->fromLayer1ToLayer2( $this->getTargetSeg() );
-            $preparedTargetToBeChecked = preg_replace( '/&nbsp;/iu', ' ', $preparedTargetToBeChecked );
-            $preparedTargetToBeChecked = rtrim( $preparedTargetToBeChecked );
-
-            if ( false === $this->_filterCheckSizeRestriction( $this->id_segment, $preparedTargetToBeChecked ) ) {
+            if ( false === $this->_filterCheckSizeRestriction( $this->id_segment ) ) {
                 $this->addError( self::ERR_SIZE_RESTRICTION );
             }
 
@@ -2518,9 +2547,13 @@ class QA {
      *
      * @return bool
      */
-    private function _filterCheckSizeRestriction( $segmentId, $text ) {
+    private function _filterCheckSizeRestriction( $segmentId ) {
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION );
+        if(!$this->characters_count){
+            return true;
+        }
+
+        $limit = @Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ];
 
         if ( $limit ) {
 
@@ -2529,9 +2562,7 @@ class QA {
                 return true;
             }
 
-            $sizeRestriction = new SizeRestriction( $text, $limit->meta_value );
-
-            return $sizeRestriction->checkLimit();
+            return $this->characters_count <= $limit->meta_value;
         }
 
         return true;

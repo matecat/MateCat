@@ -1,5 +1,8 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
+import {cloneDeep} from 'lodash/lang'
+import {find, map} from 'lodash/collection'
+import {findIndex, remove} from 'lodash/array'
 
 import CattolConstants from '../../../../constants/CatToolConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
@@ -31,6 +34,7 @@ class Search extends React.Component {
         searchTarget: '',
         searchSource: '',
         previousIsTagProjectionEnabled: false,
+        isSelectedTag: false,
       },
       focus: true,
       funcFindButton: true, // true=find / false=next
@@ -41,7 +45,7 @@ class Search extends React.Component {
       searchResultsDictionary: {},
       featuredSearchResult: null,
     }
-    this.state = _.cloneDeep(this.defaultState)
+    this.state = cloneDeep(this.defaultState)
 
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleCancelClick = this.handleCancelClick.bind(this)
@@ -78,8 +82,7 @@ class Search extends React.Component {
     })
     // disable tag projection
     if (config.tag_projection_enabled === 1) {
-      UI.disableTagProjectionInJob()
-      UI.setTagProjectionChecked(false)
+      SegmentActions.changeTagProjectionStatus(false)
     }
   }
 
@@ -91,9 +94,10 @@ class Search extends React.Component {
       searchResultsDictionary: data.searchResultsDictionary,
       featuredSearchResult: data.featuredSearchResult,
       searchReturn: true,
+      isSelectedTag: false,
     })
     setTimeout(() => {
-      !_.isUndefined(this.state.occurrencesList[data.featuredSearchResult]) &&
+      !isUndefined(this.state.occurrencesList[data.featuredSearchResult]) &&
         SegmentActions.openSegment(
           this.state.occurrencesList[data.featuredSearchResult],
         )
@@ -109,6 +113,7 @@ class Search extends React.Component {
           occurrencesList: searchObject.occurrencesList,
           searchResultsDictionary: searchObject.searchResultsDictionary,
           featuredSearchResult: searchObject.featuredSearchResult,
+          isSelectedTag: false,
         })
         setTimeout(() =>
           SegmentActions.addSearchResultToSegments(
@@ -124,13 +129,13 @@ class Search extends React.Component {
 
   updateAfterReplace(sid) {
     let {searchResults} = this.state
-    let itemReplaced = _.find(searchResults, (item) => item.id === sid)
+    let itemReplaced = find(searchResults, (item) => item.id === sid)
     let total = this.state.total
     total--
     if (itemReplaced.occurrences.length === 1) {
-      _.remove(searchResults, (item) => item.id === sid)
+      remove(searchResults, (item) => item.id === sid)
     }
-    let newResultArray = _.map(searchResults, (item) => item.id)
+    let newResultArray = map(searchResults, (item) => item.id)
     const searchObject =
       SearchUtils.updateSearchObjectAfterReplace(newResultArray)
     this.setState({
@@ -202,7 +207,7 @@ class Search extends React.Component {
     setTimeout(() => {
       CatToolActions.closeSubHeader()
       SegmentActions.removeSearchResultToSegments()
-      this.setState(_.cloneDeep(this.defaultState))
+      this.setState(cloneDeep(this.defaultState))
     })
   }
 
@@ -211,7 +216,7 @@ class Search extends React.Component {
     // SearchUtils.clearSearchMarkers();
     this.resetStatusFilter()
     setTimeout(() => {
-      this.setState(_.cloneDeep(this.defaultState))
+      this.setState(cloneDeep(this.defaultState))
       SegmentActions.removeSearchResultToSegments()
     })
   }
@@ -300,17 +305,19 @@ class Search extends React.Component {
       const segment = SegmentStore.getSegmentByIdToJS(
         this.state.occurrencesList[this.state.featuredSearchResult],
       )
-      this.updateAfterReplace(segment.original_sid)
-      // let next = this.state.occurrencesList[this.state.featuredSearchResult];
-      UI.setTranslation({
-        id_segment: segment.original_sid,
-        status: segment.status,
-      })
+      if (segment) {
+        this.updateAfterReplace(segment.original_sid)
+        // let next = this.state.occurrencesList[this.state.featuredSearchResult];
+        UI.setTranslation({
+          id_segment: segment.original_sid,
+          status: segment.status,
+        })
+      }
     })
   }
 
   handleStatusChange(value) {
-    let search = _.cloneDeep(this.state.search)
+    let search = cloneDeep(this.state.search)
     search['selectStatus'] = value
     if (value === 'APPROVED-2') {
       search.revisionNumber = 2
@@ -401,15 +408,14 @@ class Search extends React.Component {
       this.props.active !== prevProps.active &&
       this.state.previousIsTagProjectionEnabled
     ) {
-      UI.enableTagProjectionInJob()
-      UI.setTagProjectionChecked(true)
+      SegmentActions.changeTagProjectionStatus(true)
     }
   }
   getResultsHtml() {
     var html = ''
     const {featuredSearchResult, searchReturn, occurrencesList, searchResults} =
       this.state
-    const segmentIndex = _.findIndex(
+    const segmentIndex = findIndex(
       searchResults,
       (item) => item.id === occurrencesList[featuredSearchResult],
     )
@@ -554,6 +560,14 @@ class Search extends React.Component {
       }
     }
   }
+  setStateReplaceButton = ({value}) => {
+    setTimeout(() => {
+      this.setState({
+        isSelectedTag: value,
+      })
+    })
+  }
+
   componentDidMount() {
     document.addEventListener('keydown', this.handelKeydownFunction, true)
     CatToolStore.addListener(
@@ -565,6 +579,10 @@ class Search extends React.Component {
       this.handleCancelClick,
     )
     SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch)
+    SegmentStore.addListener(
+      SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      this.setStateReplaceButton,
+    )
   }
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handelKeydownFunction)
@@ -579,6 +597,10 @@ class Search extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.UPDATE_SEARCH,
       this.updateSearch,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG,
+      this.setStateReplaceButton,
     )
   }
 
@@ -632,7 +654,8 @@ class Search extends React.Component {
     let replaceButtonsClass =
       this.state.search.enableReplace &&
       this.state.search.searchTarget &&
-      !this.state.funcFindButton
+      !this.state.funcFindButton &&
+      !this.state.isSelectedTag
         ? ''
         : 'disabled'
     let replaceAllButtonsClass =

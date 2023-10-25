@@ -4,7 +4,16 @@ body.manage {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   background-color: $grey5;
-  overflow: visible;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+div#manage-container {
+  overflow: auto;
+  height: calc(100% - 60px);
+  position: relative;
+  padding-top: 40px;
+  scroll-behavior: smooth;
 }
 
 .ui.icon.button {
@@ -63,7 +72,6 @@ body.manage {
 // Closing Shadow - Transitions for buttons
 
 .project-list {
-  padding-top: 100px;
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
@@ -674,7 +682,10 @@ body.manage {
                 //border: 1px solid #797979;
                 border-radius: 2px;
                 float: right;
-
+                .buy-translation-button {
+                  display: flex;
+                  align-items: center;
+                }
                 &.buy-translation {
                   display: flex;
                   align-items: center;
@@ -691,16 +702,16 @@ body.manage {
                     text-decoration: underline;
                     font-size: 14px;
                   }
+                  &.open-outsource-disabled span {
+                    color: $grey;
+                  }
                   span {
                     color: #000;
-                    font-size: 12px;
                     margin-left: 4px;
                     line-height: 1.6;
                   }
-                  img {
+                  svg {
                     margin-left: 3px;
-                    width: 20px;
-                    height: 20px;
                   }
                 }
               }

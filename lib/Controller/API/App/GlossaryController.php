@@ -3,14 +3,26 @@
 namespace API\App;
 
 use API\V2\KleinController;
+use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
+use Utils;
 use Validator\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
 
     const GLOSSARY_WRITE = 'GLOSSARY_WRITE';
     const GLOSSARY_READ  = 'GLOSSARY_READ';
+
+    /**
+     * @return array
+     */
+    private function responseOk()
+    {
+        return [
+            'success' => true
+        ];
+    }
 
     /**
      * Glossary check action
@@ -38,7 +50,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -61,7 +73,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -82,7 +94,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -96,6 +108,23 @@ class GlossaryController extends KleinController {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
 
+        $tmKeys = [];
+
+        foreach ($json['tmKeys'] as $tmKey){
+
+            // allowing only terms belonging to the owner of the job
+            if($tmKey['owner'] == true){
+                $tmKeys[] = $tmKey;
+            }
+
+            // additional terms are also visible for the other users (NOT the owner of the job) who added them
+            if($this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
+                $tmKeys[] = $tmKey;
+            }
+        }
+
+        $json['tmKeys'] = $tmKeys;
+
         $params = [
                 'action' => 'get',
                 'payload' => $json,
@@ -103,7 +132,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -131,7 +160,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -152,7 +181,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -180,7 +209,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -203,7 +232,7 @@ class GlossaryController extends KleinController {
 
         $this->enqueueWorker( self::GLOSSARY_WRITE, $params );
 
-        $this->response->json($json);
+        $this->response->json($this->responseOk());
     }
 
     /**
@@ -226,6 +255,17 @@ class GlossaryController extends KleinController {
         if(isset($json['target_language']) and isset($json['source_language'])){
             $this->validateLanguage($json['target_language']);
             $this->validateLanguage($json['source_language']);
+
+            $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $json['source_language'], $json['target_language'], [] );
+
+            // handle source and target
+            if(isset($json['source'])){
+                $json['source'] = $filter->fromLayer1ToLayer2( $json['source'] );
+            }
+
+            if(isset($json['target'])){
+                $json['target'] = $filter->fromLayer1ToLayer2( $json['target'] );
+            }
         }
 
         if(isset($json['term']['target_language']) and isset($json['term']['source_language'])){
@@ -336,7 +376,7 @@ class GlossaryController extends KleinController {
 
             $error = $validator->getErrors()[0]->error;
 
-            $this->response->code(500);
+            $this->response->code(400);
             $this->response->json([
                     'error' => $error->getMessage()
             ]);
@@ -349,31 +389,13 @@ class GlossaryController extends KleinController {
      */
     private function validateLanguage($language){
 
-        if(!in_array($language, $this->allowedLanguages())){
+        if(!in_array($language, Utils::allowedLanguages())){
             $this->response->code(500);
             $this->response->json([
                     'error' => $language . ' is not an allowed language'
             ]);
             die();
         }
-    }
-
-    /**
-     * @return array
-     */
-    private function allowedLanguages()
-    {
-        $allowedLanguages = [];
-
-        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = $lang['rfc3066code'];
-        }
-
-        return $allowedLanguages;
     }
 
     /**

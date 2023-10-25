@@ -9,8 +9,11 @@ use Segments\ContextGroupDao;
 
 class getSegmentsController extends ajaxController {
 
+    const DEFAULT_PER_PAGE = 100;
+    const MAX_PER_PAGE = 200;
+
     private $where       = 'after';
-    private $step        = 100;
+    private $step        = self::DEFAULT_PER_PAGE;
     private $data        = [];
     private $cid         = "";
     private $jid         = "";
@@ -55,6 +58,10 @@ class getSegmentsController extends ajaxController {
         $this->id_segment = $__postInput[ 'segment' ];
         $this->password   = $__postInput[ 'password' ];
         $this->where      = $__postInput[ 'where' ];
+
+        if( $this->step > self::MAX_PER_PAGE ) {
+            $this->step = self::MAX_PER_PAGE;
+        }
 
     }
 

@@ -107,7 +107,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
         );
 
         $out = array();
-        $result = $stmt->fetchAll() ;
+        $result = $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
 
         foreach($result as $row) {
 
@@ -174,12 +174,21 @@ class CategoryDao extends \DataAccess_AbstractDao {
      *
      * @return array
      */
-    private static function extractOptions($json)
-    {
-        return array_map(function($element) {
-            return [
-                'code' => $element['code']
-            ];
-        }, array_values(json_decode( $json['options'], true )));
+    private static function extractOptions( $json ) {
+
+        $map     = [];
+        $options = json_decode( $json[ 'options' ], true );
+        if ( !empty( $options ) ) {
+
+            foreach ( $options as $key => $value ) {
+                if ( $key != 'code' ) {
+                    continue;
+                }
+                $map[] = [ 'key' => $key, 'value' => $value ];
+            }
+        }
+
+        return $map;
+
     }
 }

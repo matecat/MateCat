@@ -8,12 +8,13 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.name
  * @returns {Promise<object>}
  */
-export const loadTMX = async ({key, name}) => {
+export const loadTMX = async ({key, name, uuid}) => {
   const paramsData = {
     action: 'loadTMX',
     exec: 'uploadStatus',
     tm_key: key,
     name,
+    uuid,
   }
   const formData = new FormData()
 

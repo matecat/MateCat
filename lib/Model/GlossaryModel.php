@@ -93,7 +93,13 @@ class GlossaryModel {
 
         $config = $this->addTmKeys( $config );
 
-        return $this->_TMS->get( $config )->get_matches_as_array();
+        $engine = $this->_TMS->get( $config );
+
+        if($engine instanceof Engines_EngineInterface){
+            return $engine->get_matches_as_array();
+        }
+
+        return [];
     }
 
 

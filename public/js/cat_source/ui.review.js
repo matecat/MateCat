@@ -8,14 +8,7 @@ window.Review = {
 }
 $.extend(window.UI, {
   evalOpenableSegment: function (segment) {
-    if (!(segment.status === 'NEW' || segment.status === 'DRAFT')) return true
-
-    if (UI.projectStats && UI.projectStats.TRANSLATED_PERC === 0) {
-      alertNoTranslatedSegments()
-    } else {
-      alertNotTranslatedYet(segment.sid)
-    }
-    return false
+    return !(segment.status === 'NEW' || segment.status === 'DRAFT')
   },
 })
 
@@ -28,13 +21,12 @@ if (config.enableReview && config.isReview) {
        * Each revision overwrite this function
        */
       clickOnApprovedButton: function (segment, goToNextNotApproved) {
-        var sid = segment.sid
-        SegmentActions.removeClassToSegment(sid, 'modified')
+        SegmentActions.removeClassToSegment(segment.sid, 'modified')
         var afterApproveFn = function () {
           if (goToNextNotApproved) {
             UI.openNextTranslated()
           } else {
-            UI.gotoNextSegment(sid)
+            UI.gotoNextSegment(segment.sid)
           }
         }
 

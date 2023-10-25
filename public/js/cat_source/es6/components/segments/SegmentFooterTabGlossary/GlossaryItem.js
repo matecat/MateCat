@@ -82,23 +82,17 @@ export const GlossaryItem = ({
             <span>{metadata.definition}</span>
           </div>
           {metadata.domain && (
-            <LabelWithTooltip
-              className="glossary_badge"
-              tooltipPosition="bottom"
-            >
+            <LabelWithTooltip className="glossary_badge">
               <span>{metadata.domain}</span>
             </LabelWithTooltip>
           )}
           {metadata.subdomain && (
-            <LabelWithTooltip
-              className="glossary_badge"
-              tooltipPosition="bottom"
-            >
+            <LabelWithTooltip className="glossary_badge">
               <span>{metadata.subdomain}</span>
             </LabelWithTooltip>
           )}
           <div className="glossary_source_details">
-            <LabelWithTooltip tooltipPosition="bottom">
+            <LabelWithTooltip className="glossary_source_tooltip">
               <div className="glossary_source">
                 <b>
                   {metadata.key_name
@@ -157,7 +151,7 @@ export const GlossaryItem = ({
                 highlight && !highlight.isTarget
                   ? ` glossary_word--highlight glossary_word--highlight-${highlight.type}`
                   : ''
-              }`}
+              } source_label`}
             >{`${source.term} `}</span>
             {source.sentence && (
               <div

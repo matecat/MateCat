@@ -11,8 +11,7 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window, document, URL, webkitURL, FileReader */
-
-(function ( factory ) {
+(function (factory ) {
     'use strict';
     if ( typeof define === 'function' && define.amd ) {
         // Register as an anonymous AMD module:
@@ -104,7 +103,7 @@
                     if ( !data.isValidated ) {
                         $( '.cancel button', data.context ).click( function () {
                             if ( UI.checkAnalyzability() ) {
-                                UI.enableAnalyze();
+                                UI.enableAnalyzeButton(true)
                             }
                         } );
                     }
@@ -327,7 +326,7 @@
                 if ( !match ) {
                     //console.log( error );
                     _deleteRow( data.context );
-                    _deleteRow($('.error-message'));
+                    UI.hideUploadErrors()
                     return false;
                 }
 

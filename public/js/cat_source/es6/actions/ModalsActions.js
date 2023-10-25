@@ -1,5 +1,4 @@
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
-import DQFModal from '../components/modals/DQFModal'
 import SplitJobModal from '../components/modals/SplitJob'
 import CreateTeamModal from '../components/modals/CreateTeam'
 import ModifyTeamModal from '../components/modals/ModifyTeam'
@@ -31,7 +30,7 @@ let ModalsActions = {
       team: team,
       hideChangeName: hideChangeName,
     }
-    this.showModalComponent(ModifyTeamModal, props, 'Modify Team')
+    this.showModalComponent(ModifyTeamModal, props, 'Manage Team')
   },
 
   openSplitJobModal: function (job, project, callback) {
@@ -44,12 +43,12 @@ let ModalsActions = {
     this.showModalComponent(SplitJobModal, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {
-    var props = {
+    const props = {
       text:
         'This will cause the merging of all chunks in only one job. ' +
         'This operation cannot be canceled.',
       successText: 'Continue',
-      successCallback: function () {
+      successCallback: () => {
         mergeJobChunks(project, job).then(function () {
           if (successCallback) {
             successCallback.call()
@@ -58,20 +57,13 @@ let ModalsActions = {
         this.onCloseModal()
       },
       cancelText: 'Cancel',
-      cancelCallback: function () {
+      cancelCallback: () => {
         this.onCloseModal()
       },
     }
     this.showModalComponent(ConfirmMessageModal, props, 'Confirmation required')
   },
 
-  openDQFModal: function () {
-    var props = {
-      metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
-    }
-    var style = {width: '670px', maxWidth: '670px'}
-    this.showModalComponent(DQFModal, props, 'DQF Preferences', style)
-  },
   showDownloadWarningsModal: function (successCallback, cancelCallback) {
     ModalsActions.showModalComponent(
       ConfirmMessageModal,

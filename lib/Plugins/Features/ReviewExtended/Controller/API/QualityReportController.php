@@ -24,6 +24,9 @@ use QualityReport\QualityReportSegmentModel;
 
 class QualityReportController extends BaseChunkController {
 
+    const DEFAULT_PER_PAGE = 20;
+    const MAX_PER_PAGE = 200;
+
     /**
      * @var Projects_ProjectStruct
      */
@@ -82,7 +85,11 @@ class QualityReportController extends BaseChunkController {
         }
 
         if ( empty( $step ) ) {
-            $step = 20;
+            $step = self::DEFAULT_PER_PAGE;
+        }
+
+        if( $step > self::MAX_PER_PAGE ) {
+            $step = self::MAX_PER_PAGE;
         }
 
         $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
@@ -144,12 +151,12 @@ class QualityReportController extends BaseChunkController {
 
         $filter_query = http_build_query( [ 'filter' => array_filter( empty( $filter ) ? [] : $filter ) ] );
         if ( $this->chunk->job_last_segment > end( $segments_id ) ) {
-            $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
+            $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != self::DEFAULT_PER_PAGE ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query :
                             null );
         }
 
         if ( $this->chunk->job_first_segment < reset( $segments_id ) ) {
-            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty(
+            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) ) . ( $step != self::DEFAULT_PER_PAGE ? "&step=" . $step : null ) . ( !empty(
                     $filter_query ) ? "&" . $filter_query : null );
         }
 

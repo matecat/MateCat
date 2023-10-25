@@ -2,6 +2,7 @@
 
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Validator\IsJobRevisionValidatorObject;
 
@@ -270,6 +271,13 @@ class CatUtils {
      */
     protected static function _getStatsForJob( $job_stats ) {
 
+        $job_stats[ 'TOTAL' ] = self::normalizeNumber($job_stats[ 'TOTAL' ]);
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($job_stats[ 'TRANSLATED' ]);
+        $job_stats[ 'APPROVED' ] = self::normalizeNumber($job_stats[ 'APPROVED' ]);
+        $job_stats[ 'REJECTED' ] = self::normalizeNumber($job_stats[ 'REJECTED' ]);
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($job_stats[ 'TRANSLATED' ]);
+        $job_stats[ 'DRAFT' ] = self::normalizeNumber($job_stats[ 'DRAFT' ]);
+
         $job_stats[ 'PROGRESS' ]             = ( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ] );
         $job_stats[ 'TOTAL_FORMATTED' ]      = number_format( $job_stats[ 'TOTAL' ], 0, ".", "," );
         $job_stats[ 'PROGRESS_FORMATTED' ]   = number_format( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ], 0, ".", "," );
@@ -284,17 +292,11 @@ class CatUtils {
         $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
         $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        if ( $job_stats[ 'TRANSLATED_PERC' ] > 100 ) {
-            $job_stats[ 'TRANSLATED_PERC' ] = 100;
-        }
-
-        if ( $job_stats[ 'PROGRESS_PERC' ] > 100 ) {
-            $job_stats[ 'PROGRESS_PERC' ] = 100;
-        }
-
-        if ( $job_stats[ 'DRAFT_PERC' ] < 0 ) {
-            $job_stats[ 'DRAFT_PERC' ] = 0;
-        }
+        $job_stats[ 'APPROVED_PERC' ] = self::normalizePercent($job_stats[ 'APPROVED_PERC' ]);
+        $job_stats[ 'REJECTED_PERC' ] = self::normalizePercent($job_stats[ 'REJECTED_PERC' ]);
+        $job_stats[ 'DRAFT_PERC' ] = self::normalizePercent($job_stats[ 'DRAFT_PERC' ]);
+        $job_stats[ 'TRANSLATED_PERC' ] = self::normalizePercent($job_stats[ 'TRANSLATED_PERC' ]);
+        $job_stats[ 'PROGRESS_PERC' ] = self::normalizePercent($job_stats[ 'PROGRESS_PERC' ]);
 
         $temp = [
                 $job_stats[ 'TRANSLATED_PERC' ],
@@ -347,6 +349,36 @@ class CatUtils {
     }
 
     /**
+     * @param $number
+     * @return int
+     */
+    public static function normalizeNumber($number)
+    {
+        if ( $number < 0 ) {
+            return 0;
+        }
+
+        return $number;
+    }
+
+    /**
+     * @param $percent
+     * @return int
+     */
+    public static function normalizePercent($percent)
+    {
+        if ( $percent < 0 ) {
+            return 0;
+        }
+
+        if ( $percent > 100 ) {
+            return 100;
+        }
+
+        return $percent;
+    }
+
+    /**
      * @param WordCount_Struct $wCount
      *
      * @param bool             $performanceEstimation
@@ -368,21 +400,21 @@ class CatUtils {
     /**
      * Remove Tags and treat numbers as one word
      *
-     * @param                 $string
-     * @param string          $source_lang
-     *
-     * @param MateCatFilter|null     $Filter
+     * @param                    $string
+     * @param string             $source_lang
+     * @param MateCatFilter|null $Filter
      *
      * @return mixed|string
      * @throws \Exception
      */
-    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null ) {
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null) {
 
         if ( $Filter === null ) {
             $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang, null, []);
         }
 
         $string = $Filter->fromLayer0ToLayer1( $string );
+        $string = self::replacePlaceholders($string);
 
         //return empty on string composed only by spaces
         //do nothing
@@ -446,18 +478,40 @@ class CatUtils {
 
         }
 
+        return $string;
+    }
+
+    /**
+     * @param $string
+     * @return string
+     */
+    private static function replacePlaceholders($string)
+    {
+        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'].+?["\'] ?) ?(equiv-text=["\'].+?["\'] ?)/>|ui';
+
+        preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER );
+
+        foreach ($matches as $match){
+            $ctype = trim($match[2]);
+            $ctype = str_replace('"', '', $ctype);
+            $ctype = str_replace('ctype=', '', $ctype);
+
+            if($ctype !== CTypeEnum::HTML){
+                $string = str_replace($match[0], 'P', $string);
+            } else {
+                $string = str_replace($match[0], '', $string);
+            }
+        }
 
         return $string;
-
     }
 
     /**
      * Count words in a string
      *
-     * @param                 $string
-     * @param string          $source_lang
-     *
-     * @param MateCatFilter|null     $filter
+     * @param                    $string
+     * @param string             $source_lang
+     * @param MateCatFilter|null $filter
      *
      * @return float|int
      * @throws Exception
@@ -500,11 +554,10 @@ class CatUtils {
 
 
         //check for a string made of spaces only, after the string was cleaned
-        $string_with_no_spaces = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $string );
+        $string_with_no_spaces = preg_replace( '#[\p{Z}\p{C}]+#u', "", $string );
         if ( $string_with_no_spaces == "" ) {
             return 0;
         }
-
 
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
             $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
@@ -824,19 +877,15 @@ class CatUtils {
     public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
         $job_stats                 = [];
         $job_stats[ 'id' ]         = $wCount->getIdJob();
-        $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
-        $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
-        $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
-        $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
-
-        //sometimes new_words + draft_words < 0 (why?). If it happens, set draft words to 0
-        if ( $job_stats[ 'DRAFT' ] < 0 ) {
-            $job_stats[ 'DRAFT' ] = 0;
-        }
+        $job_stats[ 'DRAFT' ]      = self::normalizeNumber($wCount->getNewWords()) + self::normalizeNumber($wCount->getDraftWords());
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($wCount->getTranslatedWords());
+        $job_stats[ 'APPROVED' ]   = self::normalizeNumber($wCount->getApprovedWords());
+        $job_stats[ 'REJECTED' ]   = self::normalizeNumber($wCount->getRejectedWords());
 
         //avoid division by zero warning
         $total                = $wCount->getTotal();
         $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
+        $job_stats[ 'TOTAL' ] = self::normalizeNumber(  $job_stats[ 'TOTAL' ] );
 
         return $job_stats;
     }

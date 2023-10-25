@@ -1,11 +1,14 @@
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import CommonUtils from '../utils/commonUtils'
 
 let SSE = {
   init: function () {
     // TODO configure this
     this.baseURL = config.sse_base_url
+    this.clientConnected = false
+    this.disconnect = false
     this.initEvents()
   },
   getSource: function (what) {
@@ -38,8 +41,13 @@ let SSE = {
   },
   initEvents: function () {
     $(document).on('sse:ack', function (ev, message) {
+      SSE.clientConnected = true
       config.id_client = message.data.clientId
-      CatToolActions.clientConntected(message.data.clientId)
+      CatToolActions.clientConnected(message.data.clientId)
+      if (SSE.disconnect) {
+        SSE.disconnect = false
+        CatToolActions.clientReconnect()
+      }
     })
     $(document).on('sse:concordance', function (ev, message) {
       SegmentActions.setConcordanceResult(message.data.id_segment, message.data)
@@ -52,9 +60,21 @@ let SSE = {
       )
     })
     $(document).on('sse:glossary_get', function (ev, message) {
+      if (!Array.isArray(message.data.terms)) {
+        const trackingMessage = `Glossary GET terms is not Array: ${
+          message.data.terms
+        } / message: ${JSON.stringify(message)}`
+        CommonUtils.dispatchTrackingError(trackingMessage)
+      }
+
+      const terms = Array.isArray(message.data.terms) ? message.data.terms : []
+      const blacklistedTerms = Array.isArray(message.data.blacklisted_terms)
+        ? message.data.blacklisted_terms
+        : []
+
       SegmentActions.setGlossaryForSegment(message.data.id_segment, [
-        ...message.data.terms,
-        ...message.data.blacklisted_terms.map((term) => ({
+        ...terms,
+        ...blacklistedTerms.map((term) => ({
           ...term,
           isBlacklist: true,
         })),
@@ -177,6 +197,14 @@ let SSE = {
         }
       })
     }
+    $(document).on('sse:ai_assistant_explain_meaning', function (ev, message) {
+      SegmentActions.aiSuggestion({
+        sid: message.data.id_segment,
+        suggestion: message.data.message,
+        isCompleted: message.data.completed,
+        hasError: Boolean(message.data?.has_error),
+      })
+    })
   },
 
   Message: function (data) {
@@ -197,6 +225,7 @@ let SSE = {
       'glossary_search',
       'glossary_check',
       'glossary_keys',
+      'ai_assistant_explain_meaning',
     ]
     this.eventIdentifier = 'sse:' + this._type
 
@@ -206,10 +235,11 @@ let SSE = {
   },
 }
 
-let NOTIFICATIONS = {
+const NOTIFICATIONS = {
   start: function () {
     SSE.init()
     this.source = SSE.getSource('notifications')
+
     this.addEvents()
   },
   restart: function () {
@@ -220,7 +250,7 @@ let NOTIFICATIONS = {
     var self = this
     this.source.addEventListener(
       'message',
-      function (e) {
+      (e) => {
         var message = new SSE.Message(JSON.parse(e.data))
         if (message.isValid()) {
           $(document).trigger(message.eventIdentifier, message)
@@ -231,8 +261,19 @@ let NOTIFICATIONS = {
 
     this.source.addEventListener(
       'error',
-      function () {
+      () => {
         console.error('SSE: server disconnect')
+        if (SSE.clientConnected) {
+          SSE.clientConnected = false
+          SSE.disconnect = true
+          setTimeout(() => {
+            if (!SSE.clientConnected) {
+              config.id_client = undefined
+              CatToolActions.clientConnected()
+            }
+          }, 5000)
+        }
+
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -244,7 +285,8 @@ let NOTIFICATIONS = {
       },
       false,
     )
+    this.source.addEventListener('open', () => {}, false)
   },
 }
 
-module.exports = NOTIFICATIONS
+export default NOTIFICATIONS

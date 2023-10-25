@@ -36,7 +36,7 @@ class ProductionSummary extends React.Component {
       '<code>(Tot. error points * 1000) / reviewed words</code></br>' +
       'Reviewed words =  raw words - unmodified ICE matches</br></br>' +
       'The score is compared to a max. amount of tolerated error points.' +
-      '<a style="text-decoration: underline" href="https://site.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
+      '<a style="text-decoration: underline" href="https://guides.matecat.com/quality-report-in-matecat" target="_blank">Learn more</a>' +
       '</div>'
     const score = parseFloat(qualitySummary.get('score'))
     const limit = qualitySummary.get('passfail')
@@ -120,21 +120,6 @@ class ProductionSummary extends React.Component {
                   }}
                 />
 
-                <a
-                  className="approved-bar translate-tooltip"
-                  data-variation="tiny"
-                  data-html={
-                    'Approved ' +
-                    Math.round((approvedWords / stats.get('total')) * 100) +
-                    '%'
-                  }
-                  style={{
-                    width:
-                      Math.round((approvedWords / stats.get('total')) * 100) +
-                      '%',
-                  }}
-                />
-
                 {approvedWords2ndPass ? (
                   <a
                     className="approved-bar-2nd-pass translate-tooltip"
@@ -154,6 +139,21 @@ class ProductionSummary extends React.Component {
                     }}
                   />
                 ) : null}
+
+                <a
+                  className="approved-bar translate-tooltip"
+                  data-variation="tiny"
+                  data-html={
+                    'Approved ' +
+                    Math.round((approvedWords / stats.get('total')) * 100) +
+                    '%'
+                  }
+                  style={{
+                    width:
+                      Math.round((approvedWords / stats.get('total')) * 100) +
+                      '%',
+                  }}
+                />
 
                 <a
                   className="translated-bar translate-tooltip"

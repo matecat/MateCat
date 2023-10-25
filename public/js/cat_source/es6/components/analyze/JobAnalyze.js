@@ -1,22 +1,22 @@
 import React from 'react'
-import _ from 'lodash'
+import {size} from 'lodash'
+import {map} from 'lodash/collection'
 
 import JobAnalyzeHeader from './JobAnalyzeHeader'
 import JobTableHeader from './JobTableHeader'
 import ChunkAnalyze from './ChunkAnalyze'
-import AnalyzeConstants from '../../constants/AnalyzeConstants'
-import AnalyzeStore from '../../stores/AnalyzeStore'
 
 class JobAnalyze extends React.Component {
   constructor(props) {
     super(props)
     this.showDetails = this.showDetails.bind(this)
+    setTimeout(() => this.showDetails())
   }
 
   getChunks() {
     let self = this
     if (this.props.chunks) {
-      return _.map(this.props.jobInfo.chunks, function (item, index) {
+      return map(this.props.jobInfo.chunks, function (item, index) {
         let files = self.props.chunks.get(item.jpassword)
         index++
         let job = self.props.project.get('jobs').find(function (jobElem) {
@@ -32,7 +32,7 @@ class JobAnalyze extends React.Component {
             total={self.props.total.get(item.jpassword)}
             index={index}
             chunkInfo={item}
-            chunksSize={_.size(self.props.jobInfo.chunks)}
+            chunksSize={size(self.props.jobInfo.chunks)}
           />
         )
       })
@@ -40,8 +40,8 @@ class JobAnalyze extends React.Component {
     return ''
   }
 
-  showDetails(idJob) {
-    if (idJob == this.props.idJob) {
+  showDetails() {
+    if (this.props.jobToScroll == this.props.idJob && this.props.showAnalysis) {
       this.scrollElement()
     }
   }
@@ -51,9 +51,9 @@ class JobAnalyze extends React.Component {
     let self = this
     if (itemComponent) {
       this.container.classList.add('show-details')
-      $('html, body').animate(
+      $('#analyze-container').animate(
         {
-          scrollTop: $(itemComponent).offset().top,
+          scrollTop: $(itemComponent).offset().top - 200,
         },
         500,
       )
@@ -69,18 +69,15 @@ class JobAnalyze extends React.Component {
     }
   }
 
-  componentDidMount() {
-    AnalyzeStore.addListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails)
-  }
-
-  componentWillUnmount() {
-    AnalyzeStore.removeListener(AnalyzeConstants.SHOW_DETAILS, this.showDetails)
-  }
-
   shouldComponentUpdate() {
     return true
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.jobToScroll !== this.props.jobToScroll) {
+      this.showDetails()
+    }
+  }
   render() {
     return (
       <div className="job ui grid">

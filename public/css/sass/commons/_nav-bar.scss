@@ -1,6 +1,6 @@
 header {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  position: fixed;
+  position: relative;
   width: 100%;
   z-index: 12;
   margin: 0;
@@ -447,12 +447,6 @@ header {
     line-height: 1.25;
     margin-left: 24px;
     border: none;
-  }
-
-  li {
-    a {
-      font-size: 16px !important;
-    }
   }
 }
 

@@ -3,7 +3,6 @@ import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
-import Customizations from './es6/utils/customizations'
 
 $.extend(window.UI, {
   start: function () {
@@ -12,29 +11,27 @@ $.extend(window.UI, {
     // of SegmentFilter, see below.
     UI.firstLoad = true
     UI.body = $('body')
-    UI.checkCrossLanguageSettings()
     CommonUtils.setBrowserHistoryBehavior()
-    $('article').each(function () {
-      APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30)
-    })
 
     // page content mount point
-    const mountPoint = createRoot($('.page-content')[0])
-    mountPoint.render(<CatTool />)
+    const targetPageContent = document.getElementsByClassName('page-content')[0]
+    if (targetPageContent) {
+      const mountPoint = createRoot(targetPageContent)
+      mountPoint.render(<CatTool />)
+    }
   },
   init: function () {
     this.isMac = navigator.platform == 'MacIntel' ? true : false
     this.shortcutLeader = this.isMac ? 'CMD' : 'CTRL'
 
     this.initStart = new Date()
-    this.version = 'x.x.x'
+    // this.version = 'x.x.x'
     this.numContributionMatchesResults = 3
     this.numMatchesResults = 10
     this.editarea = ''
     this.byButton = false
     this.displayedMessages = []
 
-    Customizations.loadCustomization()
     $('html').trigger('init')
     this.warningStopped = false
     this.unsavedSegmentsToRecover = []
@@ -42,9 +39,7 @@ $.extend(window.UI, {
     this.setTranslationTail = []
     this.executingSetTranslation = []
 
-    this.checkVersion()
-    this.initTM()
-    this.initAdvanceOptions()
+    //this.checkVersion()
 
     // SET EVENTS
     this.setEvents()

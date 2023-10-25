@@ -17,8 +17,6 @@ class createProjectController extends ajaxController {
     private $mt_engine;
     private $tms_engine = 1;  //1 default MyMemory
     private $private_tm_key;
-    private $private_tm_user;
-    private $private_tm_pass;
     private $lang_detect_files;
     private $disable_tms_engine_flag;
     private $pretranslate_100;
@@ -53,9 +51,6 @@ class createProjectController extends ajaxController {
                 'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-
-                'private_tm_user'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'private_tm_pass'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'lang_detect_files' => [
                         'filter'  => FILTER_CALLBACK,
                         'options' => "Utils::filterLangDetectArray"
@@ -128,8 +123,6 @@ class createProjectController extends ajaxController {
         $this->mt_engine               = ( $this->postInput[ 'mt_engine' ] != null ? $this->postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
         $this->disable_tms_engine_flag = $this->postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
-        $this->private_tm_user         = $this->postInput[ 'private_tm_user' ];
-        $this->private_tm_pass         = $this->postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -206,40 +199,8 @@ class createProjectController extends ajaxController {
             $this->project_name = $default_project_name;
         }
 
-        $sourceLangHistory = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
-        $targetLangHistory = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
-
         // SET SOURCE COOKIE
-
-        if ( $sourceLangHistory == \Constants::EMPTY_VAL ) {
-            $sourceLangHistory = "";
-        }
-        $sourceLangAr = explode( '||', urldecode( $sourceLangHistory ) );
-
-        if ( ( $key = array_search( $this->source_lang, $sourceLangAr ) ) !== false ) {
-            unset( $sourceLangAr[ $key ] );
-        }
-        array_unshift( $sourceLangAr, $this->source_lang );
-        if ( $sourceLangAr == \Constants::EMPTY_VAL ) {
-            $sourceLangAr = "";
-        }
-        $newCookieVal = "";
-        $sourceLangAr = array_slice( $sourceLangAr, 0, 3 );
-        $sourceLangAr = array_reverse( $sourceLangAr );
-
-        foreach ( $sourceLangAr as $key => $link ) {
-            if ( $sourceLangAr[ $key ] == '' ) {
-                unset( $sourceLangAr[ $key ] );
-            }
-        }
-
-        foreach ( $sourceLangAr as $lang ) {
-            if ( $lang != "" ) {
-                $newCookieVal = $lang . "||" . $newCookieVal;
-            }
-        }
-
-        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal,
+        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->source_lang,
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
@@ -251,36 +212,7 @@ class createProjectController extends ajaxController {
         );
 
         // SET TARGET COOKIE
-
-        if ( $targetLangHistory == \Constants::EMPTY_VAL ) {
-            $targetLangHistory = "";
-        }
-        $targetLangAr = explode( '||', urldecode( $targetLangHistory ) );
-
-        if ( ( $key = array_search( $this->target_lang, $targetLangAr ) ) !== false ) {
-            unset( $targetLangAr[ $key ] );
-        }
-        array_unshift( $targetLangAr, $this->target_lang );
-        if ( $targetLangAr == \Constants::EMPTY_VAL ) {
-            $targetLangAr = "";
-        }
-        $newCookieVal = "";
-        $targetLangAr = array_slice( $targetLangAr, 0, 3 );
-        $targetLangAr = array_reverse( $targetLangAr );
-
-        foreach ( $targetLangAr as $key => $link ) {
-            if ( $targetLangAr[ $key ] == '' ) {
-                unset( $targetLangAr[ $key ] );
-            }
-        }
-
-        foreach ( $targetLangAr as $lang ) {
-            if ( $lang != "" ) {
-                $newCookieVal = $lang . "||" . $newCookieVal;
-            }
-        }
-
-        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal,
+        CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, $this->target_lang,
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
@@ -338,8 +270,6 @@ class createProjectController extends ajaxController {
 
         $projectStructure[ 'project_name' ]                 = $this->project_name;
         $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]              = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]              = $this->private_tm_pass;
         $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
         $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata

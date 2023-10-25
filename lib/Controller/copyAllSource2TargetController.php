@@ -76,20 +76,22 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $this->_saveEventsAndUpdateTranslations( $job_data->id );
+        $this->_saveEventsAndUpdateTranslations( $job_data->id, $job_data->password );
     }
 
     /**
      * @param $job_id
+     * @param $password
      *
      * @throws ReflectionException
+     * @throws \Exceptions\NotFoundException
      */
-    private function _saveEventsAndUpdateTranslations( $job_id ) {
+    private function _saveEventsAndUpdateTranslations( $job_id, $password ) {
         if ( !empty( $this->result[ 'errors' ] ) ) {
             return;
         }
 
-        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->pass );
+        $job_data = Jobs_JobDao::getByIdAndPassword( $job_id, $password );
 
         if ( empty( $job_data ) ) {
             $errorCode = -3;
@@ -102,7 +104,7 @@ class copyAllSource2TargetController extends ajaxController {
         $database = Database::obtain();
         $database->begin();
 
-        $chunk    = Chunks_ChunkDao::getByJobID( $job_id )[ 0 ];
+        $chunk    = Chunks_ChunkDao::getByIdAndPassword( $job_id, $password );
         $features = $chunk->getProject()->getFeaturesSet();
 
         $batchEventCreator = new TranslationEventsHandler( $chunk );

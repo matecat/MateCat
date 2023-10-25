@@ -1,10 +1,14 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: fregini
  * Date: 09/09/16
  * Time: 10:17
  */
+
+use Klein\Klein;
+global $klein;
 
 $klein->respond( '/utils/pee', function () {
 
@@ -27,7 +31,7 @@ $klein->respond( '/utils/pee', function () {
 route( '/api/app/teams/[i:id_team]/members/public',                                 'GET',  '\API\App\TeamPublicMembersController', 'publicList' );
 
 route( '/api/app/user',                                                             'GET',  'API\App\UserController', 'show' );
-route( '/api/app/user/password',                                                    'POST', 'API\App\UserController', 'updatePassword' );
+route( '/api/app/user/password/change',                                             'POST', 'API\App\UserController', 'changePasswordAsLoggedUser' );
 
 route( '/api/app/user/login',                                                       'POST', 'API\App\LoginController', 'login' );
 route( '/api/app/user/logout',                                                      'POST', 'API\App\LoginController', 'logout' );
@@ -35,10 +39,11 @@ route( '/api/app/user/logout',                                                  
 route( '/api/app/user',                                                             'POST', 'API\App\SignupController', 'create' );
 route( '/api/app/user/metadata',                                                    'POST', 'API\App\UserMetadataController', 'update' );
 
+route( '/api/app/user/confirm/[:token]',                                            'GET',  'API\App\SignupController', 'confirm' );
 route( '/api/app/user/resend_email_confirm',                                        'POST', 'API\App\SignupController', 'resendEmailConfirm' );
 route( '/api/app/user/forgot_password',                                             'POST', 'API\App\SignupController', 'forgotPassword' );
 route( '/api/app/user/password_reset/[:token]',                                     'GET',  'API\App\SignupController', 'authForPasswordReset' );
-route( '/api/app/user/confirm/[:token]',                                            'GET',  'API\App\SignupController', 'confirm' );
+route( '/api/app/user/password',                                                    'POST', 'API\App\SignupController', 'setNewPassword' );
 route( '/api/app/user/redeem_project',                                              'POST', 'API\App\SignupController', 'redeemProject' );
 
 route( '/api/app/connected_services/[:id_service]/verify',                          'GET',  'ConnectedServices\ConnectedServicesController', 'verify' );
@@ -48,13 +53,13 @@ route( '/api/app/teams/members/invite/[:jwt]',                                  
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
 
-$klein->with('/api/app/dqf', function(\Klein\Klein $klein) {
-    route('/login/check',                                     'GET',  'Features\Dqf\Controller\API\LoginCheckController', 'check');
-    route('/login',                                           'GET',  'Features\Dqf\Controller\API\LoginController', 'login');
-    route('/jobs/[:id_job]/[:password]/assign',               'POST', 'Features\Dqf\Controller\API\GenericController', 'assignProject' );
-    route('/jobs/[:id_job]/[:password]/[:page]/assignment/revoke', 'DELETE', 'Features\Dqf\Controller\API\GenericController', 'revokeAssignment' );
-    route('/projects/[:id_project]/[:password]/assignments',  'GET', 'Features\Dqf\Controller\API\AssignmentsController', 'listAssignments' );
-    route('/user/metadata',                                   'DELETE', 'Features\Dqf\Controller\API\GenericController', 'clearCredentials' );
+$klein->with('/api/app/dqf', function( Klein $klein ) {
+    route('/login/check',                                           'GET',  'Features\Dqf\Controller\API\LoginCheckController', 'check');
+    route('/login',                                                 'GET',  'Features\Dqf\Controller\API\LoginController', 'login');
+    route('/jobs/[:id_job]/[:password]/assign',                     'POST', 'Features\Dqf\Controller\API\GenericController', 'assignProject' );
+    route('/jobs/[:id_job]/[:password]/[:page]/assignment/revoke',  'DELETE', 'Features\Dqf\Controller\API\GenericController', 'revokeAssignment' );
+    route('/projects/[:id_project]/[:password]/assignments',        'GET', 'Features\Dqf\Controller\API\AssignmentsController', 'listAssignments' );
+    route('/user/metadata',                                         'DELETE', 'Features\Dqf\Controller\API\GenericController', 'clearCredentials' );
 });
 
 
@@ -66,23 +71,24 @@ route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',    
 route( '/api/app/heartbeat/ping',                                                   'GET', '\API\App\HeartBeat', 'ping' ) ;
 
 $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
-    route( '/quality-report', 'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
-    route( '/quality-report/segments', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
+    route( '/quality-report',           'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
+    route( '/quality-report/segments',  'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
 });
 
-route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
-route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST',  'API\App\FilesController', 'segments' );
+route( '/api/app/jobs/[:id_job]/[:password]/stats',     'GET',  'API\App\StatsController', 'stats' );
+route( '/api/app/jobs/[:id_job]/[:password]/segments',  'POST',  'API\App\FilesController', 'segments' );
 
 $klein->with( '/api/app/api-key', function () {
-    route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );
-    route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
-    route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
+    route( '/create',   'POST', '\API\App\ApiKeyController', 'create' );
+    route( '/show',     'GET', '\API\App\ApiKeyController', 'show' );
+    route( '/delete',   'DELETE', '\API\App\ApiKeyController', 'delete' );
 } );
 
-route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET',  'API\App\SegmentAnalysisController', 'project' );
+route( '/api/app/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\App\SegmentAnalysisController', 'project' );
+route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\App\SegmentAnalysisController', 'job' );
 
 route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
-route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'job' );
+route( '/api/app/jobs/[:id_job]/[:password]/quality-framework',         'GET',  'API\App\QualityFrameworkController', 'job' );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
@@ -100,3 +106,6 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_set', 'POST', '\API\App\GlossaryController', 'set' );
     route( '/_update', 'POST', '\API\App\GlossaryController', 'update' );
 } );
+
+// AI Assistant
+route( '/api/app/ai-assistant', 'POST',  'API\App\AIAssistantController', 'index' );

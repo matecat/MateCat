@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use TMS\TMSService;
 
 /**
  * Created by PhpStorm.

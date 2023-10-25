@@ -1,10 +1,11 @@
 import React, {useState} from 'react'
-import _ from 'lodash'
+import {round} from 'lodash/math'
 
 import CatToolStore from '../../stores/CatToolStore'
-import CattoolConstants from '../../constants/CatToolConstants'
+import CatToolConstants from '../../constants/CatToolConstants'
 import TooltipInfo from '../segments/TooltipInfo/TooltipInfo.component'
 import SegmentActions from '../../actions/SegmentActions'
+import {CookieConsent} from '../common/CookieConsent'
 
 const transformStats = (stats) => {
   let reviewWordsSecondPass
@@ -33,7 +34,7 @@ const transformStats = (stats) => {
         (parseFloat(reviewedWords.advancement_wc) * 100) / stats.TOTAL
       approvePerc =
         approvePerc > stats.APPROVED_PERC ? stats.APPROVED_PERC : approvePerc
-      a_perc_formatted = approvePerc < 0 ? 0 : _.round(approvePerc, 1)
+      a_perc_formatted = approvePerc < 0 ? 0 : round(approvePerc, 1)
       a_perc = approvePerc
     }
 
@@ -49,12 +50,12 @@ const transformStats = (stats) => {
           ? stats.APPROVED_PERC
           : approvePerc2ndPass
       a_perc_2nd_formatted =
-        approvePerc2ndPass < 0 ? 0 : _.round(approvePerc2ndPass, 1)
+        approvePerc2ndPass < 0 ? 0 : round(approvePerc2ndPass, 1)
       a_perc_2nd = approvePerc2ndPass
       revise_todo_formatted =
         config.revisionNumber === 2
           ? revise_todo_formatted +
-            _.round(parseFloat(reviewedWords.advancement_wc))
+            round(parseFloat(reviewedWords.advancement_wc))
           : revise_todo_formatted
     }
   }
@@ -90,18 +91,27 @@ export const CattolFooter = ({
     progressBar: false,
     todo: false,
   })
-  const sourceLang = languagesArray.find((item) => item.code == source).name
-  const targetLang = languagesArray.find((item) => item.code == target).name
+
+  let sourceLang = languagesArray.find((item) => item.code == source)?.name
+  let targetLang = languagesArray.find((item) => item.code == target)?.name
+
+  if (!sourceLang) {
+    sourceLang = source
+  }
+
+  if (!targetLang) {
+    targetLang = target
+  }
 
   React.useEffect(() => {
     const listener = (stats) => {
       setStats(transformStats(stats))
     }
 
-    CatToolStore.addListener(CattoolConstants.SET_PROGRESS, listener)
+    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, listener)
 
     return () => {
-      CatToolStore.removeListener(CattoolConstants.SET_PROGRESS, listener)
+      CatToolStore.removeListener(CatToolConstants.SET_PROGRESS, listener)
     }
   }, [])
 
@@ -171,14 +181,14 @@ export const CattolFooter = ({
             ) : !stats?.ANALYSIS_COMPLETE ? null : (
               <>
                 <a
-                  className="approved-bar"
-                  style={{width: stats.a_perc + '%'}}
-                  title={'Approved ' + stats.a_perc_formatted}
-                />
-                <a
                   className="approved-bar-2nd-pass"
                   style={{width: stats.a_perc_2nd + '%'}}
                   title={'2nd Approved ' + stats.a_perc_2nd_formatted}
+                />
+                <a
+                  className="approved-bar"
+                  style={{width: stats.a_perc + '%'}}
+                  title={'Approved ' + stats.a_perc_formatted}
                 />
                 <a
                   className="translated-bar"
@@ -286,6 +296,7 @@ export const CattolFooter = ({
           </div>
         )}
       </div>
+      <CookieConsent />
     </footer>
   )
 }

@@ -491,6 +491,11 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'onlyprivate' ] = true; // MyMemory configuration, get matches only from private memories
         }
 
+        // if we want only private tm with no keys mymemory should not be called
+        if( $queueElement->params->only_private && empty( $_config[ 'id_user' ] ) && !$_config[ 'get_mt' ] ){
+            $tmsEngine = Engine::getInstance( 0 );
+        }
+
         /*
          * This will be ever executed without damages because
          * fastAnalysis set Project as DONE when

@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isNull} from 'lodash'
 
 import CommonUtils from './commonUtils'
 import TagUtils from './tagUtils'
@@ -10,29 +10,90 @@ const SegmentUtils = {
    * Condition: Languages it-IT en-GB en-US, not review
    */
   tpCanActivate: undefined,
-  tagProjectionEnabled: undefined,
   TagProjectionCanActivate: undefined,
-  checkTpCanActivate: function () {
-    if (_.isUndefined(this.tpCanActivate)) {
-      var acceptedLanguages = config.tag_projection_languages
-      var elemST =
-        config.source_rfc.split('-')[0] + '-' + config.target_rfc.split('-')[0]
-      var elemTS =
-        config.target_rfc.split('-')[0] + '-' + config.source_rfc.split('-')[0]
-      var supportedPair =
+  checkGuessTagCanActivate: function (source, targets) {
+    const acceptedLanguages = config.tag_projection_languages
+    const sourceLanguageCode = source.code
+    const sourceLanguageText = source.name
+    let languageCombinations = []
+    let notSupportedCouples = []
+
+    targets.forEach(function (target) {
+      var elem = {}
+      elem.targetCode = target.code
+      elem.sourceCode = sourceLanguageCode
+      elem.targetName = target.name
+      elem.sourceName = sourceLanguageText
+      languageCombinations.push(elem)
+    })
+    //Intersection between the combination of choosen languages and the supported
+    const arrayIntersection = languageCombinations.filter(function (n) {
+      const elemST =
+        n.sourceCode.split('-')[0] + '-' + n.targetCode.split('-')[0]
+      const elemTS =
+        n.targetCode.split('-')[0] + '-' + n.sourceCode.split('-')[0]
+      if (
+        typeof acceptedLanguages[elemST] == 'undefined' &&
+        typeof acceptedLanguages[elemTS] == 'undefined'
+      ) {
+        notSupportedCouples.push(n.sourceName + ' - ' + n.targetName)
+      }
+      return (
         typeof acceptedLanguages[elemST] !== 'undefined' ||
         typeof acceptedLanguages[elemTS] !== 'undefined'
-      this.tpCanActivate = supportedPair && !config.isReview
+      )
+    })
+    return arrayIntersection.length > 0 && !!config.defaults.tag_projection
+  },
+  pippo: () => {
+    const acceptedLanguages = config.tag_projection_languages
+    const sourceLanguageCode = source.code
+    const sourceLanguageText = source.name
+    let languageCombinations = []
+    let notSupportedCouples = []
+
+    targets.forEach(function (target) {
+      var elem = {}
+      elem.targetCode = target.code
+      elem.sourceCode = sourceLanguageCode
+      elem.targetName = target.name
+      elem.sourceName = sourceLanguageText
+      languageCombinations.push(elem)
+    })
+    //Intersection between the combination of choosen languages and the supported
+    const arrayIntersection = languageCombinations.filter(function (n) {
+      const elemST =
+        n.sourceCode.split('-')[0] + '-' + n.targetCode.split('-')[0]
+      const elemTS =
+        n.targetCode.split('-')[0] + '-' + n.sourceCode.split('-')[0]
+      if (
+        typeof acceptedLanguages[elemST] == 'undefined' &&
+        typeof acceptedLanguages[elemTS] == 'undefined'
+      ) {
+        notSupportedCouples.push(n.sourceName + ' - ' + n.targetName)
+      }
+      return (
+        typeof acceptedLanguages[elemST] !== 'undefined' ||
+        typeof acceptedLanguages[elemTS] !== 'undefined'
+      )
+    })
+
+    const disableTP = !(
+      arrayIntersection.length > 0 && config.defaults.tag_projection
+    )
+    if (notSupportedCouples.length > 0) {
+      //Not supported languages
     }
-    return this.tpCanActivate
+    //disable Tag Projection
+    if (arrayIntersection.length == 0) {
+      //Disable GT
+    }
   },
   /**
    * Tag Projection: check if is enable the Tag Projection
    */
   checkTPEnabled: function () {
-    this.tagProjectionEnabled =
-      this.checkTpCanActivate() && !!config.tag_projection_enabled
-    return this.tagProjectionEnabled
+    return !!config.tag_projection_enabled && !!!config.isReview
   },
   /**
    * Check if the  the Tag Projection in the current segment is enabled and still not tagged
@@ -61,7 +122,7 @@ const SegmentUtils = {
     return segment.ice_locked === '1'
   },
   isUnlockedSegment: function (segment) {
-    return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
   },
 
   /**
@@ -88,6 +149,14 @@ const SegmentUtils = {
         ...(isActive ? [{[config.id_job]: true}] : []),
       ]),
     )
+  },
+  /**
+   * AI assistant
+   */
+  isAiAssistantAuto: () =>
+    JSON.parse(window.localStorage.getItem('aiAssistant')) == true,
+  setAiAssistantOptionValue: (isActive) => {
+    window.localStorage.setItem('aiAssistant', isActive)
   },
   /**
    * Selected keys glossary job local storage
@@ -123,9 +192,17 @@ const SegmentUtils = {
   segmentHasNote: (segment) => {
     return segment.notes ||
       segment.context_groups?.context_json ||
-      segment.metadata?.lenght > 0
+      segment.metadata?.length > 0
       ? true
       : false
+  },
+  /**
+   * Check Multi match languages
+   */
+  checkCrossLanguageSettings: function () {
+    const settings = localStorage.getItem('multiMatchLangs')
+    if (settings) return JSON.parse(settings)
+    return undefined
   },
   /**
    * Retrieve the file id of a segment

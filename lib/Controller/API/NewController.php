@@ -6,11 +6,14 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use LQA\ModelDao;
 use LQA\ModelStruct;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use PayableRates\CustomPayableRateDao;
+use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
+use TMS\TMSService;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -78,6 +81,11 @@ class NewController extends ajaxController {
      * @var QAModelTemplateStruct
      */
     protected $qaModelTemplate;
+
+    /**
+     * @var CustomPayableRateStruct
+     */
+    protected $payableRateModelTemplate;
 
     /**
      * @var ProjectManager
@@ -148,24 +156,23 @@ class NewController extends ajaxController {
                 'segmentation_rule'  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'owner_email'        => [
-                        'filter' => FILTER_VALIDATE_EMAIL
-                ],
                 'metadata'           => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'pretranslate_100'   => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
-                'id_team'              => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_qa_model'          => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_qa_model_template' => [ 'filter' => FILTER_VALIDATE_INT ],
-                'lexiqa'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'speech2text'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'tag_projection'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'project_completion'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'get_public_matches'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'instructions'         => [
+                'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_name' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'lexiqa'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'                => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'instructions'               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
@@ -199,10 +206,6 @@ class NewController extends ajaxController {
          */
         $this->postInput[ 'private_tm_key' ] = preg_replace( "/\s+/", "", $this->postInput[ 'private_tm_key' ] );
 
-        //NOTE: This is for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
-
         if ( empty( $_FILES ) ) {
             $this->setBadRequestHeader();
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file. Not Sent." ];
@@ -210,7 +213,6 @@ class NewController extends ajaxController {
         }
 
         try {
-            $this->__validateOwnerEmail();
             $this->__validateMetadataParam();
             $this->__validateEngines();
             $this->__validateSubjects();
@@ -218,6 +220,7 @@ class NewController extends ajaxController {
             $this->__validateTmAndKeys();
             $this->__validateTeam();
             $this->__validateQaModelTemplate();
+            $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
@@ -236,38 +239,8 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateOwnerEmail() {
-
-        if ( $this->postInput[ 'owner_email' ] === false ) {
-            throw new Exception( "Email is not valid", -5 );
-        } else {
-            if ( !is_null( $this->postInput[ 'owner_email' ] ) && !empty( $this->postInput[ 'owner_email' ] ) ) {
-                $domain = explode( "@", $this->postInput[ 'owner_email' ] );
-                $domain = $domain[ 1 ];
-                if ( !checkdnsrr( $domain ) ) {
-                    throw new Exception( "Email is not valid", -5 );
-                }
-            }
-        }
-
-    }
-
-    /**
-     * @throws Exception
-     */
     private function __validateSegmentationRules() {
-
-        $this->postInput[ 'segmentation_rule' ] = ( !empty( $this->postInput[ 'segmentation_rule' ] ) ) ? $this->postInput[ 'segmentation_rule' ] : '';
-
-        if ( !in_array( $this->postInput[ 'segmentation_rule' ], self::$allowed_seg_rules ) ) {
-            throw new Exception( "Segmentation rule not allowed: " . $this->postInput[ 'segmentation_rule' ], -4 );
-        }
-
-        //normalize segmentation rule to what it's used internally
-        if ( $this->postInput[ 'segmentation_rule' ] == 'standard' || $this->postInput[ 'segmentation_rule' ] == '' ) {
-            $this->postInput[ 'segmentation_rule' ] = null;
-        }
-
+        $this->postInput[ 'segmentation_rule' ] = Constants::validateSegmentationRules( $this->postInput[ 'segmentation_rule' ] );
     }
 
     /**
@@ -626,7 +599,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'tms_engine' ]           = $this->postInput[ 'tms_engine' ];
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
-        $projectStructure[ 'owner' ]                = $this->postInput[ 'owner_email' ];
+        $projectStructure[ 'owner' ]                = $this->user->email;
         $projectStructure[ 'metadata' ]             = $this->metadata;
         $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
 
@@ -643,7 +616,6 @@ class NewController extends ajaxController {
             $projectStructure[ 'userIsLogged' ] = true;
             $projectStructure[ 'uid' ]          = $this->user->getUid();
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
-            $projectStructure[ 'owner' ]        = $this->user->getEmail();
             $this->projectManager->setTeam( $this->team );
         }
 
@@ -654,6 +626,10 @@ class NewController extends ajaxController {
 
         if( $this->qaModel ) {
             $projectStructure[ 'qa_model' ] = $this->qaModel->getDecodedModel();
+        }
+
+        if( $this->payableRateModelTemplate ) {
+            $projectStructure[ 'payable_rate_model_id' ] = $this->payableRateModelTemplate->id;
         }
 
         //set features override
@@ -687,8 +663,7 @@ class NewController extends ajaxController {
 
     /**
      * @param $filename
-     *
-     * @return ArrayObject
+     * @return array
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
@@ -721,9 +696,9 @@ class NewController extends ajaxController {
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
         $metadata[ 'proprietary' ]     = [
-                [ 'proprietary' ]            => $info[ 'proprietary' ],
-                [ 'proprietary_name' ]       => $info[ 'proprietary_name' ],
-                [ 'proprietary_short_name' ] => $info[ 'proprietary_short_name' ],
+            'proprietary'            => $info[ 'proprietary' ],
+            'proprietary_name'       => $info[ 'proprietary_name' ],
+            'proprietary_short_name' => $info[ 'proprietary_short_name' ],
         ];
 
         return $metadata;
@@ -809,6 +784,10 @@ class NewController extends ajaxController {
 
         $api_key    = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
         $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
+
+        if(empty($api_key)){
+            return false;
+        }
 
         if ( false !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
             list( $api_key, $api_secret ) = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
@@ -1065,6 +1044,9 @@ class NewController extends ajaxController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function __validateQaModelTemplate()
     {
         if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
@@ -1080,6 +1062,49 @@ class NewController extends ajaxController {
 
             $this->qaModelTemplate = $qaModelTemplate;
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validatePayableRateTemplate()
+    {
+        $payableRateModelTemplate = null;
+
+        if( !empty($this->postInput[ 'payable_rate_template_name' ] ) ){
+            if ( empty( $this->postInput[ 'payable_rate_template_id' ] )) {
+                throw new \Exception('`payable_rate_template_id` param is missing');
+            }
+        }
+
+        if( !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
+            if ( empty( $this->postInput[ 'payable_rate_template_name' ] )) {
+                throw new \Exception('`payable_rate_template_name` param is missing');
+            }
+        }
+
+        if( !empty($this->postInput[ 'payable_rate_template_name' ] ) and !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
+
+            $payableRateTemplateId = $this->postInput[ 'payable_rate_template_id' ];
+            $payableRateTemplateName = $this->postInput[ 'payable_rate_template_name' ];
+            $userId = $this->getUser()->uid;
+
+            $payableRateModelTemplate = CustomPayableRateDao::getById($payableRateTemplateId);
+
+            if(null === $payableRateModelTemplate){
+                throw new \Exception('Payable rate model id not valid');
+            }
+
+            if($payableRateModelTemplate->uid !== $userId){
+                throw new \Exception('Payable rate model is not belonging to the current user');
+            }
+
+            if($payableRateModelTemplate->name !== $payableRateTemplateName){
+                throw new \Exception('Payable rate model name not matching');
+            }
+        }
+
+        $this->payableRateModelTemplate = $payableRateModelTemplate;
     }
 
     /**

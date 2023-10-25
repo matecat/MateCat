@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {each} from 'lodash/collection'
 
 class JobAnalyzeHeader extends React.Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class JobAnalyzeHeader extends React.Component {
       self.payable = self.payable + chunk.get('TOTAL_PAYABLE').get(0)
     })
 
-    _.each(this.props.jobInfo.chunks, function (chunk) {
+    each(this.props.jobInfo.chunks, function (chunk) {
       self.total = self.total + chunk.total_raw_word_count
     })
   }

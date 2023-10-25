@@ -1,10 +1,11 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {filter} from 'lodash'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
 
 window.APP = null
 
@@ -23,68 +24,11 @@ window.APP = {
     this.isCattool = $('body').hasClass('cattool')
     setTimeout(() => this.checkGlobalMassages(), 1000)
   },
-
-  fitText: function (
-    container,
-    child,
-    limitHeight,
-    escapeTextLen,
-    actualTextLow,
-    actualTextHi,
-  ) {
-    if (typeof escapeTextLen == 'undefined') escapeTextLen = 4
-    if (typeof $(child).attr('data-originalText') == 'undefined') {
-      $(child).attr('data-originalText', $(child).text())
-    }
-
-    var originalText = $(child).text()
-
-    //tail recursion exit control
-    if (
-      originalText.length < escapeTextLen ||
-      (actualTextLow + actualTextHi).length < escapeTextLen
-    ) {
-      return false
-    }
-
-    if (
-      typeof actualTextHi == 'undefined' &&
-      typeof actualTextLow == 'undefined'
-    ) {
-      //we are in window.resize
-      if (originalText.match(/\[\.\.\.]/)) {
-        originalText = $(child).attr('data-originalText')
-      }
-
-      actualTextLow = originalText.substr(0, Math.ceil(originalText.length / 2))
-      actualTextHi = originalText.replace(actualTextLow, '')
-    }
-
-    actualTextHi = actualTextHi.substr(1)
-    actualTextLow = actualTextLow.substr(0, actualTextLow.length - 1)
-
-    child.text(actualTextLow + '[...]' + actualTextHi)
-
-    var loop = true
-    // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
-    while (container.height() >= limitHeight && loop == true) {
-      loop = this.fitText(
-        container,
-        child,
-        limitHeight,
-        escapeTextLen,
-        actualTextLow,
-        actualTextHi,
-      )
-    }
-    return false
-  },
-
   /*************************************************************************************************************/
 
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
-      return _.filter(config.flash_messages.service, function (service) {
+      return filter(config.flash_messages.service, function (service) {
         return service.key == name
       })
     }
@@ -349,12 +293,12 @@ window.APP = {
             props,
             'Download fail',
           )
-          Cookies.delete(downloadToken)
+          Cookies.remove(downloadToken)
         }
       })
   },
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function (event) {
   APP.init()
 })

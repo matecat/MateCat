@@ -7,13 +7,13 @@ use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\TranslationVersionsHandler;
+use Files\FilesPartsDao;
 use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
 use Matecat\SubFiltering\Filters\SprintfToPH;
-use TaskRunner\Commons\QueueElement;
 
 class setTranslationController extends ajaxController {
 
@@ -117,7 +117,8 @@ class setTranslationController extends ajaxController {
                 'id_before'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'                => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'revision_number'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'guess_tag_used'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ]
+                'guess_tag_used'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'characters_counter'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -340,6 +341,11 @@ class setTranslationController extends ajaxController {
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
         $check->setIdSegment( $this->id_segment );
+
+        if(isset($this->__postInput[ 'characters_counter' ] )){
+            $check->setCharactersCount($this->__postInput[ 'characters_counter' ]);
+        }
+
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
@@ -401,7 +407,9 @@ class setTranslationController extends ajaxController {
         $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
 
         // if saveVersionAndIncrement() return true it means that it was persisted a new version of the parent segment
-        $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
+        if($this->VersionsHandler !== null){
+            $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
+        }
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -466,14 +474,16 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
             try {
-                $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
+                if($this->VersionsHandler !== null){
+                    $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $this->chunk,
                         $this->id_segment,
                         $this->project,
                         $this->VersionsHandler,
                         true
-                );
+                    );
+                }
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
@@ -619,7 +629,8 @@ class setTranslationController extends ajaxController {
          * This is also the init handler of all R1/R2 handling and Qr score calculation by
          *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
          */
-        $this->VersionsHandler->storeTranslationEvent( [
+        if($this->VersionsHandler !== null){
+            $this->VersionsHandler->storeTranslationEvent( [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
                 'propagation'       => $propagationTotal,
@@ -630,7 +641,8 @@ class setTranslationController extends ajaxController {
                 'controller_result' => & $this->result,
                 'features'          => $this->featureSet,
                 'project'           => $project
-        ] );
+            ] );
+        }
 
         //COMMIT THE TRANSACTION
         try {
@@ -858,8 +870,20 @@ class setTranslationController extends ajaxController {
         }
     }
 
+    /**
+     * init VersionHandler
+     */
     private function initVersionHandler() {
-        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->chunk, $this->id_segment, $this->user, $this->project );
+
+        // fix null pointer error
+        if(
+            $this->chunk !== null and
+            $this->id_segment !== null and
+            $this->user !== null and
+            $this->project !== null
+        ){
+            $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->chunk, $this->id_segment, $this->user, $this->project );
+        }
     }
 
     /**
@@ -947,11 +971,14 @@ class setTranslationController extends ajaxController {
             return;
         }
 
+        $filesParts = (new FilesPartsDao())->getBySegmentId($this->id_segment);
+
         /**
          * Set the new contribution in queue
          */
         $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = self::isRevision();
+        $contributionStruct->id_file              = ($filesParts !== null) ? $filesParts->id_file : null;
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;
         $contributionStruct->id_segment           = $this->id_segment;
@@ -995,8 +1022,10 @@ class setTranslationController extends ajaxController {
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
 
-        $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
-        Set::contributionMT( $contributionStruct );
+        if( $contributionStruct->id_mt > 1 ){
+            $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
+            Set::contributionMT( $contributionStruct );
+        }
 
     }
 }

@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import _ from 'lodash'
+import {debounce, find} from 'lodash'
 
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
@@ -29,8 +29,8 @@ class TagEntity extends Component {
       searchParams: this.props.getSearchParams(),
       entityKey: this.props.entityKey,
     }
-    this.updateTagStyleDebounced = _.debounce(this.updateTagStyle, 500)
-    this.updateTagWarningStyleDebounced = _.debounce(
+    this.updateTagStyleDebounced = debounce(this.updateTagStyle, 500)
+    this.updateTagWarningStyleDebounced = debounce(
       this.updateTagWarningStyle,
       500,
     )
@@ -50,7 +50,7 @@ class TagEntity extends Component {
       occurrences,
       currentInSearchIndex,
     } = searchParams
-    let currentOccurrence = _.find(
+    let currentOccurrence = find(
       occurrences,
       (occ) => occ.searchProgressiveIndex === currentInSearchIndex,
     )
@@ -58,6 +58,10 @@ class TagEntity extends Component {
       currentOccurrence &&
       currentOccurrence.matchPosition >= this.props.start &&
       currentOccurrence.matchPosition < this.props.end
+
+    if (active && isCurrent)
+      SegmentActions.setIsCurrentSearchOccurrenceTag(true)
+
     if (active) {
       let regex = SearchUtils.getSearchRegExp(
         textToReplace,

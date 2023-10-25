@@ -25,6 +25,26 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param array $ids
+     * @param $key
+     * @param int $ttl
+     * @return array|DataAccess_IDaoStruct[]
+     */
+    public static function getBySegmentIds(array $ids, $key, $ttl = 604800){
+
+        $thisDao = new self();
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_metadata WHERE id_segment IN (" . implode(', ' , $ids ) . ") and meta_key = ? " );
+
+        $data = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
+            new Segments_SegmentMetadataStruct(),
+            [ $key ]
+        );
+
+        return (!empty($data)) ? $data : [];
+    }
+
+    /**
      * get key
      *
      * @param int $id_segment
@@ -33,7 +53,7 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
      *
      * NOTE: 604800 sec = 1 week
      *
-     * @return DataAccess_IDaoStruct|null
+     * @return array
      */
     public static function get($id_segment, $key, $ttl = 604800){
 
@@ -46,7 +66,7 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
             [ $id_segment, $key ]
         );
 
-        return (isset($data[0])) ? $data[0] : null;
+        return (!empty($data)) ? $data : [];
     }
 
     /**

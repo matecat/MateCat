@@ -1,7 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
-import CommonUtils from '../../utils/commonUtils'
+import {isUndefined} from 'lodash'
 import TEXT_UTILS from '../../utils/textUtils'
 
 class SegmentFooterTabMessages extends React.Component {
@@ -9,6 +8,12 @@ class SegmentFooterTabMessages extends React.Component {
     super(props)
     //Parameter to exclude notes tha match this regexp, used by plugins to exclude some notes
     this.excludeMatchingNotesRegExp
+  }
+
+  getFilteredMetadataKeys() {
+    return this.props.metadata.filter(
+      ({meta_key}) => meta_key !== 'sizeRestriction',
+    )
   }
 
   getNotes() {
@@ -74,24 +79,21 @@ class SegmentFooterTabMessages extends React.Component {
       })
     }
     if (this.props.context_groups && this.props.context_groups.context_json) {
-      this.props.context_groups.context_json.forEach((contextGroup) => {
-        if (contextGroup.attr.length > 0 && contextGroup.contexts.length > 0) {
-          const contextElems = contextGroup.contexts.map((context) => (
-            <div
-              className="context-item"
-              key={contextGroup.id + context.attr['context-type']}
-            >
-              <span className="context-item-name">{context.content}</span>
-            </div>
+      this.props.context_groups.context_json.forEach((contextGroup, index) => {
+        if (
+          contextGroup.attr?.purpose &&
+          contextGroup.attr.purpose === 'information' &&
+          contextGroup.contexts.length > 0
+        ) {
+          const contextElems = contextGroup.contexts.map((context, i) => (
+            <span key={'context-item' + i} className="context-item-name">
+              {i > 0 ? ' ;' : ''}
+              {context['raw-content']}
+            </span>
           ))
           notesHtml.push(
-            <div
-              className="context-group"
-              key={contextGroup.id + contextGroup.attr.name}
-            >
-              <span className="context-group-name">
-                {contextGroup.attr.name}:{' '}
-              </span>
+            <div className="context-group" key={'context-group' + index}>
+              <span className="context-group-name">Context: </span>
               {contextElems}
             </div>,
           )
@@ -100,16 +102,26 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     // metadata notes
-    if (this.props.metadata?.length > 0) {
+    const metadata =
+      typeof this.getFilteredMetadataKeys === 'function'
+        ? this.getFilteredMetadataKeys()
+        : this.props.metadata
+    if (metadata?.length > 0) {
       notesHtml.push(this.getMetadataNoteTemplate())
     }
     return notesHtml
   }
 
   getMetadataNoteTemplate() {
+    const metadata =
+      typeof this.getFilteredMetadataKeys === 'function'
+        ? this.getFilteredMetadataKeys()
+        : this.props.metadata
     let metadataNotes = []
-    for (const [index, item] of this.props.metadata.entries()) {
-      const {meta_key: label, meta_value: body} = item
+    for (const [index, item] of metadata.entries()) {
+      const {meta_key, meta_value: body} = item
+      const label = meta_key
+
       metadataNotes.push(
         <div className="note" key={`meta-${index}`}>
           <span className="note-label">{label}: </span>
@@ -134,8 +146,8 @@ class SegmentFooterTabMessages extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     return (
-      _.isUndefined(nextProps.notes) ||
-      _.isUndefined(this.props.note) ||
+      isUndefined(nextProps.notes) ||
+      isUndefined(this.props.note) ||
       !Immutable.fromJS(this.props.notes).equals(
         Immutable.fromJS(nextProps.notes),
       ) ||

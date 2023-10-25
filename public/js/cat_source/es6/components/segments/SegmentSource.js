@@ -1,6 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {remove, cloneDeep, size, isUndefined} from 'lodash'
 import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
 
 import SegmentStore from '../../stores/SegmentStore'
@@ -16,6 +16,9 @@ import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
+import Assistant from '../icons/Assistant'
+import Education from '../icons/Education'
+import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -73,10 +76,13 @@ class SegmentSource extends React.Component {
         [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
       },
+      isShowingOptionsToolbar: false,
     }
     this.splitPoint = this.props.segment.split_group
       ? this.props.segment.split_group.length - 1
       : 0
+
+    this.delayAiAssistant
   }
 
   getSearchParams = () => {
@@ -156,7 +162,7 @@ class SegmentSource extends React.Component {
       currentInSearchIndex,
       tagRange,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
@@ -169,7 +175,7 @@ class SegmentSource extends React.Component {
       glossary.filter(({isBlacklist}) => !isBlacklist),
       sid,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) =>
         decorator.name === DraftMatecatConstants.GLOSSARY_DECORATOR,
@@ -186,7 +192,7 @@ class SegmentSource extends React.Component {
       sid,
       SegmentActions.activateTab,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) =>
         decorator.name === DraftMatecatConstants.QA_GLOSSARY_DECORATOR,
@@ -198,7 +204,7 @@ class SegmentSource extends React.Component {
     let {editorState} = this.state
     let {lexiqa, sid, lxqDecodedSource} = this.props.segment
     let ranges = LexiqaUtils.getRanges(
-      _.cloneDeep(lexiqa.source),
+      cloneDeep(lexiqa.source),
       lxqDecodedSource,
       true,
     )
@@ -211,7 +217,7 @@ class SegmentSource extends React.Component {
         true,
         this.getUpdatedSegmentInfo,
       )
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) =>
           decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
@@ -253,8 +259,8 @@ class SegmentSource extends React.Component {
       const prevGlossary = prevProps ? prevProps.segment.glossary : undefined
       if (
         glossary &&
-        _.size(glossary) > 0 &&
-        (_.isUndefined(prevGlossary) ||
+        size(glossary) > 0 &&
+        (isUndefined(prevGlossary) ||
           !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ||
           !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
       ) {
@@ -262,8 +268,8 @@ class SegmentSource extends React.Component {
         changedDecorator = true
         this.addGlossaryDecorator()
       } else if (
-        _.size(prevGlossary) > 0 &&
-        (!glossary || _.size(glossary) === 0)
+        size(prevGlossary) > 0 &&
+        (!glossary || size(glossary) === 0)
       ) {
         activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
         changedDecorator = true
@@ -278,7 +284,7 @@ class SegmentSource extends React.Component {
       if (
         missingGlossaryItems &&
         missingGlossaryItems.length > 0 &&
-        (_.isUndefined(prevMissingGlossaryItems) ||
+        (isUndefined(prevMissingGlossaryItems) ||
           !Immutable.fromJS(prevMissingGlossaryItems).equals(
             Immutable.fromJS(missingGlossaryItems),
           ))
@@ -299,10 +305,9 @@ class SegmentSource extends React.Component {
       //Lexiqa
       const {lexiqa} = this.props.segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
-      const currentLexiqaSource =
-        lexiqa && lexiqa.source && _.size(lexiqa.source)
+      const currentLexiqaSource = lexiqa && lexiqa.source && size(lexiqa.source)
       const prevLexiqaSource =
-        prevLexiqa && prevLexiqa.source && _.size(prevLexiqa.source)
+        prevLexiqa && prevLexiqa.source && size(prevLexiqa.source)
       const lexiqaChanged =
         prevLexiqaSource &&
         currentLexiqaSource &&
@@ -459,6 +464,60 @@ class SegmentSource extends React.Component {
 
   preventEdit = () => 'handled'
 
+  getSelectedWords = () =>
+    DraftMatecatUtils.getSelectedTextWithoutEntities(
+      this.state.editorState,
+    ).reduce((acc, {value}) => `${acc}${value}`, '')
+
+  isValidPhraseToAiAssistant = ({
+    phrase,
+    sourceLanguageCode = config.source_code,
+  }) => {
+    if (!phrase) return false
+
+    const phraseValidator = {
+      'zh-CN': (value) => value.split('').length <= 6,
+      'zh-TW': (value) => value.split('').length <= 6,
+      'zh-HK': (value) => value.split('').length <= 6,
+      'zh-MO': (value) => value.split('').length <= 6,
+      'ja-JP': (value) => value.split('').length <= 10,
+      default: (value) => value.split(' ').length <= 3,
+    }
+
+    const handler = {
+      get: function (target, prop) {
+        const counter = target[prop] ? target[prop] : target.default
+        return counter(phrase)
+      },
+    }
+
+    const proxy = new Proxy(phraseValidator, handler)
+    return proxy[sourceLanguageCode]
+  }
+
+  helpAiAssistant = () => {
+    if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
+
+    const isOpenAiEnabled =
+      Boolean(config.isOpenAiEnabled) && SegmentUtils.isAiAssistantAuto()
+
+    if (isOpenAiEnabled) {
+      this.delayAiAssistant = setTimeout(() => {
+        const {segment} = this.context
+        const value = this.getSelectedWords()
+
+        const isValid = this.isValidPhraseToAiAssistant({phrase: value})
+
+        if (isValid) {
+          SegmentActions.helpAiAssistant({
+            sid: segment.sid,
+            value,
+          })
+        }
+      }, 200)
+    }
+  }
+
   render() {
     const {segment} = this.context
     const {editorState} = this.state
@@ -471,6 +530,8 @@ class SegmentSource extends React.Component {
       addSplitTag,
       splitSegmentNew,
       preventEdit,
+      getSelectedWords,
+      isValidPhraseToAiAssistant,
     } = this
     // Set correct handlers
     const handlers = !segment.openSplit
@@ -482,17 +543,82 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
           onDragEnd: onDragEndEvent,
+          onMouseUp: () => {
+            this.setState({
+              isShowingOptionsToolbar: !this.editor._latestEditorState
+                .getSelection()
+                .isCollapsed(),
+            })
+
+            this.helpAiAssistant()
+          },
+          onKeyUp: (event) => {
+            if (
+              event.key === 'ArrowLeft' ||
+              event.key === 'ArrowRight' ||
+              event.key === 'ArrowUp' ||
+              event.key === 'ArrowDown'
+            ) {
+              this.setState({
+                isShowingOptionsToolbar: !this.editor._latestEditorState
+                  .getSelection()
+                  .isCollapsed(),
+              })
+
+              this.helpAiAssistant()
+            }
+          },
         }
       : {
           onClick: () => addSplitTag(),
           onBlur: onBlurEvent,
         }
 
+    const isEnabledAiAssistantButton = isValidPhraseToAiAssistant({
+      phrase: getSelectedWords(),
+    })
+
+    const optionsToolbar = this.state.isShowingOptionsToolbar && (
+      <ul className="optionsToolbar">
+        {Boolean(config.isOpenAiEnabled) && !SegmentUtils.isAiAssistantAuto() && (
+          <li
+            title={
+              isEnabledAiAssistantButton
+                ? 'See the meaning of the highlighted text in this context'
+                : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
+            }
+            className={!isEnabledAiAssistantButton ? 'disabled' : ''}
+            onMouseDown={() => {
+              if (isEnabledAiAssistantButton) {
+                SegmentActions.helpAiAssistant({
+                  sid: segment.sid,
+                  value: getSelectedWords(),
+                })
+              }
+            }}
+          >
+            <Assistant />
+          </li>
+        )}
+        <li
+          title="Click to add the highlighted text to the glossary"
+          onMouseDown={() => {
+            SegmentActions.openGlossaryFormPrefill({
+              sid: segment.sid,
+              [TERM_FORM_FIELDS.ORIGINAL_TERM]: getSelectedWords(),
+            })
+          }}
+        >
+          <Education />
+        </li>
+      </ul>
+    )
+
     // Standard editor
     const editorHtml = (
       <div
         ref={(source) => (this.source = source)}
-        className={'source item'}
+        className={`source item`}
         tabIndex={0}
         id={'segment-' + segment.sid + '-source'}
         data-original={this.originalSource}
@@ -514,6 +640,7 @@ class SegmentSource extends React.Component {
           textAlignment={config.isSourceRTL ? 'right' : 'left'}
           textDirectionality={config.isSourceRTL ? 'RTL' : 'LTR'}
         />
+        {optionsToolbar}
       </div>
     )
 
@@ -556,7 +683,7 @@ class SegmentSource extends React.Component {
   }
 
   disableDecorator = (editorState, decoratorName) => {
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === decoratorName,
     )
@@ -568,12 +695,12 @@ class SegmentSource extends React.Component {
   removeDecorator = (decoratorName) => {
     if (!decoratorName) {
       // All decorators except tags
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
       )
     } else {
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name === decoratorName,
       )
@@ -640,6 +767,10 @@ class SegmentSource extends React.Component {
   onBlurEvent = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
+    })
+
+    this.setState({
+      isShowingOptionsToolbar: false,
     })
   }
 

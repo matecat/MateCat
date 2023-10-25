@@ -1,6 +1,7 @@
-import _ from 'lodash'
+import {forEach, isUndefined} from 'lodash'
 import Immutable from 'immutable'
 import React from 'react'
+import {union} from 'lodash/array'
 
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
@@ -14,14 +15,14 @@ import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
-import CatToolStore from '../../stores/CatToolStore'
-import CatToolConstants from '../../constants/CatToolConstants'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
 import MBC from '../../utils/mbc.main'
 import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from '../segments/SegmentContext'
+import CatToolConstants from '../../constants/CatToolConstants'
+import CatToolStore from '../../stores/CatToolStore'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -46,6 +47,7 @@ class Segment extends React.Component {
     this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
     this.forceUpdateSegment = this.forceUpdateSegment.bind(this)
+    this.clientReconnection = this.clientReconnection.bind(this)
 
     let readonly = UI.isReadonlySegment(this.props.segment)
     this.secondPassLocked =
@@ -107,7 +109,7 @@ class Segment extends React.Component {
 
       /************/
       UI.editStart = new Date()
-      if (config.id_client) {
+      if (this.props.clientConnected) {
         SegmentActions.getGlossaryForSegment({
           sid: this.props.segment.sid,
           fid: this.props.fid,
@@ -269,7 +271,7 @@ class Segment extends React.Component {
       let classes = this.state.segment_classes.slice()
       if (newClass.indexOf(' ') > 0) {
         let classesSplit = newClass.split(' ')
-        _.forEach(classesSplit, function (item) {
+        forEach(classesSplit, function (item) {
           if (classes.indexOf(item) < 0) {
             classes.push(item)
           }
@@ -300,7 +302,7 @@ class Segment extends React.Component {
       }
       if (className.indexOf(' ') > 0) {
         let classesSplit = className.split(' ')
-        _.forEach(classesSplit, function (item) {
+        forEach(classesSplit, function (item) {
           removeFn(item)
         })
       } else {
@@ -353,12 +355,12 @@ class Segment extends React.Component {
     return classes
   }
   isSplitted() {
-    return !_.isUndefined(this.props.segment.split_group)
+    return !isUndefined(this.props.segment.split_group)
   }
 
   isFirstOfSplit() {
     return (
-      !_.isUndefined(this.props.segment.split_group) &&
+      !isUndefined(this.props.segment.split_group) &&
       this.props.segment.split_group.indexOf(this.props.segment.sid) === 0
     )
   }
@@ -413,7 +415,7 @@ class Segment extends React.Component {
 
   checkSegmentClasses() {
     let classes = this.state.segment_classes.slice()
-    classes = _.union(classes, this.createSegmentClasses())
+    classes = union(classes, this.createSegmentClasses())
     classes = this.checkSegmentStatus(classes)
     if (classes.indexOf('muted') > -1 && classes.indexOf('editor') > -1) {
       let indexEditor = classes.indexOf('editor')
@@ -485,7 +487,7 @@ class Segment extends React.Component {
   }
 
   handleKeyDown(event) {
-    if (event.code === 'Escape') {
+    if (event.code === 'Escape' && !config.targetIsCJK) {
       if (
         this.props.segment.opened &&
         !this.props.segment.openComments &&
@@ -506,14 +508,16 @@ class Segment extends React.Component {
     }
   }
 
-  clientConnected = () => {
-    if (this.props.segment.opened) {
-      SegmentActions.getGlossaryForSegment({
-        sid: this.props.segment.sid,
-        fid: this.props.fid,
-        text: this.props.segment.segment,
-      })
-    }
+  clientReconnection() {
+    SegmentActions.getGlossaryForSegment({
+      sid: this.props.segment.sid,
+      fid: this.props.fid,
+      text: this.props.segment.segment,
+    })
+    SegmentActions.getContributions(
+      this.props.segment.sid,
+      this.props.multiMatchLangs,
+    )
   }
 
   forceUpdateSegment(sid) {
@@ -551,8 +555,8 @@ class Segment extends React.Component {
       this.forceUpdateSegment,
     )
     CatToolStore.addListener(
-      CatToolConstants.CLIENT_CONNECT,
-      this.clientConnected,
+      CatToolConstants.CLIENT_RECONNECTION,
+      this.clientReconnection,
     )
 
     //Review
@@ -563,7 +567,6 @@ class Segment extends React.Component {
     if (this.props.segment.opened) {
       setTimeout(() => {
         this.openSegment()
-        Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section)
       })
       setTimeout(() => {
         UI.setCurrentSegment()
@@ -597,10 +600,12 @@ class Segment extends React.Component {
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
     )
+
     CatToolStore.removeListener(
-      CatToolConstants.CLIENT_CONNECT,
-      this.clientConnected,
+      CatToolConstants.CLIENT_RECONNECTION,
+      this.clientReconnection,
     )
+
     //Review
     SegmentStore.removeListener(
       SegmentConstants.OPEN_ISSUES_PANEL,
@@ -618,7 +623,9 @@ class Segment extends React.Component {
       nextState.readonly !== this.state.readonly ||
       nextState.selectedTextObj !== this.state.selectedTextObj ||
       nextProps.sideOpen !== this.props.sideOpen ||
-      nextState.showActions !== this.state.showActions
+      nextState.showActions !== this.state.showActions ||
+      nextProps.clientConnected !== this.props.clientConnected ||
+      nextProps.speechToTextActive !== this.props.speechToTextActive
     )
   }
 
@@ -641,13 +648,19 @@ class Segment extends React.Component {
         if (this.props.segment.opened && !this.props.segment.openComments) {
           SegmentActions.closeSegmentComment(this.props.segment.sid)
         }
-        Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section)
       })
     } else if (prevProps.segment.opened && !this.props.segment.opened) {
       clearTimeout(this.timeoutScroll)
       setTimeout(() => {
         SegmentActions.saveSegmentBeforeClose(this.props.segment)
       })
+    }
+    if (
+      Speech2Text.enabled() &&
+      ((!prevProps.speechToTextActive && this.props.speechToTextActive) ||
+        (!prevProps.segment.opened && this.props.segment.opened))
+    ) {
+      setTimeout(() => Speech2Text.enableMicrophone(this.$section))
     }
     return null
   }
@@ -695,7 +708,7 @@ class Segment extends React.Component {
         segment,
         files,
         speech2textEnabledFn,
-        tagModesEnabled,
+        multiMatchLangs,
       } = this.props
       return {
         enableTagProjection: enableTagProjection && !this.props.segment.tagged,
@@ -706,12 +719,14 @@ class Segment extends React.Component {
         segment,
         files,
         speech2textEnabledFn,
-        tagModesEnabled,
         readonly: this.state.readonly,
         locked,
         removeSelection: this.removeSelection.bind(this),
         openSegment: this.openSegment,
         isReviewImproved: this.props.isReviewImproved,
+        clientConnected: this.props.clientConnected,
+        clientId: this.props.clientId,
+        multiMatchLangs,
       }
     }
 
@@ -720,7 +735,10 @@ class Segment extends React.Component {
         <section
           ref={(section) => (this.section = section)}
           id={'segment-' + this.props.segment.sid}
-          className={segment_classes.join(' ')}
+          className={
+            segment_classes.join(' ') +
+            ` source-${config.source_code} target-${config.target_code}`
+          }
           data-hash={this.props.segment.segment_hash}
           data-autopropagated={this.state.autopropagated}
           data-propagable={autoPropagable}

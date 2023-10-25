@@ -204,9 +204,12 @@ abstract class KleinController implements IController {
                 $user_credentials = AuthCookie::getCredentials(); //validated cookie
             }
 
-            $dao = new Users_UserDao();
-            $dao->setCacheTTL( 3600 );
-            $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
+            if( !empty( $user_credentials ) && !empty( $user_credentials[ 'uid' ] ) ){
+                $dao = new Users_UserDao();
+                $dao->setCacheTTL( 3600 );
+                $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
+            }
+
         }
 
         if( !empty( $this->user ) ){
@@ -303,5 +306,4 @@ abstract class KleinController implements IController {
     protected function afterValidate() {
 
     }
-
 }

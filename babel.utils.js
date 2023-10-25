@@ -15,6 +15,7 @@ const getBabelPresets = (env = 'browser') => {
       '@babel/preset-react',
       ['@babel/preset-env', {targets: targetsMap[env]}],
     ],
+    compact: true,
   }
 }
 

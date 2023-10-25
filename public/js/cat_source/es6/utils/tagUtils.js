@@ -1,7 +1,5 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import {Base64} from 'js-base64'
-
-// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils'
 import {
   tagSignatures,
@@ -12,16 +10,67 @@ const TAGS_UTILS = {
   // TODO: move it in another module
   // We need to send to BE the reverse (more or less) of what we receive in the getSegments (WHY??)
   // EX: From BE
-  prepareTextToSend: function (text) {
-    return TextUtils.view2rawxliff(text)
+  prepareTextToSend: function (tx) {
+    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+    tx = tx
+      .replace(/</g, '##LESSTHANLT##')
+      .replace(/>/g, '##GREATERTHANGT##')
+      .replace(/&lt;/gi, '<')
+      .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
+      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
+      .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
+      .replace(/</gi, '&lt;')
+    tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
+    tx = tx
+      .replace(/##LESSTHANLT##/g, '&lt;')
+      .replace(/##GREATERTHANGT##/g, '&gt;')
+      .replace(/##LESSTHAN##/g, '<')
+      .replace(/##GREATERTHAN##/g, '>')
+    return tx
+  },
+
+  transformTextFromBe: (tx) => {
+    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+    tx = tx
+      .replace(/&lt;/gi, '<')
+      .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
+      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
+      .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
+      .replace(/</gi, '&lt;')
+    tx = tx.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/g, '&')
+    tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
+    return tx
+  },
+
+  transformTextForEditor: (tx) => {
+    let brTx1 = `##LESSTHAN##$1##GREATERTHAN##`
+    tx = tx
+      .replace(/</g, '##LESSTHAN##')
+      .replace(/>/g, '##GREATERTHAN##')
+      .replace(/&lt;/gi, '<')
+      .replace(/<((ph.*?)\s*?\/)&gt;/g, brTx1) // <ph \/&gt;
+      .replace(/<(g .*?\bid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?)&gt;/gi, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?)&gt;/g, brTx1)
+      .replace(/<((ph.*?)\sid[^<“]*?\/)>/g, brTx1)
+      .replace(/<(\/(g|x|bx|ex))&gt;/gi, brTx1)
+      .replace(/</gi, '&lt;')
+    tx = tx.replace(/&/g, '&amp;').replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
+    tx = tx.replace(/##LESSTHAN##/g, '&lt;').replace(/##GREATERTHAN##/g, '&gt;')
+    return tx
   },
 
   transformPlaceholdersAndTagsNew: function (text) {
     text = this.decodePlaceholdersToTextSimple(text || '')
-    if (!(config.tagLockCustomizable && !UI.tagLockEnabled)) {
-      // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
-      text = this.matchTag(this.decodeHtmlInTag(text))
-    }
+    // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
+    text = this.matchTag(this.decodeHtmlInTag(text))
+
     return text
   },
 
@@ -142,15 +191,15 @@ const TAGS_UTILS = {
     let brTxPlPh12 =
       '<span contenteditable="false" class="tag small tag-selfclosed tag-ph">$1</span>'
     tx = tx
-      .replace(/&amp;/gi, '&')
+      // .replace(/&amp;/gi, '&')
       .replace(/<span/gi, '<_plh_')
       .replace(/<\/span/gi, '</_plh_')
       .replace(/&lt;/gi, '<')
-      .replace(/(<(ph.*?)\s*?\/&gt;)/gi, brTxPlPh1) // <ph \/&gt;
+      .replace(/(<(ph.*?)\s*?\/&gt;)/g, brTxPlPh1) // <ph \/&gt;
       .replace(/(<g .*?\bid[^<“]*?&gt;)/gi, brTx1)
       .replace(/(<(x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?&gt;)/gi, brTx3)
-      .replace(/(<(ph.*?)\sid[^<“]*?&gt;)/gi, brTxPlPh1)
-      .replace(/(<(ph.*?)\sid[^<“]*?\/>)/gi, brTxPlPh1)
+      .replace(/(<(ph.*?)\sid[^<“]*?&gt;)/g, brTxPlPh1)
+      .replace(/(<(ph.*?)\sid[^<“]*?\/>)/g, brTxPlPh1)
       .replace(/</gi, '&lt;')
       .replace(/&lt;_plh_/gi, '<span')
       .replace(/&lt;\/_plh_/gi, '</span')
@@ -164,7 +213,7 @@ const TAGS_UTILS = {
       .replace(/&lt;\/del/gi, '</del') // For translation conflicts tab
       .replace(/&lt;br/gi, '<br')
       .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|it|mrk)\s*&gt;)/gi, brTx2)
-      .replace(/(&lt;\s*\/\s*(ph)\s*&gt;)/gi, brTxPlPh12)
+      .replace(/(&lt;\s*\/\s*(ph)\s*&gt;)/g, brTxPlPh12)
 
     tx = tx.replace(
       /(<span contenteditable="false" class="[^"]*">)(:?<span contenteditable="false" class="[^"]*">)(.*?)(<\/span>){2}/gi,
@@ -188,7 +237,7 @@ const TAGS_UTILS = {
           if (placeholderRegex) {
             let globalRegex = new RegExp(
               placeholderRegex.source,
-              placeholderRegex.flags + 'gi',
+              placeholderRegex.flags + 'g',
             )
             tx = tx.replace(globalRegex, function (match, text) {
               return decodeNeeded ? Base64.decode(text) : text
@@ -258,11 +307,19 @@ const TAGS_UTILS = {
       })
 
       tx = tx.replace(openRegex, function () {
-        return openings.pop().id
+        return (
+          String.fromCharCode(parseInt('200B', 16)) +
+          openings.pop().id +
+          String.fromCharCode(parseInt('200B', 16))
+        )
       })
 
       tx = tx.replace(closeRegex, function () {
-        return closings.shift().id
+        return (
+          String.fromCharCode(parseInt('200B', 16)) +
+          closings.shift().id +
+          String.fromCharCode(parseInt('200B', 16))
+        )
       })
       returnValue = tx
     } catch (e) {
@@ -329,11 +386,7 @@ const TAGS_UTILS = {
 
     //add tags into the target segment
     for (let i = 0; i < missingTags.length; i++) {
-      if (!(config.tagLockCustomizable && !UI.tagLockEnabled)) {
-        newhtml = newhtml + missingTags[i]
-      } else {
-        newhtml = newhtml + missingTags[i]
-      }
+      newhtml = newhtml + missingTags[i]
     }
     return newhtml
   },
@@ -347,7 +400,7 @@ const TAGS_UTILS = {
   hasDataOriginalTags: function (segmentSource) {
     var originalText = segmentSource
     const reg = getXliffRegExpression()
-    return !_.isUndefined(originalText) && reg.test(originalText)
+    return !isUndefined(originalText) && reg.test(originalText)
   },
 
   /**

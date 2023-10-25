@@ -28,7 +28,7 @@ header .wrapper {
   height: 60px;
   display: grid;
   grid-template-columns: 170px auto auto 64px;
-  padding: 0 33px;
+  padding: 0 24px;
   align-content: center;
   box-sizing: border-box;
   top: 0;
@@ -1334,11 +1334,11 @@ ul.suggestion-item.graysmall:last-child {
   display: block;
 }
 
-.tab.concordances.extended .graysmall {
+.tab.concordances .graysmall {
   display: block !important;
 }
 
-.tab.concordances.extended .overflow {
+.tab.concordances .overflow {
   overflow: auto;
 }
 
@@ -1423,7 +1423,7 @@ body.noGlossary .tab-switcher-gl {
   background: #f5f5f5;
   color: $grey1;
   -moz-box-shadow: none;
-  position: relative;
+  //position: relative;
   -webkit-box-shadow: none;
 }
 
@@ -1447,6 +1447,18 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu li a {
   outline: none;
+  display: flex;
+  align-items: center;
+
+  .number {
+    margin-left: 4px;
+  }
+
+  .icon-close {
+    display: block;
+    height: 15px;
+    color: $grey1;
+  }
 }
 
 .submenu li.active a {
@@ -1501,7 +1513,7 @@ body .footer.showMatches .sub-editor.open {
   width: 100%;
 }
 
-.sub-editor.concordances .more {
+.concordances .more {
   display: inline-block;
   text-decoration: none;
   color: #fff;
@@ -2107,23 +2119,15 @@ section.opened {
 .editarea,
 .search-editarea,
 .textarea-container .area {
-  /*display: inline-block;*/
-  /*float:right;*/
   width: 100%;
-  //height: 96%;
   min-height: 54px;
   resize: none;
-  //overflow: hidden;
   margin: 2px 0 0px -11px;
   padding: 5px;
   color: #4d4d4f;
   border: 1px solid transparent;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  word-wrap: break-word;
-  word-break: normal;
-  hyphens: auto;
-  -moz-hyphens: auto;
   transition: all 50ms ease-in;
   -webkit-transition: all 50ms ease-in;
 }
@@ -2140,10 +2144,6 @@ section.ice-locked:not(.segment-selected) .text {
 body section:not(.editor).ice-locked {
   background: #dde0e4 !important;
 }
-
-/*body.cattool.editing section.ice-locked:not(.editor) .text:hover {*/
-/*background-color: rgba(99, 157, 94, 0.1) !important;*/
-/*}*/
 
 .ice-locked-icon > button {
   padding: 4px;
@@ -2554,6 +2554,20 @@ body.rtl-target .editor .editarea span {
   padding: 0;
 }
 
+.graysmall-details .graydesc-sourcekey {
+  display: flex;
+  justify-content: end;
+  max-width: 30%;
+  gap: 2px;
+
+  .bold {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 //.glossary .graysmall .graysmall-details {
 //  margin-top: 0;
 //}
@@ -2762,9 +2776,13 @@ body.rtl-target .editor .editarea span {
 }
 
 .engine-errors {
-  position: absolute;
-  top: 13px;
+  position: relative;
   width: 100%;
+  min-height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
 }
 
 .engine-error-item.graysmall:hover {
@@ -3892,19 +3910,6 @@ section .toolbar .autofillTag {
 .splitBar .buttons a {
 }
 
-body:not(.tagModes) .tagModeToggle {
-  display: none;
-}
-body.rtl-source.tagModes.tagmode-default-extended
-  .suggestion_source
-  .monad.marker,
-body.rtl-source.tagModes.tagmode-default-extended .source .monad.marker,
-body.rtl-target.tagModes.tagmode-default-extended .editarea .monad.marker,
-body.rtl-target.tagModes.tagmode-default-extended .spliArea .monad.marker,
-body.rtl-target.tagModes.tagmode-default-extended .translation .monad.marker {
-  direction: ltr;
-}
-
 .monad .marker-inside {
   display: none;
 }
@@ -3971,12 +3976,12 @@ section.editor .toolbar {
   margin-right: 10px;
 }
 
-body.tagModes .editor.hasTags .textarea-container .tagMode {
+body .editor.hasTags .textarea-container .tagMode {
   display: block;
 }
 
-body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
-body.tagModes .editor.hasTagsToggle .toolbar .tagLockCustomize,
+body .editor.hasTagsToggle .toolbar .tagModeToggle,
+body .editor.hasTagsToggle .toolbar .tagLockCustomize,
 body .editor.hasTagsAutofill .toolbar .autofillTag {
   display: block;
 }
@@ -4606,11 +4611,11 @@ header {
 
     .logo {
       margin: 0;
-      background: url(../../img/logo_matecat_big_white.svg) 0 0 no-repeat;
+      background: url(/public/img/logo_matecat_big_white.svg) 0 0 no-repeat;
       width: 190px;
       height: 40px;
-      top: 0;
-      left: 0;
+      top: 1px;
+      left: 6px;
     }
   }
 
@@ -5027,6 +5032,33 @@ header {
       font-stretch: normal;
       line-height: 1.5;
       color: black;
+    }
+  }
+}
+
+.optionsToolbar {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+
+  > li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #c6c6c6;
+    color: $grey1;
+
+    &:hover:not(.disabled) {
+      color: $black;
+    }
+
+    &.disabled {
+      cursor: unset;
+      opacity: 0.6;
     }
   }
 }

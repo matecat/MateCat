@@ -13,6 +13,7 @@ use Database;
 use PDOException;
 use SplObserver;
 use SplSubject;
+use Stomp;
 use TaskRunner\Exceptions\EndQueueException;
 
 /**
@@ -228,4 +229,22 @@ abstract class AbstractWorker implements SplSubject {
 
     }
 
+    /**
+     * @param $_object
+     *
+     * @throws \StompException
+     */
+    protected function publishMessage( $_object ) {
+
+        $message = json_encode( $_object );
+
+        $stomp = new Stomp( \INIT::$QUEUE_BROKER_ADDRESS );
+        $stomp->connect();
+        $stomp->send( \INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
+            $message,
+            [ 'persistent' => 'false' ]
+        );
+
+        $this->_doLog( $message );
+    }
 }

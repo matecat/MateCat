@@ -6,6 +6,7 @@ import CommonUtils from '../../../../utils/commonUtils'
 import JobMetadataModal from '../../../modals/JobMetadataModal'
 import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
+import SegmentUtils from '../../../../utils/segmentUtils'
 
 const LinkIcon = () => {
   return (
@@ -71,23 +72,27 @@ function RowSegment({
       const file = files
         ? files.find((file) => file.id == idFileSegment)
         : false
+      let fileType = ''
+      if (file) {
+        fileType = file.file_name ? file.file_name.split('.').slice(-1) : ''
+        //check metadata for jsont2 files
+        fileType = file.metadata?.['data-type']
+          ? file.metadata?.['data-type']
+          : fileType
+      }
       let classes = sideOpen ? 'slide-right' : ''
-      const isFirstSegment = files && segment.sid === files[0].first_segment
+      const isFirstSegment =
+        files?.length &&
+        parseInt(segment.sid) === parseInt(files[0].first_segment)
       classes = isFirstSegment ? classes + ' first-segment' : classes
+
       return (
         <div className={'projectbar ' + classes}>
           {file ? (
             <div className={'projectbar-filename'}>
               <span
                 title={segment.filename}
-                className={
-                  'fileFormat ' +
-                  CommonUtils.getIconClass(
-                    file.file_name.split('.')[
-                      file.file_name.split('.').length - 1
-                    ],
-                  )
-                }
+                className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
               >
                 {file.file_name}
               </span>
@@ -100,7 +105,7 @@ function RowSegment({
               </span>
             </div>
           ) : null}
-          {file && file.metadata && file.metadata.instructions ? (
+          {CommonUtils.fileHasInstructions(file) ? (
             <div
               className={'button-notes'}
               onClick={() => openInstructionsModal(idFileSegment)}

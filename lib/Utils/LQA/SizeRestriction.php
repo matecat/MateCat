@@ -4,6 +4,8 @@ namespace LQA;
 
 use CJKLangUtils;
 use EmojiUtils;
+use Exception;
+use FeatureSet;
 
 class SizeRestriction {
 
@@ -13,23 +15,23 @@ class SizeRestriction {
     private $cleanedString;
 
     /**
-     * @var int
+     * @var FeatureSet
      */
-    private $limit;
+    private $featureSet;
 
     /**
      * SizeRestriction constructor.
      *
      * @param $string
-     * @param $limit
+     * @param FeatureSet $featureSet
      */
-    public function __construct( $string, $limit ) {
+    public function __construct( $string, FeatureSet $featureSet ) {
 
         $string = $this->clearStringFromTags( $string );
         $string = $this->removeHiddenCharacters( $string );
 
         $this->cleanedString = $string;
-        $this->limit         = $limit;
+        $this->featureSet    = $featureSet;
     }
 
     /**
@@ -59,48 +61,58 @@ class SizeRestriction {
      * Remove every hidden character like word joiner or half spaces
      *
      * @param $string
+     *
      * @return string
      */
-    private function removeHiddenCharacters($string)
-    {
-        $cleanedText = str_replace("&#8203;", "", $string);
-        $cleanedText = str_replace("\xE2\x80\x8C", "", $cleanedText);
-        $cleanedText = str_replace("\xE2\x80\x8B", "", $cleanedText);
-        $cleanedText = str_replace("⁠", "", $cleanedText);
+    private function removeHiddenCharacters( $string ) {
+        $cleanedText = str_replace( "&#8203;", "", $string );
+        $cleanedText = str_replace( "\xE2\x80\x8C", "", $cleanedText );
+        $cleanedText = str_replace( "\xE2\x80\x8B", "", $cleanedText );
+        $cleanedText = str_replace( "⁠", "", $cleanedText );
 
         return $cleanedText;
     }
 
     /**
+     * @param $limit
      * @return bool
      */
-    public function checkLimit() {
-        return $this->getCleanedStringLength() <= $this->limit;
+    public function checkLimit($limit) {
+        return $this->getCleanedStringLength() <= $limit;
+    }
+
+    /**
+     * @param $limit
+     * @return int
+     */
+    public function getCharactersRemaining($limit) {
+        return $limit - $this->getCleanedStringLength();
     }
 
     /**
      * @return int
      */
-    public function getCharactersRemaining() {
-        return $this->limit - $this->getCleanedStringLength();
-    }
 
-    /**
-     * @return int
-     */
-    private function getCleanedStringLength() {
+    public function getCleanedStringLength() {
 
-        $wordsArray = mb_str_split($this->cleanedString);
-        $stringLength = 0;
+        try {
 
-        foreach ($wordsArray as $word){
-            if(CJKLangUtils::isCjk($word) or EmojiUtils::isEmoji($word)){
-                $stringLength = $stringLength + 2;
-            } else {
-                $stringLength++;
+            $featureCounts = $this->featureSet->filter( 'characterLengthCount', $this->cleanedString );
+
+            if(is_array($featureCounts)){
+                return array_sum($featureCounts);
             }
+
+            return array_sum([
+                "baseLength"   => mb_strlen( $this->cleanedString ),
+                "cjkMatches"   => CJKLangUtils::getMatches($this->cleanedString),
+                "emojiMatches" => EmojiUtils::getMatches($this->cleanedString),
+
+            ]);
+        } catch ( Exception $e ) {
         }
 
-        return $stringLength;
+        return 0;
+
     }
 }

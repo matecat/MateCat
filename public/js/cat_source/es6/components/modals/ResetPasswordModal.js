@@ -14,6 +14,7 @@ class ResetPasswordModal extends React.Component {
       validationErrors: {},
       generalError: '',
       requestRunning: false,
+      isLoggedIn: props.showOldPassword,
     }
     this.state.validationErrors = RuleRunner.run(this.state, fieldValidations)
     this.handleFieldChanged = this.handleFieldChanged.bind(this)
@@ -24,7 +25,7 @@ class ResetPasswordModal extends React.Component {
 
   handleFieldChanged(field) {
     return (e) => {
-      var newState = update(this.state, {
+      let newState = update(this.state, {
         [field]: {$set: e.target.value},
       })
       newState.validationErrors = RuleRunner.run(newState, fieldValidations)
@@ -34,7 +35,7 @@ class ResetPasswordModal extends React.Component {
   }
 
   handleSubmitClicked() {
-    var self = this
+    let self = this
     this.setState({showErrors: true})
     if ($.isEmptyObject(this.state.validationErrors) == false) return null
 
@@ -48,24 +49,39 @@ class ResetPasswordModal extends React.Component {
         $('#modal').trigger('opensuccess', [
           {
             title: 'Reset Password',
-            text: 'Your password has been changed.',
+            text: 'Your password has been changed. You can now use the new password to log in.',
           },
         ])
       })
       .catch((response) => {
-        const text = !response.statusText
-          ? 'There was a problem saving the data, please try again later or contact support.'
-          : response.statusText
+        let text =
+          'There was a problem saving the data, please try again later or contact support.'
 
-        self.setState({
-          generalError: text,
-          requestRunning: false,
-        })
+        response
+          .json()
+          .then((payload) => {
+            payload?.errors.forEach((el) => {
+              if (el?.message) {
+                text = el.message
+              }
+            })
+          })
+          .finally(() => {
+            self.setState({
+              generalError: text,
+              requestRunning: false,
+            })
+          })
       })
   }
 
   sendResetPassword() {
-    return resetPasswordUser(this.state.password1, this.state.password2)
+    return resetPasswordUser(
+      this.state.old_password,
+      this.state.password1,
+      this.state.password2,
+      this.state.isLoggedIn,
+    )
   }
 
   errorFor(field) {
@@ -73,7 +89,7 @@ class ResetPasswordModal extends React.Component {
   }
 
   render() {
-    var generalErrorHtml = ''
+    let generalErrorHtml = ''
     if (this.state.generalError.length) {
       generalErrorHtml = (
         <span style={{color: 'red', fontSize: '14px'}} className="text">
@@ -81,10 +97,32 @@ class ResetPasswordModal extends React.Component {
         </span>
       )
     }
-    var loaderClass = this.state.requestRunning ? 'show' : ''
+    let loaderClass = this.state.requestRunning ? 'show' : ''
+
+    let oldPasswordLabel = ''
+    let oldPasswordField = ''
+    if (this.state.isLoggedIn) {
+      oldPasswordLabel = <p>Old password</p>
+      oldPasswordField = (
+        <TextField
+          type="password"
+          showError={this.state.showErrors}
+          onFieldChanged={this.handleFieldChanged('old_password')}
+          placeholder="Old Password"
+          name="old_password"
+          errorText={this.errorFor('old_password')}
+          tabindex={1}
+          onKeyPress={(e) => {
+            e.key === 'Enter' ? this.handleSubmitClicked() : null
+          }}
+        />
+      )
+    }
 
     return (
       <div className="reset-password-modal">
+        {oldPasswordLabel}
+        {oldPasswordField}
         <p>Enter the new password</p>
         <TextField
           type="password"
@@ -132,7 +170,8 @@ const fieldValidations = [
     'password1',
     'Password',
     FormRules.requiredRule,
-    FormRules.minLength(6),
+    FormRules.minLength(12),
+    FormRules.atLeastOneSpecialChar(),
   ),
   RuleRunner.ruleRunner(
     'password2',

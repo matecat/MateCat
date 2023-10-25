@@ -52,7 +52,6 @@ class ModelDao extends DataAccess_AbstractDao {
             'hash'                 => $model_hash,
             'qa_model_template_id' => (isset($data[ 'id_template' ])) ? $data[ 'id_template' ] : null,
         ] );
-        $struct->ensureValid();
 
         $conn = Database::obtain()->getConnection();
 

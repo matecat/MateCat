@@ -1,8 +1,7 @@
 <?php
 
-use AbstractControllers\IController;
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
+use TMS\TMSService;
 
 /**
  * Created by PhpStorm.

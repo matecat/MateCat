@@ -12,6 +12,8 @@ use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use CatUtils;
 use Langs_Languages;
+use LQA\SizeRestriction;
+use Matecat\SubFiltering\MateCatFilter;
 
 
 class CountWordController extends KleinController {
@@ -37,7 +39,24 @@ class CountWordController extends KleinController {
     }
 
     public function rawWords() {
-        $words_count                 = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
-        $this->response->json( [ 'word_count' => $words_count ] );
+
+        $this->featureSet->loadFromUserEmail( $this->user->email );
+        $words_count = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
+        $filter = MateCatFilter::getInstance($this->featureSet);
+        $size_restriction = new SizeRestriction($filter->fromLayer0ToLayer2($this->request->text), $this->featureSet);
+
+        $character_count = [
+            'length' =>  $size_restriction->getCleanedStringLength(),
+        ];
+
+        if(isset($this->request->limit) and is_numeric($this->request->limit)){
+            $character_count['valid'] = $size_restriction->checkLimit($this->request->limit);
+            $character_count['remaining_characters'] = $size_restriction->getCharactersRemaining($this->request->limit);
+        }
+
+        $this->response->json( [
+            'word_count' => $words_count,
+            'character_count' => $character_count,
+        ] );
     }
 }

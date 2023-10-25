@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isEqual} from 'lodash'
 
 import Shortcuts from '../../utils/shortcuts'
 import {getXliffRegExpression} from './utils/DraftMatecatUtils/tagModel'
@@ -28,12 +28,6 @@ class SegmentBody extends React.Component {
     return (
       status.charAt(0) + status.slice(1).toLowerCase() + ', click to change it'
     )
-  }
-
-  checkLockTags() {
-    if (config.tagLockCustomizable || !UI.tagLockEnabled) {
-      return false
-    } else return this.context.segment.segment.match(/&lt;.*?&gt;/gi)
   }
 
   openStatusSegmentMenu(e) {
@@ -77,7 +71,7 @@ class SegmentBody extends React.Component {
 
     return (
       (targetTags && sourceTags.length > targetTags.length) ||
-      (targetTags && !_.isEqual(sourceTags.sort(), targetTags.sort()))
+      (targetTags && !isEqual(sourceTags.sort(), targetTags.sort()))
     )
   }
 

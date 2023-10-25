@@ -1,7 +1,8 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import {Base64} from 'js-base64'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CommonUtils from './commonUtils'
+import diff_match_patch from 'diff-match-patch'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -13,37 +14,39 @@ const TEXT_UTILS = {
         Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
         indexed with the id of the tags.
          */
-    var phTagsObject = {}
+    var phTagsObject = []
     var diff
     source = source.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000)
-        if (_.isUndefined(phTagsObject[match])) {
-          phTagsObject[match] = {
+        const existingTag = phTagsObject.find((item) => item.match === match)
+        if (!existingTag) {
+          const id = Math.floor(Math.random() * 10000)
+          phTagsObject.push({
             id,
             match,
-          }
+          })
+          return '<' + id + '>'
         } else {
-          id = phTagsObject[match].id
+          return '<' + existingTag.id + '>'
         }
-        return '<' + id + '>'
       },
     )
 
     target = target.replace(
       /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
       function (match) {
-        var id = Math.floor(Math.random() * 10000000)
-        if (_.isUndefined(phTagsObject[match])) {
-          phTagsObject[match] = {
+        const existingTag = phTagsObject.find((item) => item.match === match)
+        if (!existingTag) {
+          const id = Math.floor(Math.random() * 10000)
+          phTagsObject.push({
             id,
             match,
-          }
+          })
+          return '<' + id + '>'
         } else {
-          id = phTagsObject[match].id
+          return '<' + existingTag.id + '>'
         }
-        return '<' + id + '>'
       },
     )
 
@@ -67,10 +70,10 @@ const TEXT_UTILS = {
     $.each(diff, function (index, text) {
       text[1] = text[1].replace(/<(.*?)>/gi, function (match, id) {
         try {
-          var tag = _.find(phTagsObject, function (item) {
+          var tag = phTagsObject.find((item) => {
             return item.id === parseInt(id)
           })
-          if (!_.isUndefined(tag)) {
+          if (!isUndefined(tag)) {
             return tag.match
           }
           return match
@@ -143,7 +146,7 @@ const TEXT_UTILS = {
         thereAreIncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('<') > -1 &&
-            item[1].indexOf('>') > item[1].indexOf('<')))
+            item[1].indexOf('>') < item[1].indexOf('<')))
       )
     }
     var i
@@ -220,7 +223,7 @@ const TEXT_UTILS = {
     }
   },
 
-  escapeRegExp(str) {
+  escapeRegExp(str = '') {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
   },
 
@@ -231,19 +234,6 @@ const TEXT_UTILS = {
     let GTPLACEHOLDER = '##GREATERTHAN##'
     segment = segment.replace(/&lt;/gi, LTPLACEHOLDER)
     segment = segment.replace(/&gt;/gi, GTPLACEHOLDER)
-    return segment
-  },
-  view2rawxliff(segment) {
-    // return segment+"____";
-    // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-    // output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
-
-    // caso controverso <g id="4" x="&lt; dfsd &gt;">
-    //segment=htmlDecode(segment);
-    segment = this.placehold_xliff_tags(segment)
-    segment = this.htmlEncode(segment)
-    segment = this.restore_xliff_tags(segment)
-
     return segment
   },
 
@@ -274,7 +264,7 @@ const TEXT_UTILS = {
     source = source.replace(
       /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
       function (match, group1, group2) {
-        if (_.isUndefined(phTagsObject[group2])) {
+        if (isUndefined(phTagsObject[group2])) {
           phTagsObject[group2] = match
         }
         return '<' + Base64.encode(group2) + '> '
@@ -284,7 +274,7 @@ const TEXT_UTILS = {
     target = target.replace(
       /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
       function (match, gruop1, group2) {
-        if (_.isUndefined(phTagsObject[group2])) {
+        if (isUndefined(phTagsObject[group2])) {
           phTagsObject[group2] = match
         }
         return '<' + Base64.encode(group2) + '> '
@@ -308,7 +298,7 @@ const TEXT_UTILS = {
       text[1] = text[1].replace(/<(.*?)>/gi, function (match, text) {
         try {
           var decodedText = Base64.decode(text)
-          if (!_.isUndefined(phTagsObject[decodedText])) {
+          if (!isUndefined(phTagsObject[decodedText])) {
             return phTagsObject[decodedText]
           }
           return match
@@ -364,8 +354,26 @@ const TEXT_UTILS = {
   },
 
   justSelecting: function () {
-    if (window.getSelection().isCollapsed) return false
-    return selContainer.hasClass('area') || selContainer.hasClass('source')
+    const selection = window.getSelection()
+    if (selection.isCollapsed) return false
+
+    let shouldBreakCycle = false
+    let container = selection.getRangeAt(0).startContainer
+
+    while (!shouldBreakCycle) {
+      container = container.parentNode
+      const nodeName = container.nodeName.toLowerCase()
+
+      if (
+        nodeName === 'body' ||
+        container.classList.contains('segment-body-content')
+      ) {
+        shouldBreakCycle = true
+        if (nodeName === 'body') container = undefined
+      }
+    }
+
+    return !!container
   },
 
   //Change with TagUtils.decodePlaceholdersToPlainText
@@ -528,14 +536,149 @@ const TEXT_UTILS = {
       }
     }, [])
   },
-  isCJK: (char) =>
-    /[\u3041-\u3096\u30A0-\u30FF\u3400-\u4DB5\u4E00-\u9FCB\uF900-\uFA6A\u2E80-\u2FD5\uFF5F-\uFF9F\u3000-\u303F\u31F0-\u31FF\u3220-\u3243\u3280-\u337F-\uFF01-\uFF5E-\u3130-\u318F\uAC00-\uD7AF]/g.test(
-      char,
-    ),
-  isEmoji: (char) =>
-    /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g.test(
-      char,
-    ),
+  getDefaultCharsSize: (value) => value.length * 1,
+  getUtf8CharsSize: (value) => new Blob([value]).size,
+  getUft16CharsSize: (value) => value.length * 2,
+  getCJKMatches: (value, getSize) => {
+    const regex =
+      /[\u4E00-\u9FCC\u3400-\u4DB5\u{20000}-\u{2A6D6}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{2B740}-\u{2B81F}\u{2A700}-\u{2B73F}\u30A0-\u30FF\uF900-\uFaff\u{1B000}-\u{1B0FF}\u{1B100}-\u{1B12F}\u{1B130}-\u{1B16F}\uAC00-\uD7AF\uD7B0-\uD7FF\u3000-\u303F\u3040-\u309F]/gu
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  getArmenianMatches: (value, getSize) => {
+    const regex = /[\u0530-\u058F]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  getGeorgianMatches: (value, getSize) => {
+    const regex = /[\u10A0-\u10FF\u1C90-\u1CBF\u2D00-\u2D2F]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  getSinhalaMatches: (value, getSize) => {
+    const regex = /[\u0D80-\u0DFF]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  getEmojiMatches: (value, getSize) => {
+    const regex =
+      /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  getLatinCharsMatches: (value, getSize) => {
+    const result = []
+
+    for (var i = 0; i < value.length; i++) {
+      const char = value[i]
+      if (value.charCodeAt(i) <= 255) {
+        result.push({
+          match: char,
+          index: i,
+          length: char.length,
+          size: getSize(char),
+        })
+      }
+    }
+    return result
+  },
+  getFullwidthVariantsMatches: (value, getSize) => {
+    const regex = /[\uFF01-\uFF60]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
+  /* specify how chars size should be count */
+  charsSizeMapping: {
+    default: (value) => TEXT_UTILS.getDefaultCharsSize(value),
+    custom: [
+      (value) => TEXT_UTILS.getCJKMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getArmenianMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getGeorgianMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getSinhalaMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getFullwidthVariantsMatches(
+          value,
+          TEXT_UTILS.getUft16CharsSize,
+        ),
+    ],
+  },
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
 }
 

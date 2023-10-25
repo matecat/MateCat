@@ -164,7 +164,7 @@ LABEL;
 
         $result = $this->engine_MyMemory->set($this->config_param_of_set);
 
-        $this->assertTrue($result);
+        $this->assertTrue( (bool) preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
 
         /**
          *  general check of the Engines_Results_MyMemory_SetContributionResponse object
@@ -193,7 +193,6 @@ LABEL;
         $this->config_param_of_set['segment'] = $this->str_seg_1;
         $this->config_param_of_set['translation'] = $this->str_tra_1;
 
-//        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
         $url_mock_param = "http://api.mymemory.translated.net/set";
 
         $mock_json_return = <<<'TAB'
@@ -217,7 +216,7 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with(self::any(), $curl_params)->willReturn($mock_json_return);
 
         $actual_result = $this->engine_MyMemory->set($this->config_param_of_set);
 
@@ -258,7 +257,7 @@ TAB;
         $this->config_param_of_set['id_user']= "a6043e606ac9b5d7ff24";
         $result = $this->engine_MyMemory->set($this->config_param_of_set);
 
-        $this->assertTrue($result);
+        $this->assertTrue( (bool) preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
 
         /**
          *  general check of the Engines_Results_MyMemory_SetContributionResponse object
@@ -284,7 +283,6 @@ TAB;
         $this->config_param_of_set['translation'] = $this->str_tra_2;
 
 
-//        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Ad+esempio%2C+una+copia+del+film+%3Cg+id%3D%2210%22%3EBlade+Runner%3C%2Fg%3E+in+formato+DVD%2C+con+numero+di+serie+6457.&tra=For+example%2C+a+copy+of+the+film+%3Cg+id%3D%2210%22%3EFlade+Bunner%3C%2Fg%3E+in+DVD+format%2C+with+numbers+of+6457+series.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
         $url_mock_param = "http://api.mymemory.translated.net/set";
 
         $mock_json_return = <<<'TAB'
@@ -308,7 +306,11 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(
+                $this->callback( function ( $mymemory_url, $params ) {
+                    self::assertTrue( $mymemory_url );
+                } )
+        )->willReturn( $mock_json_return );
 
         $actual_result = $this->engine_MyMemory->set($this->config_param_of_set);
 

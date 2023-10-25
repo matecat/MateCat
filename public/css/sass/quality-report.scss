@@ -5,7 +5,11 @@
 @import 'commons/progress-mc-bar';
 @import 'commons/buttons';
 @import 'commons/nav-bar';
+@import 'common-main';
 @import 'components/segment/tagsMenu';
+@import 'components/segment/Tag';
+@import 'components/header/header';
+@import 'style';
 
 $color-red: #fb2a0d;
 $color-orange: #fbaa0d;
@@ -18,7 +22,8 @@ body {
   background: $grey5;
   font-size: 16px;
   min-width: 1024px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 header {
@@ -104,16 +109,13 @@ header {
         }
       }
     }
-    .user-teams {
-      padding-right: 10px !important;
-    }
   }
 }
 
 .qr-wrapper {
   width: 100%;
-  height: auto;
-  padding-bottom: 60px;
+  height: calc(100% - 60px);
+  overflow-y: auto;
   .qr-container {
     display: block;
     .qr-container-inside {
@@ -144,7 +146,7 @@ header {
           max-width: 1366px;
           min-width: 1024px;
           margin: 0 auto;
-          padding: 80px 15px 0;
+          padding: 20px 15px 0;
           h3 {
           }
           .qr-label {
