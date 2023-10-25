@@ -126,14 +126,6 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param EnginesModel_MMTStruct $newCreatedDbRowStruct
-     */
-    private function rollback(EnginesModel_MMTStruct $newCreatedDbRowStruct)
-    {
-        ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
-    }
-
-    /**
      * Called in @param $errorObject
      *
      * @param $class_load
