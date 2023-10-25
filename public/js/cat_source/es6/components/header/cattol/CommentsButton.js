@@ -173,13 +173,13 @@ export const CommentsButton = ({teams}) => {
               ></path>
             </svg>
             <div className="mbc-badge-container">
-              {counterOpenComments > 0 && (
-                <span className="mbc-badge">{counterOpenComments}</span>
-              )}
               {counterResolvedComments > 0 && (
                 <span className="mbc-badge-resolved">
                   {counterResolvedComments}
                 </span>
+              )}
+              {counterOpenComments > 0 && (
+                <span className="mbc-badge">{counterOpenComments}</span>
               )}
             </div>
           </div>
